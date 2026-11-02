@@ -40,7 +40,8 @@ install -m 644 "$release/deploy/native/doubo@.service" /etc/systemd/system/
 install -m 644 "$release/deploy/native/doubo-migrate.service" /etc/systemd/system/
 systemctl daemon-reload
 
-previous="$(readlink -f "$base/current" || true)"
+# A missing or looped current link is not a previous release.
+previous="$(readlink -e "$base/current" || true)"
 switched=false
 switch_to() {
   ln -sfn "$1" "$base/current.next"
@@ -50,12 +51,13 @@ rollback() {
   result=$?
   trap - ERR
   echo "Deployment failed. Check journalctl -u doubo-migrate -u doubo@serve -u doubo@worker." >&2
+  systemctl --no-pager --lines=20 status doubo-migrate doubo@serve doubo@worker || true
   if [[ "$switched" == true ]]; then
     systemctl stop doubo@serve doubo@worker || true
   fi
-  if [[ -f "$previous/bin/doubo-api" ]]; then
+  if [[ -n "$previous" && -f "$previous/bin/doubo-api" ]]; then
     if [[ "$switched" == true ]]; then switch_to "$previous"; fi
-    systemctl reset-failed doubo@serve doubo@worker || true
+    systemctl reset-failed doubo@serve doubo@worker 2>/dev/null || true
     systemctl restart doubo@serve doubo@worker || true
     echo "Previous application selected; check service status. Database and environment were NOT rolled back." >&2
   fi
@@ -67,7 +69,9 @@ trap rollback ERR
 systemctl stop doubo@serve doubo@worker
 switch_to "$release"
 switched=true
-systemctl reset-failed doubo-migrate doubo@serve doubo@worker
+# Freshly installed inactive units may already be unloaded. Resetting their
+# counters is optional; migration and startup errors below remain fatal.
+systemctl reset-failed doubo-migrate doubo@serve doubo@worker 2>/dev/null || true
 systemctl start doubo-migrate
 systemctl enable doubo@serve doubo@worker
 systemctl restart doubo@serve doubo@worker
