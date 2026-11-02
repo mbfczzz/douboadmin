@@ -37,23 +37,21 @@ type Template struct {
 	RequiredImages int    `json:"requiredImages"`
 }
 type JobInput struct {
-	ExpectedCostUnits *int64    `json:"expectedCostUnits,omitempty"`
-	SourceID          string    `json:"sourceId,omitempty"`
-	Mix               *MixInput `json:"mix,omitempty"`
-	Voice             string    `json:"voice,omitempty"`
-	Purpose           string    `json:"purpose,omitempty"`
-	Quality           string    `json:"quality,omitempty"`
-	Mode              string    `json:"mode,omitempty"`
-	Kind              string    `json:"kind"`
-	Prompt            string    `json:"prompt"`
-	Model             string    `json:"model"`
-	Resolution        string    `json:"resolution"`
-	Ratio             string    `json:"ratio"`
-	Duration          int       `json:"duration"`
-	TemplateID        string    `json:"templateId,omitempty"`
-	Assets            []string  `json:"assets"`
-	Style             string    `json:"style,omitempty"`
-	ParentID          string    `json:"parentId,omitempty"`
+	ExpectedCostUnits *int64   `json:"expectedCostUnits,omitempty"`
+	SourceID          string   `json:"sourceId,omitempty"`
+	Voice             string   `json:"voice,omitempty"`
+	Purpose           string   `json:"purpose,omitempty"`
+	Quality           string   `json:"quality,omitempty"`
+	Mode              string   `json:"mode,omitempty"`
+	Kind              string   `json:"kind"`
+	Prompt            string   `json:"prompt"`
+	Model             string   `json:"model"`
+	Resolution        string   `json:"resolution"`
+	Ratio             string   `json:"ratio"`
+	Duration          int      `json:"duration"`
+	TemplateID        string   `json:"templateId,omitempty"`
+	Assets            []string `json:"assets"`
+	ParentID          string   `json:"parentId,omitempty"`
 }
 type Job struct {
 	ActivationRequired  bool      `json:"-"`
@@ -63,9 +61,6 @@ type Job struct {
 	EstimatedCostMicros *int64    `json:"estimatedCostMicros,omitempty"`
 	HoldOnFailure       bool      `json:"-"`
 	Stage               string    `json:"stage,omitempty"`
-	OutputScript        string    `json:"outputScript,omitempty"`
-	ActualDuration      float64   `json:"actualDuration,omitempty"`
-	CaptionTiming       string    `json:"captionTiming,omitempty"`
 	Deleted             bool      `json:"deleted,omitempty"`
 	ReviewStatus        string    `json:"reviewStatus,omitempty"`
 	ModelName           string    `json:"modelName,omitempty"`

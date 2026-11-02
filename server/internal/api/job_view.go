@@ -20,21 +20,6 @@ func (a *Server) presentJob(ctx context.Context, j *core.Job) {
 			j.Stage = progress.Stage
 		}
 	}
-	if j.Input.Kind == "mix" {
-		j.ModelName = "智能混剪"
-		if row, e := a.Store.Get(ctx, "executions", j.ID); e == nil {
-			var result struct {
-				Script   string  `json:"script"`
-				Duration float64 `json:"duration"`
-				Timing   string  `json:"timing"`
-			}
-			if json.Unmarshal(row.Data, &result) == nil {
-				j.OutputScript = result.Script
-				j.ActualDuration = result.Duration
-				j.CaptionTiming = result.Timing
-			}
-		}
-	}
 	if row, e := a.Store.Get(ctx, "work_meta", j.ID); e == nil {
 		var meta core.WorkMeta
 		if json.Unmarshal(row.Data, &meta) == nil {
@@ -67,7 +52,8 @@ func (a *Server) presentJob(ctx context.Context, j *core.Job) {
 			j.Result = ""
 		}
 	}
-	if j.Status == "failed" {
+	j.Retryable = false
+	if j.Status == "failed" && (core.IsGeneration(j.Input.Kind) || j.Input.Kind == "import") {
 		r, err := a.Store.Get(ctx, "executions", j.ID)
 		if err == core.ErrNotFound {
 			j.Retryable = true

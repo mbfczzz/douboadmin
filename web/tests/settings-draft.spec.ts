@@ -11,11 +11,8 @@ async function settings(page: Page) {
       pointsPerYuan: 100,
       minRechargeFen: 100,
       maxRechargeFen: 100000,
-      mixPoints: 10,
       alarmFailures: 5,
       alarmQueueMinutes: 10,
-      rewriteModel: "",
-      ttsModel: "",
       hotKeywords: ["原始词"],
       supportText: "原始说明",
       billingEnabled: false,
@@ -37,6 +34,28 @@ async function settings(page: Page) {
   await expect(page.getByLabel("帮助与联系说明")).toHaveValue("原始说明");
   return () => record;
 }
+
+test("removed mix administration has no navigation, settings, or model lookup", async ({
+  page,
+}) => {
+  const modelRequests: string[] = [];
+  page.on("request", (request) => {
+    if (request.url().endsWith("/api/admin/models"))
+      modelRequests.push(request.url());
+  });
+  await settings(page);
+  await expect(
+    page.getByRole("button", { name: "背景音乐", exact: true }),
+  ).toHaveCount(0);
+  for (const label of ["单次混剪积分", "AI 改写模型", "AI 配音模型"])
+    await expect(page.getByLabel(label, { exact: true })).toHaveCount(0);
+  await expect(page.getByText("语音识别：", { exact: false })).toHaveCount(0);
+  expect(modelRequests).toEqual([]);
+  await page.goto("/#music");
+  await expect(
+    page.getByRole("heading", { name: "工作概览", exact: true }),
+  ).toBeVisible();
+});
 
 test("keyword newlines survive typing and are normalized only on save", async ({
   page,

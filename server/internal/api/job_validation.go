@@ -11,15 +11,8 @@ import (
 )
 
 func (a *Server) validateJob(ctx context.Context, user string, in *core.JobInput) error {
-	if in.Kind == "mix" {
-		_, settings, e := a.platform(ctx)
-		if e != nil {
-			return e
-		}
-		if a.Mix == nil {
-			return fmt.Errorf("混剪引擎尚未配置")
-		}
-		return a.Mix.Validate(ctx, user, in, settings)
+	if !core.IsGeneration(in.Kind) {
+		return fmt.Errorf("该任务类型暂未开放")
 	}
 	if !a.Relay.Ready() {
 		return fmt.Errorf("生成服务尚未配置")

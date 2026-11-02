@@ -5,6 +5,7 @@ import (
 	"doubo/server/internal/core"
 	"doubo/server/internal/partners"
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -86,15 +87,14 @@ func (a *Server) adjustWallet(w http.ResponseWriter, r *http.Request) {
 	reply(w, 200, value)
 }
 func (a *Server) priceInput(r *http.Request, in core.JobInput) (units int64, estimated *int64, enabled bool, err error) {
+	if !core.IsGeneration(in.Kind) {
+		return 0, nil, false, fmt.Errorf("该任务类型暂未开放")
+	}
 	_, settings, err := a.platform(r.Context())
 	if err != nil {
 		return
 	}
 	enabled = settings.BillingEnabled
-	if in.Kind == "mix" {
-		units, err = core.PointUnits(settings.MixPoints)
-		return
-	}
 	m, err := a.model(r.Context(), in.Model)
 	if err != nil {
 		return 0, nil, enabled, err
@@ -111,6 +111,10 @@ func (a *Server) priceInput(r *http.Request, in core.JobInput) (units int64, est
 func (a *Server) quoteJob(w http.ResponseWriter, r *http.Request) {
 	var in core.JobInput
 	if !decode(w, r, &in) {
+		return
+	}
+	if !core.IsGeneration(in.Kind) {
+		fail(w, 400, "该任务类型暂未开放")
 		return
 	}
 	units, _, enabled, e := a.priceInput(r, in)

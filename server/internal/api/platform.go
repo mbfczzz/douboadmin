@@ -16,6 +16,7 @@ func (a *Server) platform(ctx context.Context) (core.Record, core.PlatformSettin
 	}
 	if e == nil {
 		e = json.Unmarshal(r.Data, &s)
+		r.Data = core.Data(s)
 	}
 	return r, s, e
 }
@@ -27,7 +28,7 @@ func (a *Server) platformSettings(w http.ResponseWriter, r *http.Request) {
 	}
 	reply(w, 200, map[string]any{"record": row, "capabilities": map[string]bool{
 		"payment": a.Pay.Ready(), "oss": a.Objects != nil, "hot": a.Hot.Ready(),
-		"asr": a.Mix != nil && a.Mix.ASR.Ready(), "mix": a.Mix.Ready(), "subscription": a.Config.CompletionReady,
+		"subscription": a.Config.CompletionReady,
 	}})
 }
 func (a *Server) savePlatform(w http.ResponseWriter, r *http.Request) {

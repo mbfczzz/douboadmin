@@ -30,3 +30,7 @@ type Share struct {
 }
 
 func IsWork(kind string) bool { return kind == "image" || kind == "video" || kind == "mix" }
+
+func IsGeneration(kind string) bool {
+	return kind == "image" || kind == "video" || kind == "chat" || kind == "audio"
+}

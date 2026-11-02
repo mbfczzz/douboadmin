@@ -69,9 +69,6 @@ export interface Job {
   resultAssetId?: string;
   deleted?: boolean;
   reviewStatus?: string;
-  outputScript?: string;
-  actualDuration?: number;
-  captionTiming?: string;
   modelName?: string;
   retryable?: boolean;
   id: string;
@@ -121,6 +118,7 @@ export interface Config {
   completionTemplateId?: string;
   relayConfigured: boolean;
   mixAvailable: boolean;
+  mixMessage?: string;
   demo: boolean;
   demoLogin: boolean;
   wechatLogin: boolean;

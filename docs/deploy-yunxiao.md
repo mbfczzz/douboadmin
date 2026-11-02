@@ -1,9 +1,9 @@
 # 测试环境：云效 Flow + Linux 原生部署
 
-使用 GitHub 代码源、云效构建和主机部署；服务器运行 Nginx、Go API、独立 Worker，不需要 Docker。本文以支持 systemd 的 Linux 为前提，目录固定为 `/opt/doubo`。Windows 或由宝塔管理的 Nginx 需要调整安装步骤。
+使用 Gitee / GitHub 代码源、云效构建和主机部署；服务器运行 Nginx、Go API、独立 Worker，不需要 Docker。本文以支持 systemd 的 Linux 为前提，目录固定为 `/opt/doubo`。Windows 或由宝塔管理的 Nginx 需要调整安装步骤。
 
 ```text
-GitHub main → 云效构建 / 测试 → 上传制品 → 测试主机部署
+Gitee main → 云效构建 / 测试 → 上传制品 → 测试主机部署
                                          ├─ Nginx：HTTPS、React 静态文件、反向代理
                                          ├─ doubo@serve：Go API，127.0.0.1:8080
                                          └─ doubo@worker：生成任务处理
@@ -15,14 +15,19 @@ GitHub main → 云效构建 / 测试 → 上传制品 → 测试主机部署
 
 ## 1. 准备测试主机
 
-需要 Nginx、curl、Bash、flock、FFmpeg、FFprobe 和中文字体。下面仅是 Ubuntu / Debian 的安装示例；其他发行版使用对应包管理器，不要混用安装命令。
+需要 Nginx、curl、Bash、flock。下面仅是 Ubuntu / Debian 的安装示例；其他发行版使用对应包管理器，不要混用安装命令。
 
 ```bash
 sudo apt-get update
-sudo apt-get install -y nginx curl util-linux ffmpeg fonts-noto-cjk
-ffmpeg -version
-ffprobe -version
-ffmpeg -hide_banner -filters 2>&1 | grep subtitles
+sudo apt-get install -y nginx curl util-linux
+```
+
+Alibaba Cloud Linux / Rocky / AlmaLinux 可使用：
+
+```bash
+sudo yum install -y nginx curl util-linux
+sudo nginx -t
+sudo systemctl enable --now nginx
 ```
 
 按云效“主机组管理”的指引接入 ECS / 自有主机，完成 Runner 及其 Java 环境要求，确认主机在线。构建机和部署机是两个环境：Node 和 Go 只需装在构建机。
@@ -33,7 +38,7 @@ ffmpeg -hide_banner -filters 2>&1 | grep subtitles
 - Redis：可达的地址、ACL 用户名（无则留空）、密码、逻辑库编号。当前客户端连接单个 Redis 端点；不直接配置 Redis Cluster 节点列表。
 - OSS：测试 Bucket、所在 Region、拥有对应对象读写权限的访问凭证。
 - 真实小程序 AppID / AppSecret；测试 HTTPS 域名及有效证书。
-- 中转站 API Key，用于真实模型调用；支付、抖音、ASR 等可按需填写。
+- 中转站 API Key，用于真实模型调用；支付、抖音 等可按需填写。
 
 数据库、Redis 可使用本机服务或云上实例。云实例应允许测试主机连接。Nginx 对外提供 80/443；API 8080 只监听本机。
 
@@ -62,7 +67,7 @@ OSS_ACCESS_KEY_SECRET=实际AccessKeySecret
 RELAY_API_KEY=实际中转站密钥
 ```
 
-请保留示例文件中的其他配置，尤其是 `RUN_WORKER=false`、`ALLOW_DEMO_LOGIN=false`、`MEDIA_DIR` 和 `MIX_WORK_DIR`。测试服务器也使用 production 校验，微信和 OSS 必填，否则 API / Worker 会拒绝启动。没有中转凭证时不会返回假生成结果。
+请保留示例文件中的其他配置，尤其是 `RUN_WORKER=false`、`ALLOW_DEMO_LOGIN=false`和 `MEDIA_DIR`。测试服务器也使用 production 校验，微信和 OSS 必填，否则 API / Worker 会拒绝启动。没有中转凭证时不会返回假生成结果。
 
 这是 systemd 的 `EnvironmentFile`，不是 Shell 脚本。不要写 `export` 或变量替换；包含空格、特殊字符的值用符合 systemd 规则的引号包围。Go 程序不会自动加载仓库中的 `.env`。支付证书单独放到服务账号可读的位置，在配置中填写绝对路径。
 
@@ -72,24 +77,25 @@ RELAY_API_KEY=实际中转站密钥
 
 ### 代码源
 
-先确认 `deploy/native/` 等部署文件已提交并推送到目标分支。在云效 Flow 新建流水线，添加 GitHub 服务连接，选择仓库 `mbfczzz/douboadmin` 和分支 `main`。构建工作目录选仓库根目录。先手动触发验证，通过后再开启 main 分支提交触发。
+先确认 `deploy/native/` 等部署文件已提交并推送到目标分支。在云效 Flow 新建流水线，添加码云服务连接，选择仓库 `mbfczzzz/douboai`（或使用原 GitHub 仓库） 和分支 `main`。构建工作目录选仓库根目录。先手动触发验证，通过后再开启 main 分支提交触发。
 
 ### 构建
 
-使用具备 **Node >=22.12、Go >=1.26** 的 Linux 构建环境，执行：
+使用具备 **Node >=22.12、Go >=1.25** 的 Linux 构建环境，启用自动工具链切换到项目要求的 Go 1.26，执行：
 
 ```bash
+export GOTOOLCHAIN=auto
 bash deploy/native/build.sh
 ```
 
-如果内置工具版本不满足要求，先在构建环境安装匹配版本或使用自有构建机；不要直接降级 `go.mod` 或删除前端版本限制。
+如果内置工具版本不满足要求，先在构建环境安装匹配版本或使用自动工具链切换；不要直接降级 `go.mod` 或删除前端版本限制。
 
 脚本安装锁定的 npm 依赖，运行前端构建和体积检查、Go 测试，再生成 Linux 静态二进制及最小发布目录 `out/package/`。不会打入 `.env.local`、node_modules、测试数据或本地上传文件。
 
 默认目标为 Linux amd64（x86_64）。服务器是 ARM64 时，构建命令改为：
 
 ```bash
-TARGET_ARCH=arm64 bash deploy/native/build.sh
+GOTOOLCHAIN=auto TARGET_ARCH=arm64 bash deploy/native/build.sh
 ```
 
 ### 构建物上传
@@ -147,7 +153,7 @@ Nginx 将 `/api/`、`/media/`、`/s/`、`/health/` 原路径转给 Go；不把�
 3. 开发者工具构建 npm、编译，上传体验版并在手机验证微信登录。
 4. 后台“模型管理 → 同步上游”，配置并上架模型、创建和上架模板。空测试库不会自动导入本地临时模板或用户。
 5. 创建服务商和激活码 / 二维码，验证未激活用户被拦截、激活后正常使用。真实生成会消耗上游额度，请按需验证。
-6. 确认上传、任务状态、生成结果和 OSS 下载正常，再验收已配置的支付 / 配音等外部服务。
+6. 确认上传、任务状态、生成结果和 OSS 下载正常，再验收已配置的支付等外部服务。
 
 ## 6. 日常维护与扩容
 
@@ -158,7 +164,7 @@ sudo systemctl restart doubo@serve doubo@worker
 readlink -f /opt/doubo/current
 ```
 
-发布版本保存在 `/opt/doubo/releases/`；上传文件、混剪工作目录和历史前端资源在 `/opt/doubo/shared/`。配置修改后重启两个服务。定期备份 MySQL 和 OSS，并按保留策略清理旧版本与无引用文件；发布脚本不会自动删除业务数据或历史版本。
+发布版本保存在 `/opt/doubo/releases/`；上传文件和历史前端资源在 `/opt/doubo/shared/`。配置修改后重启两个服务。定期备份 MySQL 和 OSS，并按保留策略清理旧版本与无引用文件；发布脚本不会自动删除业务数据或历史版本。
 
 以后扩容时，API 节点接同一 MySQL、Redis、OSS，Nginx / 负载均衡转发到多个 API；Worker 可在其他主机独立启动。迁移阶段只能执行一次，不要让多台主机同时执行部署迁移。当前这套脚本用于单主机，不宣称多主机滚动发布或零中断。
 

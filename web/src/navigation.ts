@@ -24,7 +24,6 @@ export const pageInfo = {
     "查询支付流水、到账积分与退款记录。",
     SlidersHorizontal,
   ],
-  music: ["背景音乐", "维护小程序混剪可选的音乐素材。", Film],
   monitor: ["运行监控", "查看节点、队列、错误日志和异常告警。", Settings2],
   users: ["用户管理", "管理用户资料、使用授权与积分。", Users],
   models: [
@@ -39,7 +38,7 @@ export type PageId = keyof typeof pageInfo;
 export const navGroups: { label: string; pages: PageId[] }[] = [
   {
     label: "内容与创作",
-    pages: ["overview", "templates", "jobs", "works", "reviews", "music"],
+    pages: ["overview", "templates", "jobs", "works", "reviews"],
   },
   { label: "用户与交易", pages: ["users", "orders", "payments"] },
   { label: "平台管理", pages: ["models", "monitor", "feedback", "settings"] },

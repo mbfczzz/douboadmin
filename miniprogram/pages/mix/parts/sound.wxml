@@ -4,6 +4,7 @@
     ><text>保留素材原声</text
     ><switch
       checked="{{keepOriginalAudio}}"
+      disabled="{{!config.enabled}}"
       color="#9BCBAA"
       data-field="keepOriginalAudio"
       bindchange="toggle" /></view

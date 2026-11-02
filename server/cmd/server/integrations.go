@@ -4,12 +4,9 @@ import (
 	"context"
 	"doubo/server/internal/api"
 	"doubo/server/internal/hotvideo"
-	"doubo/server/internal/mixing"
 	"doubo/server/internal/payments"
 	"doubo/server/internal/provider"
-	"doubo/server/internal/speech"
 	"os"
-	"path/filepath"
 )
 
 func integrations(ctx context.Context, app *api.Server) (provider.Provider, error) {
@@ -19,7 +16,6 @@ func integrations(ctx context.Context, app *api.Server) (provider.Provider, erro
 	}
 	app.Pay = p
 	ai := &provider.Relay{Client: app.Relay, Store: app.Store, Assets: app.Media.Inputs, SaveResult: app.Media.Save}
-	app.Mix = &mixing.Engine{Runner: mixing.Runner{FFmpeg: env("FFMPEG_PATH", "ffmpeg"), FFprobe: env("FFPROBE_PATH", "ffprobe")}, Store: app.Store, Media: app.Media, AI: ai, ASR: &speech.Client{BaseURL: os.Getenv("ASR_BASE_URL"), Key: os.Getenv("ASR_API_KEY"), Model: os.Getenv("ASR_MODEL")}, WorkDir: env("MIX_WORK_DIR", filepath.Join(os.TempDir(), "doubo-mix"))}
 	app.Hot = &hotvideo.Service{Client: &hotvideo.Client{BaseURL: env("TIKHUB_BASE_URL", "https://api.tikhub.io"), Key: os.Getenv("TIKHUB_API_KEY")}, Store: app.Store}
-	return provider.Router{AI: ai, Mix: app.Mix, Import: hotvideo.Importer{Service: app.Hot, Media: app.Media}}, nil
+	return provider.Router{AI: ai, Import: hotvideo.Importer{Service: app.Hot, Media: app.Media}}, nil
 }

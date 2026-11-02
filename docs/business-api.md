@@ -51,13 +51,10 @@
 
 作品公开分享须审核通过；关闭平台人工审核开关后新作品自动通过。短链 30 天到期，每次读取重新核验作品/用户/审核状态。私有 OSS 使用短期签名链接；本地媒体目录仅用于开发。
 
-## 混剪、热门视频与运营
+## 热门视频与运营
 
 | 方法 | 路径 | 说明 |
 | --- | --- | --- |
-| GET | /mix/config | 引擎/ASR/改写/TTS 能力、音色、参数限制、积分 |
-| GET | /music、/admin/music | 已发布/管理音乐库 |
-| PUT | /admin/music/{id} | `{version,data}`，title、assetId、published、sort；音频先上传到 /admin/assets |
 | GET | /hot/discovery | 是否配置、热词或后台推荐词、排序范围 |
 | GET | /hot/videos | q、sort=relevance/likes/recent/views、cursor/searchId/backtrace |
 | GET | /hot/videos/{id} | 标题、文案、作者、可用指标、时间、封面/视频 |
@@ -70,6 +67,6 @@
 | GET | /admin/logs、/admin/alerts | 最近脱敏日志/告警 |
 | PUT | /admin/alerts/{id}/ack | 确认告警 |
 
-混剪继续使用 `/jobs`，`kind=mix,model=local-mix`，`mix` 中包含 autoScenes/transcribe/rewrite/narration/voice/ttsModel/rewriteModel/captions/musicId/musicVolume/keepOriginalAudio。音乐库 ID 或 `asset:本人音频ID` 均可；最多 10 个素材、单个 50 MB、总计 200 MB、5–120 秒。任务返回真实 stage、progress、outputScript、actualDuration、captionTiming、costUnits、billingState、reviewStatus。
+小程序混剪界面保留，`/config` 返回 `mixAvailable=false` 和说明文案。混剪提交、音乐库及本地渲染接口已移除。
 
-搜索缓存 5 分钟，热词缓存 10 分钟；第三方缺失的播放量等保持 null，不补假数。ASR/配音没有配置时拒绝对应操作，上传纯素材的混剪仍可用。
+搜索缓存 5 分钟，热词缓存 10 分钟；第三方缺失的播放量等保持 null，不补假数。

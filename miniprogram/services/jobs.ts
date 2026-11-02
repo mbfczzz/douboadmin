@@ -30,10 +30,6 @@ export async function submitInput(input: Input, channel: string) {
     throw e;
   }
   wx.removeStorageSync(storage);
-  track(
-    input.kind === "mix" ? "mix_submit" : "generate_submit",
-    input.kind === "mix" ? "mix" : "create",
-    j.id,
-  );
+  track("generate_submit", "create", j.id);
   return j;
 }

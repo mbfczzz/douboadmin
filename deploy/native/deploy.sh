@@ -7,11 +7,11 @@ release="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 base=/opt/doubo
 [[ "$release" == "$base/releases/"* ]] || die "Extract into /opt/doubo/releases/<unique-id> first."
 [[ -f "$release/bin/doubo-api" && -f "$release/web/index.html" ]] || die "Incomplete release."
-for command in systemctl curl flock ffmpeg ffprobe; do
+for command in systemctl curl flock; do
   command -v "$command" >/dev/null || die "Missing command: $command"
 done
 
-mkdir -p "$base/shared/media" "$base/shared/work" "$base/shared/web/assets" /etc/doubo
+mkdir -p "$base/shared/media" "$base/shared/web/assets" /etc/doubo
 exec 9> "$base/deploy.lock"
 flock -n 9 || die "Another deployment is running; retry after it completes."
 if [[ ! -f /etc/doubo/doubo.env ]]; then
@@ -23,7 +23,7 @@ chown root:root /etc/doubo/doubo.env
 if ! id doubo >/dev/null 2>&1; then
   useradd --system --home-dir "$base" --shell /usr/sbin/nologin doubo
 fi
-chown doubo:doubo "$base/shared" "$base/shared/media" "$base/shared/work"
+chown doubo:doubo "$base/shared" "$base/shared/media"
 for assets in design model-icons; do
   mkdir -p "$base/shared/media/$assets"
   cp -R "$release/media/$assets/." "$base/shared/media/$assets/"

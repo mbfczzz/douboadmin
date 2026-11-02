@@ -22,10 +22,6 @@ func NewMemory() *Memory {
 func copyRecord(r core.Record) core.Record { r.Data = append(json.RawMessage{}, r.Data...); return r }
 func copyJob(j core.Job) core.Job {
 	j.Input.Assets = append([]string{}, j.Input.Assets...)
-	if j.Input.Mix != nil {
-		v := *j.Input.Mix
-		j.Input.Mix = &v
-	}
 	if j.Input.ExpectedCostUnits != nil {
 		v := *j.Input.ExpectedCostUnits
 		j.Input.ExpectedCostUnits = &v

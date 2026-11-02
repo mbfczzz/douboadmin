@@ -118,8 +118,6 @@ for (const width of [1440, 390, 320]) {
     }
     page.once("dialog", (d) => d.accept());
     await template.getByRole("button", { name: "关闭", exact: true }).click();
-    await nav("背景音乐");
-    await modal("新增音乐", "背景音乐");
     await nav("模型管理");
     await modal("新增模型", "添加上游模型");
     for (const kind of [...new Set(models.map((m) => m.data.kind))]) {

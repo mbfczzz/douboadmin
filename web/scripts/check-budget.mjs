@@ -37,17 +37,10 @@ const result = {
   ),
   chunks: files.length,
 };
-// Quote B14–B20 adds six independently lazy management pages. Keep the original
+// Quote B14–B20 adds independently lazy management pages. Keep the original
 // 100 KiB cap for shared/existing code, and give each new route a measured 2 KiB cap.
 // The initial 80 KiB cap is unchanged; no dependency is moved to an external CDN.
-const newRoutes = [
-  "Orders",
-  "Payments",
-  "Works",
-  "Reviews",
-  "Music",
-  "Monitor",
-];
+const newRoutes = ["Orders", "Payments", "Works", "Reviews", "Monitor"];
 const routeBudgets = Object.fromEntries(
   newRoutes.map((name) => {
     const file = files.find(

@@ -25,7 +25,6 @@ function health(): Health {
     ossConfigured: false,
     relayConfigured: true,
     paymentConfigured: false,
-    mixConfigured: true,
     hotConfigured: false,
   };
 }
@@ -136,7 +135,7 @@ test("unavailable monitor data stays unknown and retry restores real states", as
   ]);
   await expect(
     page.locator(".monitor-connections").getByText("未读取", { exact: true }),
-  ).toHaveCount(7);
+  ).toHaveCount(6);
   failed = false;
   await page.getByRole("button", { name: "重试", exact: true }).click();
   await expect(page.getByRole("alert")).toHaveCount(0);

@@ -57,12 +57,9 @@ export interface Platform {
   pointsPerYuan: number;
   minRechargeFen: number;
   maxRechargeFen: number;
-  mixPoints: number;
   reviewRequired: boolean;
   supportText: string;
   hotKeywords: string[];
-  ttsModel: string;
-  rewriteModel: string;
   alarmFailures: number;
   alarmQueueMinutes: number;
 }
@@ -88,13 +85,6 @@ export interface Profile {
   bio?: string;
   disabled?: boolean;
   statusReason?: string;
-}
-export interface Music {
-  title: string;
-  assetId: string;
-  published: boolean;
-  sort: number;
-  url?: string;
 }
 export interface Daily {
   date: string;

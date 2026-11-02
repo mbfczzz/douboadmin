@@ -1,6 +1,7 @@
 package api
 
 import (
+	"doubo/server/internal/core"
 	"doubo/server/internal/provider"
 	"encoding/json"
 	"net/http"
@@ -65,6 +66,10 @@ func (a *Server) resumeJob(w http.ResponseWriter, r *http.Request) {
 	}
 	if job.Status != "failed" {
 		fail(w, 409, "此任务正在处理或已经完成")
+		return
+	}
+	if !core.IsGeneration(job.Input.Kind) && job.Input.Kind != "import" {
+		fail(w, 409, "该任务类型已停止支持，不能恢复执行")
 		return
 	}
 	if err = a.Store.Resume(r.Context(), id); err != nil {

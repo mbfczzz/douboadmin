@@ -6,7 +6,6 @@ import (
 	"doubo/server/internal/billing"
 	"doubo/server/internal/hotvideo"
 	"doubo/server/internal/media"
-	"doubo/server/internal/mixing"
 	"doubo/server/internal/partners"
 	"doubo/server/internal/payments"
 	"doubo/server/internal/relay"
@@ -41,7 +40,6 @@ type Server struct {
 	Partners *partners.Service
 	Activity *analytics.Recorder
 	Hot      *hotvideo.Service
-	Mix      *mixing.Engine
 	Billing  *billing.Service
 	Pay      *payments.Client
 	Objects  Objects

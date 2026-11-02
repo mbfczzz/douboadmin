@@ -8,7 +8,6 @@ import (
 
 type Router struct {
 	AI     Provider
-	Mix    Provider
 	Import Provider
 }
 
@@ -19,11 +18,8 @@ func (p Router) Generate(ctx context.Context, j core.Job) (string, error) {
 		}
 		return p.Import.Generate(ctx, j)
 	}
-	if j.Input.Kind == "mix" {
-		if p.Mix == nil {
-			return "", fmt.Errorf("混剪服务尚未配置")
-		}
-		return p.Mix.Generate(ctx, j)
+	if !core.IsGeneration(j.Input.Kind) {
+		return "", fmt.Errorf("该任务类型已停止支持")
 	}
 	return p.AI.Generate(ctx, j)
 }

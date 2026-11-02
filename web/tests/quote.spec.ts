@@ -12,7 +12,6 @@ test("quote management pages load real APIs and report missing services", async 
     "支付管理",
     "作品管理",
     "内容审核",
-    "背景音乐",
     "运行监控",
     "系统设置",
   ]) {

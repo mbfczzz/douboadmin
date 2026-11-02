@@ -18,7 +18,6 @@ const routes = {
   reviews: lazy(() => import("./pages/Reviews")),
   orders: lazy(() => import("./pages/Orders")),
   payments: lazy(() => import("./pages/Payments")),
-  music: lazy(() => import("./pages/Music")),
   monitor: lazy(() => import("./pages/Monitor")),
 };
 export default function Workspace({

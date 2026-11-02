@@ -75,14 +75,7 @@ export async function restoreMusic(page: Editor, revision: number) {
     return;
   }
   if (!id.startsWith("asset:")) {
-    const index = page.data.music.findIndex((row) => row.id === id);
-    page.setData({
-      musicIndex: Math.max(0, index + 1),
-      musicLabel:
-        index >= 0
-          ? page.data.music[index].data.title
-          : "音乐已下架，请重新选择",
-    });
+    page.setData({ musicIndex: 0, musicLabel: "请重新上传音乐文件" });
     return;
   }
   try {

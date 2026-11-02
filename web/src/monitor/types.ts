@@ -17,7 +17,6 @@ export interface Health {
   ossConfigured: boolean;
   relayConfigured: boolean;
   paymentConfigured: boolean;
-  mixConfigured: boolean;
   hotConfigured: boolean;
 }
 export interface Event {

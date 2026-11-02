@@ -1,11 +1,11 @@
 # 部署、备案与提审准备
 
-代码中的可配置接入不代表平台业务已经开通。用户尚未提供测试库、OSS、支付商户、抖音和 ASR 凭证，本页保留待办，不填写虚假的完成状态。
+代码中的可配置接入不代表平台业务已经开通。用户尚未提供测试库、OSS、支付商户和抖音凭证，本页保留待办，不填写虚假的完成状态。
 
 ## 测试与生产环境
 
 1. 填写 `.env` / `.env.local` 中的 MySQL、Redis、OSS、微信登录、中转站配置；生产环境设 `APP_ENV=production`，更换默认管理员密码。
-2. 单机使用 `deploy/compose.yaml` 启动共享 MySQL、Redis，显式执行 `migrate`，再启动 API、Worker、Web。镜像包含 FFmpeg、FFprobe 和中文字幕字体。
+2. 单机使用 `deploy/compose.yaml` 启动共享 MySQL、Redis，显式执行 `migrate`，再启动 API、Worker、Web。本地视频处理依赖已移除，原生部署步骤见 [云效部署](deploy-yunxiao.md)。
 3. 商户私钥、公钥放入 `deploy/secrets/`，容器内只读路径 `/run/secrets/`。目录已排除 Git 和 Docker 构建上下文。
 4. 使用 `deploy/nginx.tls.conf.example` 配置自己的域名和证书。内层 Nginx 已转发 `/api/`、`/media/`、`/s/`，短链不会误进入管理端 SPA。
 5. 设置 `PUBLIC_BASE_URL=https://实际域名`、对应 `WEB_ORIGIN`，并修改小程序 `config.ts` 的 API 地址。
@@ -30,7 +30,6 @@
 ## 第三方数据、语音与通知
 
 - TikHub：填写 `TIKHUB_API_KEY`；搜索使用已核对的 `fetch_video_search_v2`，综合/点赞/最新由上游支持，播放量只做当前页排序。缺失指标显示“未提供”。
-- ASR：填写兼容 multipart `/audio/transcriptions` 的 `ASR_BASE_URL`、`ASR_API_KEY`、`ASR_MODEL`，使用真实音轨验证文本及时间轴。
 - 配音：选择已上架的 `tts-*` 中转模型与音色。此次实调出现未确认提交，需在中转站核实；代码未盲目重发。
 - 完成订阅消息：填写真实 `WECHAT_COMPLETION_TEMPLATE_ID` 和 `WECHAT_COMPLETION_FIELDS`。字段名必须与获批模板一致，可使用 `{{title}}`、`{{jobId}}`、`{{state}}`、`{{time}}` 占位。用户主动授权后才尝试发送，站内通知独立保留。
 - 外部告警：可配置 `ALERT_WEBHOOK_URL`；未配置时告警保存在后台。不要把密钥或个人内容放进告警模板。
@@ -40,7 +39,7 @@
 - 域名与小程序主体信息、负责人核验、服务器与域名信息、类目和所需资质、隐私说明与数据处理清单，由真实主体通过相应平台提交。
 - 按[微信小程序备案指引](https://developers.weixin.qq.com/miniprogram/product/record_guidelines.html)办理，小程序备案与网站/域名相关备案分别核对；查询入口为[工信部备案系统](https://beian.miit.gov.cn/)。是否完成以平台回执为准。
 - 微信后台配置 request/uploadFile/downloadFile 合法域名、隐私接口说明与类目；填写真实客服/联系方式。
-- 开发者工具检查最终上传包，进行 iOS/Android 真机登录、上传、生成、混剪、相册保存、支付与分享测试。
-- 准备审核账号、操作路径、生成与混剪示例、收费说明、审核机制说明、用户协议/隐私政策。上传体验版并验收后，由有权限的管理员提交审核和发布。
+- 开发者工具检查最终上传包，进行 iOS/Android 真机登录、上传、生成、相册保存、支付与分享测试。
+- 准备审核账号、操作路径、生成示例、收费说明、审核机制说明、用户协议/隐私政策。上传体验版并验收后，由有权限的管理员提交审核和发布。
 
 本轮未代替用户办理备案、开通商户、购买服务器/CDN或提交小程序审核。

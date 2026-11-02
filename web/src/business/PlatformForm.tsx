@@ -1,15 +1,13 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { api, type Row, type Model } from "../api";
+import { api, type Row } from "../api";
 import type { Platform } from "./types";
 
 export default function PlatformForm({
   row,
-  models,
   onSaved,
   notify,
 }: {
   row: Row<Platform>;
-  models: Row<Model>[];
   onSaved: () => unknown;
   notify: (s: string) => void;
 }) {
@@ -54,7 +52,6 @@ export default function PlatformForm({
     ["pointsPerYuan", "每 1 元兑换积分", 1],
     ["minRechargeFen", "最低充值金额（分）", 1],
     ["maxRechargeFen", "最高充值金额（分）", 1],
-    ["mixPoints", "单次混剪积分", 0],
     ["alarmFailures", "每小时失败告警阈值", 1],
     ["alarmQueueMinutes", "排队告警阈值（分钟）", 1],
   ];
@@ -75,36 +72,10 @@ export default function PlatformForm({
               type="number"
               disabled={busy}
               min={min}
-              step={key === "mixPoints" ? "0.01" : "1"}
+              step="1"
               value={Number(value[key])}
               onChange={(e) => patch({ [key]: Number(e.target.value) })}
             />
-          </label>
-        ))}
-        {(["rewriteModel", "ttsModel"] as const).map((key) => (
-          <label key={key}>
-            {key === "rewriteModel" ? "AI 改写模型" : "AI 配音模型"}
-            <select
-              disabled={busy}
-              value={value[key]}
-              onChange={(e) => patch({ [key]: e.target.value })}
-            >
-              <option value="">请选择已上架的模型</option>
-              {models
-                .filter(
-                  (m) =>
-                    m.data.published &&
-                    (key === "rewriteModel"
-                      ? m.data.kind === "chat"
-                      : m.data.kind === "audio" &&
-                        m.data.key.startsWith("tts-")),
-                )
-                .map((m) => (
-                  <option key={m.id} value={m.id}>
-                    {m.data.name}
-                  </option>
-                ))}
-            </select>
           </label>
         ))}
       </div>

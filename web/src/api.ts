@@ -32,8 +32,6 @@ export interface Job {
   costUnits?: number;
   billingState?: string;
   stage?: string;
-  actualDuration?: number;
-  outputScript?: string;
   modelName?: string;
   retryable: boolean;
   id: string;
@@ -83,7 +81,6 @@ export interface Model {
 }
 export interface Config {
   relayConfigured: boolean;
-  mixAvailable: boolean;
   demo: boolean;
   demoLogin: boolean;
   storage: string;

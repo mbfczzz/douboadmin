@@ -1,19 +1,7 @@
 import type { Row, Asset } from "../../services/types";
 export interface MixConfig {
   enabled: boolean;
-  asr: boolean;
-  rewrite: boolean;
-  tts: boolean;
-  ttsModel: string;
-  rewriteModel: string;
-  voiceModels: { id: string; name: string; voices: string[] | null }[];
-  points: number;
-  billingEnabled: boolean;
-}
-export interface Music {
-  title: string;
-  assetId: string;
-  url: string;
+  message?: string;
 }
 export const mixState = {
   config: null as MixConfig | null,
@@ -36,7 +24,6 @@ export const mixState = {
   ttsModel: "",
   modelNames: [] as string[],
   modelIndex: 0,
-  music: [] as Row<Music>[],
   musicNames: ["不使用背景音乐"],
   musicIndex: 0,
   musicId: "",

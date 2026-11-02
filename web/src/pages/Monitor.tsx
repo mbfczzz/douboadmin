@@ -34,7 +34,6 @@ export default function Monitor({ notify }: PageProps) {
     ["阿里云 OSS", h?.ossConfigured, "已配置", "未配置"],
     ["AI 中转", h?.relayConfigured, "已配置", "未配置"],
     ["微信支付", h?.paymentConfigured, "已配置", "未配置"],
-    ["混剪引擎", h?.mixConfigured, "已配置", "未配置"],
     ["抖音接口", h?.hotConfigured, "已配置", "未配置"],
   ] as const;
   return (

@@ -1,52 +1,50 @@
 const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const { harness } = require("./harness.cjs");
-const config = {
-  enabled: true,
-  voiceModels: [
-    { id: "voice-model", name: "配音", voices: ["Zephyr", "Puck"] },
-  ],
-  ttsModel: "voice-model",
-};
+const config = { mixAvailable: false, mixMessage: "混剪功能暂未开放" };
 
-test("re-editing restores selected music and voice names", async () => {
+test("mix UI reads real general capabilities and never calls retired APIs", async () => {
   const h = harness(),
-    page = h.page("mix");
-  h.api.request = async (path) =>
-    path === "/mix/config"
+    page = h.page("mix"),
+    paths = [];
+  h.api.request = async (path) => {
+    paths.push(path);
+    return path === "/config"
       ? config
-      : path === "/music"
-        ? [{ id: "music-one", data: { title: "背景音乐" } }]
-        : { id: "asset", data: { name: "我的音乐.mp3" } };
+      : { id: "asset", data: { name: "我的音乐.mp3" } };
+  };
   h.storage.set("mix-draft", {
-    prompt: "脚本",
+    prompt: "保留脚本",
     assets: [],
     duration: 15,
     ratio: "9:16",
     resolution: "720p",
-    mix: { musicId: "music-one", voice: "Puck", ttsModel: "voice-model" },
+    mix: {
+      musicId: "retired-library",
+      voice: "Puck",
+      ttsModel: "retired-model",
+    },
   });
   page.onShow();
   await new Promise(setImmediate);
-  assert.equal(page.data.voiceIndex, 1);
-  assert.equal(page.data.musicIndex, 1);
-  assert.equal(page.data.musicLabel, "背景音乐");
+  assert.equal(page.data.config.enabled, false);
+  assert.equal(page.data.config.message, "混剪功能暂未开放");
+  assert.equal(page.data.script, "保留脚本");
+  assert.equal(page.data.musicLabel, "请重新上传音乐文件");
+  assert.equal(page.data.narration, false);
+  assert.deepEqual(paths, ["/config"]);
   page.setData({ musicId: "asset:asset" });
   await page.load();
   await new Promise(setImmediate);
   assert.equal(page.data.musicLabel, "我的音乐.mp3");
 });
 
-test("a late music lookup does not overwrite a user's newer selection", async () => {
+test("a late music lookup cannot overwrite a newer user selection", async () => {
   const h = harness(),
     page = h.page("mix");
   let finish;
   h.api.request = async (path) =>
-    path === "/mix/config"
-      ? config
-      : path === "/music"
-        ? []
-        : new Promise((resolve) => (finish = resolve));
+    path === "/config" ? config : new Promise((resolve) => (finish = resolve));
   page.setData({ musicId: "asset:old" });
   await page.load();
   page.chooseMusic({ detail: { value: "0" } });
@@ -73,4 +71,31 @@ test("leaving while a music picker is open prevents a late upload", async () => 
   await task;
   assert.equal(uploads, 0);
   assert.equal(page.data.musicId, "");
+});
+
+test("mix cannot create or quote a job even with stale enabled state", async () => {
+  const h = harness(),
+    page = h.page("mix");
+  let calls = 0;
+  h.api.submitInput = h.api.request = async () => {
+    calls++;
+  };
+  page.setData({
+    config: { enabled: true },
+    assets: [{ id: "image", data: { type: "image/jpeg" } }],
+  });
+  await page.generate();
+  assert.equal(calls, 0);
+});
+
+test("a capability response arriving after leaving cannot update the page", async () => {
+  const h = harness(),
+    page = h.page("mix");
+  let finish;
+  h.api.request = () => new Promise((resolve) => (finish = resolve));
+  const task = page.load();
+  page.onUnload();
+  finish(config);
+  await task;
+  assert.equal(page.data.config, null);
 });

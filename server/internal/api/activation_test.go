@@ -25,7 +25,7 @@ func activationFixture(t *testing.T) (*Server, string, string) {
 }
 func TestWechatIdentityAloneCannotUseBusinessEndpoints(t *testing.T) {
 	a, user, admin := activationFixture(t)
-	for _, path := range []string{"/api/templates", "/api/music", "/api/mix/config", "/api/hot/discovery", "/api/jobs", "/api/wallet", "/api/me", "/api/shares/123"} {
+	for _, path := range []string{"/api/templates", "/api/hot/discovery", "/api/jobs", "/api/wallet", "/api/me", "/api/shares/123"} {
 		w := call(a, "GET", path, user, "", nil)
 		if w.Code != 403 || !strings.Contains(w.Body.String(), "ACTIVATION_REQUIRED") {
 			t.Fatalf("ungated endpoint %s: %d %s", path, w.Code, w.Body.String())

@@ -9,36 +9,36 @@
   /><view class="biz-row"
     ><view
       ><text>语音转文字</text
-      ><text wx:if="{{!config.asr}}" class="biz-note"
-        >语音识别接口待配置</text
+      ><text wx:if="{{!config.enabled}}" class="biz-note"
+        >混剪服务暂未开放</text
       ></view
     ><switch
       checked="{{transcribe}}"
-      disabled="{{!config.asr}}"
+      disabled="{{!config.enabled}}"
       data-field="transcribe"
       bindchange="toggle"
       color="#9BCBAA" /></view
   ><view class="biz-row"
     ><view
       ><text>AI 改写文案</text
-      ><text wx:if="{{!config.rewrite}}" class="biz-note"
-        >请在后台选择改写模型</text
+      ><text wx:if="{{!config.enabled}}" class="biz-note"
+        >混剪服务暂未开放</text
       ></view
     ><switch
       checked="{{rewrite}}"
-      disabled="{{!config.rewrite}}"
+      disabled="{{!config.enabled}}"
       data-field="rewrite"
       bindchange="toggle"
       color="#9BCBAA" /></view
   ><view class="biz-row"
     ><view
       ><text>AI 配音</text
-      ><text wx:if="{{!config.tts}}" class="biz-note"
-        >请在后台启用配音模型</text
+      ><text wx:if="{{!config.enabled}}" class="biz-note"
+        >混剪服务暂未开放</text
       ></view
     ><switch
       checked="{{narration}}"
-      disabled="{{!config.tts}}"
+      disabled="{{!config.enabled}}"
       data-field="narration"
       bindchange="toggle"
       color="#9BCBAA" /></view
@@ -62,6 +62,7 @@
     ><text>自动字幕</text
     ><switch
       checked="{{captions}}"
+      disabled="{{!config.enabled}}"
       data-field="captions"
       bindchange="toggle"
       color="#9BCBAA" /></view

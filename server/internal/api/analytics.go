@@ -29,7 +29,7 @@ func (a *Server) track(w http.ResponseWriter, r *http.Request) {
 	if !decode(w, r, &v) {
 		return
 	}
-	if !slices.Contains([]string{"page_view", "template_view", "generate_submit", "mix_submit", "work_saved", "share_created", "search"}, v.Name) || len(v.Page) > 40 || len(v.TargetID) > 64 {
+	if !slices.Contains([]string{"page_view", "template_view", "generate_submit", "work_saved", "share_created", "search"}, v.Name) || len(v.Page) > 40 || len(v.TargetID) > 64 {
 		fail(w, 400, "事件格式无效")
 		return
 	}

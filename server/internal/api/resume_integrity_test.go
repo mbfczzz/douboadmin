@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func TestMixedWorkflowResumePreservesStateAndRollsBackOnBillingConflict(t *testing.T) {
+func TestGenerationResumePreservesStateAndRollsBackOnBillingConflict(t *testing.T) {
 	for _, release := range []bool{false, true} {
 		t.Run(map[bool]string{false: "reserved", true: "released"}[release], func(t *testing.T) {
 			a, _, _ := setup(t)
@@ -17,7 +17,7 @@ func TestMixedWorkflowResumePreservesStateAndRollsBackOnBillingConflict(t *testi
 			if _, e := a.Billing.Adjust(ctx, "user-a", "fund", "admin", "test credit", 1000); e != nil {
 				t.Fatal(e)
 			}
-			j := core.NewJob("user-a", "resume-mix", core.JobInput{Kind: "mix", Model: "local-mix"})
+			j := core.NewJob("user-a", "resume-image", core.JobInput{Kind: "image", Model: "image-model"})
 			j.CostUnits = 100
 			if _, e := a.Store.CreateJob(ctx, j); e != nil {
 				t.Fatal(e)
@@ -30,7 +30,7 @@ func TestMixedWorkflowResumePreservesStateAndRollsBackOnBillingConflict(t *testi
 			if e = a.Store.Finish(ctx, claimed, "", "save interrupted"); e != nil {
 				t.Fatal(e)
 			}
-			state := map[string]any{"phase": "polling", "startedAt": time.Now().Add(-2 * time.Hour), "step": "render", "script": "保留原文案", "sources": []any{map[string]string{"id": "source"}}, "voiceResult": "asset:voice", "duration": 30, "futureField": map[string]any{"exact": 9007199254740993}}
+			state := map[string]any{"phase": "polling", "startedAt": time.Now().Add(-2 * time.Hour), "taskId": "upstream-task", "result": "asset:output", "futureField": map[string]any{"exact": 9007199254740993}}
 			before, e := a.Store.Put(ctx, "executions", core.Record{ID: j.ID, Data: core.Data(state)}, 0)
 			if e != nil {
 				t.Fatal(e)
@@ -76,7 +76,7 @@ func TestDuplicateSubmissionReturnsCurrentBillingState(t *testing.T) {
 	if _, err := a.Billing.Adjust(ctx, "user-a", "fund", "admin", "test credit", 1000); err != nil {
 		t.Fatal(err)
 	}
-	in := core.JobInput{Kind: "mix", Model: "local-mix", Prompt: "original"}
+	in := core.JobInput{Kind: "image", Model: "image-model", Prompt: "original"}
 	j := core.NewJob("user-a", "repeat-key", in)
 	j.CostUnits = 500
 	if _, err := a.Store.CreateJob(ctx, j); err != nil {

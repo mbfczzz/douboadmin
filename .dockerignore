@@ -11,6 +11,5 @@ deploy/backups
 .env*
 media/uploads
 media/results
-media/.mix-tmp
 docs
 miniprogram

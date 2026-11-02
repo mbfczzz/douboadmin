@@ -24,6 +24,7 @@
     ><text>自动识别镜头</text
     ><switch
       checked="{{autoScenes}}"
+      disabled="{{!config.enabled}}"
       color="#9BCBAA"
       data-field="autoScenes"
       bindchange="toggle" /></view
@@ -69,6 +70,6 @@
     value="{{duration}}"
     bindinput="duration"
   /><text class="biz-note"
-    >素材不足时会重复镜头；配音较长时会自动延长视频，最多两分钟。</text
+    >混剪服务暂未开放，当前设置不会提交生成任务。</text
   ></view
 >
