@@ -1,6 +1,6 @@
 # 测试环境：云效 Flow + Linux 原生部署
 
-使用 Gitee / GitHub 代码源、云效构建和主机部署；服务器运行 Nginx、Go API、独立 Worker，不需要 Docker。本文以支持 systemd 的 Linux 为前提，目录固定为 `/opt/doubo`。Windows 或由宝塔管理的 Nginx 需要调整安装步骤。
+使用 Gitee / GitHub 代码源、云效构建和主机部署；服务器运行 Nginx、Go API、独立 Worker，不需要 Docker。本文以支持 systemd 的 Linux 为前提，发布版本目录为 `/srv/doubo`，运行入口与共享数据在 `/opt/doubo`。Windows 或由宝塔管理的 Nginx 需要调整安装步骤。
 
 ```text
 Gitee main → 云效构建 / 测试 → 上传制品 → 测试主机部署
@@ -121,8 +121,8 @@ GOTOOLCHAIN=auto TARGET_ARCH=arm64 bash deploy/native/build.sh
 
 ```bash
 set -eu
-mkdir -p /opt/doubo/releases
-release_dir="$(mktemp -d /opt/doubo/releases/test-XXXXXXXX)"
+mkdir -p /srv/doubo
+release_dir="$(mktemp -d /srv/doubo/test-XXXXXXXX)"
 tar -xzf /opt/doubo/artifacts/package.tgz -C "$release_dir"
 bash "$release_dir/deploy/native/deploy.sh"
 ```
@@ -164,7 +164,7 @@ sudo systemctl restart doubo@serve doubo@worker
 readlink -f /opt/doubo/current
 ```
 
-发布版本保存在 `/opt/doubo/releases/`；上传文件和历史前端资源在 `/opt/doubo/shared/`。配置修改后重启两个服务。定期备份 MySQL 和 OSS，并按保留策略清理旧版本与无引用文件；发布脚本不会自动删除业务数据或历史版本。
+发布版本保存在 `/srv/doubo/test-随机字符/`；部署成功后 `/opt/doubo/current` 链接到该版本，systemd 和 Nginx 通过这个固定入口运行。上传文件和历史前端资源在 `/opt/doubo/shared/`，制品下载路径为 `/opt/doubo/artifacts/package.tgz`，环境配置在 `/etc/doubo/doubo.env`。配置修改后重启两个服务。定期备份 MySQL 和 OSS，并按保留策略清理旧版本与无引用文件；发布脚本不会自动删除业务数据或历史版本。
 
 以后扩容时，API 节点接同一 MySQL、Redis、OSS，Nginx / 负载均衡转发到多个 API；Worker 可在其他主机独立启动。迁移阶段只能执行一次，不要让多台主机同时执行部署迁移。当前这套脚本用于单主机，不宣称多主机滚动发布或零中断。
 

@@ -5,7 +5,8 @@ die() { echo "$*" >&2; exit 1; }
 [[ "$(id -u)" == 0 ]] || die "Run as root (Flow host deployment user: root)."
 release="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 base=/opt/doubo
-[[ "$release" == "$base/releases/"* ]] || die "Extract into /opt/doubo/releases/<unique-id> first."
+release_root=/srv/doubo
+[[ "$release" == "$release_root/"* ]] || die "Extract into /srv/doubo/<unique-id> first."
 [[ -f "$release/bin/doubo-api" && -f "$release/web/index.html" ]] || die "Incomplete release."
 for command in systemctl curl flock; do
   command -v "$command" >/dev/null || die "Missing command: $command"
@@ -32,7 +33,7 @@ done
 # Keep old hashed chunks so an already-open browser can still lazy-load pages.
 cp -R "$release/web/assets/." "$base/shared/web/assets/"
 chmod -R a+rX "$base/shared/web"
-chmod 755 "$base" "$base/releases" "$base/shared" "$release" "$release/bin"
+chmod 755 "$base" "$release_root" "$base/shared" "$release" "$release/bin"
 chmod -R a+rX "$release/web"
 chmod 755 "$release/bin/doubo-api"
 install -m 644 "$release/deploy/native/doubo@.service" /etc/systemd/system/
