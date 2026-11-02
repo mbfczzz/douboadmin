@@ -95,7 +95,11 @@ REDIS_DB=测试环境数据库编号
 先执行迁移，再重启服务并同步模型。临时预览模板不会自动写入新数据库；需要迁移的正式模板及本地文件应单独确认和转存。
 正式环境设置对应的 `REDIS_ADDR` / `REDIS_USERNAME` / `REDIS_PASSWORD` / `REDIS_DB`，并通过 HTTPS 访问服务。账号、密码和环境地址只保存在部署配置中，不提交到仓库。
 
-## 单机 Docker 部署与扩容
+## 测试环境原生部署（不使用 Docker）
+
+推荐使用云效 Flow 从 GitHub 构建并发布到 Linux 测试主机，Nginx 提供 HTTPS，Go API 与 Worker 由 systemd 分别管理，连接 MySQL、Redis 和 OSS。构建、环境配置、服务单元、Nginx 示例在 `deploy/native/`，完整步骤见 [云效原生部署](docs/deploy-yunxiao.md)。云效中构建执行 `bash deploy/native/build.sh`，上传 `out/package/` 后交给主机部署步骤解压发布；数据库迁移由部署脚本单独执行。
+
+## 可选：单机 Docker 部署与扩容
 
 复制 `.env.example` 到 `.env`，填写 MySQL、Redis、微信、中转、OSS 等配置。生产部署设置 `APP_ENV=production`、`ALLOW_DEMO_LOGIN=false` 和非默认管理员密码。
 

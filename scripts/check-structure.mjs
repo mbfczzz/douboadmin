@@ -6,6 +6,7 @@ const ignored = new Set([
   "node_modules",
   ".git",
   ".runtime",
+  "out",
   "dist",
   "miniprogram_npm",
   "test-results",
