@@ -83,8 +83,12 @@ func run() error {
 		}
 	}
 	var rc *redis.Client
-	if addr := os.Getenv("REDIS_ADDR"); addr != "" {
-		rc = redis.NewClient(&redis.Options{Addr: addr, Password: os.Getenv("REDIS_PASSWORD")})
+	redisOptions, err := redisOptionsFromEnv()
+	if err != nil {
+		return err
+	}
+	if redisOptions != nil {
+		rc = redis.NewClient(redisOptions)
 		defer rc.Close()
 		if err = rc.Ping(check).Err(); err != nil {
 			return err

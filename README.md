@@ -86,10 +86,14 @@ OSS_REGION=cn-hangzhou
 OSS_BUCKET=在本地填写
 OSS_ACCESS_KEY_ID=在本地填写
 OSS_ACCESS_KEY_SECRET=在本地填写
+REDIS_ADDR=测试实例地址:6379
+REDIS_USERNAME=在本地填写
+REDIS_PASSWORD=在本地填写
+REDIS_DB=测试环境数据库编号
 ```
 
 先执行迁移，再重启服务并同步模型。临时预览模板不会自动写入新数据库；需要迁移的正式模板及本地文件应单独确认和转存。
-正式环境再设置共享 `REDIS_ADDR` / `REDIS_PASSWORD`，并通过 HTTPS 访问服务。
+正式环境设置对应的 `REDIS_ADDR` / `REDIS_USERNAME` / `REDIS_PASSWORD` / `REDIS_DB`，并通过 HTTPS 访问服务。账号、密码和环境地址只保存在部署配置中，不提交到仓库。
 
 ## 单机 Docker 部署与扩容
 
