@@ -1,0 +1,11 @@
+<view style="padding-top:{{top}}px" class="nav">
+  <view class="nav-inner" style="height:{{height}}px;font-size:{{size}}px">
+    <view wx:if="{{back}}" class="back" bindtap="goBack" aria-label="返回">
+      <t-icon name="chevron-left" size="26" />
+    </view>
+    <text>{{title}}</text>
+    <view class="nav-actions" style="right:{{actionsRight}}px">
+      <slot name="actions" />
+    </view>
+  </view>
+</view>

@@ -1,0 +1,78 @@
+import { useState } from "react";
+import { date } from "../api";
+import Records, { useRecords } from "./Records";
+import QuotaForm from "./QuotaForm";
+import QuotaRequests from "./QuotaRequests";
+import type { Move, Scope } from "./types";
+import { labels } from "./types";
+export default function Quotas({ id, changed, notify }: Scope) {
+  const resource = useRecords<Move>("/admin/quota-moves"),
+    [form, setForm] = useState<"move" | "request" | null>(null),
+    [revision, setRevision] = useState(0);
+  return (
+    <>
+      <h3>名额划拨记录</h3>
+      <Records
+        resource={resource}
+        actions={
+          <>
+            <button
+              type="button"
+              className="primary"
+              onClick={() => setForm("move")}
+            >
+              划拨 / 收回名额
+            </button>
+            <button
+              type="button"
+              className="secondary"
+              disabled={id === "root"}
+              onClick={() => setForm("request")}
+            >
+              向上级申请
+            </button>
+          </>
+        }
+        columns={[
+          {
+            title: "上级 → 下级",
+            render: (r) => (
+              <>
+                {r.data.parentId}
+                <small className="cell-note">→ {r.data.childId}</small>
+              </>
+            ),
+          },
+          { title: "类型", render: (r) => labels[r.data.kind] },
+          {
+            title: "子账号 / 服务商名额",
+            render: (r) => `${r.data.users} / ${r.data.partners}`,
+          },
+          { title: "说明", render: (r) => r.data.reason },
+          { title: "时间", render: (r) => date(r.createdAt) },
+        ]}
+      />
+      <QuotaRequests
+        key={revision}
+        notify={notify}
+        changed={async () => {
+          await resource.reload();
+          await changed();
+        }}
+      />
+      {form && (
+        <QuotaForm
+          id={id}
+          request={form === "request"}
+          notify={notify}
+          onClose={() => setForm(null)}
+          onSaved={async () => {
+            await resource.reload();
+            await changed();
+            setRevision((v) => v + 1);
+          }}
+        />
+      )}
+    </>
+  );
+}

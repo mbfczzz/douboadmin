@@ -1,0 +1,83 @@
+<nav-bar title="任务队列" back />
+<view class="subpage queue-page page-motion {{pageMotion}}">
+  <view class="loading" wx:if="{{loading}}"><t-loading /></view>
+  <view wx:elif="{{needsLogin}}" class="empty">
+    <t-icon name="task" size="40" />
+    <text class="title">登录后查看任务</text>
+    <text class="desc">生成进度和历史作品都会保存在这里。</text>
+    <t-button theme="primary" loading="{{signingIn}}" bind:tap="signIn">去登录</t-button>
+  </view>
+  <view wx:elif="{{loadError&&!jobs.length}}" class="error-box" bindtap="load"
+    >{{loadError}} · 点击重试</view
+  >
+  <view wx:elif="{{!jobs.length}}" class="empty">
+    <t-icon name="task" size="40" /><text class="title">这里还没有任务</text>
+    <text class="desc">每个作品，都从一个想法开始。</text>
+    <t-button theme="primary" variant="outline" bind:tap="create"
+      >去创作</t-button
+    >
+  </view>
+  <view wx:else class="content-reveal">
+    <view wx:if="{{loadError}}" class="error-box" bindtap="load">刷新失败，已保留上次结果 · 点击重试</view>
+    <view class="queue-summary"
+      ><text>进行中 · {{runningCount}}</text
+      ><text class="failure-count">失败 · {{failedCount}}</text></view
+    >
+    <view
+      class="queue-item"
+      wx:for="{{ongoing}}"
+      wx:key="id"
+      data-id="{{item.id}}"
+      bindtap="detail"
+      hover-class="card-pressed"
+    >
+      <view class="queue-thumb"
+        ><t-icon
+          name="{{item.input.kind==='image'?'image':'video-camera'}}"
+          size="22"
+      /></view>
+      <view class="queue-copy">
+        <view class="queue-title-row"
+          ><text class="queue-title">{{item.shortTitle}}</text
+          ><text class="queue-state {{item.status}}"
+            >{{item.stateText}}</text
+          ></view
+        >
+        <text class="queue-spec" wx:if="{{item.status!=='failed'}}"
+          >{{item.kindText}} · {{item.input.ratio}} ·
+          {{item.input.resolution}}<text wx:if="{{item.input.duration}}"> · {{item.input.duration}}秒</text></text
+        >
+        <text class="queue-spec" wx:else>{{item.error}}</text>
+        <view class="queue-time"
+          ><text>{{item.time}} 提交</text
+          ><text>{{item.status==='failed'?(item.retryable?'查看并重试 ›':'查看原因 ›'):'详情 ›'}}</text></view
+        >
+      </view>
+    </view>
+    <view class="completed-heading" wx:if="{{completed.length}}">最近完成</view>
+    <view class="completed-grid">
+      <view
+        class="completed-item content-reveal"
+        wx:for="{{completed}}"
+        wx:key="id"
+        data-id="{{item.id}}"
+        bindtap="detail"
+        hover-class="card-pressed"
+      >
+        <view class="completed-cover">
+          <image
+            wx:if="{{item.input.kind==='image'}}"
+            src="{{item.result}}"
+            mode="aspectFill"
+            lazy-load
+          />
+          <t-icon wx:else name="play-circle" size="36" />
+          <text wx:if="{{item.input.duration}}" class="completed-duration"
+            >{{item.input.duration}} 秒</text
+          >
+        </view>
+        <text class="completed-title">{{item.shortTitle}}</text>
+      </view>
+    </view>
+  </view>
+</view>

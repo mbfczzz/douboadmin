@@ -1,0 +1,68 @@
+package api
+
+import (
+	"context"
+	"doubo/server/internal/analytics"
+	"doubo/server/internal/billing"
+	"doubo/server/internal/hotvideo"
+	"doubo/server/internal/media"
+	"doubo/server/internal/mixing"
+	"doubo/server/internal/partners"
+	"doubo/server/internal/payments"
+	"doubo/server/internal/relay"
+	"doubo/server/internal/store"
+	"doubo/server/internal/wechat"
+	"io"
+	"net/http"
+)
+
+type Config struct {
+	RequireActivation    bool
+	Production           bool
+	DemoLogin            bool
+	Storage              string
+	AdminUser            string
+	AdminPassword        string
+	MediaDir             string
+	WebOrigin            string
+	WeChatAppID          string
+	WeChatSecret         string
+	RelayURL             string
+	RelayKey             string
+	PublicBaseURL        string
+	CompletionTemplateID string
+	CompletionReady      bool
+}
+type Objects interface {
+	Put(context.Context, string, io.Reader, string) error
+	URL(context.Context, string) (string, error)
+}
+type Server struct {
+	Partners *partners.Service
+	Activity *analytics.Recorder
+	Hot      *hotvideo.Service
+	Mix      *mixing.Engine
+	Billing  *billing.Service
+	Pay      *payments.Client
+	Objects  Objects
+	Relay    *relay.Client
+	Media    *media.Service
+	WeChat   *wechat.Client
+	Store    store.Store
+	Sessions *Sessions
+	Config   Config
+	Mux      *http.ServeMux
+}
+type ctxKey int
+
+const identityKey ctxKey = 0
+
+func New(s store.Store, sessions *Sessions, c Config) *Server {
+	a := &Server{Store: s, Sessions: sessions, Config: c, Mux: http.NewServeMux(), WeChat: wechat.New(c.WeChatAppID, c.WeChatSecret)}
+	a.Relay = relay.New(c.RelayURL, c.RelayKey)
+	a.Billing = &billing.Service{Store: s, RequireActivation: c.RequireActivation}
+	a.Partners = &partners.Service{Store: s}
+	a.Activity = &analytics.Recorder{Store: s}
+	a.routes()
+	return a
+}

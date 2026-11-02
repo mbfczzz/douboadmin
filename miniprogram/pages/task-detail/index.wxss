@@ -1,0 +1,145 @@
+.task-detail-page {
+  padding: 24px 20px calc(30px + env(safe-area-inset-bottom));
+  --td-button-border-radius: 6px;
+  --td-button-primary-bg-color: #e1e6e2;
+  --td-button-primary-color: #112218;
+  --td-button-primary-border-color: #e1e6e2;
+}
+.task-heading {
+  word-break: break-all;
+  display: block;
+  font-size: 23px;
+  font-weight: 500;
+  line-height: 1.4;
+  margin: 0 0 12px;
+  color: #f0f1ef;
+}
+.task-state {
+  font-size: 13px;
+  color: #a7b6ac;
+  gap: 8px;
+}
+.state-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+}
+.task-state .small {
+  font-size: 12px;
+}
+.task-state t-icon {
+  color: #9bcbaa;
+}
+.task-state.failed t-icon {
+  color: #dea28b;
+}
+.failure-reason {
+  font-size: 14px;
+  color: #b7aaa3;
+  line-height: 1.5;
+  margin-top: 12px;
+}
+.waiting-note {
+  margin-top: 16px;
+  color: #a0a8ac;
+  font-size: 13px;
+  line-height: 1.7;
+}
+.continue-create {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 6px 0;
+  color: #b1d8bd;
+}
+.result {
+  position: relative;
+  margin-top: 24px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #080b09;
+}
+.result image,
+.result video {
+  width: 100%;
+}
+.result video {
+  height: 320px;
+}
+.demo-watermark {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  background: #131516bb;
+  font-size: 10px;
+  padding: 4px 7px;
+  border-radius: 4px;
+  color: #d5e6db;
+  pointer-events: none;
+}
+.task-detail-page .foot-actions {
+  gap: 10px;
+  margin: 12px 0 24px;
+}
+.task-detail-page .section-title {
+  font-size: 12px;
+  font-weight: 400;
+  color: #89938d;
+  margin: 24px 0 10px;
+}
+.task-detail-page .section-title .small {
+  font-size: 11px;
+}
+.full-prompt {
+  word-break: break-all;
+  display: block;
+  font-size: 15px;
+  line-height: 1.65;
+  color: #d0d6d2;
+  white-space: pre-wrap;
+}
+.asset-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+.asset-row {
+  min-width: 0;
+}
+.asset-row image,
+.asset-file {
+  width: 100%;
+  height: 96px;
+  border-radius: 5px;
+}
+.asset-file {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #222628;
+}
+.asset-row > text {
+  display: block;
+  font-size: 12px;
+  color: #b9c9be;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-top: 8px;
+}
+.asset-row > text.tiny {
+  font-size: 11px;
+  color: #89938d;
+  margin-top: 3px;
+}
+.specs {
+  font-size: 12px;
+  line-height: 1.8;
+  color: #929d96;
+  border-top: 1px solid #353b3e;
+  padding-top: 16px;
+  margin-top: 24px;
+}
+.task-detail-page .note {
+  font-size: 12px;
+}

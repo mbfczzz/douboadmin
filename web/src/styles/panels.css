@@ -1,0 +1,21 @@
+.panel {
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  overflow: hidden;
+}
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 23px 24px 17px;
+}
+.section-head h2 {
+  font-size: 15px;
+  margin: 0;
+  font-weight: 600;
+}
+.quiet {
+  color: var(--muted);
+  font-size: 12px;
+}

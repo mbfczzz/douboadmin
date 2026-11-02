@@ -1,0 +1,16 @@
+<nav-bar title="确认照片" back />
+<view class="subpage preview-page page-motion {{pageMotion}}">
+  <image class="preview" src="{{path}}" mode="aspectFit" />
+  <view class="preview-name">{{name}}</view>
+  <text class="preview-hint">确认商品主体清晰、完整，没有被遮挡。</text>
+  <view class="foot-actions">
+    <view>
+      <t-button block variant="outline" bind:tap="back">重新选择</t-button>
+    </view>
+    <view>
+      <t-button block theme="primary" loading="{{busy}}" bind:tap="confirm">
+        {{uploaded?'返回继续':'使用这张照片'}}
+      </t-button>
+    </view>
+  </view>
+</view>

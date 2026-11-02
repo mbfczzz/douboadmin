@@ -1,0 +1,39 @@
+<nav-bar title="视频详情" back /><view
+  class="subpage page-motion {{pageMotion}}"
+  ><view wx:if="{{loadError}}" class="biz-error" bindtap="load"
+    >{{loadError}} · 点击重试</view
+  ><block wx:if="{{video}}"
+    ><view class="biz-card"
+      ><video
+        wx:if="{{video.url}}"
+        class="biz-preview"
+        src="{{video.url}}"
+        poster="{{video.cover}}"
+        controls
+      /><image
+        wx:else
+        class="biz-image"
+        src="{{video.cover}}"
+        mode="aspectFill"
+      /><text class="biz-heading">{{video.title}}</text
+      ><text class="biz-small">{{video.author}} · {{video.dateText}}</text
+      ><view class="biz-row"
+        ><text>点赞 {{video.likesText}}</text
+        ><text>播放 {{video.viewsText}}</text></view
+      ></view
+    ><view class="biz-card"
+      ><view class="row"
+        ><text class="biz-heading">视频文案</text
+        ><text class="biz-link" bindtap="copy">复制</text></view
+      ><text selectable="true" class="video-copy">{{video.text}}</text></view
+    ><text wx:if="{{busy}}" class="biz-note">{{progress}}</text
+    ><button
+      class="biz-action"
+      loading="{{busy}}"
+      disabled="{{busy||!video.url}}"
+      bindtap="use"
+    >
+      导入素材并混剪
+    </button></block
+  ></view
+>

@@ -1,0 +1,67 @@
+{
+  "pages": [
+    "pages/activate/index",
+    "pages/templates/index",
+    "pages/mix/index",
+    "pages/create/index",
+    "pages/agent/index",
+    "pages/mine/index",
+    "pages/template-detail/index",
+    "pages/tasks/index",
+    "pages/task-detail/index",
+    "pages/library/index",
+    "pages/upload-preview/index",
+    "pages/login/index",
+    "pages/transition/index",
+    "pages/works/index",
+    "pages/wallet/index",
+    "pages/orders/index",
+    "pages/notifications/index",
+    "pages/preferences/index",
+    "pages/share/index",
+    "pages/shared-work/index",
+    "pages/hot-videos/index",
+    "pages/hot-detail/index"
+  ],
+  "window": {
+    "navigationStyle": "custom",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#131516",
+    "backgroundTextStyle": "light"
+  },
+  "tabBar": {
+    "custom": true,
+    "color": "#A0A8AC",
+    "selectedColor": "#9BCBAA",
+    "backgroundColor": "#1C1F21",
+    "list": [
+      {
+        "pagePath": "pages/templates/index",
+        "text": "模板"
+      },
+      {
+        "pagePath": "pages/mix/index",
+        "text": "混剪"
+      },
+      {
+        "pagePath": "pages/create/index",
+        "text": "创作"
+      },
+      {
+        "pagePath": "pages/agent/index",
+        "text": "Agent"
+      },
+      {
+        "pagePath": "pages/mine/index",
+        "text": "我的"
+      }
+    ]
+  },
+  "usingComponents": {
+    "nav-bar": "/components/nav-bar/index",
+    "t-icon": "tdesign-miniprogram/icon/icon"
+  },
+  "style": "v2",
+  "lazyCodeLoading": "requiredComponents",
+  "sitemapLocation": "sitemap.json"
+}

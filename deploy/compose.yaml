@@ -1,0 +1,68 @@
+name: doubo
+x-api: &api
+  build:
+    context: ..
+    dockerfile: server/Dockerfile
+  env_file: ../.env
+  environment: &api-env
+    STORAGE_DRIVER: mysql
+    MYSQL_DSN: "${MYSQL_USER}:${MYSQL_PASSWORD}@tcp(mysql:3306)/${MYSQL_DATABASE}?charset=utf8mb4&parseTime=true"
+    REDIS_ADDR: redis:6379
+    RUN_WORKER: "false"
+  depends_on:
+    mysql:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    volumes: [mysql-data:/var/lib/mysql]
+    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
+    restart: unless-stopped
+    healthcheck:
+      test: [CMD-SHELL, 'MYSQL_PWD="$$MYSQL_ROOT_PASSWORD" mysqladmin ping -h 127.0.0.1 -u root --silent']
+      interval: 5s
+      timeout: 5s
+      retries: 30
+  redis:
+    image: redis:7.4-alpine
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    command: [sh, -c, 'exec redis-server --appendonly yes --requirepass "$$REDIS_PASSWORD"']
+    volumes: [redis-data:/data]
+    restart: unless-stopped
+    healthcheck:
+      test: [CMD-SHELL, 'REDISCLI_AUTH="$$REDIS_PASSWORD" redis-cli ping | grep -q PONG']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+  migrate:
+    <<: *api
+    command: [migrate]
+    profiles: [tools]
+  api:
+    <<: *api
+    restart: unless-stopped
+    volumes: [local-media:/app/media, ./secrets:/run/secrets:ro]
+  worker:
+    <<: *api
+    command: [worker]
+    restart: unless-stopped
+    volumes: [local-media:/app/media, ./secrets:/run/secrets:ro]
+  web:
+    build:
+      context: ..
+      dockerfile: web/Dockerfile
+    ports: ["127.0.0.1:8088:80"]
+    depends_on: [api]
+    restart: unless-stopped
+volumes:
+  mysql-data:
+  redis-data:
+  local-media:

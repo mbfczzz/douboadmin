@@ -1,0 +1,71 @@
+<view class="biz-card"
+  ><text class="biz-heading">文案与配音</text
+  ><textarea
+    class="biz-input textarea"
+    value="{{script}}"
+    maxlength="500"
+    placeholder="输入旁白或字幕文案，也可以从原声识别…"
+    bindinput="input"
+  /><view class="biz-row"
+    ><view
+      ><text>语音转文字</text
+      ><text wx:if="{{!config.asr}}" class="biz-note"
+        >语音识别接口待配置</text
+      ></view
+    ><switch
+      checked="{{transcribe}}"
+      disabled="{{!config.asr}}"
+      data-field="transcribe"
+      bindchange="toggle"
+      color="#9BCBAA" /></view
+  ><view class="biz-row"
+    ><view
+      ><text>AI 改写文案</text
+      ><text wx:if="{{!config.rewrite}}" class="biz-note"
+        >请在后台选择改写模型</text
+      ></view
+    ><switch
+      checked="{{rewrite}}"
+      disabled="{{!config.rewrite}}"
+      data-field="rewrite"
+      bindchange="toggle"
+      color="#9BCBAA" /></view
+  ><view class="biz-row"
+    ><view
+      ><text>AI 配音</text
+      ><text wx:if="{{!config.tts}}" class="biz-note"
+        >请在后台启用配音模型</text
+      ></view
+    ><switch
+      checked="{{narration}}"
+      disabled="{{!config.tts}}"
+      data-field="narration"
+      bindchange="toggle"
+      color="#9BCBAA" /></view
+  ><block wx:if="{{narration}}"
+    ><picker range="{{modelNames}}" value="{{modelIndex}}" bindchange="model"
+      ><view class="biz-row"
+        ><text>配音模型</text
+        ><text class="accent">{{modelNames[modelIndex]}} ›</text></view
+      ></picker
+    ><picker
+      wx:if="{{voices.length}}"
+      range="{{voices}}"
+      value="{{voiceIndex}}"
+      bindchange="voice"
+      ><view class="biz-row"
+        ><text>音色</text
+        ><text class="accent">{{voices[voiceIndex]}} ›</text></view
+      ></picker
+    ></block
+  ><view class="biz-row"
+    ><text>自动字幕</text
+    ><switch
+      checked="{{captions}}"
+      data-field="captions"
+      bindchange="toggle"
+      color="#9BCBAA" /></view
+  ><text wx:if="{{captions}}" class="biz-note"
+    >有识别时间轴时沿用时间轴；手动或改写文案按时长分句生成字幕。</text
+  ></view
+>

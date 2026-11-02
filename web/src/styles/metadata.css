@@ -1,0 +1,18 @@
+dl {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 13px;
+  font-size: 13px;
+  margin: 20px 0;
+}
+dt {
+  color: var(--muted);
+}
+dd {
+  margin: 0;
+  color: #424c52;
+}
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 12px;
+}

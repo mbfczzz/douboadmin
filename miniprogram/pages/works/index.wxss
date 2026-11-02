@@ -1,0 +1,55 @@
+@import "../../styles/works.wxss";
+.works-page {
+  padding: 20px 20px calc(32px + env(safe-area-inset-bottom));
+}
+.work-filters {
+  display: flex;
+  gap: 26px;
+  margin-bottom: 20px;
+}
+.work-filter {
+  padding: 10px 0;
+  border-bottom: 2px solid transparent;
+  font-size: 14px;
+  color: #a0a8ac;
+}
+.work-filter.active {
+  color: #e9eceb;
+  border-color: #9bcbaa;
+  font-weight: 600;
+}
+.works-page .completed-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px 12px;
+}
+.works-page .completed-cover {
+  height: 180px;
+  border-radius: 9px;
+}
+.works-page .completed-cover image {
+  border-radius: 9px;
+}
+.works-page .completed-title {
+  font-size: 14px;
+  margin-top: 10px;
+}
+.work-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 5px;
+  font-size: 11px;
+  line-height: 1.5;
+  color: #a0a8ac;
+}
+.works-note {
+  display: block;
+  margin-top: 28px;
+  text-align: center;
+  font-size: 12px;
+  color: #a0a8ac;
+}
+.empty t-button {
+  display: block;
+  margin-top: 20px;
+}

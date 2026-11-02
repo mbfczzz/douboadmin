@@ -1,0 +1,156 @@
+<nav-bar title="我的" size="{{23}}" />
+<view class="page mine-page page-motion {{pageMotion}}">
+  <view wx:if="{{loading}}" class="loading"><t-loading /></view>
+  <view wx:elif="{{loadError&&!me}}" class="error-box" bindtap="load">
+    {{loadError}} · 点击重试
+  </view>
+  <view wx:elif="{{!me}}" class="guest-profile">
+    <view class="avatar"><t-icon name="user" size="34" /></view>
+    <text class="guest-title">欢迎来到你的创作空间</text>
+    <text class="guest-copy">
+      登录后，保存作品、收藏灵感，
+      <view />
+      继续每一个未完成的好想法。
+    </text>
+    <t-button theme="primary" block bind:tap="signIn">微信登录</t-button>
+    <text class="note">登录不会自动获取你的头像、昵称或手机号</text>
+  </view>
+  <view wx:elif="{{me}}" class="content-reveal">
+    <view wx:if="{{loadError}}" class="error-box" bindtap="load">刷新失败，已保留上次信息 · 点击重试</view>
+    <view class="profile" bindtap="edit">
+      <view class="avatar">
+        <image
+          wx:if="{{me.profile.data.avatarUrl}}"
+          src="{{me.profile.data.avatarUrl}}"
+          mode="aspectFill"
+        />
+        <text wx:else>{{avatarLetter}}</text>
+      </view>
+      <view class="profile-copy">
+        <text class="nickname">{{me.profile.data.nickname}}</text>
+        <text class="muted small">{{me.profile.data.bio}}</text>
+      </view>
+      <t-icon name="chevron-right" size="20" />
+    </view>
+    <view class="numbers">
+      <view bindtap="works">
+        <text>{{me.works}}</text>
+        <text>作品数量</text>
+      </view>
+      <view bindtap="tasks">
+        <text>{{me.running}}</text>
+        <text>正在生成</text>
+      </view>
+      <view bindtap="favorites">
+        <text>{{me.favorites}}</text>
+        <text>收藏</text>
+      </view>
+    </view>
+    <view class="row section-title works-heading">
+      <text>我的作品</text>
+      <text class="small muted" bindtap="works">查看全部 ›</text>
+    </view>
+    <view class="works" wx:if="{{jobs.length}}">
+      <view
+        class="work"
+        wx:for="{{jobs}}"
+        wx:key="id"
+        data-id="{{item.id}}"
+        bindtap="detail"
+        hover-class="card-pressed"
+      >
+        <view class="work-cover">
+          <image
+            wx:if="{{item.input.kind==='image'&&item.result}}"
+            src="{{item.result}}"
+            mode="aspectFill"
+          />
+          <t-icon wx:if="{{item.input.kind!=='image'||!item.result}}" name="video-camera" size="32" color="#9BCBAA" />
+          <text class="work-state">{{item.stateText}}</text>
+        </view>
+        <text class="work-title">{{item.shortTitle}}</text>
+        <text class="work-kind">{{item.kindText}}作品</text>
+      </view>
+    </view>
+    <view wx:else class="empty-work" bindtap="emptyWorks">
+      <t-icon name="{{me.running?'time':'image'}}" size="30" />
+      <text>{{me.running?'作品正在生成中':'你的第一份作品，从这里开始'}}</text>
+      <text class="accent">{{me.running?'查看生成进度 ›':'去创作 ↗'}}</text>
+    </view>
+    <text class="section-title common-heading">常用功能</text>
+    <view class="menu-list">
+      <view
+        class="menu"
+        wx:for="{{menus}}"
+        wx:key="mode"
+        data-mode="{{item.mode}}"
+        bindtap="menu"
+        hover-class="card-pressed"
+      >
+        <t-icon name="{{item.icon}}" size="21" />
+        <text>{{item.label}}</text>
+        <t-icon name="chevron-right" size="18" />
+      </view>
+    </view>
+  </view>
+</view>
+<t-popup
+  visible="{{profileOpen}}"
+  placement="bottom"
+  bind:visible-change="close"
+>
+  <view class="sheet">
+    <view class="row sheet-title">
+      <text>个人资料</text>
+      <t-icon name="close" bindtap="close" />
+    </view>
+    <view class="avatar-editor">
+      <button
+        class="choose-avatar"
+        open-type="chooseAvatar"
+        bindchooseavatar="chooseAvatar"
+        disabled="{{uploadingAvatar||busy}}"
+      >
+        <image wx:if="{{avatarUrl}}" src="{{avatarUrl}}" mode="aspectFill" />
+        <t-icon wx:else name="user" size="32" />
+      </button>
+      <text class="small muted">
+        {{uploadingAvatar?'正在上传头像…':'点击选择头像（选填）'}}
+      </text>
+    </view>
+    <form bindsubmit="save">
+      <text class="field-label">昵称</text>
+      <input
+        class="form-input"
+        type="nickname"
+        name="nickname"
+        maxlength="30"
+        value="{{nickname}}"
+        data-field="nickname"
+        bindinput="input"
+        bindblur="input"
+      />
+      <text class="field-label">姓名（选填）</text><input class="form-input" name="name" value="{{name}}" data-field="name" maxlength="50" bindinput="input" />
+      <text class="field-label">手机号（选填）</text><input class="form-input" name="phone" value="{{phone}}" data-field="phone" maxlength="16" bindinput="input" />
+      <text class="field-label bio-label">个人简介</text>
+      <input
+        class="form-input"
+        maxlength="120"
+        name="bio"
+        value="{{bio}}"
+        data-field="bio"
+        bindinput="input"
+      />
+      <view class="save-profile">
+        <button
+          class="profile-submit"
+          form-type="submit"
+          loading="{{busy}}"
+          disabled="{{busy||uploadingAvatar}}"
+        >
+          保存
+        </button>
+      </view>
+    </form>
+  </view>
+</t-popup>

@@ -1,0 +1,74 @@
+<view class="biz-card"
+  ><text class="biz-heading">剪辑设置</text
+  ><view class="biz-tabs"
+    ><view
+      class="{{style==='clean'?'selected':''}}"
+      data-field="style"
+      data-value="clean"
+      bindtap="option"
+      >自然剪辑</view
+    ><view
+      class="{{style==='rhythm'?'selected':''}}"
+      data-field="style"
+      data-value="rhythm"
+      bindtap="option"
+      >快节奏</view
+    ><view
+      class="{{style==='cinematic'?'selected':''}}"
+      data-field="style"
+      data-value="cinematic"
+      bindtap="option"
+      >电影色调</view
+    ></view
+  ><view class="biz-row"
+    ><text>自动识别镜头</text
+    ><switch
+      checked="{{autoScenes}}"
+      color="#9BCBAA"
+      data-field="autoScenes"
+      bindchange="toggle" /></view
+  ><view class="biz-label">画面比例</view
+  ><view class="biz-tabs"
+    ><view
+      class="{{ratio==='9:16'?'selected':''}}"
+      data-field="ratio"
+      data-value="9:16"
+      bindtap="option"
+      >9:16</view
+    ><view
+      class="{{ratio==='16:9'?'selected':''}}"
+      data-field="ratio"
+      data-value="16:9"
+      bindtap="option"
+      >16:9</view
+    ><view
+      class="{{ratio==='1:1'?'selected':''}}"
+      data-field="ratio"
+      data-value="1:1"
+      bindtap="option"
+      >1:1</view
+    ></view
+  ><view class="biz-tabs"
+    ><view
+      class="{{resolution==='720p'?'selected':''}}"
+      data-field="resolution"
+      data-value="720p"
+      bindtap="option"
+      >720p</view
+    ><view
+      class="{{resolution==='1080p'?'selected':''}}"
+      data-field="resolution"
+      data-value="1080p"
+      bindtap="option"
+      >1080p</view
+    ></view
+  ><text class="biz-label">目标时长（5–120 秒）</text
+  ><input
+    class="biz-input"
+    type="number"
+    value="{{duration}}"
+    bindinput="duration"
+  /><text class="biz-note"
+    >素材不足时会重复镜头；配音较长时会自动延长视频，最多两分钟。</text
+  ></view
+>

@@ -1,0 +1,25 @@
+<nav-bar title="" back disabled="{{navigating}}" />
+<view class="transition-page">
+  <view class="transition-stage {{error?'is-error':''}}">
+    <view class="bean-scene" aria-hidden="true">
+      <view class="bean-shadow" />
+      <view class="bean-hop">
+        <view class="bean-leaf" />
+        <view class="bean-body">
+          <view class="bean-face">
+            <view class="bean-eye eye-left" />
+            <view class="bean-eye eye-right" />
+            <view class="bean-cheek cheek-left" />
+            <view class="bean-cheek cheek-right" />
+            <view class="bean-mouth" />
+          </view>
+        </view>
+      </view>
+    </view>
+    <text class="transition-title">{{error?'没能打开'+targetLabel:heading}}</text>
+    <block wx:if="{{error}}">
+      <text class="transition-hint">{{error}}</text>
+      <button wx:if="{{valid}}" class="retry-button" hover-class="retry-pressed" bindtap="retry">再试一次</button>
+    </block>
+  </view>
+</view>

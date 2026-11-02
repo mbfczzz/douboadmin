@@ -1,0 +1,187 @@
+.model-config input,
+.model-config select {
+  height: 36px;
+  padding: 0 11px;
+  border-radius: 8px;
+  background: #fff;
+  border: 1px solid var(--line);
+  color: #1f1f24;
+  font-size: 12.5px;
+  min-width: 0;
+}
+.model-config textarea {
+  padding: 7px 9px;
+  min-height: 72px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #1f1f24;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fff;
+}
+.model-config input:focus,
+.model-config select:focus,
+.model-config textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+  outline: 0;
+}
+.model-config input[readonly],
+.model-config select:disabled {
+  background: #fafafa;
+  color: var(--muted);
+}
+.model-config input::placeholder,
+.model-config textarea::placeholder {
+  color: #8a8a94;
+}
+.config-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.config-chips button,
+.config-ghost,
+.config-inline > button {
+  min-height: 32px;
+  padding: 0 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #4a4a52;
+  background: #fff;
+  border: 1px solid var(--line);
+}
+.config-chips button[aria-pressed="true"] {
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-color: var(--accent-border);
+}
+.config-chips button:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+.config-save {
+  height: 36px;
+  padding: 0 14px;
+  background: var(--accent);
+  color: #fff;
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  font-size: 12.5px;
+}
+.config-save:hover {
+  background: var(--accent);
+}
+.config-brands {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.config-brands button {
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--line);
+  background: #fff;
+  border-radius: 8px;
+  padding: 6px;
+}
+.config-brands button[aria-pressed="true"] {
+  border: 2px solid var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.config-brands img,
+.model-brand-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.config-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+.model-config .config-toggle input {
+  appearance: none;
+  width: 30px;
+  height: 18px;
+  border-radius: 12px;
+  background: #d4d4d8;
+  padding: 2px;
+  border: 0;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.config-toggle input::before {
+  content: "";
+  display: block;
+  width: 14px;
+  height: 14px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.15s;
+}
+.model-config .config-toggle input:checked {
+  background: var(--accent);
+}
+.config-toggle input:checked::before {
+  transform: translateX(12px);
+}
+.config-matrix {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: auto;
+  margin-top: 8px;
+}
+.config-matrix th {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
+  padding: 7px 10px;
+  background: #fafafa;
+  border-bottom: 1px solid var(--line);
+  text-align: center;
+}
+.config-matrix th:first-child,
+.config-matrix td:first-child {
+  text-align: left;
+}
+.config-matrix td {
+  padding: 8px 10px;
+  font-size: 12.5px;
+  color: #4a4a52;
+  border-bottom: 1px solid #f0f0f2;
+  text-align: center;
+}
+.config-matrix input {
+  height: 32px;
+  min-width: 72px;
+  max-width: 160px;
+  text-align: center;
+}
+.model-cell .catalog-icon {
+  padding: 3px;
+  background: #fff;
+}
+.model-display-badges {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+.model-display-badges small {
+  padding: 1px 4px;
+  border-radius: 3px;
+  background: #f4f4f5;
+  color: var(--muted);
+  font-size: 10px;
+}
+.model-display-badges .hot {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+.model-display-badges .new {
+  background: #ecfeff;
+  color: #0e7490;
+}

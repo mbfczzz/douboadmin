@@ -1,0 +1,9 @@
+@import "../../styles/business.wxss";
+.video-copy {
+  white-space: pre-wrap;
+  line-height: 1.7;
+  font-size: 27rpx;
+}
+.biz-preview {
+  margin-bottom: 24rpx;
+}

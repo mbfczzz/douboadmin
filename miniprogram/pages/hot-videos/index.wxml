@@ -1,0 +1,102 @@
+<nav-bar title="热门视频灵感" back /><view
+  class="subpage page-motion {{pageMotion}}"
+  ><view class="hot-search"
+    ><input
+      class="biz-input"
+      value="{{query}}"
+      bindinput="input"
+      bindconfirm="search"
+      confirm-type="search"
+      maxlength="60"
+      placeholder="搜索抖音视频关键词"
+    /><button class="biz-action" bindtap="search" loading="{{loading}}">
+      搜索
+    </button></view
+  ><view wx:if="{{!enabled}}" class="biz-error"
+    >抖音数据接口尚未配置，可以先上传自己的素材。<button
+      class="biz-action biz-secondary"
+      bindtap="upload"
+    >
+      上传素材混剪
+    </button></view
+  ><view wx:if="{{loadError}}" class="biz-error">{{loadError}}</view
+  ><view class="biz-tabs"
+    ><view
+      class="{{sort==='relevance'?'selected':''}}"
+      data-value="relevance"
+      bindtap="sort"
+      >综合</view
+    ><view
+      class="{{sort==='likes'?'selected':''}}"
+      data-value="likes"
+      bindtap="sort"
+      >点赞</view
+    ><view
+      class="{{sort==='recent'?'selected':''}}"
+      data-value="recent"
+      bindtap="sort"
+      >最新</view
+    ><view
+      class="{{sort==='views'?'selected':''}}"
+      data-value="views"
+      bindtap="sort"
+      >播放（本页）</view
+    ></view
+  ><text wx:if="{{sortScope==='page'}}" class="biz-note"
+    >仅对当前返回的视频按已提供的播放量排序。</text
+  ><view wx:if="{{!searched}}"
+    ><view wx:if="{{words.length}}" class="biz-card"
+      ><text class="biz-heading">{{wordSource}}</text
+      ><view class="hot-words"
+        ><text
+          wx:for="{{words}}"
+          wx:key="*this"
+          data-word="{{item}}"
+          bindtap="choose"
+          >{{item}}</text
+        ></view
+      ></view
+    ><view wx:if="{{history.length}}" class="biz-card"
+      ><view class="row"
+        ><text class="biz-heading">最近搜索</text
+        ><text class="biz-link" bindtap="clearHistory">清空</text></view
+      ><view class="hot-words"
+        ><text
+          wx:for="{{history}}"
+          wx:key="keyword"
+          data-word="{{item.keyword}}"
+          bindtap="choose"
+          >{{item.keyword}}</text
+        ></view
+      ></view
+    ></view
+  ><view
+    wx:for="{{items}}"
+    wx:key="id"
+    class="biz-card"
+    data-id="{{item.id}}"
+    bindtap="detail"
+    ><image
+      class="biz-image"
+      src="{{item.cover}}"
+      mode="aspectFill"
+      lazy-load
+    /><text class="biz-list-title hot-title">{{item.title}}</text
+    ><text class="biz-small">{{item.author}} · {{item.dateText}}</text
+    ><view class="row biz-note"
+      ><text>点赞 {{item.likesText}}</text
+      ><text>播放 {{item.viewsText}}</text></view
+    ></view
+  ><view
+    wx:if="{{searched&&!loading&&!items.length&&!loadError}}"
+    class="biz-empty"
+    >没有找到相关视频</view
+  ><button
+    wx:if="{{hasMore}}"
+    class="biz-action biz-secondary"
+    bindtap="more"
+    loading="{{loading}}"
+  >
+    加载更多
+  </button></view
+>

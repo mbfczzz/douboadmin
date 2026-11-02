@@ -1,0 +1,77 @@
+<nav-bar title="Agent" size="{{23}}" />
+<view class="agent-page page-motion {{pageMotion}}">
+  <scroll-view
+    scroll-y
+    class="chat-scroll"
+    scroll-into-view="{{bottom}}"
+    scroll-with-animation
+  >
+    <view class="conversation">
+      <view class="agent-intro">
+        <view class="agent-mark"><t-icon name="chat" size="27" /></view>
+        <text class="headline">让想法，再往前一步。</text>
+        <text class="muted small">
+          从一个模糊的念头，到一份清晰的创作脚本。
+        </text>
+
+      </view>
+      <view class="suggestions">
+        <view
+          wx:for="{{quick}}"
+          wx:key="*this"
+          data-value="{{item}}"
+          bindtap="quick"
+        >
+          {{item}}
+          <t-icon name="arrow-right-up" size="16" />
+        </view>
+      </view>
+      <view
+        wx:for="{{messages}}"
+        wx:key="id"
+        id="m{{item.id}}"
+        class="message {{item.role}}"
+      >
+        <view class="message-label">
+          {{item.role==='user'?'你':'豆播 Agent'}}
+        </view>
+        <view class="bubble">
+          <t-loading wx:if="{{item.pending}}" size="28rpx" />
+          <text selectable>{{item.text}}</text>
+        </view>
+        <view
+          class="use-script"
+          wx:if="{{item.role==='assistant'&&!item.pending}}"
+          data-text="{{item.text}}"
+          bindtap="use"
+        >
+          带到创作
+          <t-icon name="arrow-right" size="14" />
+        </view>
+      </view>
+    </view>
+  </scroll-view>
+  <view class="composer">
+    <textarea
+      auto-height
+      maxlength="500"
+      placeholder="说说你的创作想法…"
+      placeholder-style="color:#818B90"
+      value="{{prompt}}"
+      bindinput="input"
+      cursor-spacing="130"
+    />
+    <view class="row">
+      <text class="muted tiny">{{prompt.length}} / 500</text>
+      <t-button
+        theme="primary"
+        size="small"
+        loading="{{busy}}"
+        disabled="{{!prompt}}"
+        bind:tap="send"
+      >
+        <t-icon name="arrow-up" size="20" />
+      </t-button>
+    </view>
+  </view>
+</view>

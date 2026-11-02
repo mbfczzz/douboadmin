@@ -1,0 +1,30 @@
+.nav {
+  background: #131516;
+  color: #e9eceb;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+.nav-inner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+.back {
+  position: absolute;
+  left: 20rpx;
+  top: 0;
+  height: 100%;
+  width: 80rpx;
+  display: flex;
+  align-items: center;
+}
+.nav-actions {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+}

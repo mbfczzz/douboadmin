@@ -1,0 +1,142 @@
+.bean-scene {
+  position: relative;
+  width: 120px;
+  height: 112px;
+  margin: 0 auto 20px;
+  pointer-events: none;
+}
+.bean-hop {
+  position: absolute;
+  top: 20px;
+  left: 30px;
+  width: 60px;
+  height: 66px;
+  transform-origin: center bottom;
+  animation: bean-hop 600ms ease-in-out infinite;
+}
+.bean-body {
+  width: 60px;
+  height: 66px;
+  border-radius: 48% 52% 45% 55% / 58% 47% 53% 42%;
+  background: #a7d3b3;
+  border: 1px solid #c1dfc8;
+  transform: rotate(-8deg);
+}
+.bean-leaf {
+  position: absolute;
+  top: -8px;
+  left: 31px;
+  width: 17px;
+  height: 10px;
+  border-radius: 2px 12px 2px 12px;
+  background: #c6d9a5;
+  transform: rotate(-30deg);
+  z-index: 1;
+}
+.bean-face {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.bean-eye {
+  position: absolute;
+  top: 25px;
+  width: 4px;
+  height: 6px;
+  border-radius: 50%;
+  background: #284434;
+  animation: bean-blink 600ms ease-in-out infinite;
+}
+.eye-left {
+  left: 18px;
+}
+.eye-right {
+  right: 17px;
+}
+.bean-mouth {
+  position: absolute;
+  top: 34px;
+  left: 25px;
+  width: 10px;
+  height: 6px;
+  border-bottom: 2px solid #284434;
+  border-radius: 0 0 10px 10px;
+}
+.bean-cheek {
+  position: absolute;
+  top: 35px;
+  width: 7px;
+  height: 3px;
+  border-radius: 50%;
+  background: #739f8055;
+}
+.cheek-left {
+  left: 10px;
+}
+.cheek-right {
+  right: 9px;
+}
+.bean-shadow {
+  position: absolute;
+  left: 38px;
+  bottom: 12px;
+  width: 44px;
+  height: 6px;
+  border-radius: 50%;
+  background: #8ba79725;
+  animation: bean-shadow 600ms ease-in-out infinite;
+}
+@keyframes bean-hop {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0);
+  }
+  18% {
+    transform: translateY(2px) scale(1.04, 0.96);
+  }
+  52% {
+    transform: translateY(-10px) rotate(5deg);
+  }
+  82% {
+    transform: translateY(0) scale(1.03, 0.97);
+  }
+}
+@keyframes bean-shadow {
+  0%,
+  100% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+  52% {
+    transform: scaleX(0.7);
+    opacity: 0.55;
+  }
+}
+@keyframes bean-blink {
+  0%,
+  72%,
+  100% {
+    transform: scaleY(1);
+  }
+  82% {
+    transform: scaleY(0.2);
+  }
+}
+.is-error .bean-hop,
+.is-error .bean-eye,
+.is-error .bean-shadow {
+  animation: none;
+}
+.is-error .bean-mouth {
+  top: 37px;
+  border-bottom: 0;
+  border-top: 2px solid #284434;
+  border-radius: 10px 10px 0 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .bean-hop,
+  .bean-eye,
+  .bean-shadow {
+    animation: none;
+  }
+}

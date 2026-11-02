@@ -1,0 +1,16 @@
+**/node_modules
+**/dist
+**/miniprogram_npm
+**/test-results
+**/*.tsbuildinfo
+.git
+.runtime
+deploy/secrets
+deploy/certs
+deploy/backups
+.env*
+media/uploads
+media/results
+media/.mix-tmp
+docs
+miniprogram

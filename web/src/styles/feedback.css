@@ -1,0 +1,29 @@
+.error {
+  color: #a46556;
+  background: #f8ebe5;
+  border: 1px solid #ead5c9;
+  padding: 13px 16px;
+  font-size: 12px;
+  border-radius: 7px;
+  margin-bottom: 18px;
+}
+.error button {
+  background: none;
+  border: 0;
+  color: inherit;
+  text-decoration: underline;
+}
+.toast {
+  position: fixed;
+  inset: auto 16px 36px;
+  margin: auto;
+  z-index: 300;
+  pointer-events: none;
+  max-width: 560px;
+  overflow-wrap: anywhere;
+  background: var(--ink);
+  color: white;
+  padding: 14px 24px;
+  border-radius: 8px;
+  font-size: 13px;
+}

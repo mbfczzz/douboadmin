@@ -1,0 +1,4 @@
+{
+  "desc": "用户私有内容不索引",
+  "rules": [{ "action": "disallow", "page": "*" }]
+}

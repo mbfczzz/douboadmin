@@ -1,0 +1,111 @@
+.page-motion.enter-a {
+  animation: page-enter-a 180ms ease-out;
+}
+.page-motion.enter-b {
+  animation: page-enter-b 180ms ease-out;
+}
+.page-motion.enter-a.motion-overlay-open,
+.page-motion.enter-b.motion-overlay-open {
+  animation: none;
+}
+@keyframes page-enter-a {
+  from {
+    opacity: 0.55;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes page-enter-b {
+  from {
+    opacity: 0.55;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.content-reveal {
+  animation: content-reveal 180ms ease-out;
+}
+@keyframes content-reveal {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.skeleton {
+  background: #272d30;
+  border-radius: 9px;
+  animation: skeleton-pulse 1.2s ease-in-out infinite alternate;
+}
+.skeleton-line {
+  height: 14px;
+  width: 68%;
+  margin: 12px 0 24px;
+  border-radius: 4px;
+}
+.skeleton-line.short {
+  width: 42%;
+}
+.skeleton-title {
+  height: 18px;
+  width: 70%;
+  margin-top: 10px;
+  border-radius: 4px;
+}
+@keyframes skeleton-pulse {
+  from {
+    opacity: 0.45;
+  }
+  to {
+    opacity: 0.85;
+  }
+}
+.chip,
+.ratio,
+.resolution-option,
+.mode-tab {
+  transition:
+    color 160ms ease,
+    background-color 160ms ease,
+    border-color 160ms ease;
+}
+.template,
+.queue-item,
+.completed-item,
+.work,
+.queue-link,
+.menu {
+  transition:
+    opacity 120ms ease,
+    transform 120ms ease;
+}
+.card-pressed {
+  opacity: 0.78;
+  transform: scale(0.985);
+}
+@media (prefers-reduced-motion: reduce) {
+  .page-motion.enter-a,
+  .page-motion.enter-b,
+  .content-reveal,
+  .skeleton {
+    animation: none;
+  }
+  .chip,
+  .ratio,
+  .resolution-option,
+  .mode-tab,
+  .template,
+  .queue-item,
+  .completed-item,
+  .work,
+  .queue-link,
+  .menu {
+    transition: none;
+  }
+  .card-pressed {
+    transform: none;
+  }
+}

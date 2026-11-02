@@ -1,0 +1,40 @@
+<nav-bar title="登录豆播" back disabled="{{returning}}" />
+<view class="subpage login-page page-motion {{pageMotion}}">
+  <view class="login-brand">豆</view>
+  <text class="login-heading">{{heading}}</text>
+  <text class="login-description">{{description}}</text>
+  <view wx:if="{{loading}}" class="loading"><t-loading text="正在连接" /></view>
+  <view wx:elif="{{loadError}}" class="error-box" bindtap="load">
+    {{loadError}} · 点击重试
+  </view>
+  <block wx:else>
+    <view wx:if="{{!wechatReady}}" class="login-notice">
+      {{activationRequired?'微信登录暂不可用，请稍后重试。':'微信登录暂不可用，可以先逛逛，稍后再试。'}}
+    </view>
+    <t-button
+      theme="primary"
+      size="large"
+      block
+      loading="{{busy}}"
+      disabled="{{!wechatReady||busy||returning}}"
+      bind:tap="wechat"
+    >
+      {{returning?'登录成功，正在返回':'微信登录并继续'}}
+    </t-button>
+    <text class="login-explain">
+      头像和昵称可稍后填写，不会自动获取手机号。
+    </text>
+    <button
+      wx:if="{{demoAllowed}}"
+      class="demo-entry"
+      disabled="{{busy}}"
+      bindtap="demo"
+    >
+      开发演示登录
+    </button>
+  </block>
+  <button class="text-button browse" disabled="{{busy||returning}}" bindtap="back">
+    {{activationRequired?'返回授权页':backLabel}}
+  </button>
+  <text class="privacy-link" bindtap="privacy">隐私保护指引</text>
+</view>

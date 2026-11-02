@@ -1,0 +1,20 @@
+<nav-bar title="作品分享" /><view class="subpage page-motion {{pageMotion}}"
+  ><view wx:if="{{loadError}}" class="biz-error" bindtap="load"
+    >{{loadError}}</view
+  ><view wx:if="{{work}}" class="biz-card"
+    ><text class="biz-heading">{{work.title}}</text
+    ><image
+      wx:if="{{work.kind==='image'}}"
+      class="biz-preview"
+      src="{{work.result}}"
+      mode="widthFix"
+      bindtap="preview"
+    /><video wx:else class="biz-preview" src="{{work.result}}" controls /><text
+      wx:if="{{work.prompt}}"
+      class="biz-note"
+      >{{work.prompt}}</text
+    ></view
+  ><button class="biz-action biz-secondary" bindtap="home">
+    去豆播找灵感
+  </button></view
+>

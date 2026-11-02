@@ -1,0 +1,28 @@
+.login {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+.login-form {
+  width: min(100%, 420px);
+  background: white;
+  padding: 32px;
+  border: 1px solid #e2e6e9;
+  border-radius: 10px;
+}
+.login-form h1 {
+  font-size: 24px;
+  margin: 28px 0 10px;
+}
+.login-form > p {
+  font-size: 13px;
+  line-height: 1.7;
+  color: #68747b;
+  margin-bottom: 28px;
+}
+.login-form .primary {
+  width: 100%;
+  margin-top: 7px;
+  padding: 14px;
+}

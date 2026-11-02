@@ -1,0 +1,22 @@
+{
+  "name": "doubo-miniprogram",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "check": "node scripts/check.mjs",
+    "test:flow": "node --test scripts/flow.test.cjs",
+    "test:auth": "node --test scripts/auth.test.cjs scripts/profile.test.cjs",
+    "test:runtime": "node --test scripts/runtime.test.cjs scripts/create.test.cjs scripts/navigation.test.cjs scripts/navigation-review.test.cjs scripts/transition.test.cjs scripts/journey.test.cjs scripts/editing.test.cjs scripts/favorites-ux.test.cjs scripts/chat-ux.test.cjs scripts/mine-ux.test.cjs scripts/usability.test.cjs",
+    "build": "node ../scripts/check-structure.mjs && tsc --noEmit && node scripts/check.mjs && node scripts/compile.cjs && node scripts/package-budget.mjs"
+  },
+  "dependencies": {
+    "tdesign-miniprogram": "^1.17.0",
+    "tslib": "^2.8.1"
+  },
+  "devDependencies": {
+    "miniprogram-api-typings": "^4.0.0",
+    "miniprogram-compiler": "^0.2.3",
+    "typescript": "~5.9.3"
+  }
+}

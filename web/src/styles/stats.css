@@ -1,0 +1,47 @@
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+  margin-bottom: 24px;
+}
+.stat {
+  background: white;
+  border: 1px solid #e1e6de;
+  border-radius: 9px;
+  padding: 22px;
+}
+.stat > div {
+  display: flex;
+  justify-content: space-between;
+  color: #6c796d;
+  font-size: 12px;
+}
+.stat > div svg {
+  color: #91a38f;
+}
+.stat strong {
+  font-weight: 500;
+  display: block;
+  font-size: 39px;
+  letter-spacing: -2px;
+  margin: 15px 0 12px;
+}
+.stat small {
+  font-size: 10px;
+  color: #9aa298;
+}
+.dot-1 {
+  background: #b9b095;
+}
+.dot-2 {
+  background: #93a5ad;
+}
+.dot-3 {
+  background: #b5c49c;
+}
+.overview-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 24px;
+  margin-bottom: 24px;
+}

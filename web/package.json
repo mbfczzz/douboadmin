@@ -1,0 +1,30 @@
+{
+  "name": "doubo-admin",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "node ../scripts/check-structure.mjs && tsc -b && vite build && node scripts/check-budget.mjs",
+    "preview": "vite preview --host 127.0.0.1",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "lucide-react": "^0.468.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.51.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "prettier": "^3.9.10",
+    "vite": "^8.3.5",
+    "@vitejs/plugin-react": "^6.1.2",
+    "typescript": "~5.9.3"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}

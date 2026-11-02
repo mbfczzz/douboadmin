@@ -1,0 +1,28 @@
+page {
+  background: #131516;
+  color: #e9eceb;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei",
+    sans-serif;
+  font-size: 28rpx;
+  --td-brand-color: #9bcbaa;
+  --td-brand-color-active: #86b796;
+  --td-brand-color-disabled: #39463d;
+  --td-text-color-primary: #e9eceb;
+  --td-text-color-secondary: #a0a8ac;
+  --td-bg-color-container: #1c1f21;
+  --td-bg-color-page: #131516;
+  --td-border-level-1-color: #353b3e;
+  --td-button-primary-bg-color: #9bcbaa;
+  --td-button-primary-color: #17281d;
+  --td-button-primary-border-color: #9bcbaa;
+  --td-button-border-radius: 16rpx;
+  --td-button-default-bg-color: #272b2d;
+  --td-button-default-color: #e9eceb;
+  --td-button-default-border-color: #353b3e;
+  --td-button-default-disabled-bg: #282d2f;
+  --td-button-primary-disabled-bg: #282d2f;
+  --td-button-primary-disabled-color: #818b90;
+  --td-popup-bg-color: #1c1f21;
+  --td-popup-border-radius: 32rpx;
+}

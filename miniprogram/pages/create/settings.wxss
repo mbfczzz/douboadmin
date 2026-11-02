@@ -1,0 +1,123 @@
+.settings {
+  margin-top: 16px;
+}
+.setting-title {
+  display: block;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 21px;
+  margin: 24px 0 10px;
+}
+.setting-title.first-setting {
+  margin-top: 0;
+}
+.resolution-options {
+  display: flex;
+  gap: 4px;
+}
+.resolution-option {
+  flex: 1;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  color: #c1c6ce;
+  background: #1c1f21;
+  border: 1px solid #353b3e;
+  border-radius: 8px;
+}
+.resolution-option.selected {
+  color: #9bcbaa;
+  background: #25372c;
+  border-color: #577b62;
+}
+.duration-slider {
+  margin: 0 10px;
+  height: 24px;
+}
+.duration-limits {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+  font-size: 12px;
+  color: #a0a8ac;
+}
+.ratio-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+.ratio {
+  height: 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  color: #aeb9bc;
+  background: #1a1e20;
+  border: 1px solid #2d3437;
+  border-radius: 8px;
+}
+.ratio.selected {
+  color: #c5e2ce;
+  border-color: #779c83;
+  background: #25372c;
+}
+.ratio-pressed {
+  opacity: 0.75;
+}
+.ratio-label {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
+}
+.selected .ratio-label {
+  font-weight: 600;
+}
+.ratio-visual {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #89989d;
+}
+.ratio-shape {
+  border: 1px solid #738287;
+  background: #252d30;
+  border-radius: 2px;
+}
+.selected .ratio-visual {
+  color: #9bcbaa;
+}
+.selected .ratio-shape {
+  border-color: #9bcbaa;
+  background: #9bcbaa20;
+}
+.shape-wide {
+  width: 28px;
+  height: 15.75px;
+}
+.shape-portrait {
+  width: 15.75px;
+  height: 28px;
+}
+.shape-square {
+  width: 24px;
+  height: 24px;
+}
+.shape-landscape {
+  width: 28px;
+  height: 21px;
+}
+.shape-photo {
+  width: 21px;
+  height: 28px;
+}
+.shape-cinema {
+  width: 28px;
+  height: 12px;
+}

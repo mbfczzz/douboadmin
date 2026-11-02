@@ -1,0 +1,21 @@
+<nav-bar title="授权开通" />
+<view class="subpage activation-page">
+  <view class="activation-logo">豆</view>
+  <text class="activation-title">开通你的创作空间</text>
+  <text class="biz-note">{{logged?'扫描服务商提供的授权二维码，或输入激活码。':'微信登录后，再扫描授权二维码或输入激活码。'}}</text>
+  <view wx:if="{{loading}}" class="biz-note">正在确认授权状态…</view>
+  <view wx:if="{{loadError}}" class="biz-error" bindtap="load">{{loadError}} · 点击重试</view>
+  <button wx:if="{{!logged}}" class="biz-action" loading="{{busy}}" disabled="{{busy||loading||!wechatReady}}" bindtap="login">微信登录</button>
+  <block wx:else>
+    <view wx:if="{{status.message&&status.status!=='pending'}}" class="biz-note">{{status.message}}</view>
+    <view wx:if="{{!loadError&&(!status||status.status==='pending'||status.status==='unbound')}}" class="biz-card">
+      <text class="biz-heading">激活授权</text>
+      <input class="biz-input" placeholder="输入 20 位激活码" value="{{code}}" maxlength="64" bindinput="input" disabled="{{busy}}" />
+      <button class="biz-action" loading="{{busy}}" disabled="{{busy||loading||!code}}" bindtap="activate">确认激活</button>
+      <button class="biz-action biz-secondary" disabled="{{busy||loading}}" bindtap="scan">扫码激活</button>
+      <text class="biz-note">二维码请在此页面内扫描。每个激活码仅能绑定一个微信账号。</text>
+    </view>
+    <view class="activation-links"><text bindtap="load">刷新授权状态</text><text bindtap="signOut">退出登录</text></view>
+  </block>
+  <text class="activation-privacy" bindtap="privacy">隐私保护指引</text>
+</view>

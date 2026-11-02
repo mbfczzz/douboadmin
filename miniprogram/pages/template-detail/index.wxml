@@ -1,0 +1,128 @@
+<nav-bar title="模板详情" back />
+<view class="subpage detail page-motion {{pageMotion}}">
+  <view wx:if="{{loading}}" aria-label="正在加载模板详情">
+    <view class="hero skeleton" />
+    <view class="skeleton skeleton-line" />
+    <view class="skeleton skeleton-line short" />
+    <view class="required-upload skeleton" style="height:126px" />
+  </view>
+  <view wx:elif="{{loadError}}" class="empty">
+    <text>{{loadError}}</text>
+    <t-button bind:tap="load">重试</t-button>
+  </view>
+  <view wx:elif="{{template}}" class="content-reveal">
+    <view wx:if="{{template.data.kind==='video'&&template.data.preview}}" class="hero"><video src="{{template.data.preview}}" poster="{{template.data.cover}}" controls object-fit="contain" /></view>
+    <view wx:else class="hero" bindtap="preview">
+      <image src="{{template.data.cover}}" mode="aspectFill" />
+      <view class="hero-preview"><t-icon name="fullscreen" size="20" /></view>
+    </view>
+    <view class="row title-row">
+      <text class="detail-title">{{template.data.title}}</text>
+      <view class="favorite" bindtap="favorite">
+        <t-icon
+          name="{{favorite?'heart-filled':'heart'}}"
+          color="{{favorite?'#9BCBAA':'#A0A8AC'}}"
+          size="25"
+        />
+      </view>
+    </view>
+    <text wx:if="{{template.data.description}}" class="template-description">{{template.data.description}}</text>
+    <view class="row">
+      <text class="section-title upload-title">上传商品照片</text>
+      <text class="small muted">
+        {{template.data.requiredImages?'必填':'选填'}}
+        <block wx:if="{{template.data.requiredImages}}">{{assets.length>=template.data.requiredImages?template.data.requiredImages:assets.length}} / {{template.data.requiredImages}}</block>
+      </text>
+    </view>
+    <text class="upload-description">
+      <block wx:if="{{template.data.requiredImages}}">只需 {{template.data.requiredImages}} 张照片，即可制作同款{{template.data.kind==='image'?'图片':'视频'}}</block>
+      <block wx:else>可以直接生成，也可以添加参考照片。</block>
+    </text>
+    <view class="required-upload" wx:if="{{!assets.length||assets.length<template.data.requiredImages}}" bindtap="choose">
+      <view class="upload-icon"><t-icon name="image-add" size="25" /></view>
+      <view>
+        <text class="upload-name">商品主体图</text>
+        <text class="upload-hint">正面清晰，效果更好</text>
+        <text class="upload-text">{{assets.length?'＋ 继续添加照片':'＋ 上传商品照片'}}</text>
+      </view>
+      <text class="required">
+        {{template.data.requiredImages?'必填':'选填'}}
+      </text>
+    </view>
+    <view class="uploaded" wx:for="{{assets}}" wx:key="id">
+      <image src="{{item.data.url}}" mode="aspectFill" />
+      <view class="uploaded-copy">
+        <text>{{item.data.name}}</text>
+        <text class="accent small">照片已就绪</text>
+      </view>
+      <view class="delete" data-id="{{item.id}}" bindtap="remove">
+        <t-icon name="close" size="20" />
+      </view>
+    </view>
+    <text class="format">JPG / PNG / WebP · 单张不超过 50 MB</text>
+    <view class="row section-title">
+      <text>补充素材</text>
+      <text class="muted small">选填，可跳过</text>
+    </view>
+    <view class="optional-grid">
+      <view wx:for="{{optionalNames}}" wx:key="*this" bindtap="choose">
+        <t-icon name="image" size="18" />
+        <text>{{item}}</text>
+        <t-icon name="add" size="17" />
+      </view>
+    </view>
+    <view class="queue-link" bindtap="queue">
+      <t-icon name="task" size="23" />
+      <view class="copy">
+        任务队列
+        <text class="muted">查看生成进度与结果</text>
+      </view>
+      <t-icon name="chevron-right" />
+    </view>
+    <view class="submit-area {{assets.length>=template.data.requiredImages?'is-ready':''}}">
+      <view class="row submit-caption">
+        <text class="submit-status">
+          {{assets.length>=template.data.requiredImages?(template.data.requiredImages?'照片已就绪，可以生成':'可以直接生成'):'还需 '+(template.data.requiredImages-assets.length)+' 张照片'}}
+        </text>
+        <text>已添加 {{assets.length}} 张</text>
+      </view>
+      <t-button
+        theme="primary"
+        block
+        size="large"
+        disabled="{{busy||uploading||assets.length<template.data.requiredImages}}"
+        loading="{{busy}}"
+        bind:tap="generate"
+      >
+        生成同款
+      </t-button>
+
+    </view>
+  </view>
+</view>
+<t-popup
+  visible="{{sourceOpen}}"
+  placement="bottom"
+  bind:visible-change="closeSource"
+>
+  <view class="photo-sources">
+    <view class="photo-source-heading">
+      <text>上传商品照片</text>
+      <view class="photo-source-close" bindtap="closeSource"
+        ><t-icon name="close" size="20"
+      /></view>
+    </view>
+    <view
+      class="photo-source"
+      wx:for="{{sources}}"
+      wx:key="label"
+      data-index="{{index}}"
+      bindtap="chooseSource"
+    >
+      <t-icon name="{{item.icon}}" size="21" />
+      <text>{{item.label}}</text>
+      <t-icon name="chevron-right" size="17" />
+    </view>
+    <text class="photo-source-note">JPG / PNG / WebP · 单张不超过 50 MB</text>
+  </view>
+</t-popup>

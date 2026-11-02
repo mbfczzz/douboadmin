@@ -1,0 +1,31 @@
+@import "../../styles/business.wxss";
+.hot-search {
+  display: flex;
+  gap: 14rpx;
+  align-items: center;
+  margin-bottom: 24rpx;
+}
+.hot-search input {
+  flex: 1;
+  min-width: 0;
+}
+.hot-search button {
+  white-space: nowrap;
+  padding: 20rpx;
+  margin: 0;
+}
+.hot-words {
+  display: flex;
+  gap: 16rpx;
+  flex-wrap: wrap;
+}
+.hot-words text {
+  background: #29322c;
+  padding: 12rpx 18rpx;
+  border-radius: 10rpx;
+  color: #b7d2c0;
+  font-size: 25rpx;
+}
+.hot-title {
+  margin-top: 22rpx;
+}

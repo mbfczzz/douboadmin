@@ -1,0 +1,64 @@
+.partner-context {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+.partner-context h2 {
+  margin: 0 0 8px;
+}
+.partner-context p,
+.partner-hub .business-metrics small {
+  color: #7c8290;
+  font-size: 12px;
+}
+.partner-hub h3 {
+  margin: 24px 0 16px;
+}
+.partner-hub .business-metrics strong {
+  font-size: 22px;
+}
+.partner-hub .business-metrics small {
+  display: block;
+  margin-top: 8px;
+}
+.partner-hub .business-metrics .panel {
+  min-width: 0;
+}
+.partner-dialog {
+  width: min(1000px, 95vw);
+  max-width: 1000px;
+}
+.partner-policy {
+  padding: 20px;
+  margin: 20px 0;
+}
+.partner-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.activation-code-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: center;
+  padding: 20px;
+  text-align: center;
+}
+.activation-code-preview strong {
+  user-select: all;
+}
+.activation-code-preview img {
+  max-width: 100%;
+  height: auto;
+}
+@media (max-width: 700px) {
+  .partner-form-grid {
+    grid-template-columns: 1fr;
+  }
+  .partner-context {
+    align-items: start;
+  }
+}

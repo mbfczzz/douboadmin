@@ -1,0 +1,39 @@
+.photo-sources {
+  padding: 20px 20px calc(32px + env(safe-area-inset-bottom));
+}
+.photo-source-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 18px;
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+.photo-source-close {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.photo-source {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  height: 52px;
+  padding: 0 4px;
+  border-bottom: 1px solid #303538;
+  font-size: 15px;
+}
+.photo-source text {
+  flex: 1;
+}
+.photo-source t-icon {
+  color: #b9c3bd;
+}
+.photo-source-note {
+  display: block;
+  font-size: 11px;
+  color: #919a9f;
+  margin-top: 20px;
+}

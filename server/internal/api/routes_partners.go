@@ -1,0 +1,30 @@
+package api
+
+func (a *Server) partnerRoutes() {
+	m := a.Mux
+	m.HandleFunc("GET /api/access", a.auth("user", a.myAccess))
+	m.HandleFunc("POST /api/access/redeem", a.auth("user", a.redeemAccess))
+	m.HandleFunc("GET /api/admin/partners", a.auth("admin", a.partnerList("partners")))
+	m.HandleFunc("POST /api/admin/partners", a.auth("admin", a.createPartner))
+	m.HandleFunc("GET /api/admin/partners/{id}", a.auth("admin", a.partnerOverview))
+	m.HandleFunc("PUT /api/admin/partners/{id}", a.auth("admin", a.updatePartner))
+	m.HandleFunc("GET /api/admin/partner-policy", a.auth("admin", a.partnerPolicy))
+	m.HandleFunc("PUT /api/admin/partner-policy", a.auth("admin", a.savePartnerPolicy))
+	m.HandleFunc("GET /api/admin/quota-moves", a.auth("admin", a.partnerList("quota_moves")))
+	m.HandleFunc("POST /api/admin/quota-moves", a.auth("admin", a.movePartnerQuota))
+	m.HandleFunc("GET /api/admin/quota-requests", a.auth("admin", a.partnerList("quota_requests")))
+	m.HandleFunc("POST /api/admin/quota-requests", a.auth("admin", a.requestPartnerQuota))
+	m.HandleFunc("PUT /api/admin/quota-requests/{id}", a.auth("admin", a.decidePartnerQuota))
+	m.HandleFunc("GET /api/admin/activation-codes", a.auth("admin", a.partnerList("activation_codes")))
+	m.HandleFunc("POST /api/admin/activation-codes", a.auth("admin", a.issueActivationCode))
+	m.HandleFunc("GET /api/admin/activation-codes/{id}", a.auth("admin", a.revealActivationCode))
+	m.HandleFunc("GET /api/admin/activation-codes/{id}/trace", a.auth("admin", a.activationTrace))
+	m.HandleFunc("DELETE /api/admin/activation-codes/{id}", a.auth("admin", a.revokeActivationCode))
+	m.HandleFunc("GET /api/admin/memberships", a.auth("admin", a.partnerList("memberships")))
+	m.HandleFunc("PUT /api/admin/memberships/{id}", a.auth("admin", a.changeMembership))
+	m.HandleFunc("GET /api/admin/commission-ledger", a.auth("admin", a.partnerList("commission_ledger")))
+	m.HandleFunc("GET /api/admin/orders/{id}/distribution", a.auth("admin", a.orderDistribution))
+	m.HandleFunc("GET /api/admin/commission-payouts", a.auth("admin", a.partnerList("commission_payouts")))
+	m.HandleFunc("POST /api/admin/commission-payouts", a.auth("admin", a.requestCommissionPayout))
+	m.HandleFunc("PUT /api/admin/commission-payouts/{id}", a.auth("admin", a.finishCommissionPayout))
+}

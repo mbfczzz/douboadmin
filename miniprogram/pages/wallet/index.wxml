@@ -1,0 +1,53 @@
+<nav-bar title="我的积分" back />
+<view class="subpage page-motion {{pageMotion}}">
+  <view wx:if="{{needsLogin}}" class="biz-empty"
+    ><text>登录后查看积分与充值记录</text
+    ><button class="biz-action" bindtap="signIn">去登录</button></view
+  >
+  <block wx:else>
+    <view wx:if="{{error}}" class="biz-error" bindtap="load"
+      >{{error}} · 点击重试</view
+    >
+    <view class="biz-card"
+      ><text class="biz-label">可用积分</text
+      ><text class="biz-value">{{available}}</text
+      ><view class="row"
+        ><text class="biz-small" bindtap="load">预留积分 {{held}} · 刷新</text
+        ><text class="biz-link" bindtap="orders">充值订单 ›</text></view
+      ></view
+    >
+    <view class="biz-card" wx:if="{{info}}"
+      ><text class="biz-heading">购买积分</text
+      ><text class="biz-label">充值金额（元）</text
+      ><input
+        class="biz-input"
+        type="digit"
+        value="{{amount}}"
+        bindinput="input"
+        placeholder="输入充值金额"
+      /><text class="biz-note"
+        >1 元约 {{displayRate}} 积分，预计获得 {{estimated}}
+        积分</text
+      ><button
+        class="biz-action"
+        loading="{{busy}}"
+        disabled="{{busy||!allowed}}"
+        bindtap="pay"
+      >
+        {{allowed?'微信支付':'充值暂未开放'}}</button
+      ><text wx:if="{{!allowed}}" class="biz-note"
+        >{{info.pricing.message||'支付服务或当前设备尚未开放充值。'}}</text
+      ></view
+    >
+    <view class="biz-card"
+      ><text class="biz-heading">最近积分流水</text
+      ><view wx:if="{{!ledger.length}}" class="biz-empty">暂无积分变动</view
+      ><view wx:for="{{ledger}}" wx:key="id" class="biz-row"
+        ><view
+          ><text class="biz-list-title">{{item.title}}</text
+          ><text class="biz-small">{{item.note}} · {{item.time}}</text></view
+        ><text>{{item.change}}</text></view
+      ></view
+    >
+  </block>
+</view>

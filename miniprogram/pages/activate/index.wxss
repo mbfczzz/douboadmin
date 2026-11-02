@@ -1,0 +1,36 @@
+@import "../../styles/business.wxss";
+.activation-page {
+  padding-top: 40rpx;
+}
+.activation-logo {
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: 24rpx;
+  background: #9bcbaa;
+  color: #213c2d;
+  font-size: 58rpx;
+  line-height: 96rpx;
+  text-align: center;
+  font-weight: 700;
+  margin-bottom: 36rpx;
+}
+.activation-title {
+  display: block;
+  font-size: 42rpx;
+  font-weight: 600;
+  margin-bottom: 20rpx;
+}
+.activation-links {
+  display: flex;
+  justify-content: space-between;
+  color: #9bcbaa;
+  font-size: 26rpx;
+  margin-top: 30rpx;
+}
+.activation-privacy {
+  display: block;
+  text-align: center;
+  font-size: 24rpx;
+  color: #a0a8ac;
+  margin-top: 60rpx;
+}

@@ -1,0 +1,36 @@
+.task-card {
+  padding: 28rpx;
+  border: 1rpx solid #353b3e;
+  background: #1c1f21;
+  border-radius: 20rpx;
+  margin-bottom: 20rpx;
+}
+.task-title {
+  font-size: 29rpx;
+  line-height: 1.6;
+  display: block;
+  margin: 20rpx 0 15rpx;
+}
+.progress-track {
+  height: 6rpx;
+  background: #353b3e;
+  border-radius: 8rpx;
+  margin: 24rpx 0;
+}
+.progress-fill {
+  height: 6rpx;
+  background: #9bcbaa;
+  border-radius: 8rpx;
+}
+.task-meta {
+  font-size: 22rpx;
+  color: #a0a8ac;
+}
+.foot-actions {
+  display: flex;
+  gap: 20rpx;
+  margin: 28rpx 0;
+}
+.foot-actions > view {
+  flex: 1;
+}

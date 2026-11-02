@@ -1,0 +1,85 @@
+package monitor
+
+import (
+	"context"
+	"doubo/server/internal/core"
+	"doubo/server/internal/store"
+	"fmt"
+	"log/slog"
+	"strings"
+	"time"
+)
+
+type LogHandler struct {
+	base    slog.Handler
+	node    string
+	secrets []string
+	attrs   []slog.Attr
+	queue   chan core.ErrorLog
+}
+
+func NewLogHandler(ctx context.Context, base slog.Handler, s store.Store, node string, secrets []string) *LogHandler {
+	h := &LogHandler{base: base, node: node, secrets: secrets, queue: make(chan core.ErrorLog, 128)}
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case entry := <-h.queue:
+				write, cancel := context.WithTimeout(ctx, 2*time.Second)
+				_, _ = s.Put(write, "error_logs", core.Record{ID: core.NewID(), Data: core.Data(entry)}, 0)
+				cancel()
+			}
+		}
+	}()
+	return h
+}
+func (h *LogHandler) Enabled(ctx context.Context, level slog.Level) bool {
+	return h.base.Enabled(ctx, level)
+}
+func (h *LogHandler) scrub(s string) string {
+	for _, v := range h.secrets {
+		if len(v) > 3 {
+			s = strings.ReplaceAll(s, v, "[redacted]")
+		}
+	}
+	if len(s) > 4000 {
+		s = s[:4000]
+	}
+	return s
+}
+func (h *LogHandler) Handle(ctx context.Context, r slog.Record) error {
+	clean := slog.NewRecord(r.Time, r.Level, h.scrub(r.Message), r.PC)
+	details := []string{}
+	add := func(a slog.Attr) bool {
+		key := strings.ToLower(a.Key)
+		v := h.scrub(fmt.Sprint(a.Value.Any()))
+		if strings.Contains(key, "secret") || strings.Contains(key, "password") || strings.Contains(key, "token") || strings.Contains(key, "authorization") {
+			v = "[redacted]"
+		}
+		clean.AddAttrs(slog.String(a.Key, v))
+		details = append(details, a.Key+"="+v)
+		return true
+	}
+	for _, a := range h.attrs {
+		add(a)
+	}
+	r.Attrs(add)
+	if r.Level >= slog.LevelWarn {
+		select {
+		case h.queue <- core.ErrorLog{Level: r.Level.String(), Message: clean.Message, Detail: strings.Join(details, " "), Node: h.node}:
+		default:
+		}
+	}
+	return h.base.Handle(ctx, clean)
+}
+func (h *LogHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
+	copy := *h
+	copy.attrs = append(append([]slog.Attr{}, h.attrs...), attrs...)
+	return &copy
+}
+func (h *LogHandler) WithGroup(name string) slog.Handler {
+	copy := *h
+	copy.base = h.base.WithGroup(name)
+	return &copy
+}

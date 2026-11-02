@@ -1,0 +1,28 @@
+<view class="biz-card"
+  ><view class="mix-materials"
+    ><view class="mix-material" wx:for="{{assets}}" wx:key="id"
+      ><image
+        wx:if="{{item.isImage}}"
+        src="{{item.data.url}}"
+        mode="aspectFill"
+      /><view wx:else class="mix-video"
+        ><t-icon name="video-camera" size="28" /><text
+          >{{item.data.name}}</text
+        ></view
+      ><text class="mix-remove" data-id="{{item.id}}" bindtap="remove"
+        >×</text
+      ></view
+    ><view class="mix-add" bindtap="add"
+      ><t-icon name="add" size="30" /><text
+        >{{uploading?'上传中':'添加素材'}}</text
+      ></view
+    ></view
+  ><text class="biz-note">{{assets.length}} / 10 个素材，单个不超过 50 MB</text
+  ><view wx:if="{{restoreError}}" class="biz-error"
+    ><text>{{restoreError}}</text
+    ><view class="row"
+      ><text bindtap="retryAssets">重新加载</text
+      ><text bindtap="clearAssets">清空重选</text></view
+    ></view
+  ></view
+>

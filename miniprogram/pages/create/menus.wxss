@@ -1,0 +1,147 @@
+.model-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+}
+.model-menu {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(-6px);
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease,
+    visibility 0s linear 160ms;
+  position: absolute;
+  top: calc(100% - 8px);
+  left: 14px;
+  width: 248px;
+  max-width: calc(100% - 28px);
+  padding: 6px;
+  border: 1px solid #353b3e;
+  border-radius: 10px;
+  background: #1c1f21;
+  z-index: 1001;
+  box-shadow: 0 8px 24px #00000040;
+}
+.model-menu.is-open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: none;
+  transition-delay: 0s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .model-menu {
+    transition: none;
+    transform: none;
+  }
+}
+.model-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 44px;
+  padding: 10px;
+  border-radius: 7px;
+  font-size: 15px;
+}
+.workspace.expanded.model-open {
+  z-index: 1001;
+}
+.expanded .model-menu {
+  top: auto;
+  bottom: 64px;
+}
+.model-option.selected {
+  background: #25372c;
+}
+.model-option t-icon {
+  color: #9bcbaa;
+}
+.reference-sheet {
+  padding: 16px 20px calc(24px + env(safe-area-inset-bottom));
+}
+.reference-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  font-size: 19px;
+  font-weight: 700;
+}
+.close-sheet {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.source-option {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  height: 72px;
+  padding: 0 12px;
+  margin-top: 8px;
+  border-radius: 10px;
+  background: #272b2d;
+  font-size: 16px;
+}
+.source-option > view {
+  flex: 1;
+}
+.source-hint {
+  display: block;
+  margin-top: 5px;
+  font-size: 12px;
+  color: #a0a8ac;
+}
+.model-logo {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  background: #fff;
+  border-radius: 4px;
+  padding: 2px;
+}
+.model-info {
+  flex: 1;
+  min-width: 0;
+}
+.model-description {
+  display: block;
+  font-size: 11px;
+  color: #9ba7a0;
+  margin-top: 4px;
+}
+.model-estimate {
+  font-size: 10px;
+  color: #9ba7a0;
+  white-space: nowrap;
+}
+.model-badges {
+  display: flex;
+  gap: 4px;
+  margin-top: 4px;
+}
+.model-badges text {
+  font-size: 10px;
+  padding: 2px 4px;
+  background: #2c3430;
+  color: #bac7bf;
+  border-radius: 3px;
+}
+.model-badges .hot {
+  background: #392b2a;
+  color: #dfaaa3;
+}
+.model-badges .new {
+  background: #223631;
+  color: #9bcbaa;
+}
+.model-glyph {
+  font-size: 20px;
+  flex-shrink: 0;
+}

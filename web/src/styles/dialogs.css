@@ -1,0 +1,102 @@
+.scrim {
+  position: fixed;
+  inset: 0;
+  background: #202a2566;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 25px;
+}
+.modal {
+  background: white;
+  width: 580px;
+  max-width: 100%;
+  max-height: 90vh;
+  overflow: auto;
+  border-radius: 8px;
+}
+.modal > header {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background: white;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 23px 26px;
+  border-bottom: 1px solid #e6ebdf;
+}
+.modal h2 {
+  margin: 0;
+}
+.modal h2,
+.studio-body p {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.icon {
+  border: 0;
+  background: transparent;
+  padding: 5px;
+  color: #86927a;
+}
+.icon svg {
+  width: 20px;
+  height: 20px;
+}
+.edit-form,
+.job-detail {
+  padding: 25px 26px;
+}
+.edit-form label,
+.login-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 13px;
+  color: #515d63;
+  margin-bottom: 17px;
+}
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+.edit-form .checkbox {
+  flex-direction: row;
+  align-items: center;
+}
+input[type="checkbox"] {
+  width: 16px;
+  accent-color: #52744c;
+}
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 25px;
+}
+.form-modal,
+.form-modal > form {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+}
+.form-modal > form {
+  padding: 0;
+}
+.form-body {
+  overflow: auto;
+  padding: 24px;
+}
+.form-modal .modal-actions {
+  flex-shrink: 0;
+  margin: 0;
+  padding: 16px 24px;
+  border-top: 1px solid var(--line);
+}

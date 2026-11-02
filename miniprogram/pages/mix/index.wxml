@@ -1,0 +1,22 @@
+<nav-bar title="混剪" /><view class="page page-motion {{pageMotion}}">
+  <view class="row mix-heading"
+    ><text class="biz-heading">素材与灵感</text
+    ><text class="biz-link" bindtap="hot">热门视频 ›</text></view
+  ><view wx:if="{{loadError}}" class="biz-error" bindtap="load"
+    >{{loadError}} · 重试</view
+  ><view wx:if="{{config&&!config.enabled}}" class="biz-error"
+    >混剪引擎尚未配置，请联系管理员。</view
+  >
+  <include src="./parts/materials.wxml" />
+  <include src="./parts/settings.wxml" />
+  <include src="./parts/narration.wxml" />
+  <include src="./parts/sound.wxml" />
+  <button
+    class="biz-action"
+    loading="{{busy}}"
+    disabled="{{busy||uploading||restoring||!config.enabled}}"
+    bindtap="generate"
+  >
+    开始混剪{{config.billingEnabled?' · '+config.points+' 积分':''}}
+  </button>
+</view>

@@ -1,0 +1,97 @@
+package api
+
+import (
+	"context"
+	"doubo/server/internal/core"
+	"errors"
+	"log/slog"
+	"net/http"
+	"net/url"
+	"slices"
+	"strings"
+)
+
+func (a *Server) Handler() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("X-Content-Type-Options", "nosniff")
+		w.Header().Set("Cache-Control", "no-store")
+		origin := r.Header.Get("Origin")
+		if origin != "" {
+			u, _ := url.Parse(origin)
+			if !slices.Contains(strings.Split(a.Config.WebOrigin, ","), origin) && (u == nil || u.Host != r.Host) {
+				fail(w, 403, "来源不允许")
+				return
+			}
+			w.Header().Set("Access-Control-Allow-Origin", origin)
+			w.Header().Set("Vary", "Origin")
+			w.Header().Set("Access-Control-Allow-Credentials", "true")
+			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, Idempotency-Key")
+			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		}
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(204)
+			return
+		}
+		defer func() {
+			if e := recover(); e != nil {
+				slog.Error("request panic", "error", e)
+				fail(w, 500, "服务异常")
+			}
+		}()
+		a.Mux.ServeHTTP(w, r)
+	})
+}
+
+func (a *Server) auth(role string, h http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		t := strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer ")
+		if c, e := r.Cookie("doubo_session"); e == nil && t == "" {
+			t = c.Value
+		}
+		v, err := a.Sessions.Get(r.Context(), t)
+		if err != nil {
+			if errors.Is(err, core.ErrNotFound) {
+				fail(w, 401, "请先登录")
+			} else {
+				dbError(w, err)
+			}
+			return
+		}
+		if role != "" && v.Role != role {
+			fail(w, 403, "没有操作权限")
+			return
+		}
+		// A user must be able to revoke a session even after exhausting the API quota.
+		if r.URL.Path == "/api/auth/logout" {
+			h(w, r.WithContext(context.WithValue(r.Context(), identityKey, v)))
+			return
+		}
+		if v.Role == "user" {
+			disabled, e := a.userDisabled(r.Context(), v.ID)
+			if e != nil && !errors.Is(e, core.ErrNotFound) { // Legacy private sessions can predate profiles; public shares cannot.
+				dbError(w, e)
+				return
+			}
+			if disabled {
+				fail(w, 403, "账号已停用，请联系管理员")
+				return
+			}
+			if !a.allowActivation(w, r, v.ID) {
+				return
+			}
+		}
+		ok, err := a.Sessions.Allow(r.Context(), v.ID, 180)
+		if err != nil {
+			fail(w, 503, "限流服务不可用")
+			return
+		}
+		if !ok {
+			fail(w, 429, "操作过于频繁，请稍后再试")
+			return
+		}
+		if v.Role == "user" && a.Activity != nil {
+			a.Activity.Active(r.Context(), v.ID)
+		}
+		h(w, r.WithContext(context.WithValue(r.Context(), identityKey, v)))
+	}
+}

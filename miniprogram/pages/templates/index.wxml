@@ -1,0 +1,77 @@
+<nav-bar title="模板" size="{{27}}">
+  <view slot="actions" class="search-icon" bindtap="toggleSearch" aria-label="搜索模板">
+    <t-icon name="search" size="22" />
+  </view>
+</nav-bar>
+<view class="page templates-page page-motion {{pageMotion}}">
+  <view class="search-field" wx:if="{{searching}}">
+    <input
+      placeholder="搜索你想要的画面"
+      placeholder-class="muted"
+      value="{{search}}"
+      bindinput="input"
+      confirm-type="search"
+      bindconfirm="search"
+    />
+    <text bindtap="search">搜索</text>
+  </view>
+  <scroll-view scroll-x class="filter-scroll">
+    <view
+      wx:for="{{categories}}"
+      wx:key="*this"
+      class="filter {{category===item?'active':''}}"
+      data-value="{{item}}"
+      bindtap="choose"
+    >
+      {{item}}
+    </view>
+  </scroll-view>
+  <view wx:if="{{loading}}" class="waterfall" aria-label="正在加载模板">
+    <view class="column" wx:for="{{[0,1]}}" wx:for-item="column" wx:key="*this">
+      <view class="template" wx:for="{{[0,1]}}" wx:key="*this">
+        <view class="cover skeleton {{column===1?'alternate':''}}" />
+        <view class="skeleton skeleton-title" />
+      </view>
+    </view>
+  </view>
+  <view wx:elif="{{loadError}}" class="empty">
+    <text>{{loadError}}</text>
+    <t-button variant="outline" bind:tap="load">重试</t-button>
+  </view>
+  <view wx:elif="{{!items.length}}" class="empty">
+    <t-icon name="image" size="38" />
+    <text class="title">还没有这类模板</text>
+    <text class="desc">换个分类，继续发现灵感。</text>
+  </view>
+  <view wx:else class="waterfall content-reveal">
+    <view
+      class="column"
+      wx:for="{{columns}}"
+      wx:for-item="column"
+      wx:for-index="col"
+      wx:key="id"
+    >
+      <view
+        class="template"
+        wx:for="{{column.items}}"
+        wx:key="id"
+        data-id="{{item.id}}"
+        bindtap="detail"
+        hover-class="card-pressed"
+      >
+        <view class="cover {{col===1?'alternate':''}}">
+          <image mode="aspectFill" src="{{item.data.cover}}" lazy-load />
+          <view class="cover-line" />
+          <view class="play">
+            <t-icon
+              name="{{item.data.kind==='image'?'image':'play'}}"
+              size="12"
+            />
+          </view>
+        </view>
+        <text class="title">{{item.data.title}}</text>
+      </view>
+    </view>
+  </view>
+  <view class="end" wx:if="{{items.length>visibleCount}}" bindtap="more">查看更多 →</view>
+</view>

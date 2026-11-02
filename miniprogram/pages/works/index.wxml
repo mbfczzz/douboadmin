@@ -1,0 +1,38 @@
+<nav-bar title="我的作品" back />
+<view class="subpage works-page page-motion {{pageMotion}}">
+  <view wx:if="{{loading}}" class="loading"><t-loading text="正在加载作品" /></view>
+  <view wx:elif="{{needsLogin}}" class="empty">
+    <t-icon name="image" size="36" />
+    <text class="title">登录后查看你的作品</text>
+    <text class="desc">完成的图片和视频都在这里。</text>
+    <t-button theme="primary" loading="{{signingIn}}" bind:tap="signIn">去登录</t-button>
+  </view>
+  <view wx:elif="{{loadError&&!works.length}}" class="error-box" bindtap="load">{{loadError}} · 点击重试</view>
+  <block wx:else>
+    <view class="work-filters">
+      <view wx:for="{{filters}}" wx:key="key" class="work-filter {{filter===item.key?'active':''}}" data-value="{{item.key}}" bindtap="choose">{{item.text}}</view>
+    </view>
+    <view wx:if="{{loadError}}" class="error-box" bindtap="load">刷新失败，已保留作品 · 点击重试</view>
+    <view wx:if="{{!filtered.length}}" class="empty">
+      <t-icon name="image" size="36" />
+      <text class="title">{{filter==='image'?'还没有图片作品':filter==='video'?'还没有视频作品':'还没有完成的作品'}}</text>
+      <text class="desc">可以开始一次创作，或换个分类看看。</text>
+      <t-button variant="outline" theme="primary" bind:tap="create">去创作</t-button>
+    </view>
+    <view wx:else class="completed-grid content-reveal">
+      <view class="completed-item" wx:for="{{filtered}}" wx:key="id" data-id="{{item.id}}" bindtap="detail" hover-class="card-pressed">
+        <view class="completed-cover">
+          <image wx:if="{{item.input.kind==='image'}}" src="{{item.result}}" mode="aspectFill" lazy-load />
+          <t-icon wx:else name="play-circle" size="36" />
+          <text wx:if="{{item.input.duration}}" class="completed-duration">{{item.input.duration}} 秒</text>
+        </view>
+        <text class="completed-title">{{item.shortTitle}}</text>
+        <view class="work-meta">
+          <text>{{item.kindText}}</text>
+          <text>{{item.time}}</text>
+        </view>
+      </view>
+    </view>
+    <text wx:if="{{filtered.length}}" class="works-note">最近完成的作品 · 下拉可刷新</text>
+  </block>
+</view>

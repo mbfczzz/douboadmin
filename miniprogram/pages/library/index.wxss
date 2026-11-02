@@ -1,0 +1,79 @@
+.favorite-card {
+  display: flex;
+  align-items: center;
+  gap: 22rpx;
+  padding: 22rpx;
+  background: #1c1f21;
+  border: 1rpx solid #353b3e;
+  border-radius: 20rpx;
+  margin-bottom: 20rpx;
+}
+.favorite-card image {
+  width: 150rpx;
+  height: 170rpx;
+  border-radius: 12rpx;
+}
+.favorite-card > view {
+  flex: 1;
+  min-width: 0;
+  word-break: break-all;
+}
+.favorite-card > view text {
+  display: block;
+  margin: 15rpx 0;
+  font-size: 27rpx;
+}
+.favorite-card > view .small {
+  font-size: 23rpx;
+}
+.help-card {
+  padding: 28rpx;
+}
+.help-card text {
+  display: block;
+  font-size: 25rpx;
+  color: #a0a8ac;
+  line-height: 1.9;
+}
+.help-card .help-title {
+  font-size: 28rpx;
+  color: #e9eceb;
+  margin: 28rpx 0 14rpx;
+}
+.help-card .help-title:first-child {
+  margin-top: 0;
+}
+.feedback {
+  height: 300rpx;
+}
+.send {
+  margin-top: 30rpx;
+}
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 35rpx 0;
+  border-bottom: 1rpx solid #353b3e;
+  font-size: 28rpx;
+}
+.logout {
+  margin-top: 65rpx;
+}
+.unavailable-favorite {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px;
+  margin-bottom: 12px;
+  background: #1c1f21;
+  border: 1px solid #353b3e;
+  border-radius: 10px;
+  font-size: 14px;
+}
+.unavailable-favorite .muted {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+}

@@ -1,0 +1,101 @@
+.agent-page {
+  height: calc(100vh - 110px - env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 90rpx;
+}
+.chat-scroll {
+  flex: 1;
+  height: 0;
+  min-height: 0;
+}
+.conversation {
+  padding: 25rpx 38rpx 35rpx;
+}
+.agent-intro {
+  padding: 18rpx 0 26rpx;
+}
+.agent-mark {
+  color: #9bcbaa;
+  margin-bottom: 24rpx;
+}
+.headline {
+  display: block;
+  font-size: 39rpx;
+  margin-bottom: 20rpx;
+}
+.agent-intro .muted {
+  display: block;
+  line-height: 1.8;
+}
+.demo-label {
+  margin-top: 25rpx;
+}
+.suggestions {
+  margin: 8rpx 0 45rpx;
+}
+.suggestions > view {
+  border-bottom: 1rpx solid #353b3e;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 23rpx 0;
+  font-size: 25rpx;
+  color: #c4ccca;
+}
+.message {
+  margin-top: 30rpx;
+}
+.message-label {
+  font-size: 21rpx;
+  color: #818b90;
+  margin-bottom: 12rpx;
+}
+.bubble {
+  padding: 24rpx 26rpx;
+  border-radius: 16rpx;
+  background: #1c1f21;
+  font-size: 27rpx;
+  line-height: 1.9;
+  white-space: pre-wrap;
+  display: flex;
+  gap: 12rpx;
+}
+.bubble text {
+  min-width: 0;
+  word-break: break-all;
+}
+.user .message-label {
+  text-align: right;
+}
+.user .bubble {
+  background: #25372c;
+  margin-left: 50rpx;
+  color: #d1e2d6;
+}
+.assistant .bubble {
+  margin-right: 20rpx;
+}
+.use-script {
+  display: flex;
+  gap: 12rpx;
+  align-items: center;
+  font-size: 23rpx;
+  color: #9bcbaa;
+  margin: 18rpx 0;
+}
+.composer {
+  margin: 12rpx 38rpx 24rpx;
+  background: #1c1f21;
+  border: 1rpx solid #353b3e;
+  border-radius: 20rpx;
+  padding: 22rpx 24rpx;
+}
+.composer textarea {
+  width: 100%;
+  font-size: 27rpx;
+  line-height: 1.6;
+  min-height: 65rpx;
+  max-height: 160rpx;
+  margin-bottom: 16rpx;
+}

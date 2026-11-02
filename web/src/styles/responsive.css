@@ -1,0 +1,88 @@
+@media (min-width: 1700px) {
+  .content {
+    padding-top: 45px;
+  }
+}
+@media (max-width: 1200px) {
+  .content {
+    padding: 28px;
+  }
+  .topbar {
+    padding: 0 28px;
+  }
+}
+@media (max-width: 900px) {
+  .sidebar {
+    width: 190px;
+    padding: 25px 14px;
+  }
+  .main {
+    margin-left: 190px;
+    width: calc(100% - 190px);
+  }
+  .toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .page-heading {
+    align-items: flex-start;
+  }
+  .page-heading h1 {
+    font-size: 24px;
+  }
+  .actions {
+    flex-direction: column;
+  }
+}
+@media (max-width: 640px) {
+  .sidebar {
+    transform: translateX(-100%);
+    width: 228px;
+    visibility: hidden;
+  }
+  .sidebar.open {
+    transform: none;
+    visibility: visible;
+  }
+  .main {
+    margin: 0;
+    width: 100%;
+  }
+  .mobile-toggle {
+    display: inline-flex;
+  }
+  .topbar {
+    padding: 0 20px;
+    height: 64px;
+  }
+  .topbar > span {
+    margin-right: auto;
+    margin-left: 12px;
+  }
+  .topbar b {
+    display: none;
+  }
+  .content {
+    padding: 24px 18px 0;
+  }
+  .page-heading p {
+    line-height: 1.7;
+    max-width: 210px;
+  }
+  .page-heading {
+    flex-wrap: wrap;
+  }
+  .actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  .form-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .notice {
+    padding: 13px;
+  }
+  .scrim {
+    padding: 12px;
+  }
+}

@@ -1,0 +1,57 @@
+<nav-bar title="分享作品" back /><view
+  class="subpage page-motion {{pageMotion}}"
+  ><view wx:if="{{needsLogin}}" class="biz-empty"
+    >登录后分享自己的作品<button class="biz-action" bindtap="signIn">
+      去登录
+    </button></view
+  ><view wx:if="{{loadError}}" class="biz-error">{{loadError}}</view
+  ><block wx:if="{{job}}"
+    ><view class="biz-card"
+      ><image
+        wx:if="{{job.input.kind==='image'}}"
+        class="biz-preview"
+        src="{{job.result}}"
+        mode="widthFix" /><video
+        wx:else
+        class="biz-preview"
+        src="{{job.result}}"
+        controls /></view
+    ><view
+      wx:if="{{job.reviewStatus!=='approved'||job.deleted}}"
+      class="biz-error"
+      >{{job.deleted?'作品已删除':'作品通过审核后可以公开分享。'}}</view
+    ><view wx:else class="biz-card"
+      ><text class="biz-label">分享标题</text
+      ><input
+        class="biz-input"
+        value="{{title}}"
+        maxlength="60"
+        bindinput="input"
+      /><view class="biz-row"
+        ><text>包含创作描述</text
+        ><switch
+          color="#9BCBAA"
+          checked="{{showPrompt}}"
+          bindchange="prompt" /></view
+      ><button
+        wx:if="{{!share}}"
+        class="biz-action"
+        bindtap="prepare"
+        loading="{{busy}}"
+      >
+        准备分享</button
+      ><block wx:else
+        ><button class="biz-action" open-type="share">发给微信好友</button
+        ><button
+          class="biz-action biz-secondary"
+          bindtap="copy"
+          disabled="{{!share.publicDomainConfigured}}"
+        >
+          复制短链</button
+        ><text class="biz-note"
+          >{{share.publicDomainConfigured?'链接有效期 30 天，删除作品后失效。':'当前尚未配置公网域名，短链需部署后启用。'}}</text
+        ></block
+      ></view
+    ></block
+  ></view
+>

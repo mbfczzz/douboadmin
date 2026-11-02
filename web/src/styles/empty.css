@@ -1,0 +1,14 @@
+.empty {
+  text-align: center;
+  color: #68747b;
+  padding: 32px 20px;
+}
+.empty h3 {
+  margin: 0 0 8px;
+  font-weight: 500;
+  font-size: 14px;
+}
+.empty p {
+  font-size: 12px;
+  margin: 0;
+}

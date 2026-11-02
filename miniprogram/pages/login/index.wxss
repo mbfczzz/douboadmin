@@ -1,0 +1,83 @@
+.login-page {
+  padding: 40px 24px calc(24px + env(safe-area-inset-bottom));
+  text-align: center;
+}
+.login-brand {
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px;
+  border-radius: 14px;
+  background: #9bcbaa;
+  color: #17281d;
+  font-size: 28px;
+  font-weight: 600;
+}
+.login-heading {
+  display: block;
+  font-size: 23px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.login-description {
+  display: block;
+  max-width: 300px;
+  margin: 12px auto 28px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: #a0a8ac;
+}
+.login-page t-button {
+  display: block;
+}
+.login-explain {
+  display: block;
+  margin: 16px 0;
+  font-size: 12px;
+  line-height: 1.7;
+  color: #a0a8ac;
+}
+.login-notice {
+  margin-bottom: 16px;
+  padding: 12px;
+  border-radius: 8px;
+  background: #272b2d;
+  color: #c4ccca;
+  font-size: 13px;
+  line-height: 1.6;
+}
+.login-page .demo-entry {
+  background: transparent;
+  color: #a0a8ac;
+  font-size: 13px;
+  padding: 8px;
+}
+.login-page .browse {
+  margin: 4px auto 0;
+  padding: 12px 18px;
+  font-size: 14px;
+}
+.privacy-link {
+  display: block;
+  margin-top: 8px;
+  padding: 12px;
+  font-size: 12px;
+  color: #a0a8ac;
+}
+.login-page .loading {
+  padding: 20px;
+  min-height: 48px;
+}
+@media (max-height: 650px) {
+  .login-page {
+    padding-top: 20px;
+  }
+  .login-brand {
+    margin-bottom: 16px;
+  }
+  .login-description {
+    margin-bottom: 20px;
+  }
+}

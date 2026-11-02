@@ -1,0 +1,44 @@
+<nav-bar title="充值订单" back /><view
+  class="subpage page-motion {{pageMotion}}"
+>
+  <view wx:if="{{needsLogin}}" class="biz-empty"
+    >登录后查看充值订单<button class="biz-action" bindtap="signIn">
+      去登录
+    </button></view
+  >
+  <view wx:if="{{loadError}}" class="biz-error" bindtap="load"
+    >{{loadError}} · 重试</view
+  >
+  <view wx:if="{{!loading&&!needsLogin&&!rows.length}}" class="biz-empty"
+    >暂无充值订单</view
+  >
+  <view wx:for="{{rows}}" wx:key="id" class="biz-card"
+    ><view class="row"
+      ><text class="biz-heading">{{item.points}} 积分</text
+      ><text class="accent">{{item.state}}</text></view
+    ><text class="biz-value">¥{{item.amount}}</text
+    ><text class="biz-small">{{item.time}} · {{item.id}}</text
+    ><view wx:if="{{item.data.status==='created'}}" class="biz-pair"
+      ><view
+        ><button
+          class="biz-action biz-secondary"
+          disabled="{{busy}}"
+          data-id="{{item.id}}"
+          bindtap="refresh"
+        >
+          查支付结果
+        </button></view
+      ><view
+        ><button
+          class="biz-action"
+          loading="{{busy===item.id}}"
+          disabled="{{busy}}"
+          data-id="{{item.id}}"
+          bindtap="pay"
+        >
+          继续支付
+        </button></view
+      ></view
+    ></view
+  >
+</view>

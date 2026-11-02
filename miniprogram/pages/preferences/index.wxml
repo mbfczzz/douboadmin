@@ -1,0 +1,52 @@
+<nav-bar title="设置" back /><view class="subpage page-motion {{pageMotion}}"
+  ><view wx:if="{{needsLogin}}" class="biz-empty"
+    >登录后设置个人偏好<button class="biz-action" bindtap="signIn">
+      去登录
+    </button></view
+  ><view wx:if="{{loadError}}" class="biz-error" bindtap="load"
+    >{{loadError}} · 重试</view
+  ><block wx:if="{{row}}"
+    ><view class="biz-card"
+      ><view class="biz-row"
+        ><text>作品完成站内通知</text
+        ><switch
+          checked="{{row.data.inAppNotifications}}"
+          disabled="{{busy}}"
+          color="#9BCBAA"
+          data-field="inAppNotifications"
+          bindchange="change" /></view
+      ><view class="biz-row"
+        ><text>作品预览自动播放</text
+        ><switch
+          checked="{{row.data.autoplay}}"
+          disabled="{{busy}}"
+          color="#9BCBAA"
+          data-field="autoplay"
+          bindchange="change" /></view
+      ><view class="biz-row"
+        ><text>详细使用统计</text
+        ><switch
+          checked="{{row.data.analytics}}"
+          disabled="{{busy}}"
+          color="#9BCBAA"
+          data-field="analytics"
+          bindchange="change" /></view
+      ><text class="biz-note"
+        >使用统计仅记录页面和操作类型，不上传创作描述、素材内容或手机号。</text
+      ></view
+    ><view class="biz-card"
+      ><text class="biz-heading">微信完成通知</text
+      ><text class="biz-note"
+        >{{completionTemplateId?'需要微信授权订阅，是否能送达以微信授权状态为准。':'通知模板尚未配置，当前可使用站内通知。'}}</text
+      ><button
+        class="biz-action biz-secondary"
+        disabled="{{!completionTemplateId}}"
+        bindtap="subscribe"
+      >
+        授权订阅通知
+      </button></view
+    ><button class="biz-action biz-secondary" bindtap="signOut">
+      退出登录
+    </button></block
+  ></view
+>

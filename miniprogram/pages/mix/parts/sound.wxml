@@ -1,0 +1,27 @@
+<view class="biz-card"
+  ><text class="biz-heading">声音</text
+  ><view class="biz-row"
+    ><text>保留素材原声</text
+    ><switch
+      checked="{{keepOriginalAudio}}"
+      color="#9BCBAA"
+      data-field="keepOriginalAudio"
+      bindchange="toggle" /></view
+  ><picker
+    range="{{musicNames}}"
+    value="{{musicIndex}}"
+    bindchange="chooseMusic"
+    ><view class="biz-row"
+      ><text>背景音乐</text><text class="accent">{{musicLabel}} ›</text></view
+    ></picker
+  ><text class="biz-link" bindtap="uploadMusic">上传自己的音乐</text
+  ><text class="biz-label">背景音乐音量 {{musicVolume}}%</text
+  ><slider
+    min="0"
+    max="100"
+    value="{{musicVolume}}"
+    activeColor="#9BCBAA"
+    backgroundColor="#343B37"
+    block-color="#9BCBAA"
+    bindchange="volume"
+/></view>

@@ -1,0 +1,57 @@
+@import "../../styles/business.wxss";
+.mix-heading {
+  margin: 12rpx 0 18rpx;
+}
+.mix-materials {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14rpx;
+}
+.mix-material,
+.mix-add {
+  width: 170rpx;
+  height: 170rpx;
+  border-radius: 14rpx;
+  background: #29322d;
+  position: relative;
+  overflow: hidden;
+}
+.mix-material image {
+  width: 100%;
+  height: 100%;
+}
+.mix-add,
+.mix-video {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12rpx;
+  color: #a7cbb3;
+  font-size: 23rpx;
+}
+.mix-add {
+  height: 170rpx;
+  border: 1rpx dashed #61786a;
+}
+.mix-video text {
+  max-width: 150rpx;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 21rpx;
+}
+.mix-remove {
+  position: absolute;
+  top: 5rpx;
+  right: 5rpx;
+  padding: 3rpx 12rpx;
+  border-radius: 50%;
+  background: #17201bd9;
+  color: #fff;
+  font-size: 32rpx;
+}
+.biz-row > view {
+  flex: 1;
+}
