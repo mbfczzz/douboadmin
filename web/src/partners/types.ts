@@ -1,4 +1,5 @@
 import type { Row } from "../api";
+import type { Notify } from "../navigation";
 export type Partner = {
   name: string;
   parentId: string;
@@ -23,7 +24,7 @@ export type Price = {
 };
 export type Overview = {
   record: Row<Partner>;
-  quota: { users: Pool; partners: Pool };
+  quota: { users: Pool; partners?: Pool };
   price: Price;
   priceError?: string;
   commission: { balanceFen: number; heldFen: number; paidOutFen: number };
@@ -68,7 +69,7 @@ export type Move = {
   parentId: string;
   childId: string;
   users: number;
-  partners: number;
+  partners?: number;
   kind: string;
   reason: string;
 };
@@ -76,7 +77,7 @@ export type QuotaRequest = {
   partnerId: string;
   parentId: string;
   users: number;
-  partners: number;
+  partners?: number;
   status: string;
   reason: string;
   decision?: string;
@@ -85,6 +86,7 @@ export type Policy = {
   enabled: boolean;
   costPer100Fen: number;
   rootMarginBps: number;
+  totalUserQuota: number;
 };
 export type CommissionEntry = {
   partnerId: string;
@@ -107,7 +109,7 @@ export type Scope = {
   id: string;
   view: Overview;
   changed: () => Promise<void>;
-  notify: (s: string) => void;
+  notify: Notify;
 };
 export const available = (pool: Pool) =>
   pool.granted - pool.allocated - pool.reserved - pool.used;

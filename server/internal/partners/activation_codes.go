@@ -25,7 +25,7 @@ func (s *Service) Issue(ctx context.Context, partner, label string, days int, ke
 		if e != nil {
 			return qr, e
 		}
-		if e = ensure(&q.Users, partner == core.RootPartner, 1); e != nil {
+		if e = ensure(&q.Users, legacyRootQuota(tx, partner), 1); e != nil {
 			return qr, e
 		}
 		q.Users.Reserved++

@@ -2,7 +2,7 @@
   display: flex;
   align-items: flex-end;
   gap: 12px;
-  margin-bottom: 18px;
+  margin-bottom: 20px;
   flex-wrap: wrap;
 }
 .payments-page .business-filters > input {
@@ -39,6 +39,9 @@
   padding: 10px 14px;
   background: white;
 }
+.mobile-records {
+  display: none;
+}
 .business-preview {
   padding: 20px;
 }
@@ -66,11 +69,43 @@
   margin-bottom: 24px;
   background: white;
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: var(--radius);
   overflow: hidden;
 }
+.attention-panel {
+  margin-bottom: 20px;
+}
+.attention-list button {
+  width: 100%;
+  padding: 14px 22px;
+  justify-content: space-between;
+  border: 0;
+  border-top: 1px solid var(--line);
+  background: transparent;
+  color: var(--accent);
+  text-align: left;
+}
+.attention-list span,
+.attention-list b,
+.attention-list small {
+  display: block;
+}
+.attention-list b {
+  color: var(--ink);
+}
+.attention-list small {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.attention-clear {
+  margin: 0;
+  padding: 0 22px 20px;
+  color: var(--muted);
+  font-size: 13px;
+}
 .business-metrics .panel {
-  padding: 20px 24px;
+  padding: 20px 22px;
   border: 0;
   border-left: 1px solid var(--line);
   border-radius: 0;
@@ -86,7 +121,7 @@
   display: block;
   font-size: 30px;
   margin-top: 8px;
-  font-weight: 600;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
 .business-trend {
@@ -158,6 +193,41 @@
   }
 }
 @media (max-width: 640px) {
+  .mobile-records {
+    display: grid;
+  }
+  .mobile-record {
+    padding: 16px;
+    border-bottom: 1px solid var(--line);
+  }
+  .mobile-record:last-child {
+    border-bottom: 0;
+  }
+  .mobile-record dl {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 11px;
+    margin: 0;
+  }
+  .mobile-record dl > div {
+    display: grid;
+    grid-template-columns: minmax(90px, 0.8fr) minmax(0, 1.2fr);
+    gap: 12px;
+  }
+  .mobile-record dt {
+    color: var(--muted);
+    font-size: 12px;
+  }
+  .mobile-record dd {
+    min-width: 0;
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+  .mobile-record-actions {
+    margin-top: 14px;
+    padding-top: 10px;
+    border-top: 1px solid var(--line);
+  }
   .business-metrics {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }

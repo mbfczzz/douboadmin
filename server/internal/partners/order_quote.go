@@ -33,6 +33,16 @@ func Snapshot(tx store.Transaction, user string, fen, pointsPerYuan int64) (*cor
 	if !a.Active {
 		return nil, 0, core.ErrActivationRequired
 	}
+	if a.PartnerID == "" {
+		if fen < 1 || fen > 10000000 || pointsPerYuan < 1 || pointsPerYuan > 100000 {
+			return nil, 0, rulef("充值参数无效")
+		}
+		units := fen * pointsPerYuan
+		if units <= 0 || units > core.MaxBalance {
+			return nil, 0, rulef("充值金额对应积分超出允许范围")
+		}
+		return nil, units, nil
+	}
 	p, e := prices(tx, a.PartnerID)
 	if e != nil {
 		return nil, 0, e

@@ -27,8 +27,8 @@ test("nested picker can repeatedly close without releasing the parent scroll loc
 }) => {
   await login(page);
   await surfaceFixtures(page);
-  await page.getByRole("button", { name: "用户管理", exact: true }).click();
-  await page.getByRole("button", { name: "服务商与授权", exact: true }).click();
+  await page.getByRole("button", { name: "小程序用户", exact: true }).click();
+  await page.getByRole("button", { name: "服务商管理", exact: true }).click();
   await page.getByRole("tab", { name: "名额划拨", exact: true }).click();
   for (let i = 0; i < 4; i++) {
     await page

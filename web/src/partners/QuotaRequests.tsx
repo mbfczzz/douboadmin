@@ -5,11 +5,12 @@ import Records, { useRecords } from "./Records";
 import type { QuotaRequest } from "./types";
 import { labels } from "./types";
 import { useCommand } from "./useCommand";
+import type { Notify } from "../navigation";
 export default function QuotaRequests({
   notify,
   changed,
 }: {
-  notify: (s: string) => void;
+  notify: Notify;
   changed: () => Promise<void>;
 }) {
   const resource = useRecords<QuotaRequest>("/admin/quota-requests"),
@@ -23,8 +24,8 @@ export default function QuotaRequests({
         columns={[
           { title: "服务商", render: (r) => r.data.partnerId },
           {
-            title: "子账号 / 服务商名额",
-            render: (r) => `${r.data.users} / ${r.data.partners}`,
+            title: "用户额度",
+            render: (r) => r.data.users,
           },
           { title: "原因", render: (r) => r.data.reason },
           { title: "状态", render: (r) => labels[r.data.status] },
@@ -65,14 +66,11 @@ export default function QuotaRequests({
                 await changed();
                 notify("审批结果已保存");
               } catch (e) {
-                notify((e as Error).message);
+                notify((e as Error).message, "error");
               }
             }}
           >
-            <p>
-              申请 {detail.data.users} 个子账号名额、{detail.data.partners}{" "}
-              个下级服务商名额。
-            </p>
+            <p>申请 {detail.data.users} 个用户额度。</p>
             <label>
               审批结果
               <select name="decision">

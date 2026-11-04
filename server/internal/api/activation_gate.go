@@ -15,7 +15,7 @@ func tokenFrom(r *http.Request) string {
 	return token
 }
 func activationExempt(path string) bool {
-	return path == "/api/access" || path == "/api/access/redeem" || path == "/api/auth/logout"
+	return path == "/api/access" || path == "/api/access/direct" || path == "/api/access/redeem" || path == "/api/auth/logout"
 }
 func (a *Server) allowActivation(w http.ResponseWriter, r *http.Request, user string) bool {
 	if !a.Config.RequireActivation || activationExempt(r.URL.Path) {
@@ -80,6 +80,14 @@ func (a *Server) myAccess(w http.ResponseWriter, r *http.Request) {
 	access, e := a.Partners.Access(r.Context(), identity(r).ID)
 	if e != nil {
 		dbError(w, e)
+		return
+	}
+	reply(w, 200, access)
+}
+func (a *Server) directAccess(w http.ResponseWriter, r *http.Request) {
+	access, e := a.Partners.ActivateDirect(r.Context(), identity(r).ID)
+	if e != nil {
+		partnerError(w, e)
 		return
 	}
 	reply(w, 200, access)

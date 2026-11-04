@@ -8,8 +8,8 @@ import (
 )
 
 func validQuota(users, dealers int64, reason string) error {
-	if users < 0 || dealers < 0 || users > 1000000 || dealers > 1000000 || users+dealers == 0 {
-		return rulef("请填写有效的独立名额数量")
+	if users <= 0 || users > 1000000 || dealers < 0 || dealers > 1000000 {
+		return rulef("请填写有效的用户额度")
 	}
 	if len([]rune(strings.TrimSpace(reason))) < 2 || len([]rune(reason)) > 200 {
 		return rulef("请填写 2–200 字的操作原因")
@@ -37,7 +37,7 @@ func moveQuota(tx store.Transaction, id string, v core.QuotaMove) (core.Record, 
 	}
 	transfer := func(parent, child *core.QuotaPool, n int64) error {
 		if v.Kind == "grant" {
-			if e := ensure(parent, v.ParentID == core.RootPartner, n); e != nil {
+			if e := ensure(parent, legacyRootQuota(tx, v.ParentID), n); e != nil {
 				return e
 			}
 			parent.Allocated += n
@@ -54,9 +54,6 @@ func moveQuota(tx store.Transaction, id string, v core.QuotaMove) (core.Record, 
 		return nil
 	}
 	if e = transfer(&p.Users, &c.Users, v.Users); e != nil {
-		return pr, e
-	}
-	if e = transfer(&p.Partners, &c.Partners, v.Partners); e != nil {
 		return pr, e
 	}
 	if _, e = put(tx, "partner_quotas", pr, p); e != nil {
@@ -83,7 +80,7 @@ func (s *Service) RequestQuota(ctx context.Context, id string, users, dealers in
 		if id == core.RootPartner {
 			return core.Record{}, rulef("总账号是名额源头，无需申请")
 		}
-		v := core.QuotaRequest{PartnerID: id, ParentID: p.ParentID, Users: users, Partners: dealers, Status: "pending", Reason: reason}
+		v := core.QuotaRequest{PartnerID: id, ParentID: p.ParentID, Users: users, Status: "pending", Reason: reason}
 		return tx.Put("quota_requests", core.Record{ID: command, Owner: id, Data: core.Data(v)}, 0)
 	})
 }
@@ -105,7 +102,7 @@ func (s *Service) DecideRequest(ctx context.Context, id string, approve bool, re
 		v.Status = "rejected"
 		v.Decision = reason
 		if approve {
-			move := core.QuotaMove{ParentID: v.ParentID, ChildID: v.PartnerID, Users: v.Users, Partners: v.Partners, Kind: "grant", Reason: reason, Actor: actor}
+			move := core.QuotaMove{ParentID: v.ParentID, ChildID: v.PartnerID, Users: v.Users, Kind: "grant", Reason: reason, Actor: actor}
 			if _, e = moveQuota(tx, "request-"+id, move); e != nil {
 				return e
 			}

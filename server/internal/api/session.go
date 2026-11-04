@@ -13,10 +13,11 @@ import (
 )
 
 type Identity struct {
-	Account string    `json:"account,omitempty"`
-	ID      string    `json:"id"`
-	Role    string    `json:"role"`
-	Expires time.Time `json:"expires"`
+	Account   string    `json:"account,omitempty"`
+	AdminRole string    `json:"adminRole,omitempty"`
+	ID        string    `json:"id"`
+	Role      string    `json:"role"`
+	Expires   time.Time `json:"expires"`
 }
 type Sessions struct {
 	Redis  *redis.Client
@@ -37,11 +38,17 @@ func tokenKey(t string) string {
 	return "doubo:session:" + hex.EncodeToString(h[:])
 }
 func (s *Sessions) Create(ctx context.Context, id, role string, account ...string) (string, error) {
-	token := core.NewID() + core.NewID()
 	v := Identity{ID: id, Role: role, Expires: time.Now().Add(24 * time.Hour), Account: id}
 	if len(account) > 0 {
 		v.Account = account[0]
 	}
+	return s.create(ctx, v)
+}
+func (s *Sessions) CreateAdmin(ctx context.Context, id, account, role string) (string, error) {
+	return s.create(ctx, Identity{ID: id, Role: "admin", AdminRole: role, Account: account, Expires: time.Now().Add(24 * time.Hour)})
+}
+func (s *Sessions) create(ctx context.Context, v Identity) (string, error) {
+	token := core.NewID() + core.NewID()
 	if s.Redis != nil {
 		b, _ := json.Marshal(v)
 		return token, s.Redis.Set(ctx, tokenKey(token), b, 24*time.Hour).Err()

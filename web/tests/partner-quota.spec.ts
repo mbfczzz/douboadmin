@@ -15,8 +15,8 @@ test("quota requests approve against the parent pool and unused codes can be rev
   });
   expect(response.status()).toBe(200);
   const partner = await response.json();
-  await page.getByRole("button", { name: "用户管理", exact: true }).click();
-  await page.getByRole("button", { name: "服务商与授权", exact: true }).click();
+  await page.getByRole("button", { name: "小程序用户", exact: true }).click();
+  await page.getByRole("button", { name: "服务商管理", exact: true }).click();
   await selectProvider(page, "申请验收服务商");
   await page.getByRole("tab", { name: "名额划拨", exact: true }).click();
   await page.getByRole("button", { name: "向上级申请", exact: true }).click();
@@ -24,8 +24,8 @@ test("quota requests approve against the parent pool and unused codes can be rev
     name: "向上级申请名额",
     exact: true,
   });
-  await form.getByLabel("子账号名额", { exact: true }).fill("2");
-  await form.getByLabel("原因", { exact: true }).fill("测试申请两个子账号名额");
+  await form.getByLabel("用户额度", { exact: true }).fill("2");
+  await form.getByLabel("原因", { exact: true }).fill("测试申请两个用户额度");
   await form.getByRole("button", { name: "提交申请", exact: true }).click();
   await expect(form).toHaveCount(0);
   const row = page

@@ -4,6 +4,8 @@ import (
 	"context"
 	"doubo/server/internal/core"
 	"doubo/server/internal/store"
+	"encoding/json"
+	"errors"
 )
 
 type Price struct {
@@ -70,17 +72,48 @@ func (s *Service) Price(ctx context.Context, id string) (out Price, err error) {
 	return
 }
 func (s *Service) Policy(ctx context.Context) (core.Record, core.DistributionPolicy, error) {
-	return policy(reader{ctx, s.Store})
+	row, value, err := policy(reader{ctx, s.Store})
+	if err != nil || value.TotalUserQuota != 0 {
+		return row, value, err
+	}
+	quotaRow, quotaErr := s.Store.Get(ctx, "partner_quotas", core.RootPartner)
+	if errors.Is(quotaErr, core.ErrNotFound) {
+		return row, value, nil
+	}
+	if quotaErr != nil {
+		return row, value, quotaErr
+	}
+	var quota core.PartnerQuota
+	if json.Unmarshal(quotaRow.Data, &quota) != nil {
+		return row, value, rulef("总账号额度数据异常")
+	}
+	value.TotalUserQuota = quota.Users.Granted
+	return row, value, nil
 }
 func (s *Service) SavePolicy(ctx context.Context, v core.DistributionPolicy, version int64, actor string) (out core.Record, err error) {
-	if v.CostPer100Fen < 0 || v.CostPer100Fen > 10000 || v.RootMarginBps < 0 || v.RootMarginBps > 10000 {
-		return out, rulef("成本或毛利分配比例无效")
+	if v.CostPer100Fen < 0 || v.CostPer100Fen > 10000 || v.RootMarginBps < 0 || v.RootMarginBps > 10000 || v.TotalUserQuota < 0 || v.TotalUserQuota > 1000000 {
+		return out, rulef("成本、毛利比例或平台总额度无效")
 	}
 	err = s.Store.Atomic(ctx, func(tx store.Transaction) error {
 		if e := Lock(tx); e != nil {
 			return e
 		}
-		var e error
+		quotaRow, quotaValue, e := quota(tx, core.RootPartner)
+		if e != nil {
+			return e
+		}
+		if v.TotalUserQuota == 0 && quotaValue.Users.Granted > 0 {
+			v.TotalUserQuota = quotaValue.Users.Granted
+		}
+		used := quotaValue.Users.Allocated + quotaValue.Users.Reserved + quotaValue.Users.Used
+		if v.TotalUserQuota < used {
+			return rulef("平台总额度不能低于已划拨、预留和使用数量")
+		}
+		quotaValue.Users.Granted = v.TotalUserQuota
+		quotaValue.Partners = core.QuotaPool{}
+		if _, e = put(tx, "partner_quotas", quotaRow, quotaValue); e != nil {
+			return e
+		}
 		out, e = tx.Put("settings", core.Record{ID: "distribution", Data: core.Data(v)}, version)
 		if e != nil {
 			return e

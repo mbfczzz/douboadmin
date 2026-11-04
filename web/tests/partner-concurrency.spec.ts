@@ -7,8 +7,8 @@ test.skip(
 );
 
 async function openBusiness(page: import("@playwright/test").Page) {
-  await page.getByRole("button", { name: "用户管理", exact: true }).click();
-  await page.getByRole("button", { name: "服务商与授权", exact: true }).click();
+  await page.getByRole("button", { name: "小程序用户", exact: true }).click();
+  await page.getByRole("button", { name: "服务商管理", exact: true }).click();
   await expect(
     page.getByRole("heading", { name: "总账号", exact: true }),
   ).toBeVisible();

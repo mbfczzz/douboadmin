@@ -2,9 +2,14 @@ package api
 
 import (
 	"crypto/subtle"
+	"doubo/server/internal/core"
+	"errors"
 	"net"
 	"net/http"
 	"strings"
+	"time"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 func (a *Server) loginLimit(w http.ResponseWriter, r *http.Request) bool {
@@ -32,17 +37,27 @@ func (a *Server) adminLogin(w http.ResponseWriter, r *http.Request) {
 	if !decode(w, r, &v) {
 		return
 	}
-	if subtle.ConstantTimeCompare([]byte(v.Username), []byte(a.Config.AdminUser)) != 1 || subtle.ConstantTimeCompare([]byte(v.Password), []byte(a.Config.AdminPassword)) != 1 {
+	v.Username = strings.TrimSpace(v.Username)
+	row, account, e := a.readAdmin(r, v.Username)
+	if errors.Is(e, core.ErrNotFound) && subtle.ConstantTimeCompare([]byte(v.Username), []byte(a.Config.AdminUser)) == 1 && subtle.ConstantTimeCompare([]byte(v.Password), []byte(a.Config.AdminPassword)) == 1 {
+		row, account, e = a.bootstrapAdmin(r, v.Username, v.Password)
+	}
+	if e != nil || account.Disabled || account.Archived || bcrypt.CompareHashAndPassword([]byte(account.PasswordHash), []byte(v.Password)) != nil {
 		fail(w, 401, "账号或密码不正确")
 		return
 	}
-	t, e := a.Sessions.Create(r.Context(), "admin", "admin", v.Username)
+	account.LastLoginAt = time.Now().UTC()
+	row.Data = core.Data(account)
+	if updated, updateErr := a.Store.Put(r.Context(), "admin_accounts", row, row.Version); updateErr == nil {
+		row = updated
+	}
+	t, e := a.Sessions.CreateAdmin(r.Context(), row.ID, account.Username, account.Role)
 	if e != nil {
 		dbError(w, e)
 		return
 	}
 	http.SetCookie(w, &http.Cookie{Name: "doubo_session", Value: t, Path: "/api", HttpOnly: true, Secure: a.Config.Production, SameSite: http.SameSiteStrictMode, MaxAge: 86400})
-	reply(w, 200, map[string]string{"name": "管理员"})
+	reply(w, 200, map[string]string{"name": account.Name, "role": account.Role})
 }
 
 func (a *Server) logout(w http.ResponseWriter, r *http.Request) {

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { api, date, type Row } from "../api";
 import type { PageProps } from "../navigation";
 import { useResource } from "../hooks/useResource";
+import { useRememberedState } from "../hooks/useRememberedState";
 import Modal from "../components/Modal";
 import ResourcePage from "../business/ResourcePage";
 import Table from "../business/Table";
@@ -9,8 +10,8 @@ import { money, points, statuses, type Order } from "../business/types";
 
 export default function Orders({ notify }: PageProps) {
   const resource = useResource<Row<Order>[]>("/admin/orders"),
-    [query, setQuery] = useState(""),
-    [state, setState] = useState("");
+    [query, setQuery] = useRememberedState("orders.query", ""),
+    [state, setState] = useRememberedState("orders.status", "");
   const [detail, setDetail] = useState<Row<Order> | null>(null),
     [reason, setReason] = useState(""),
     [busy, setBusy] = useState(false);
@@ -25,13 +26,13 @@ export default function Orders({ notify }: PageProps) {
       await resource.reload();
       notify("订单状态已更新");
     } catch (e) {
-      notify((e as Error).message);
+      notify((e as Error).message, "error");
     }
   }
   async function refund() {
     if (!detail || busy) return;
     if (!reason.trim()) {
-      notify("请填写退款原因");
+      notify("请填写退款原因", "warning");
       return;
     }
     setBusy(true);
@@ -44,7 +45,7 @@ export default function Orders({ notify }: PageProps) {
       await resource.reload();
       notify("退款申请已提交，到账以微信最终结果为准");
     } catch (e) {
-      notify((e as Error).message);
+      notify((e as Error).message, "error");
       void resource.reload();
     } finally {
       setBusy(false);

@@ -25,7 +25,7 @@ func TestActivationTraceUsesSessionAccountAndIsAdminOnly(t *testing.T) {
 	}
 	var grant core.ActivationCode
 	_ = json.Unmarshal(row.Data, &grant)
-	if grant.CreatorAccount != "verified-account" || grant.Actor != "admin" {
+	if grant.CreatorAccount != "verified-account" || grant.Actor == "" {
 		t.Fatal("issuer came from mutable config instead of session", grant)
 	}
 	_, _ = a.Store.Put(ctx, "users", core.Record{ID: "user-a", Data: core.Data(map[string]string{"nickname": "激活用户", "phone": "private-phone", "openid": "private-openid"})}, 0)

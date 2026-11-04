@@ -1,17 +1,22 @@
 # 服务商业务 API
 
-前缀 `/api`。所有 `/admin/*` 路由只允许总账号；本版本没有独立服务商登录。普通用户使用微信业务 token，未激活的业务请求返回 `403` 及 `code=ACTIVATION_REQUIRED`。
+前缀 `/api`。管理平台账号与微信小程序用户完全分离。普通用户使用微信业务 token，可直接申请自动开通，或使用服务商激活码建立归属；尚未开通的业务请求返回 `403` 及 `code=ACTIVATION_REQUIRED`。
 
 | 方法 | 路径 | 用途 |
 | --- | --- | --- |
 | GET | /access | 当前身份是否已激活、归属与停用原因 |
+| POST | /access/direct | 直接申请并自动开通，不建立服务商归属 |
 | POST | /access/redeem | `{code,method?}`；method 为 qr/code，旧客户端未报则记 unknown；同一兑换流程，限流及单次占位 |
+| GET / POST | /admin/accounts | 管理平台账号列表与创建；小程序用户不能通过此接口创建 |
+| PUT | /admin/accounts/{id} | 编辑管理账号姓名、手机号、角色和启停状态 |
+| PUT | /admin/accounts/{id}/password | 重置管理账号密码，最少 16 位 |
+| DELETE | /admin/accounts/{id} | 归档管理账号并禁止登录 |
 | GET / POST | /admin/partners | 直接下级/搜索分页；创建 `{parentId,name}` |
-| GET | /admin/partners/{id} | 服务商资料、两套额度、当前价格链和佣金余额；`root` 为总账号 |
+| GET | /admin/partners/{id} | 服务商资料、固定用户额度、当前价格链和佣金余额；`root` 为总账号 |
 | PUT | /admin/partners/{id} | `{version,data}`；名称、状态、子账号售价、向下供货的保留比例 |
 | GET / PUT | /admin/partner-policy | 总账号成本与保留比例；写入 `{version,data}` |
-| GET / POST | /admin/quota-moves | 历史；写入 `{parentId,childId,users,partners,kind,reason}`，kind 为 grant/reclaim |
-| GET / POST | /admin/quota-requests | 申请历史；写入 `{partnerId,users,partners,reason}` |
+| GET / POST | /admin/quota-moves | 历史；写入 `{parentId,childId,users,kind,reason}`，kind 为 grant/reclaim |
+| GET / POST | /admin/quota-requests | 申请历史；写入 `{partnerId,users,reason}` |
 | PUT | /admin/quota-requests/{id} | `{version,approve,reason}`；批准与划拨在同一事务 |
 | GET / POST | /admin/activation-codes | 授权码列表；生成 `{partnerId,label,days}` 并预留名额 |
 | GET | /admin/activation-codes/{id} | 有效未使用码的正文和二维码 Data URL，仅总账号可读取 |
@@ -34,4 +39,4 @@
 
 匿名 `/config` 只返回登录/激活引导能力，模型与分类为空。模板、混剪配置、音乐、热门视频发现及小程序分享数据均受激活保护。外部 H5 分享仍可公开访问，但作品所有者必须保持有效授权。
 
-程序入口固定开启激活校验，开发演示身份同样需要兑换授权码；演示登录仅供隔离测试，正式环境禁止启用。
+程序入口固定要求用户先选择开通方式；直接申请自动通过且不产生服务商日志，激活码开通保留服务商归属和完整来源记录。演示登录仅供隔离测试，正式环境禁止启用。

@@ -3,9 +3,9 @@
   height: 36px;
   padding: 0 11px;
   border-radius: 8px;
-  background: #fff;
+  background: var(--surface);
   border: 1px solid var(--line);
-  color: #1f1f24;
+  color: var(--ink);
   font-size: 12.5px;
   min-width: 0;
 }
@@ -14,10 +14,10 @@
   min-height: 72px;
   font-size: 12.5px;
   line-height: 1.5;
-  color: #1f1f24;
+  color: var(--ink);
   border: 1px solid var(--line);
   border-radius: 6px;
-  background: #fff;
+  background: var(--surface);
 }
 .model-config input:focus,
 .model-config select:focus,
@@ -28,7 +28,7 @@
 }
 .model-config input[readonly],
 .model-config select:disabled {
-  background: #fafafa;
+  background: var(--surface-subtle);
   color: var(--muted);
 }
 .model-config input::placeholder,
@@ -48,8 +48,8 @@
   border-radius: 6px;
   font-size: 12px;
   font-weight: 500;
-  color: #4a4a52;
-  background: #fff;
+  color: #42544a;
+  background: var(--surface);
   border: 1px solid var(--line);
 }
 .config-chips button[aria-pressed="true"] {
@@ -71,7 +71,7 @@
   font-size: 12.5px;
 }
 .config-save:hover {
-  background: var(--accent);
+  background: var(--accent-hover);
 }
 .config-brands {
   display: flex;
@@ -83,7 +83,7 @@
   width: 34px;
   height: 34px;
   border: 1px solid var(--line);
-  background: #fff;
+  background: var(--surface);
   border-radius: 8px;
   padding: 6px;
 }
@@ -140,7 +140,7 @@
   font-weight: 500;
   color: var(--muted);
   padding: 7px 10px;
-  background: #fafafa;
+  background: var(--surface-subtle);
   border-bottom: 1px solid var(--line);
   text-align: center;
 }
@@ -151,8 +151,8 @@
 .config-matrix td {
   padding: 8px 10px;
   font-size: 12.5px;
-  color: #4a4a52;
-  border-bottom: 1px solid #f0f0f2;
+  color: #42544a;
+  border-bottom: 1px solid #e7ede9;
   text-align: center;
 }
 .config-matrix input {
@@ -163,7 +163,7 @@
 }
 .model-cell .catalog-icon {
   padding: 3px;
-  background: #fff;
+  background: var(--surface);
 }
 .model-display-badges {
   display: flex;

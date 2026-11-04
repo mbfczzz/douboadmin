@@ -44,7 +44,7 @@ export default function Providers({
             title: "名称",
             render: (r) => (
               <>
-                {r.data.name}
+                <span className="provider-name">{r.data.name}</span>
                 <small className="cell-note">{r.id}</small>
               </>
             ),

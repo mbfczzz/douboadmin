@@ -1,7 +1,7 @@
 @import "./model-config-controls.css";
 .scrim.model-config-mask {
-  background: rgba(24, 24, 27, 0.4);
-  backdrop-filter: none;
+  background: #10271d80;
+  backdrop-filter: blur(3px);
   padding: 24px;
   z-index: 240;
 }
@@ -11,10 +11,11 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: #fff;
+  background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: 12px;
-  color: #1f1f24;
+  border-radius: var(--radius-lg);
+  color: var(--ink);
+  box-shadow: var(--shadow-float);
 }
 .model-config > header {
   padding: 18px 22px;
@@ -57,7 +58,7 @@
   padding: 14px 22px;
   flex-shrink: 0;
   border-top: 1px solid var(--line);
-  background: #fff;
+  background: var(--surface-subtle);
 }
 .model-config-footer > span {
   margin-right: auto;
@@ -66,7 +67,7 @@
   color: var(--muted);
 }
 .model-config-footer .config-error {
-  color: #b91c1c;
+  color: var(--danger);
 }
 .model-config button {
   white-space: nowrap;
@@ -86,7 +87,7 @@
   font-size: 13px;
   font-weight: 600;
   margin: 0 0 14px;
-  color: #1f1f24;
+  color: var(--ink);
 }
 .config-grid {
   display: grid;
@@ -108,7 +109,7 @@
 .config-field > span {
   font-size: 12px;
   font-weight: 500;
-  color: #4a4a52;
+  color: #42544a;
 }
 .model-config small,
 .config-hint {
@@ -196,5 +197,13 @@
   }
   .config-inline > select {
     width: auto;
+  }
+}
+@media (max-height: 480px) {
+  .model-config > header {
+    padding-block: 10px;
+  }
+  .model-config .modal-subtitle {
+    display: none;
   }
 }

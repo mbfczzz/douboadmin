@@ -1,16 +1,16 @@
-import { lazy, Suspense, useState } from "react";
+import { lazy, Suspense } from "react";
 import type { Row } from "../api";
 import type { PageProps } from "../navigation";
 import { useResource } from "../hooks/useResource";
+import { useRememberedState } from "../hooks/useRememberedState";
 import PageHeader from "../components/PageHeader";
-import RequestState from "../components/RequestState";
-import "../styles/catalog.css";
+import RequestState, { LoadingState } from "../components/RequestState";
 import type { Platform } from "../business/types";
 import RefundRecords from "../business/RefundRecords";
 const PaymentRecords = lazy(() => import("../business/PaymentRecords"));
 
 export default function Payments({ notify, navigate }: PageProps) {
-  const [tab, setTab] = useState("payments");
+  const [tab, setTab] = useRememberedState("payments.tab", "payments");
   const settings = useResource<{
     record: Row<Platform>;
     capabilities: { payment: boolean };
@@ -59,7 +59,7 @@ export default function Payments({ notify, navigate }: PageProps) {
           </button>
         ))}
       </div>
-      <Suspense fallback={<p role="status">正在加载记录…</p>}>
+      <Suspense fallback={<LoadingState label="正在加载支付记录" />}>
         {tab === "payments" ? (
           <PaymentRecords />
         ) : (

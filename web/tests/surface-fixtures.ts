@@ -67,6 +67,19 @@ export async function surfaceFixtures(page: Page) {
     demo: false,
   };
   const maps: Record<string, unknown> = {
+    "/accounts": {
+      canManage: true,
+      items: [
+        row("qa-admin", {
+          username: "qa-admin",
+          name: "质检管理员",
+          phone: "13800138000",
+          role: "super_admin",
+          disabled: false,
+          lastLoginAt: now,
+        }),
+      ],
+    },
     "/models": models,
     "/users": [
       row("qa-user", { nickname: "界面质检用户", name: "", phone: "" }),

@@ -23,20 +23,9 @@ func (s *Service) Create(ctx context.Context, parent, name, key, actor string) (
 		if len(p.Path) >= 8 {
 			return core.Record{}, rulef("服务商层级最多 8 层")
 		}
-		row, q, e := quota(tx, parent)
-		if e != nil {
-			return row, e
-		}
-		if e = ensure(&q.Partners, parent == core.RootPartner, 1); e != nil {
-			return row, e
-		}
-		q.Partners.Used++
-		if _, e = put(tx, "partner_quotas", row, q); e != nil {
-			return row, e
-		}
 		price, e := prices(tx, parent)
 		if e != nil {
-			return row, e
+			return core.Record{}, e
 		}
 		incoming := price.IncomingPer100Fen + (price.RetailPer100Fen-price.IncomingPer100Fen)*p.ChildMarginBps/10000
 		n := core.Partner{Name: name, ParentID: parent, Path: append(append([]string{}, p.Path...), parent), Status: "active", RetailPer100Fen: max(int64(10000), incoming), ChildMarginBps: 5000}
@@ -44,7 +33,7 @@ func (s *Service) Create(ctx context.Context, parent, name, key, actor string) (
 		if e != nil {
 			return created, e
 		}
-		return created, audit(tx, id, "create_partner", actor, "创建服务商，初始两类可用名额均为零", n)
+		return created, audit(tx, id, "create_partner", actor, "创建下级服务商，用户额度由上级另行划拨", n)
 	})
 }
 func (s *Service) Update(ctx context.Context, id string, v core.Partner, version int64, actor string) (out core.Record, err error) {

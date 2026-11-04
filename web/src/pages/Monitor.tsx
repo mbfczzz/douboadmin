@@ -8,8 +8,6 @@ import Nodes from "../monitor/Nodes";
 import Events from "../monitor/Events";
 import type { Health, Event } from "../monitor/types";
 import { online } from "../monitor/types";
-import "../styles/catalog.css";
-import "../styles/monitor.css";
 
 export default function Monitor({ notify }: PageProps) {
   const resource = useResource<Health>("/admin/monitor", 15000),
@@ -25,7 +23,7 @@ export default function Monitor({ notify }: PageProps) {
       await api(`/admin/alerts/${id}/ack`, { method: "PUT" });
       await alerts.reload();
     } catch (e) {
-      notify((e as Error).message);
+      notify((e as Error).message, "error");
     }
   }
   const connections = [

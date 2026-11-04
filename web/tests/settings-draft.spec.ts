@@ -83,7 +83,7 @@ test("settings cancel navigation, reload and refresh without losing the draft", 
   const field = page.getByLabel("帮助与联系说明");
   await field.fill("保留本次修改");
   page.once("dialog", (d) => d.dismiss());
-  await page.getByRole("button", { name: "用户管理", exact: true }).click();
+  await page.getByRole("button", { name: "小程序用户", exact: true }).click();
   await expect(page).toHaveURL(/#settings$/);
   await expect(field).toHaveValue("保留本次修改");
   page.once("dialog", (d) => d.dismiss());
@@ -174,7 +174,7 @@ test("settings stay locked until the pending save finishes", async ({
   await page.getByRole("button", { name: "保存设置", exact: true }).click();
   await expect.poll(() => saves).toBe(1);
   await expect(page.getByLabel("帮助与联系说明")).toBeDisabled();
-  await page.getByRole("button", { name: "用户管理", exact: true }).click();
+  await page.getByRole("button", { name: "小程序用户", exact: true }).click();
   await expect(page).toHaveURL(/#settings$/);
   expect(prompts).toBe(0);
   release();

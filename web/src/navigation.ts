@@ -6,6 +6,7 @@ import {
   SlidersHorizontal,
   MessageSquare,
   Settings2,
+  Handshake,
 } from "lucide-react";
 import type { Config } from "./api";
 export const pageInfo = {
@@ -25,7 +26,13 @@ export const pageInfo = {
     SlidersHorizontal,
   ],
   monitor: ["运行监控", "查看节点、队列、错误日志和异常告警。", Settings2],
-  users: ["用户管理", "管理用户资料、使用授权与积分。", Users],
+  users: ["小程序用户", "管理微信用户资料、使用授权与积分。", Users],
+  partners: [
+    "服务商管理",
+    "管理服务商层级、授权名额、激活码与算力分佣。",
+    Handshake,
+  ],
+  accounts: ["管理账号", "管理后台登录账号、角色与启停状态。", Settings2],
   models: [
     "模型管理",
     "同步中转模型，管理可用能力与生成参数。",
@@ -35,16 +42,24 @@ export const pageInfo = {
   settings: ["系统设置", "部署状态与服务连接信息。", Settings2],
 } as const;
 export type PageId = keyof typeof pageInfo;
+export type NoticeTone = "success" | "error" | "warning";
+export type Notify = (message: string, tone?: NoticeTone) => void;
 export const navGroups: { label: string; pages: PageId[] }[] = [
   {
     label: "内容与创作",
     pages: ["overview", "templates", "jobs", "works", "reviews"],
   },
-  { label: "用户与交易", pages: ["users", "orders", "payments"] },
-  { label: "平台管理", pages: ["models", "monitor", "feedback", "settings"] },
+  {
+    label: "用户与交易",
+    pages: ["users", "partners", "orders", "payments"],
+  },
+  {
+    label: "平台管理",
+    pages: ["accounts", "models", "monitor", "feedback", "settings"],
+  },
 ];
 export interface PageProps {
   config?: Config;
-  notify: (message: string) => void;
+  notify: Notify;
   navigate: (page: PageId) => void;
 }

@@ -93,7 +93,11 @@ func (s *Service) CreateOrder(ctx context.Context, user, key string, fen int64, 
 			if e != nil {
 				return e
 			}
-			if len(pricingVersion) != 1 || pricingVersion[0] != snapshot.PricingVersion {
+			if snapshot != nil {
+				if len(pricingVersion) != 1 || pricingVersion[0] != snapshot.PricingVersion {
+					return fmt.Errorf("%w: 兑换价格已更新，请刷新确认后重新提交", core.ErrConflict)
+				}
+			} else if len(pricingVersion) > 0 && pricingVersion[0] != "" {
 				return fmt.Errorf("%w: 兑换价格已更新，请刷新确认后重新提交", core.ErrConflict)
 			}
 			order.Distribution = snapshot

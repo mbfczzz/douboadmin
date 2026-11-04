@@ -55,14 +55,15 @@ test("mobile user actions stay accessible and failed balances remain unknown", a
   await page.route("**/api/admin/users/ui-polish-user/ledger", (route) =>
     route.fulfill({ json: [] }),
   );
-  await page.getByRole("button", { name: "用户管理", exact: true }).click();
+  await page.getByRole("button", { name: "小程序用户", exact: true }).click();
   await page.setViewportSize({ width: 390, height: 844 });
   const action = page.getByRole("button", { name: "详情 / 积分", exact: true });
+  await action.scrollIntoViewIfNeeded();
   await expect(action).toBeInViewport();
   const before = await action.boundingBox();
-  await page.locator(".table-scroll").evaluate((el) => {
-    el.scrollLeft = el.scrollWidth;
-  });
+  expect(before!.width).toBeGreaterThanOrEqual(44);
+  expect(before!.height).toBeGreaterThanOrEqual(44);
+  await expect(page.locator(".record-table > .table-scroll")).toHaveCount(0);
   expect(Math.abs((await action.boundingBox())!.x - before!.x)).toBeLessThan(2);
   await action.click();
   const dialog = page.getByRole("dialog");

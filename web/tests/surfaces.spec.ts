@@ -154,14 +154,24 @@ for (const width of [1440, 390, 320]) {
     await modal("查看并审核", "作品审核");
     await nav("充值订单");
     await modal("详情", "充值订单详情");
-    await nav("用户管理");
-    await modal("详情 / 积分", "用户与积分");
-    await page
-      .getByRole("button", { name: "服务商与授权", exact: true })
-      .click();
+    await nav("管理账号");
+    await modal("添加管理账号", "添加管理账号");
+    await modal("编辑", "编辑管理账号");
+    await nav("小程序用户");
+    await modal("详情 / 积分", "小程序用户与积分");
+    await nav("服务商管理");
     await expect(
       page.getByRole("heading", { name: "总账号", exact: true }),
     ).toBeVisible();
+    const providerName = page.locator(".provider-name:visible").first();
+    await expect(providerName).toBeVisible();
+    expect(
+      await providerName.evaluate(
+        (el) =>
+          el.scrollWidth <= el.clientWidth &&
+          getComputedStyle(el).whiteSpace === "normal",
+      ),
+    ).toBeTruthy();
     await modal("新增下级服务商", "新增下级服务商");
     await modal("切换服务商", "切换服务商");
     await page.getByRole("tab", { name: "名额划拨", exact: true }).click();

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { api, date, type Job } from "../api";
 import type { PageProps } from "../navigation";
 import { useResource } from "../hooks/useResource";
+import { useRememberedState } from "../hooks/useRememberedState";
 import ResourcePage from "../business/ResourcePage";
 import Table from "../business/Table";
 import Modal from "../components/Modal";
@@ -10,7 +11,7 @@ import MediaPreview from "../business/MediaPreview";
 export default function Works({ notify }: PageProps) {
   const resource = useResource<Job[]>("/admin/works"),
     [detail, setDetail] = useState<Job | null>(null),
-    [query, setQuery] = useState("");
+    [query, setQuery] = useRememberedState("works.query", "");
   const rows = (resource.data || []).filter(
     (j) => j.input.prompt.includes(query) || j.userId.includes(query),
   );
@@ -26,7 +27,7 @@ export default function Works({ notify }: PageProps) {
       await resource.reload();
       notify("作品已删除");
     } catch (e) {
-      notify((e as Error).message);
+      notify((e as Error).message, "error");
     }
   }
   return (

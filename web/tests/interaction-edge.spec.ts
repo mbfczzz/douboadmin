@@ -59,11 +59,11 @@ test("collapsed account actions do not trap keyboard focus", async ({
   await page.route("**/api/admin/users/focus-user/ledger", (route) =>
     route.fulfill({ json: [] }),
   );
-  await page.getByRole("button", { name: "用户管理", exact: true }).click();
+  await page.getByRole("button", { name: "小程序用户", exact: true }).click();
   await page.getByRole("button", { name: "详情 / 积分", exact: true }).click();
   const dialog = page.getByRole("dialog"),
     close = dialog.getByRole("button", { name: "关闭", exact: true });
-  const summary = dialog.locator("summary");
+  const summary = dialog.getByText("账号状态管理 · 正常", { exact: true });
   await close.focus();
   await page.keyboard.press("Shift+Tab");
   await expect(summary).toBeFocused();
@@ -73,7 +73,7 @@ test("collapsed account actions do not trap keyboard focus", async ({
   await close.focus();
   await page.keyboard.press("Shift+Tab");
   await expect(
-    dialog.getByRole("button", { name: "停用账号", exact: true }),
+    dialog.getByRole("button", { name: "归档用户", exact: true }),
   ).toBeFocused();
 });
 

@@ -3,13 +3,13 @@ import { Plus, Layers, Lightbulb, Search, Image, Film } from "lucide-react";
 import { api, type Row, type Template, type Model } from "../api";
 import type { PageProps } from "../navigation";
 import { useResource } from "../hooks/useResource";
+import { useRememberedState } from "../hooks/useRememberedState";
 import PageHeader from "../components/PageHeader";
 import RequestState from "../components/RequestState";
 import Empty from "../components/Empty";
 import Pagination from "../components/Pagination";
 import TemplateCard from "../components/TemplateCard";
 import TemplateEditor from "../components/TemplateEditor";
-import "../styles/catalog.css";
 
 const blank: Template = {
   title: "",
@@ -32,12 +32,12 @@ const blank: Template = {
 export default function Templates({ notify }: PageProps) {
   const resource = useResource<Row<Template>[]>("/admin/templates"),
     models = useResource<Row<Model>[]>("/admin/models");
-  const [family, setFamily] = useState("style"),
-    [kind, setKind] = useState("image"),
-    [status, setStatus] = useState(""),
-    [category, setCategory] = useState(""),
-    [q, setQ] = useState(""),
-    [sort, setSort] = useState("sort"),
+  const [family, setFamily] = useRememberedState("templates.family", "style"),
+    [kind, setKind] = useRememberedState("templates.kind", "image"),
+    [status, setStatus] = useRememberedState("templates.status", ""),
+    [category, setCategory] = useRememberedState("templates.category", ""),
+    [q, setQ] = useRememberedState("templates.query", ""),
+    [sort, setSort] = useRememberedState("templates.sort", "sort"),
     [page, setPage] = useState(1);
   const [edit, setEdit] = useState<Row<Template> | null>(null),
     [busy, setBusy] = useState("");
@@ -89,7 +89,7 @@ export default function Templates({ notify }: PageProps) {
             : "模板已发布",
       );
     } catch (e) {
-      notify((e as Error).message);
+      notify((e as Error).message, "error");
       void resource.reload();
     } finally {
       setBusy("");

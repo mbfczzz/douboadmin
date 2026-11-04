@@ -3,6 +3,7 @@ import { Plus, RefreshCw, Search } from "lucide-react";
 import { api, type Row, type Model } from "../api";
 import type { PageProps } from "../navigation";
 import { useResource } from "../hooks/useResource";
+import { useRememberedState } from "../hooks/useRememberedState";
 import PageHeader from "../components/PageHeader";
 import RequestState from "../components/RequestState";
 import Empty from "../components/Empty";
@@ -12,13 +13,12 @@ import ModelEditor, {
   modelKinds,
   supportedModel,
 } from "../components/ModelEditor";
-import "../styles/catalog.css";
 import { ModelIcon } from "../models/brands";
 
 export default function Models({ notify }: PageProps) {
   const resource = useResource<Row<Model>[]>("/admin/models");
-  const [kind, setKind] = useState(""),
-    [q, setQ] = useState(""),
+  const [kind, setKind] = useRememberedState("models.kind", ""),
+    [q, setQ] = useRememberedState("models.query", ""),
     [page, setPage] = useState(1);
   const [busy, setBusy] = useState(""),
     [edit, setEdit] = useState<Row<Model> | null>(null),
@@ -46,7 +46,7 @@ export default function Models({ notify }: PageProps) {
       );
       await resource.reload();
     } catch (e) {
-      notify((e as Error).message);
+      notify((e as Error).message, "error");
     } finally {
       setBusy("");
     }
@@ -76,7 +76,7 @@ export default function Models({ notify }: PageProps) {
         remove ? "模型已删除" : r.data.published ? "模型已下架" : "模型已上架",
       );
     } catch (e) {
-      notify((e as Error).message);
+      notify((e as Error).message, "error");
       void resource.reload();
     } finally {
       setBusy("");

@@ -1,10 +1,11 @@
 import { useState } from "react";
+import type { PageProps } from "../navigation";
 import { useResource } from "../hooks/useResource";
 import ResourcePage from "../business/ResourcePage";
 import Table from "../business/Table";
 import { money, type Dashboard } from "../business/types";
 
-export default function Overview() {
+export default function Overview({ config, navigate }: PageProps) {
   const [days, setDays] = useState(30),
     resource = useResource<Dashboard>("/admin/dashboard?days=" + days, 30000);
   const data = resource.data,
@@ -19,6 +20,34 @@ export default function Overview() {
     { users: 0, jobs: 0, revenue: 0, refund: 0 },
   );
   const peak = Math.max(0, ...series.map((d) => d.jobs));
+  const failed = series.reduce((sum, day) => sum + day.failed, 0),
+    unknownCost = (data?.models || []).reduce(
+      (sum, model) => sum + Math.max(0, model.calls - model.known),
+      0,
+    ),
+    attention = [
+      failed
+        ? {
+            label: `${failed} 个生成任务失败`,
+            help: "查看失败原因并判断是否需要重试。",
+            page: "jobs" as const,
+          }
+        : undefined,
+      unknownCost
+        ? {
+            label: `${unknownCost} 次 AI 调用成本未知`,
+            help: "补充模型成本，避免经营数据失真。",
+            page: "models" as const,
+          }
+        : undefined,
+      config && !config.relayConfigured
+        ? {
+            label: "AI 中转服务尚未配置",
+            help: "完成服务连接后才能提交真实生成任务。",
+            page: "settings" as const,
+          }
+        : undefined,
+    ].filter((item) => item !== undefined);
   return (
     <ResourcePage
       page="overview"
@@ -35,6 +64,31 @@ export default function Overview() {
         </select>
       }
     >
+      <section className="panel attention-panel">
+        <div className="section-head">
+          <h2>需要处理</h2>
+          <span className="quiet">
+            {attention.length ? `${attention.length} 项` : "当前正常"}
+          </span>
+        </div>
+        {attention.length ? (
+          <div className="attention-list">
+            {attention.map((item) => (
+              <button key={item.label} onClick={() => navigate(item.page)}>
+                <span>
+                  <b>{item.label}</b>
+                  <small>{item.help}</small>
+                </span>
+                查看
+              </button>
+            ))}
+          </div>
+        ) : (
+          <p className="attention-clear">
+            当前没有失败任务、成本缺口或关键服务配置问题。
+          </p>
+        )}
+      </section>
       <div className="business-metrics">
         {[
           ["新增用户", total.users],

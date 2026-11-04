@@ -1,29 +1,75 @@
 .error {
-  color: #a46556;
-  background: #f8ebe5;
-  border: 1px solid #ead5c9;
-  padding: 13px 16px;
-  font-size: 12px;
-  border-radius: 7px;
   margin-bottom: 18px;
+  padding: 13px 15px;
+  border: 1px solid #e8c8c1;
+  border-radius: 8px;
+  background: var(--danger-soft);
+  color: var(--danger);
+  font-size: 12px;
 }
 .error button {
-  background: none;
+  padding: 2px 4px;
   border: 0;
+  background: transparent;
   color: inherit;
+  font-weight: 650;
   text-decoration: underline;
+  text-underline-offset: 3px;
 }
 .toast {
   position: fixed;
-  inset: auto 16px 36px;
-  margin: auto;
+  inset: auto 18px 28px;
   z-index: 300;
-  pointer-events: none;
-  max-width: 560px;
-  overflow-wrap: anywhere;
-  background: var(--ink);
-  color: white;
-  padding: 14px 24px;
-  border-radius: 8px;
+  width: fit-content;
+  max-width: min(560px, calc(100% - 36px));
+  margin: auto;
+  padding: 13px 20px;
+  border: 1px solid #ffffff1f;
+  border-radius: 9px;
+  background: #152a20;
+  box-shadow: 0 12px 32px #0d21184d;
+  color: #fff;
   font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  pointer-events: none;
+}
+.toast.error {
+  background: #5f2923;
+}
+.toast.warning {
+  background: #614817;
+}
+.toast button {
+  padding: 4px;
+  flex-shrink: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  pointer-events: auto;
+}
+.loading-state {
+  width: min(460px, 100%);
+  padding: 7px 0 18px;
+}
+.loading-state span {
+  display: block;
+  height: 10px;
+  margin-top: 9px;
+  border-radius: 5px;
+  background: linear-gradient(90deg, #e5ebe7 25%, #f5f8f6 50%, #e5ebe7 75%);
+  background-size: 200% 100%;
+  animation: loading-shimmer 1.4s ease-in-out infinite;
+}
+.loading-state span:nth-child(2) {
+  width: 78%;
+}
+.loading-state span:nth-child(3) {
+  width: 58%;
+}
+@keyframes loading-shimmer {
+  to {
+    background-position: -200% 0;
+  }
 }

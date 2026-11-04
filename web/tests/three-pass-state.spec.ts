@@ -7,7 +7,7 @@ test("pending point adjustment locks the submitted fields and preserves failed i
 }) => {
   await login(page);
   await surfaceFixtures(page);
-  await page.getByRole("button", { name: "用户管理", exact: true }).click();
+  await page.getByRole("button", { name: "小程序用户", exact: true }).click();
   await page.getByRole("button", { name: "详情 / 积分", exact: true }).click();
   const dialog = page.getByRole("dialog"),
     amount = dialog.getByLabel("积分变动（负数为扣减）"),
@@ -45,8 +45,8 @@ test("commission policy draft survives a cancelled tab or back action", async ({
 }) => {
   await login(page);
   await surfaceFixtures(page);
-  await page.getByRole("button", { name: "用户管理", exact: true }).click();
-  await page.getByRole("button", { name: "服务商与授权", exact: true }).click();
+  await page.getByRole("button", { name: "小程序用户", exact: true }).click();
+  await page.getByRole("button", { name: "服务商管理", exact: true }).click();
   await page.getByRole("tab", { name: "算力分佣", exact: true }).click();
   const cost = page.getByLabel("每 100 元基准算力成本（元）", { exact: true });
   await cost.fill("75");
@@ -66,11 +66,23 @@ test("commission policy draft survives a cancelled tab or back action", async ({
   await expect(picker).toBeVisible();
   await picker.getByRole("button", { name: "关闭", exact: true }).click();
   await expect(cost).toHaveValue("75");
-  page.once("dialog", (d) => d.dismiss());
-  await page.getByRole("button", { name: "返回用户列表", exact: true }).click();
+  const navigationBlocked = new Promise<void>((resolve) =>
+    page.once("dialog", async (dialog) => {
+      await dialog.dismiss();
+      resolve();
+    }),
+  );
+  await page.getByRole("button", { name: "小程序用户", exact: true }).click();
+  await navigationBlocked;
   await expect(cost).toHaveValue("75");
-  page.once("dialog", (d) => d.accept());
+  const tabAccepted = new Promise<void>((resolve) =>
+    page.once("dialog", async (dialog) => {
+      await dialog.accept();
+      resolve();
+    }),
+  );
   await page.getByRole("tab", { name: "下级服务商", exact: true }).click();
+  await tabAccepted;
   await expect(
     page.getByRole("heading", { name: "直接下级服务商", exact: true }),
   ).toBeVisible();
@@ -81,8 +93,8 @@ test("commission save locks inputs and a failed save keeps the draft", async ({
 }) => {
   await login(page);
   await surfaceFixtures(page);
-  await page.getByRole("button", { name: "用户管理", exact: true }).click();
-  await page.getByRole("button", { name: "服务商与授权", exact: true }).click();
+  await page.getByRole("button", { name: "小程序用户", exact: true }).click();
+  await page.getByRole("button", { name: "服务商管理", exact: true }).click();
   await page.getByRole("tab", { name: "算力分佣", exact: true }).click();
   const cost = page.getByLabel("每 100 元基准算力成本（元）", { exact: true });
   await cost.fill("75");
@@ -137,8 +149,8 @@ test("a successful commission save clears the unsaved marker", async ({
       },
     });
   });
-  await page.getByRole("button", { name: "用户管理", exact: true }).click();
-  await page.getByRole("button", { name: "服务商与授权", exact: true }).click();
+  await page.getByRole("button", { name: "小程序用户", exact: true }).click();
+  await page.getByRole("button", { name: "服务商管理", exact: true }).click();
   await page.getByRole("tab", { name: "算力分佣", exact: true }).click();
   const cost = page.getByLabel("每 100 元基准算力成本（元）", { exact: true });
   await cost.fill("75");

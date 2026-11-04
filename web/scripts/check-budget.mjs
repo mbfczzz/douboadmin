@@ -37,10 +37,21 @@ const result = {
   ),
   chunks: files.length,
 };
-// Quote B14–B20 adds independently lazy management pages. Keep the original
-// 100 KiB cap for shared/existing code, and give each new route a measured 2 KiB cap.
-// The initial 80 KiB cap is unchanged; no dependency is moved to an external CDN.
-const newRoutes = ["Orders", "Payments", "Works", "Reviews", "Monitor"];
+// Independently lazy routes receive explicit measured caps; shared code keeps
+// its original cap. Initial JS stays at 80 KiB and no code moves to a CDN.
+const routeCaps = {
+  Orders: 2,
+  Payments: 2,
+  Works: 2,
+  Reviews: 2,
+  Monitor: 2,
+  AdminAccounts: 2,
+  // New UX work stays independently lazy and cannot inflate existing shared code.
+  Overview: 2.25,
+  Workspace: 4.25,
+  CommandPalette: 1.5,
+};
+const newRoutes = Object.keys(routeCaps);
 const routeBudgets = Object.fromEntries(
   newRoutes.map((name) => {
     const file = files.find(
@@ -76,7 +87,9 @@ if (
   result.sharedAndExistingJSGzipBytes > 98.5 * 1024 ||
   result.partnerJSGzipBytes > 12 * 1024 ||
   result.usersJSGzipBytes > 3 * 1024 ||
-  Object.values(routeBudgets).some((n) => n > 2 * 1024) ||
+  Object.entries(routeBudgets).some(
+    ([name, size]) => size > routeCaps[name] * 1024,
+  ) ||
   result.totalCSSGzipBytes > 8 * 1024
 ) {
   throw new Error(

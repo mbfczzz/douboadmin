@@ -43,16 +43,23 @@
 }
 .studio-card {
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: var(--radius);
   overflow: hidden;
   background: #fff;
+  transition:
+    border-color 160ms,
+    transform 160ms;
+}
+.studio-card:hover {
+  border-color: var(--accent-border);
+  transform: translateY(-1px);
 }
 .studio-cover {
   height: 220px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f5f6f8;
+  background: var(--surface-subtle);
 }
 .studio-cover img {
   width: 100%;

@@ -1,14 +1,21 @@
 .empty {
+  max-width: 460px;
+  min-height: 180px;
+  margin: 0 auto;
+  padding: 48px 24px;
+  display: grid;
+  align-content: center;
   text-align: center;
-  color: #68747b;
-  padding: 32px 20px;
+  color: var(--muted);
 }
 .empty h3 {
   margin: 0 0 8px;
-  font-weight: 500;
-  font-size: 14px;
+  color: #34483e;
+  font-size: 16px;
+  font-weight: 650;
 }
 .empty p {
-  font-size: 12px;
   margin: 0;
+  font-size: 13px;
+  line-height: 1.7;
 }

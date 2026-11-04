@@ -1,25 +1,18 @@
 import { lazy, Suspense, useState } from "react";
 import PageHeader from "../components/PageHeader";
-import RequestState from "../components/RequestState";
+import RequestState, { LoadingState } from "../components/RequestState";
+import type { PageProps } from "../navigation";
 import { useResource } from "../hooks/useResource";
 import { money } from "../business/types";
 import type { Overview } from "./types";
 import { available, labels } from "./types";
 import Picker from "./Picker";
 import { canLeave } from "../hooks/unsaved";
-import "../styles/catalog.css";
-import "./partners.css";
 const Providers = lazy(() => import("./Providers")),
   Quotas = lazy(() => import("./Quotas")),
   Codes = lazy(() => import("./Codes")),
   Commissions = lazy(() => import("./Commissions"));
-export default function Hub({
-  onBack,
-  notify,
-}: {
-  onBack: () => void;
-  notify: (s: string) => void;
-}) {
+export default function Hub({ notify }: PageProps) {
   const [id, setID] = useState("root"),
     [tab, setTab] = useState("providers"),
     [picking, setPicking] = useState(false);
@@ -40,20 +33,10 @@ export default function Hub({
   return (
     <div className="catalog-page partner-hub">
       <PageHeader
-        page="users"
-        title="服务商与授权"
+        page="partners"
         loading={resource.loading}
         onRefresh={resource.reload}
-      >
-        <button
-          className="secondary"
-          onClick={() => {
-            if (canLeave()) onBack();
-          }}
-        >
-          返回用户列表
-        </button>
-      </PageHeader>
+      />
       <div className="partner-context">
         <div>
           <h2>{view?.record.data.name || "正在读取服务商…"}</h2>
@@ -71,10 +54,7 @@ export default function Hub({
       {view && (
         <>
           <div className="business-metrics">
-            {[
-              ["子账号名额", view.quota.users],
-              ["下级服务商名额", view.quota.partners],
-            ].map(([label, pool]) => {
+            {[["用户额度", view.quota.users]].map(([label, pool]) => {
               const p = pool as Overview["quota"]["users"];
               return (
                 <div className="panel" key={String(label)}>
@@ -132,7 +112,7 @@ export default function Hub({
               </button>
             ))}
           </div>
-          <Suspense fallback={<p role="status">正在加载…</p>}>
+          <Suspense fallback={<LoadingState label="正在加载服务商模块" />}>
             <Current
               key={id + tab}
               id={id}

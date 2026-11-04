@@ -12,3 +12,7 @@
 @import "./styles/login.css";
 @import "./styles/motion.css";
 @import "./styles/responsive.css";
+@import "./styles/catalog.css";
+@import "./styles/model-config.css";
+@import "./styles/monitor.css";
+@import "./partners/partners.css";

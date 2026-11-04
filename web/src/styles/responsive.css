@@ -1,24 +1,23 @@
 @media (min-width: 1700px) {
   .content {
-    padding-top: 45px;
+    padding-top: 42px;
   }
 }
 @media (max-width: 1200px) {
   .content {
-    padding: 28px;
+    padding: 30px 28px 48px;
   }
   .topbar {
-    padding: 0 28px;
+    padding-inline: 28px;
   }
 }
 @media (max-width: 900px) {
   .sidebar {
-    width: 190px;
-    padding: 25px 14px;
+    width: 210px;
   }
   .main {
-    margin-left: 190px;
-    width: calc(100% - 190px);
+    width: calc(100% - 210px);
+    margin-left: 210px;
   }
   .toolbar {
     align-items: flex-start;
@@ -27,62 +26,107 @@
   .page-heading {
     align-items: flex-start;
   }
-  .page-heading h1 {
-    font-size: 24px;
-  }
-  .actions {
-    flex-direction: column;
-  }
 }
 @media (max-width: 640px) {
   .sidebar {
-    transform: translateX(-100%);
-    width: 228px;
+    width: min(84vw, 284px);
+    padding-top: 20px;
     visibility: hidden;
+    transform: translateX(-102%);
+    transition:
+      transform 200ms ease-out,
+      visibility 0s linear 200ms;
+    box-shadow: 18px 0 45px #0b201766;
   }
   .sidebar.open {
-    transform: none;
     visibility: visible;
+    transform: none;
+    transition-delay: 0s;
   }
   .main {
-    margin: 0;
     width: 100%;
+    margin: 0;
   }
   .mobile-toggle {
     display: inline-flex;
   }
+  .mobile-toggle,
+  .icon {
+    min-width: 44px;
+    min-height: 44px;
+  }
   .topbar {
-    padding: 0 20px;
-    height: 64px;
+    height: 62px;
+    padding: 0 16px;
   }
   .topbar > span {
-    margin-right: auto;
-    margin-left: 12px;
+    min-width: 0;
+    margin: 0 auto 0 8px;
+    gap: 9px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .topbar b {
     display: none;
   }
-  .content {
-    padding: 24px 18px 0;
+  .command-trigger span,
+  .command-trigger kbd {
+    display: none;
   }
-  .page-heading p {
-    line-height: 1.7;
-    max-width: 210px;
+  .content {
+    padding: 26px 18px 40px;
   }
   .page-heading {
     flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 22px;
+  }
+  .page-heading h1 {
+    font-size: 25px;
+  }
+  .page-heading p {
+    max-width: 32ch;
   }
   .actions {
-    flex-direction: row;
-    flex-wrap: wrap;
+    width: 100%;
+  }
+  button:not([role="switch"]),
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  summary {
+    min-height: 44px;
+  }
+  .catalog-tabs button,
+  .tabs button,
+  .catalog-table button,
+  .catalog-pagination button {
+    min-width: 44px;
+  }
+  input,
+  select,
+  textarea {
+    font-size: 16px;
   }
   .form-grid {
     grid-template-columns: minmax(0, 1fr);
   }
   .notice {
-    padding: 13px;
+    padding: 15px;
   }
   .scrim {
-    padding: 12px;
+    align-items: flex-end;
+    padding: 8px;
+  }
+  .modal {
+    width: 100%;
+    max-height: 94vh;
+    border-radius: 15px 15px 8px 8px;
+  }
+  .modal > header,
+  .edit-form,
+  .job-detail,
+  .form-body {
+    padding-inline: 18px;
   }
 }

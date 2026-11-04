@@ -2,6 +2,7 @@ import { useState } from "react";
 import { api, date, type Row, type Job } from "../api";
 import type { PageProps } from "../navigation";
 import { useResource } from "../hooks/useResource";
+import { useRememberedState } from "../hooks/useRememberedState";
 import ResourcePage from "../business/ResourcePage";
 import Table from "../business/Table";
 import Modal from "../components/Modal";
@@ -11,7 +12,7 @@ type Item = { record: Row<Review>; job: Job };
 
 export default function Reviews({ notify }: PageProps) {
   const resource = useResource<Item[]>("/admin/reviews"),
-    [state, setState] = useState("pending"),
+    [state, setState] = useRememberedState("reviews.status", "pending"),
     [detail, setDetail] = useState<Item | null>(null),
     [reason, setReason] = useState(""),
     [busy, setBusy] = useState(false);
@@ -31,7 +32,7 @@ export default function Reviews({ notify }: PageProps) {
       await resource.reload();
       notify("审核结果已保存并通知用户");
     } catch (e) {
-      notify((e as Error).message);
+      notify((e as Error).message, "error");
     } finally {
       setBusy(false);
     }

@@ -8,7 +8,7 @@ export default function Picker({
   onClose,
 }: {
   owner?: string;
-  onChoose: (id: string) => void;
+  onChoose: (id: string, row?: Row<Partner>) => void;
   onClose: () => void;
 }) {
   const resource = useRecords<Partner>(
@@ -42,7 +42,7 @@ export default function Picker({
               title: "操作",
               action: true,
               render: (r: Row<Partner>) => (
-                <button onClick={() => onChoose(r.id)}>选择</button>
+                <button onClick={() => onChoose(r.id, r)}>选择</button>
               ),
             },
           ]}

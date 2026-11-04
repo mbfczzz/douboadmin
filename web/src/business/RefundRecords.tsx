@@ -3,12 +3,9 @@ import { useResource } from "../hooks/useResource";
 import Table from "./Table";
 import RequestState from "../components/RequestState";
 import { money, statuses, type Refund } from "./types";
+import type { Notify } from "../navigation";
 
-export default function RefundRecords({
-  notify,
-}: {
-  notify: (message: string) => void;
-}) {
+export default function RefundRecords({ notify }: { notify: Notify }) {
   const resource = useResource<Row<Refund>[]>("/admin/refunds");
   async function refresh(id: string) {
     try {
@@ -16,7 +13,7 @@ export default function RefundRecords({
       await resource.reload();
       notify("退款状态已更新");
     } catch (e) {
-      notify((e as Error).message);
+      notify((e as Error).message, "error");
     }
   }
   return (

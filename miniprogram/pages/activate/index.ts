@@ -103,6 +103,20 @@ Page({
       if (!this.destroyed && !cancelled(e)) error(e);
     }
   },
+  async direct() {
+    if (this.data.busy || !this.data.logged) return;
+    this.setData({ busy: true });
+    try {
+      const status = await request<AccessStatus>("/access/direct", "POST", {});
+      if (this.destroyed) return;
+      this.setData({ status });
+      this.enter();
+    } catch (e) {
+      if (!this.destroyed) error(e);
+    } finally {
+      if (!this.destroyed) this.setData({ busy: false });
+    }
+  },
   async activate(method?: unknown) {
     if (this.data.busy || !this.data.logged) return;
     this.setData({ busy: true });

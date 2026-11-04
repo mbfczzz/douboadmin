@@ -9,3 +9,20 @@
     transform: rotate(360deg);
   }
 }
+@media (prefers-reduced-motion: reduce) {
+  .sidebar,
+  button,
+  input,
+  select,
+  textarea,
+  tbody tr,
+  .studio-card,
+  .catalog-switch span,
+  .config-toggle input::before {
+    transition: none !important;
+  }
+  .loading-state span,
+  .spinning {
+    animation: none !important;
+  }
+}

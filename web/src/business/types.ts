@@ -84,6 +84,7 @@ export interface Profile {
   phone?: string;
   bio?: string;
   disabled?: boolean;
+  archived?: boolean;
   statusReason?: string;
 }
 export interface Daily {

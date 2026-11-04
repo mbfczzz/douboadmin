@@ -1,23 +1,100 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { api, type Row } from "../api";
 import Modal from "../components/Modal";
+import { LoadingState } from "../components/RequestState";
+import type { Notify } from "../navigation";
 import Picker from "./Picker";
+import type { Overview, Partner } from "./types";
+import { available } from "./types";
 import { useCommand } from "./useCommand";
+
 export default function QuotaForm({
-  id,
+  view,
   request,
   onClose,
   onSaved,
   notify,
 }: {
-  id: string;
+  view: Overview;
   request: boolean;
   onClose: () => void;
   onSaved: () => Promise<void>;
-  notify: (s: string) => void;
+  notify: Notify;
 }) {
-  const [child, setChild] = useState(""),
+  const [target, setTarget] = useState<Row<Partner>>(),
+    [targetView, setTargetView] = useState<Overview>(),
+    [targetError, setTargetError] = useState(""),
+    [targetRevision, setTargetRevision] = useState(0),
     [picking, setPicking] = useState(false),
+    [kind, setKind] = useState("grant"),
+    [users, setUsers] = useState(1),
+    [error, setError] = useState(""),
     command = useCommand();
+  useEffect(() => {
+    if (!target) return;
+    const controller = new AbortController();
+    setTargetView(undefined);
+    setTargetError("");
+    void api<Overview>(`/admin/partners/${target.id}`, {
+      signal: controller.signal,
+    })
+      .then(setTargetView)
+      .catch((reason) => {
+        if (!controller.signal.aborted)
+          setTargetError((reason as Error).message);
+      });
+    return () => controller.abort();
+  }, [target, targetRevision]);
+  const sourceAvailable = available(view.quota.users),
+    targetAvailable = targetView ? available(targetView.quota.users) : 0,
+    limit = kind === "grant" ? sourceAvailable : targetAvailable,
+    amountValid = Number.isInteger(users) && users > 0 && users <= limit,
+    targetAfter =
+      kind === "grant" ? targetAvailable + users : targetAvailable - users,
+    sourceAfter =
+      kind === "grant" ? sourceAvailable - users : sourceAvailable + users;
+  async function submit(form: HTMLFormElement) {
+    const reason = String(new FormData(form).get("reason") || "").trim();
+    setError("");
+    if (!request && !target) return setError("请选择直接下级服务商");
+    if (!request && !targetView) return setError("请等待目标额度读取完成");
+    if (!Number.isInteger(users) || users < 1)
+      return setError("用户额度必须是大于 0 的整数");
+    if (!request && users > limit)
+      return setError(
+        `本次最多可${kind === "grant" ? "划拨" : "收回"} ${limit} 个名额`,
+      );
+    if (reason.length < 2) return setError("请填写至少 2 个字的操作原因");
+    if (
+      !request &&
+      kind === "reclaim" &&
+      !confirm(
+        `确认从「${target!.data.name}」收回 ${users} 个可用名额？收回后该服务商剩余 ${targetAfter} 个可用名额。`,
+      )
+    )
+      return;
+    try {
+      if (request)
+        await command.send("/admin/quota-requests", {
+          users,
+          reason,
+          partnerId: view.record.id,
+        });
+      else
+        await command.send("/admin/quota-moves", {
+          users,
+          reason,
+          parentId: view.record.id,
+          childId: target!.id,
+          kind,
+        });
+      await onSaved();
+      onClose();
+      notify(request ? "名额申请已提交" : "名额操作已保存");
+    } catch (reason) {
+      setError((reason as Error).message);
+    }
+  }
   return (
     <>
       <Modal
@@ -26,35 +103,9 @@ export default function QuotaForm({
       >
         <form
           className="edit-form"
-          onSubmit={async (e) => {
-            e.preventDefault();
-            const f = new FormData(e.currentTarget),
-              values = {
-                users: Number(f.get("users")),
-                partners: Number(f.get("partners")),
-                reason: String(f.get("reason")),
-              };
-            try {
-              if (request)
-                await command.send("/admin/quota-requests", {
-                  ...values,
-                  partnerId: id,
-                });
-              else {
-                if (!child) throw Error("请选择直接下级");
-                await command.send("/admin/quota-moves", {
-                  ...values,
-                  parentId: id,
-                  childId: child,
-                  kind: String(f.get("kind")),
-                });
-              }
-              await onSaved();
-              onClose();
-              notify("名额操作已保存");
-            } catch (e) {
-              notify((e as Error).message);
-            }
+          onSubmit={(event) => {
+            event.preventDefault();
+            void submit(event.currentTarget);
           }}
         >
           {!request && (
@@ -64,12 +115,21 @@ export default function QuotaForm({
                 className="secondary"
                 onClick={() => setPicking(true)}
               >
-                {child ? "更换下级服务商" : "选择直接下级服务商"}
+                {target ? "更换下级服务商" : "选择直接下级服务商"}
               </button>
-              <small>{child}</small>
+              {target && (
+                <div className="notice quota-target">
+                  <div>
+                    <b>{target.data.name}</b>
+                    <p>
+                      {view.record.data.name}（{view.record.id}） → {target.id}
+                    </p>
+                  </div>
+                </div>
+              )}
               <label>
                 操作
-                <select name="kind">
+                <select value={kind} onChange={(e) => setKind(e.target.value)}>
                   <option value="grant">划拨给下级</option>
                   <option value="reclaim">收回下级可用名额</option>
                 </select>
@@ -77,47 +137,86 @@ export default function QuotaForm({
             </>
           )}
           <label>
-            子账号名额
+            用户额度
             <input
               name="users"
               type="number"
-              min="0"
-              max="1000000"
+              min="1"
+              max={request ? 1000000 : Math.max(1, limit)}
               step="1"
-              defaultValue="0"
+              value={users}
+              onChange={(e) => setUsers(Number(e.target.value))}
               required
             />
           </label>
-          <label>
-            下级服务商名额
-            <input
-              name="partners"
-              type="number"
-              min="0"
-              max="1000000"
-              step="1"
-              defaultValue="0"
-              required
-            />
-          </label>
+          {!request && target && !targetView && !targetError && (
+            <LoadingState label="正在读取目标额度" />
+          )}
+          {targetError && (
+            <div className="error" role="alert">
+              {targetError}{" "}
+              <button
+                type="button"
+                onClick={() => setTargetRevision((value) => value + 1)}
+              >
+                重试
+              </button>
+            </div>
+          )}
+          {!request && targetView && (
+            <div className="business-metrics quota-preview">
+              <div className="panel">
+                <span>来源可用名额</span>
+                <strong>
+                  {sourceAvailable} → {sourceAfter}
+                </strong>
+                <small>{view.record.data.name}</small>
+              </div>
+              <div className="panel">
+                <span>目标可用名额</span>
+                <strong>
+                  {targetAvailable} → {targetAfter}
+                </strong>
+                <small>{target!.data.name}</small>
+              </div>
+            </div>
+          )}
           <p className="muted">
-            两类名额不可互换。已激活、已预留或继续划拨的名额不能收回。
+            {request
+              ? "申请批准后才会增加当前服务商可用名额。"
+              : "已激活、已预留或继续划拨给更下级的额度不能收回。"}
           </p>
           <label>
             原因
             <textarea name="reason" minLength={2} maxLength={200} required />
           </label>
-          <button className="primary" disabled={command.busy}>
-            {request ? "提交申请" : "确认名额操作"}
+          {error && (
+            <div className="error" role="alert">
+              {error}
+            </div>
+          )}
+          <button
+            className={!request && kind === "reclaim" ? "danger" : "primary"}
+            disabled={
+              command.busy || (!request && (!targetView || !amountValid))
+            }
+          >
+            {command.busy
+              ? "处理中…"
+              : request
+                ? "提交申请"
+                : kind === "reclaim"
+                  ? `确认收回 ${users || 0} 个名额`
+                  : `确认划拨 ${users || 0} 个名额`}
           </button>
         </form>
       </Modal>
       {picking && (
         <Picker
-          owner={id}
+          owner={view.record.id}
           onClose={() => setPicking(false)}
-          onChoose={(value) => {
-            setChild(value);
+          onChoose={(_, row) => {
+            if (row) setTarget(row);
             setPicking(false);
           }}
         />

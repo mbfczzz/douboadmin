@@ -6,13 +6,14 @@ import { useCommand } from "./useCommand";
 import type { Membership } from "./types";
 import { labels } from "./types";
 import ActivationTrace from "./ActivationTrace";
+import type { Notify } from "../navigation";
 export default function Memberships({
   id,
   notify,
   changed,
 }: {
   id: string;
-  notify: (s: string) => void;
+  notify: Notify;
   changed: () => Promise<void>;
 }) {
   const resource = useRecords<Membership>(
@@ -91,7 +92,7 @@ export default function Memberships({
                 await changed();
                 notify("授权状态已更新");
               } catch (e) {
-                notify((e as Error).message);
+                notify((e as Error).message, "error");
               }
             }}
           >

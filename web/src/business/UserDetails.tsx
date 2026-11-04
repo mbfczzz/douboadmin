@@ -4,6 +4,8 @@ import { useResource } from "../hooks/useResource";
 import Modal from "../components/Modal";
 import Table from "./Table";
 import RequestState from "../components/RequestState";
+import UserProfileForm from "./UserProfileForm";
+import type { Notify } from "../navigation";
 import {
   points,
   ledgerLabels,
@@ -21,7 +23,7 @@ export default function UserDetails({
   user: Row<Profile>;
   onClose: () => void;
   onSaved: () => unknown;
-  notify: (s: string) => void;
+  notify: Notify;
 }) {
   const ledger = useResource<Row<Ledger>[]>(`/admin/users/${user.id}/ledger`),
     wallet = useResource<{ wallet: Wallet }>(`/admin/users/${user.id}/wallet`);
@@ -32,7 +34,7 @@ export default function UserDetails({
   async function adjust() {
     const n = Number(amount);
     if (!Number.isFinite(n) || n === 0 || !note.trim()) {
-      notify("请填写积分变动和原因");
+      notify("请填写积分变动和原因", "warning");
       return;
     }
     if (busy) return;
@@ -52,7 +54,55 @@ export default function UserDetails({
       await Promise.all([ledger.reload(), wallet.reload()]);
       notify("积分调整已记录");
     } catch (e) {
-      notify((e as Error).message);
+      notify((e as Error).message, "error");
+    } finally {
+      setBusy(false);
+    }
+  }
+  async function saveProfile(form: HTMLFormElement) {
+    if (busy) return;
+    setBusy(true);
+    const data = new FormData(form);
+    try {
+      await api(`/admin/users/${user.id}`, {
+        method: "PUT",
+        body: JSON.stringify({
+          version: user.version,
+          nickname: data.get("nickname"),
+          name: data.get("name"),
+          phone: data.get("phone"),
+          bio: data.get("bio"),
+        }),
+      });
+      await onSaved();
+      onClose();
+      notify("小程序用户资料已更新");
+    } catch (e) {
+      notify((e as Error).message, "error");
+    } finally {
+      setBusy(false);
+    }
+  }
+  async function archive() {
+    if (busy || !note.trim()) {
+      notify("请填写归档原因", "warning");
+      return;
+    }
+    if (
+      !confirm("归档后用户将无法登录，但订单、作品和流水会保留。确认继续吗？")
+    )
+      return;
+    setBusy(true);
+    try {
+      await api(`/admin/users/${user.id}`, {
+        method: "DELETE",
+        body: JSON.stringify({ version: user.version, reason: note }),
+      });
+      await onSaved();
+      onClose();
+      notify("小程序用户已归档");
+    } catch (e) {
+      notify((e as Error).message, "error");
     } finally {
       setBusy(false);
     }
@@ -60,7 +110,7 @@ export default function UserDetails({
   async function status() {
     if (busy) return;
     if (!note.trim()) {
-      notify("请填写状态变更原因");
+      notify("请填写状态变更原因", "warning");
       return;
     }
     setBusy(true);
@@ -77,19 +127,21 @@ export default function UserDetails({
       onClose();
       notify("用户状态已更新");
     } catch (e) {
-      notify((e as Error).message);
+      notify((e as Error).message, "error");
     } finally {
       setBusy(false);
     }
   }
   return (
-    <Modal title="用户与积分" onClose={() => !busy && onClose()}>
+    <Modal title="小程序用户与积分" onClose={() => !busy && onClose()}>
       <div className="edit-form" aria-busy={busy}>
         <h3>{user.data.nickname}</h3>
         <p className="cell-note mono">{user.id}</p>
-        <p>
-          {user.data.name || "未填写姓名"} · {user.data.phone || "未填写手机号"}
-        </p>
+        <UserProfileForm
+          user={user}
+          busy={busy}
+          onSave={(form) => void saveProfile(form)}
+        />
         <div className="business-metrics">
           {(
             [
@@ -142,20 +194,36 @@ export default function UserDetails({
         </div>
         <details className="overview-details">
           <summary>
-            账号状态管理 · {user.data.disabled ? "已停用" : "正常"}
+            账号状态管理 ·{" "}
+            {user.data.archived
+              ? "已归档"
+              : user.data.disabled
+                ? "已停用"
+                : "正常"}
           </summary>
           <p className="quiet">
             填写上方操作原因后再变更状态；停用不释放授权名额。
           </p>
-          <button
-            className={
-              user.data.disabled ? "secondary" : "secondary danger-text"
-            }
-            disabled={busy}
-            onClick={() => void status()}
-          >
-            {user.data.disabled ? "启用账号" : "停用账号"}
-          </button>
+          {!user.data.archived && (
+            <button
+              className={
+                user.data.disabled ? "secondary" : "secondary danger-text"
+              }
+              disabled={busy}
+              onClick={() => void status()}
+            >
+              {user.data.disabled ? "启用账号" : "停用账号"}
+            </button>
+          )}
+          {!user.data.archived && (
+            <button
+              className="secondary danger-text"
+              disabled={busy}
+              onClick={() => void archive()}
+            >
+              归档用户
+            </button>
+          )}
         </details>
         <h3 className="business-section-title">积分流水</h3>
         <Table

@@ -8,7 +8,6 @@ import PromptFields from "../models/PromptFields";
 import PricingFields from "../models/PricingFields";
 import { ErrorFields, StatusFields } from "../models/StatusFields";
 import { modelDraft, type ModelSettings } from "../models/settings";
-import "../styles/model-config.css";
 import { canLeave } from "../hooks/unsaved";
 export { modelKinds, supportedModel } from "../models/settings";
 export { default as ModelImport } from "./ModelImport";

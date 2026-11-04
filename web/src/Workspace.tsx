@@ -1,8 +1,14 @@
 import { lazy, Suspense, useRef, useEffect, useState } from "react";
-import { LogOut, Menu, ChevronRight, X } from "lucide-react";
+import { LogOut, Menu, ChevronRight, Search, X } from "lucide-react";
 import { api, type Config } from "./api";
-import { pageInfo, navGroups, type PageId } from "./navigation";
+import {
+  pageInfo,
+  navGroups,
+  type NoticeTone,
+  type PageId,
+} from "./navigation";
 import LoadBoundary from "./components/LoadBoundary";
+import { LoadingState } from "./components/RequestState";
 import { usePage } from "./hooks/usePage";
 import { useDrawer } from "./hooks/useDrawer";
 import { canLeave } from "./hooks/unsaved";
@@ -11,6 +17,8 @@ const routes = {
   templates: lazy(() => import("./pages/Templates")),
   jobs: lazy(() => import("./pages/Jobs")),
   users: lazy(() => import("./pages/Users")),
+  partners: lazy(() => import("./partners/Hub")),
+  accounts: lazy(() => import("./pages/AdminAccounts")),
   models: lazy(() => import("./pages/Models")),
   feedback: lazy(() => import("./pages/Feedback")),
   settings: lazy(() => import("./pages/Settings")),
@@ -20,6 +28,7 @@ const routes = {
   payments: lazy(() => import("./pages/Payments")),
   monitor: lazy(() => import("./pages/Monitor")),
 };
+const CommandPalette = lazy(() => import("./components/CommandPalette"));
 export default function Workspace({
   config,
   onLogout,
@@ -29,15 +38,54 @@ export default function Workspace({
 }) {
   const [page, setPage] = usePage(),
     { open: mobile, setOpen: setMobile, closeButton } = useDrawer(),
-    [toast, setToast] = useState("");
+    [commandOpen, setCommandOpen] = useState(false),
+    [recent, setRecent] = useState<PageId[]>(() => {
+      try {
+        return JSON.parse(localStorage.getItem("doubo-recent-pages") || "[]");
+      } catch {
+        return [];
+      }
+    }),
+    [toast, setToast] = useState<{
+      message: string;
+      tone: NoticeTone;
+    }>();
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  useEffect(() => () => clearTimeout(timer.current), []);
-  const notify = (message: string) => {
+  useEffect(() => {
+    const shortcut = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        setCommandOpen(true);
+      }
+    };
+    window.addEventListener("keydown", shortcut);
+    return () => {
+      clearTimeout(timer.current);
+      window.removeEventListener("keydown", shortcut);
+    };
+  }, []);
+  const notify = (message: string, tone: NoticeTone = "success") => {
     clearTimeout(timer.current);
-    setToast(message);
-    timer.current = setTimeout(() => setToast(""), 3500);
+    setToast({ message, tone });
+    if (tone !== "error")
+      timer.current = setTimeout(
+        () => setToast(undefined),
+        tone === "warning" ? 6000 : 3500,
+      );
   };
   const navigate = (id: PageId) => {
+    if (id !== page) {
+      const next = [page, ...recent.filter((value) => value !== page)].slice(
+        0,
+        4,
+      );
+      setRecent(next);
+      try {
+        localStorage.setItem("doubo-recent-pages", JSON.stringify(next));
+      } catch {
+        /* Recent pages are optional. */
+      }
+    }
     setPage(id);
     setMobile(false);
   };
@@ -48,7 +96,7 @@ export default function Workspace({
       await api("/auth/logout", { method: "POST" });
       onLogout();
     } catch (e) {
-      notify((e as Error).message);
+      notify((e as Error).message, "error");
     }
   }
   return (
@@ -125,13 +173,23 @@ export default function Workspace({
             {pageInfo[page][0]}
           </span>
           <div>
+            <button
+              className="secondary command-trigger"
+              aria-label="快速跳转"
+              title="快速跳转（Ctrl / Command + K）"
+              onClick={() => setCommandOpen(true)}
+            >
+              <Search size={15} />
+              <span>快速跳转</span>
+              <kbd>Ctrl K</kbd>
+            </button>
             <span className="avatar">管</span>
             <b>管理员</b>
           </div>
         </header>
         <div className="content">
           <LoadBoundary key={page}>
-            <Suspense fallback={<p role="status">正在加载页面…</p>}>
+            <Suspense fallback={<LoadingState label="正在加载页面" />}>
               <CurrentPage
                 config={config}
                 notify={notify}
@@ -141,9 +199,25 @@ export default function Workspace({
           </LoadBoundary>
         </div>
       </main>
+      {commandOpen && (
+        <Suspense fallback={null}>
+          <CommandPalette
+            current={page}
+            recent={recent}
+            onChoose={navigate}
+            onClose={() => setCommandOpen(false)}
+          />
+        </Suspense>
+      )}
       {toast && (
-        <div className="toast" role="status">
-          {toast}
+        <div
+          className={"toast " + toast.tone}
+          role={toast.tone === "error" ? "alert" : "status"}
+        >
+          <span>{toast.message}</span>
+          <button aria-label="关闭通知" onClick={() => setToast(undefined)}>
+            <X size={16} />
+          </button>
         </div>
       )}
     </div>

@@ -74,7 +74,7 @@ export default function Payouts({ id, view, changed, notify }: Scope) {
                 await resource.reload();
                 await changed();
               } catch (e) {
-                notify((e as Error).message);
+                notify((e as Error).message, "error");
               }
             }}
           >
@@ -128,7 +128,7 @@ export default function Payouts({ id, view, changed, notify }: Scope) {
                 await resource.reload();
                 await changed();
               } catch (e) {
-                notify((e as Error).message);
+                notify((e as Error).message, "error");
               }
             }}
           >

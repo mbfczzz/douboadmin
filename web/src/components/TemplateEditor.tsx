@@ -5,12 +5,13 @@ import Modal from "./Modal";
 import TemplateOptions from "./TemplateOptions";
 import CoverUpload from "./CoverUpload";
 import { canLeave } from "../hooks/unsaved";
+import type { Notify } from "../navigation";
 interface Props {
   initial: Row<Template>;
   models: Row<Model>[];
   onClose: () => void;
   onSaved: () => void;
-  notify: (s: string) => void;
+  notify: Notify;
 }
 
 export default function TemplateEditor({

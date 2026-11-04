@@ -1,3 +1,13 @@
+export function LoadingState({ label = "正在加载" }: { label?: string }) {
+  return (
+    <div className="loading-state" role="status" aria-label={label}>
+      <span />
+      <span />
+      <span />
+    </div>
+  );
+}
+
 export default function RequestState({
   loading,
   error,
@@ -13,9 +23,5 @@ export default function RequestState({
         {error} <button onClick={retry}>重试</button>
       </div>
     );
-  return loading ? (
-    <p className="quiet" role="status">
-      正在加载…
-    </p>
-  ) : null;
+  return loading ? <LoadingState /> : null;
 }

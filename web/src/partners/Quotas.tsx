@@ -5,7 +5,7 @@ import QuotaForm from "./QuotaForm";
 import QuotaRequests from "./QuotaRequests";
 import type { Move, Scope } from "./types";
 import { labels } from "./types";
-export default function Quotas({ id, changed, notify }: Scope) {
+export default function Quotas({ id, view, changed, notify }: Scope) {
   const resource = useRecords<Move>("/admin/quota-moves"),
     [form, setForm] = useState<"move" | "request" | null>(null),
     [revision, setRevision] = useState(0);
@@ -45,8 +45,8 @@ export default function Quotas({ id, changed, notify }: Scope) {
           },
           { title: "类型", render: (r) => labels[r.data.kind] },
           {
-            title: "子账号 / 服务商名额",
-            render: (r) => `${r.data.users} / ${r.data.partners}`,
+            title: "用户额度",
+            render: (r) => r.data.users,
           },
           { title: "说明", render: (r) => r.data.reason },
           { title: "时间", render: (r) => date(r.createdAt) },
@@ -62,7 +62,7 @@ export default function Quotas({ id, changed, notify }: Scope) {
       />
       {form && (
         <QuotaForm
-          id={id}
+          view={view}
           request={form === "request"}
           notify={notify}
           onClose={() => setForm(null)}

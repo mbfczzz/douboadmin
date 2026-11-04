@@ -3,26 +3,39 @@
   display: grid;
   place-items: center;
   padding: 24px;
+  background: #12382b;
+}
+.login > p {
+  color: #d9e9df;
 }
 .login-form {
-  width: min(100%, 420px);
-  background: white;
-  padding: 32px;
-  border: 1px solid #e2e6e9;
-  border-radius: 10px;
+  width: min(100%, 430px);
+  padding: 34px;
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow: 0 28px 70px #071c145c;
+}
+.login-form .brand {
+  padding: 0;
+  color: #183b2c;
+}
+.login-form .brand > span {
+  background: var(--accent);
+  color: #fff;
 }
 .login-form h1 {
-  font-size: 24px;
-  margin: 28px 0 10px;
+  margin: 30px 0 9px;
+  font-size: 26px;
+  font-weight: 720;
 }
 .login-form > p {
+  margin-bottom: 26px;
+  color: var(--muted);
   font-size: 13px;
   line-height: 1.7;
-  color: #68747b;
-  margin-bottom: 28px;
 }
 .login-form .primary {
   width: 100%;
-  margin-top: 7px;
-  padding: 14px;
+  min-height: 46px;
+  margin-top: 8px;
 }

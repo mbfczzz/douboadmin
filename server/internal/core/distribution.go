@@ -1,9 +1,10 @@
 package core
 
 type DistributionPolicy struct {
-	Enabled       bool  `json:"enabled"`
-	CostPer100Fen int64 `json:"costPer100Fen"`
-	RootMarginBps int64 `json:"rootMarginBps"`
+	Enabled        bool  `json:"enabled"`
+	CostPer100Fen  int64 `json:"costPer100Fen"`
+	RootMarginBps  int64 `json:"rootMarginBps"`
+	TotalUserQuota int64 `json:"totalUserQuota"`
 }
 
 func DefaultDistributionPolicy() DistributionPolicy {

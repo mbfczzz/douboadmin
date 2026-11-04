@@ -10,6 +10,11 @@ import (
 )
 
 func access(r Reader, user string) (core.Access, error) {
+	if _, _, e := get[core.DirectAccess](r, "direct_access", user); e == nil {
+		return core.Access{Active: true, Status: "direct"}, nil
+	} else if !errors.Is(e, core.ErrNotFound) {
+		return core.Access{}, e
+	}
 	_, m, e := get[core.Membership](r, "memberships", user)
 	if errors.Is(e, core.ErrNotFound) {
 		return core.Access{Status: "pending", Message: core.ErrActivationRequired.Error()}, nil
@@ -63,6 +68,11 @@ func (s *Service) Redeem(ctx context.Context, user, input string, source ...stri
 		profile, e := enabledProfile(tx, user)
 		if e != nil {
 			return e
+		}
+		if _, _, directErr := get[core.DirectAccess](tx, "direct_access", user); directErr == nil {
+			return rulef("账号已通过直接申请开通，无需使用激活码")
+		} else if !errors.Is(directErr, core.ErrNotFound) {
+			return directErr
 		}
 		row, v, e := get[core.ActivationCode](tx, "activation_codes", core.Digest(code))
 		if e != nil {
@@ -118,6 +128,32 @@ func (s *Service) Redeem(ctx context.Context, user, input string, source ...stri
 			return e
 		}
 		out, e = access(tx, user)
+		return e
+	})
+	return
+}
+
+func (s *Service) ActivateDirect(ctx context.Context, user string) (out core.Access, err error) {
+	err = s.Store.Atomic(ctx, func(tx store.Transaction) error {
+		if _, _, e := store.LockWallet(tx, user); e != nil {
+			return e
+		}
+		if _, e := enabledProfile(tx, user); e != nil {
+			return e
+		}
+		current, e := access(tx, user)
+		if e != nil {
+			return e
+		}
+		if current.Active {
+			out = current
+			return nil
+		}
+		_, e = tx.Put("direct_access", core.Record{ID: user, Owner: user, Data: core.Data(core.DirectAccess{ActivatedAt: time.Now().UTC()})}, 0)
+		if errors.Is(e, core.ErrConflict) {
+			e = nil
+		}
+		out = core.Access{Active: true, Status: "direct"}
 		return e
 	})
 	return

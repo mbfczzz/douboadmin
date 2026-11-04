@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { api, type Row } from "../api";
+import type { Notify } from "../navigation";
 import type { Platform } from "./types";
 
 export default function PlatformForm({
@@ -9,7 +10,7 @@ export default function PlatformForm({
 }: {
   row: Row<Platform>;
   onSaved: () => unknown;
-  notify: (s: string) => void;
+  notify: Notify;
 }) {
   const [value, setValue] = useState(row.data),
     [keywords, setKeywords] = useState(row.data.hotKeywords.join("\n")),
@@ -43,7 +44,7 @@ export default function PlatformForm({
       await onSaved();
       notify("平台设置已保存");
     } catch (e) {
-      notify((e as Error).message);
+      notify((e as Error).message, "error");
     } finally {
       setBusy(false);
     }

@@ -3,6 +3,7 @@ import Modal from "../components/Modal";
 import type { Partner } from "./types";
 import { hundredths } from "./types";
 import { useCommand } from "./useCommand";
+import type { Notify } from "../navigation";
 export default function ProviderForm({
   parent,
   row,
@@ -14,7 +15,7 @@ export default function ProviderForm({
   row?: Row<Partner>;
   onSaved: () => Promise<void>;
   onClose: () => void;
-  notify: (s: string) => void;
+  notify: Notify;
 }) {
   const command = useCommand();
   return (
@@ -52,7 +53,7 @@ export default function ProviderForm({
             onClose();
             notify("服务商已保存");
           } catch (error) {
-            notify((error as Error).message);
+            notify((error as Error).message, "error");
           }
         }}
       >
@@ -104,8 +105,7 @@ export default function ProviderForm({
           </>
         ) : (
           <p className="muted">
-            创建将占用上级 1 个下级服务商名额。新服务商的两类可用名额均为
-            0，需另行划拨。
+            创建服务商不占用户额度。创建后由上级从固定总额度中另行划拨。
           </p>
         )}
         <button className="primary" disabled={command.busy}>

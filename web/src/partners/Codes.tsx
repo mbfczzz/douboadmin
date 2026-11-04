@@ -25,7 +25,7 @@ export default function Codes({ id, view, changed, notify }: Scope) {
       await resource.reload();
       await changed();
     } catch (e) {
-      notify((e as Error).message);
+      notify((e as Error).message, "error");
     }
   }
   return (
@@ -130,7 +130,7 @@ export default function Codes({ id, view, changed, notify }: Scope) {
         ]}
       />
       <p className="muted">
-        生成时预留一个子账号名额，激活后转为已使用。未激活的码撤销或过期后释放名额。
+        生成时预留一个用户额度，激活后转为已使用。未激活的码撤销或过期后释放额度。
         生成者、激活用户及时间会保留，解绑不会删除历史记录。
       </p>
       <Memberships
@@ -165,7 +165,7 @@ export default function Codes({ id, view, changed, notify }: Scope) {
                 await resource.reload();
                 await changed();
               } catch (e) {
-                notify((e as Error).message);
+                notify((e as Error).message, "error");
               }
             }}
           >

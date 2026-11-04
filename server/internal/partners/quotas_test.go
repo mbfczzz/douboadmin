@@ -19,7 +19,7 @@ func fixture(t *testing.T) (*Service, context.Context, string, string) {
 	if e != nil {
 		t.Fatal(e)
 	}
-	_, e = s.Transfer(ctx, core.QuotaMove{ParentID: core.RootPartner, ChildID: s1.ID, Users: 9, Partners: 1, Kind: "grant", Reason: "初始划拨"}, "grant-s1", "admin")
+	_, e = s.Transfer(ctx, core.QuotaMove{ParentID: core.RootPartner, ChildID: s1.ID, Users: 9, Kind: "grant", Reason: "初始划拨"}, "grant-s1", "admin")
 	if e != nil {
 		t.Fatal(e)
 	}
@@ -29,10 +29,10 @@ func fixture(t *testing.T) (*Service, context.Context, string, string) {
 	}
 	return s, ctx, s1.ID, s2.ID
 }
-func TestQuotaPoolsStayIndependentAcrossLevels(t *testing.T) {
+func TestSingleUserQuotaFlowsAcrossLevels(t *testing.T) {
 	s, ctx, s1, s2 := fixture(t)
-	if _, e := s.Create(ctx, s1, "S3", "create-s3", "admin"); !errors.Is(e, core.ErrQuota) {
-		t.Fatal("user slots converted to dealer slots", e)
+	if _, e := s.Create(ctx, s1, "S3", "create-s3", "admin"); e != nil {
+		t.Fatal("creating a provider consumed user quota", e)
 	}
 	if _, e := s.Issue(ctx, s2, "no quota", 7, "issue-empty", "admin"); !errors.Is(e, core.ErrQuota) {
 		t.Fatal("new child inherited user slots", e)
@@ -43,7 +43,7 @@ func TestQuotaPoolsStayIndependentAcrossLevels(t *testing.T) {
 	}
 	parent, _ := s.Overview(ctx, s1)
 	child, _ := s.Overview(ctx, s2)
-	if parent.Quota.Users.Available() != 6 || child.Quota.Users.Available() != 3 || parent.Quota.Partners.Used != 1 || child.Quota.Partners.Available() != 0 {
+	if parent.Quota.Users.Available() != 6 || child.Quota.Users.Available() != 3 {
 		t.Fatal(parent.Quota, child.Quota)
 	}
 	if _, e = s.Transfer(ctx, core.QuotaMove{ParentID: core.RootPartner, ChildID: s2, Users: 1, Kind: "grant", Reason: "跳级划拨"}, "skip-tier", "admin"); e == nil {

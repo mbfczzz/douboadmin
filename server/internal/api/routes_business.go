@@ -10,6 +10,8 @@ func (a *Server) businessRoutes() {
 	m.HandleFunc("GET /api/admin/dashboard", a.auth("admin", a.dashboard))
 	m.HandleFunc("POST /api/events", a.auth("user", a.track))
 	m.HandleFunc("PUT /api/admin/users/{id}/status", a.auth("admin", a.userStatus))
+	m.HandleFunc("PUT /api/admin/users/{id}", a.auth("admin", a.updateUser))
+	m.HandleFunc("DELETE /api/admin/users/{id}", a.auth("admin", a.archiveUser))
 	m.HandleFunc("GET /api/wallet", a.auth("user", a.wallet))
 	m.HandleFunc("GET /api/wallet/ledger", a.auth("user", a.ledger))
 	m.HandleFunc("POST /api/jobs/quote", a.auth("user", a.quoteJob))

@@ -3,7 +3,6 @@ import PageHeader from "../components/PageHeader";
 import RequestState from "../components/RequestState";
 import type { PageId } from "../navigation";
 import { canLeave } from "../hooks/unsaved";
-import "../styles/catalog.css";
 export default function ResourcePage({
   page,
   resource,

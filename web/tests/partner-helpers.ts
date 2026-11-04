@@ -35,12 +35,7 @@ export async function selectProvider(page: Page, name: string) {
   await expect(page.getByRole("heading", { name, exact: true })).toBeVisible();
   await expect(picker).toHaveCount(0);
 }
-export async function allocate(
-  page: Page,
-  name: string,
-  users: number,
-  dealers: number,
-) {
+export async function allocate(page: Page, name: string, users: number) {
   await page.getByRole("tab", { name: "名额划拨", exact: true }).click();
   await page
     .getByRole("button", { name: "划拨 / 收回名额", exact: true })
@@ -66,12 +61,9 @@ export async function allocate(
     .filter({ hasText: name })
     .getByRole("button", { name: "选择", exact: true })
     .click();
-  await form.getByLabel("子账号名额", { exact: true }).fill(String(users));
-  await form
-    .getByLabel("下级服务商名额", { exact: true })
-    .fill(String(dealers));
+  await form.getByLabel("用户额度", { exact: true }).fill(String(users));
   await form.getByLabel("原因", { exact: true }).fill("隔离验收名额划拨");
-  await form.getByRole("button", { name: "确认名额操作", exact: true }).click();
+  await form.getByRole("button", { name: `确认划拨 ${users} 个名额` }).click();
   await expect(form).toHaveCount(0);
 }
 export async function issueCode(page: Page, label = "隔离验收授权码") {

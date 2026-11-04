@@ -9,8 +9,8 @@ test("code trace shows issuer, activation user and retained history after unbind
   page,
 }) => {
   await login(page);
-  await page.getByRole("button", { name: "用户管理", exact: true }).click();
-  await page.getByRole("button", { name: "服务商与授权", exact: true }).click();
+  await page.getByRole("button", { name: "小程序用户", exact: true }).click();
+  await page.getByRole("button", { name: "服务商管理", exact: true }).click();
   const code = await issueCode(page, "来源记录验收");
   const registered = await page.request.post("/api/auth/login", {
     data: { demoId: crypto.randomUUID() },

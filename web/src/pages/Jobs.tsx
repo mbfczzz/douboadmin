@@ -1,6 +1,7 @@
 import PageHeader from "../components/PageHeader";
 import RequestState from "../components/RequestState";
 import { useResource } from "../hooks/useResource";
+import { useRememberedState } from "../hooks/useRememberedState";
 import { useState } from "react";
 import { stateText, type Job } from "../api";
 import FilterBar from "../components/FilterBar";
@@ -10,8 +11,8 @@ import JobDetail from "../components/JobDetail";
 export default function Jobs() {
   const resource = useResource<Job[]>("/admin/jobs", 15000);
   const jobs = resource.data || [];
-  const [filter, setFilter] = useState("all"),
-    [search, setSearch] = useState(""),
+  const [filter, setFilter] = useRememberedState("jobs.status", "all"),
+    [search, setSearch] = useRememberedState("jobs.query", ""),
     [detail, setDetail] = useState<Job | null>(null);
   const filteredJobs = jobs.filter(
     (j) =>

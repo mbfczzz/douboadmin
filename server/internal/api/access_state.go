@@ -15,11 +15,12 @@ func (a *Server) userDisabled(ctx context.Context, id string) (bool, error) {
 	}
 	var profile *struct {
 		Disabled bool `json:"disabled"`
+		Archived bool `json:"archived"`
 	}
 	if json.Unmarshal(row.Data, &profile) != nil || profile == nil {
 		return false, fmt.Errorf("账号状态异常")
 	}
-	return profile.Disabled, nil
+	return profile.Disabled || profile.Archived, nil
 }
 
 // Authorization must not depend on presentJob's best-effort display enrichment.

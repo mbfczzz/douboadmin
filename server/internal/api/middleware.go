@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"doubo/server/internal/core"
+	"encoding/json"
 	"errors"
 	"log/slog"
 	"net/http"
@@ -60,6 +61,18 @@ func (a *Server) auth(role string, h http.HandlerFunc) http.HandlerFunc {
 		if role != "" && v.Role != role {
 			fail(w, 403, "没有操作权限")
 			return
+		}
+		if v.Role == "admin" && v.AdminRole != "" {
+			row, e := a.Store.Get(r.Context(), "admin_accounts", v.ID)
+			if e != nil {
+				dbError(w, e)
+				return
+			}
+			var account core.AdminAccount
+			if json.Unmarshal(row.Data, &account) != nil || account.Disabled || account.Archived {
+				fail(w, 403, "管理账号已停用")
+				return
+			}
 		}
 		// A user must be able to revoke a session even after exhausting the API quota.
 		if r.URL.Path == "/api/auth/logout" {

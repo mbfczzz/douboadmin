@@ -35,8 +35,8 @@ test("repeating a provider search retries the same failed query", async ({
       return route.fulfill({ status: 503, json: { error: "测试查询失败" } });
     return route.fulfill({ json: { items: [], page: 1, size: 20, total: 0 } });
   });
-  await page.getByRole("button", { name: "用户管理", exact: true }).click();
-  await page.getByRole("button", { name: "服务商与授权", exact: true }).click();
+  await page.getByRole("button", { name: "小程序用户", exact: true }).click();
+  await page.getByRole("button", { name: "服务商管理", exact: true }).click();
   await page.getByLabel("查询记录").fill("same");
   await page.getByRole("button", { name: "查询", exact: true }).click();
   await expect(page.getByRole("alert")).toBeVisible();

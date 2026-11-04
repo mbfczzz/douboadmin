@@ -11,32 +11,34 @@ test.skip(
   process.env.PARTNER_ACCEPTANCE !== "true",
   "Requires isolated partner acceptance database and API",
 );
-test("provider quotas, QR activation, suspension, unbinding and configurable margins", async ({
+test("fixed user quotas, QR activation, suspension, unbinding and configurable margins", async ({
   page,
 }) => {
   test.setTimeout(120000);
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await login(page);
-  await page.getByRole("button", { name: "用户管理", exact: true }).click();
-  await page.getByRole("button", { name: "服务商与授权", exact: true }).click();
+  await page.getByRole("button", { name: "小程序用户", exact: true }).click();
+  await page.getByRole("button", { name: "服务商管理", exact: true }).click();
   await expect(
     page.getByRole("heading", { name: "总账号", exact: true }),
   ).toBeVisible();
   const s1 = await createProvider(page, "验收 S1");
-  await allocate(page, "验收 S1", 9, 1);
+  await allocate(page, "验收 S1", 9);
   await selectProvider(page, "验收 S1");
   const s2 = await createProvider(page, "验收 S2");
   let view = await (
     await page.request.get("/api/admin/partners/" + s2.id)
   ).json();
   expect(view.quota.users.granted).toBe(0);
-  const denied = await page.request.post("/api/admin/partners", {
+  const additional = await page.request.post("/api/admin/partners", {
     headers: { "Idempotency-Key": crypto.randomUUID() },
-    data: { parentId: s1.id, name: "不应创建" },
+    data: { parentId: s1.id, name: "不占额度的服务商" },
   });
-  expect(denied.status()).toBe(409);
-  await allocate(page, "验收 S2", 3, 0);
+  expect(additional.status()).toBe(200);
+  view = await (await page.request.get("/api/admin/partners/" + s1.id)).json();
+  expect(view.quota.users.granted).toBe(9);
+  await allocate(page, "验收 S2", 3);
   await selectProvider(page, "验收 S2");
   const code = await issueCode(page);
   const signIn = await page.request.post("/api/auth/login", {

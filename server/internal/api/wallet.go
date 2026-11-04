@@ -41,7 +41,7 @@ func (a *Server) wallet(w http.ResponseWriter, r *http.Request) {
 			if identity(r).Role == "user" {
 				pricing["message"] = "充值暂未开放，请联系服务商"
 			}
-		} else {
+		} else if snapshot != nil {
 			pricing["retailPer100Fen"] = snapshot.RetailPer100Fen
 			pricing["version"] = snapshot.PricingVersion
 		}

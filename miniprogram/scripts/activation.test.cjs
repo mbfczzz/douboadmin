@@ -20,6 +20,22 @@ test("scan and manual activation report their method without trusting it for ide
   assert.deepEqual(methods, ["code", "qr"]);
 });
 
+test("direct application auto-approves without an activation code", async () => {
+  const h = harness(),
+    page = h.page("activate"),
+    requests = [],
+    moves = [];
+  page.setData({ logged: true });
+  h.wx.reLaunch = (o) => moves.push(o.url);
+  h.api.request = async (path, method) => {
+    requests.push([path, method]);
+    return { active: true, status: "direct" };
+  };
+  await page.direct();
+  assert.deepEqual(requests, [["/access/direct", "POST"]]);
+  assert.equal(moves[0], "/pages/templates/index");
+});
+
 test("activation-required business response redirects instead of exposing data", async () => {
   const h = harness();
   await h.api.signIn();
