@@ -4,6 +4,8 @@ import {
   hasSession,
   logout,
   error,
+  errorMessage,
+  AuthCancelledError,
   cancelled,
 } from "../../utils/api";
 import {
@@ -82,12 +84,16 @@ Page({
   },
   async login() {
     if (this.data.busy) return;
-    this.setData({ busy: true });
+    this.setData({ busy: true, loadError: "" });
     try {
       await signIn();
       if (!this.destroyed) await this.load();
     } catch (e) {
-      if (!this.destroyed) error(e);
+      if (!this.destroyed && !(e instanceof AuthCancelledError)) {
+        const message = errorMessage(e, "微信登录未完成，请重试");
+        this.setData({ loadError: message });
+        error(e);
+      }
     } finally {
       if (!this.destroyed) this.setData({ busy: false });
     }

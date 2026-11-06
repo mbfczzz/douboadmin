@@ -1,7 +1,11 @@
 import { API_BASE } from "../config";
 import { publicRequest } from "./transport";
 import { uid } from "./ids";
-import { AuthCancelledError, SessionExpiredError } from "./errors";
+import {
+  AuthCancelledError,
+  SessionExpiredError,
+  errorMessage,
+} from "./errors";
 import type { LoginPurpose } from "./login-context";
 interface Session {
   token: string;
@@ -98,9 +102,17 @@ export async function signIn(mode: "wechat" | "demo" = "wechat") {
     let body: object;
     let endpoint = "/auth/wechat";
     if (mode === "wechat") {
-      const result = await wx.login({ timeout: 10000 });
+      let result: WechatMiniprogram.LoginSuccessCallbackResult;
+      try {
+        result = await wx.login({ timeout: 10000 });
+      } catch (e) {
+        if (generation !== authGeneration) throw new AuthCancelledError();
+        throw new Error(
+          "微信登录失败：" + errorMessage(e, "未能获取登录凭证，请重试"),
+        );
+      }
       if (generation !== authGeneration) throw new AuthCancelledError();
-      if (!result.code) throw new Error("未能获取微信登录凭证，请重试");
+      if (!result?.code) throw new Error("未能获取微信登录凭证，请重试");
       body = { code: result.code };
     } else {
       let id = wx.getStorageSync("demoId");

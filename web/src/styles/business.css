@@ -1,3 +1,4 @@
+@import "../overview/overview.css";
 .business-filters {
   display: flex;
   align-items: flex-end;
@@ -55,12 +56,8 @@
 .business-metrics {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 0;
+  gap: 16px;
   margin-bottom: 24px;
-  background: white;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  overflow: hidden;
 }
 .attention-panel {
   margin-bottom: 20px;
@@ -96,12 +93,6 @@
 }
 .business-metrics .panel {
   padding: 20px 22px;
-  border: 0;
-  border-left: 1px solid var(--line);
-  border-radius: 0;
-}
-.business-metrics .panel:first-child {
-  border-left: 0;
 }
 .business-metrics span {
   color: var(--muted);
@@ -110,26 +101,9 @@
 .business-metrics strong {
   display: block;
   font-size: 30px;
-  margin-top: 8px;
+  margin: 8px 0;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
-}
-.business-trend {
-  display: flex;
-  gap: 2px;
-  height: 160px;
-  align-items: end;
-  padding: 24px 20px 0;
-  overflow-x: auto;
-}
-.business-trend > div {
-  flex: 1;
-  min-width: 0;
-  background: #739980;
-  border-radius: 3px 3px 0 0;
-}
-.business-trend .quiet {
-  margin: auto;
 }
 .business-filters[role="tablist"] {
   border-bottom: 1px solid var(--line);
@@ -146,41 +120,6 @@
 .business-filters button[aria-selected="true"] {
   color: var(--accent);
   border-bottom-color: var(--accent);
-}
-.overview-summary {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-  align-items: start;
-}
-.overview-summary > * {
-  min-width: 0;
-}
-.chart-axis {
-  display: flex;
-  justify-content: space-between;
-  padding: 12px 20px;
-  margin: 0;
-  color: var(--muted);
-  font-size: 12px;
-}
-.overview-details {
-  border-top: 1px solid var(--line);
-  margin-top: 24px;
-}
-.overview-details > summary {
-  padding: 20px 0;
-  cursor: pointer;
-  font-weight: 600;
-}
-.overview-summary .panel .panel {
-  border: 0;
-  border-radius: 0;
-}
-@media (max-width: 1000px) {
-  .overview-summary {
-    grid-template-columns: minmax(0, 1fr);
-  }
 }
 @media (max-width: 640px) {
   .mobile-records {
@@ -223,15 +162,6 @@
   }
   .business-metrics .panel {
     padding: 16px;
-  }
-  .business-metrics .panel:nth-child(odd) {
-    border-left: 0;
-  }
-  .business-metrics .panel:last-child:nth-child(odd) {
-    grid-column: span 2;
-  }
-  .actions select {
-    width: auto;
   }
 }
 .catalog-table audio {

@@ -1,4 +1,4 @@
-import { AuthCancelledError } from "../services/errors";
+import { AuthCancelledError, errorMessage } from "../services/errors";
 import { media } from "../services/media";
 import type { Job } from "../services/types";
 import { enterPage } from "./motion";
@@ -7,7 +7,7 @@ import { track } from "../services/analytics";
 export function error(e: unknown) {
   if (e instanceof AuthCancelledError) return;
   wx.showToast({
-    title: e instanceof Error ? e.message : "操作失败",
+    title: errorMessage(e),
     icon: "none",
     duration: 3000,
   });

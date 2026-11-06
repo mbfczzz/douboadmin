@@ -22,3 +22,14 @@ export class RequestError extends Error {
     super(message);
   }
 }
+
+export function errorMessage(value: unknown, fallback = "操作失败") {
+  if (typeof value === "string") return value.trim() || fallback;
+  if (value && typeof value === "object") {
+    const error = value as { message?: unknown; errMsg?: unknown };
+    for (const message of [error.message, error.errMsg]) {
+      if (typeof message === "string" && message.trim()) return message.trim();
+    }
+  }
+  return fallback;
+}

@@ -4,6 +4,8 @@ import {
   captureLoginFlow,
   hasSession,
   error,
+  errorMessage,
+  AuthCancelledError,
   enterPage,
   returnAfterTransition,
 } from "../../utils/api";
@@ -88,12 +90,16 @@ Page({
   },
   async authenticate(mode: "wechat" | "demo") {
     if (this.data.busy) return;
-    this.setData({ busy: true });
+    this.setData({ busy: true, loadError: "" });
     try {
       if (!hasSession()) await signIn(mode);
       if (!this.destroyed) await this.finish();
     } catch (e) {
-      error(e instanceof Error ? e : new Error("微信登录未完成，请重试"));
+      if (!this.destroyed && !(e instanceof AuthCancelledError)) {
+        const message = errorMessage(e, "微信登录未完成，请重试");
+        this.setData({ loadError: message });
+        error(e);
+      }
     } finally {
       if (!this.destroyed) this.setData({ busy: false });
     }
