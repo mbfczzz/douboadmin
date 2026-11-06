@@ -1,5 +1,6 @@
 {
   "usingComponents": {
+    "points-balance": "/components/points-balance/index",
     "t-popup": "tdesign-miniprogram/popup/popup"
   }
 }

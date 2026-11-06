@@ -30,6 +30,8 @@ export const creationData = {
   busy: false,
   uploading: false,
   showModels: false,
+  modelMenuHeight: 240,
+  modelMenuUp: false,
   assetsOpen: false,
   expanded: false,
   restoring: false,

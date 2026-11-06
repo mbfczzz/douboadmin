@@ -6,12 +6,15 @@
   margin-bottom: 24rpx;
 }
 .biz-heading {
+  overflow-wrap: anywhere;
   font-size: 34rpx;
   font-weight: 600;
   display: block;
   margin-bottom: 18rpx;
 }
 .biz-value {
+  overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
   display: block;
   font-size: 64rpx;
   font-weight: 600;
@@ -50,7 +53,8 @@
   height: 220rpx;
   line-height: 1.7;
 }
-.biz-action {
+button.biz-action {
+  width: 100%;
   background: #9bcbaa;
   color: #14251b;
   border-radius: 14rpx;
@@ -60,19 +64,20 @@
   text-align: center;
   margin: 16rpx 0;
 }
-.biz-action[disabled] {
+button.biz-action[disabled] {
   background: #2b3430;
   color: #76867c;
 }
-.biz-secondary {
+button.biz-secondary {
   background: #242c28;
   color: #b8cfbf;
   border: 1rpx solid #415347;
 }
 .biz-note {
+  overflow-wrap: anywhere;
   display: block;
   color: #96a39b;
-  font-size: 23rpx;
+  font-size: 12px;
   line-height: 1.7;
   margin-top: 16rpx;
 }
@@ -110,8 +115,37 @@
   margin-bottom: 10rpx;
 }
 .biz-small {
-  font-size: 23rpx;
+  font-size: 12px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
   color: #97a69d;
+}
+.row.biz-note {
+  display: flex;
+  flex-wrap: wrap;
+}
+.biz-title-row {
+  align-items: center;
+  margin-bottom: 12px;
+}
+.biz-title-row .biz-heading {
+  min-width: 0;
+  margin: 0;
+}
+.biz-title-row .biz-link {
+  flex-shrink: 0;
+  padding: 6px 0;
+}
+.biz-picker-row {
+  align-items: flex-start;
+}
+.biz-picker-row > text:first-child {
+  flex-shrink: 0;
+}
+.biz-picker-row > text:last-child {
+  min-width: 0;
+  text-align: right;
+  overflow-wrap: anywhere;
 }
 .biz-link {
   color: #a6d4b5;
@@ -143,6 +177,28 @@
   width: 100%;
   border-radius: 18rpx;
   background: #202622;
+}
+.biz-card-head {
+  align-items: flex-start;
+}
+.biz-card-head > text:first-child {
+  flex: 1;
+  min-width: 0;
+  margin-bottom: 0;
+  overflow-wrap: anywhere;
+}
+.biz-card-head > text:last-child {
+  flex-shrink: 0;
+  text-align: right;
+}
+.biz-record-meta {
+  display: block;
+  margin-top: 12rpx;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.biz-row > switch {
+  flex-shrink: 0;
 }
 .biz-image {
   width: 100%;

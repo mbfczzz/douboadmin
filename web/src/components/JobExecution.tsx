@@ -61,26 +61,28 @@ export default function JobExecution({ job }: { job: Job }) {
         <dt>上游任务号</dt>
         <dd className="mono">{data.taskId || "未返回"}</dd>
       </dl>
-      {job.status === "failed" &&
-        ["polling", "output", "succeeded"].includes(data.phase) && (
+      <div className="business-filters">
+        {job.status === "failed" &&
+          ["polling", "output", "succeeded"].includes(data.phase) && (
+            <button
+              className="secondary"
+              onClick={resume}
+              disabled={busy || message.startsWith("已恢复")}
+            >
+              {busy ? "正在恢复…" : "恢复查询 / 保存"}
+            </button>
+          )}
+        {job.status === "failed" && job.billingState === "reserved" && (
           <button
             className="secondary"
-            onClick={resume}
-            disabled={busy || message.startsWith("已恢复")}
+            disabled={busy || message.startsWith("预留积分已退回")}
+            onClick={() => void release()}
           >
-            {busy ? "正在恢复…" : "恢复查询 / 保存"}
+            核实后退回积分
           </button>
         )}
+      </div>
       {message && <p role="status">{message}</p>}
-      {job.status === "failed" && job.billingState === "reserved" && (
-        <button
-          className="secondary"
-          disabled={busy || message.startsWith("预留积分已退回")}
-          onClick={() => void release()}
-        >
-          核实后退回积分
-        </button>
-      )}
     </div>
   );
 }

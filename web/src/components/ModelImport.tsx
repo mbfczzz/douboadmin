@@ -51,7 +51,12 @@ export default function ModelImport({
           />
         </label>
         <div className="modal-actions">
-          <button type="button" onClick={onClose} disabled={busy}>
+          <button
+            className="secondary"
+            type="button"
+            onClick={onClose}
+            disabled={busy}
+          >
             取消
           </button>
           <button className="primary" disabled={busy}>

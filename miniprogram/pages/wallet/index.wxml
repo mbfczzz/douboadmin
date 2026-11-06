@@ -8,17 +8,30 @@
     <view wx:if="{{error}}" class="biz-error" bindtap="load"
       >{{error}} · 点击重试</view
     >
+    <view wx:if="{{loading&&!info}}" class="biz-note">正在读取积分余额…</view>
+    <view wx:if="{{paymentNotice}}" class="biz-note" aria-role="status">{{paymentNotice}}</view>
+    <view wx:if="{{pendingOrderId&&paymentWaiting}}" class="biz-pair">
+      <view><button class="biz-action biz-secondary" bindtap="orders">查看订单</button></view>
+      <view><button class="biz-action biz-secondary" disabled="{{busy}}" bindtap="additionalPurchase">另购积分</button></view>
+    </view>
     <view class="biz-card"
       ><text class="biz-label">可用积分</text
       ><text class="biz-value">{{available}}</text
-      ><view class="row"
+      ><view class="row wallet-links"
         ><text class="biz-small" bindtap="load">预留积分 {{held}} · 刷新</text
         ><text class="biz-link" bindtap="orders">充值订单 ›</text></view
       ></view
     >
     <view class="biz-card" wx:if="{{info}}"
       ><text class="biz-heading">购买积分</text
-      ><text class="biz-label">充值金额（元）</text
+      ><block wx:if="{{info.paymentChannel==='wechat_virtual'}}">
+        <view class="virtual-products">
+          <button wx:for="{{products}}" wx:key="id" class="virtual-product {{productId===item.id?'selected':''}}" aria-label="{{item.name}}，{{item.amount}}元，{{item.points}}积分，{{productId===item.id?'已选择':'未选择'}}" data-id="{{item.id}}" bindtap="chooseProduct" disabled="{{busy||pendingOrderId}}">
+            <text>{{item.name}}</text><text class="product-price">¥{{item.amount}}</text><text class="biz-small">{{item.points}} 积分</text>
+          </button>
+        </view>
+        <text wx:if="{{!products.length}}" class="biz-note">暂无可用积分商品，请稍后再试。</text>
+      </block><block wx:else><text class="biz-label">充值金额（元）</text
       ><input
         class="biz-input"
         type="digit"
@@ -27,14 +40,14 @@
         placeholder="输入充值金额"
       /><text class="biz-note"
         >1 元约 {{displayRate}} 积分，预计获得 {{estimated}}
-        积分</text
+        积分</text></block
       ><button
         class="biz-action"
         loading="{{busy}}"
-        disabled="{{busy||!allowed}}"
+        disabled="{{busy||!allowed||pendingOrderId||(info.paymentChannel==='wechat_virtual'&&!productId)}}"
         bindtap="pay"
       >
-        {{allowed?'微信支付':'充值暂未开放'}}</button
+        {{pendingOrderId?'正在确认到账':allowed?(info.paymentChannel==='wechat_virtual'?'购买积分':'微信支付'):'充值暂未开放'}}</button
       ><text wx:if="{{!allowed}}" class="biz-note"
         >{{info.pricing.message||'支付服务或当前设备尚未开放充值。'}}</text
       ></view
@@ -42,11 +55,12 @@
     <view class="biz-card"
       ><text class="biz-heading">最近积分流水</text
       ><view wx:if="{{!ledger.length}}" class="biz-empty">暂无积分变动</view
-      ><view wx:for="{{ledger}}" wx:key="id" class="biz-row"
-        ><view
+      ><view wx:for="{{ledger}}" wx:key="id" class="biz-row ledger-row"
+        ><view class="ledger-copy"
           ><text class="biz-list-title">{{item.title}}</text
-          ><text class="biz-small">{{item.note}} · {{item.time}}</text></view
-        ><text>{{item.change}}</text></view
+          ><text wx:if="{{item.note}}" class="biz-small ledger-note">{{item.note}}</text
+          ><text class="biz-small ledger-time">{{item.time}}</text></view
+        ><text class="ledger-change">{{item.change}}</text></view
       ></view
     >
   </block>

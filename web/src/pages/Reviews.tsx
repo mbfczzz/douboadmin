@@ -91,6 +91,7 @@ export default function Reviews({ notify }: PageProps) {
             <label>
               审核说明（驳回必填）
               <textarea
+                disabled={busy}
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 maxLength={300}
@@ -98,6 +99,7 @@ export default function Reviews({ notify }: PageProps) {
             </label>
             <div className="modal-actions">
               <button
+                className="secondary danger-text"
                 disabled={busy || !reason.trim()}
                 onClick={() => void decide("rejected")}
               >

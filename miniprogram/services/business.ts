@@ -16,6 +16,8 @@ export interface Platform {
   supportText: string;
 }
 export interface WalletInfo {
+  paymentChannel?: "wechat_jsapi" | "wechat_virtual";
+  virtualProducts?: VirtualProduct[];
   pricing?: {
     ready: boolean;
     retailPer100Fen: number;
@@ -28,7 +30,20 @@ export interface WalletInfo {
   paymentReady: boolean;
   iosPayment: boolean;
 }
+export interface VirtualProduct {
+  id: string;
+  name: string;
+  amountFen: number;
+  pointsUnits: number;
+}
 export interface Order {
+  channel?: string;
+  virtual?: {
+    productId: string;
+    productName: string;
+    env: number;
+    issued: boolean;
+  };
   userId: string;
   amountFen: number;
   pointsUnits: number;

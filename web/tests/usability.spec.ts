@@ -91,7 +91,7 @@ test("mobile navigation closes accessibly and keeps page actions available", asy
   await menu.click();
   await drawer.getByRole("button", { name: "服务商管理", exact: true }).click();
   await expect(
-    page.getByRole("heading", { name: "服务商管理", exact: true }),
+    page.getByRole("heading", { name: "服务商列表", exact: true }),
   ).toBeVisible();
   await menu.click();
   await drawer.getByRole("button", { name: "小程序用户", exact: true }).click();

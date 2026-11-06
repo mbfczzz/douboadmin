@@ -23,19 +23,11 @@ func channelFixture(t *testing.T) (*Service, *partners.Service, context.Context,
 	if _, e := p.SavePolicy(ctx, policy, 0, "admin"); e != nil {
 		t.Fatal(e)
 	}
-	a, e := p.Create(ctx, core.RootPartner, "S1", "create-s1", "admin")
+	a, e := p.Create(ctx, core.RootPartner, "S1", 9, "create-s1", "admin")
 	if e != nil {
 		t.Fatal(e)
 	}
-	_, e = p.Transfer(ctx, core.QuotaMove{ParentID: core.RootPartner, ChildID: a.ID, Users: 9, Partners: 1, Kind: "grant", Reason: "初始划拨"}, "allocate-s1", "admin")
-	if e != nil {
-		t.Fatal(e)
-	}
-	b, e := p.Create(ctx, a.ID, "S2", "create-s2", "admin")
-	if e != nil {
-		t.Fatal(e)
-	}
-	_, e = p.Transfer(ctx, core.QuotaMove{ParentID: a.ID, ChildID: b.ID, Users: 1, Kind: "grant", Reason: "下级划拨"}, "allocate-s2", "admin")
+	b, e := p.Create(ctx, a.ID, "S2", 1, "create-s2", "admin")
 	if e != nil {
 		t.Fatal(e)
 	}

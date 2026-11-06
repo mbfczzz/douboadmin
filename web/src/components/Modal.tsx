@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, type CSSProperties } from "react";
 import { X } from "lucide-react";
 import { useOverlay } from "../hooks/useOverlay";
 export default function Modal({
@@ -7,12 +7,14 @@ export default function Modal({
   onClose,
   className = "",
   subtitle,
+  style,
 }: {
   title: string;
   children: React.ReactNode;
   onClose: () => void;
   className?: string;
-  subtitle?: string;
+  subtitle?: React.ReactNode;
+  style?: CSSProperties;
 }) {
   const dialog = useRef<HTMLElement>(null);
   const backdrop = useRef(false);
@@ -40,6 +42,7 @@ export default function Modal({
         ref={dialog}
         tabIndex={-1}
         className={"modal " + className}
+        style={style}
         role="dialog"
         aria-modal="true"
         aria-label={title}
@@ -47,7 +50,7 @@ export default function Modal({
         <header>
           <div>
             <h2 title={title}>{title}</h2>
-            {subtitle && <p className="modal-subtitle">{subtitle}</p>}
+            {subtitle && <div className="modal-subtitle quiet">{subtitle}</div>}
           </div>
           <button className="icon" aria-label="关闭" onClick={onClose}>
             <X />

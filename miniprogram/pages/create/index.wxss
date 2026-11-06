@@ -6,8 +6,11 @@
 }
 .mode-tabs {
   display: flex;
-  height: 44px;
-  border-bottom: 1px solid #2b3235;
+  height: 42px;
+  padding: 4px;
+  gap: 4px;
+  border-radius: 10px;
+  background: #1c1f21;
   margin-bottom: 16px;
 }
 .mode-tab {
@@ -16,21 +19,23 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 15px;
-  line-height: 22px;
-  font-weight: 400;
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 500;
+  border-radius: 7px;
   color: #929fa4;
 }
 .mode-tab.active {
-  color: #e9eceb;
-  font-weight: 600;
+  color: #d7fce2;
+  background: #25372c;
+  font-weight: 700;
 }
 .mode-tab.active::after {
   content: "";
   position: absolute;
-  left: calc(50% - 14px);
-  bottom: -1px;
-  width: 28px;
+  left: 0;
+  top: -1px;
+  width: 100%;
   height: 2px;
   border-radius: 1px;
   background: #9bcbaa;
@@ -42,9 +47,12 @@
   height: 58px;
   padding: 0 14px;
   gap: 12px;
-  margin-top: 28px;
+  margin-top: 16px;
   border-radius: 10px;
   font-size: 14px;
+}
+.creation-balance {
+  margin-top: 24px;
 }
 .create-page .queue-link .copy .muted {
   font-size: 12px;

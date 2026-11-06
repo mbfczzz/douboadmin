@@ -9,9 +9,19 @@
   margin-bottom: 20rpx;
 }
 .favorite-card image {
+  flex-shrink: 0;
   width: 150rpx;
   height: 170rpx;
   border-radius: 12rpx;
+}
+.favorite-card > t-icon,
+.unavailable-favorite > t-button {
+  flex-shrink: 0;
+}
+.unavailable-favorite > view {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 .favorite-card > view {
   flex: 1;

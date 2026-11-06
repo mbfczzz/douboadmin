@@ -154,11 +154,8 @@
   font-size: 16px;
   margin: 13px 0 8px;
 }
-.bio-label {
-  margin-top: 28rpx;
-}
 .save-profile {
-  margin-top: 40rpx;
+  margin-top: 24px;
 }
 .avatar image {
   width: 100%;
@@ -191,7 +188,8 @@
   gap: 24rpx;
   margin: 0 0 32rpx;
 }
-.choose-avatar {
+button.choose-avatar {
+  flex-shrink: 0;
   width: 115rpx;
   height: 115rpx;
   padding: 0;
@@ -203,11 +201,16 @@
   align-items: center;
   justify-content: center;
 }
+.avatar-editor > text {
+  flex: 1;
+  min-width: 0;
+}
 .choose-avatar image {
   width: 100%;
   height: 100%;
 }
-.profile-submit {
+button.profile-submit {
+  width: 100%;
   background: #9bcbaa;
   color: #17281d;
   border-radius: 16rpx;
@@ -216,7 +219,41 @@
   font-size: 28rpx;
   font-weight: 600;
 }
+.profile-sheet-scroll {
+  height: 80vh;
+}
+.profile-field + .profile-field {
+  margin-top: 20px;
+}
+.profile-field .field-label {
+  margin: 0 0 8px;
+  font-size: 14px;
+  line-height: 20px;
+}
+.profile-field .form-input {
+  height: 44px;
+  padding: 10px 12px;
+  font-size: 14px;
+}
+.profile-close {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 .profile-submit[disabled] {
   background: #282d2f;
   color: #818b90;
+}
+.mine-balance {
+  margin: 24px 0;
+}
+.work-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

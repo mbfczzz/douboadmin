@@ -27,7 +27,7 @@ func (a *Server) platformSettings(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	reply(w, 200, map[string]any{"record": row, "capabilities": map[string]bool{
-		"payment": a.Pay.Ready(), "oss": a.Objects != nil, "hot": a.Hot.Ready(),
+		"payment": a.rechargeReady(), "oss": a.Objects != nil, "hot": a.Hot.Ready(),
 		"subscription": a.Config.CompletionReady,
 	}})
 }
@@ -43,7 +43,7 @@ func (a *Server) savePlatform(w http.ResponseWriter, r *http.Request) {
 		fail(w, 400, e.Error())
 		return
 	}
-	if v.Data.RechargeEnabled && !a.Pay.Ready() {
+	if v.Data.RechargeEnabled && !a.rechargeReady() {
 		fail(w, 400, "请先配置并开通微信支付，再启用充值")
 		return
 	}

@@ -2,6 +2,14 @@
 .activation-page {
   padding-top: 40rpx;
 }
+.activation-options {
+  margin-top: 24px;
+}
+.activation-path + .activation-path {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #343b38;
+}
 .activation-logo {
   width: 96rpx;
   height: 96rpx;

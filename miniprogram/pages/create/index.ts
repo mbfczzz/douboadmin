@@ -9,6 +9,7 @@ import {
 } from "../../utils/api";
 import type { Config, Row, Asset, Input } from "../../services/types";
 import { creationData } from "./state";
+import { openModelMenu } from "./model-menu";
 import { modelChoices, modelSettings, resolutionSettings } from "./models";
 import type { ModelChoice } from "./models";
 import {
@@ -30,6 +31,10 @@ Page({
   destroyed: false,
   onHide() {
     this.visible = false;
+    this.closeModels();
+  },
+  onResize() {
+    this.closeModels();
   },
 
   onShow() {
@@ -176,7 +181,8 @@ Page({
       !this.data.availableModels.length
     )
       return;
-    this.setData({ showModels: !this.data.showModels });
+    if (this.data.showModels) this.closeModels();
+    else openModelMenu(this);
   },
   closeModels() {
     this.setData({ showModels: false });

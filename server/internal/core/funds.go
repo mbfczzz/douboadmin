@@ -36,6 +36,7 @@ type JobBilling struct {
 	EstimatedCostMicros *int64 `json:"estimatedCostMicros,omitempty"`
 }
 type Order struct {
+	Virtual       *VirtualOrder         `json:"virtual,omitempty"`
 	Distribution  *DistributionSnapshot `json:"distribution,omitempty"`
 	UserID        string                `json:"userId"`
 	AmountFen     int64                 `json:"amountFen"`
@@ -53,15 +54,28 @@ type Order struct {
 	RequestHash   string                `json:"requestHash"`
 }
 type Refund struct {
-	OrderID     string     `json:"orderId"`
-	UserID      string     `json:"userId"`
-	AmountFen   int64      `json:"amountFen"`
-	PointsUnits int64      `json:"pointsUnits"`
-	Status      string     `json:"status"`
-	Reason      string     `json:"reason"`
-	ProviderID  string     `json:"providerId,omitempty"`
-	Error       string     `json:"error,omitempty"`
-	CompletedAt *time.Time `json:"completedAt,omitempty"`
+	Channel         string     `json:"channel,omitempty"`
+	ProviderOrderID string     `json:"providerOrderId,omitempty"`
+	OrderID         string     `json:"orderId"`
+	UserID          string     `json:"userId"`
+	AmountFen       int64      `json:"amountFen"`
+	PointsUnits     int64      `json:"pointsUnits"`
+	Status          string     `json:"status"`
+	Reason          string     `json:"reason"`
+	ProviderID      string     `json:"providerId,omitempty"`
+	Error           string     `json:"error,omitempty"`
+	CompletedAt     *time.Time `json:"completedAt,omitempty"`
+}
+
+// Virtual goods and environment are immutable order snapshots, not live catalog references.
+type VirtualOrder struct {
+	ProductID   string `json:"productId"`
+	ProductName string `json:"productName"`
+	PointsUnits int64  `json:"pointsUnits"`
+	Env         int    `json:"env"`
+	Platform    string `json:"platform"`
+	Issued      bool   `json:"issued"`
+	Delivered   bool   `json:"delivered"`
 }
 
 func PointUnits(points float64) (int64, error) {

@@ -140,34 +140,56 @@ export default function Orders({ notify }: PageProps) {
               <dd>{points(detail.data.pointsUnits)}</dd>
               <dt>状态</dt>
               <dd>{statuses[detail.data.status]}</dd>
+              <dt>支付通道</dt>
+              <dd>
+                {detail.data.channel === "wechat_virtual"
+                  ? "微信虚拟支付"
+                  : "微信支付"}
+              </dd>
+              {detail.data.virtual && (
+                <>
+                  <dt>积分商品</dt>
+                  <dd>{detail.data.virtual.productName}</dd>
+                </>
+              )}
             </dl>
-            {(detail.data.status === "paid" ||
-              detail.data.status === "refunding") && (
-              <>
-                <p className="muted">
-                  全额退款会回收该订单对应积分；可用积分不足时不能申请。重复提交使用同一退款单。
-                </p>
-                <label>
-                  退款原因
-                  <input
-                    value={reason}
-                    maxLength={25}
-                    onChange={(e) => setReason(e.target.value)}
-                  />
-                </label>
-                <button
-                  className="primary"
-                  disabled={busy}
-                  onClick={() => void refund()}
-                >
-                  {busy
-                    ? "提交中…"
-                    : detail.data.status === "refunding"
-                      ? "重试原退款申请"
-                      : "申请全额退款"}
-                </button>
-              </>
+            {detail.data.virtual?.platform === "ios" && (
+              <p className="quiet">
+                Apple 支付订单由用户在 App Store
+                申请退款，平台通知后核对积分回收。
+              </p>
             )}
+            {detail.data.virtual?.platform !== "ios" &&
+              (detail.data.status === "paid" ||
+                detail.data.status === "refunding") && (
+                <>
+                  <p className="quiet">
+                    全额退款会回收该订单对应积分；可用积分不足时不能申请。重复提交使用同一退款单。
+                  </p>
+                  <label>
+                    退款原因
+                    <input
+                      disabled={busy}
+                      value={reason}
+                      maxLength={25}
+                      onChange={(e) => setReason(e.target.value)}
+                    />
+                  </label>
+                  <div className="modal-actions">
+                    <button
+                      className="primary"
+                      disabled={busy}
+                      onClick={() => void refund()}
+                    >
+                      {busy
+                        ? "提交中…"
+                        : detail.data.status === "refunding"
+                          ? "重试原退款申请"
+                          : "申请全额退款"}
+                    </button>
+                  </div>
+                </>
+              )}
           </div>
         </Modal>
       )}

@@ -7,7 +7,7 @@
     bindtap="switchTab"
     hover-class="item-pressed"
   >
-    <view class="glyph"><t-icon name="{{item.icon}}" size="24" /></view>
+    <view class="glyph"><t-icon name="{{item.icon}}" size="{{selected===index?18:24}}" /></view>
     <text class="label">{{item.text}}</text>
   </view>
 </view>

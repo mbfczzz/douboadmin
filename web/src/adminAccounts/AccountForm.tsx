@@ -15,9 +15,11 @@ export default function AccountForm({
   onClose: () => void;
   onSaved: () => unknown;
 }) {
-  const [busy, setBusy] = useState(false);
+  const [busy, setBusy] = useState(false),
+    [error, setError] = useState("");
   async function submit(form: HTMLFormElement) {
     if (busy) return;
+    setError("");
     setBusy(true);
     const data = new FormData(form),
       password = String(data.get("password") || ""),
@@ -49,7 +51,7 @@ export default function AccountForm({
       onClose();
       notify(row ? "管理账号已更新" : "管理账号已创建");
     } catch (error) {
-      notify((error as Error).message, "error");
+      setError((error as Error).message);
     } finally {
       setBusy(false);
     }
@@ -57,6 +59,7 @@ export default function AccountForm({
   async function archive() {
     if (!row || !confirm("归档后该账号将无法登录，确认继续吗？")) return;
     setBusy(true);
+    setError("");
     try {
       await api(`/admin/accounts/${row.id}`, {
         method: "DELETE",
@@ -66,12 +69,15 @@ export default function AccountForm({
       onClose();
       notify("管理账号已归档");
     } catch (error) {
-      notify((error as Error).message, "error");
+      setError((error as Error).message);
       setBusy(false);
     }
   }
   return (
-    <Modal title={row ? "编辑管理账号" : "添加管理账号"} onClose={onClose}>
+    <Modal
+      title={row ? "编辑管理账号" : "添加管理账号"}
+      onClose={() => !busy && onClose()}
+    >
       <form
         className="edit-form"
         aria-busy={busy}
@@ -144,7 +150,12 @@ export default function AccountForm({
             停用账号
           </label>
         )}
-        <div className="business-actions">
+        {error && (
+          <div className="error" role="alert">
+            {error}
+          </div>
+        )}
+        <div className="modal-actions">
           <button className="primary" disabled={busy}>
             {busy ? "保存中…" : "保存账号"}
           </button>

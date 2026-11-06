@@ -70,10 +70,7 @@ export default function TemplateEditor({
         aria-busy={busy || uploading}
       >
         <div className="form-body">
-          <fieldset
-            disabled={busy}
-            style={{ border: 0, margin: 0, padding: 0, minWidth: 0 }}
-          >
+          <fieldset disabled={busy}>
             {error && (
               <div ref={errorRef} tabIndex={-1} className="error" role="alert">
                 {error}

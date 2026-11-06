@@ -33,6 +33,10 @@ func reconcileOnce(ctx context.Context, s store.Store, p *Client, b *billing.Ser
 		check, cancel := context.WithTimeout(ctx, 9*time.Second)
 		reconcileBatch(check, s, ns, func(row core.Record) error {
 			if ns == "refunds" {
+				var refund core.Refund
+				if json.Unmarshal(row.Data, &refund) != nil || refund.Channel == "wechat_virtual" {
+					return nil
+				}
 				result, e := p.QueryRefund(check, row.ID)
 				if e != nil {
 					return e
@@ -42,6 +46,9 @@ func reconcileOnce(ctx context.Context, s store.Store, p *Client, b *billing.Ser
 			var o core.Order
 			if e := json.Unmarshal(row.Data, &o); e != nil {
 				return e
+			}
+			if o.Channel == "wechat_virtual" {
+				return nil
 			}
 			state, result, e := p.Query(check, row.ID)
 			if e != nil {

@@ -15,6 +15,9 @@ func integrations(ctx context.Context, app *api.Server) (provider.Provider, erro
 		return nil, err
 	}
 	app.Pay = p
+	if err = virtualPayment(app); err != nil {
+		return nil, err
+	}
 	ai := &provider.Relay{Client: app.Relay, Store: app.Store, Assets: app.Media.Inputs, SaveResult: app.Media.Save}
 	app.Hot = &hotvideo.Service{Client: &hotvideo.Client{BaseURL: env("TIKHUB_BASE_URL", "https://api.tikhub.io"), Key: os.Getenv("TIKHUB_API_KEY")}, Store: app.Store}
 	return provider.Router{AI: ai, Import: hotvideo.Importer{Service: app.Hot, Media: app.Media}}, nil

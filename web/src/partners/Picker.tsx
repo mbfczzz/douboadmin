@@ -42,7 +42,12 @@ export default function Picker({
               title: "操作",
               action: true,
               render: (r: Row<Partner>) => (
-                <button onClick={() => onChoose(r.id, r)}>选择</button>
+                <button
+                  className="text-button"
+                  onClick={() => onChoose(r.id, r)}
+                >
+                  选择
+                </button>
               ),
             },
           ]}

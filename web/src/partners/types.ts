@@ -14,6 +14,10 @@ export type Pool = {
   reserved: number;
   used: number;
 };
+export type PartnerTreeItem = {
+  record: Row<Partner>;
+  quota: { users: Pool; partners?: Pool };
+};
 export type Price = {
   enabled: boolean;
   version: string;

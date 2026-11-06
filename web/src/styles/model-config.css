@@ -1,27 +1,14 @@
 @import "./model-config-controls.css";
-.scrim.model-config-mask {
-  background: #10271d80;
-  backdrop-filter: blur(3px);
-  padding: 24px;
-  z-index: 240;
-}
 .modal.model-config {
   width: min(1040px, calc(100vw - 48px));
   max-height: min(90dvh, 900px);
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
-  color: var(--ink);
-  box-shadow: var(--shadow-float);
 }
 .model-config > header {
   padding: 18px 22px;
   gap: 12px;
-  border-bottom: 1px solid var(--line);
-  flex-shrink: 0;
 }
 .model-config > header h2 {
   font-size: 16px;
@@ -32,13 +19,6 @@
   color: var(--muted);
   margin: 2px 0 0;
   line-height: 1.5;
-}
-.model-config .icon {
-  color: var(--muted);
-  width: 32px;
-  height: 32px;
-  border-radius: 6px;
-  flex-shrink: 0;
 }
 .model-config-form {
   display: flex;
@@ -170,9 +150,6 @@
   }
 }
 @media (max-width: 480px) {
-  .scrim.model-config-mask {
-    padding: 10px;
-  }
   .modal.model-config {
     width: 100%;
     max-height: calc(100dvh - 20px);

@@ -95,8 +95,8 @@ export default function PricingFields({ model: m, onChange }: SettingsProps) {
         </table>
       </div>
       <p className="config-hint">
-        不同档位可设置不同积分；留空或 0
-        使用基础积分。此处保存定价配置，充值与积分扣费尚未启用。
+        不同档位可设置不同积分；留空使用基础积分，填写 0
+        表示免费。开启系统设置中的生成扣费后生效。
       </p>
     </Card>
   );

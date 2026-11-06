@@ -65,7 +65,9 @@
             src="{{item.result}}"
             mode="aspectFill"
           />
-          <t-icon wx:if="{{item.input.kind!=='image'||!item.result}}" name="video-camera" size="32" color="#9BCBAA" />
+          <view wx:if="{{item.input.kind!=='image'||!item.result}}" class="work-placeholder">
+            <t-icon name="{{item.input.kind==='image'?'image':'play-circle'}}" size="32" color="#9BCBAA" />
+          </view>
           <text class="work-state">{{item.stateText}}</text>
         </view>
         <text class="work-title">{{item.shortTitle}}</text>
@@ -77,6 +79,7 @@
       <text>{{me.running?'作品正在生成中':'你的第一份作品，从这里开始'}}</text>
       <text class="accent">{{me.running?'查看生成进度 ›':'去创作 ↗'}}</text>
     </view>
+    <view class="mine-balance"><points-balance /></view>
     <text class="section-title common-heading">常用功能</text>
     <view class="menu-list">
       <view
@@ -99,10 +102,11 @@
   placement="bottom"
   bind:visible-change="close"
 >
-  <view class="sheet">
+  <scroll-view scroll-y class="profile-sheet-scroll">
+  <view class="sheet profile-sheet">
     <view class="row sheet-title">
       <text>个人资料</text>
-      <t-icon name="close" bindtap="close" />
+      <view class="profile-close" bindtap="close" aria-role="button" aria-label="关闭个人资料"><t-icon name="close" /></view>
     </view>
     <view class="avatar-editor">
       <button
@@ -119,6 +123,7 @@
       </text>
     </view>
     <form bindsubmit="save">
+      <view class="profile-field">
       <text class="field-label">昵称</text>
       <input
         class="form-input"
@@ -130,9 +135,11 @@
         bindinput="input"
         bindblur="input"
       />
-      <text class="field-label">姓名（选填）</text><input class="form-input" name="name" value="{{name}}" data-field="name" maxlength="50" bindinput="input" />
-      <text class="field-label">手机号（选填）</text><input class="form-input" name="phone" value="{{phone}}" data-field="phone" maxlength="16" bindinput="input" />
-      <text class="field-label bio-label">个人简介</text>
+      </view>
+      <view class="profile-field"><text class="field-label">姓名（选填）</text><input class="form-input" name="name" value="{{name}}" data-field="name" maxlength="50" bindinput="input" /></view>
+      <view class="profile-field"><text class="field-label">手机号（选填）</text><input class="form-input" name="phone" value="{{phone}}" data-field="phone" maxlength="16" bindinput="input" /></view>
+      <view class="profile-field">
+      <text class="field-label">个人简介</text>
       <input
         class="form-input"
         maxlength="120"
@@ -141,6 +148,7 @@
         data-field="bio"
         bindinput="input"
       />
+      </view>
       <view class="save-profile">
         <button
           class="profile-submit"
@@ -153,4 +161,5 @@
       </view>
     </form>
   </view>
+  </scroll-view>
 </t-popup>

@@ -32,49 +32,60 @@ type Client struct {
 func New(appID, secret string) *Client {
 	return &Client{AppID: appID, Secret: secret, HTTP: &http.Client{Timeout: 10 * time.Second, CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}}
 }
+
+type Session struct {
+	OpenID string `json:"-"`
+	Key    string `json:"-"`
+}
+
 func (c *Client) Exchange(ctx context.Context, code string) (string, error) {
+	session, err := c.ExchangeSession(ctx, code)
+	return session.OpenID, err
+}
+func (c *Client) ExchangeSession(ctx context.Context, code string) (Session, error) {
 	if c == nil || c.AppID == "" || c.Secret == "" {
-		return "", ErrNotConfigured
+		return Session{}, ErrNotConfigured
 	}
 	if strings.TrimSpace(code) == "" || len(code) > 256 {
-		return "", ErrInvalidCode
+		return Session{}, ErrInvalidCode
 	}
 	q := url.Values{"appid": {c.AppID}, "secret": {c.Secret}, "js_code": {code}, "grant_type": {"authorization_code"}}
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "https://api.weixin.qq.com/sns/jscode2session?"+q.Encode(), nil)
 	if err != nil {
-		return "", ErrUnavailable
+		return Session{}, ErrUnavailable
 	}
 	res, err := c.HTTP.Do(req)
 	if err != nil {
-		return "", ErrUnavailable
+		return Session{}, ErrUnavailable
 	} // Transport errors can contain the secret-bearing URL. Never return/log them.
 	defer res.Body.Close()
 	if res.StatusCode != http.StatusOK {
-		return "", ErrUnavailable
+		return Session{}, ErrUnavailable
 	}
 	var data struct {
-		OpenID string `json:"openid"`
-		Error  int    `json:"errcode"`
+		OpenID     string `json:"openid"`
+		SessionKey string `json:"session_key"`
+		Error      int    `json:"errcode"`
 	}
 	if json.NewDecoder(io.LimitReader(res.Body, 65536)).Decode(&data) != nil {
-		return "", ErrUnavailable
+		return Session{}, ErrUnavailable
 	}
 	switch data.Error {
 	case 0:
 	case 40029, 40163:
-		return "", ErrInvalidCode
+		return Session{}, ErrInvalidCode
 	case 45011:
-		return "", ErrRateLimited
+		return Session{}, ErrRateLimited
 	case 40226:
-		return "", ErrRejected
+		return Session{}, ErrRejected
 	case 40013, 40125, 40164:
-		return "", ErrNotConfigured
+		return Session{}, ErrNotConfigured
 	default:
-		return "", ErrUnavailable
+		return Session{}, ErrUnavailable
 	}
 	if data.OpenID == "" || len(data.OpenID) > 128 {
-		return "", ErrUnavailable
+		return Session{}, ErrUnavailable
 	}
 	// session_key/unionid are deliberately not sent to clients or used as tokens.
-	return data.OpenID, nil
+	return Session{OpenID: data.OpenID, Key: data.SessionKey}, nil
 }

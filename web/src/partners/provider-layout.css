@@ -1,0 +1,48 @@
+.partner-hub {
+  container-type: inline-size;
+}
+.provider-add {
+  margin-left: auto;
+}
+@container (max-width: 960px) {
+  .provider-tree-head {
+    display: none;
+  }
+  .provider-tree-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 16px;
+  }
+  .provider-tree-name {
+    grid-column: 1 / -1;
+  }
+  .provider-tree-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px 24px;
+    padding-left: calc(var(--tree-control) + 8px);
+  }
+  .provider-tree-meta small {
+    display: block;
+    margin-bottom: 8px;
+  }
+  .provider-quota {
+    text-align: left;
+  }
+}
+@container (max-width: 520px) {
+  .provider-tree {
+    --tree-indent: 12px;
+    --tree-control: 44px;
+    --tree-inset: 16px;
+  }
+  .provider-tree-meta {
+    grid-column: 1 / -1;
+    padding-left: 0;
+  }
+  .provider-tree-actions {
+    grid-column: 1 / -1;
+  }
+  .provider-tree-actions button {
+    min-height: 44px;
+  }
+}

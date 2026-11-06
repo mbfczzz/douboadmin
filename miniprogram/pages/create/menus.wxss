@@ -50,9 +50,15 @@
 .workspace.expanded.model-open {
   z-index: 1001;
 }
-.expanded .model-menu {
+.model-menu.menu-up {
   top: auto;
   bottom: 64px;
+}
+.model-info > text:first-child {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .model-option.selected {
   background: #25372c;
@@ -72,6 +78,7 @@
   font-weight: 700;
 }
 .close-sheet {
+  flex-shrink: 0;
   width: 44px;
   height: 44px;
   display: flex;
@@ -82,8 +89,8 @@
   display: flex;
   align-items: center;
   gap: 14px;
-  height: 72px;
-  padding: 0 12px;
+  min-height: 72px;
+  padding: 12px;
   margin-top: 8px;
   border-radius: 10px;
   background: #272b2d;
@@ -91,6 +98,12 @@
 }
 .source-option > view {
   flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.source-option > t-icon,
+.model-option > t-icon {
+  flex-shrink: 0;
 }
 .source-hint {
   display: block;
@@ -107,6 +120,7 @@
   padding: 2px;
 }
 .model-info {
+  overflow-wrap: anywhere;
   flex: 1;
   min-width: 0;
 }
@@ -117,11 +131,15 @@
   margin-top: 4px;
 }
 .model-estimate {
+  flex-shrink: 0;
+  max-width: 35%;
+  overflow-wrap: anywhere;
+  text-align: right;
   font-size: 10px;
   color: #9ba7a0;
-  white-space: nowrap;
 }
 .model-badges {
+  flex-wrap: wrap;
   display: flex;
   gap: 4px;
   margin-top: 4px;

@@ -5,7 +5,8 @@ import Modal from "../components/Modal";
 import Records, { useRecords } from "./Records";
 import { useCommand } from "./useCommand";
 import type { Payout, Scope } from "./types";
-import { labels, hundredths } from "./types";
+import { hundredths } from "./types";
+import { PartnerStatus } from "./PartnerIdentity";
 export default function Payouts({ id, view, changed, notify }: Scope) {
   const resource = useRecords<Payout>("/admin/commission-payouts?owner=" + id),
     [create, setCreate] = useState(false),
@@ -13,11 +14,10 @@ export default function Payouts({ id, view, changed, notify }: Scope) {
     command = useCommand();
   return (
     <>
-      <h3>提现与线下打款登记</h3>
-      <p className="muted">
-        这里登记提现和打款凭据，不会自动从微信商户转账。已提现佣金遇到退款会形成负余额，后续佣金优先抵扣。
-      </p>
       <Records
+        title="提现与线下打款登记"
+        description="仅登记提现和打款凭据，不会自动从微信商户转账。"
+        footnote="已提现佣金遇到退款会形成负余额，后续佣金优先抵扣。"
         resource={resource}
         actions={
           <button
@@ -31,7 +31,10 @@ export default function Payouts({ id, view, changed, notify }: Scope) {
         }
         columns={[
           { title: "金额", render: (r) => money(r.data.amountFen) },
-          { title: "状态", render: (r) => labels[r.data.status] },
+          {
+            title: "状态",
+            render: (r) => <PartnerStatus state={r.data.status} />,
+          },
           {
             title: "说明 / 凭据",
             render: (r) => (
@@ -47,7 +50,9 @@ export default function Payouts({ id, view, changed, notify }: Scope) {
             action: true,
             render: (r) =>
               r.data.status === "pending" ? (
-                <button onClick={() => setDetail(r)}>处理提现</button>
+                <button className="text-button" onClick={() => setDetail(r)}>
+                  处理提现
+                </button>
               ) : (
                 "—"
               ),
@@ -61,6 +66,8 @@ export default function Payouts({ id, view, changed, notify }: Scope) {
         >
           <form
             className="edit-form"
+            aria-busy={command.busy}
+            data-unsaved={command.busy || undefined}
             onSubmit={async (e) => {
               e.preventDefault();
               const f = new FormData(e.currentTarget);
@@ -78,23 +85,27 @@ export default function Payouts({ id, view, changed, notify }: Scope) {
               }
             }}
           >
-            <label>
-              提现金额（元）
-              <input
-                name="amount"
-                type="number"
-                min="0.01"
-                step="0.01"
-                required
-              />
-            </label>
-            <label>
-              说明
-              <textarea name="note" minLength={2} maxLength={200} required />
-            </label>
-            <button className="primary" disabled={command.busy}>
-              预留提现佣金
-            </button>
+            <fieldset disabled={command.busy}>
+              <label>
+                提现金额（元）
+                <input
+                  name="amount"
+                  type="number"
+                  min="0.01"
+                  step="0.01"
+                  required
+                />
+              </label>
+              <label>
+                说明
+                <textarea name="note" minLength={2} maxLength={200} required />
+              </label>
+              <div className="modal-actions">
+                <button className="primary" disabled={command.busy}>
+                  预留提现佣金
+                </button>
+              </div>
+            </fieldset>
           </form>
         </Modal>
       )}
@@ -105,6 +116,8 @@ export default function Payouts({ id, view, changed, notify }: Scope) {
         >
           <form
             className="edit-form"
+            aria-busy={command.busy}
+            data-unsaved={command.busy || undefined}
             onSubmit={async (e) => {
               e.preventDefault();
               const f = new FormData(e.currentTarget),
@@ -132,26 +145,30 @@ export default function Payouts({ id, view, changed, notify }: Scope) {
               }
             }}
           >
-            <p>{money(detail.data.amountFen)}</p>
-            <label>
-              处理结果
-              <select name="status">
-                <option value="paid">确认已线下打款</option>
-                <option value="cancelled">取消提现并解冻</option>
-              </select>
-            </label>
-            <label>
-              打款流水号 / 取消原因
-              <textarea
-                name="reference"
-                minLength={4}
-                maxLength={200}
-                required
-              />
-            </label>
-            <button className="primary" disabled={command.busy}>
-              保存提现结果
-            </button>
+            <fieldset disabled={command.busy}>
+              <p>{money(detail.data.amountFen)}</p>
+              <label>
+                处理结果
+                <select name="status">
+                  <option value="paid">确认已线下打款</option>
+                  <option value="cancelled">取消提现并解冻</option>
+                </select>
+              </label>
+              <label>
+                打款流水号 / 取消原因
+                <textarea
+                  name="reference"
+                  minLength={4}
+                  maxLength={200}
+                  required
+                />
+              </label>
+              <div className="modal-actions">
+                <button className="primary" disabled={command.busy}>
+                  保存提现结果
+                </button>
+              </div>
+            </fieldset>
           </form>
         </Modal>
       )}

@@ -1,0 +1,9 @@
+<view class="balance">
+  <view class="balance-copy">
+    <text class="label">可用积分</text>
+    <text class="amount">{{logged?available:'登录后查看'}}</text>
+    <text wx:if="{{logged&&loaded&&held!=='0'}}" class="note">预留 {{held}} 积分</text>
+    <text wx:if="{{loadError}}" class="error" bindtap="reload">{{loadError}}</text>
+  </view>
+  <button class="action" bindtap="openWallet">{{logged&&rechargeEnabled?'微信充值':'我的积分'}}</button>
+</view>

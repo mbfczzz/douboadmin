@@ -19,7 +19,7 @@ func background(ctx context.Context, app *api.Server, role string) {
 	go sender.Run(ctx)
 	metrics := monitor.New(app.Store, role, os.Getenv("ALERT_WEBHOOK_URL"))
 	secrets := []string{}
-	for _, key := range []string{"RELAY_API_KEY", "WECHAT_APP_SECRET", "WECHAT_PAY_API_V3_KEY", "TIKHUB_API_KEY", "OSS_ACCESS_KEY_SECRET", "REDIS_PASSWORD", "MYSQL_DSN", "ADMIN_PASSWORD", "ALERT_WEBHOOK_URL"} {
+	for _, key := range []string{"RELAY_API_KEY", "WECHAT_APP_SECRET", "WECHAT_PAY_API_V3_KEY", "WECHAT_VIRTUAL_APP_KEY", "WECHAT_VIRTUAL_SANDBOX_APP_KEY", "WECHAT_VIRTUAL_TOKEN", "WECHAT_VIRTUAL_ENCODING_AES_KEY", "TIKHUB_API_KEY", "OSS_ACCESS_KEY_SECRET", "REDIS_PASSWORD", "MYSQL_DSN", "ADMIN_PASSWORD", "ALERT_WEBHOOK_URL"} {
 		if v := os.Getenv(key); v != "" {
 			secrets = append(secrets, v)
 		}
@@ -27,5 +27,6 @@ func background(ctx context.Context, app *api.Server, role string) {
 	slog.SetDefault(slog.New(monitor.NewLogHandler(ctx, slog.NewTextHandler(os.Stderr, nil), app.Store, metrics.ID, secrets)))
 	go metrics.Run(ctx)
 	go payments.Reconcile(ctx, app.Store, app.Pay, app.Billing)
+	go app.Virtual.Run(ctx)
 	go app.Partners.Run(ctx)
 }

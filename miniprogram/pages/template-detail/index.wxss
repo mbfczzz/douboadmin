@@ -28,11 +28,15 @@
   margin: 20px 0 32px;
 }
 .detail-title {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
   font-size: 21px;
   font-weight: 700;
   line-height: 1.4;
 }
 .favorite {
+  flex-shrink: 0;
   width: 28px;
   height: 28px;
 }
@@ -72,11 +76,15 @@
   flex-shrink: 0;
 }
 .required-upload > view:nth-child(2) {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 .upload-text {
+  max-width: 100%;
   width: 140px;
   height: 44px;
   line-height: 44px;
@@ -96,6 +104,7 @@
   color: #bbc0c7;
 }
 .required {
+  flex-shrink: 0;
   margin-left: auto;
   font-size: 22rpx;
   color: #9bcbaa;
@@ -108,15 +117,15 @@
 }
 .optional-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
 }
 .optional-grid > view {
   display: flex;
   align-items: center;
   gap: 10px;
-  height: 58px;
-  padding: 0 14px;
+  min-height: 58px;
+  padding: 12px 14px;
   background: #1a1d1f;
   border: 1px solid #2d3235;
   border-radius: 8px;
@@ -125,6 +134,17 @@
 }
 .optional-grid text {
   flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.5;
+}
+@media (max-width: 360px) {
+  .optional-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.optional-grid t-icon {
+  flex-shrink: 0;
 }
 .submit-area {
   position: fixed;
@@ -179,6 +199,7 @@
   margin-top: 25rpx;
 }
 .uploaded image {
+  flex-shrink: 0;
   height: 110rpx;
   width: 110rpx;
   border-radius: 12rpx;
@@ -196,6 +217,7 @@
   font-size: 25rpx;
 }
 .delete {
+  flex-shrink: 0;
   padding: 15rpx;
 }
 .hero video {

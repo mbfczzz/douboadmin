@@ -110,17 +110,23 @@
   font-weight: 500;
 }
 .model-name {
+  min-width: 0;
   flex: 1;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
 }
 .spec {
-  flex: 1 0 68px;
-  min-width: 68px;
+  flex: 1 1 68px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
   text-align: center;
   white-space: nowrap;
   font-size: 12px;
+}
+.model-select t-icon {
+  flex-shrink: 0;
 }
 .workspace .generate-button {
   flex: 0 0 78px;

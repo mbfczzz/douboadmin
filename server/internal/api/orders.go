@@ -46,6 +46,10 @@ func (a *Server) order(w http.ResponseWriter, r *http.Request) {
 	reply(w, 200, publicOrder(row))
 }
 func (a *Server) createOrder(w http.ResponseWriter, r *http.Request) {
+	if a.Config.PaymentChannel == "wechat_virtual" {
+		a.createVirtualOrder(w, r)
+		return
+	}
 	var v struct {
 		PricingVersion  string `json:"pricingVersion"`
 		AmountFen       int64  `json:"amountFen"`
@@ -105,6 +109,7 @@ func (a *Server) createOrder(w http.ResponseWriter, r *http.Request) {
 func (a *Server) payOrder(w http.ResponseWriter, r *http.Request) {
 	var client struct {
 		Platform string `json:"platform"`
+		Code     string `json:"code"`
 	}
 	if !decode(w, r, &client) {
 		return
@@ -121,6 +126,10 @@ func (a *Server) payOrder(w http.ResponseWriter, r *http.Request) {
 	var o core.Order
 	if json.Unmarshal(row.Data, &o) != nil {
 		fail(w, 503, "订单信息异常")
+		return
+	}
+	if o.Channel == "wechat_virtual" {
+		a.payVirtualOrder(w, r, row, o, client.Code, client.Platform)
 		return
 	}
 	if !a.Pay.Ready() {
@@ -180,6 +189,23 @@ func (a *Server) refreshOrder(w http.ResponseWriter, r *http.Request) {
 	allowed, e := a.Sessions.Allow(r.Context(), "order-query:"+row.ID, 6)
 	if e != nil || !allowed {
 		fail(w, 429, "查询过于频繁，请稍后再试")
+		return
+	}
+	var o core.Order
+	if json.Unmarshal(row.Data, &o) != nil {
+		fail(w, 503, "订单信息异常")
+		return
+	}
+	if o.Channel == "wechat_virtual" {
+		if !a.Virtual.Ready() {
+			fail(w, 503, "虚拟支付尚未配置")
+			return
+		}
+		if e = a.Virtual.Refresh(r.Context(), row.ID); e != nil {
+			fail(w, 502, e.Error())
+			return
+		}
+		a.order(w, r)
 		return
 	}
 	state, result, e := a.Pay.Query(r.Context(), row.ID)

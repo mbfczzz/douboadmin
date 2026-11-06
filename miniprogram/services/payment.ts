@@ -1,9 +1,19 @@
 import { request } from "./request";
 import { uid } from "./ids";
-import { AuthCancelledError } from "./errors";
+import { AuthCancelledError, PaymentCancelledError } from "./errors";
 import { sessionToken } from "./session";
 import type { Row } from "./types";
 import type { WalletInfo, Order } from "./business";
+import {
+  createVirtualOrder,
+  invokeVirtualPayment,
+  supportsVirtualPayment,
+} from "./virtual-payment";
+import {
+  clearPayment,
+  pendingPayments,
+  rememberPayment,
+} from "./payment-status";
 
 export function amountFen(value: string): number {
   if (!/^\d+(\.\d{1,2})?$/.test(value.trim())) return 0;
@@ -21,12 +31,18 @@ export function canRecharge(info: WalletInfo) {
     info.paymentReady &&
     info.pricing?.ready !== false &&
     info.settings.rechargeEnabled &&
+    (info.paymentChannel !== "wechat_virtual" ||
+      supportsVirtualPayment(devicePlatform())) &&
     (devicePlatform() !== "ios" || info.iosPayment)
   );
 }
 
-export async function recharge(info: WalletInfo, fen: number) {
+export async function recharge(info: WalletInfo, fen: number, productId = "") {
   if (!canRecharge(info)) throw new Error("当前暂未开放充值");
+  if (info.paymentChannel === "wechat_virtual") {
+    const row = await createVirtualOrder(info, productId, devicePlatform());
+    return payExisting(row.id);
+  }
   const owner = info.wallet.userId,
     hash = JSON.stringify({
       owner,
@@ -60,19 +76,30 @@ export async function recharge(info: WalletInfo, fen: number) {
 
 export async function payExisting(id: string) {
   const info = await request<WalletInfo>("/wallet");
-  if (!canRecharge(info)) throw new Error("当前设备或服务暂未开放充值");
   const token = sessionToken();
   const row = await request<Row<Order>>("/orders/" + id);
   if (row.data.status === "paid") {
-    clearDraft(id);
+    clearPayment(id);
     return row;
   }
-  if (
-    row.data.status !== "created" ||
-    Date.parse(row.data.expiresAt) <= Date.now()
-  ) {
-    clearDraft(id);
+  if (row.data.status !== "created") {
+    clearPayment(id);
     throw new Error("此订单已结束或过期，请重新充值");
+  }
+  if (pendingPayments(info.wallet.userId).includes(id)) return row;
+  if (Date.parse(row.data.expiresAt) <= Date.now()) {
+    clearPayment(id);
+    throw new Error("此订单已结束或过期，请重新充值");
+  }
+  if (!canRecharge(info)) throw new Error("当前设备或服务暂未开放充值");
+  if (row.data.channel === "wechat_virtual") {
+    await invokeVirtualPayment(
+      row,
+      info.wallet.userId,
+      token,
+      devicePlatform(),
+    );
+    return confirmPayment(row, info.wallet.userId, token);
   }
   const params = await request<{
     timeStamp: string;
@@ -89,24 +116,31 @@ export async function payExisting(id: string) {
       fail: (e) =>
         reject(
           e.errMsg.includes("cancel")
-            ? new AuthCancelledError()
+            ? new PaymentCancelledError()
             : new Error("支付未完成，请查看订单状态"),
         ),
     }),
   );
   if (sessionToken() !== token) throw new AuthCancelledError();
+  return confirmPayment(row, info.wallet.userId, token);
+}
+
+async function confirmPayment(row: Row<Order>, owner: string, token: string) {
+  const id = row.id;
+  rememberPayment(id, owner);
   try {
     await request("/orders/" + id + "/refresh", "POST", {});
   } catch {
     /* The server notification or reconciliation remains authoritative. */
   }
-  const confirmed = await request<Row<Order>>("/orders/" + id);
-  if (confirmed.data.status === "paid") clearDraft(id);
-  return confirmed;
-}
-
-function clearDraft(id: string) {
-  const draft = wx.getStorageSync("pending-recharge") as
-    { id?: string } | undefined;
-  if (draft?.id === id) wx.removeStorageSync("pending-recharge");
+  if (sessionToken() !== token) throw new AuthCancelledError();
+  try {
+    const confirmed = await request<Row<Order>>("/orders/" + id);
+    if (confirmed.data.status !== "created") clearPayment(id);
+    return confirmed;
+  } catch (error) {
+    if (sessionToken() !== token) throw new AuthCancelledError();
+    // The payment sheet completed. Keep tracking instead of reporting a payment failure.
+    return row;
+  }
 }

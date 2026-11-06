@@ -11,7 +11,7 @@ test("quick jump and page filters remember recent work", async ({ page }) => {
   await palette.getByLabel("搜索后台功能").fill("服务商");
   await palette.getByRole("button", { name: /服务商管理/ }).click();
   await expect(
-    page.getByRole("heading", { name: "服务商管理", exact: true }),
+    page.getByRole("heading", { name: "服务商列表", exact: true }),
   ).toBeVisible();
   await page.getByRole("button", { name: "小程序用户", exact: true }).click();
   await page.getByLabel("搜索用户").fill("需要记住");
@@ -75,36 +75,6 @@ test("mobile records expose every field without horizontal discovery", async ({
     record.getByRole("button", { name: "详情 / 积分", exact: true }),
   ).toBeVisible();
   await expect(page.locator(".record-table > .table-scroll")).toHaveCount(0);
-});
-
-test("quota changes show target and before-after balances", async ({
-  page,
-}) => {
-  await login(page);
-  await surfaceFixtures(page);
-  await page.getByRole("button", { name: "服务商管理", exact: true }).click();
-  await page.getByRole("tab", { name: "名额划拨", exact: true }).click();
-  await page
-    .getByRole("button", { name: "划拨 / 收回名额", exact: true })
-    .click();
-  const form = page.getByRole("dialog", { name: "名额划拨 / 收回" });
-  await form
-    .getByRole("button", { name: "选择直接下级服务商", exact: true })
-    .click();
-  await page
-    .getByRole("dialog", { name: "选择直接下级服务商" })
-    .getByRole("button", { name: "选择", exact: true })
-    .click();
-  await expect(form).toContainText("总账号（root） → qa-provider");
-  await expect(form).toContainText("9 → 8");
-  await expect(form).toContainText("9 → 10");
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.waitForTimeout(250);
-  await page.screenshot({ path: "../.runtime/admin-390-名额确认.png" });
-  await form.getByLabel("操作").selectOption("reclaim");
-  await expect(
-    form.getByRole("button", { name: "确认收回 1 个名额" }),
-  ).toHaveClass("danger");
 });
 
 test("failed commands stay visible until dismissed", async ({ page }) => {

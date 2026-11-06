@@ -27,6 +27,7 @@ func (a *Server) wallet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	pricing := map[string]any{"ready": true, "retailPer100Fen": 10000, "version": ""}
+	retail := int64(10000)
 	if a.Config.RequireActivation {
 		snapshot, _, err := a.Partners.UserQuote(r.Context(), user, 100, settings.PointsPerYuan)
 		if err != nil {
@@ -42,11 +43,21 @@ func (a *Server) wallet(w http.ResponseWriter, r *http.Request) {
 				pricing["message"] = "充值暂未开放，请联系服务商"
 			}
 		} else if snapshot != nil {
+			retail = snapshot.RetailPer100Fen
 			pricing["retailPer100Fen"] = snapshot.RetailPer100Fen
 			pricing["version"] = snapshot.PricingVersion
 		}
 	}
-	reply(w, 200, map[string]any{"wallet": value, "settings": settings, "settingsVersion": row.Version, "pricing": pricing, "paymentReady": a.Pay.Ready(), "iosPayment": a.Pay != nil && a.Pay.Config.IOSAllowed})
+	products := a.virtualProducts(settings, retail)
+	channel := a.Config.PaymentChannel
+	if channel == "" {
+		channel = "wechat_jsapi"
+	}
+	ready := a.rechargeReady()
+	if channel == "wechat_virtual" && len(products) == 0 {
+		ready = false
+	}
+	reply(w, 200, map[string]any{"wallet": value, "settings": settings, "settingsVersion": row.Version, "pricing": pricing, "paymentReady": ready, "iosPayment": a.rechargeIOS(), "paymentChannel": channel, "virtualProducts": products})
 }
 func (a *Server) ledger(w http.ResponseWriter, r *http.Request) {
 	user := identity(r).ID
@@ -113,8 +124,8 @@ func (a *Server) quoteJob(w http.ResponseWriter, r *http.Request) {
 	if !decode(w, r, &in) {
 		return
 	}
-	if !core.IsGeneration(in.Kind) {
-		fail(w, 400, "该任务类型暂未开放")
+	if e := a.validateJob(r.Context(), identity(r).ID, &in); e != nil {
+		fail(w, 400, e.Error())
 		return
 	}
 	units, _, enabled, e := a.priceInput(r, in)

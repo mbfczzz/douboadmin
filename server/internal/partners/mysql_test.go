@@ -58,11 +58,7 @@ func sqlFixture(t *testing.T) (*store.MySQL, *store.MySQL, context.Context) {
 }
 func makePartner(t *testing.T, p *partners.Service, ctx context.Context) string {
 	t.Helper()
-	r, e := p.Create(ctx, core.RootPartner, "S1", "mysql-create-s1", "admin")
-	if e != nil {
-		t.Fatal(e)
-	}
-	_, e = p.Transfer(ctx, core.QuotaMove{ParentID: core.RootPartner, ChildID: r.ID, Users: 1, Partners: 1, Kind: "grant", Reason: "测试划拨"}, "mysql-grant-s1", "admin")
+	r, e := p.Create(ctx, core.RootPartner, "S1", 1, "mysql-create-s1", "admin")
 	if e != nil {
 		t.Fatal(e)
 	}
@@ -159,11 +155,7 @@ func TestMySQLCommissionsAndRefundsAreAtomicAcrossInstances(t *testing.T) {
 	a, b, ctx := sqlFixture(t)
 	p := &partners.Service{Store: a}
 	s1 := makePartner(t, p, ctx)
-	s2, e := p.Create(ctx, s1, "S2", "mysql-create-s2", "admin")
-	if e != nil {
-		t.Fatal(e)
-	}
-	_, e = p.Transfer(ctx, core.QuotaMove{ParentID: s1, ChildID: s2.ID, Users: 1, Kind: "grant", Reason: "向下划拨"}, "mysql-grant-s2", "admin")
+	s2, e := p.Create(ctx, s1, "S2", 1, "mysql-create-s2", "admin")
 	if e != nil {
 		t.Fatal(e)
 	}

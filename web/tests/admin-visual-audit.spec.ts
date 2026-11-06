@@ -27,9 +27,14 @@ test("capture representative admin surfaces", async ({ page }) => {
       } else {
         await page.getByRole("button", { name, exact: true }).click();
       }
-      await expect(
-        page.getByRole("heading", { name, exact: true }),
-      ).toBeVisible();
+      if (name === "服务商管理")
+        await expect(
+          page.getByRole("heading", { name: "服务商列表", exact: true }),
+        ).toBeVisible();
+      else
+        await expect(
+          page.getByRole("heading", { name, exact: true }),
+        ).toBeVisible();
       if (width < 640) {
         await expect(
           page.getByRole("dialog", { name: "工作空间导航" }),

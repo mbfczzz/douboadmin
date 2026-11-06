@@ -4,6 +4,7 @@
   line-height: 1.7;
   font-size: 27rpx;
 }
-.biz-preview {
-  margin-bottom: 24rpx;
+.biz-preview,
+.biz-image {
+  margin-bottom: 16px;
 }

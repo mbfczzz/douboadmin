@@ -9,6 +9,7 @@ import (
 type userProfile struct {
 	Nickname string `json:"nickname"`
 	Disabled bool   `json:"disabled"`
+	Archived bool   `json:"archived"`
 }
 
 // Call inside the wallet transaction so account suspension cannot race admission.
@@ -21,7 +22,7 @@ func enabledProfile(r Reader, user string) (*userProfile, error) {
 	if e = json.Unmarshal(row.Data, &profile); e != nil || profile == nil {
 		return nil, fmt.Errorf("账号状态异常")
 	}
-	if profile.Disabled {
+	if profile.Disabled || profile.Archived {
 		return nil, core.ErrUserDisabled
 	}
 	return profile, nil

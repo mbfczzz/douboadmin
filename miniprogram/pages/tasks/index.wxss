@@ -6,7 +6,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 4px;
+  margin-bottom: 20px;
   font-size: 15px;
   font-weight: 500;
 }
@@ -62,6 +62,7 @@
   color: #e6ab94;
 }
 .queue-spec {
+  overflow-wrap: anywhere;
   display: block;
   font-size: 12px;
   line-height: 1.5;
@@ -69,6 +70,7 @@
   margin-top: 7px;
 }
 .queue-time {
+  flex-wrap: wrap;
   display: flex;
   align-items: center;
   justify-content: space-between;

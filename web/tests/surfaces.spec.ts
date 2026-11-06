@@ -3,6 +3,7 @@ import { writeFileSync } from "node:fs";
 import type { Row, Model } from "../src/api";
 import { login } from "./helpers";
 import { surfaceFixtures, longName } from "./surface-fixtures";
+import { inspectModal } from "./modal-audit";
 
 for (const width of [1440, 390, 320]) {
   test(`read-only UI surface inventory at ${width}px`, async ({
@@ -54,6 +55,7 @@ for (const width of [1440, 390, 320]) {
         await expect(selects.nth(i)).toHaveValue(value);
       }
       surfaces.push({ name, selects: count, ...shape });
+      if (await dialog.count()) await inspectModal(page, `${width}-${name}`);
       if (
         name === "名额划拨 / 收回" ||
         name === "长名称服务商" ||
@@ -69,9 +71,14 @@ for (const width of [1440, 390, 320]) {
         .locator("nav")
         .getByRole("button", { name, exact: true })
         .click();
-      await expect(
-        page.getByRole("heading", { name, exact: true }),
-      ).toBeVisible();
+      if (name === "服务商管理")
+        await expect(
+          page.getByRole("heading", { name: "服务商列表", exact: true }),
+        ).toBeVisible();
+      else
+        await expect(
+          page.getByRole("heading", { name, exact: true }),
+        ).toBeVisible();
       await page.setViewportSize({ width, height: 900 });
     }
     async function modal(
@@ -90,6 +97,7 @@ for (const width of [1440, 390, 320]) {
     }
     await nav("创作模板");
     await modal("新增模板", "新增创作模板");
+    await modal("编辑", "编辑创作模板");
     await page.getByRole("button", { name: "新增模板", exact: true }).click();
     const template = page.getByRole("dialog");
     await template
@@ -160,10 +168,7 @@ for (const width of [1440, 390, 320]) {
     await nav("小程序用户");
     await modal("详情 / 积分", "小程序用户与积分");
     await nav("服务商管理");
-    await expect(
-      page.getByRole("heading", { name: "总账号", exact: true }),
-    ).toBeVisible();
-    const providerName = page.locator(".provider-name:visible").first();
+    const providerName = page.locator(".provider-tree-name b:visible").first();
     await expect(providerName).toBeVisible();
     expect(
       await providerName.evaluate(
@@ -172,64 +177,12 @@ for (const width of [1440, 390, 320]) {
           getComputedStyle(el).whiteSpace === "normal",
       ),
     ).toBeTruthy();
-    await modal("新增下级服务商", "新增下级服务商");
-    await modal("切换服务商", "切换服务商");
-    await page.getByRole("tab", { name: "名额划拨", exact: true }).click();
-    await page
-      .getByRole("button", { name: "划拨 / 收回名额", exact: true })
-      .click();
-    const parent = page.getByRole("dialog", {
-      name: "名额划拨 / 收回",
-      exact: true,
-    });
-    await expect(parent).toBeVisible();
-    await inspect("名额划拨 / 收回");
-    await parent
-      .getByRole("button", { name: "选择直接下级服务商", exact: true })
-      .click();
-    await expect(page.getByRole("dialog")).toHaveCount(2);
-    await inspect("二级选择服务商");
-    await page.keyboard.press("Escape");
-    await expect(page.getByRole("dialog")).toHaveCount(1);
-    expect(await page.evaluate(() => document.body.style.overflow)).toBe(
-      "hidden",
-    );
-    await expect(
-      parent.getByRole("button", { name: "选择直接下级服务商" }),
-    ).toBeFocused();
-    await parent.getByRole("button", { name: "关闭", exact: true }).click();
-    await modal("审批", "名额申请审批");
-    await page.getByRole("tab", { name: "授权激活", exact: true }).click();
-    await expect(
-      page.getByRole("heading", { name: "授权码", exact: true }),
-    ).toBeVisible();
-    await inspect("授权子页面");
-    await modal("生成授权码", "生成授权码");
-    await modal("查看二维码", "授权二维码 / 激活码");
-    await modal("来源记录", "二维码生成与激活记录");
-    await modal("管理授权", "管理用户授权");
-    await page.getByRole("tab", { name: "算力分佣", exact: true }).click();
-    await expect(
-      page.getByRole("button", { name: "保存分佣规则" }),
-    ).toBeVisible();
-    await inspect("分佣子页面");
-    await modal("申请提现", "申请提现");
-    await modal("处理提现", "处理提现");
-    await modal("qa-order", "充值分佣快照");
-    await page.getByRole("button", { name: "切换服务商", exact: true }).click();
-    await page
-      .getByRole("dialog")
-      .getByRole("button", { name: "选择", exact: true })
-      .first()
-      .click();
-    await expect(
-      page.getByRole("heading", { name: longName, exact: true }),
-    ).toBeVisible();
+    await modal("新增服务商", "新增服务商");
+    const provider = page
+      .locator(".provider-tree-row")
+      .filter({ hasText: longName });
+    await modal("编辑", "编辑服务商", provider);
     await inspect("长名称服务商");
-    await page.getByRole("tab", { name: "下级服务商", exact: true }).click();
-    await modal("编辑当前服务商", "编辑服务商");
-    await page.getByRole("tab", { name: "名额划拨", exact: true }).click();
-    await modal("向上级申请", "向上级申请名额");
     await info.attach("surface-inventory", {
       body: JSON.stringify({ surfaces, issues }, null, 2),
       contentType: "application/json",

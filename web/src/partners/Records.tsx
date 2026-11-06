@@ -34,38 +34,63 @@ export default function Records<T>({
   resource,
   columns,
   actions,
+  title,
+  description,
+  controls,
+  footnote,
   empty = "暂无记录",
 }: {
   resource: ReturnType<typeof useRecords<T>>;
   columns: Column<Row<T>>[];
   actions?: ReactNode;
+  title?: string;
+  description?: ReactNode;
+  controls?: ReactNode;
+  footnote?: ReactNode;
   empty?: string;
 }) {
   return (
-    <>
-      <form
-        className="business-filters"
-        onSubmit={(e) => {
-          e.preventDefault();
-          resource.search(String(new FormData(e.currentTarget).get("q") || ""));
-        }}
-      >
-        <input
-          name="q"
-          aria-label="查询记录"
-          placeholder="输入名称、编号或备注"
-          maxLength={100}
-        />
-        <button className="secondary">查询</button>
-        <button
-          type="button"
-          className="secondary"
-          onClick={() => void resource.reload()}
+    <section
+      className={title ? "panel attention-panel partner-records" : undefined}
+      aria-label={title}
+    >
+      <div className={title ? "catalog-head actions" : undefined}>
+        {title && (
+          <>
+            <div>
+              <h2>{title}</h2>
+              {description && <p>{description}</p>}
+            </div>
+            <div className="actions">{actions}</div>
+          </>
+        )}
+        <form
+          className="business-filters"
+          onSubmit={(e) => {
+            e.preventDefault();
+            resource.search(
+              String(new FormData(e.currentTarget).get("q") || ""),
+            );
+          }}
         >
-          刷新
-        </button>
-        {actions}
-      </form>
+          <input
+            name="q"
+            aria-label="查询记录"
+            placeholder="输入名称、编号或备注"
+            maxLength={100}
+          />
+          <button className="secondary">查询</button>
+          <button
+            type="button"
+            className="secondary"
+            onClick={() => void resource.reload()}
+          >
+            刷新
+          </button>
+          {!title && actions}
+          {controls}
+        </form>
+      </div>
       <RequestState
         loading={resource.loading && !resource.data}
         error={resource.error}
@@ -73,6 +98,7 @@ export default function Records<T>({
       />
       {resource.data && (
         <Table
+          framed={!title}
           rows={resource.data.items}
           id={(r) => r.id}
           columns={columns}
@@ -84,6 +110,7 @@ export default function Records<T>({
           }}
         />
       )}
-    </>
+      {footnote && <div className="catalog-head quiet">{footnote}</div>}
+    </section>
   );
 }

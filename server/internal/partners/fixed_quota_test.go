@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-func TestConfiguredRootQuotaIsFixedAndProvidersCostNoQuota(t *testing.T) {
+func TestTopLevelQuotaIsIndependentAndChildCreationConsumesParentQuota(t *testing.T) {
 	s := &Service{Store: store.NewMemory()}
 	ctx := context.Background()
 	policy := core.DefaultDistributionPolicy()
@@ -16,17 +16,27 @@ func TestConfiguredRootQuotaIsFixedAndProvidersCostNoQuota(t *testing.T) {
 	if _, err := s.SavePolicy(ctx, policy, 0, "admin"); err != nil {
 		t.Fatal(err)
 	}
-	provider, err := s.Create(ctx, core.RootPartner, "S1", "create-provider", "admin")
+	provider, err := s.Create(ctx, core.RootPartner, "S1", 10, "create-provider", "admin")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err = s.Transfer(ctx, core.QuotaMove{ParentID: core.RootPartner, ChildID: provider.ID, Users: 2, Kind: "grant", Reason: "固定额度划拨"}, "grant-provider", "admin"); err != nil {
+	view, err := s.Overview(ctx, provider.ID)
+	if err != nil || view.Quota.Users.Granted != 10 {
+		t.Fatal(view.Quota, err)
+	}
+	if _, err = s.Create(ctx, provider.ID, "S2", 6, "create-child", "admin"); err != nil {
 		t.Fatal(err)
 	}
-	if _, err = s.Create(ctx, provider.ID, "S2", "create-child", "admin"); err != nil {
-		t.Fatal("provider creation consumed user quota", err)
+	view, _ = s.Overview(ctx, provider.ID)
+	if view.Quota.Users.Allocated != 6 || view.Quota.Users.Available() != 4 {
+		t.Fatal(view.Quota)
 	}
-	if _, err = s.Transfer(ctx, core.QuotaMove{ParentID: core.RootPartner, ChildID: provider.ID, Users: 1, Kind: "grant", Reason: "禁止超发"}, "over-grant", "admin"); !errors.Is(err, core.ErrQuota) {
-		t.Fatal("fixed total quota expanded", err)
+	before, _ := s.Store.List(ctx, "partners", "")
+	if _, err = s.Create(ctx, provider.ID, "S3", 5, "over-create", "admin"); !errors.Is(err, core.ErrQuota) {
+		t.Fatal("child quota exceeded parent availability", err)
+	}
+	after, _ := s.Store.List(ctx, "partners", "")
+	if len(after) != len(before) {
+		t.Fatal("failed quota allocation did not roll back partner creation")
 	}
 }

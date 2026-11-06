@@ -61,6 +61,12 @@ func Quote(model core.Model, input core.JobInput) (int64, error) {
 }
 
 func (s *Service) CreateOrder(ctx context.Context, user, key string, fen int64, settings core.PlatformSettings, appid, mchid, openid string, pricingVersion ...string) (out core.Record, err error) {
+	return s.createOrder(ctx, user, key, fen, settings, appid, mchid, openid, nil, pricingVersion...)
+}
+func (s *Service) CreateVirtualOrder(ctx context.Context, user, key string, fen int64, settings core.PlatformSettings, appid, offerid, openid, pricingVersion string, goods core.VirtualOrder) (core.Record, error) {
+	return s.createOrder(ctx, user, key, fen, settings, appid, offerid, openid, &goods, pricingVersion)
+}
+func (s *Service) createOrder(ctx context.Context, user, key string, fen int64, settings core.PlatformSettings, appid, mchid, openid string, goods *core.VirtualOrder, pricingVersion ...string) (out core.Record, err error) {
 	if fen < settings.MinRechargeFen || fen > settings.MaxRechargeFen {
 		return out, fmt.Errorf("充值金额超出允许范围")
 	}
@@ -70,6 +76,10 @@ func (s *Service) CreateOrder(ctx context.Context, user, key string, fen int64, 
 	// fen * points/yuan already equals hundredths of a point, with no floating-point conversion.
 	units := fen * settings.PointsPerYuan
 	order := core.Order{UserID: user, AmountFen: fen, PointsUnits: units, Status: "created", Channel: "wechat_jsapi", AppID: appid, MerchantID: mchid, OpenID: openid, ExpiresAt: time.Now().UTC().Add(30 * time.Minute), RequestHash: core.Digest(strconv.FormatInt(fen, 10))}
+	if goods != nil {
+		order.Channel, order.Virtual = "wechat_virtual", goods
+		order.RequestHash = core.Digest(string(core.Data([]any{fen, appid, mchid, goods.ProductID, goods.PointsUnits, goods.Env})))
+	}
 	id := core.Digest("recharge:" + user + ":" + key)[:32]
 	err = s.Store.Atomic(ctx, func(tx store.Transaction) error {
 		if _, _, e := store.LockWallet(tx, user); e != nil {
@@ -104,6 +114,9 @@ func (s *Service) CreateOrder(ctx context.Context, user, key string, fen int64, 
 			order.PointsUnits = points
 		}
 		var e error
+		if goods != nil && (goods.PointsUnits <= 0 || goods.PointsUnits != order.PointsUnits) {
+			return fmt.Errorf("%w: 商品积分与当前服务商报价不一致，请刷新后选择其他商品", core.ErrConflict)
+		}
 		out, e = tx.Put("orders", core.Record{ID: id, Owner: user, Data: core.Data(order)}, 0)
 		return e
 	})
@@ -111,6 +124,8 @@ func (s *Service) CreateOrder(ctx context.Context, user, key string, fen int64, 
 }
 
 type PaymentResult struct {
+	Platform                                                    string
+	Channel                                                     string
 	OrderID, TransactionID, AppID, MerchantID, OpenID, Currency string
 	AmountFen                                                   int64
 	PaidAt                                                      time.Time
@@ -132,6 +147,17 @@ func (s *Service) Settle(ctx context.Context, p PaymentResult) error {
 		var order core.Order
 		if e = json.Unmarshal(current.Data, &order); e != nil {
 			return e
+		}
+		channel := p.Channel
+		if channel == "" {
+			channel = "wechat_jsapi"
+		}
+		storedChannel := order.Channel
+		if storedChannel == "" {
+			storedChannel = "wechat_jsapi"
+		}
+		if channel != storedChannel {
+			return core.ErrPaymentMismatch
 		}
 		if p.AppID != order.AppID || p.MerchantID != order.MerchantID || p.OpenID != order.OpenID || p.AmountFen != order.AmountFen || p.Currency != "CNY" || p.TransactionID == "" || len(p.TransactionID) > 64 {
 			return core.ErrPaymentMismatch
@@ -163,6 +189,13 @@ func (s *Service) Settle(ctx context.Context, p PaymentResult) error {
 			return e
 		}
 		order.Status = "paid"
+		if order.Virtual != nil {
+			order.Virtual.Platform = p.Platform
+			// A durable outbox survives failures between crediting and notifying WeChat.
+			if _, e = tx.Put("virtual_deliveries", core.Record{ID: row.ID, Owner: row.Owner, Data: core.Data(map[string]string{"status": "pending"})}, 0); e != nil {
+				return e
+			}
+		}
 		order.TransactionID = p.TransactionID
 		order.PaidAt = &p.PaidAt
 		current.Data = core.Data(order)

@@ -10,7 +10,7 @@ async function openBusiness(page: import("@playwright/test").Page) {
   await page.getByRole("button", { name: "小程序用户", exact: true }).click();
   await page.getByRole("button", { name: "服务商管理", exact: true }).click();
   await expect(
-    page.getByRole("heading", { name: "总账号", exact: true }),
+    page.getByRole("tab", { name: "服务商列表", exact: true }),
   ).toBeVisible();
 }
 test("an accepted code issue with a lost response keeps its key across browser reload", async ({
@@ -79,7 +79,7 @@ test("background refresh cannot silently replace an open provider edit version",
   await login(page);
   const response = await page.request.post("/api/admin/partners", {
     headers: { "Idempotency-Key": crypto.randomUUID() },
-    data: { parentId: "root", name: "并发编辑验收" },
+    data: { parentId: "root", name: "并发编辑验收", users: 10 },
   });
   expect(response.status()).toBe(200);
   const row = await response.json();

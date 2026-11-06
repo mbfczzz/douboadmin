@@ -1,1 +1,55 @@
 @import "../../styles/business.wxss";
+.virtual-products {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16rpx;
+}
+button.virtual-product {
+  width: 100%;
+  padding: 24rpx 16rpx;
+  background: #242c28;
+  color: #e7eee9;
+  border: 1px solid #415347;
+  border-radius: 14rpx;
+  line-height: 1.6;
+  font-size: 26rpx;
+  overflow-wrap: anywhere;
+}
+.virtual-product.selected {
+  border-color: #9bcbaa;
+  background: #25372c;
+}
+.virtual-product text {
+  display: block;
+}
+.product-price {
+  margin: 8rpx 0;
+  font-size: 34rpx;
+  color: #c2e0ca;
+}
+.wallet-links {
+  flex-wrap: wrap;
+}
+.ledger-row {
+  align-items: flex-start;
+}
+.ledger-copy {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.ledger-note,
+.ledger-time {
+  display: block;
+  line-height: 1.6;
+}
+.ledger-time {
+  margin-top: 8rpx;
+}
+.ledger-change {
+  flex: 0 0 35%;
+  text-align: right;
+  line-height: 1.5;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}

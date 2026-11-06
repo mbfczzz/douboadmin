@@ -1,0 +1,101 @@
+const { test } = require("node:test");
+const assert = require("node:assert/strict");
+const { harness } = require("./harness.cjs");
+
+function menuFixture(height, bottom, count = 20) {
+  const h = harness();
+  h.wx.getWindowInfo = () => ({
+    windowHeight: height,
+    statusBarHeight: 24,
+    screenHeight: height,
+  });
+  let measure;
+  const query = {
+    select() {
+      return this;
+    },
+    boundingClientRect(callback) {
+      measure = callback;
+      return this;
+    },
+    exec() {},
+  };
+  h.wx.createSelectorQuery = () => query;
+  const page = h.page("create");
+  page.setData({
+    modelsLoading: false,
+    availableModels: Array.from({ length: count }, (_, id) => ({
+      id: String(id),
+    })),
+  });
+  return {
+    page,
+    measure: () => measure({ top: bottom - 300, bottom, height: 300 }),
+  };
+}
+
+test("long model menus flip upward on short screens and stay inside the viewport", () => {
+  const f = menuFixture(568, 438);
+  f.page.showModels();
+  f.measure();
+  assert.equal(f.page.data.modelMenuUp, true);
+  assert.equal(f.page.data.modelMenuHeight, 298);
+  assert.ok(438 - 64 - f.page.data.modelMenuHeight >= 76);
+});
+
+test("a roomy screen retains the designed downward dropdown", () => {
+  const f = menuFixture(1000, 438, 4);
+  f.page.showModels();
+  f.measure();
+  assert.equal(f.page.data.modelMenuUp, false);
+  assert.equal(f.page.data.modelMenuHeight, 316);
+});
+
+test("late measurement cannot reopen a dismissed or hidden menu", () => {
+  const f = menuFixture(568, 438);
+  f.page.showModels();
+  f.page.closeModels();
+  f.measure();
+  assert.equal(f.page.data.showModels, false);
+  assert.equal(f.page.data.modelMenuUp, false);
+  f.page.showModels();
+  f.page.onHide();
+  f.measure();
+  assert.equal(f.page.data.modelMenuUp, false);
+});
+
+test("navigation uses a safe height for an empty capsule measurement", () => {
+  const h = harness();
+  h.wx.getWindowInfo = () => ({ windowWidth: 390, statusBarHeight: 24 });
+  h.wx.getMenuButtonBoundingClientRect = () => ({ left: 0, top: 0, height: 0 });
+  const nav = h.component("components/nav-bar");
+  nav.measure();
+  assert.equal(nav.data.height, 44);
+  assert.equal(nav.data.actionsRight, 88);
+});
+
+test("resizing dismisses stale menu geometry without changing the draft", () => {
+  const f = menuFixture(568, 438);
+  f.page.setData({ prompt: "保留的创作内容", model: "chosen" });
+  f.page.showModels();
+  f.page.onResize();
+  f.measure();
+  assert.equal(f.page.data.showModels, false);
+  assert.equal(f.page.data.prompt, "保留的创作内容");
+  assert.equal(f.page.data.model, "chosen");
+});
+
+test("navigation updates capsule spacing after resize and accepts a zero status bar", () => {
+  const h = harness();
+  h.wx.getWindowInfo = () => ({ windowWidth: 390, statusBarHeight: 0 });
+  h.wx.getMenuButtonBoundingClientRect = () => ({
+    left: 300,
+    top: 8,
+    height: 32,
+  });
+  const nav = h.component("components/nav-bar");
+  nav.pageLifetimes.resize.call(nav);
+  assert.equal(nav.data.top, 0);
+  assert.equal(nav.data.height, 48);
+  assert.equal(nav.data.actionsRight, 98);
+});

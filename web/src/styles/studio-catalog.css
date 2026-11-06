@@ -33,7 +33,6 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 18px 0 14px;
 }
 .studio-grid {
   display: grid;

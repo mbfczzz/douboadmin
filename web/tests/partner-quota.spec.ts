@@ -11,7 +11,7 @@ test("quota requests approve against the parent pool and unused codes can be rev
   await login(page);
   const response = await page.request.post("/api/admin/partners", {
     headers: { "Idempotency-Key": crypto.randomUUID() },
-    data: { parentId: "root", name: "申请验收服务商" },
+    data: { parentId: "root", name: "申请验收服务商", users: 1 },
   });
   expect(response.status()).toBe(200);
   const partner = await response.json();
@@ -45,7 +45,7 @@ test("quota requests approve against the parent pool and unused codes can be rev
   let view = await (
     await page.request.get("/api/admin/partners/" + partner.id)
   ).json();
-  expect(view.quota.users.granted).toBe(2);
+  expect(view.quota.users.granted).toBe(3);
   const code = await issueCode(page);
   view = await (
     await page.request.get("/api/admin/partners/" + partner.id)

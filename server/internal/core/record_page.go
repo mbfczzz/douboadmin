@@ -1,6 +1,8 @@
 package core
 
 type RecordQuery struct {
+	AfterID                                     string
+	ByID                                        bool
 	Namespace, Owner, Search, Status, PartnerID string
 	Page, Size                                  int
 }

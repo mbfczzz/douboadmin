@@ -5,14 +5,15 @@ import QuotaForm from "./QuotaForm";
 import QuotaRequests from "./QuotaRequests";
 import type { Move, Scope } from "./types";
 import { labels } from "./types";
+import { PartnerIdentity } from "./PartnerIdentity";
 export default function Quotas({ id, view, changed, notify }: Scope) {
   const resource = useRecords<Move>("/admin/quota-moves"),
     [form, setForm] = useState<"move" | "request" | null>(null),
     [revision, setRevision] = useState(0);
   return (
     <>
-      <h3>名额划拨记录</h3>
       <Records
+        title="名额划拨记录"
         resource={resource}
         actions={
           <>
@@ -35,13 +36,12 @@ export default function Quotas({ id, view, changed, notify }: Scope) {
         }
         columns={[
           {
-            title: "上级 → 下级",
-            render: (r) => (
-              <>
-                {r.data.parentId}
-                <small className="cell-note">→ {r.data.childId}</small>
-              </>
-            ),
+            title: "上级服务商",
+            render: (r) => <PartnerIdentity id={r.data.parentId} />,
+          },
+          {
+            title: "下级服务商",
+            render: (r) => <PartnerIdentity id={r.data.childId} />,
           },
           { title: "类型", render: (r) => labels[r.data.kind] },
           {

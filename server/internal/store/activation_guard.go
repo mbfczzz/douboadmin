@@ -3,6 +3,7 @@ package store
 import (
 	"doubo/server/internal/core"
 	"encoding/json"
+	"errors"
 )
 
 // Called after locking the user's wallet; matches activation/unbind's wallet -> tree order.
@@ -16,9 +17,19 @@ func requireActiveMember(tx Transaction, user string) error {
 	}
 	var profile *struct {
 		Disabled bool `json:"disabled"`
+		Archived bool `json:"archived"`
 	}
-	if json.Unmarshal(row.Data, &profile) != nil || profile == nil || profile.Disabled {
+	if json.Unmarshal(row.Data, &profile) != nil || profile == nil || profile.Disabled || profile.Archived {
 		return core.ErrActivationRequired
+	}
+	if direct, err := tx.Get("direct_access", user); err == nil {
+		var grant *core.DirectAccess
+		if json.Unmarshal(direct.Data, &grant) != nil || grant == nil {
+			return core.ErrActivationRequired
+		}
+		return nil
+	} else if !errors.Is(err, core.ErrNotFound) {
+		return err
 	}
 	row, e = tx.Get("memberships", user)
 	if e != nil {

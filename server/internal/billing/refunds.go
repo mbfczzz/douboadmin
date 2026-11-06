@@ -11,7 +11,15 @@ import (
 	"time"
 )
 
-func (s *Service) StartRefund(ctx context.Context, orderID, reason, actor string) (out core.Record, err error) {
+func (s *Service) StartRefund(ctx context.Context, orderID, reason, actor string) (core.Record, error) {
+	return s.startRefund(ctx, orderID, reason, actor, false)
+}
+
+func (s *Service) StartExternalRefund(ctx context.Context, orderID, reason, actor string) (core.Record, error) {
+	return s.startRefund(ctx, orderID, reason, actor, true)
+}
+
+func (s *Service) startRefund(ctx context.Context, orderID, reason, actor string, external bool) (out core.Record, err error) {
 	base, err := s.Store.Get(ctx, "orders", orderID)
 	if err != nil {
 		return out, err
@@ -42,10 +50,18 @@ func (s *Service) StartRefund(ctx context.Context, orderID, reason, actor string
 		if e = partners.HoldCommissionRefund(tx, orderID, id, order); e != nil {
 			return e
 		}
-		refund := core.Refund{OrderID: orderID, UserID: order.UserID, AmountFen: order.AmountFen, PointsUnits: order.PointsUnits, Status: "pending", Reason: reason}
+		refund := core.Refund{Channel: order.Channel, OrderID: orderID, UserID: order.UserID, AmountFen: order.AmountFen, PointsUnits: order.PointsUnits, Status: "pending", Reason: reason}
 		out, e = tx.Put("refunds", core.Record{ID: id, Owner: order.UserID, Data: core.Data(refund)}, 0)
 		if e != nil {
 			return e
+		}
+		if order.Channel == "wechat_virtual" && !external {
+			// Persist submission work together with the hold, including when the
+			// HTTP request is interrupted before it can reach WeChat.
+			event := core.Data(map[string]any{"event": "refund_submission", "orderId": orderID, "refundId": id, "amountFen": order.AmountFen, "status": "pending"})
+			if _, e = tx.Put("virtual_payment_events", core.Record{ID: core.RefundSubmissionEventID(orderID, id), Data: event}, 0); e != nil {
+				return e
+			}
 		}
 		order.Status = "refunding"
 		order.RefundID = id
@@ -57,6 +73,7 @@ func (s *Service) StartRefund(ctx context.Context, orderID, reason, actor string
 }
 
 type RefundResult struct {
+	Channel                         string
 	ID, OrderID, ProviderID, Status string
 	AmountFen                       int64
 	CompletedAt                     time.Time
@@ -78,6 +95,17 @@ func (s *Service) FinishRefund(ctx context.Context, result RefundResult) error {
 		var refund core.Refund
 		if e = json.Unmarshal(row.Data, &refund); e != nil {
 			return e
+		}
+		channel := result.Channel
+		if channel == "" {
+			channel = "wechat_jsapi"
+		}
+		storedChannel := refund.Channel
+		if storedChannel == "" {
+			storedChannel = "wechat_jsapi"
+		}
+		if channel != storedChannel {
+			return core.ErrPaymentMismatch
 		}
 		if refund.OrderID != result.OrderID || refund.AmountFen != result.AmountFen {
 			return core.ErrPaymentMismatch

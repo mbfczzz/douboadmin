@@ -57,7 +57,7 @@
         ></view
       ></view
     ><view wx:if="{{history.length}}" class="biz-card"
-      ><view class="row"
+      ><view class="row biz-title-row"
         ><text class="biz-heading">最近搜索</text
         ><text class="biz-link" bindtap="clearHistory">清空</text></view
       ><view class="hot-words"

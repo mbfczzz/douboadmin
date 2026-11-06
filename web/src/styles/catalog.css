@@ -137,9 +137,6 @@
 .catalog-table td:last-child {
   width: 120px;
 }
-.catalog-table tbody tr:hover {
-  background: #f6faf7;
-}
 .model-cell {
   display: flex;
   align-items: center;

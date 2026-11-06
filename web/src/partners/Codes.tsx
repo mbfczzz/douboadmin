@@ -3,7 +3,8 @@ import { api, date, type Row } from "../api";
 import Modal from "../components/Modal";
 import Records, { useRecords } from "./Records";
 import type { Code, Scope } from "./types";
-import { labels, activationMethod, traceTime } from "./types";
+import { activationMethod, traceTime } from "./types";
+import { PartnerIdentity, PartnerStatus } from "./PartnerIdentity";
 import { useCommand } from "./useCommand";
 import CodeReveal from "./CodeReveal";
 import Memberships from "./Memberships";
@@ -30,23 +31,23 @@ export default function Codes({ id, view, changed, notify }: Scope) {
   }
   return (
     <>
-      <h3>授权码</h3>
-      <p className="muted">
-        新生成的码归属「{view.record.data.name}
-        」。可按生成账号、激活用户编号、当时昵称或备注查询。
-      </p>
-      <label>
-        <input
-          type="checkbox"
-          checked={all}
-          onChange={(e) => {
-            setAll(e.target.checked);
-            resource.setPage(1);
-          }}
-        />{" "}
-        查看全部服务商的授权码
-      </label>
       <Records
+        title="授权码"
+        description={`新生成的码归属「${view.record.data.name}」。可按生成账号、激活用户编号、当时昵称或备注查询。`}
+        footnote="生成时预留一个用户额度，激活后转为已使用；未激活的码撤销或过期后释放额度。生成者、激活用户及时间会保留，解绑不会删除历史记录。"
+        controls={
+          <label className="actions quiet">
+            <input
+              type="checkbox"
+              checked={all}
+              onChange={(e) => {
+                setAll(e.target.checked);
+                resource.setPage(1);
+              }}
+            />{" "}
+            查看全部服务商的授权码
+          </label>
+        }
         resource={resource}
         actions={
           <button
@@ -81,17 +82,19 @@ export default function Codes({ id, view, changed, notify }: Scope) {
             title: "状态",
             render: (r) =>
               r.data.status === "pending" &&
-              Date.parse(r.data.expiresAt) <= Date.now()
-                ? "已过期，等待释放"
-                : labels[r.data.status],
+              Date.parse(r.data.expiresAt) <= Date.now() ? (
+                "已过期，等待释放"
+              ) : (
+                <PartnerStatus state={r.data.status} />
+              ),
           },
           {
             title: "归属服务商",
             render: (r) => (
-              <>
-                {r.data.partnerName || r.data.partnerId}
-                <small className="cell-note">{r.data.partnerId}</small>
-              </>
+              <PartnerIdentity
+                id={r.data.partnerId}
+                name={r.data.partnerName}
+              />
             ),
           },
           { title: "有效期", render: (r) => date(r.data.expiresAt) },
@@ -129,10 +132,6 @@ export default function Codes({ id, view, changed, notify }: Scope) {
           },
         ]}
       />
-      <p className="muted">
-        生成时预留一个用户额度，激活后转为已使用。未激活的码撤销或过期后释放额度。
-        生成者、激活用户及时间会保留，解绑不会删除历史记录。
-      </p>
       <Memberships
         id={id}
         notify={notify}
@@ -148,6 +147,8 @@ export default function Codes({ id, view, changed, notify }: Scope) {
         >
           <form
             className="edit-form"
+            aria-busy={command.busy}
+            data-unsaved={command.busy || undefined}
             onSubmit={async (e) => {
               e.preventDefault();
               const f = new FormData(e.currentTarget);
@@ -169,32 +170,36 @@ export default function Codes({ id, view, changed, notify }: Scope) {
               }
             }}
           >
-            <label>
-              备注
-              <input
-                name="label"
-                maxLength={80}
-                placeholder="便于区分使用对象"
-              />
-            </label>
-            <label>
-              激活码有效天数
-              <input
-                name="days"
-                type="number"
-                min="1"
-                max="30"
-                step="1"
-                defaultValue="7"
-                required
-              />
-            </label>
-            <p className="muted">
-              这里设置的是激活码领取期限。激活成功后长期绑定，停用仍占名额，解绑才释放。
-            </p>
-            <button className="primary" disabled={command.busy}>
-              生成并预留名额
-            </button>
+            <fieldset disabled={command.busy}>
+              <label>
+                备注
+                <input
+                  name="label"
+                  maxLength={80}
+                  placeholder="便于区分使用对象"
+                />
+              </label>
+              <label>
+                激活码有效天数
+                <input
+                  name="days"
+                  type="number"
+                  min="1"
+                  max="30"
+                  step="1"
+                  defaultValue="7"
+                  required
+                />
+              </label>
+              <p className="muted">
+                这里设置的是激活码领取期限。激活成功后长期绑定，停用仍占名额，解绑才释放。
+              </p>
+              <div className="modal-actions">
+                <button className="primary" disabled={command.busy}>
+                  生成并预留名额
+                </button>
+              </div>
+            </fieldset>
           </form>
         </Modal>
       )}

@@ -13,12 +13,14 @@ export default function Table<T>({
   empty = "暂无记录",
   help = "",
   pagination,
+  framed = true,
 }: {
   rows: T[];
   columns: Column<T>[];
   id: (row: T) => string;
   empty?: string;
   help?: string;
+  framed?: boolean;
   pagination?: {
     page: number;
     total: number;
@@ -40,7 +42,7 @@ export default function Table<T>({
     return () => media.removeEventListener("change", update);
   }, []);
   return (
-    <section className="panel record-table">
+    <section className={framed ? "panel record-table" : "record-table"}>
       {!mobile && (
         <div className="table-scroll" key={current}>
           <table className="catalog-table">

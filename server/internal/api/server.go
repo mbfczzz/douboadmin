@@ -10,12 +10,14 @@ import (
 	"doubo/server/internal/payments"
 	"doubo/server/internal/relay"
 	"doubo/server/internal/store"
+	"doubo/server/internal/virtualpay"
 	"doubo/server/internal/wechat"
 	"io"
 	"net/http"
 )
 
 type Config struct {
+	PaymentChannel       string
 	RequireActivation    bool
 	Production           bool
 	DemoLogin            bool
@@ -42,6 +44,7 @@ type Server struct {
 	Hot      *hotvideo.Service
 	Billing  *billing.Service
 	Pay      *payments.Client
+	Virtual  *virtualpay.Service
 	Objects  Objects
 	Relay    *relay.Client
 	Media    *media.Service

@@ -15,15 +15,17 @@
   color: #f0f1ef;
 }
 .task-state {
+  flex-wrap: wrap;
   font-size: 13px;
   color: #a7b6ac;
   gap: 8px;
 }
 .state-label {
+  min-width: 0;
+  flex-wrap: wrap;
   display: flex;
   align-items: center;
   gap: 10px;
-  white-space: nowrap;
 }
 .task-state .small {
   font-size: 12px;
@@ -35,6 +37,7 @@
   color: #dea28b;
 }
 .failure-reason {
+  overflow-wrap: anywhere;
   font-size: 14px;
   color: #b7aaa3;
   line-height: 1.5;
@@ -79,7 +82,23 @@
 }
 .task-detail-page .foot-actions {
   gap: 10px;
-  margin: 12px 0 24px;
+  margin: 12px 0 0;
+}
+.result-actions {
+  margin-top: 8px;
+}
+.stage-note {
+  margin-top: 8px;
+  color: #a0a8ac;
+  font-size: 12px;
+  line-height: 1.7;
+}
+.billing-summary {
+  display: block;
+  margin-top: 8px;
+}
+.task-balance {
+  margin-top: 24px;
 }
 .task-detail-page .section-title {
   font-size: 12px;
@@ -133,6 +152,7 @@
   margin-top: 3px;
 }
 .specs {
+  overflow-wrap: anywhere;
   font-size: 12px;
   line-height: 1.8;
   color: #929d96;

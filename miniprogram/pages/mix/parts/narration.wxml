@@ -44,7 +44,7 @@
       color="#9BCBAA" /></view
   ><block wx:if="{{narration}}"
     ><picker range="{{modelNames}}" value="{{modelIndex}}" bindchange="model"
-      ><view class="biz-row"
+      ><view class="biz-row biz-picker-row"
         ><text>配音模型</text
         ><text class="accent">{{modelNames[modelIndex]}} ›</text></view
       ></picker
@@ -53,7 +53,7 @@
       range="{{voices}}"
       value="{{voiceIndex}}"
       bindchange="voice"
-      ><view class="biz-row"
+      ><view class="biz-row biz-picker-row"
         ><text>音色</text
         ><text class="accent">{{voices[voiceIndex]}} ›</text></view
       ></picker

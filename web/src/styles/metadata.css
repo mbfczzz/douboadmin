@@ -1,6 +1,6 @@
 dl {
   display: grid;
-  grid-template-columns: 110px 1fr;
+  grid-template-columns: 110px minmax(0, 1fr);
   gap: 13px;
   font-size: 13px;
   margin: 20px 0;
@@ -11,6 +11,12 @@ dt {
 dd {
   margin: 0;
   color: #424c52;
+}
+.edit-form > dl:first-child {
+  margin-top: 0;
+}
+.table-scroll + .quiet {
+  margin-top: 16px;
 }
 .mono {
   font-family: ui-monospace, SFMono-Regular, Consolas, monospace;

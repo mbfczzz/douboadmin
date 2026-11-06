@@ -1,7 +1,11 @@
-param([ValidateSet('serve','migrate')][string]$Command='serve')
+param(
+  [ValidateSet('serve','migrate')][string]$Command='serve',
+  [ValidatePattern('^[A-Za-z0-9_-]+\.exe$')][string]$Binary='doubo-local.exe'
+)
 $ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path -Parent $PSScriptRoot
 $runtimeDir = Join-Path $projectRoot '.runtime'
+$binaryPath = Join-Path $runtimeDir $Binary
 $envPath = Join-Path $projectRoot '.env.local'
 $previous = @{}
 
@@ -29,11 +33,11 @@ try {
   }
   # Only the API child inherits local credentials; restore before starting Vite.
 	if ($Command -eq 'migrate') {
-		& (Join-Path $runtimeDir 'doubo-local.exe') migrate
+		& $binaryPath migrate
 		if ($LASTEXITCODE -ne 0) { throw 'Database migration failed' }
 		return
 	}
-  Start-Process -FilePath (Join-Path $runtimeDir 'doubo-local.exe') `
+  Start-Process -FilePath $binaryPath `
     -WorkingDirectory (Join-Path $projectRoot 'server') -WindowStyle Hidden `
     -RedirectStandardOutput (Join-Path $runtimeDir 'local-api.out.log') `
     -RedirectStandardError (Join-Path $runtimeDir 'local-api.err.log') -PassThru

@@ -2,6 +2,11 @@ package api
 
 func (a *Server) paymentRoutes() {
 	m := a.Mux
+	m.HandleFunc("GET /api/payments/virtual/notify", a.virtualNotify)
+	m.HandleFunc("POST /api/payments/virtual/notify", a.virtualNotify)
+	m.HandleFunc("GET /api/admin/virtual-payments/events", a.auth("admin", a.virtualEvents))
+	m.HandleFunc("POST /api/admin/virtual-payments/events/{id}/retry", a.auth("admin", a.retryVirtualEvent))
+	m.HandleFunc("POST /api/admin/virtual-payments/events/{id}/review", a.auth("admin", a.reviewVirtualEvent))
 	m.HandleFunc("GET /api/admin/payments", a.auth("admin", a.paymentRecords))
 	m.HandleFunc("GET /api/orders", a.auth("user", a.orders))
 	m.HandleFunc("POST /api/orders", a.auth("user", a.createOrder))

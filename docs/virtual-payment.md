@@ -1,0 +1,81 @@
+# 微信虚拟支付（积分商品直购）
+
+当前实现 `short_series_goods`，不是微信代币钱包或会员订阅。Go API 自建接收安全模式消息推送，不依赖 CloudBase，也没有新增运行时依赖。默认关闭，不含真实 OfferID、AppKey 或商品 ID。
+
+## 配置
+
+在服务器环境文件填写；本地使用被 Git 忽略的 `.env.local`。密钥禁止放入小程序代码、管理员接口或 Git。
+
+| 配置 | 用途 |
+| --- | --- |
+| `PAYMENT_CHANNEL` | 新订单通道：`wechat_jsapi`（默认）或 `wechat_virtual` |
+| `WECHAT_VIRTUAL_ENABLED` | 新虚拟订单开关，默认 `false` |
+| `WECHAT_VIRTUAL_ENV` | `1` 沙箱、`0` 现网；生产环境禁止启用沙箱 |
+| `WECHAT_VIRTUAL_OFFER_ID` | 微信虚拟支付 OfferID，不是普通支付商户号 |
+| `WECHAT_VIRTUAL_APP_KEY` | 现网 AppKey |
+| `WECHAT_VIRTUAL_SANDBOX_APP_KEY` | 沙箱 AppKey；生产部署必须留空 |
+| `WECHAT_VIRTUAL_TOKEN` | 消息推送 Token |
+| `WECHAT_VIRTUAL_ENCODING_AES_KEY` | 43 位消息推送 EncodingAESKey |
+| `WECHAT_VIRTUAL_PRODUCTS` | JSON 商品目录，默认 `[]` |
+| `WECHAT_VIRTUAL_IOS_ALLOWED` | 默认 `false`；仅现网、开通 IAP 后允许 |
+
+复用 `WECHAT_APP_ID` / `WECHAT_APP_SECRET`。AppSecret、AppKey、推送 Token 和 EncodingAESKey 各不相同。关闭新订单开关后，已配置凭证仍可用于旧订单通知和对账；不要立即删除旧环境凭证。
+
+商品示例仅展示格式，ID 需替换为微信后台已经发布的道具 ID：
+
+```json
+[{"id":"REPLACE_PRODUCT_ID","name":"1000积分","amountFen":1000,"pointsUnits":100000}]
+```
+
+金额单位为分，积分单位为百分之一积分。示例为10元、1000积分。商品价格和权益必须与微信后台一致。商品与平台兑换率、服务商报价不匹配时，不展示该商品，直接调用下单接口也会被拒绝；不可通过填写虚假的积分数绕过渠道报价。不同权益需要配置对应商品 ID。
+
+## 调用与安全边界
+
+1. 钱包接口返回当前通道及可用商品；虚拟支付页不接受任意金额。
+2. 服务器建立不可变订单快照，金额、积分、商品、OfferID、AppID、环境绑定到订单。
+3. 小程序获取新的 `wx.login` code；服务器换取 session_key，核对 openid 与订单归属后计算双签名。session_key 不写库、不回传、不作业务令牌。
+4. 签名只签发一次。用户取消后须创建新订单；结果未知时查单，不重复使用 outTradeNo。
+5. 小程序原样传递 signData 字符串给 `wx.requestVirtualPayment`，不得重新序列化。前端 success 不发积分。
+6. 后端核对查单返回的单号、金额、环境、类型和透传数据，在同一事务中记录支付、发积分、记分佣和写发货 outbox。
+7. 发货确认失败会由持久化 outbox 重试；后台扫描使用共享租约和分页，通知与查单共用幂等结算。
+
+旧 JSAPI 订单仍走原查询、通知和退款链路，不根据当前通道误路由。两类通知不能跨通道结算。
+
+## 微信后台回调配置
+
+配置已部署的 HTTPS 地址：`https://你的域名/api/payments/virtual/notify`。
+
+- 必须选择**安全模式**，Token / EncodingAESKey 与服务器一致。
+- 支持 XML、JSON 加密推送，以及 GET URL 验证；拒绝未加密的业务 POST。
+- 订阅发货、退款、投诉/风控及 iOS 退款问询事件。
+- 普通处理成功返回 `success`；未完成不返回成功，允许平台重试。
+- iOS 退款问询依据数据库状态快速返回加密证据，不伪造消费记录。
+
+## 退款及人工核对边界
+
+- 当前业务仅支持整笔积分商品退款，不支持代币退款、订阅退款或按比例部分回收。
+- Android 等通道可从后台申请全额退款，先预留积分；退款接口返回受理不代表完成。查单状态5仅为商户扣款，状态8才是用户侧收款完成。
+- Apple 订单禁止调用开发者主动退款接口；用户从 App Store 申请，平台通知后核对回收。
+- **外部退款时积分已经消费、收到部分退款、或平台发货状态与本地不一致，必须人工核对。** 已验签通知先持久化，再应用业务；本地交易号尚未入账的通知也会保留。后台“支付管理 → 虚拟支付异常”可筛选、分页查看原因并重试。待重试事件由后台任务自动处理；不会将回收失败伪报为成功。
+- 管理员可保存人工核对说明，记录操作者和时间、停止该事件的自动重试；此操作不修改订单、退款或积分。接口为 `POST /api/admin/virtual-payments/events/{id}/retry` 和 `POST /api/admin/virtual-payments/events/{id}/review`（后者要求 `version`、`note`）。
+- 新退款在冻结积分前核验微信可退金额、支付交易号和状态。提交结果不确定时保留原退款单和预留积分，并进入异常队列；重试先查原退款结果，必要时沿用原退款单号提交，不能新建另一笔退款。
+- 小程序查询超时后可查看订单，或确认原订单仍可能到账后另购一笔。旧订单继续留在充值订单中跟踪，不因超时标记失败；已签发的虚拟支付单不能重新拉起支付。
+- 投诉和风控事件只记录供人工处理，不自动申诉；事件详情可能含交易身份信息，仅管理员接口可读，不应复制到公开日志。退款异常需要配置运营巡检；不要在未验收这些流程前放开 iOS。
+
+## 后续提供真实配置后的验收
+
+确认主体能力开通、商品已发布、服务器回调 GET 验证通过；完成沙箱支持场景和真机现网小额支付验证。iOS 需 iOS15+、微信8.0.68+、已开通IAP，且不支持沙箱。真实支付测试必须另外确认，不能仅凭单元测试启用收款。
+
+验收顺序：签名 → 拉起支付 → 加密通知 → 积分到账 → 重复通知 → 通知丢失查单 → 生成扣减 → 全额退款及异常队列 → 新旧通道并存。
+
+运行：服务端 `go test ./internal/virtualpay ./internal/api ./internal/billing ./internal/payments ./internal/wechat`；小程序 `npm run test:virtual-payment`、`npm run test:payment`、`npm run build`。
+
+## 官方协议来源
+
+- https://developers.weixin.qq.com/miniprogram/dev/platform-capabilities/business-capabilities/virtual-payment.html
+- https://developers.weixin.qq.com/miniprogram/dev/api/payment/wx.requestVirtualPayment.html
+- https://developers.weixin.qq.com/miniprogram/dev/server/API/VirtualPayment/api_query_order.html
+- https://developers.weixin.qq.com/miniprogram/dev/server/API/VirtualPayment/api_refund_order.html
+- https://developers.weixin.qq.com/miniprogram/dev/framework/server-ability/message-push.html
+
+以上实现依据2026-11-06读取的官方页面，尤其注意查询结果 `env_type` 为1/2，而请求 `env` 为0/1。

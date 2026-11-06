@@ -9,7 +9,10 @@
   flex: 1;
   min-width: 0;
 }
-.hot-search button {
+.hot-search button.biz-action {
+  width: auto;
+  flex: 0 0 auto;
+  min-height: 86rpx;
   white-space: nowrap;
   padding: 20rpx;
   margin: 0;
@@ -20,6 +23,8 @@
   flex-wrap: wrap;
 }
 .hot-words text {
+  max-width: 100%;
+  overflow-wrap: anywhere;
   background: #29322c;
   padding: 12rpx 18rpx;
   border-radius: 10rpx;

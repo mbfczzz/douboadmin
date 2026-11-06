@@ -13,11 +13,13 @@
     >暂无充值订单</view
   >
   <view wx:for="{{rows}}" wx:key="id" class="biz-card"
-    ><view class="row"
+    ><view class="row biz-card-head"
       ><text class="biz-heading">{{item.points}} 积分</text
       ><text class="accent">{{item.state}}</text></view
     ><text class="biz-value">¥{{item.amount}}</text
-    ><text class="biz-small">{{item.time}} · {{item.id}}</text
+    ><text class="biz-small biz-record-meta">{{item.time}}</text
+    ><text class="biz-small biz-record-meta" selectable>{{item.id}}</text
+    ><text wx:if="{{item.data.status==='created'&&item.data.virtual.issued}}" class="biz-note">此支付单不能再次拉起支付。若已取消，可返回积分页重新购买；已付款请先查支付结果。</text
     ><view wx:if="{{item.data.status==='created'}}" class="biz-pair"
       ><view
         ><button
@@ -28,7 +30,7 @@
         >
           查支付结果
         </button></view
-      ><view
+      ><view wx:if="{{item.canPay}}"
         ><button
           class="biz-action"
           loading="{{busy===item.id}}"

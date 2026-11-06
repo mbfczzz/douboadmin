@@ -20,6 +20,10 @@ func (m *MySQL) RecordPage(ctx context.Context, q core.RecordQuery) (out core.Re
 	}
 	where := ` FROM records WHERE namespace=?`
 	args := []any{q.Namespace}
+	if q.ByID && q.AfterID != "" {
+		where += ` AND id>?`
+		args = append(args, q.AfterID)
+	}
 	if q.Owner != "" {
 		where += ` AND owner_id=?`
 		args = append(args, q.Owner)
@@ -44,7 +48,11 @@ func (m *MySQL) RecordPage(ctx context.Context, q core.RecordQuery) (out core.Re
 	if e = tx.QueryRowContext(ctx, `SELECT COUNT(*)`+where, args...).Scan(&out.Total); e != nil {
 		return out, e
 	}
-	rows, e := tx.QueryContext(ctx, `SELECT id,owner_id,version,data,created_at`+where+` ORDER BY created_at DESC,id DESC LIMIT ? OFFSET ?`, append(args, q.Size, (q.Page-1)*q.Size)...)
+	order := ` ORDER BY created_at DESC,id DESC`
+	if q.ByID {
+		order = ` ORDER BY id ASC`
+	}
+	rows, e := tx.QueryContext(ctx, `SELECT id,owner_id,version,data,created_at`+where+order+` LIMIT ? OFFSET ?`, append(args, q.Size, (q.Page-1)*q.Size)...)
 	if e != nil {
 		return out, e
 	}
@@ -72,6 +80,9 @@ func (m *Memory) RecordPage(_ context.Context, q core.RecordQuery) (out core.Rec
 	defer m.mu.Unlock()
 	items := []core.Record{}
 	for key, row := range m.records {
+		if q.ByID && row.ID <= q.AfterID {
+			continue
+		}
 		if key != q.Namespace+":"+row.ID || (q.Owner != "" && q.Owner != row.Owner) {
 			continue
 		}
@@ -97,6 +108,9 @@ func (m *Memory) RecordPage(_ context.Context, q core.RecordQuery) (out core.Rec
 		items = append(items, copyRecord(row))
 	}
 	sort.Slice(items, func(i, j int) bool {
+		if q.ByID {
+			return items[i].ID < items[j].ID
+		}
 		if items[i].CreatedAt.Equal(items[j].CreatedAt) {
 			return items[i].ID > items[j].ID
 		}

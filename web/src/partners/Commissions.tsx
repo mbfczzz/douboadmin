@@ -28,8 +28,8 @@ export default function Commissions(scope: Scope) {
         ))}
       </div>
       {id === "root" && <PolicyForm notify={notify} changed={changed} />}
-      <h3>佣金流水</h3>
       <Records
+        title="佣金流水"
         resource={resource}
         columns={[
           { title: "类型", render: (r) => labels[r.data.kind] || r.data.kind },
@@ -47,7 +47,10 @@ export default function Commissions(scope: Scope) {
             render: (r) => (
               <>
                 {r.data.orderId ? (
-                  <button onClick={() => setOrder(r.data.orderId!)}>
+                  <button
+                    className="text-button"
+                    onClick={() => setOrder(r.data.orderId!)}
+                  >
                     {r.data.orderId}
                   </button>
                 ) : (

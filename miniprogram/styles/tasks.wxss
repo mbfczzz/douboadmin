@@ -33,4 +33,5 @@
 }
 .foot-actions > view {
   flex: 1;
+  min-width: 0;
 }

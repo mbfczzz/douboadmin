@@ -127,7 +127,11 @@ export default function PaymentRecords() {
             {
               title: "渠道",
               render: (r) =>
-                r.channel === "wechat_jsapi" ? "微信支付" : r.channel,
+                r.channel === "wechat_jsapi"
+                  ? "微信支付"
+                  : r.channel === "wechat_virtual"
+                    ? "微信虚拟支付"
+                    : r.channel,
             },
           ]}
         />

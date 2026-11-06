@@ -3,7 +3,7 @@ import type { Row } from "../api";
 import Modal from "../components/Modal";
 import Records, { useRecords } from "./Records";
 import type { QuotaRequest } from "./types";
-import { labels } from "./types";
+import { PartnerIdentity, PartnerStatus } from "./PartnerIdentity";
 import { useCommand } from "./useCommand";
 import type { Notify } from "../navigation";
 export default function QuotaRequests({
@@ -18,25 +18,35 @@ export default function QuotaRequests({
     command = useCommand();
   return (
     <>
-      <h3>名额申请（总账号统一审批）</h3>
       <Records
+        title="名额申请"
+        description="由平台管理员统一审批。"
         resource={resource}
         columns={[
-          { title: "服务商", render: (r) => r.data.partnerId },
+          {
+            title: "服务商",
+            render: (r) => <PartnerIdentity id={r.data.partnerId} />,
+          },
           {
             title: "用户额度",
             render: (r) => r.data.users,
           },
           { title: "原因", render: (r) => r.data.reason },
-          { title: "状态", render: (r) => labels[r.data.status] },
+          {
+            title: "状态",
+            render: (r) => <PartnerStatus state={r.data.status} />,
+          },
+          { title: "审批说明", render: (r) => r.data.decision || "—" },
           {
             title: "操作",
             action: true,
             render: (r) =>
               r.data.status === "pending" ? (
-                <button onClick={() => setDetail(r)}>审批</button>
+                <button className="text-button" onClick={() => setDetail(r)}>
+                  审批
+                </button>
               ) : (
-                r.data.decision || "—"
+                "—"
               ),
           },
         ]}
@@ -48,6 +58,8 @@ export default function QuotaRequests({
         >
           <form
             className="edit-form"
+            aria-busy={command.busy}
+            data-unsaved={command.busy || undefined}
             onSubmit={async (e) => {
               e.preventDefault();
               const f = new FormData(e.currentTarget);
@@ -70,21 +82,30 @@ export default function QuotaRequests({
               }
             }}
           >
-            <p>申请 {detail.data.users} 个用户额度。</p>
-            <label>
-              审批结果
-              <select name="decision">
-                <option value="approve">批准并划拨</option>
-                <option value="reject">拒绝申请</option>
-              </select>
-            </label>
-            <label>
-              审批说明
-              <textarea name="reason" minLength={2} maxLength={200} required />
-            </label>
-            <button className="primary" disabled={command.busy}>
-              保存审批
-            </button>
+            <fieldset disabled={command.busy}>
+              <p>申请 {detail.data.users} 个用户额度。</p>
+              <label>
+                审批结果
+                <select name="decision">
+                  <option value="approve">批准并划拨</option>
+                  <option value="reject">拒绝申请</option>
+                </select>
+              </label>
+              <label>
+                审批说明
+                <textarea
+                  name="reason"
+                  minLength={2}
+                  maxLength={200}
+                  required
+                />
+              </label>
+              <div className="modal-actions">
+                <button className="primary" disabled={command.busy}>
+                  保存审批
+                </button>
+              </div>
+            </fieldset>
           </form>
         </Modal>
       )}

@@ -1,5 +1,6 @@
 {
   "usingComponents": {
+    "points-balance": "/components/points-balance/index",
     "t-button": "tdesign-miniprogram/button/button",
     "t-loading": "tdesign-miniprogram/loading/loading",
     "t-popup": "tdesign-miniprogram/popup/popup"

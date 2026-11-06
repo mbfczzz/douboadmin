@@ -18,14 +18,39 @@ export const longName = "QualityControlProvider".repeat(2) + "International";
 // Browser-only read fixtures. Writes are blocked; no payments or quotas are changed.
 export async function surfaceFixtures(page: Page) {
   const models = await (await page.request.get("/api/admin/models")).json();
+  const imageModel = models.find(
+    (r: { data: { kind: string } }) => r.data.kind === "image",
+  );
   const partner = row("qa-provider", {
-    name: longName,
-    parentId: "root",
-    path: ["root"],
-    status: "active",
-    retailPer100Fen: 10000,
-    childMarginBps: 5000,
-  });
+      name: longName,
+      parentId: "root",
+      path: ["root"],
+      status: "active",
+      retailPer100Fen: 10000,
+      childMarginBps: 5000,
+    }),
+    childPartner = row("qa-child", {
+      name: "质检子级服务商",
+      parentId: "qa-provider",
+      path: ["root", "qa-provider"],
+      status: "active",
+      retailPer100Fen: 12000,
+      childMarginBps: 3000,
+    }),
+    partnerTree = [
+      {
+        record: partner,
+        quota: {
+          users: { granted: 20, used: 1, reserved: 1, allocated: 9 },
+        },
+      },
+      {
+        record: childPartner,
+        quota: {
+          users: { granted: 4, used: 1, reserved: 0, allocated: 0 },
+        },
+      },
+    ];
   const membership = {
     partnerId: "root",
     status: "active",
@@ -67,6 +92,26 @@ export async function surfaceFixtures(page: Page) {
     demo: false,
   };
   const maps: Record<string, unknown> = {
+    "/templates": [
+      row("qa-template", {
+        title: "弹窗质检模板",
+        category: "测试分类",
+        family: "style",
+        kind: "image",
+        model: imageModel?.id || "",
+        resolution: imageModel?.data.resolutions[0] || "",
+        ratio: imageModel?.data.ratios[0] || "",
+        quality: "",
+        mode: "",
+        duration: 0,
+        cover: "/media/design/cover-1.jpg",
+        prompt: "只读界面验收提示词",
+        description: "只读测试模板，不写入业务数据库",
+        published: false,
+        sort: 0,
+        requiredImages: 0,
+      }),
+    ],
     "/accounts": {
       canManage: true,
       items: [
@@ -137,7 +182,7 @@ export async function surfaceFixtures(page: Page) {
     "/activation-codes": list([code]),
     "/activation-codes/qa-code": {
       code: "AAAABBBBCCCCDDDDEEEE",
-      qr: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jmAAAAABJRU5ErkJggg==",
+      qr: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAUAAAAFAAQMAAAD3XjfpAAAABlBMVEX///8AAABVwtN+AAABm0lEQVR42uyaO5KzQAyERTmYkCNwFI4GR+MocwTCCVz0X5JmwI+fddUuDA66k334y1RStzQWiqIoivqlGmRFaSDS2u/zrfx3IngdONrPIQZA+jksMkxyg39K8FKwAyBD1L96pMZLKANwJ3gyiEl7ZuwJfhUYFpF+9iYi+BVgnmar5XgJ98cewb+BxdjDoj2TGgd/SAAEq4DP6udgJfwYjQmeDuo0M1uJKwjM3m2lxQheAYqIgu42GdGOApBuL81F8AAwTzP3GTd2qKXLgPS/jZ1gTdCGV5fM8MOaALr3EhKsCCqiqRe6Ooq0SZurvYt22/3FaggeCI4dlryxj33OWwSvBHVNaW14YcmF9DA8SnjbCwlWBA2BZquAfPDNG7tGLoKHg5ZxNWFFz1mbYgDBC8FNfmH3HaSc3AleBz68Sr0cfOPueyHBOuDT/XFe0zHB08Dtwu6VKUqye4onWBM0n/FpZnvLbgkJVga1hNZctqbk7WUieDy4TTO19/JdheHtrEiwMvjwKlVuKfLpvZDg+SBFURRFmf4FAAD//13EXvMqiHVCAAAAAElFTkSuQmCC",
     },
     "/activation-codes/qa-code/trace": {
       record: code,
@@ -191,6 +236,7 @@ export async function surfaceFixtures(page: Page) {
       });
     const url = new URL(route.request().url()),
       path = url.pathname.replace("/api/admin", "");
+    if (path === "/partners/tree") return route.fulfill({ json: partnerTree });
     if (path === "/partners")
       return route.fulfill({
         json: list(

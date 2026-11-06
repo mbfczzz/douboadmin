@@ -28,6 +28,7 @@
       </view>
       <text class="small muted">{{job.time}} 提交</text>
     </view>
+    <view wx:if="{{job.stage&&(job.status==='running'||job.status==='queued')}}" class="stage-note">{{job.stage}} · {{job.progress}}%</view>
     <view
       wx:if="{{job.status==='queued'||job.status==='running'}}"
       class="waiting-note"
@@ -88,21 +89,12 @@
         </t-button>
       </view>
     </view>
-    <text class="section-title">提示词</text>
-    <view
-      wx:if="{{job.stage&&(job.status==='running'||job.status==='queued')}}"
-      class="note"
-      >{{job.stage}} · {{job.progress}}%</view
-    >
-    <view wx:if="{{job.costUnits}}" class="note"
-      >本次积分 {{job.costUnits/100}} ·
-      {{job.billingState==='reserved'?'已预留':job.billingState==='charged'?'已扣除':job.billingState==='released'?'已退回':''}}</view
-    >
-    <view wx:if="{{job.status==='succeeded'&&!job.deleted}}" class="row"
+    <view wx:if="{{job.status==='succeeded'&&!job.deleted}}" class="row result-actions"
       ><button class="text-button" bindtap="share">
         {{job.reviewStatus==='approved'?'分享作品':'待审核后分享'}}</button
       ><button class="text-button" bindtap="remove">删除作品</button></view
     >
+    <text class="section-title">提示词</text>
     <text class="full-prompt" selectable>{{job.input.prompt}}</text>
     <view class="row section-title">
       <text>参考文件</text>
@@ -128,6 +120,8 @@
     <view class="specs">
       {{job.modelName}} · {{job.input.resolution}} · {{job.input.ratio}}
       <text wx:if="{{job.input.duration}}">· {{job.input.duration}}秒</text>
+      <text wx:if="{{job.costUnits}}" class="billing-summary">本次积分 {{job.costUnits/100}} · {{job.billingState==='reserved'?'已预留':job.billingState==='charged'?'已扣除':job.billingState==='released'?'已退回':''}}</text>
     </view>
+    <view class="task-balance"><points-balance /></view>
   </view>
 </view>

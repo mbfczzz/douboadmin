@@ -1,0 +1,48 @@
+.balance {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24rpx;
+  margin: 0;
+  padding: 24rpx;
+  border-radius: 20rpx;
+  background: var(--td-bg-color-container, #1c1f21);
+}
+.balance-copy {
+  min-width: 0;
+  flex: 1;
+}
+.label,
+.note {
+  display: block;
+  color: var(--td-text-color-secondary, #a0a8ac);
+  font-size: 24rpx;
+}
+.amount {
+  display: block;
+  margin: 6rpx 0;
+  color: var(--td-text-color-primary, #e9eceb);
+  font-size: 38rpx;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+button.action {
+  width: auto;
+  flex-shrink: 0;
+  margin: 0;
+  padding: 20rpx 24rpx;
+  line-height: 1.6;
+  border-radius: 14rpx;
+  color: var(--td-button-primary-color, #17281d);
+  background: var(--td-brand-color, #9bcbaa);
+  font-size: 28rpx;
+}
+.action::after {
+  border: 0;
+}
+.error {
+  display: block;
+  color: #e5bfa6;
+  font-size: 24rpx;
+  padding: 12rpx 0;
+}

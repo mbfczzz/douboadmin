@@ -17,7 +17,7 @@ func (a *Server) monitor(w http.ResponseWriter, r *http.Request) {
 		dbError(w, e)
 		return
 	}
-	reply(w, 200, map[string]any{"instances": instances, "queue": queue, "database": a.Store.Ping(r.Context()) == nil, "redisConfigured": a.Sessions.Redis != nil, "ossConfigured": a.Objects != nil, "relayConfigured": a.Relay.Ready(), "paymentConfigured": a.Pay.Ready(), "hotConfigured": a.Hot.Ready()})
+	reply(w, 200, map[string]any{"instances": instances, "queue": queue, "database": a.Store.Ping(r.Context()) == nil, "redisConfigured": a.Sessions.Redis != nil, "ossConfigured": a.Objects != nil, "relayConfigured": a.Relay.Ready(), "paymentConfigured": a.rechargeReady(), "hotConfigured": a.Hot.Ready()})
 }
 func (a *Server) operationalRecords(namespace string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {

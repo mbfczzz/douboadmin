@@ -4,15 +4,19 @@ import (
 	"context"
 	"doubo/server/internal/core"
 	"doubo/server/internal/store"
+	"encoding/json"
 	"strings"
 )
 
-func (s *Service) Create(ctx context.Context, parent, name, key, actor string) (core.Record, error) {
+func (s *Service) Create(ctx context.Context, parent, name string, users int64, key, actor string) (core.Record, error) {
 	name = strings.TrimSpace(name)
 	if name == "" || len([]rune(name)) > 60 {
 		return core.Record{}, rulef("服务商名称需为 1–60 字")
 	}
-	return s.command(ctx, actor, key, []string{"create", parent, name}, func(tx store.Transaction, id string) (core.Record, error) {
+	if users <= 0 || users > 1000000 {
+		return core.Record{}, rulef("可授权账号额度需为 1–1000000")
+	}
+	return s.command(ctx, actor, key, []any{"create", parent, name, users}, func(tx store.Transaction, id string) (core.Record, error) {
 		if e := activeChain(tx, parent); e != nil {
 			return core.Record{}, e
 		}
@@ -33,8 +37,56 @@ func (s *Service) Create(ctx context.Context, parent, name, key, actor string) (
 		if e != nil {
 			return created, e
 		}
-		return created, audit(tx, id, "create_partner", actor, "创建下级服务商，用户额度由上级另行划拨", n)
+		if parent == core.RootPartner {
+			row, initial, quotaErr := quota(tx, id)
+			if quotaErr != nil {
+				return created, quotaErr
+			}
+			initial.Users.Granted = users
+			if _, quotaErr = put(tx, "partner_quotas", row, initial); quotaErr != nil {
+				return created, quotaErr
+			}
+		} else if _, e = moveQuota(tx, core.NewID(), core.QuotaMove{
+			ParentID: parent,
+			ChildID:  id,
+			Users:    users,
+			Kind:     "grant",
+			Reason:   "创建下级服务商并分配初始额度",
+			Actor:    actor,
+		}); e != nil {
+			return created, e
+		}
+		return created, audit(tx, id, "create_partner", actor, "创建服务商并分配初始用户额度", map[string]any{"partner": n, "users": users})
 	})
+}
+
+type TreeItem struct {
+	Record core.Record       `json:"record"`
+	Quota  core.PartnerQuota `json:"quota"`
+}
+
+func (s *Service) Tree(ctx context.Context) ([]TreeItem, error) {
+	rows, err := s.Store.List(ctx, "partners", "")
+	if err != nil {
+		return nil, err
+	}
+	quotaRows, err := s.Store.List(ctx, "partner_quotas", "")
+	if err != nil {
+		return nil, err
+	}
+	quotas := make(map[string]core.PartnerQuota, len(quotaRows))
+	for _, row := range quotaRows {
+		var value core.PartnerQuota
+		if err = json.Unmarshal(row.Data, &value); err != nil {
+			return nil, err
+		}
+		quotas[row.ID] = value
+	}
+	out := make([]TreeItem, len(rows))
+	for i, row := range rows {
+		out[i] = TreeItem{Record: row, Quota: quotas[row.ID]}
+	}
+	return out, nil
 }
 func (s *Service) Update(ctx context.Context, id string, v core.Partner, version int64, actor string) (out core.Record, err error) {
 	if id == core.RootPartner {

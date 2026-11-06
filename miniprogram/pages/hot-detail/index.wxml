@@ -22,7 +22,7 @@
         ><text>播放 {{video.viewsText}}</text></view
       ></view
     ><view class="biz-card"
-      ><view class="row"
+      ><view class="row biz-title-row"
         ><text class="biz-heading">视频文案</text
         ><text class="biz-link" bindtap="copy">复制</text></view
       ><text selectable="true" class="video-copy">{{video.text}}</text></view

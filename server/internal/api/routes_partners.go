@@ -6,6 +6,7 @@ func (a *Server) partnerRoutes() {
 	m.HandleFunc("POST /api/access/direct", a.auth("user", a.directAccess))
 	m.HandleFunc("POST /api/access/redeem", a.auth("user", a.redeemAccess))
 	m.HandleFunc("GET /api/admin/partners", a.auth("admin", a.partnerList("partners")))
+	m.HandleFunc("GET /api/admin/partners/tree", a.auth("admin", a.partnerTree))
 	m.HandleFunc("POST /api/admin/partners", a.auth("admin", a.createPartner))
 	m.HandleFunc("GET /api/admin/partners/{id}", a.auth("admin", a.partnerOverview))
 	m.HandleFunc("PUT /api/admin/partners/{id}", a.auth("admin", a.updatePartner))

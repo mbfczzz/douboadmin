@@ -149,6 +149,9 @@ func (s *Service) ActivateDirect(ctx context.Context, user string) (out core.Acc
 			out = current
 			return nil
 		}
+		if current.Status != "pending" && current.Status != "unbound" {
+			return rulef("当前授权已停用，请联系管理员恢复，不能直接申请开通")
+		}
 		_, e = tx.Put("direct_access", core.Record{ID: user, Owner: user, Data: core.Data(core.DirectAccess{ActivatedAt: time.Now().UTC()})}, 0)
 		if errors.Is(e, core.ErrConflict) {
 			e = nil

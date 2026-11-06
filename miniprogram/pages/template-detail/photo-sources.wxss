@@ -10,6 +10,7 @@
   margin-bottom: 10px;
 }
 .photo-source-close {
+  flex-shrink: 0;
   width: 36px;
   height: 36px;
   display: flex;
@@ -20,15 +21,18 @@
   display: flex;
   align-items: center;
   gap: 14px;
-  height: 52px;
-  padding: 0 4px;
+  min-height: 52px;
+  padding: 12px 4px;
   border-bottom: 1px solid #303538;
   font-size: 15px;
 }
 .photo-source text {
   flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 .photo-source t-icon {
+  flex-shrink: 0;
   color: #b9c3bd;
 }
 .photo-source-note {

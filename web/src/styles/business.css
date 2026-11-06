@@ -20,7 +20,7 @@
   align-items: center;
   flex-wrap: wrap;
 }
-.business-actions button,
+.business-actions button:not(.primary, .secondary),
 .catalog-table button {
   border: 0;
   background: transparent;
@@ -28,16 +28,6 @@
   padding: 5px;
   font-size: 12px;
   white-space: nowrap;
-}
-.business-actions .primary {
-  padding: 10px 14px;
-  background: var(--accent);
-  color: white;
-}
-.business-actions .secondary {
-  border: 1px solid #dce0e6;
-  padding: 10px 14px;
-  background: white;
 }
 .mobile-records {
   display: none;
@@ -247,12 +237,4 @@
 .catalog-table audio {
   width: 220px;
   height: 32px;
-}
-.sidebar nav {
-  overflow-y: auto;
-  min-height: 0;
-  flex: 1;
-}
-.sidebar-bottom {
-  flex-shrink: 0;
 }

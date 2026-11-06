@@ -183,7 +183,7 @@ export default function UserDetails({
             onChange={(e) => setNote(e.target.value)}
           />
         </label>
-        <div className="business-actions">
+        <div className="modal-actions">
           <button
             className="primary"
             disabled={busy}

@@ -1,11 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { login } from "./helpers";
-import {
-  createProvider,
-  selectProvider,
-  allocate,
-  issueCode,
-} from "./partner-helpers";
+import { createProvider, selectProvider, issueCode } from "./partner-helpers";
 
 test.skip(
   process.env.PARTNER_ACCEPTANCE !== "true",
@@ -21,24 +16,22 @@ test("fixed user quotas, QR activation, suspension, unbinding and configurable m
   await page.getByRole("button", { name: "小程序用户", exact: true }).click();
   await page.getByRole("button", { name: "服务商管理", exact: true }).click();
   await expect(
-    page.getByRole("heading", { name: "总账号", exact: true }),
+    page.getByRole("tab", { name: "服务商列表", exact: true }),
   ).toBeVisible();
   const s1 = await createProvider(page, "验收 S1");
-  await allocate(page, "验收 S1", 9);
   await selectProvider(page, "验收 S1");
   const s2 = await createProvider(page, "验收 S2");
   let view = await (
     await page.request.get("/api/admin/partners/" + s2.id)
   ).json();
-  expect(view.quota.users.granted).toBe(0);
+  expect(view.quota.users.granted).toBe(10);
   const additional = await page.request.post("/api/admin/partners", {
     headers: { "Idempotency-Key": crypto.randomUUID() },
-    data: { parentId: s1.id, name: "不占额度的服务商" },
+    data: { parentId: s1.id, name: "额度不足的服务商", users: 1 },
   });
-  expect(additional.status()).toBe(200);
+  expect(additional.status()).toBe(409);
   view = await (await page.request.get("/api/admin/partners/" + s1.id)).json();
-  expect(view.quota.users.granted).toBe(9);
-  await allocate(page, "验收 S2", 3);
+  expect(view.quota.users.allocated).toBe(10);
   await selectProvider(page, "验收 S2");
   const code = await issueCode(page);
   const signIn = await page.request.post("/api/auth/login", {
@@ -107,7 +100,7 @@ test("fixed user quotas, QR activation, suspension, unbinding and configurable m
   await expect(dialog).toHaveCount(0);
   view = await (await page.request.get("/api/admin/partners/" + s2.id)).json();
   expect(view.quota.users.used).toBe(0);
-  expect(view.quota.users.granted - view.quota.users.reserved).toBe(3);
+  expect(view.quota.users.granted - view.quota.users.reserved).toBe(10);
   await selectProvider(page, "总账号");
   await page.getByRole("tab", { name: "算力分佣", exact: true }).click();
   await page

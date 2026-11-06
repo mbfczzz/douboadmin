@@ -1,0 +1,111 @@
+import { expect, test } from "@playwright/test";
+import { readFileSync } from "node:fs";
+import path from "node:path";
+
+// Layout projections use source styles; they do not emulate native components.
+function css(file: string, width: number): string {
+  return readFileSync(path.resolve("../miniprogram", file), "utf8")
+    .replace(/@import "([^"]+)";/g, (_, name) =>
+      css(path.join(path.dirname(file), name), width),
+    )
+    .replace(/^page\s*{/gm, "body {")
+    .replace(/(?<![\w.-])view\b/g, "div")
+    .replace(/(?<![\w.-])image\b/g, "img")
+    .replace(/(?<![\w.-])text\b(?=\s*[,>{:])/g, "span")
+    .replace(/([\d.]+)rpx/g, (_, n) => `${(Number(n) * width) / 750}px`);
+}
+
+for (const width of [320, 375, 430]) {
+  test(`search, metadata and activation sections fit ${width}px`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width, height: 900 });
+    const styles = [
+      "styles/theme.wxss",
+      "styles/common.wxss",
+      "pages/hot-videos/index.wxss",
+      "pages/activate/index.wxss",
+      "pages/library/index.wxss",
+    ]
+      .map((file) => css(file, width))
+      .join("\n");
+    await page.setContent(`<style>body{margin:0;font-family:sans-serif}${styles}</style><div class="subpage">
+      <div class="hot-search"><input class="biz-input" placeholder="搜索抖音视频关键词"><button class="biz-action">搜索</button></div>
+      <div class="biz-card"><div class="row biz-title-row"><span class="biz-heading">最近搜索</span><span class="biz-link">清空</span></div><div class="row biz-note"><span>点赞 123.4万</span><span>播放 999.9万</span></div></div>
+      <div class="favorite-card"><img style="object-fit:cover" alt=""><div><span>这是一个比较长的收藏模板标题，需要保持图片和箭头位置稳定</span><span class="small">作品分类</span></div><t-icon>›</t-icon></div>
+      <div class="biz-card activation-options"><div class="activation-path"><span class="biz-heading">申请使用</span><button class="biz-action">直接申请使用</button><span class="biz-note">直接申请自动开通，不关联服务商。</span></div><div class="activation-path"><span class="biz-heading">服务商激活</span><input class="biz-input" placeholder="输入 20 位激活码"><button class="biz-action">确认激活</button></div></div>
+    </div>`);
+    const input = await page.locator(".hot-search input").boundingBox();
+    const button = await page.locator(".hot-search button").boundingBox();
+    expect(input!.width).toBeGreaterThan(160);
+    expect(button!.width).toBeLessThan(100);
+    expect(input!.x + input!.width).toBeLessThan(button!.x);
+    expect(
+      await page
+        .locator(".row.biz-note")
+        .evaluate((el) => getComputedStyle(el).display),
+    ).toBe("flex");
+    const title = await page
+      .locator(".biz-title-row .biz-heading")
+      .boundingBox();
+    const action = await page.locator(".biz-title-row .biz-link").boundingBox();
+    expect(title!.y + title!.height / 2).toBeCloseTo(
+      action!.y + action!.height / 2,
+      0,
+    );
+    expect(
+      (await page.locator(".favorite-card img").boundingBox())!.width,
+    ).toBeCloseTo((150 * width) / 750, 0);
+    const sections = await page
+      .locator(".activation-path")
+      .evaluateAll((nodes) =>
+        nodes.map((node) => node.getBoundingClientRect()),
+      );
+    expect(sections[1].top - sections[0].bottom).toBeGreaterThanOrEqual(24);
+    expect(
+      await page.evaluate(() => document.documentElement.scrollWidth),
+    ).toBe(width);
+    await page.screenshot({
+      path: `../.runtime/mini-secondary-${width}.png`,
+      fullPage: true,
+    });
+  });
+
+  test(`designed selection markers are visible at ${width}px`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width, height: 700 });
+    const styles = [
+      "styles/theme.wxss",
+      "styles/common.wxss",
+      "pages/create/index.wxss",
+      "custom-tab-bar/index.wxss",
+    ]
+      .map((file) => css(file, width))
+      .join("\n");
+    await page.setContent(
+      `<style>body{margin:0;font-family:sans-serif}${styles}</style><div class="create-page"><div class="mode-tabs"><div class="mode-tab active">生成视频</div><div class="mode-tab">生成图片</div></div></div><div class="tabbar">${["模板", "混剪", "创作", "Agent", "我的"].map((name, i) => `<div class="item ${i === 2 ? "active" : ""}"><div class="glyph"><t-icon>◇</t-icon></div><span class="label">${name}</span></div>`).join("")}</div>`,
+    );
+    expect((await page.locator(".mode-tabs").boundingBox())!.height).toBe(42);
+    const underline = await page
+      .locator(".mode-tab.active")
+      .evaluate((el) => ({
+        width: getComputedStyle(el, "::after").width,
+        top: getComputedStyle(el, "::after").top,
+        actual: el.getBoundingClientRect().width,
+      }));
+    expect(parseFloat(underline.width)).toBe(underline.actual);
+    expect(underline.top).toBe("-1px");
+    expect(
+      await page
+        .locator(".item.active .glyph")
+        .evaluate((el) => getComputedStyle(el, "::before").width),
+    ).toBe("27px");
+    expect(
+      await page
+        .locator(".item.active")
+        .evaluate((el) => getComputedStyle(el, "::after").width),
+    ).toBe("3px");
+    await page.screenshot({ path: `../.runtime/mini-selection-${width}.png` });
+  });
+}

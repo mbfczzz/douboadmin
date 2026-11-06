@@ -8,6 +8,7 @@ import RequestState, { LoadingState } from "../components/RequestState";
 import type { Platform } from "../business/types";
 import RefundRecords from "../business/RefundRecords";
 const PaymentRecords = lazy(() => import("../business/PaymentRecords"));
+const VirtualEvents = lazy(() => import("../business/VirtualEvents"));
 
 export default function Payments({ notify, navigate }: PageProps) {
   const [tab, setTab] = useRememberedState("payments.tab", "payments");
@@ -35,7 +36,7 @@ export default function Payments({ notify, navigate }: PageProps) {
                   : "微信支付待配置"}
           </b>
           <p>
-            充值按金额兑换积分，不使用套餐。支付成功以服务端验签通知或查单为准。
+            支付成功以服务端验签通知或查单为准。虚拟支付异常可在异常处理页核对。
           </p>
         </div>
       </div>
@@ -47,6 +48,7 @@ export default function Payments({ notify, navigate }: PageProps) {
         {[
           ["payments", "支付记录"],
           ["refunds", "退款记录"],
+          ["events", "虚拟支付异常"],
         ].map(([key, label]) => (
           <button
             key={key}
@@ -62,6 +64,8 @@ export default function Payments({ notify, navigate }: PageProps) {
       <Suspense fallback={<LoadingState label="正在加载支付记录" />}>
         {tab === "payments" ? (
           <PaymentRecords />
+        ) : tab === "events" ? (
+          <VirtualEvents notify={notify} />
         ) : (
           <RefundRecords notify={notify} />
         )}

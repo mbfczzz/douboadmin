@@ -26,6 +26,8 @@ export function useOverlay(
       ).filter(
         (el) =>
           el.getClientRects().length > 0 &&
+          el.tabIndex >= 0 &&
+          el.closest('[role="dialog"]') === panel &&
           getComputedStyle(el).visibility === "visible" &&
           !el.matches(":disabled") &&
           !el.closest("details:not([open]) > :not(summary)"),

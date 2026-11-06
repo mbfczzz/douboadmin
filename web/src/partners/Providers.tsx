@@ -1,82 +1,127 @@
-import { useState } from "react";
-import type { Row } from "../api";
-import { money } from "../business/types";
-import Records, { useRecords } from "./Records";
-import type { Partner, Scope } from "./types";
-import { labels } from "./types";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { Plus, RefreshCw } from "lucide-react";
+import RequestState, { LoadingState } from "../components/RequestState";
+import { useResource } from "../hooks/useResource";
+import type { Notify } from "../navigation";
 import ProviderForm from "./ProviderForm";
-export default function Providers({
-  id,
-  view,
-  changed,
-  notify,
-  select,
-}: { select: (id: string) => void } & Scope) {
-  const resource = useRecords<Partner>("/admin/partners?owner=" + id),
-    [editing, setEditing] = useState<"create" | Row<Partner> | null>(null);
+import ProviderTree from "./ProviderTree";
+import type { PartnerTreeItem } from "./types";
+import { available } from "./types";
+
+const ProviderEditor = lazy(() => import("./ProviderEditor"));
+
+export default function Providers({ notify }: { notify: Notify }) {
+  const resource = useResource<PartnerTreeItem[]>(
+      "/admin/partners/tree",
+      15000,
+    ),
+    [query, setQuery] = useState(""),
+    [expanded, setExpanded] = useState<Set<string>>(new Set()),
+    [editing, setEditing] = useState<{
+      parent: string;
+      row?: PartnerTreeItem["record"];
+      parentAvailable?: number;
+    }>(),
+    initialized = useRef(false);
+  const rows = resource.data || [];
+  useEffect(() => {
+    if (initialized.current || !rows.length) return;
+    const parents = new Set(rows.map((item) => item.record.data.parentId));
+    setExpanded(
+      new Set(
+        rows
+          .filter((item) => parents.has(item.record.id))
+          .map((item) => item.record.id),
+      ),
+    );
+    initialized.current = true;
+  }, [rows]);
+  const toggle = (id: string) =>
+    setExpanded((current) => {
+      const next = new Set(current);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
   return (
     <>
-      <h3>直接下级服务商</h3>
-      <Records
-        resource={resource}
-        actions={
-          <>
-            <button
-              type="button"
-              className="primary"
-              onClick={() => setEditing("create")}
-            >
-              新增下级服务商
-            </button>
-            {id !== "root" && (
-              <button
-                type="button"
-                className="secondary"
-                onClick={() => setEditing(view.record)}
-              >
-                编辑当前服务商
-              </button>
-            )}
-          </>
-        }
-        columns={[
-          {
-            title: "名称",
-            render: (r) => (
-              <>
-                <span className="provider-name">{r.data.name}</span>
-                <small className="cell-note">{r.id}</small>
-              </>
-            ),
-          },
-          { title: "状态", render: (r) => labels[r.data.status] },
-          {
-            title: "子账号售价 / 基准算力",
-            render: (r) => money(r.data.retailPer100Fen),
-          },
-          {
-            title: "下级供货保留毛利",
-            render: (r) => r.data.childMarginBps / 100 + "%",
-          },
-          {
-            title: "操作",
-            action: true,
-            render: (r) => <button onClick={() => select(r.id)}>管理</button>,
-          },
-        ]}
+      <h2>服务商列表</h2>
+      <form
+        className="business-filters provider-toolbar"
+        onSubmit={(event) => event.preventDefault()}
+      >
+        <input
+          aria-label="搜索服务商"
+          placeholder="搜索服务商名称或编号"
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+        />
+        <button
+          type="button"
+          className="secondary"
+          disabled={resource.loading}
+          onClick={() => void resource.reload()}
+        >
+          <RefreshCw size={16} aria-hidden="true" />
+          {resource.loading ? "刷新中" : "刷新"}
+        </button>
+        <button
+          type="button"
+          className="primary provider-add"
+          onClick={() => setEditing({ parent: "root" })}
+        >
+          <Plus size={16} aria-hidden="true" />
+          新增服务商
+        </button>
+      </form>
+      <RequestState
+        loading={resource.loading && !resource.data}
+        error={resource.error}
+        retry={resource.reload}
       />
-      {editing && (
-        <ProviderForm
-          parent={id}
-          row={editing === "create" ? undefined : editing}
-          onClose={() => setEditing(null)}
-          notify={notify}
-          onSaved={async () => {
-            await resource.reload();
-            await changed();
+      {resource.data && (
+        <ProviderTree
+          rows={rows}
+          query={query}
+          expanded={expanded}
+          toggle={toggle}
+          edit={(item) =>
+            setEditing({
+              parent: item.record.data.parentId,
+              row: item.record,
+            })
+          }
+          add={(item) => {
+            setExpanded((current) => new Set(current).add(item.record.id));
+            setEditing({
+              parent: item.record.id,
+              parentAvailable: available(item.quota.users),
+            });
           }}
         />
       )}
+      {editing?.row ? (
+        <Suspense fallback={<LoadingState label="正在加载服务商编辑" />}>
+          <ProviderEditor
+            row={editing.row}
+            rows={rows}
+            notify={notify}
+            onClose={() => setEditing(undefined)}
+            onSaved={resource.reload}
+          />
+        </Suspense>
+      ) : editing ? (
+        <ProviderForm
+          parent={editing.parent}
+          parentAvailable={editing.parentAvailable}
+          onClose={() => setEditing(undefined)}
+          notify={notify}
+          onSaved={async () => {
+            await resource.reload();
+            setEditing(undefined);
+          }}
+        />
+      ) : null}
     </>
   );
 }

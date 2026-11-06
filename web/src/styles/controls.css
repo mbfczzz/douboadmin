@@ -35,6 +35,3 @@
 .danger:hover {
   background: #85352c;
 }
-.danger-text {
-  color: var(--danger) !important;
-}

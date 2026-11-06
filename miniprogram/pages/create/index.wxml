@@ -82,7 +82,7 @@
         生成
       </button>
     </view>
-    <view class="model-menu {{showModels?'is-open':''}}" aria-hidden="{{!showModels}}">
+    <scroll-view scroll-y class="model-menu {{showModels?'is-open':''}} {{modelMenuUp?'menu-up':''}}" style="height:{{modelMenuHeight||240}}px" aria-hidden="{{!showModels}}">
       <view
         class="model-option {{model===item.id?'selected':''}}"
         wx:for="{{availableModels}}"
@@ -96,7 +96,7 @@
         <text wx:if="{{item.estimate}}" class="model-estimate">{{item.estimate}}</text>
         <t-icon wx:if="{{model===item.id}}" name="check" size="18" />
       </view>
-    </view>
+    </scroll-view>
   </view>
   <view class="creation-hint">
     <text>{{modelsLoading?'正在准备模型参数':modelError?'请选择可用模型':parameterError?'请调整创作参数':'参数已选好，可以直接生成'}}</text>
@@ -167,6 +167,7 @@
       </view>
     </view>
   </view>
+  <view class="creation-balance"><points-balance /></view>
   <view class="queue-link" bindtap="queue">
     <t-icon name="task" size="22" color="#9BCBAA" />
     <view class="copy">

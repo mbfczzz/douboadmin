@@ -18,7 +18,7 @@
       class="biz-card"
       data-id="{{item.id}}"
       bindtap="open"
-      ><view class="row"
+      ><view class="row biz-card-head"
         ><text class="biz-list-title"
           >{{item.data.read?'':'● '}}{{item.data.title}}</text
         ><text class="biz-small">{{item.time}}</text></view

@@ -48,6 +48,10 @@ func (a *Server) partnerList(ns string) http.HandlerFunc {
 		partnerResult(w, rows, e)
 	}
 }
+func (a *Server) partnerTree(w http.ResponseWriter, r *http.Request) {
+	rows, e := a.Partners.Tree(r.Context())
+	partnerResult(w, rows, e)
+}
 func (a *Server) partnerOverview(w http.ResponseWriter, r *http.Request) {
 	out, e := a.Partners.Overview(r.Context(), r.PathValue("id"))
 	partnerResult(w, out, e)
@@ -56,11 +60,12 @@ func (a *Server) createPartner(w http.ResponseWriter, r *http.Request) {
 	var v struct {
 		Name     string `json:"name"`
 		ParentID string `json:"parentId"`
+		Users    int64  `json:"users"`
 	}
 	if !decode(w, r, &v) {
 		return
 	}
-	out, e := a.Partners.Create(r.Context(), v.ParentID, v.Name, r.Header.Get("Idempotency-Key"), identity(r).ID)
+	out, e := a.Partners.Create(r.Context(), v.ParentID, v.Name, v.Users, r.Header.Get("Idempotency-Key"), identity(r).ID)
 	partnerResult(w, out, e)
 }
 func (a *Server) updatePartner(w http.ResponseWriter, r *http.Request) {

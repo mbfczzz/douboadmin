@@ -64,10 +64,7 @@ export default function ModelEditor({
         data-unsaved={dirty || busy || undefined}
       >
         <div className="model-config-body">
-          <fieldset
-            disabled={busy}
-            style={{ border: 0, margin: 0, padding: 0, minWidth: 0 }}
-          >
+          <fieldset disabled={busy}>
             <BasicFields
               model={model}
               onChange={(m) => {

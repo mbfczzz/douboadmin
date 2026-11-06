@@ -14,6 +14,8 @@ export interface Ledger {
   note: string;
 }
 export interface Order {
+  channel?: string;
+  virtual?: { productName: string; platform: string };
   userId: string;
   amountFen: number;
   pointsUnits: number;

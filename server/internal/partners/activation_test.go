@@ -62,7 +62,7 @@ func TestActivationSingleUseDisableAndUnbind(t *testing.T) {
 		t.Fatal(e)
 	}
 	p, _ = s.Overview(ctx, s1)
-	if p.Quota.Users.Used != 0 || p.Quota.Users.Available() != 9 {
+	if p.Quota.Users.Used != 0 || p.Quota.Users.Available() != 8 {
 		t.Fatal(p.Quota)
 	}
 	if access, e := s.Redeem(ctx, user, code); e != nil || access.Active {
@@ -93,7 +93,7 @@ func TestExpiredCodesReleaseExactlyOneReservation(t *testing.T) {
 	}
 	wg.Wait()
 	p, _ := s.Overview(ctx, s1)
-	if p.Quota.Users.Reserved != 0 || p.Quota.Users.Available() != 9 {
+	if p.Quota.Users.Reserved != 0 || p.Quota.Users.Available() != 8 {
 		t.Fatal(p.Quota)
 	}
 	if _, e = s.Reveal(ctx, row.ID); e == nil {
