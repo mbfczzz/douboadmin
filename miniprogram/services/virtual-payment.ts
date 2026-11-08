@@ -5,6 +5,8 @@ import { AuthCancelledError, PaymentCancelledError } from "./errors";
 import { rememberPayment, clearPayment } from "./payment-status";
 import type { WalletInfo, Order } from "./business";
 import type { Row } from "./types";
+import { customError } from "./virtual-amount";
+import type { PurchaseMode } from "./virtual-amount";
 
 export function supportsVirtualPayment(platform: string) {
   if (typeof wx.requestVirtualPayment !== "function") return false;
@@ -26,19 +28,33 @@ export async function createVirtualOrder(
   info: WalletInfo,
   productId: string,
   platform: string,
+  mode: PurchaseMode = "package",
+  fen = 0,
+  token = sessionToken(),
 ) {
   const product = info.virtualProducts?.find((item) => item.id === productId);
-  if (!product) throw new Error("请选择可用的积分商品");
+  if (mode === "custom") {
+    const problem = customError(info, fen, platform);
+    if (problem) throw new Error(problem);
+  } else if (!product) throw new Error("请选择可用的积分商品");
   return request<Row<Order>>(
     "/orders",
     "POST",
     {
-      productId,
+      ...(mode === "custom"
+        ? {
+            purchaseMode: mode,
+            productId: info.virtualCustom!.productId,
+            amountFen: fen,
+          }
+        : { productId, amountFen: product!.amountFen }),
       settingsVersion: info.settingsVersion,
       pricingVersion: info.pricing?.version || "",
       platform,
     },
     uid(),
+    true,
+    token,
   );
 }
 

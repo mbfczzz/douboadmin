@@ -22,6 +22,7 @@ func virtualPayment(app *api.Server) error {
 		return e
 	}
 	cfg := virtualpay.Config{AppID: app.Config.WeChatAppID, AppSecret: app.Config.WeChatSecret, OfferID: os.Getenv("WECHAT_VIRTUAL_OFFER_ID"), AppKey: os.Getenv("WECHAT_VIRTUAL_APP_KEY"), SandboxAppKey: os.Getenv("WECHAT_VIRTUAL_SANDBOX_APP_KEY"), Token: os.Getenv("WECHAT_VIRTUAL_TOKEN"), EncodingAESKey: os.Getenv("WECHAT_VIRTUAL_ENCODING_AES_KEY"), Enabled: env("WECHAT_VIRTUAL_ENABLED", "false") == "true", IOSAllowed: env("WECHAT_VIRTUAL_IOS_ALLOWED", "false") == "true", Env: environment, Products: products}
+	cfg.CustomProductID = os.Getenv("WECHAT_VIRTUAL_CUSTOM_PRODUCT_ID")
 	if app.Config.Production && ((cfg.Enabled && cfg.Env != 0) || cfg.SandboxAppKey != "") {
 		return fmt.Errorf("生产环境不得启用虚拟支付沙箱")
 	}

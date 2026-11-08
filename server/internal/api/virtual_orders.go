@@ -34,12 +34,7 @@ func (a *Server) virtualProducts(settings core.PlatformSettings, retail int64) [
 	return out
 }
 func (a *Server) createVirtualOrder(w http.ResponseWriter, r *http.Request) {
-	var v struct {
-		ProductID       string `json:"productId"`
-		SettingsVersion int64  `json:"settingsVersion"`
-		PricingVersion  string `json:"pricingVersion"`
-		Platform        string `json:"platform"`
-	}
+	var v virtualCheckout
 	if !decode(w, r, &v) {
 		return
 	}
@@ -66,12 +61,44 @@ func (a *Server) createVirtualOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	cfg := a.Virtual.Client.Config
+	quantity := int64(1)
+	if v.PurchaseMode == "" {
+		v.PurchaseMode = "package"
+	}
+	if v.PurchaseMode == "custom" {
+		custom, err := a.customForUser(r.Context(), identity(r).ID, settings)
+		if err != nil {
+			partnerError(w, err)
+			return
+		}
+		if custom == nil || (v.ProductID != "" && v.ProductID != custom.ProductID) {
+			fail(w, 409, "当前自定义充值暂不可用，请刷新后选择积分套餐")
+			return
+		}
+		if v.AmountFen < custom.MinAmountFen || v.AmountFen > custom.MaxAmountFen || v.AmountFen%custom.UnitAmountFen != 0 {
+			fail(w, 400, "充值金额须在允许范围内，且为基础商品单价的整数倍")
+			return
+		}
+		v.ProductID, quantity = custom.ProductID, v.AmountFen/custom.UnitAmountFen
+	} else if v.PurchaseMode != "package" {
+		fail(w, 400, "请选择有效的购买方式")
+		return
+	}
 	p, ok := cfg.Product(v.ProductID)
 	if !ok {
 		fail(w, 400, "请选择已配置的积分商品")
 		return
 	}
 	platform := strings.ToLower(v.Platform)
+	goods, fen, err := p.Purchase(quantity, cfg.Env, platform, v.PurchaseMode)
+	if err != nil {
+		fail(w, 400, err.Error())
+		return
+	}
+	if v.AmountFen != 0 && v.AmountFen != fen {
+		fail(w, 409, "商品价格已更新，请刷新后确认")
+		return
+	}
 	if platform == "ios" && (!cfg.IOSAllowed || cfg.Env != 0 || p.AmountFen < 100) {
 		fail(w, 403, "当前商品暂不支持此设备充值")
 		return
@@ -84,12 +111,13 @@ func (a *Server) createVirtualOrder(w http.ResponseWriter, r *http.Request) {
 	}
 	var account struct {
 		OpenID string `json:"openid"`
+		AppID  string `json:"appid"`
 	}
-	if json.Unmarshal(row.Data, &account) != nil || account.OpenID == "" {
+	if json.Unmarshal(row.Data, &account) != nil || account.OpenID == "" || (account.AppID != "" && account.AppID != cfg.AppID) {
 		fail(w, 401, "请使用微信账号登录")
 		return
 	}
-	order, e := a.Billing.CreateVirtualOrder(r.Context(), user, key, p.AmountFen, settings, cfg.AppID, cfg.OfferID, account.OpenID, v.PricingVersion, core.VirtualOrder{ProductID: p.ID, ProductName: p.Name, PointsUnits: p.PointsUnits, Env: cfg.Env, Platform: platform})
+	order, e := a.Billing.CreateVirtualOrder(r.Context(), user, key, fen, settings, cfg.AppID, cfg.OfferID, account.OpenID, v.PricingVersion, goods)
 	if e != nil {
 		dbError(w, e)
 		return
@@ -128,7 +156,11 @@ func (a *Server) payVirtualOrder(w http.ResponseWriter, r *http.Request, row cor
 		return
 	}
 	p, ok := cfg.Product(o.Virtual.ProductID)
-	if !ok || p.AmountFen != o.AmountFen || p.PointsUnits != o.PointsUnits || o.Virtual.Env != cfg.Env {
+	if ok && strings.EqualFold(platform, "ios") && p.AmountFen < 100 {
+		fail(w, 403, "当前设备暂不支持此充值档位")
+		return
+	}
+	if !ok || !p.Matches(o) || o.Virtual.Env != cfg.Env {
 		fail(w, 409, "商品或支付环境已更新，请创建新订单")
 		return
 	}

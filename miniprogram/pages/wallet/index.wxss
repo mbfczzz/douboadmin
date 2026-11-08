@@ -1,4 +1,30 @@
 @import "../../styles/business.wxss";
+.purchase-tabs {
+  display: flex;
+  gap: 8px;
+  margin: 12px 0 16px;
+}
+.purchase-tabs button {
+  flex: 1;
+  margin: 0;
+  min-height: 44px;
+  line-height: 44px;
+  padding: 0;
+  border-radius: 7px;
+  background: #242c28;
+  color: #b6c4bb;
+  font-size: 13px;
+}
+.purchase-tabs .selected {
+  background: #9bcbaa;
+  color: #17281d;
+}
+.checkout-error {
+  display: block;
+  color: #efb29a;
+  font-size: 12px;
+  margin: 8px 0;
+}
 .virtual-products {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

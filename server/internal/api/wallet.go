@@ -49,15 +49,16 @@ func (a *Server) wallet(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	products := a.virtualProducts(settings, retail)
+	custom := a.virtualCustom(settings, retail)
 	channel := a.Config.PaymentChannel
 	if channel == "" {
 		channel = "wechat_jsapi"
 	}
 	ready := a.rechargeReady()
-	if channel == "wechat_virtual" && len(products) == 0 {
+	if channel == "wechat_virtual" && len(products) == 0 && custom == nil {
 		ready = false
 	}
-	reply(w, 200, map[string]any{"wallet": value, "settings": settings, "settingsVersion": row.Version, "pricing": pricing, "paymentReady": ready, "iosPayment": a.rechargeIOS(), "paymentChannel": channel, "virtualProducts": products})
+	reply(w, 200, map[string]any{"wallet": value, "settings": settings, "settingsVersion": row.Version, "pricing": pricing, "paymentReady": ready, "iosPayment": a.rechargeIOS(), "paymentChannel": channel, "virtualProducts": products, "virtualCustom": custom})
 }
 func (a *Server) ledger(w http.ResponseWriter, r *http.Request) {
 	user := identity(r).ID

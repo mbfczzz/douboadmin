@@ -69,13 +69,16 @@ type Refund struct {
 
 // Virtual goods and environment are immutable order snapshots, not live catalog references.
 type VirtualOrder struct {
-	ProductID   string `json:"productId"`
-	ProductName string `json:"productName"`
-	PointsUnits int64  `json:"pointsUnits"`
-	Env         int    `json:"env"`
-	Platform    string `json:"platform"`
-	Issued      bool   `json:"issued"`
-	Delivered   bool   `json:"delivered"`
+	Quantity     int64  `json:"quantity,omitempty"`
+	UnitFen      int64  `json:"unitFen,omitempty"`
+	PurchaseMode string `json:"purchaseMode,omitempty"`
+	ProductID    string `json:"productId"`
+	ProductName  string `json:"productName"`
+	PointsUnits  int64  `json:"pointsUnits"`
+	Env          int    `json:"env"`
+	Platform     string `json:"platform"`
+	Issued       bool   `json:"issued"`
+	Delivered    bool   `json:"delivered"`
 }
 
 func PointUnits(points float64) (int64, error) {

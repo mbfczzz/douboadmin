@@ -53,7 +53,11 @@ func (c *Client) Parameters(id string, o core.Order, sessionKey string) (Params,
 	if c == nil || o.Virtual == nil || !c.Config.Configured(o.Virtual.Env) || o.AppID != c.Config.AppID || o.MerchantID != c.Config.OfferID || sessionKey == "" {
 		return Params{}, fmt.Errorf("虚拟支付配置或订单信息不匹配")
 	}
-	data := string(core.Data(map[string]any{"offerId": o.MerchantID, "buyQuantity": 1, "env": o.Virtual.Env, "currencyType": "CNY", "productId": o.Virtual.ProductID, "goodsPrice": o.AmountFen, "outTradeNo": id, "attach": id}))
+	quantity, unitFen, err := PurchaseDetails(o)
+	if err != nil {
+		return Params{}, err
+	}
+	data := string(core.Data(map[string]any{"offerId": o.MerchantID, "buyQuantity": quantity, "env": o.Virtual.Env, "currencyType": "CNY", "productId": o.Virtual.ProductID, "goodsPrice": unitFen, "outTradeNo": id, "attach": id}))
 	return Params{Channel: Channel, Mode: "short_series_goods", SignData: data, PaySig: MAC(c.Config.Key(o.Virtual.Env), "requestVirtualPayment&"+data), Signature: MAC(sessionKey, data)}, nil
 }
 func (c *Client) accessToken(ctx context.Context) (string, error) {

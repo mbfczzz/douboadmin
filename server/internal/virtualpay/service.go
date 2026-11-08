@@ -24,8 +24,11 @@ func (s *Service) order(ctx context.Context, id string) (core.Record, core.Order
 	if e == nil {
 		e = json.Unmarshal(row.Data, &o)
 	}
-	if e == nil && (o.Channel != Channel || o.Virtual == nil || !s.Client.Config.Configured(o.Virtual.Env) || o.AppID != s.Client.Config.AppID || o.MerchantID != s.Client.Config.OfferID) {
+	if e == nil && (row.Owner == "" || o.UserID != row.Owner || o.Channel != Channel || o.Virtual == nil || !s.Client.Config.Configured(o.Virtual.Env) || o.AppID != s.Client.Config.AppID || o.MerchantID != s.Client.Config.OfferID) {
 		e = core.ErrPaymentMismatch
+	}
+	if e == nil {
+		e = validateSnapshot(o)
 	}
 	return row, o, e
 }
@@ -99,26 +102,6 @@ func (s *Service) markDelivered(ctx context.Context, id string) error {
 	})
 }
 
-// Issuing a signed order is a one-way transition: never reuse its outTradeNo.
-func (s *Service) ClaimSignature(ctx context.Context, id string) error {
-	return s.Store.Atomic(ctx, func(tx store.Transaction) error {
-		r, e := tx.Lock("orders", core.Record{ID: id})
-		if e != nil {
-			return e
-		}
-		var o core.Order
-		if json.Unmarshal(r.Data, &o) != nil || o.Virtual == nil || o.Status != "created" || !o.ExpiresAt.After(time.Now()) {
-			return core.ErrConflict
-		}
-		if o.Virtual.Issued {
-			return fmt.Errorf("%w: 支付单号已使用，请查询结果或创建新订单", core.ErrConflict)
-		}
-		o.Virtual.Issued = true
-		r.Data = core.Data(o)
-		_, e = tx.Put("orders", r, r.Version)
-		return e
-	})
-}
 func (s *Service) StartRefund(ctx context.Context, id, reason, actor string) (core.Record, error) {
 	if !s.Ready() {
 		return core.Record{}, fmt.Errorf("虚拟支付尚未配置")

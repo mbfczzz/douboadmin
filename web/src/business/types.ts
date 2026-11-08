@@ -15,7 +15,13 @@ export interface Ledger {
 }
 export interface Order {
   channel?: string;
-  virtual?: { productName: string; platform: string };
+  virtual?: {
+    productName: string;
+    platform: string;
+    purchaseMode?: string;
+    quantity?: number;
+    unitFen?: number;
+  };
   userId: string;
   amountFen: number;
   pointsUnits: number;

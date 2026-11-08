@@ -31,7 +31,12 @@ func (s *Service) processEvent(ctx context.Context, event Event) error {
 			return e
 		}
 		g := event.Goods
-		if event.Env == nil || *event.Env != o.Virtual.Env || event.OpenID != o.OpenID || g == nil || g.ProductID != o.Virtual.ProductID || g.Quantity != 1 || g.OrigPrice != o.AmountFen || g.ActualPrice != o.AmountFen || g.Attach != event.OrderID {
+		quantity, unitFen, err := PurchaseDetails(o)
+		if err != nil || event.Env == nil || *event.Env != o.Virtual.Env || event.OpenID != o.OpenID || g == nil || g.ProductID != o.Virtual.ProductID || g.Quantity != quantity || g.Attach != event.OrderID {
+			return core.ErrPaymentMismatch
+		}
+		// Accept only matching unit/aggregate pairs; Refresh verifies the authoritative paid total.
+		if !((g.OrigPrice == unitFen && g.ActualPrice == unitFen) || (g.OrigPrice == o.AmountFen && g.ActualPrice == o.AmountFen)) {
 			return core.ErrPaymentMismatch
 		}
 		if e = s.Refresh(ctx, event.OrderID); e != nil {

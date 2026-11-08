@@ -27,17 +27,21 @@ let pendingLogin:
 let exchange:
   { generation: number; mode: string; promise: Promise<void> } | undefined;
 let authGeneration = 0;
+function storedSession() {
+  return wx.getStorageSync("douboSession") as Session | undefined;
+}
 export function storedToken() {
-  return (
-    (wx.getStorageSync("douboSession") as Session | undefined)?.token || ""
-  );
+  return storedSession()?.token || "";
 }
 export function sessionToken() {
-  const s = wx.getStorageSync("douboSession") as Session | undefined;
+  const s = storedSession();
   return s && s.expiresAt > Date.now() ? s.token : "";
 }
 export function hasSession() {
   return !!sessionToken();
+}
+export function sessionUserId() {
+  return storedSession()?.userId || "";
 }
 export function clearSession() {
   authGeneration++;
@@ -156,7 +160,7 @@ export async function signIn(mode: "wechat" | "demo" = "wechat") {
 export async function logout() {
   // Revocation must complete before clearing local credentials; do not silently
   // leave a live server session behind when the network is unavailable.
-  const old = wx.getStorageSync("douboSession") as Session | undefined;
+  const old = storedSession();
   if (old?.token) {
     await new Promise<void>((resolve, reject) =>
       wx.request({
@@ -184,8 +188,7 @@ export async function logout() {
         },
       }),
     );
-    const current = (wx.getStorageSync("douboSession") as Session | undefined)
-      ?.token;
+    const current = storedSession()?.token;
     if (current && current !== old.token)
       throw new Error("登录状态已更新，请重新退出");
   }

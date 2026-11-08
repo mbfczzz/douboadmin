@@ -1,9 +1,11 @@
 import { request } from "./request";
 import { uid } from "./ids";
 import { AuthCancelledError, PaymentCancelledError } from "./errors";
-import { sessionToken } from "./session";
+import { sessionToken, sessionUserId } from "./session";
+import { money } from "./business";
 import type { Row } from "./types";
 import type { WalletInfo, Order } from "./business";
+import type { PurchaseMode } from "./virtual-amount";
 import {
   createVirtualOrder,
   invokeVirtualPayment,
@@ -37,11 +39,31 @@ export function canRecharge(info: WalletInfo) {
   );
 }
 
-export async function recharge(info: WalletInfo, fen: number, productId = "") {
+export async function recharge(
+  info: WalletInfo,
+  fen: number,
+  productId = "",
+  mode: PurchaseMode = "package",
+) {
+  const token = sessionToken();
+  if (!token || sessionUserId() !== info.wallet.userId)
+    throw new AuthCancelledError();
   if (!canRecharge(info)) throw new Error("当前暂未开放充值");
+  const s = info.settings;
+  if (fen < s.minRechargeFen || fen > s.maxRechargeFen)
+    throw new Error(
+      `请输入 ${money(s.minRechargeFen)}–${money(s.maxRechargeFen)} 元`,
+    );
   if (info.paymentChannel === "wechat_virtual") {
-    const row = await createVirtualOrder(info, productId, devicePlatform());
-    return payExisting(row.id);
+    const row = await createVirtualOrder(
+      info,
+      productId,
+      devicePlatform(),
+      mode,
+      fen,
+      token,
+    );
+    return payExisting(row.id, token);
   }
   const owner = info.wallet.userId,
     hash = JSON.stringify({
@@ -67,15 +89,25 @@ export async function recharge(info: WalletInfo, fen: number, productId = "") {
         platform: devicePlatform(),
       },
       draft.key,
+      true,
+      token,
     );
+    if (sessionToken() !== token) throw new AuthCancelledError();
     draft.id = row.id;
     wx.setStorageSync("pending-recharge", draft);
   }
-  return payExisting(draft.id);
+  return payExisting(draft.id, token);
 }
 
-export async function payExisting(id: string) {
-  const info = await request<WalletInfo>("/wallet");
+export async function payExisting(id: string, expectedToken?: string) {
+  const info = await request<WalletInfo>(
+    "/wallet",
+    "GET",
+    undefined,
+    undefined,
+    true,
+    expectedToken,
+  );
   const token = sessionToken();
   const row = await request<Row<Order>>("/orders/" + id);
   if (row.data.status === "paid") {

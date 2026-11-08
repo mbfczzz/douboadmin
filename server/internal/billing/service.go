@@ -77,8 +77,15 @@ func (s *Service) createOrder(ctx context.Context, user, key string, fen int64, 
 	units := fen * settings.PointsPerYuan
 	order := core.Order{UserID: user, AmountFen: fen, PointsUnits: units, Status: "created", Channel: "wechat_jsapi", AppID: appid, MerchantID: mchid, OpenID: openid, ExpiresAt: time.Now().UTC().Add(30 * time.Minute), RequestHash: core.Digest(strconv.FormatInt(fen, 10))}
 	if goods != nil {
+		quantity, unitFen, e := goods.PurchaseDetails(fen)
+		if e != nil {
+			return out, e
+		}
 		order.Channel, order.Virtual = "wechat_virtual", goods
 		order.RequestHash = core.Digest(string(core.Data([]any{fen, appid, mchid, goods.ProductID, goods.PointsUnits, goods.Env})))
+		if quantity > 1 {
+			order.RequestHash = core.Digest(string(core.Data([]any{order.RequestHash, quantity, unitFen})))
+		}
 	}
 	id := core.Digest("recharge:" + user + ":" + key)[:32]
 	err = s.Store.Atomic(ctx, func(tx store.Transaction) error {

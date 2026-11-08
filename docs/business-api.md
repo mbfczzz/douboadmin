@@ -30,6 +30,8 @@
 
 生成积分扣减默认启用；后台可显式关闭并持久保存。模型费用按后台配置计算，明确配置为 0 的档位仍为免费。微信充值需完成支付配置后另行启用。
 
+虚拟支付钱包可返回 `virtualCustom`：`productId`、`unitAmountFen`、`unitPointsUnits`、`minAmountFen`、`maxAmountFen`。套餐下单沿用 `{productId,settingsVersion,pricingVersion,platform}`；自定义金额下单传 `{purchaseMode:"custom",amountFen,settingsVersion,pricingVersion,platform}`，可附同一个基础 `productId`。服务端按基础商品换算份数与积分，不接受自报积分或购买数量。订单 `virtual` 增加 `quantity`、`unitFen`、`purchaseMode`，历史缺失字段按1份处理，金额、到账、分佣和退款均按整单计算。
+
 账本操作引用唯一，订单金额/积分为创建时快照。钱包锁、流水、订单或任务状态在同一个 MySQL 事务提交；支付交易号防止跨订单重复到账。任务失去租约后不能结算。退款成功回收冻结积分，CLOSED 退回可用积分，ABNORMAL 保留待处理。
 
 支付流水从已确认的 `payment_transactions` 关联订单读取，未支付订单、人工调整积分不会混入。`q` 搜索订单号/微信交易号/用户编号；`status` 为 paid/refunding/refunded；`from/to` 按北京时间到账日期筛选，结束日期包含当天。返回 `{items,total,page,size}`，每页 20 条，不受通用列表 500 条上限限制；每条包含实付金额、到账积分、渠道、支付/到账时间、订单状态与关联退款单，不返回 OpenID、预支付凭据或密钥。

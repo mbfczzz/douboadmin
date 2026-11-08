@@ -150,6 +150,20 @@ export default function Orders({ notify }: PageProps) {
                 <>
                   <dt>积分商品</dt>
                   <dd>{detail.data.virtual.productName}</dd>
+                  <dt>购买方式</dt>
+                  <dd>
+                    {detail.data.virtual.purchaseMode === "custom"
+                      ? "自定义金额"
+                      : "积分套餐"}
+                  </dd>
+                  <dt>购买份数</dt>
+                  <dd>{detail.data.virtual.quantity || 1}</dd>
+                  <dt>商品单价</dt>
+                  <dd>
+                    {money(
+                      detail.data.virtual.unitFen || detail.data.amountFen,
+                    )}
+                  </dd>
                 </>
               )}
             </dl>

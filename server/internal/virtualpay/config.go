@@ -23,6 +23,7 @@ type Config struct {
 	Enabled, IOSAllowed                          bool
 	Env                                          int
 	Products                                     []Product
+	CustomProductID                              string
 }
 
 func ParseProducts(raw string) ([]Product, error) {
@@ -62,6 +63,11 @@ func (c Config) Validate() error {
 		k, e := base64.StdEncoding.DecodeString(c.EncodingAESKey + "=")
 		if e != nil || len(k) != 32 {
 			return fmt.Errorf("虚拟支付消息 AES 密钥无效")
+		}
+	}
+	if c.CustomProductID != "" {
+		if _, ok := c.Product(c.CustomProductID); !ok {
+			return fmt.Errorf("自定义充值的基础商品不存在")
 		}
 	}
 	if c.Enabled && (!c.Configured(c.Env) || len(c.Products) == 0) {

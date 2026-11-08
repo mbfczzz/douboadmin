@@ -18,6 +18,13 @@ export interface Platform {
 export interface WalletInfo {
   paymentChannel?: "wechat_jsapi" | "wechat_virtual";
   virtualProducts?: VirtualProduct[];
+  virtualCustom?: {
+    productId: string;
+    unitAmountFen: number;
+    unitPointsUnits: number;
+    minAmountFen: number;
+    maxAmountFen: number;
+  } | null;
   pricing?: {
     ready: boolean;
     retailPer100Fen: number;
@@ -43,6 +50,9 @@ export interface Order {
     productName: string;
     env: number;
     issued: boolean;
+    quantity?: number;
+    unitFen?: number;
+    purchaseMode?: string;
   };
   userId: string;
   amountFen: number;

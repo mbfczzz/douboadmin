@@ -4,13 +4,13 @@ import {
   enterPage,
   hasSession,
   login,
+  sessionUserId,
   openPage,
-  cancelled,
 } from "../../utils/api";
 import type { Row } from "../../services/types";
 import { money, points } from "../../services/business";
 import type { WalletInfo, VirtualProduct } from "../../services/business";
-import { amountFen, canRecharge, recharge } from "../../services/payment";
+import { canRecharge } from "../../services/payment";
 import {
   pendingPayment,
   paymentMessage,
@@ -18,46 +18,19 @@ import {
 } from "../../services/payment-status";
 import { ledgerView } from "../../services/wallet-ledger";
 import type { Ledger } from "../../services/wallet-ledger";
-import { PaymentCancelledError } from "../../services/errors";
+import { walletData, loggedOut } from "./state";
+import { checkout } from "./checkout";
 import {
   estimateCheckout,
   confirmAdditionalPurchase,
 } from "../../services/wallet-checkout";
 Page({
-  data: {
-    productId: "",
-    products: [] as Array<{
-      id: string;
-      name: string;
-      amount: string;
-      points: string;
-    }>,
-    loading: true,
-    needsLogin: false,
-    error: "",
-    info: null as WalletInfo | null,
-    available: "—",
-    held: "0",
-    amount: "10",
-    estimated: "0",
-    displayRate: "0",
-    allowed: false,
-    busy: false,
-    pendingOrderId: "",
-    paymentWaiting: false,
-    paymentNotice: "",
-    ledger: [] as Array<{
-      id: string;
-      title: string;
-      note: string;
-      change: string;
-      time: string;
-    }>,
-  },
+  data: walletData,
   revision: 0,
   destroyed: false,
   visible: false,
   watching: "",
+  checkoutToken: "",
   stopWatching: undefined as (() => void) | undefined,
   refreshTimer: undefined as ReturnType<typeof setTimeout> | undefined,
   onShow() {
@@ -90,20 +63,14 @@ Page({
     if (this.destroyed) return;
     if (this.refreshTimer !== undefined) clearTimeout(this.refreshTimer);
     const revision = ++this.revision;
+    const owner = this.data.info?.wallet.userId;
+    if (owner && owner !== sessionUserId()) {
+      this.stopWatching?.();
+      this.watching = "";
+      this.setData({ ...loggedOut, loading: true, needsLogin: false });
+    }
     if (!hasSession()) {
-      this.setData({
-        loading: false,
-        needsLogin: true,
-        productId: "",
-        products: [],
-        info: null,
-        ledger: [],
-        available: "—",
-        held: "0",
-        allowed: false,
-        pendingOrderId: "",
-        paymentNotice: "",
-      });
+      this.setData(loggedOut);
       return;
     }
     try {
@@ -136,20 +103,7 @@ Page({
       this.trackPayment(pendingPayment(info.wallet.userId));
     } catch (e) {
       if (revision === this.revision) {
-        if (!hasSession())
-          this.setData({
-            needsLogin: true,
-            productId: "",
-            products: [],
-            info: null,
-            ledger: [],
-            available: "0",
-            held: "0",
-            allowed: false,
-            pendingOrderId: "",
-            paymentNotice: "",
-            error: "",
-          });
+        if (!hasSession()) this.setData(loggedOut);
         else this.setData({ error: (e as Error).message });
       }
     } finally {
@@ -198,16 +152,36 @@ Page({
     );
   },
   input(e: WechatMiniprogram.Input) {
+    if (this.data.busy || this.data.pendingOrderId) return;
     this.setData({
       amount: e.detail.value,
+      ...(this.data.purchaseMode === "custom"
+        ? { customAmount: e.detail.value }
+        : {}),
       paymentNotice: this.data.pendingOrderId ? this.data.paymentNotice : "",
     });
     this.estimate();
   },
   estimate() {
     this.setData(
-      estimateCheckout(this.data.info, this.data.amount, this.data.productId),
+      estimateCheckout(
+        this.data.info,
+        this.data.amount,
+        this.data.productId,
+        this.data.purchaseMode,
+      ),
     );
+  },
+  choosePurchase(e: WechatMiniprogram.TouchEvent) {
+    if (this.data.busy || this.data.pendingOrderId) return;
+    const mode = e.currentTarget.dataset.mode;
+    if (mode !== "package" && mode !== "custom") return;
+    if (mode === "custom" && !this.data.info?.virtualCustom) return;
+    this.setData({
+      purchaseMode: mode,
+      ...(mode === "custom" ? { amount: this.data.customAmount } : {}),
+    });
+    this.estimate();
   },
   async additionalPurchase() {
     const id = this.data.pendingOrderId,
@@ -233,58 +207,14 @@ Page({
     if (product)
       this.setData({
         productId: product.id,
+        purchaseMode: "package",
         amount: money(product.amountFen),
         estimated: points(product.pointsUnits),
         paymentNotice: "",
       });
   },
   async pay() {
-    if (this.data.busy || !this.data.info || this.data.pendingOrderId) return;
-    const pending = pendingPayment(this.data.info.wallet.userId);
-    if (pending) {
-      this.trackPayment(pending);
-      return;
-    }
-    const fen = amountFen(this.data.amount),
-      settings = this.data.info.settings;
-    if (
-      this.data.info.paymentChannel === "wechat_virtual" &&
-      !this.data.productId
-    ) {
-      error(new Error("请选择积分商品"));
-      return;
-    }
-    if (fen < settings.minRechargeFen || fen > settings.maxRechargeFen) {
-      error(
-        new Error(
-          `请输入 ${money(settings.minRechargeFen)}–${money(settings.maxRechargeFen)} 元`,
-        ),
-      );
-      return;
-    }
-    this.setData({ busy: true, paymentNotice: "" });
-    try {
-      const row = await recharge(this.data.info, fen, this.data.productId);
-      if (this.destroyed) return;
-      wx.showToast({
-        title: paymentMessage(row.data.status),
-        icon: "none",
-      });
-      this.setData({ paymentNotice: paymentMessage(row.data.status) });
-      this.trackPayment(row.data.status === "created" ? row.id : "");
-      await this.load();
-    } catch (e) {
-      if (!this.destroyed && e instanceof PaymentCancelledError)
-        this.setData({
-          paymentNotice: "已取消本次支付，可在充值订单中查看结果",
-        });
-      if (!this.destroyed && !cancelled(e)) {
-        error(e);
-        if ((e as { status?: number }).status === 409) await this.load();
-      }
-    } finally {
-      if (!this.destroyed) this.setData({ busy: false });
-    }
+    await checkout(this);
   },
   orders() {
     openPage(this, { url: "/pages/orders/index" });
