@@ -52,6 +52,7 @@ export default function VirtualEvents({ notify }: { notify: Notify }) {
     try {
       await api(`/admin/virtual-payments/events/${detail.id}/${action}`, {
         method: "POST",
+        confirmation: { before: detail.data },
         body: JSON.stringify({ version: detail.version, note: note.trim() }),
       });
       setDetail(null);

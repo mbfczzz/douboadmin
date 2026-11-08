@@ -2,8 +2,10 @@ package api
 
 import (
 	"doubo/server/internal/core"
+	"doubo/server/internal/settings"
 	"encoding/json"
 	"net/http"
+	"path/filepath"
 	"testing"
 )
 
@@ -30,16 +32,15 @@ func TestSuspensionDuringWechatExchangeCannotIssuePaymentSignature(t *testing.T)
 	}
 }
 
-func TestClosingRechargeDuringWechatExchangePreventsNewSignature(t *testing.T) {
+func TestPendingPaymentSettingsDuringWechatExchangePreventNewSignature(t *testing.T) {
 	a, user, _ := virtualFixture(t)
+	a.Integrations = settings.New(a.Store, filepath.Join(t.TempDir(), "integrations.key"), nil)
+	if _, err := a.Integrations.LoadStartup(t.Context()); err != nil {
+		t.Fatal(err)
+	}
 	row := virtualOrder(t, a, user)
 	a.WeChat.HTTP = virtualHTTP(func(*http.Request) (*http.Response, error) {
-		platform, settings, err := a.platform(t.Context())
-		if err != nil {
-			t.Fatal(err)
-		}
-		settings.RechargeEnabled = false
-		_, err = a.Store.Put(t.Context(), "settings", core.Record{ID: "platform", Data: core.Data(settings)}, platform.Version)
+		err := a.Integrations.Save(t.Context(), "wechat", "admin", settings.Update{Values: settings.Values{"WECHAT_APP_SECRET": "fixture-rotated"}}, false)
 		if err != nil {
 			t.Fatal(err)
 		}

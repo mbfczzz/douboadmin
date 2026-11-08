@@ -73,6 +73,7 @@ export default function Templates({ notify }: PageProps) {
     try {
       await api("/admin/templates/" + row.id, {
         method: remove ? "DELETE" : "PUT",
+        confirmation: { before: row.data },
         body: JSON.stringify({
           version: row.version,
           ...(!remove

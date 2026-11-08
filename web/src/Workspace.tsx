@@ -12,6 +12,8 @@ import { LoadingState } from "./components/RequestState";
 import { usePage } from "./hooks/usePage";
 import { useDrawer } from "./hooks/useDrawer";
 import { canLeave } from "./hooks/unsaved";
+import ConfirmationHost from "./confirmation/Host";
+import { confirmationPending } from "./confirmation/request";
 const routes = {
   overview: lazy(() => import("./pages/Overview")),
   templates: lazy(() => import("./pages/Templates")),
@@ -55,7 +57,7 @@ export default function Workspace({
     const shortcut = (event: KeyboardEvent) => {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();
-        setCommandOpen(true);
+        if (!confirmationPending()) setCommandOpen(true);
       }
     };
     window.addEventListener("keydown", shortcut);
@@ -65,6 +67,7 @@ export default function Workspace({
     };
   }, []);
   const notify = (message: string, tone: NoticeTone = "success") => {
+    if (!message) return;
     clearTimeout(timer.current);
     setToast({ message, tone });
     if (tone !== "error")
@@ -222,6 +225,7 @@ export default function Workspace({
           </button>
         </div>
       )}
+      <ConfirmationHost />
     </div>
   );
 }

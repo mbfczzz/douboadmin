@@ -3,6 +3,7 @@ package api
 import (
 	"doubo/server/internal/settings"
 	"errors"
+	"log/slog"
 	"net/http"
 )
 
@@ -18,6 +19,9 @@ func (a *Server) integrationSettings(w http.ResponseWriter, r *http.Request) {
 	}
 	states, err := a.Integrations.States(r.Context(), a.Config.Production)
 	if err != nil {
+		if integrationKeyError(w, err) {
+			return
+		}
 		fail(w, 503, "无法读取接入配置，请检查数据库和加密密钥文件")
 		return
 	}
@@ -38,10 +42,22 @@ func (a *Server) saveIntegrationSettings(w http.ResponseWriter, r *http.Request)
 		var validation *settings.ValidationError
 		if errors.As(err, &validation) {
 			reply(w, 400, validation)
+		} else if integrationKeyError(w, err) {
+			return
 		} else {
 			dbError(w, err)
 		}
 		return
 	}
 	a.integrationSettings(w, r)
+}
+
+func integrationKeyError(w http.ResponseWriter, err error) bool {
+	var key *settings.KeyFileError
+	if !errors.As(err, &key) {
+		return false
+	}
+	slog.Warn("integration key unavailable", "error", key.Error())
+	reply(w, 503, map[string]string{"code": "INTEGRATION_KEY_UNAVAILABLE", "error": key.Error()})
+	return true
 }

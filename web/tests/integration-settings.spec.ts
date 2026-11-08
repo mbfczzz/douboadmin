@@ -1,5 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
-import { login } from "./helpers";
+import { confirmSubmission, login } from "./helpers";
 
 test.skip(
   process.env.DOUBO_TEST_ISOLATED_SETTINGS !== "true",
@@ -45,6 +45,7 @@ test("real API shows the saved secret and independent forms preserve drafts", as
     .getByLabel("API Key", { exact: true })
     .fill("fixture-private-relay-key");
   await relay.getByRole("button", { name: "保存配置", exact: true }).click();
+  await confirmSubmission(page);
   await expect(page.getByRole("status")).toContainText("已保存");
   await expect(relay.locator("summary")).toContainText("待重启");
   await expect(relay.getByLabel("API Key", { exact: true })).toHaveValue(
@@ -79,6 +80,7 @@ test("structured products preserve typing, convert units, and populate custom am
     .getByLabel("自定义金额基础商品", { exact: false })
     .selectOption("fixture-10001");
   await card.getByRole("button", { name: "保存配置", exact: true }).click();
+  await confirmSubmission(page);
   await expect(page.getByRole("status")).toContainText("已保存");
   const data = await (await page.request.get("/api/admin/integrations")).json();
   const values = data.groups.find(
@@ -107,6 +109,7 @@ test("a stale save retains the draft and rereading discards it explicitly", asyn
   });
   expect(saved.status()).toBe(200);
   await card.getByRole("button", { name: "保存配置", exact: true }).click();
+  await confirmSubmission(page);
   await expect(card.getByRole("alert")).toContainText("其他管理员");
   await expect(field).toHaveValue("https://draft.example");
   await card.getByRole("button", { name: "重新读取", exact: true }).click();
@@ -125,6 +128,7 @@ test("explicit secret removal is distinct from leaving the password input blank"
     .getByLabel("小程序密钥 AppSecret", { exact: true })
     .fill("wechat-secret-fixture");
   await card.getByRole("button", { name: "保存配置", exact: true }).click();
+  await confirmSubmission(page);
   await expect(page.getByRole("status")).toContainText("已保存");
   const clear = card.getByLabel("清除小程序密钥 AppSecret", { exact: true });
   await expect(clear).toBeVisible();
@@ -133,6 +137,7 @@ test("explicit secret removal is distinct from leaving the password input blank"
     card.getByLabel("小程序密钥 AppSecret", { exact: true }),
   ).toBeDisabled();
   await card.getByRole("button", { name: "保存配置", exact: true }).click();
+  await confirmSubmission(page);
   await expect(clear).toHaveCount(0);
   await expect(
     card.getByLabel("小程序密钥 AppSecret", { exact: true }),
@@ -162,6 +167,7 @@ test("duplicate notification fields cannot silently overwrite each other", async
     .toContain("重复");
   await card.getByLabel("微信字段名", { exact: true }).last().fill("thing2");
   await card.getByRole("button", { name: "保存配置", exact: true }).click();
+  await confirmSubmission(page);
   await expect(page.getByRole("status")).toContainText("已保存");
 });
 
@@ -250,6 +256,7 @@ test("removing the custom amount base product clears its selection and permits s
     card.getByLabel("自定义金额基础商品", { exact: true }),
   ).toHaveValue("");
   await card.getByRole("button", { name: "保存配置", exact: true }).click();
+  await confirmSubmission(page);
   await expect(page.getByRole("status")).toContainText("已保存");
   const data = await (await page.request.get("/api/admin/integrations")).json();
   const values = data.groups.find(

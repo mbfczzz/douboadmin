@@ -49,6 +49,11 @@ export async function createVirtualOrder(
           }
         : { productId, amountFen: product!.amountFen }),
       settingsVersion: info.settingsVersion,
+      expectedPointsUnits:
+        mode === "custom"
+          ? info.virtualCustom!.unitPointsUnits *
+            (fen / info.virtualCustom!.unitAmountFen)
+          : product!.pointsUnits,
       pricingVersion: info.pricing?.version || "",
       platform,
     },

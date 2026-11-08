@@ -25,15 +25,13 @@ func (a *Server) rechargeIOS() bool {
 	}
 	return a.Pay != nil && a.Pay.Config.IOSAllowed
 }
-func (a *Server) virtualProducts(settings core.PlatformSettings, retail int64) []virtualpay.Product {
+func (a *Server) virtualProducts() []virtualpay.Product {
 	out := []virtualpay.Product{}
-	if !a.Virtual.Enabled() || retail <= 0 {
+	if !a.Virtual.Enabled() {
 		return out
 	}
 	for _, p := range a.Virtual.Client.Config.Products {
-		if p.AmountFen >= settings.MinRechargeFen && p.AmountFen <= settings.MaxRechargeFen && p.PointsUnits == p.AmountFen*settings.PointsPerYuan*10000/retail {
-			out = append(out, p)
-		}
+		out = append(out, p)
 	}
 	return out
 }
@@ -70,11 +68,7 @@ func (a *Server) createVirtualOrder(w http.ResponseWriter, r *http.Request) {
 		v.PurchaseMode = "package"
 	}
 	if v.PurchaseMode == "custom" {
-		custom, err := a.customForUser(r.Context(), identity(r).ID, settings)
-		if err != nil {
-			partnerError(w, err)
-			return
-		}
+		custom := a.virtualCustom()
 		if custom == nil || (v.ProductID != "" && v.ProductID != custom.ProductID) {
 			fail(w, 409, "当前自定义充值暂不可用，请刷新后选择积分套餐")
 			return
@@ -101,6 +95,10 @@ func (a *Server) createVirtualOrder(w http.ResponseWriter, r *http.Request) {
 	}
 	if v.AmountFen != 0 && v.AmountFen != fen {
 		fail(w, 409, "商品价格已更新，请刷新后确认")
+		return
+	}
+	if v.ExpectedPointsUnits != nil && *v.ExpectedPointsUnits != goods.PointsUnits {
+		fail(w, 409, "套餐积分已更新，请刷新后确认")
 		return
 	}
 	if platform == "ios" && (!cfg.IOSAllowed || cfg.Env != 0 || p.AmountFen < 100) {

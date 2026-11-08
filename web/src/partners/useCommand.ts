@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { api } from "../api";
+import { api, type APIInit } from "../api";
 export function useCommand() {
   const [busy, setBusy] = useState(false),
     pending = useRef({ hash: "", key: "" }),
@@ -8,6 +8,7 @@ export function useCommand() {
     path: string,
     body: unknown,
     method = "POST",
+    confirmation?: APIInit["confirmation"],
   ): Promise<T> {
     if (running.current) throw Error("操作正在处理中");
     running.current = true;
@@ -37,6 +38,7 @@ export function useCommand() {
       }
       const result = await api<T>(path, {
         method,
+        confirmation,
         body: JSON.stringify(body),
         headers: { "Idempotency-Key": key },
       });

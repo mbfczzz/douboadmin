@@ -139,11 +139,6 @@ export default function Payouts({ id, view, changed, notify }: Scope) {
               e.preventDefault();
               const f = new FormData(e.currentTarget),
                 status = String(f.get("status"));
-              if (
-                status === "paid" &&
-                !confirm("请确认已完成线下打款，本操作仅记录打款结果。继续吗？")
-              )
-                return;
               try {
                 await command.send(
                   "/admin/commission-payouts/" + detail.id,
@@ -153,6 +148,7 @@ export default function Payouts({ id, view, changed, notify }: Scope) {
                     reference: String(f.get("reference")),
                   },
                   "PUT",
+                  { before: detail.data },
                 );
                 setDetail(null);
                 await resource.reload();

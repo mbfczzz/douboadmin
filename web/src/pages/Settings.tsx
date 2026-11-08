@@ -2,7 +2,6 @@ import type { Row } from "../api";
 import type { PageProps } from "../navigation";
 import { useResource } from "../hooks/useResource";
 import ResourcePage from "../business/ResourcePage";
-import PlatformForm from "../business/PlatformForm";
 import type { Platform } from "../business/types";
 import IntegrationPanel from "../integrations/Panel";
 
@@ -43,14 +42,6 @@ export default function Settings({ notify }: PageProps) {
           })}
         </ul>
       </section>
-      {resource.data && (
-        <PlatformForm
-          key={resource.data.record.version}
-          row={resource.data.record}
-          onSaved={resource.reload}
-          notify={notify}
-        />
-      )}
       <IntegrationPanel notify={notify} />
     </ResourcePage>
   );

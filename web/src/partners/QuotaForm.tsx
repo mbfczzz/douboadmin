@@ -66,14 +66,6 @@ export default function QuotaForm({
         `本次最多可${kind === "grant" ? "划拨" : "收回"} ${limit} 个名额`,
       );
     if (reason.length < 2) return setError("请填写至少 2 个字的操作原因");
-    if (
-      !request &&
-      kind === "reclaim" &&
-      !confirm(
-        `确认从「${target!.data.name}」收回 ${users} 个可用名额？收回后该服务商剩余 ${targetAfter} 个可用名额。`,
-      )
-    )
-      return;
     try {
       if (request)
         await command.send("/admin/quota-requests", {

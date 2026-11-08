@@ -51,19 +51,14 @@ type CustomPurchase struct {
 	MaxAmountFen    int64  `json:"maxAmountFen"`
 }
 
-func (c Config) CustomPurchase(settings core.PlatformSettings, retail int64) *CustomPurchase {
+// Each SKU owns its price and credit.
+func (c Config) CustomPurchase() *CustomPurchase {
 	p, ok := c.Product(c.CustomProductID)
-	if !ok || retail <= 0 || p.AmountFen < 1 || p.AmountFen > MaxAmountFen ||
-		settings.PointsPerYuan < 1 || settings.PointsPerYuan > 100000 {
+	if !ok || p.AmountFen < 1 || p.AmountFen > MaxAmountFen || p.PointsUnits < 1 || p.PointsUnits > core.MaxBalance {
 		return nil
 	}
-	// Unit conversion must be exact: rounding once per item would under-credit bulk orders.
-	numerator := p.AmountFen * settings.PointsPerYuan * 10000
-	if numerator%retail != 0 || numerator/retail != p.PointsUnits {
-		return nil
-	}
-	minimum := ((settings.MinRechargeFen-1)/p.AmountFen + 1) * p.AmountFen
-	maximum := settings.MaxRechargeFen / p.AmountFen * p.AmountFen
+	minimum := p.AmountFen
+	maximum := MaxAmountFen / p.AmountFen * p.AmountFen
 	if maximum/p.AmountFen > core.MaxBalance/p.PointsUnits {
 		maximum = core.MaxBalance / p.PointsUnits * p.AmountFen
 	}

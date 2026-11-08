@@ -1,0 +1,5 @@
+# Optional drop-in: /etc/systemd/system/doubo@.service.d/media-path.conf
+# Use when MEDIA_DIR=/srv/doubo/shared/media. Create and assign the directory first.
+# Adds only the persistent shared directory; release directories stay protected.
+[Service]
+ReadWritePaths=/srv/doubo/shared

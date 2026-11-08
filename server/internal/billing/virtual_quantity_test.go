@@ -9,12 +9,14 @@ import (
 
 func TestMultipleVirtualPurchaseCommissionsUseFullAmountAndRefundOnce(t *testing.T) {
 	s, partners, ctx, s1, s2 := channelFixture(t)
-	quote, units, err := partners.UserQuote(ctx, "user", 10000, 100)
+	quote, err := partners.UserPurchaseQuote(ctx, "user", 10000)
+	units := int64(987654321)
 	if err != nil {
 		t.Fatal(err)
 	}
 	goods := core.VirtualOrder{ProductID: "base", Quantity: 10, UnitFen: 1000, PointsUnits: units, Env: 0}
-	row, err := s.CreateVirtualOrder(ctx, "user", "quantity-commission", 10000, core.DefaultPlatform(), "app", "offer", "openid", quote.PricingVersion, goods)
+	legacy := core.PlatformSettings{PointsPerYuan: 0, MinRechargeFen: 100000, MaxRechargeFen: 1}
+	row, err := s.CreateVirtualOrder(ctx, "user", "quantity-commission", 10000, legacy, "app", "offer", "openid", quote.PricingVersion, goods)
 	if err != nil {
 		t.Fatal(err)
 	}

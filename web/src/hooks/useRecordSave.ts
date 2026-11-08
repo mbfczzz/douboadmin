@@ -1,15 +1,17 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { api, APIError, type Row } from "../api";
 
 export function useRecordSave<T>(namespace: string, initial: Row<T>) {
   const [version, setVersion] = useState(initial.version);
   const [error, setError] = useState("");
+  const before = useRef(initial.data);
   async function save(data: T) {
     setError("");
     try {
       await api(`/admin/${namespace}/${initial.id}`, {
         method: "PUT",
         body: JSON.stringify({ version, data }),
+        confirmation: { before: before.current },
       });
       return true;
     } catch (e) {
@@ -22,6 +24,7 @@ export function useRecordSave<T>(namespace: string, initial: Row<T>) {
             return false;
           }
           setVersion(latest.version);
+          before.current = latest.data;
           setError(
             "记录已被其他人修改。你的草稿已保留，再次保存会覆盖最新版本，请确认后操作。",
           );

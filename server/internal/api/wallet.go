@@ -27,9 +27,8 @@ func (a *Server) wallet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	pricing := map[string]any{"ready": true, "retailPer100Fen": 10000, "version": ""}
-	retail := int64(10000)
 	if a.Config.RequireActivation {
-		snapshot, _, err := a.Partners.UserQuote(r.Context(), user, 100, settings.PointsPerYuan)
+		snapshot, err := a.Partners.UserPurchaseQuote(r.Context(), user, 100)
 		if err != nil {
 			var rule *partners.RuleError
 			adminDisabled := identity(r).Role == "admin" && errors.Is(err, core.ErrUserDisabled)
@@ -43,13 +42,12 @@ func (a *Server) wallet(w http.ResponseWriter, r *http.Request) {
 				pricing["message"] = "充值暂未开放，请联系服务商"
 			}
 		} else if snapshot != nil {
-			retail = snapshot.RetailPer100Fen
 			pricing["retailPer100Fen"] = snapshot.RetailPer100Fen
 			pricing["version"] = snapshot.PricingVersion
 		}
 	}
-	products := a.virtualProducts(settings, retail)
-	custom := a.virtualCustom(settings, retail)
+	products := a.virtualProducts()
+	custom := a.virtualCustom()
 	channel := a.Config.PaymentChannel
 	if channel == "" {
 		channel = "wechat_jsapi"

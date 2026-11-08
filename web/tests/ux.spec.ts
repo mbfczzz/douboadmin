@@ -1,5 +1,11 @@
 import { test, expect } from "@playwright/test";
-import { login, createTemplate, removeTemplate, catalog } from "./helpers";
+import {
+  confirmSubmission,
+  login,
+  createTemplate,
+  removeTemplate,
+  catalog,
+} from "./helpers";
 import type { Row, Model } from "../src/api";
 
 test("model availability is reflected in the public catalog", async ({
@@ -19,10 +25,12 @@ test("model availability is reflected in the public catalog", async ({
     });
     await expect(toggle).toBeChecked();
     await toggle.click();
+    await confirmSubmission(page);
     await expect(toggle).not.toBeChecked();
     const cfg = await (await page.request.get("/api/config")).json();
     expect(cfg.models.some((m: Model) => m.id === row.id)).toBeFalsy();
     await toggle.click();
+    await confirmSubmission(page);
     await expect(toggle).toBeChecked();
     const restored = await (await page.request.get("/api/config")).json();
     expect(restored.models.some((m: Model) => m.id === row.id)).toBeTruthy();
@@ -86,10 +94,12 @@ test("version conflicts preserve a draft and require an explicit resave", async 
       ).ok(),
     ).toBeTruthy();
     await page.getByRole("button", { name: "保存模板", exact: true }).click();
+    await confirmSubmission(page);
     await expect(page.getByRole("alert")).toContainText("草稿已保留");
     await expect(page.getByRole("alert")).toBeFocused();
     await expect(page.getByLabel("模板名称")).toHaveValue(edited);
     await page.getByRole("button", { name: "保存模板", exact: true }).click();
+    await confirmSubmission(page);
     await expect(page.getByRole("dialog")).toHaveCount(0);
     await expect(
       page.getByRole("heading", { name: edited, exact: true }),

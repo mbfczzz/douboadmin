@@ -64,6 +64,14 @@ export default function GroupForm({
     try {
       await api("/admin/integrations/" + group.id, {
         method: "PUT",
+        confirmation: {
+          title: `确认修改${group.name}`,
+          before: group.values,
+          labels: Object.fromEntries(group.fields.map((f) => [f.key, f.label])),
+          secrets: group.fields
+            .filter((f) => f.kind === "secret")
+            .map((f) => f.key),
+        },
         body: JSON.stringify({
           version,
           values,

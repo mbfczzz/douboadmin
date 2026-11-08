@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { login } from "./helpers";
+import { confirmSubmission, login } from "./helpers";
 import { selectProvider } from "./partner-helpers";
 test.skip(
   process.env.PARTNER_ACCEPTANCE !== "true",
@@ -106,6 +106,7 @@ test("background refresh cannot silently replace an open provider edit version",
   expect(update.status()).toBe(200);
   await polled;
   await dialog.getByRole("button", { name: "保存服务商", exact: true }).click();
+  await confirmSubmission(page);
   await expect(
     page.getByText("数据已发生变化，请刷新后重试", { exact: true }),
   ).toBeVisible();

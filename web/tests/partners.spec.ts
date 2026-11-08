@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { login } from "./helpers";
+import { confirmSubmission, login } from "./helpers";
 import { createProvider, selectProvider, issueCode } from "./partner-helpers";
 
 test.skip(
@@ -78,6 +78,7 @@ test("fixed user quotas, QR activation, suspension, unbinding and configurable m
   await dialog
     .getByRole("button", { name: "保存授权状态", exact: true })
     .click();
+  await confirmSubmission(page);
   await expect(dialog).toHaveCount(0);
   view = await (await page.request.get("/api/admin/partners/" + s2.id)).json();
   expect(view.quota.users.used).toBe(1);
@@ -97,6 +98,7 @@ test("fixed user quotas, QR activation, suspension, unbinding and configurable m
   await dialog
     .getByRole("button", { name: "保存授权状态", exact: true })
     .click();
+  await confirmSubmission(page);
   await expect(dialog).toHaveCount(0);
   view = await (await page.request.get("/api/admin/partners/" + s2.id)).json();
   expect(view.quota.users.used).toBe(0);
@@ -109,6 +111,7 @@ test("fixed user quotas, QR activation, suspension, unbinding and configurable m
   await page.getByLabel("总账号保留毛利（%）", { exact: true }).fill("50");
   await page.getByLabel("已确认成本与价格，启用按充值分佣").check();
   await page.getByRole("button", { name: "保存分佣规则", exact: true }).click();
+  await confirmSubmission(page);
   await expect(
     page.getByText("价格规则已保存，历史订单快照不变", { exact: true }),
   ).toBeVisible();
@@ -132,6 +135,7 @@ test("fixed user quotas, QR activation, suspension, unbinding and configurable m
     .getByLabel("子账号售价（每 100 元基准算力）", { exact: true })
     .fill("94");
   await edit.getByRole("button", { name: "保存服务商", exact: true }).click();
+  await confirmSubmission(page);
   await expect(
     page.getByText("服务商售价低于进价，请先调整价格链", { exact: true }),
   ).toBeVisible();

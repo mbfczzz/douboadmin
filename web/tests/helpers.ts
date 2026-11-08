@@ -2,6 +2,12 @@ import { expect, type Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import type { Row, Model, Template } from "../src/api";
 
+export async function confirmSubmission(page: Page) {
+  const dialog = page.locator('[role="dialog"].save-confirmation');
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole("button", { name: "确认提交", exact: true }).click();
+}
+
 export async function login(page: Page) {
   await page.goto("/");
   await page.getByLabel("管理员账号").fill(process.env.ADMIN_USER || "admin");

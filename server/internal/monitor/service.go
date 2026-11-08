@@ -4,7 +4,6 @@ import (
 	"context"
 	"doubo/server/internal/core"
 	"doubo/server/internal/store"
-	"encoding/json"
 	"os"
 	"runtime"
 	"sync"
@@ -50,9 +49,6 @@ func (m *Service) beat(ctx context.Context) {
 	old, _ := m.Store.Get(ctx, "instances", m.ID)
 	_, _ = m.Store.Put(ctx, "instances", core.Record{ID: m.ID, Data: core.Data(m.Snapshot())}, old.Version)
 	settings := core.DefaultPlatform()
-	if r, e := m.Store.Get(ctx, "settings", "platform"); e == nil {
-		_ = json.Unmarshal(r.Data, &settings)
-	}
 	queue, e := m.Store.QueueHealth(ctx)
 	if e != nil {
 		m.alert(ctx, "database", "数据库或任务状态读取失败")

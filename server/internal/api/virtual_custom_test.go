@@ -60,7 +60,7 @@ func TestVirtualCustomAmountSnapshotSignatureAndIdempotency(t *testing.T) {
 
 func TestVirtualCustomRejectsInvalidAmountsAndForgedProducts(t *testing.T) {
 	for _, change := range []map[string]any{
-		{"amountFen": 0}, {"amountFen": -100}, {"amountFen": 150}, {"amountFen": 100100},
+		{"amountFen": 0}, {"amountFen": -100}, {"amountFen": 150}, {"amountFen": core.MaxOrderAmountFen + 100},
 		{"amountFen": 100.5}, {"productId": "other"}, {"purchaseMode": "unknown"}, {"settingsVersion": 0},
 	} {
 		a, user := customFixture(t)
@@ -91,7 +91,7 @@ func TestVirtualCustomCanUseUnitBelowRechargeMinimum(t *testing.T) {
 		Custom   *virtualpay.CustomPurchase `json:"virtualCustom"`
 	}
 	_ = json.Unmarshal(w.Body.Bytes(), &info)
-	if !info.Ready || len(info.Products) != 0 || info.Custom == nil || info.Custom.MinAmountFen != 100 {
+	if !info.Ready || len(info.Products) != 1 || info.Custom == nil || info.Custom.MinAmountFen != 10 {
 		t.Fatal(w.Body.String())
 	}
 	input := map[string]any{"purchaseMode": "custom", "amountFen": 100, "settingsVersion": 1, "platform": "android"}

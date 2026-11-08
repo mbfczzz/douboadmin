@@ -90,7 +90,7 @@ func TestJobEstimateTracksDurationAndPerRequestVideoPricing(t *testing.T) {
 	assertEstimate(t, a, user, in, 900, true)
 }
 
-func TestJobEstimateHonorsBillingSwitchAndFallbackPrice(t *testing.T) {
+func TestJobEstimateIgnoresRetiredBillingSwitchAndUsesFallbackPrice(t *testing.T) {
 	a, user, m := estimateFixture(t)
 	m.Settings.PriceMatrix = nil
 	row, _ := a.Store.Get(context.Background(), "models", m.ID)
@@ -107,7 +107,7 @@ func TestJobEstimateHonorsBillingSwitchAndFallbackPrice(t *testing.T) {
 	if _, err = a.Store.Put(context.Background(), "settings", core.Record{ID: "platform", Data: core.Data(settings)}, platform.Version); err != nil {
 		t.Fatal(err)
 	}
-	assertEstimate(t, a, user, in, 0, false)
+	assertEstimate(t, a, user, in, 125, true)
 }
 
 func TestJobEstimateRejectsUnsupportedParametersAndInactiveUsers(t *testing.T) {

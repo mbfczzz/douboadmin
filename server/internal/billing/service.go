@@ -15,6 +15,7 @@ import (
 type Service struct {
 	Store             store.Store
 	RequireActivation bool
+	BeforePayment     func(store.Transaction) error
 }
 
 func (s *Service) Wallet(ctx context.Context, user string) (core.Wallet, error) {
@@ -67,21 +68,27 @@ func (s *Service) CreateVirtualOrder(ctx context.Context, user, key string, fen 
 	return s.createOrder(ctx, user, key, fen, settings, appid, offerid, openid, &goods, pricingVersion)
 }
 func (s *Service) createOrder(ctx context.Context, user, key string, fen int64, settings core.PlatformSettings, appid, mchid, openid string, goods *core.VirtualOrder, pricingVersion ...string) (out core.Record, err error) {
-	if fen < settings.MinRechargeFen || fen > settings.MaxRechargeFen {
+	if fen < 1 || fen > core.MaxOrderAmountFen || (goods == nil && (fen < settings.MinRechargeFen || fen > settings.MaxRechargeFen)) {
 		return out, fmt.Errorf("充值金额超出允许范围")
 	}
-	if settings.PointsPerYuan < 1 || settings.PointsPerYuan > 100000 {
+	if goods == nil && (settings.PointsPerYuan < 1 || settings.PointsPerYuan > 100000) {
 		return out, fmt.Errorf("兑换比例尚未配置")
 	}
 	// fen * points/yuan already equals hundredths of a point, with no floating-point conversion.
-	units := fen * settings.PointsPerYuan
+	units := int64(0)
+	if goods == nil {
+		units = fen * settings.PointsPerYuan
+	}
 	order := core.Order{UserID: user, AmountFen: fen, PointsUnits: units, Status: "created", Channel: "wechat_jsapi", AppID: appid, MerchantID: mchid, OpenID: openid, ExpiresAt: time.Now().UTC().Add(30 * time.Minute), RequestHash: core.Digest(strconv.FormatInt(fen, 10))}
 	if goods != nil {
 		quantity, unitFen, e := goods.PurchaseDetails(fen)
 		if e != nil {
 			return out, e
 		}
-		order.Channel, order.Virtual = "wechat_virtual", goods
+		if goods.PointsUnits < 1 || goods.PointsUnits > core.MaxBalance {
+			return out, core.ErrPaymentMismatch
+		}
+		order.Channel, order.Virtual, order.PointsUnits = "wechat_virtual", goods, goods.PointsUnits
 		order.RequestHash = core.Digest(string(core.Data([]any{fen, appid, mchid, goods.ProductID, goods.PointsUnits, goods.Env})))
 		if quantity > 1 {
 			order.RequestHash = core.Digest(string(core.Data([]any{order.RequestHash, quantity, unitFen})))
@@ -105,8 +112,20 @@ func (s *Service) createOrder(ctx context.Context, user, key string, fen int64, 
 		} else if !errors.Is(e, core.ErrNotFound) {
 			return e
 		}
+		if s.BeforePayment != nil {
+			if e := s.BeforePayment(tx); e != nil {
+				return e
+			}
+		}
 		if s.RequireActivation {
-			snapshot, points, e := partners.Snapshot(tx, user, fen, settings.PointsPerYuan)
+			var snapshot *core.DistributionSnapshot
+			var e error
+			points := order.PointsUnits
+			if goods != nil {
+				snapshot, e = partners.PurchaseSnapshot(tx, user, fen)
+			} else {
+				snapshot, points, e = partners.Snapshot(tx, user, fen, settings.PointsPerYuan)
+			}
 			if e != nil {
 				return e
 			}
@@ -121,9 +140,6 @@ func (s *Service) createOrder(ctx context.Context, user, key string, fen int64, 
 			order.PointsUnits = points
 		}
 		var e error
-		if goods != nil && (goods.PointsUnits <= 0 || goods.PointsUnits != order.PointsUnits) {
-			return fmt.Errorf("%w: 商品积分与当前服务商报价不一致，请刷新后选择其他商品", core.ErrConflict)
-		}
 		out, e = tx.Put("orders", core.Record{ID: id, Owner: user, Data: core.Data(order)}, 0)
 		return e
 	})

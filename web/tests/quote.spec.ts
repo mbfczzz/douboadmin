@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { login } from "./helpers";
+import { confirmSubmission, login } from "./helpers";
 
 test("quote management pages load real APIs and report missing services", async ({
   page,
@@ -51,6 +51,7 @@ test("admin adjusts points with an immutable visible ledger", async ({
   await dialog
     .getByRole("button", { name: "确认调整积分", exact: true })
     .click();
+  await confirmSubmission(page);
   await expect(
     dialog.getByText("浏览器验收临时积分", { exact: true }),
   ).toBeVisible();

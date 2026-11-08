@@ -63,7 +63,7 @@ const identityKey ctxKey = 0
 func New(s store.Store, sessions *Sessions, c Config) *Server {
 	a := &Server{Store: s, Sessions: sessions, Config: c, Mux: http.NewServeMux(), WeChat: wechat.New(c.WeChatAppID, c.WeChatSecret)}
 	a.Relay = relay.New(c.RelayURL, c.RelayKey)
-	a.Billing = &billing.Service{Store: s, RequireActivation: c.RequireActivation}
+	a.Billing = &billing.Service{Store: s, RequireActivation: c.RequireActivation, BeforePayment: a.paymentAdmission}
 	a.Partners = &partners.Service{Store: s}
 	a.Activity = &analytics.Recorder{Store: s}
 	a.routes()

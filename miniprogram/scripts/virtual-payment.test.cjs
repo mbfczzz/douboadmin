@@ -2,6 +2,20 @@ const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const { fixture } = require("./virtual-payment-fixture.cjs");
 
+test("a 0.1 yuan SKU uses its own credit despite retired recharge limits and switches", async () => {
+  const f = await fixture();
+  f.info.settings = { rechargeEnabled: false, pointsPerYuan: 0, minRechargeFen: 100000, maxRechargeFen: 1 };
+  f.info.virtualProducts[0].amountFen = 10;
+  f.info.virtualProducts[0].pointsUnits = 1000000;
+  f.row.data.amountFen = 10;
+  f.row.data.pointsUnits = 1000000;
+  await f.page.load();
+  await f.page.pay();
+  assert.equal(f.native.length, 1);
+  assert.equal(f.calls.find((c) => c.path === "/orders").data.amountFen, 10);
+  assert.equal(f.page.data.available, "0");
+});
+
 test("virtual checkout sends product identity and untouched dual signatures, never credits from client success", async () => {
   const f = await fixture();
   await f.page.pay();

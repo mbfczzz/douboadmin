@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { login } from "./helpers";
+import { confirmSubmission, login } from "./helpers";
 import { selectProvider, issueCode } from "./partner-helpers";
 test.skip(
   process.env.PARTNER_ACCEPTANCE !== "true",
@@ -41,6 +41,7 @@ test("quota requests approve against the parent pool and unused codes can be rev
     .getByLabel("审批说明", { exact: true })
     .fill("同意从总账号划拨");
   await decision.getByRole("button", { name: "保存审批", exact: true }).click();
+  await confirmSubmission(page);
   await expect(decision).toHaveCount(0);
   let view = await (
     await page.request.get("/api/admin/partners/" + partner.id)

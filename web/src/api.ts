@@ -1,4 +1,9 @@
 import type { ModelSettings } from "./models/types";
+import {
+  requestConfirmation,
+  type ConfirmationOptions,
+} from "./confirmation/request";
+import { needsConfirmation, confirmationPlan } from "./confirmation/plan";
 export interface Row<T = Record<string, unknown>> {
   id: string;
   owner?: string;
@@ -107,7 +112,29 @@ export class APIError extends Error {
     super(message);
   }
 }
-export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
+export type APIInit = RequestInit & {
+  confirmation?: false | ConfirmationOptions;
+};
+export async function api<T>(path: string, options: APIInit = {}): Promise<T> {
+  const { confirmation, ...init } = options;
+  let body: unknown;
+  if (typeof init.body === "string") {
+    try {
+      body = JSON.parse(init.body);
+    } catch {
+      /* Validation belongs to the server. */
+    }
+  }
+  if (
+    confirmation !== false &&
+    needsConfirmation(path, (init.method || "GET").toUpperCase(), body)
+  ) {
+    const approved = await requestConfirmation(
+      confirmationPlan(path, body, confirmation),
+      init.signal,
+    );
+    if (!approved) throw new APIError(0, "");
+  }
   let r: Response;
   try {
     r = await fetch("/api" + path, {

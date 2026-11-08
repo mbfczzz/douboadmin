@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { login } from "./helpers";
+import { confirmSubmission, login } from "./helpers";
 
 test("model fields cannot change while a save is pending; failure preserves the draft", async ({
   page,
@@ -22,6 +22,7 @@ test("model fields cannot change while a save is pending; failure preserves the 
     await route.fulfill({ status: 503, json: { error: "测试保存失败" } });
   });
   await dialog.getByRole("button", { name: "保存", exact: true }).click();
+  await confirmSubmission(page);
   await expect.poll(() => submitted).toBeTruthy();
   try {
     await expect(name).toBeDisabled();

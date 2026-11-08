@@ -58,6 +58,7 @@ export default function PolicyForm({
                   },
                 },
                 "PUT",
+                { before: resource.data!.data },
               );
               setDirty(false);
               await resource.reload();

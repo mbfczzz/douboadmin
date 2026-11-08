@@ -6,7 +6,6 @@ import (
 	"doubo/server/internal/partners"
 	"doubo/server/internal/store"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"time"
 )
@@ -25,16 +24,10 @@ func (s *Service) ClaimSignature(ctx context.Context, id string) error {
 		if _, _, err := store.LockWallet(tx, base.Owner); err != nil {
 			return err
 		}
-		settings := core.DefaultPlatform()
-		if row, err := tx.Get("settings", "platform"); err == nil {
-			if err = json.Unmarshal(row.Data, &settings); err != nil {
+		if s.Billing != nil && s.Billing.BeforePayment != nil {
+			if err := s.Billing.BeforePayment(tx); err != nil {
 				return err
 			}
-		} else if !errors.Is(err, core.ErrNotFound) {
-			return err
-		}
-		if !settings.RechargeEnabled {
-			return fmt.Errorf("%w: 积分充值暂未开放，请刷新后重试", core.ErrConflict)
 		}
 		access, err := partners.AuthorizePayment(tx, base.Owner, requireActivation)
 		if err != nil {

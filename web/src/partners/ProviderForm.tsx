@@ -54,6 +54,7 @@ export default function ProviderForm({
                 },
               },
               "PUT",
+              { before: row.data },
             );
           else
             await command.send("/admin/partners", {

@@ -16,7 +16,9 @@
 | 站点地址 | 公网地址、允许的后台来源 |
 | 外部告警 | Webhook 地址 |
 
-积分兑换率、最低/最高充值金额、充值和扣费开关仍在业务设置中，保存即时生效。商品价格和权益须与微信后台已发布商品一致。账号实际开通、密钥有效性和真机支付仍需实际验证；保存成功只表示格式校验和持久化成功。
+整块业务设置已移除：不再配置全站兑换率、最低/最高充值金额、充值/扣费开关、审核开关、告警阈值、推荐词及帮助说明。旧数据库记录保留用于兼容，不再参与运行。虚拟支付按套餐金额和到账积分处理，自定义金额按基础商品的整数份购买；充值由通道配置和商品可用性决定。生成按模型定价扣费；公开作品保留人工审核流程，监控使用内置阈值（每小时失败 5 次、排队 10 分钟），热词由抖音接口提供。商品价格须与微信后台已发布商品一致。账号实际开通、密钥有效性和真机支付仍需实际验证。
+
+已有配置、资料修改在提交前展示确认弹窗；取消、关闭或按 Escape 保留草稿且不提交。确认摘要隐藏密码及密钥。新增记录沿用原创建流程。原 `PUT /api/admin/platform` 返回 410，旧客户端须刷新升级；钱包仍保留兼容字段。
 
 ## 首次部署
 
@@ -64,7 +66,7 @@ sudo systemctl restart doubo@serve doubo@worker
 - AppID 必须与小程序项目一致。更换 AppID 时需重新输入对应 AppSecret，并重新编译小程序；更换 OfferID 时需提供对应现网 AppKey。
 - 切换接入身份前须先关闭充值。有任何历史订单时，禁止直接切换 AppID / OfferID，须另行安排账户和历史订单迁移。
 - 已有订单时，查询、通知与退款所需的密钥可以替换，不能直接清除。暂停充值使用业务开关，不删凭证。
-- 微信或虚拟支付配置待重启时，不能重新开启业务充值开关；支付到账仍以服务端可信通知或查单为准。
+- 微信或虚拟支付配置待重启时，阻止创建新订单及签发新支付；API / Worker 重启后应用新配置。已有订单的到账、查单及退款继续使用订单快照。
 
 ## 加密密钥与备份
 
@@ -79,3 +81,25 @@ sudo systemctl restart doubo@serve doubo@worker
 如需使用其他持久目录，可在环境文件指定 `INTEGRATION_SETTINGS_KEY_FILE` 绝对路径，确保服务账号和 systemd 的可写目录设置允许访问。不要放到每次发布替换的版本目录。
 
 备份、迁移和恢复必须同时保留数据库及原加密密钥文件。数据库已有密文而文件丢失或被替换时，程序会拒绝启动；运行中的服务也会拒绝继续读取、修改接入配置，不会重新生成密钥或静默回退环境配置。应恢复匹配备份。仅有数据库备份无法恢复接入密钥。
+
+## 自定义 /srv 目录的写权限
+
+默认 systemd 单元使用 `ProtectSystem=strict`，只放行 `/opt/doubo/shared`。如果保留 `MEDIA_DIR=/srv/doubo/shared/media`，页面读取可以成功，但首次保存需要在 `.secrets/` 创建密钥，会因写权限不足失败。`APP_ENV=test` 不会关闭 systemd 的文件系统隔离。
+
+保留当前目录时，在服务器执行下面的目录和服务配置，不移动数据或重新生成已有密钥：
+
+```bash
+sudo install -d -o doubo -g doubo -m 750 /srv/doubo/shared/media
+sudo install -d -o doubo -g doubo -m 700 /srv/doubo/shared/media/.secrets
+sudo mkdir -p /etc/systemd/system/doubo@.service.d
+sudo tee /etc/systemd/system/doubo@.service.d/media-path.conf >/dev/null <<'EOF'
+[Service]
+ReadWritePaths=/srv/doubo/shared
+EOF
+sudo systemctl daemon-reload
+sudo systemctl restart doubo@serve doubo@worker
+```
+
+仓库的 `deploy/native/media-srv.conf.example` 是同一份可选 drop-in。它追加共享目录写入权限，不放开发布版本目录。若原密钥文件曾由 root 生成或恢复，还需将原文件及其目录的所有者设为 `doubo:doubo`，密钥文件权限保持 `600`，不要删除文件内容。部署脚本不会覆盖 `/etc/systemd/system/doubo@.service.d/` 中的配置。
+
+保存接口会以 `INTEGRATION_KEY_UNAVAILABLE` 返回安全的具体原因；数据库错误仍使用通用提示，详细信息查看 `journalctl -u doubo@serve -n 50 --no-pager`。

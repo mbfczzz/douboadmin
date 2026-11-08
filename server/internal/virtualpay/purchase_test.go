@@ -19,28 +19,21 @@ func TestPurchaseAmountAndPointOverflowAreRejected(t *testing.T) {
 	}
 }
 
-func TestCustomPurchaseRequiresExactUnitConversion(t *testing.T) {
+func TestCustomPurchaseUsesSKUPriceAndCreditWithoutLegacyRules(t *testing.T) {
 	c := testConfig()
 	c.CustomProductID = c.Products[0].ID
-	s := core.DefaultPlatform()
-	if custom := c.CustomPurchase(s, 10000); custom == nil || custom.MinAmountFen != 100 || custom.MaxAmountFen != 100000 {
+	c.Products[0].AmountFen, c.Products[0].PointsUnits = 10, 1000000
+	custom := c.CustomPurchase()
+	if custom == nil || custom.MinAmountFen != 10 || custom.UnitPointsUnits != 1000000 || custom.MaxAmountFen != MaxAmountFen {
 		t.Fatal(custom)
 	}
-	c.Products[0].AmountFen, c.Products[0].PointsUnits = 10, 1000
-	if custom := c.CustomPurchase(s, 10000); custom == nil || custom.MinAmountFen != 100 {
-		t.Fatal("unit below minimum cannot support a valid larger order", custom)
-	}
-	c.Products[0].PointsUnits = 909
-	if custom := c.CustomPurchase(s, 11000); custom != nil {
-		t.Fatal("repeated rounding would under-credit a multi-item order", custom)
-	}
-	c.Products[0].PointsUnits = 999
-	if custom := c.CustomPurchase(s, 10000); custom != nil {
-		t.Fatal("a mismatched unit rate was advertised", custom)
+	c.Products[0].PointsUnits = core.MaxBalance
+	if custom = c.CustomPurchase(); custom == nil || custom.MaxAmountFen != 10 {
+		t.Fatal(custom)
 	}
 	c.CustomProductID = "missing"
-	if c.Validate() == nil {
-		t.Fatal("missing custom base product accepted")
+	if c.CustomPurchase() != nil || c.Validate() == nil {
+		t.Fatal("missing base SKU accepted")
 	}
 }
 

@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { login } from "./helpers";
+import { confirmSubmission, login } from "./helpers";
 import { modalPartnerFixtures } from "./modal-partner-fixtures";
 import { submitCases } from "./modal-submit-cases";
 
@@ -63,6 +63,16 @@ for (const sample of submitCases) {
     await dialog
       .getByRole("button", { name: sample.submit, exact: true })
       .click();
+    if (
+      ![
+        "管理账号",
+        "模型导入",
+        "新增服务商",
+        "名额申请",
+        "生成授权码",
+      ].includes(sample.name)
+    )
+      await confirmSubmission(page);
     await expect.poll(() => submitted).toBe(1);
     try {
       for (const label of Object.keys(sample.fields))

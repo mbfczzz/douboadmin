@@ -66,6 +66,7 @@ export default function UserDetails({
     try {
       await api(`/admin/users/${user.id}`, {
         method: "PUT",
+        confirmation: { before: user.data },
         body: JSON.stringify({
           version: user.version,
           nickname: data.get("nickname"),
@@ -117,6 +118,7 @@ export default function UserDetails({
     try {
       await api(`/admin/users/${user.id}/status`, {
         method: "PUT",
+        confirmation: { before: user.data },
         body: JSON.stringify({
           version: user.version,
           disabled: !user.data.disabled,

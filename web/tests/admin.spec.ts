@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { login, catalog, removeTemplate } from "./helpers";
+import { confirmSubmission, login, catalog, removeTemplate } from "./helpers";
 import type { Row, Template } from "../src/api";
 
 test("real catalog, template upload, publish, copy, unpublish and delete", async ({
@@ -84,6 +84,7 @@ test("real catalog, template upload, publish, copy, unpublish and delete", async
     ids.push(copy.id);
     expect(copy.data.published).toBeFalsy();
     await card.getByRole("button", { name: "下架", exact: true }).click();
+    await confirmSubmission(page);
     await expect(card.getByText("草稿", { exact: true })).toBeVisible();
     expect(
       (await page.request.get("/api/templates/" + record.id)).status(),

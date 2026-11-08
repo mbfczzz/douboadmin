@@ -45,7 +45,7 @@ var definitions = []Group{
 		{Key: "OSS_ACCESS_KEY_ID", Label: "AccessKey ID", Kind: "secret"},
 		{Key: "OSS_ACCESS_KEY_SECRET", Label: "AccessKey Secret", Kind: "secret"},
 	}},
-	{ID: "virtual", Name: "微信虚拟支付", Hint: "管理支付接入及积分商品；临时暂停充值请使用业务设置中的充值开关。商品 ID 和单价须与微信后台已发布商品一致。", Fields: []Field{
+	{ID: "virtual", Name: "微信虚拟支付", Hint: "管理支付接入及积分商品；暂停新充值可关闭虚拟支付通道，保存后重启服务。商品 ID 和单价须与微信后台已发布商品一致。", Fields: []Field{
 		{Key: "PAYMENT_CHANNEL", Label: "支付通道", Kind: "select", Default: "wechat_jsapi", Options: []Option{{"wechat_virtual", "微信虚拟支付"}, {"wechat_jsapi", "普通微信支付（凭证由服务器配置）"}}},
 		{Key: "WECHAT_VIRTUAL_ENABLED", Label: "加载虚拟支付通道", Kind: "bool", Default: "false"},
 		{Key: "WECHAT_VIRTUAL_ENV", Label: "微信支付环境", Kind: "select", Default: "1", Options: []Option{{"0", "现网（真实付款）"}, {"1", "沙箱"}}},

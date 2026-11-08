@@ -23,6 +23,7 @@ export default function Reviews({ notify }: PageProps) {
     try {
       await api(`/admin/reviews/${detail.job.id}`, {
         method: "PUT",
+        confirmation: { before: detail.record.data },
         body: JSON.stringify({
           version: detail.record.version,
           status,

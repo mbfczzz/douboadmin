@@ -64,6 +64,7 @@ export default function Models({ notify }: PageProps) {
     try {
       await api("/admin/models/" + r.id, {
         method: remove ? "DELETE" : "PUT",
+        confirmation: { before: r.data },
         body: JSON.stringify({
           version: r.version,
           ...(!remove

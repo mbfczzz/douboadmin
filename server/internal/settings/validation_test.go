@@ -51,14 +51,11 @@ func TestPaymentIdentityProtection(t *testing.T) {
 		t.Fatal("AppID changed while preserving mismatched AppSecret")
 	}
 	update.Values["WECHAT_APP_SECRET"] = "new-fixture"
-	platform := core.DefaultPlatform()
-	platform.RechargeEnabled = true
-	row, _ := m.Store.Put(t.Context(), "settings", core.Record{ID: "platform", Data: core.Data(platform)}, 0)
+	m.base["WECHAT_VIRTUAL_ENABLED"] = "true"
 	if err := m.Save(t.Context(), "wechat", "admin", update, false); err == nil {
-		t.Fatal("identity changed while purchases remained open")
+		t.Fatal("identity changed while virtual channel was loaded")
 	}
-	platform.RechargeEnabled = false
-	_, _ = m.Store.Put(t.Context(), "settings", core.Record{ID: "platform", Data: core.Data(platform)}, row.Version)
+	m.base["WECHAT_VIRTUAL_ENABLED"] = "false"
 	_, _ = m.Store.Put(t.Context(), "orders", core.Record{ID: "historic", Data: core.Data(core.Order{Status: "paid"})}, 0)
 	if err := m.Save(t.Context(), "wechat", "admin", update, false); err == nil {
 		t.Fatal("historical order identity was changed")

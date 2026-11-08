@@ -80,13 +80,6 @@ export default function Memberships({
               e.preventDefault();
               const f = new FormData(e.currentTarget),
                 status = String(f.get("status"));
-              if (
-                status === "unbound" &&
-                !confirm(
-                  "解绑将停止使用权限并释放一个名额；已有作品、订单和历史分佣归属保留。确定解绑？",
-                )
-              )
-                return;
               try {
                 await command.send(
                   "/admin/memberships/" + detail.id,
@@ -96,6 +89,7 @@ export default function Memberships({
                     reason: String(f.get("reason")),
                   },
                   "PUT",
+                  { before: detail.data },
                 );
                 setDetail(null);
                 await resource.reload();

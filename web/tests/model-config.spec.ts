@@ -1,5 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
-import { login, catalog } from "./helpers";
+import { confirmSubmission, login, catalog } from "./helpers";
 import type { Model } from "../src/api";
 
 async function openModel(page: Page, key: string) {
@@ -100,6 +100,7 @@ test("capability chips, prompts, pricing and metadata persist and survive upstre
       .getByLabel("用户提示文案 1", { exact: true })
       .fill("服务额度暂时不足，请稍后再试");
     await dialog.getByRole("button", { name: "保存", exact: true }).click();
+    await confirmSubmission(page);
     await expect(dialog).toHaveCount(0);
     const sync = await page.request.post("/api/admin/models/sync");
     expect(sync.ok()).toBeTruthy();

@@ -17,6 +17,8 @@ export default function AccountForm({
 }) {
   const [busy, setBusy] = useState(false),
     [error, setError] = useState("");
+  const [version, setVersion] = useState(row?.version || 0);
+  const [before, setBefore] = useState<unknown>(row?.data);
   async function submit(form: HTMLFormElement) {
     if (busy) return;
     setError("");
@@ -35,11 +37,21 @@ export default function AccountForm({
       if (row) {
         saved = await api(`/admin/accounts/${row.id}`, {
           method: "PUT",
-          body: JSON.stringify({ ...body, version: row.version }),
+          body: JSON.stringify({
+            name: body.name,
+            phone: body.phone,
+            role: body.role,
+            disabled: body.disabled,
+            version,
+          }),
+          confirmation: { before, extra: password ? { password } : undefined },
         });
+        setVersion(saved.version);
+        setBefore(saved.data);
         if (password)
           await api(`/admin/accounts/${row.id}/password`, {
             method: "PUT",
+            confirmation: false,
             body: JSON.stringify({ version: saved.version, password }),
           });
       } else

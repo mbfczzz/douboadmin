@@ -32,7 +32,8 @@ export function canRecharge(info: WalletInfo) {
   return (
     info.paymentReady &&
     info.pricing?.ready !== false &&
-    info.settings.rechargeEnabled &&
+    (info.paymentChannel === "wechat_virtual" ||
+      info.settings.rechargeEnabled) &&
     (info.paymentChannel !== "wechat_virtual" ||
       supportsVirtualPayment(devicePlatform())) &&
     (devicePlatform() !== "ios" || info.iosPayment)
@@ -50,7 +51,10 @@ export async function recharge(
     throw new AuthCancelledError();
   if (!canRecharge(info)) throw new Error("当前暂未开放充值");
   const s = info.settings;
-  if (fen < s.minRechargeFen || fen > s.maxRechargeFen)
+  if (
+    info.paymentChannel !== "wechat_virtual" &&
+    (fen < s.minRechargeFen || fen > s.maxRechargeFen)
+  )
     throw new Error(
       `请输入 ${money(s.minRechargeFen)}–${money(s.maxRechargeFen)} 元`,
     );

@@ -85,11 +85,15 @@ func TestSignatureCanOnlyBeClaimedOnce(t *testing.T) {
 		t.Fatal(won.Load())
 	}
 }
-func TestCatalogPointsCannotOverrideSupplierQuote(t *testing.T) {
+func TestCatalogCreditIsIndependentOfLegacyRate(t *testing.T) {
 	f := newFixture(t)
-	_, e := f.svc.Billing.CreateVirtualOrder(context.Background(), "u", "other-key", 100, core.DefaultPlatform(), "wx-test", "offer-test", "openid", "", core.VirtualOrder{ProductID: "p", PointsUnits: 99999, Env: 1})
-	if e == nil {
-		t.Fatal("mismatched points accepted")
+	row, e := f.svc.Billing.CreateVirtualOrder(context.Background(), "u", "other-key", 100, core.DefaultPlatform(), "wx-test", "offer-test", "openid", "", core.VirtualOrder{ProductID: "p", PointsUnits: 99999, Env: 1})
+	if e != nil {
+		t.Fatal(e)
+	}
+	var order core.Order
+	if json.Unmarshal(row.Data, &order) != nil || order.PointsUnits != 99999 {
+		t.Fatal("catalog credit was repriced", string(row.Data))
 	}
 }
 func TestV3ResultCannotSettleVirtualOrder(t *testing.T) {

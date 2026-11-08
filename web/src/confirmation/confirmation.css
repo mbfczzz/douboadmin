@@ -1,0 +1,66 @@
+.save-confirmation-mask {
+  z-index: 60;
+}
+.save-confirmation {
+  width: min(620px, calc(100vw - 24px));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.save-confirmation form {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+}
+.confirmation-body {
+  padding: 4px 24px 20px;
+  overflow: auto;
+}
+.confirmation-body > p {
+  margin: 12px 0 20px;
+}
+.confirmation-body dl {
+  margin: 0;
+  display: block;
+}
+.confirmation-body dl > div {
+  padding: 14px 0;
+  border-top: 1px solid var(--line);
+}
+.confirmation-body dt {
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+.confirmation-body dd {
+  margin: 0;
+}
+.confirmation-body small {
+  color: var(--muted);
+}
+.confirmation-body pre {
+  margin: 6px 0 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--surface-subtle);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font: inherit;
+  font-size: 13px;
+  max-height: 220px;
+  overflow: auto;
+}
+.save-confirmation .modal-actions {
+  flex-shrink: 0;
+  margin: 0;
+  padding: 16px 24px;
+  border-top: 1px solid var(--line);
+}
+.save-confirmation .modal-actions button {
+  flex-shrink: 0;
+}
+@media (max-width: 480px) {
+  .confirmation-body {
+    padding-inline: 16px;
+  }
+}

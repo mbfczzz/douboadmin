@@ -1,3 +1,3 @@
-// Real device: replace loopback with your development machine's LAN address.
-// Release: use a registered HTTPS request/upload/download domain.
-export const API_BASE = "http://127.0.0.1:5173";
+// Test environment: use the public Nginx entry, without appending /api.
+// Release: switch to a registered HTTPS request/upload/download domain.
+export const API_BASE = "http://106.15.92.153:8088";

@@ -3,7 +3,6 @@ package settings
 import (
 	"doubo/server/internal/core"
 	"doubo/server/internal/store"
-	"encoding/json"
 	"errors"
 	"strings"
 )
@@ -41,18 +40,8 @@ func protectIdentity(tx store.Transaction, id string, previous, next Values, inp
 		}
 		return invalid(cleared, "已有订单需要继续查单和退款，此密钥可以替换但不能直接清除")
 	}
-	if identity != "" {
-		row, err := tx.Get("settings", "platform")
-		if err != nil && !errors.Is(err, core.ErrNotFound) {
-			return err
-		}
-		var platform core.PlatformSettings
-		if err == nil && json.Unmarshal(row.Data, &platform) != nil {
-			return invalid(identity, "无法确认充值开关状态，请先检查业务设置")
-		}
-		if platform.RechargeEnabled {
-			return invalid(identity, "更换接入身份前，请先在业务设置关闭积分充值")
-		}
+	if identity != "" && previous["WECHAT_VIRTUAL_ENABLED"] == "true" {
+		return invalid(identity, "更换接入身份前，请先关闭虚拟支付通道并重启服务")
 	}
 	return nil
 }

@@ -76,20 +76,25 @@ func TestIntegrationAPIShowsSecretsOnlyToSuperAdmins(t *testing.T) {
 	}
 }
 
-func TestRechargeCannotEnableBeforeSavedPaymentSettingsAreApplied(t *testing.T) {
-	a, admin, _ := integrationAdmin(t)
-	if err := a.Integrations.Save(t.Context(), "wechat", "admin", settings.Update{Values: settings.Values{"WECHAT_APP_ID": "wx0000000000000001"}}, false); err != nil {
+func TestNewPurchaseWaitsForPaymentSettingsRestart(t *testing.T) {
+	a, _, _ := integrationAdmin(t)
+	if err := a.Integrations.Save(t.Context(), "wechat", "admin", settings.Update{Values: settings.Values{"WECHAT_APP_SECRET": "fixture-updated-secret"}}, false); err != nil {
 		t.Fatal(err)
 	}
-	platform := core.DefaultPlatform()
-	platform.RechargeEnabled = true
-	w := call(a, "PUT", "/api/admin/platform", admin, "", map[string]any{"version": 0, "data": platform})
-	if w.Code != 409 || !strings.Contains(w.Body.String(), "重启") {
-		t.Fatal("pending payment configuration admitted new purchases", w.Code, w.Body.String())
+	goods := core.VirtualOrder{ProductID: "pack", PointsUnits: 1000000, Env: 0}
+	_, err := a.Billing.CreateVirtualOrder(t.Context(), "user-a", "pending-settings", 10, core.DefaultPlatform(), "app", "offer", "openid", "", goods)
+	if err == nil || !strings.Contains(err.Error(), "重启") {
+		t.Fatal("pending payment settings admitted purchase", err)
 	}
-	platform.RechargeEnabled = false
-	if w = call(a, "PUT", "/api/admin/platform", admin, "", map[string]any{"version": 0, "data": platform}); w.Code != 200 {
-		t.Fatal("pending settings prevented disabling purchases", w.Code, w.Body.String())
+	orders, _ := a.Store.List(t.Context(), "orders", "")
+	if len(orders) != 0 {
+		t.Fatal("pending purchase persisted")
+	}
+	if _, err = a.Integrations.LoadStartup(t.Context()); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = a.Billing.CreateVirtualOrder(t.Context(), "user-a", "pending-settings", 10, core.DefaultPlatform(), "app", "offer", "openid", "", goods); err != nil {
+		t.Fatal("applied payment settings blocked purchase", err)
 	}
 }
 
@@ -105,5 +110,23 @@ func TestProductionWithoutOSSAllowsAdminConfigurationButBlocksMedia(t *testing.T
 	input := core.JobInput{Kind: "image", Model: "demo-image", Prompt: "test", Resolution: "1K", Ratio: "1:1"}
 	if w := call(a, "POST", "/api/jobs", user, "missing-oss-test", input); w.Code != 400 || !strings.Contains(w.Body.String(), "OSS") {
 		t.Fatal("production media task starts before storage configuration", w.Code, w.Body.String())
+	}
+}
+
+func TestIntegrationSaveExplainsKeyFileFailureWithoutExposingSecrets(t *testing.T) {
+	a, admin, _ := integrationAdmin(t)
+	// A directory cannot be read as a key file on either Windows or Linux.
+	a.Integrations.KeyPath = t.TempDir()
+	w := call(a, "PUT", "/api/admin/integrations/relay", admin, "", settings.Update{
+		Values: settings.Values{"RELAY_API_KEY": "submitted-private-fixture"},
+	})
+	if w.Code != 503 || !strings.Contains(w.Body.String(), "INTEGRATION_KEY_UNAVAILABLE") || !strings.Contains(w.Body.String(), "ReadWritePaths") {
+		t.Fatal("key file failure became a generic service error", w.Code, w.Body.String())
+	}
+	if strings.Contains(w.Body.String(), "submitted-private-fixture") || strings.Contains(w.Body.String(), a.Integrations.KeyPath) {
+		t.Fatal("key file failure exposed private input or an OS path")
+	}
+	if rows, err := a.Store.List(t.Context(), "integration_audit", ""); err != nil || len(rows) != 0 {
+		t.Fatal("failed save wrote an audit or configuration", err)
 	}
 }

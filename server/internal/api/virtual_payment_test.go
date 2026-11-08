@@ -135,7 +135,7 @@ func TestVirtualSafeNotificationCreditsOnce(t *testing.T) {
 		t.Fatal("user accessed payment audit")
 	}
 }
-func TestVirtualDisabledAndIncompatibleCatalog(t *testing.T) {
+func TestVirtualDisabledAndIndependentlyPricedCatalog(t *testing.T) {
 	a, user, _ := virtualFixture(t)
 	a.Virtual.Client.Config.Products[0].PointsUnits = 999
 	w := call(a, "GET", "/api/wallet", user, "", nil)
@@ -144,11 +144,11 @@ func TestVirtualDisabledAndIncompatibleCatalog(t *testing.T) {
 		Products     []virtualpay.Product `json:"virtualProducts"`
 	}
 	_ = json.Unmarshal(w.Body.Bytes(), &info)
-	if info.PaymentReady || len(info.Products) != 0 {
+	if !info.PaymentReady || len(info.Products) != 1 || info.Products[0].PointsUnits != 999 {
 		t.Fatal(w.Body.String())
 	}
 	w = call(a, "POST", "/api/orders", user, "invalid-product-order", map[string]any{"productId": "pack", "settingsVersion": 1, "platform": "android"})
-	if w.Code != 409 {
+	if w.Code != 201 {
 		t.Fatal(w.Code, w.Body.String())
 	}
 	a.Virtual.Client.Config.Enabled = false

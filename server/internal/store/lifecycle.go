@@ -27,14 +27,7 @@ func completeLifecycle(tx Transaction, j core.Job, failure string) error {
 	}
 	if failure == "" {
 		if _, e := tx.Get("reviews", j.ID); errors.Is(e, core.ErrNotFound) {
-			settings := core.DefaultPlatform()
-			if row, e := tx.Get("settings", "platform"); e == nil {
-				_ = json.Unmarshal(row.Data, &settings)
-			}
 			state := "pending"
-			if !settings.ReviewRequired {
-				state = "approved"
-			}
 			_, e = tx.Put("reviews", core.Record{ID: j.ID, Owner: j.UserID, Data: core.Data(core.Review{JobID: j.ID, Kind: j.Input.Kind, Status: state})}, 0)
 			if e != nil {
 				return e

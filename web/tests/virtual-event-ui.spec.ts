@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { login } from "./helpers";
+import { confirmSubmission, login } from "./helpers";
 import { surfaceFixtures } from "./surface-fixtures";
 
 async function fixture(page: Page) {
@@ -77,6 +77,7 @@ for (const width of [1440, 390]) {
       fullPage: true,
     });
     await dialog.getByRole("button", { name: "保存核对说明" }).click();
+    await confirmSubmission(page);
     await expect(dialog).toHaveCount(0);
     expect(writes).toEqual([
       {
@@ -94,6 +95,7 @@ test("payment exception retry uses original event and refreshes results", async 
   const writes = await fixture(page);
   await page.getByRole("button", { name: "查看处理" }).click();
   await page.getByRole("button", { name: "重试处理", exact: true }).click();
+  await confirmSubmission(page);
   await expect(page.getByRole("dialog")).toHaveCount(0);
   expect(writes[0].action).toBe("retry");
   await expect(page.getByText("暂无此状态的支付异常")).toBeVisible();
@@ -112,6 +114,7 @@ test("failed exception action preserves the review note and leaves the dialog us
   const dialog = page.getByRole("dialog", { name: "虚拟支付异常处理" });
   await dialog.getByLabel("人工核对说明").fill("已核对，暂存这段说明");
   await dialog.getByRole("button", { name: "保存核对说明" }).click();
+  await confirmSubmission(page);
   await expect(dialog.getByRole("alert")).toContainText("服务暂不可用");
   await expect(dialog.getByLabel("人工核对说明")).toHaveValue(
     "已核对，暂存这段说明",

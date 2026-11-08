@@ -7,34 +7,21 @@ import (
 	"testing"
 )
 
-func TestPlatformBillingDefaultsAndExplicitOverride(t *testing.T) {
-	for _, test := range []struct {
-		name string
-		data map[string]any
-		want bool
-	}{
-		{name: "new installation", want: true},
-		{name: "legacy settings without a billing flag", data: map[string]any{"pointsPerYuan": 200}, want: true},
-		{name: "explicitly enabled", data: map[string]any{"billingEnabled": true}, want: true},
-		{name: "explicitly disabled", data: map[string]any{"billingEnabled": false}, want: false},
-	} {
-		t.Run(test.name, func(t *testing.T) {
-			a, _, _ := setup(t)
-			if test.data != nil {
-				if _, err := a.Store.Put(t.Context(), "settings", core.Record{ID: "platform", Data: core.Data(test.data)}, 0); err != nil {
-					t.Fatal(err)
-				}
-			}
-			for range 2 {
-				_, settings, err := a.platform(t.Context())
-				if err != nil || settings.BillingEnabled != test.want {
-					t.Fatalf("billing enabled: %v, want %v, error: %v", settings.BillingEnabled, test.want, err)
-				}
-				if test.name == "legacy settings without a billing flag" && settings.PointsPerYuan != 200 {
-					t.Fatal("loading billing defaults reset existing settings")
-				}
-			}
-		})
+func TestRetiredPlatformOverridesNeverControlRuntime(t *testing.T) {
+	a, _, _ := setup(t)
+	legacy := core.PlatformSettings{BillingEnabled: false, RechargeEnabled: false, PointsPerYuan: 999,
+		MinRechargeFen: 10000, MaxRechargeFen: 10000, ReviewRequired: false, SupportText: "old", HotKeywords: []string{"old"}, AlarmFailures: 999}
+	stored, err := a.Store.Put(t.Context(), "settings", core.Record{ID: "platform", Data: core.Data(legacy)}, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	row, current, err := a.platform(t.Context())
+	if err != nil || row.Version != stored.Version || string(core.Data(current)) != string(core.Data(core.DefaultPlatform())) {
+		t.Fatal(row, current, err)
+	}
+	old, _ := a.Store.Get(t.Context(), "settings", "platform")
+	if string(old.Data) != string(stored.Data) {
+		t.Fatal("reading settings changed historical data")
 	}
 }
 
@@ -75,26 +62,17 @@ func TestDefaultBillingQuotesAndRejectsInsufficientBalance(t *testing.T) {
 	}
 }
 
-func TestAdminBillingTogglePersistsWithoutResettingOtherSettings(t *testing.T) {
+func TestRetiredPlatformWriteIsRejected(t *testing.T) {
 	a, _, _ := setup(t)
 	admin, err := a.Sessions.Create(t.Context(), "admin", "admin")
 	if err != nil {
 		t.Fatal(err)
 	}
-	settings := core.DefaultPlatform()
-	settings.PointsPerYuan = 200
-	settings.SupportText = "测试联系说明"
-	version := int64(0)
-	for _, enabled := range []bool{false, true} {
-		settings.BillingEnabled = enabled
-		w := call(a, "PUT", "/api/admin/platform", admin, "", map[string]any{"version": version, "data": settings})
-		if w.Code != 200 {
-			t.Fatal(w.Code, w.Body.String())
-		}
-		row, persisted, err := a.platform(t.Context())
-		if err != nil || row.Version != version+1 || persisted.BillingEnabled != enabled || persisted.PointsPerYuan != 200 || persisted.SupportText != settings.SupportText {
-			t.Fatal("saved platform settings did not persist", row, persisted, err)
-		}
-		version = row.Version
+	w := call(a, "PUT", "/api/admin/platform", admin, "", map[string]any{"version": 0, "data": core.DefaultPlatform()})
+	if w.Code != 410 {
+		t.Fatal(w.Code, w.Body.String())
+	}
+	if _, err = a.Store.Get(t.Context(), "settings", "platform"); err == nil {
+		t.Fatal("retired write persisted")
 	}
 }

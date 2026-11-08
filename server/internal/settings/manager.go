@@ -6,7 +6,6 @@ import (
 	"doubo/server/internal/core"
 	"doubo/server/internal/store"
 	"errors"
-	"fmt"
 	"sync"
 )
 
@@ -39,7 +38,7 @@ func (m *Manager) encryptionKey(required bool) ([]byte, error) {
 	defer m.mu.Unlock()
 	key, err := loadKey(m.KeyPath, required || len(m.key) != 0)
 	if err == nil && len(m.key) != 0 && !bytes.Equal(key, m.key) {
-		return nil, fmt.Errorf("接入配置加密密钥已被替换，请恢复原密钥文件")
+		return nil, keyFileError("接入配置加密密钥已被替换，请恢复原密钥文件")
 	}
 	if err == nil {
 		m.key = key

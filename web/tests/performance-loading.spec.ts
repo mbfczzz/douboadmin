@@ -19,9 +19,19 @@ function stylesheetRequests(page: Page) {
     if (file.endsWith(".css")) loaded.add(file);
   });
   const report = JSON.parse(readFileSync("dist/budget.json", "utf8"));
+  // The confirmation dialog adds shared shell CSS loaded on login. Only the
+  // page's own styles must remain unloaded until its first navigation.
+  const shellStyles = new Set(
+    report.entries["src/Workspace.tsx"].assets
+      .filter((asset: { file: string }) => asset.file.endsWith(".css"))
+      .map((asset: { file: string }) => asset.file),
+  );
   function files(entry: string): string[] {
     const styles = report.entries[entry].assets
-      .filter((asset: { file: string }) => asset.file.endsWith(".css"))
+      .filter(
+        (asset: { file: string }) =>
+          asset.file.endsWith(".css") && !shellStyles.has(asset.file),
+      )
       .map((asset: { file: string }) => "/" + asset.file);
     expect(styles.length, entry + " should own its styles").toBeGreaterThan(0);
     return styles;

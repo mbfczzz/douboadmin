@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { login } from "./helpers";
+import { confirmSubmission, login } from "./helpers";
 import { surfaceFixtures } from "./surface-fixtures";
 
 test("pending point adjustment locks the submitted fields and preserves failed input", async ({
@@ -28,6 +28,7 @@ test("pending point adjustment locks the submitted fields and preserves failed i
   await dialog
     .getByRole("button", { name: "确认调整积分", exact: true })
     .click();
+  await confirmSubmission(page);
   await expect.poll(() => sent).toBeTruthy();
   try {
     await expect(amount).toBeDisabled();
