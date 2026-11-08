@@ -21,6 +21,6 @@
   font-size: 13px;
   line-height: 1.9;
   padding: 20px;
-  background: #edf1e8;
+  background: var(--surface-subtle);
   border-radius: 8px;
 }

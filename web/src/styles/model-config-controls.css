@@ -23,12 +23,12 @@
   border-radius: 6px;
   font-size: 12px;
   font-weight: 500;
-  color: #42544a;
+  color: var(--text);
   background: var(--surface);
   border: 1px solid var(--line);
 }
 .config-chips button[aria-pressed="true"] {
-  color: var(--accent);
+  color: var(--accent-text);
   background: var(--accent-soft);
   border-color: var(--accent-border);
 }
@@ -71,7 +71,7 @@
   width: 30px;
   height: 18px;
   border-radius: 12px;
-  background: #d4d4d8;
+  background: var(--line-strong);
   padding: 2px;
   border: 0;
   cursor: pointer;
@@ -114,8 +114,8 @@
 .config-matrix td {
   padding: 8px 10px;
   font-size: 12.5px;
-  color: #42544a;
-  border-bottom: 1px solid #e7ede9;
+  color: var(--text);
+  border-bottom: 1px solid var(--line);
   text-align: center;
 }
 .config-matrix input {
@@ -136,15 +136,15 @@
 .model-display-badges small {
   padding: 1px 4px;
   border-radius: 3px;
-  background: #f4f4f5;
+  background: var(--surface-subtle);
   color: var(--muted);
   font-size: 10px;
 }
 .model-display-badges .hot {
-  background: #fef2f2;
-  color: #b91c1c;
+  background: var(--danger-soft);
+  color: var(--danger);
 }
 .model-display-badges .new {
-  background: #ecfeff;
-  color: #0e7490;
+  background: var(--info-soft);
+  color: var(--info);
 }

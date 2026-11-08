@@ -20,14 +20,14 @@ th {
   padding: 11px 18px;
   border-block: 1px solid var(--line);
   background: var(--surface-subtle);
-  color: #596b62;
+  color: var(--muted);
   font-size: 12px;
   font-weight: 650;
 }
 td {
   padding: 14px 18px;
-  border-bottom: 1px solid #e7ede9;
-  color: #35453d;
+  border-bottom: 1px solid var(--line);
+  color: var(--text);
   font-size: 13px;
 }
 tbody tr:last-child td {
@@ -37,7 +37,7 @@ tbody tr {
   transition: background 140ms;
 }
 tbody tr:hover {
-  background: #f6faf7;
+  background: var(--surface-subtle);
 }
 .task-name {
   display: flex;
@@ -51,12 +51,12 @@ tbody tr:hover {
   place-items: center;
   flex-shrink: 0;
   border-radius: 8px;
-  color: var(--accent);
+  color: var(--accent-text);
   background: var(--accent-soft);
 }
 .task-name b {
   display: block;
-  color: #263b30;
+  color: var(--ink);
   font-size: 13px;
   font-weight: 600;
 }
@@ -72,7 +72,7 @@ tbody tr:hover {
   gap: 6px;
   padding: 4px 8px;
   border-radius: 5px;
-  background: #f5f0df;
+  background: var(--warning-soft);
   color: var(--warning);
   font-size: 12px;
 }
@@ -83,12 +83,12 @@ tbody tr:hover {
   background: currentColor;
 }
 .badge.succeeded {
-  color: var(--accent);
-  background: var(--accent-soft);
+  color: var(--success);
+  background: var(--success-soft);
 }
 .badge.running {
-  color: #286477;
-  background: #e8f3f6;
+  color: var(--info);
+  background: var(--info-soft);
 }
 .badge.muted {
   color: var(--muted);
@@ -102,7 +102,7 @@ tbody tr:hover {
   padding: 4px 0;
   border: 0;
   background: transparent;
-  color: var(--accent);
+  color: var(--accent-text);
   font-size: 13px;
   font-weight: 600;
 }
@@ -125,17 +125,17 @@ tbody tr:hover {
   border: 0;
   border-bottom: 2px solid transparent;
   background: transparent;
-  color: #75857c;
+  color: var(--muted);
   font-size: 13px;
   font-weight: 550;
   white-space: nowrap;
 }
 .tabs button:hover {
-  color: #32483c;
+  color: var(--ink);
 }
 .tabs button.active,
 .tabs button[aria-selected="true"] {
-  color: var(--accent);
+  color: var(--accent-text);
   border-bottom-color: var(--accent);
 }
 .search {
@@ -145,7 +145,7 @@ tbody tr:hover {
   border: 1px solid var(--line-strong);
   border-radius: 8px;
   background: var(--surface);
-  color: #72837a;
+  color: var(--muted);
 }
 .search input {
   min-width: 180px;

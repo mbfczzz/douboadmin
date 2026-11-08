@@ -10,16 +10,16 @@
   padding: 24px 14px 18px;
   display: flex;
   flex-direction: column;
-  color: #eaf3ee;
-  background: #15392d;
-  box-shadow: 1px 0 0 #0d2a201f;
+  color: var(--ink);
+  background: var(--canvas);
+  box-shadow: 1px 0 0 var(--line);
 }
 .brand {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 0 10px 8px;
-  color: #fff;
+  color: var(--ink-strong);
   font-size: 19px;
   font-weight: 720;
   letter-spacing: -0.02em;
@@ -30,15 +30,15 @@
   width: 40px;
   height: 40px;
   border-radius: 10px;
-  color: #113a29;
-  background: #c9ead5;
+  color: var(--accent-ink);
+  background: var(--brand-gradient);
   font-size: 23px;
-  box-shadow: inset 0 0 0 1px #fff4;
+  box-shadow: 0 6px 18px #a78bfa33;
 }
 .brand small {
   display: block;
   margin-top: 3px;
-  color: #a9c2b5;
+  color: var(--muted);
   font-size: 11px;
   font-weight: 450;
 }
@@ -47,11 +47,11 @@
   min-height: 0;
   flex: 1;
   padding-right: 2px;
-  scrollbar-color: #709083 transparent;
+  scrollbar-color: var(--line-strong) transparent;
 }
 .nav-label {
   margin: 22px 12px 7px;
-  color: #8da99b;
+  color: var(--muted);
   font-size: 11px;
   font-weight: 600;
 }
@@ -68,25 +68,25 @@ nav button {
   border: 0;
   border-radius: 8px;
   background: transparent;
-  color: #c7d8cf;
+  color: var(--text);
   font-size: 14px;
 }
 nav button:hover {
-  color: #fff;
+  color: var(--ink-strong);
   background: #ffffff0d;
 }
 nav button.active {
-  color: #fff;
-  background: #ffffff18;
+  color: #101113;
+  background: linear-gradient(100deg, #f6f7f7 52%, #c8f3fb);
   font-weight: 650;
-  box-shadow: inset 0 0 0 1px #ffffff0d;
+  box-shadow: 0 0 22px #22d3ee2e;
 }
 .sidebar-bottom {
   flex-shrink: 0;
   margin-top: auto;
   padding: 15px 12px 0;
-  border-top: 1px solid #ffffff17;
-  color: #a9c2b5;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
   font-size: 11px;
 }
 .sidebar-bottom button {
@@ -94,11 +94,11 @@ nav button.active {
   padding: 15px 0 0;
   border: 0;
   background: transparent;
-  color: #c2d4ca;
+  color: var(--text);
   font-size: 12px;
 }
 .sidebar-bottom button:hover {
-  color: #fff;
+  color: var(--ink-strong);
 }
 .live-dot {
   display: inline-block;
@@ -106,10 +106,10 @@ nav button.active {
   height: 7px;
   margin-right: 7px;
   border-radius: 50%;
-  background: #7bd19a;
+  background: var(--success);
 }
 .live-dot.off {
-  background: #e3b45c;
+  background: var(--warning);
 }
 .main {
   width: calc(100% - 244px);
@@ -126,7 +126,7 @@ nav button.active {
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid var(--line);
-  background: #ffffffed;
+  background: var(--canvas);
   color: var(--muted);
   font-size: 13px;
 }
@@ -137,7 +137,7 @@ nav button.active {
   gap: 13px;
 }
 .topbar b {
-  color: #31443a;
+  color: var(--text);
   font-weight: 600;
 }
 .command-trigger {
@@ -191,10 +191,10 @@ nav button.active {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  border: 1px solid #c8dacd;
+  border: 1px solid var(--line-strong);
   border-radius: 50%;
   background: var(--accent-soft);
-  color: var(--accent);
+  color: var(--accent-text);
   font-size: 12px;
   font-weight: 650;
 }
@@ -210,6 +210,17 @@ nav button.active {
   justify-content: space-between;
   gap: 24px;
   margin-bottom: 24px;
+}
+.eyebrow {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: transparent;
+  background: linear-gradient(90deg, var(--accent), #a78bfa);
+  -webkit-background-clip: text;
+  background-clip: text;
 }
 .page-heading h1 {
   margin: 0 0 7px;
@@ -234,11 +245,11 @@ nav button.active {
   position: fixed;
   inset: 0;
   z-index: 9;
-  background: #0b1e176b;
+  background: #00000099;
 }
 .drawer-close {
   position: absolute;
   top: 15px;
   right: 9px;
-  color: #c7d8cf !important;
+  color: var(--text) !important;
 }

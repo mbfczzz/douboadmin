@@ -27,7 +27,7 @@
 .catalog-table button {
   border: 0;
   background: transparent;
-  color: var(--accent);
+  color: var(--accent-text);
   padding: 5px;
   font-size: 12px;
   white-space: nowrap;
@@ -71,7 +71,7 @@
   border: 0;
   border-top: 1px solid var(--line);
   background: transparent;
-  color: var(--accent);
+  color: var(--accent-text);
   text-align: left;
 }
 .attention-list span,
@@ -94,7 +94,17 @@
   font-size: 13px;
 }
 .business-metrics .panel {
+  position: relative;
   padding: 20px 22px;
+}
+.business-metrics .panel::before,
+.studio-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 2px;
+  background: var(--brand-gradient);
+  opacity: 0.85;
 }
 .business-metrics span {
   color: var(--muted);
@@ -120,7 +130,7 @@
   padding: 12px 0;
 }
 .business-filters button[aria-selected="true"] {
-  color: var(--accent);
+  color: var(--accent-text);
   border-bottom-color: var(--accent);
 }
 @media (max-width: 640px) {

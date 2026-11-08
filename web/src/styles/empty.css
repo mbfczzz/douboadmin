@@ -10,7 +10,7 @@
 }
 .empty h3 {
   margin: 0 0 8px;
-  color: #34483e;
+  color: var(--ink);
   font-size: 16px;
   font-weight: 650;
 }

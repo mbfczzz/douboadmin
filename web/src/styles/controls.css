@@ -13,8 +13,8 @@
 .primary {
   border: 1px solid var(--accent);
   background: var(--accent);
-  color: #fff;
-  box-shadow: 0 1px 2px #163b2a24;
+  color: var(--accent-ink);
+  box-shadow: 0 6px 18px #f0177f33;
 }
 .primary:hover {
   border-color: var(--accent-hover);
@@ -22,19 +22,19 @@
 }
 .secondary {
   border: 1px solid var(--line-strong);
-  color: #33463c;
+  color: var(--ink);
   background: var(--surface);
 }
 .secondary:hover {
   border-color: var(--accent-border);
-  color: var(--accent);
+  color: var(--accent-text);
   background: var(--accent-soft);
 }
 .danger {
-  border: 1px solid var(--danger);
-  background: var(--danger);
+  border: 1px solid var(--danger-strong);
+  background: var(--danger-strong);
   color: #fff;
 }
 .danger:hover {
-  background: #85352c;
+  background: #b23c34;
 }
