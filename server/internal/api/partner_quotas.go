@@ -7,7 +7,7 @@ import (
 
 func (a *Server) movePartnerQuota(w http.ResponseWriter, r *http.Request) {
 	var v core.QuotaMove
-	if !decode(w, r, &v) {
+	if !decode(w, r, &v) || !a.inPartnerScope(w, r, v.ParentID) {
 		return
 	}
 	out, e := a.Partners.Transfer(r.Context(), v, r.Header.Get("Idempotency-Key"), identity(r).ID)
@@ -20,7 +20,7 @@ func (a *Server) requestPartnerQuota(w http.ResponseWriter, r *http.Request) {
 		Partners  int64  `json:"partners"`
 		Reason    string `json:"reason"`
 	}
-	if !decode(w, r, &v) {
+	if !decode(w, r, &v) || !a.inPartnerScope(w, r, v.PartnerID) {
 		return
 	}
 	out, e := a.Partners.RequestQuota(r.Context(), v.PartnerID, v.Users, v.Partners, v.Reason, r.Header.Get("Idempotency-Key"), identity(r).ID)
@@ -32,7 +32,7 @@ func (a *Server) decidePartnerQuota(w http.ResponseWriter, r *http.Request) {
 		Approve bool   `json:"approve"`
 		Reason  string `json:"reason"`
 	}
-	if !decode(w, r, &v) {
+	if !platformOnly(w, r) || !decode(w, r, &v) {
 		return
 	}
 	out, e := a.Partners.DecideRequest(r.Context(), r.PathValue("id"), v.Approve, v.Reason, v.Version, identity(r).ID)

@@ -6,6 +6,9 @@ import { canLeave } from "../hooks/unsaved";
 import { useResource } from "../hooks/useResource";
 import type { Notify } from "../navigation";
 import ProviderForm from "./ProviderForm";
+import ProviderAccount from "./ProviderAccount";
+import ProviderSelf from "./ProviderSelf";
+import { useMe } from "../session";
 import type { Overview, Partner, PartnerTreeItem, Scope } from "./types";
 import { PartnerNames } from "./PartnerIdentity";
 import ProviderId from "./ProviderId";
@@ -27,6 +30,9 @@ export default function ProviderEditor({
   onClose: () => void;
   onSaved: () => Promise<void>;
 }) {
+  // A provider login opening its own node may operate quotas and codes but not
+  // edit its own profile or login, which belong to its parent.
+  const self = useMe()?.partnerId === row.id;
   const [tab, setTab] = useState("basic"),
     resource = useResource<Overview>("/admin/partners/" + row.id, 15000),
     view = resource.data?.record.id === row.id ? resource.data : undefined;
@@ -43,7 +49,7 @@ export default function ProviderEditor({
     : undefined;
   return (
     <Modal
-      title="编辑服务商"
+      title={self ? "本服务商" : "编辑服务商"}
       subtitle={
         <>
           {row.data.name} · <ProviderId id={row.id} />
@@ -123,16 +129,23 @@ export default function ProviderEditor({
               />
             </div>
           )}
-          {view && tab === "basic" && (
-            <ProviderForm
-              embedded
-              parent={view.record.data.parentId}
-              row={view.record}
-              notify={notify}
-              onClose={onClose}
-              onSaved={onSaved}
-            />
-          )}
+          {view &&
+            tab === "basic" &&
+            (self ? (
+              <ProviderSelf partner={view.record.data} />
+            ) : (
+              <>
+                <ProviderForm
+                  embedded
+                  parent={view.record.data.parentId}
+                  row={view.record}
+                  notify={notify}
+                  onClose={onClose}
+                  onSaved={onSaved}
+                />
+                <ProviderAccount id={row.id} notify={notify} />
+              </>
+            ))}
           {scope && tab !== "basic" && (
             <Suspense fallback={<LoadingState label="正在加载服务商功能" />}>
               {tab === "quotas" && <Quotas {...scope} />}

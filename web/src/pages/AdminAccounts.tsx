@@ -7,6 +7,7 @@ import { useResource } from "../hooks/useResource";
 import ResourcePage from "../business/ResourcePage";
 import Table from "../business/Table";
 import AccountForm from "../adminAccounts/AccountForm";
+import { useRoles } from "../roles/types";
 import { adminRoleLabel, type AdminAccount } from "../adminAccounts/types";
 
 export default function AdminAccounts({ notify }: PageProps) {
@@ -14,7 +15,12 @@ export default function AdminAccounts({ notify }: PageProps) {
       items: Row<AdminAccount>[];
       canManage: boolean;
     }>("/admin/accounts"),
-    [editing, setEditing] = useState<Row<AdminAccount> | null | undefined>();
+    [editing, setEditing] = useState<Row<AdminAccount> | null | undefined>(),
+    roles = useRoles(),
+    roleName = (id: string) =>
+      roles.rows.find((row) => row.id === id)?.data.name ||
+      adminRoleLabel[id] ||
+      id;
   return (
     <ResourcePage
       page="accounts"
@@ -42,7 +48,7 @@ export default function AdminAccounts({ notify }: PageProps) {
               </>
             ),
           },
-          { title: "角色", render: (row) => adminRoleLabel[row.data.role] },
+          { title: "角色", render: (row) => roleName(row.data.role) },
           { title: "手机号", render: (row) => row.data.phone || "未填写" },
           {
             title: "状态",

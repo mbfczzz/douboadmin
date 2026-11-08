@@ -70,8 +70,17 @@ func (a *Server) auth(role string, h http.HandlerFunc) http.HandlerFunc {
 				return
 			}
 			var account core.AdminAccount
-			if json.Unmarshal(row.Data, &account) != nil || account.Disabled || account.Archived || !validAdminRole(account.Role) {
+			if json.Unmarshal(row.Data, &account) != nil || account.Disabled || account.Archived {
 				fail(w, 403, "管理账号已停用")
+				return
+			}
+			role, denied, e := a.adminAccess(r.Context(), account)
+			if e != nil {
+				dbError(w, e)
+				return
+			}
+			if denied != "" {
+				fail(w, 403, denied)
 				return
 			}
 			changed := v.PasswordVersion != "" && v.PasswordVersion != account.PasswordChangedAt.UTC().Format(time.RFC3339Nano)
@@ -80,7 +89,11 @@ func (a *Server) auth(role string, h http.HandlerFunc) http.HandlerFunc {
 				fail(w, 401, "密码已修改，请重新登录")
 				return
 			}
-			v.AdminRole = account.Role
+			v.AdminRole, v.PartnerID, v.Menus = account.Role, account.PartnerID, role.Menus
+			if !menuAllowed(account.Role, role.Menus, r.Method, r.URL.Path) {
+				fail(w, 403, "没有该菜单的访问权限")
+				return
+			}
 		}
 		// A user must be able to revoke a session even after exhausting the API quota.
 		if r.URL.Path == "/api/auth/logout" {

@@ -13,12 +13,15 @@ import (
 )
 
 type Identity struct {
-	PasswordVersion string    `json:"passwordVersion,omitempty"`
-	Account         string    `json:"account,omitempty"`
-	AdminRole       string    `json:"adminRole,omitempty"`
-	ID              string    `json:"id"`
-	Role            string    `json:"role"`
-	Expires         time.Time `json:"expires"`
+	PasswordVersion string `json:"passwordVersion,omitempty"`
+	Account         string `json:"account,omitempty"`
+	AdminRole       string `json:"adminRole,omitempty"`
+	// Resolved per request from the account and role; never persisted in the session.
+	PartnerID string    `json:"-"`
+	Menus     []string  `json:"-"`
+	ID        string    `json:"id"`
+	Role      string    `json:"role"`
+	Expires   time.Time `json:"expires"`
 }
 type Sessions struct {
 	Redis  *redis.Client

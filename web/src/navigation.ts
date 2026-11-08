@@ -13,6 +13,7 @@ import {
   Activity,
   MessageSquare,
   Settings2,
+  KeyRound,
 } from "lucide-react";
 import type { Config } from "./api";
 export const pageInfo = {
@@ -35,6 +36,11 @@ export const pageInfo = {
     Handshake,
   ],
   accounts: ["管理账号", "管理后台登录账号、角色与启停状态。", UserCog],
+  roles: [
+    "角色管理",
+    "为角色配置可见菜单；服务商角色只能使用服务商相关菜单。",
+    KeyRound,
+  ],
   models: ["模型管理", "同步中转模型，管理可用能力与生成参数。", Bot],
   feedback: ["用户反馈", "查看用户提交的问题与建议。", MessageSquare],
   settings: ["系统设置", "部署状态与服务连接信息。", Settings2],
@@ -53,6 +59,7 @@ export const pageEyebrow: Record<PageId, string> = {
   users: "MINI-PROGRAM USERS",
   partners: "SERVICE PROVIDERS",
   accounts: "ADMIN ACCOUNTS",
+  roles: "ROLES",
   models: "MODELS",
   feedback: "FEEDBACK",
   settings: "SETTINGS",
@@ -70,9 +77,17 @@ export const navGroups: { label: string; pages: PageId[] }[] = [
   },
   {
     label: "平台管理",
-    pages: ["accounts", "models", "monitor", "feedback", "settings"],
+    pages: ["accounts", "roles", "models", "monitor", "feedback", "settings"],
   },
 ];
+// Navigation groups limited to the menus granted to the signed-in role.
+export const groupsFor = (menus: readonly string[]) =>
+  navGroups
+    .map((group) => ({
+      ...group,
+      pages: group.pages.filter((id) => menus.includes(id)),
+    }))
+    .filter((group) => group.pages.length > 0);
 export interface PageProps {
   config?: Config;
   notify: Notify;

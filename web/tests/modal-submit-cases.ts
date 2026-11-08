@@ -63,7 +63,12 @@ export const submitCases: SubmitCase[] = [
     open: "新增服务商",
     submit: "保存服务商",
     endpoint: "/partners",
-    fields: { 服务商名称: "保留的服务商草稿", 可授权账号额度: "10" },
+    fields: {
+      服务商名称: "保留的服务商草稿",
+      可授权账号额度: "10",
+      账号: "draft-provider",
+      初始密码: "draft-provider-password",
+    },
   },
   {
     name: "服务商基本信息",

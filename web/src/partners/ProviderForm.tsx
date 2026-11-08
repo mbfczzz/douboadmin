@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { Row } from "../api";
 import Modal from "../components/Modal";
+import ProviderLoginFields from "./ProviderLoginFields";
 import type { Notify } from "../navigation";
 import type { Partner } from "./types";
 import { hundredths } from "./types";
@@ -61,6 +62,11 @@ export default function ProviderForm({
               parentId: parent,
               name: String(data.get("name")),
               users: Number(data.get("users")),
+              account: {
+                username: String(data.get("accountUsername") || "").trim(),
+                password: String(data.get("accountPassword") || ""),
+                role: String(data.get("accountRole") || "partner"),
+              },
             });
           await onSaved();
           onClose();
@@ -145,6 +151,7 @@ export default function ProviderForm({
                       : `上级当前可用 ${parentAvailable} 个，本次分配后预计剩余 ${remaining} 个。`
                   : "一级服务商额度不占用总账号额度，可直接设置初始可授权账号数。"}
               </p>
+              <ProviderLoginFields disabled={command.busy} />
             </>
           )}
         </fieldset>

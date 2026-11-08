@@ -6,9 +6,25 @@ import (
 	"doubo/server/internal/core"
 	"encoding/json"
 	"fmt"
+	"slices"
 	"sort"
 	"strings"
 )
+
+// placeholders returns "NULL" for an empty list so `IN (NULL)` matches nothing.
+func placeholders(n int) string {
+	if n == 0 {
+		return "NULL"
+	}
+	return strings.TrimSuffix(strings.Repeat("?,", n), ",")
+}
+func anyStrings(values []string) []any {
+	out := make([]any, len(values))
+	for i, v := range values {
+		out[i] = v
+	}
+	return out
+}
 
 func validRecordPage(q core.RecordQuery) bool {
 	return q.Namespace != "" && q.Page >= 1 && q.Page <= 1000000 && q.Size >= 1 && q.Size <= 100 && len([]rune(q.Search)) <= 100
@@ -31,6 +47,15 @@ func (m *MySQL) RecordPage(ctx context.Context, q core.RecordQuery) (out core.Re
 	if q.PartnerID != "" {
 		where += ` AND JSON_UNQUOTE(JSON_EXTRACT(data,'$.partnerId'))=?`
 		args = append(args, q.PartnerID)
+	}
+	// A non-nil empty scope means the caller may see nothing.
+	if q.OwnerIn != nil {
+		where += ` AND owner_id IN (` + placeholders(len(q.OwnerIn)) + `)`
+		args = append(args, anyStrings(q.OwnerIn)...)
+	}
+	if q.PartnerIn != nil {
+		where += ` AND JSON_UNQUOTE(JSON_EXTRACT(data,'$.partnerId')) IN (` + placeholders(len(q.PartnerIn)) + `)`
+		args = append(args, anyStrings(q.PartnerIn)...)
 	}
 	if q.Search != "" {
 		where += ` AND (LOCATE(?,id)>0 OR LOCATE(?,CAST(data AS CHAR))>0)`
@@ -86,6 +111,9 @@ func (m *Memory) RecordPage(_ context.Context, q core.RecordQuery) (out core.Rec
 		if key != q.Namespace+":"+row.ID || (q.Owner != "" && q.Owner != row.Owner) {
 			continue
 		}
+		if q.OwnerIn != nil && !slices.Contains(q.OwnerIn, row.Owner) {
+			continue
+		}
 		if q.Search != "" && !strings.Contains(strings.ToLower(row.ID+string(row.Data)), strings.ToLower(q.Search)) {
 			continue
 		}
@@ -97,11 +125,11 @@ func (m *Memory) RecordPage(_ context.Context, q core.RecordQuery) (out core.Rec
 				continue
 			}
 		}
-		if q.PartnerID != "" {
+		if q.PartnerID != "" || q.PartnerIn != nil {
 			var v struct {
 				PartnerID string `json:"partnerId"`
 			}
-			if json.Unmarshal(row.Data, &v) != nil || v.PartnerID != q.PartnerID {
+			if json.Unmarshal(row.Data, &v) != nil || (q.PartnerID != "" && v.PartnerID != q.PartnerID) || (q.PartnerIn != nil && !slices.Contains(q.PartnerIn, v.PartnerID)) {
 				continue
 			}
 		}

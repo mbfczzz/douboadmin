@@ -46,6 +46,13 @@ func (a *Server) adminLogin(w http.ResponseWriter, r *http.Request) {
 		fail(w, 401, "账号或密码不正确")
 		return
 	}
+	if _, denied, accessErr := a.adminAccess(r.Context(), account); accessErr != nil {
+		dbError(w, accessErr)
+		return
+	} else if denied != "" {
+		fail(w, 403, denied)
+		return
+	}
 	account.LastLoginAt = time.Now().UTC()
 	row.Data = core.Data(account)
 	if updated, updateErr := a.Store.Put(r.Context(), "admin_accounts", row, row.Version); updateErr == nil {

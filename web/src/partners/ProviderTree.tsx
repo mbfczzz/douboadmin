@@ -7,6 +7,18 @@ import type { PartnerTreeItem } from "./types";
 import { labels } from "./types";
 
 type Node = { item: PartnerTreeItem; children: Node[] };
+// Matches the server rule: providers go at most three levels below the platform.
+export const MAX_LEVELS = 3;
+const levelNames = [
+  "一级",
+  "二级",
+  "三级",
+  "四级",
+  "五级",
+  "六级",
+  "七级",
+  "八级",
+];
 type Props = {
   rows: PartnerTreeItem[];
   query: string;
@@ -61,6 +73,7 @@ function TreeNodes({
   return nodes.map(({ item, children }) => {
     const { record: row, quota } = item,
       open = Boolean(query) || expanded.has(row.id),
+      level = Math.max(depth + 1, row.data.path?.length || 0),
       style = { "--tree-depth": depth } as CSSProperties;
     return (
       <div
@@ -95,6 +108,7 @@ function TreeNodes({
             <div className="provider-tree-identity">
               <b>{row.data.name}</b>
               <div className="provider-tree-detail quiet">
+                <span>{levelNames[level - 1] || `${level}级`} · </span>
                 <ProviderId id={row.id} />
                 {children.length > 0 && (
                   <span> · {children.length} 个下级</span>
@@ -115,10 +129,12 @@ function TreeNodes({
             <ProviderQuota pool={quota.users} />
           </div>
           <div className="provider-tree-actions">
-            <button className="text-button subtle" onClick={() => add(item)}>
-              <Plus size={14} aria-hidden="true" />
-              新增子级
-            </button>
+            {level < MAX_LEVELS && (
+              <button className="text-button subtle" onClick={() => add(item)}>
+                <Plus size={14} aria-hidden="true" />
+                新增子级
+              </button>
+            )}
             <button className="text-button" onClick={() => edit(item)}>
               <Pencil size={13} aria-hidden="true" />
               编辑

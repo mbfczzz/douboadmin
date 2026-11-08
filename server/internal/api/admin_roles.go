@@ -1,0 +1,186 @@
+package api
+
+import (
+	"context"
+	"doubo/server/internal/core"
+	"encoding/json"
+	"errors"
+	"net/http"
+	"slices"
+	"strings"
+)
+
+const rolesNamespace = "admin_roles"
+
+// adminRole resolves a role id; stored records override builtin names and menus.
+func (a *Server) adminRole(ctx context.Context, id string) (core.AdminRole, bool, error) {
+	builtin := core.BuiltinAdminRoles()
+	if id == core.SuperAdminRole {
+		return builtin[id], true, nil
+	}
+	row, err := a.Store.Get(ctx, rolesNamespace, id)
+	if errors.Is(err, core.ErrNotFound) {
+		role, ok := builtin[id]
+		return role, ok, nil
+	}
+	if err != nil {
+		return core.AdminRole{}, false, err
+	}
+	var role core.AdminRole
+	if json.Unmarshal(row.Data, &role) != nil || role.Deleted {
+		return core.AdminRole{}, false, nil
+	}
+	if b, ok := builtin[id]; ok {
+		role.Scope, role.System = b.Scope, true
+	}
+	return role, true, nil
+}
+
+func validRoleMenus(scope string, menus []string) bool {
+	allowed := core.AdminMenus
+	if scope == core.RoleScopePartner {
+		allowed = core.PartnerMenus
+	} else if scope != core.RoleScopePlatform {
+		return false
+	}
+	for _, m := range menus {
+		if !slices.Contains(allowed, m) {
+			return false
+		}
+	}
+	return len(menus) > 0
+}
+
+type roleView struct {
+	ID       string         `json:"id"`
+	Version  int64          `json:"version"`
+	Data     core.AdminRole `json:"data"`
+	Accounts int            `json:"accounts"`
+}
+
+func (a *Server) listAdminRoles(w http.ResponseWriter, r *http.Request) {
+	stored, err := a.Store.List(r.Context(), rolesNamespace, "")
+	if err != nil {
+		dbError(w, err)
+		return
+	}
+	accounts, err := a.Store.List(r.Context(), "admin_accounts", "")
+	if err != nil {
+		dbError(w, err)
+		return
+	}
+	used := map[string]int{}
+	for _, row := range accounts {
+		var account core.AdminAccount
+		if json.Unmarshal(row.Data, &account) == nil && !account.Archived {
+			used[account.Role]++
+		}
+	}
+	ids := []string{core.SuperAdminRole, "operator", "partner"}
+	versions := map[string]int64{}
+	for _, row := range stored {
+		versions[row.ID] = row.Version
+		if !slices.Contains(ids, row.ID) {
+			ids = append(ids, row.ID)
+		}
+	}
+	scope := identity(r).PartnerID != ""
+	out := []roleView{}
+	for _, id := range ids {
+		role, ok, e := a.adminRole(r.Context(), id)
+		if e != nil {
+			dbError(w, e)
+			return
+		}
+		// Provider accounts only ever assign provider roles to their children.
+		if ok && (!scope || role.Scope == core.RoleScopePartner) {
+			view := roleView{ID: id, Version: versions[id], Data: role, Accounts: used[id]}
+			if scope {
+				view.Accounts = 0 // platform-wide counts are not a provider's business
+			}
+			out = append(out, view)
+		}
+	}
+	reply(w, 200, out)
+}
+
+func (a *Server) saveAdminRole(w http.ResponseWriter, r *http.Request) {
+	var input struct {
+		Version int64    `json:"version"`
+		Name    string   `json:"name"`
+		Scope   string   `json:"scope"`
+		Menus   []string `json:"menus"`
+	}
+	if !decode(w, r, &input) {
+		return
+	}
+	id := r.PathValue("id")
+	input.Name = strings.TrimSpace(input.Name)
+	if id == core.SuperAdminRole {
+		fail(w, 400, "超级管理员角色不可修改")
+		return
+	}
+	if id != "" {
+		current, ok, err := a.adminRole(r.Context(), id)
+		if err != nil {
+			dbError(w, err)
+			return
+		}
+		if !ok {
+			fail(w, 404, "角色不存在")
+			return
+		}
+		input.Scope = current.Scope
+	}
+	if input.Name == "" || len([]rune(input.Name)) > 20 || !validRoleMenus(input.Scope, input.Menus) {
+		fail(w, 400, "请填写 1–20 字的角色名称，并至少选择一个可用菜单")
+		return
+	}
+	if id == "" {
+		id = core.NewID()
+	}
+	_, system := core.BuiltinAdminRoles()[id]
+	role := core.AdminRole{Name: input.Name, Scope: input.Scope, Menus: input.Menus, System: system}
+	row, err := a.Store.Put(r.Context(), rolesNamespace, core.Record{ID: id, Data: core.Data(role)}, input.Version)
+	if err != nil {
+		dbError(w, err)
+		return
+	}
+	reply(w, 200, roleView{ID: row.ID, Version: row.Version, Data: role})
+}
+
+func (a *Server) deleteAdminRole(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+	if _, system := core.BuiltinAdminRoles()[id]; system {
+		fail(w, 400, "内置角色不可删除")
+		return
+	}
+	accounts, err := a.Store.List(r.Context(), "admin_accounts", "")
+	if err != nil {
+		dbError(w, err)
+		return
+	}
+	for _, row := range accounts {
+		var account core.AdminAccount
+		if json.Unmarshal(row.Data, &account) == nil && !account.Archived && account.Role == id {
+			fail(w, 409, "仍有账号使用该角色，请先调整这些账号")
+			return
+		}
+	}
+	row, err := a.Store.Get(r.Context(), rolesNamespace, id)
+	if err != nil {
+		dbError(w, err)
+		return
+	}
+	var role core.AdminRole
+	if json.Unmarshal(row.Data, &role) != nil {
+		fail(w, 500, "角色数据异常")
+		return
+	}
+	role.Deleted = true
+	if _, err = a.Store.Put(r.Context(), rolesNamespace, core.Record{ID: id, Data: core.Data(role)}, row.Version); err != nil {
+		dbError(w, err)
+		return
+	}
+	reply(w, 200, map[string]bool{"ok": true})
+}

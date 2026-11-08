@@ -3,6 +3,7 @@ import { api, type Row } from "../api";
 import Modal from "../components/Modal";
 import type { Notify } from "../navigation";
 import type { AdminAccount } from "./types";
+import RoleSelect from "../roles/RoleSelect";
 
 export default function AccountForm({
   row,
@@ -132,14 +133,11 @@ export default function AccountForm({
           </label>
           <label>
             角色
-            <select
-              name="role"
-              defaultValue={row?.data.role || "operator"}
+            <RoleSelect
+              scope="platform"
+              value={row?.data.role}
               disabled={busy}
-            >
-              <option value="operator">平台运营</option>
-              <option value="super_admin">超级管理员</option>
-            </select>
+            />
           </label>
           <label>
             {row ? "重置密码（不修改请留空）" : "初始密码"}

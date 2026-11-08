@@ -18,8 +18,6 @@ func adminID(username string) string {
 	return core.Digest("admin:" + strings.ToLower(strings.TrimSpace(username)))[:32]
 }
 
-func validAdminRole(role string) bool { return role == "super_admin" || role == "operator" }
-
 func hashPassword(password string) (string, error) {
 	if len([]rune(password)) < 16 || len([]rune(password)) > 128 {
 		return "", errors.New("密码长度需为 16–128 个字符")
@@ -70,9 +68,15 @@ func (a *Server) adminAccounts(w http.ResponseWriter, r *http.Request) {
 		dbError(w, err)
 		return
 	}
-	for i := range rows {
-		rows[i] = adminView(rows[i])
+	items := []core.Record{}
+	for _, row := range rows {
+		// Provider login accounts are managed under 服务商管理, not here.
+		var account core.AdminAccount
+		if json.Unmarshal(row.Data, &account) == nil && account.PartnerID == "" {
+			items = append(items, adminView(row))
+		}
 	}
+	rows = items
 	role := identity(r).AdminRole
 	reply(w, 200, map[string]any{"items": rows, "canManage": role == "" || role == "super_admin"})
 }
@@ -89,7 +93,7 @@ func (a *Server) createAdminAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	input.Username, input.Name, input.Phone = strings.TrimSpace(input.Username), strings.TrimSpace(input.Name), strings.TrimSpace(input.Phone)
-	if !adminUsername.MatchString(input.Username) || input.Name == "" || len([]rune(input.Name)) > 50 || (input.Phone != "" && !validPhone.MatchString(input.Phone)) || !validAdminRole(input.Role) {
+	if !adminUsername.MatchString(input.Username) || input.Name == "" || len([]rune(input.Name)) > 50 || (input.Phone != "" && !validPhone.MatchString(input.Phone)) || !a.platformRole(r, input.Role) {
 		fail(w, 400, "管理账号资料无效")
 		return
 	}
@@ -130,7 +134,7 @@ func (a *Server) updateAdminAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	input.Name, input.Phone = strings.TrimSpace(input.Name), strings.TrimSpace(input.Phone)
-	if input.Name == "" || len([]rune(input.Name)) > 50 || (input.Phone != "" && !validPhone.MatchString(input.Phone)) || !validAdminRole(input.Role) {
+	if input.Name == "" || len([]rune(input.Name)) > 50 || (input.Phone != "" && !validPhone.MatchString(input.Phone)) || !a.platformRole(r, input.Role) {
 		fail(w, 400, "管理账号资料无效")
 		return
 	}

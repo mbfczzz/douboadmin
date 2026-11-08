@@ -10,6 +10,8 @@ func (a *Server) partnerRoutes() {
 	m.HandleFunc("POST /api/admin/partners", a.auth("admin", a.createPartner))
 	m.HandleFunc("GET /api/admin/partners/{id}", a.auth("admin", a.partnerOverview))
 	m.HandleFunc("PUT /api/admin/partners/{id}", a.auth("admin", a.updatePartner))
+	m.HandleFunc("GET /api/admin/partners/{id}/account", a.auth("admin", a.getProviderAccount))
+	m.HandleFunc("PUT /api/admin/partners/{id}/account", a.auth("admin", a.saveProviderAccount))
 	m.HandleFunc("GET /api/admin/partner-policy", a.auth("admin", a.partnerPolicy))
 	m.HandleFunc("PUT /api/admin/partner-policy", a.auth("admin", a.savePartnerPolicy))
 	m.HandleFunc("GET /api/admin/quota-moves", a.auth("admin", a.partnerList("quota_moves")))

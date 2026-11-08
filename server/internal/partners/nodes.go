@@ -8,6 +8,9 @@ import (
 	"strings"
 )
 
+// MaxLevels is the deepest provider level below the platform.
+const MaxLevels = 3
+
 func (s *Service) Create(ctx context.Context, parent, name string, users int64, key, actor string) (core.Record, error) {
 	name = strings.TrimSpace(name)
 	if name == "" || len([]rune(name)) > 60 {
@@ -24,15 +27,21 @@ func (s *Service) Create(ctx context.Context, parent, name string, users int64, 
 		if e != nil {
 			return core.Record{}, e
 		}
-		if len(p.Path) >= 8 {
-			return core.Record{}, rulef("服务商层级最多 8 层")
+		// Root has an empty path; a parent already at level 3 cannot add a fourth level.
+		if len(p.Path) >= MaxLevels {
+			return core.Record{}, rulef("服务商最多 %d 级，不能再创建下级", MaxLevels)
 		}
 		price, e := prices(tx, parent)
 		if e != nil {
 			return core.Record{}, e
 		}
 		incoming := price.IncomingPer100Fen + (price.RetailPer100Fen-price.IncomingPer100Fen)*p.ChildMarginBps/10000
-		n := core.Partner{Name: name, ParentID: parent, Path: append(append([]string{}, p.Path...), parent), Status: "active", RetailPer100Fen: max(int64(10000), incoming), ChildMarginBps: 5000}
+		retail, margin := max(int64(10000), incoming), int64(5000)
+		if parent != core.RootPartner {
+			// A new child starts within its parent's own price and margin.
+			retail, margin = max(incoming, min(retail, p.RetailPer100Fen)), min(margin, p.ChildMarginBps)
+		}
+		n := core.Partner{Name: name, ParentID: parent, Path: append(append([]string{}, p.Path...), parent), Status: "active", RetailPer100Fen: retail, ChildMarginBps: margin}
 		created, e := tx.Put("partners", core.Record{ID: id, Owner: parent, Data: core.Data(n)}, 0)
 		if e != nil {
 			return created, e

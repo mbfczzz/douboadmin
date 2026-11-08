@@ -8,6 +8,8 @@ import ProviderForm from "./ProviderForm";
 import ProviderTree from "./ProviderTree";
 import type { PartnerTreeItem } from "./types";
 import { available } from "./types";
+import { MAX_LEVELS } from "./ProviderTree";
+import { useMe } from "../session";
 
 const ProviderEditor = lazy(() => import("./ProviderEditor"));
 
@@ -25,6 +27,11 @@ export default function Providers({ notify }: { notify: Notify }) {
     }>(),
     initialized = useRef(false);
   const rows = resource.data || [];
+  // A provider login adds children under its own node, within the level limit.
+  const ownId = useMe()?.partnerId,
+    own = ownId ? rows.find((item) => item.record.id === ownId) : undefined,
+    canAddTop =
+      !ownId || (!!own && (own.record.data.path?.length || 0) < MAX_LEVELS);
   const parentIds = useMemo(() => {
     const parents = new Set(rows.map((item) => item.record.data.parentId));
     return rows
@@ -51,14 +58,27 @@ export default function Providers({ notify }: { notify: Notify }) {
         loading={resource.loading}
         onRefresh={() => void resource.reload()}
       >
-        <button
-          type="button"
-          className="primary"
-          onClick={() => setEditing({ parent: "root" })}
-        >
-          <Plus size={16} aria-hidden="true" />
-          新增服务商
-        </button>
+        {canAddTop && (
+          <button
+            type="button"
+            className="primary"
+            onClick={() => {
+              if (own)
+                setExpanded((current) => new Set(current).add(own.record.id));
+              setEditing(
+                own
+                  ? {
+                      parent: own.record.id,
+                      parentAvailable: available(own.quota.users),
+                    }
+                  : { parent: "root" },
+              );
+            }}
+          >
+            <Plus size={16} aria-hidden="true" />
+            {own ? "新增下级服务商" : "新增服务商"}
+          </button>
+        )}
       </PageHeader>
       <h2>服务商列表</h2>
       <form

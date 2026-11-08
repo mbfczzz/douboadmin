@@ -7,6 +7,7 @@ type AdminAccount struct {
 	Name              string    `json:"name"`
 	Phone             string    `json:"phone,omitempty"`
 	Role              string    `json:"role"`
+	PartnerID         string    `json:"partnerId,omitempty"`
 	PasswordHash      string    `json:"passwordHash,omitempty"`
 	Disabled          bool      `json:"disabled,omitempty"`
 	Archived          bool      `json:"archived,omitempty"`

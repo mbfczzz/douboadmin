@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { isProviderAccount, useMe } from "../session";
 import { date, type Row } from "../api";
 import { money } from "../business/types";
 import Modal from "../components/Modal";
@@ -11,7 +12,9 @@ export default function Payouts({ id, view, changed, notify }: Scope) {
   const resource = useRecords<Payout>("/admin/commission-payouts?owner=" + id),
     [create, setCreate] = useState(false),
     [detail, setDetail] = useState<Row<Payout> | null>(null),
-    command = useCommand();
+    command = useCommand(),
+    // Confirming offline payouts is a platform task.
+    provider = isProviderAccount(useMe());
   return (
     <>
       <Records
@@ -49,7 +52,7 @@ export default function Payouts({ id, view, changed, notify }: Scope) {
             title: "操作",
             action: true,
             render: (r) =>
-              r.data.status === "pending" ? (
+              r.data.status === "pending" && !provider ? (
                 <button className="text-button" onClick={() => setDetail(r)}>
                   处理提现
                 </button>

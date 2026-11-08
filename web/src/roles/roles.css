@@ -1,0 +1,18 @@
+.edit-form .role-menus {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 4px 16px;
+  margin: 0 0 16px;
+  padding: 14px 16px 2px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+.edit-form .role-menus legend {
+  padding: 0 6px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+.edit-form .role-menus .checkbox {
+  margin-bottom: 12px;
+}

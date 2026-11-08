@@ -11,7 +11,11 @@
 | PUT | /admin/accounts/{id} | 编辑管理账号姓名、手机号、角色和启停状态 |
 | PUT | /admin/accounts/{id}/password | 重置管理账号密码，最少 16 位 |
 | DELETE | /admin/accounts/{id} | 归档管理账号并禁止登录 |
-| GET / POST | /admin/partners | 直接下级/搜索分页；创建 `{parentId,name}` |
+| GET | /admin/me | 当前登录账号、角色、可见菜单及所属服务商 |
+| GET | /admin/roles | 角色列表及账号数；服务商账号只返回服务商角色 |
+| POST / PUT / DELETE | /admin/roles、/admin/roles/{id} | 超级管理员维护角色 `{name,scope,menus}`；scope 为 platform/partner，创建后不可改 |
+| GET / POST | /admin/partners | 直接下级/搜索分页；创建 `{parentId,name,account:{username,password,role}}`，同时开通登录账号 |
+| GET / PUT | /admin/partners/{id}/account | 下级服务商登录账号；PUT 用于补开、重置密码、换角色或停用 |
 | GET | /admin/partners/{id} | 服务商资料、固定用户额度、当前价格链和佣金余额；`root` 为总账号 |
 | PUT | /admin/partners/{id} | `{version,data}`；名称、状态、子账号售价、向下供货的保留比例 |
 | GET / PUT | /admin/partner-policy | 总账号成本与保留比例；写入 `{version,data}` |
@@ -19,7 +23,7 @@
 | GET / POST | /admin/quota-requests | 申请历史；写入 `{partnerId,users,reason}` |
 | PUT | /admin/quota-requests/{id} | `{version,approve,reason}`；批准与划拨在同一事务 |
 | GET / POST | /admin/activation-codes | 授权码列表；生成 `{partnerId,label,days}` 并预留名额 |
-| GET | /admin/activation-codes/{id} | 有效未使用码的正文和二维码 Data URL，仅总账号可读取 |
+| GET | /admin/activation-codes/{id} | 有效未使用码的正文和二维码 Data URL，仅限本服务商子树内 |
 | GET | /admin/activation-codes/{id}/trace | 生成账号/时间、归属、首次激活用户/昵称/时间/方式、当前用户资料及绑定；已使用/撤销码也可查询 |
 | DELETE | /admin/activation-codes/{id} | 撤销未使用码，释放预留 |
 | GET | /admin/memberships | 按 provider/用户编号/状态查询授权绑定 |
@@ -29,9 +33,11 @@
 | GET / POST | /admin/commission-payouts | 提现记录；申请 `{partnerId,amountFen,note}` |
 | PUT | /admin/commission-payouts/{id} | `{version,status,reference}`；paid 表示确认已线下打款，cancelled 表示取消 |
 
+服务商账号的所有 `/admin` 请求按角色菜单校验，并限定在本服务商子树内；越权返回 `403`；所属服务商或其上级停用时登录与会话均返回 `403`。`partner-policy`、名额申请审批、提现处理仅限平台账号。`/admin/accounts` 只管理平台账号。
+
 列表支持 `page`、`q`、`status`、`owner`，返回 `{items,total,page,size}`，每页 20 条。授权绑定另支持 `provider` 精确筛选归属。创建服务商、名额划拨/申请、生成码、申请提现需要 `Idempotency-Key`，相同键不同输入返回冲突。
 
-授权码的 `actor` 来自登录身份，`creatorAccount` 来自该登录会话的账号快照，不能由发码请求指定。首次兑换记录 `userId/usedAt/activatedNickname/activationMethod`，原码记录不随用户改名、解绑或更换服务商而被覆盖。trace 仅供总账号查询，不返回完整激活凭证或额外用户隐私字段。
+授权码的 `actor` 来自登录身份，`creatorAccount` 来自该登录会话的账号快照，不能由发码请求指定。首次兑换记录 `userId/usedAt/activatedNickname/activationMethod`，原码记录不随用户改名、解绑或更换服务商而被覆盖。trace 仅可查询本服务商子树内的码，不返回完整激活凭证或额外用户隐私字段。
 
 售价/成本字段 `retailPer100Fen`、`costPer100Fen` 单位为分，分别表示每 100 元基准算力的售价/成本；`childMarginBps`、`rootMarginBps` 采用万分比，5000 表示 50%。它们不是固定充值套餐。
 

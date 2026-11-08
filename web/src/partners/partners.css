@@ -159,3 +159,21 @@
 .partner-records td {
   white-space: normal;
 }
+.edit-form .provider-login {
+  margin: 4px 0 16px;
+  padding: 14px 16px 2px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+.edit-form .provider-login legend {
+  padding: 0 6px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+.provider-account {
+  border-top: 1px solid var(--line);
+}
+.provider-account h3 {
+  margin: 0 0 8px;
+}

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { isProviderAccount, useMe } from "../session";
 import type { Row } from "../api";
 import Modal from "../components/Modal";
 import Records, { useRecords } from "./Records";
@@ -15,7 +16,9 @@ export default function QuotaRequests({
 }) {
   const resource = useRecords<QuotaRequest>("/admin/quota-requests"),
     [detail, setDetail] = useState<Row<QuotaRequest> | null>(null),
-    command = useCommand();
+    command = useCommand(),
+    // Approval stays with the platform; provider logins only see the history.
+    provider = isProviderAccount(useMe());
   return (
     <>
       <Records
@@ -41,7 +44,7 @@ export default function QuotaRequests({
             title: "操作",
             action: true,
             render: (r) =>
-              r.data.status === "pending" ? (
+              r.data.status === "pending" && !provider ? (
                 <button className="text-button" onClick={() => setDetail(r)}>
                   审批
                 </button>

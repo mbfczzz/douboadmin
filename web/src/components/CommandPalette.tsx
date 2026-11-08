@@ -1,15 +1,17 @@
 import { Search } from "lucide-react";
 import { useState } from "react";
-import { navGroups, pageInfo, type PageId } from "../navigation";
+import { pageInfo, type PageId } from "../navigation";
 import Modal from "./Modal";
 
 export default function CommandPalette({
   current,
   recent,
+  groups,
   onChoose,
   onClose,
 }: {
   current: PageId;
+  groups: { label: string; pages: PageId[] }[];
   recent: PageId[];
   onChoose: (page: PageId) => void;
   onClose: () => void;
@@ -62,7 +64,7 @@ export default function CommandPalette({
             {list(recent)}
           </>
         )}
-        {navGroups.map((group) => {
+        {groups.map((group) => {
           const pages = group.pages.filter(matches);
           return pages.length ? (
             <section key={group.label}>
@@ -71,7 +73,7 @@ export default function CommandPalette({
             </section>
           ) : null;
         })}
-        {!navGroups.some((group) => group.pages.some(matches)) && (
+        {!groups.some((group) => group.pages.some(matches)) && (
           <p className="quiet">没有匹配的后台功能</p>
         )}
       </div>
