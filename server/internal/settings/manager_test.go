@@ -3,7 +3,6 @@ package settings
 import (
 	"doubo/server/internal/core"
 	"doubo/server/internal/store"
-	"encoding/json"
 	"errors"
 	"os"
 	"path/filepath"
@@ -22,7 +21,7 @@ func testManager(t *testing.T, base Values) *Manager {
 	return m
 }
 
-func TestEncryptedPersistenceMaskingAndRestart(t *testing.T) {
+func TestEncryptedPersistenceAndRestart(t *testing.T) {
 	m := testManager(t, Values{"RELAY_API_KEY": "env-private-fixture", "RELAY_BASE_URL": "https://old.example"})
 	if _, err := os.Stat(m.KeyPath); !errors.Is(err, os.ErrNotExist) {
 		t.Fatal("read-only startup must not create a key", err)
@@ -39,9 +38,9 @@ func TestEncryptedPersistenceMaskingAndRestart(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	public, _ := json.Marshal(states)
-	if strings.Contains(string(public), "private-fixture") {
-		t.Fatal("read API exposes credentials")
+	// States are served only to super administrators, who see configured secrets.
+	if states[1].Values["RELAY_API_KEY"] != "new-private-fixture" {
+		t.Fatal("super administrator state is missing the configured secret")
 	}
 	if s := states[1]; s.Source != "database" || s.Version != 1 || s.AppliedVersion != 0 || !s.PendingRestart || !s.Secrets["RELAY_API_KEY"] {
 		t.Fatal("incorrect saved/restart status", s)

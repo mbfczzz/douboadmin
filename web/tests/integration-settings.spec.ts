@@ -29,7 +29,7 @@ async function group(page: Page, name: string) {
   return card;
 }
 
-test("real API stores a masked secret and independent forms preserve drafts", async ({
+test("real API shows the saved secret and independent forms preserve drafts", async ({
   page,
 }) => {
   await settings(page);
@@ -47,17 +47,15 @@ test("real API stores a masked secret and independent forms preserve drafts", as
   await relay.getByRole("button", { name: "保存配置", exact: true }).click();
   await expect(page.getByRole("status")).toContainText("已保存");
   await expect(relay.locator("summary")).toContainText("待重启");
-  await expect(relay.getByLabel("API Key", { exact: true })).toHaveValue("");
-  await expect(relay.getByLabel("API Key", { exact: true })).toHaveAttribute(
-    "placeholder",
-    "已配置，留空保持",
+  await expect(relay.getByLabel("API Key", { exact: true })).toHaveValue(
+    "fixture-private-relay-key",
   );
   await expect(oss.getByLabel("存储桶 Bucket", { exact: true })).toHaveValue(
     "unsaved-fixture",
   );
   const response = await page.request.get("/api/admin/integrations");
   expect(response.status()).toBe(200);
-  expect(await response.text()).not.toContain("fixture-private-relay-key");
+  expect(await response.text()).toContain("fixture-private-relay-key");
   await oss.getByRole("button", { name: "重新读取", exact: true }).click();
   await expect(oss.getByLabel("存储桶 Bucket", { exact: true })).toHaveValue(
     "",

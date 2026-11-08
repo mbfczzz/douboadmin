@@ -90,22 +90,15 @@ export default function Fields({
               ) : (
                 <input
                   {...props}
-                  type={
-                    field.kind === "secret"
-                      ? "password"
-                      : field.kind === "url"
-                        ? "url"
-                        : "text"
-                  }
+                  type={field.kind === "url" ? "url" : "text"}
                   maxLength={field.kind === "origins" ? 65536 : 4096}
-                  autoComplete={
-                    field.kind === "secret" ? "new-password" : "off"
-                  }
+                  autoComplete="off"
+                  spellCheck={false}
                   disabled={disabled || !!clear[field.key]}
                   placeholder={
                     field.kind === "secret"
                       ? group.secrets[field.key]
-                        ? "已配置，留空保持"
+                        ? "留空保持原密钥"
                         : "尚未配置"
                       : undefined
                   }

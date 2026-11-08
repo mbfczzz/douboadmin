@@ -253,6 +253,12 @@
   height: 32px;
   border: 1px solid var(--line);
   border-radius: 5px;
+  background: var(--surface);
+  color: var(--ink);
+}
+.catalog-pagination button:hover:not(:disabled) {
+  border-color: var(--accent-border);
+  color: var(--accent);
 }
 @media (max-width: 640px) {
   .catalog-tabs button {

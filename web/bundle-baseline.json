@@ -1,87 +1,87 @@
 {
   "schemaVersion": 2,
-  "createdAt": "2026-11-08T09:48:40.314Z",
-  "revision": "0041e27f45c1439e90477de457090fafb0f27fa0",
-  "reason": "Reviewed first-load budgets and lazy feature styles",
-  "initialJSGzipBytes": 74294,
-  "initialCSSGzipBytes": 6891,
-  "totalJSGzipBytes": 132205,
-  "totalCSSGzipBytes": 9073,
+  "createdAt": "2026-11-08T10:59:05.135Z",
+  "revision": "7904acd86a894c3342a0b6f640650ebe1ae2be18",
+  "reason": "Styled integration settings groups, collection rows, pagination and reread buttons instead of browser-default controls; verified lazy loading",
+  "initialJSGzipBytes": 74296,
+  "initialCSSGzipBytes": 6909,
+  "totalJSGzipBytes": 132350,
+  "totalCSSGzipBytes": 9434,
   "entries": {
     "chunk:partner-business": {
-      "jsGzipBytes": 21767,
+      "jsGzipBytes": 21774,
       "cssGzipBytes": 676
     },
     "src/Workspace.tsx": {
-      "jsGzipBytes": 9841,
+      "jsGzipBytes": 9845,
       "cssGzipBytes": 0
     },
     "src/business/PaymentRecords.tsx": {
-      "jsGzipBytes": 11107,
+      "jsGzipBytes": 11111,
       "cssGzipBytes": 0
     },
     "src/business/VirtualEvents.tsx": {
-      "jsGzipBytes": 11824,
+      "jsGzipBytes": 11830,
       "cssGzipBytes": 0
     },
     "src/components/CommandPalette.tsx": {
-      "jsGzipBytes": 10634,
+      "jsGzipBytes": 10641,
       "cssGzipBytes": 0
     },
     "src/overview/Details.tsx": {
-      "jsGzipBytes": 10324,
+      "jsGzipBytes": 10328,
       "cssGzipBytes": 0
     },
     "src/pages/AdminAccounts.tsx": {
-      "jsGzipBytes": 11628,
+      "jsGzipBytes": 11632,
       "cssGzipBytes": 0
     },
     "src/pages/Feedback.tsx": {
-      "jsGzipBytes": 10468,
+      "jsGzipBytes": 10473,
       "cssGzipBytes": 0
     },
     "src/pages/Jobs.tsx": {
-      "jsGzipBytes": 9841,
+      "jsGzipBytes": 9845,
       "cssGzipBytes": 0
     },
     "src/pages/Models.tsx": {
-      "jsGzipBytes": 17880,
+      "jsGzipBytes": 17886,
       "cssGzipBytes": 1433
     },
     "src/pages/Monitor.tsx": {
-      "jsGzipBytes": 11844,
+      "jsGzipBytes": 11848,
       "cssGzipBytes": 0
     },
     "src/pages/Orders.tsx": {
-      "jsGzipBytes": 11833,
+      "jsGzipBytes": 11836,
       "cssGzipBytes": 0
     },
     "src/pages/Overview.tsx": {
-      "jsGzipBytes": 12088,
+      "jsGzipBytes": 12093,
       "cssGzipBytes": 0
     },
     "src/pages/Payments.tsx": {
-      "jsGzipBytes": 11325,
+      "jsGzipBytes": 11334,
       "cssGzipBytes": 0
     },
     "src/pages/Reviews.tsx": {
-      "jsGzipBytes": 11025,
+      "jsGzipBytes": 11029,
       "cssGzipBytes": 0
     },
     "src/pages/Settings.tsx": {
-      "jsGzipBytes": 13668,
-      "cssGzipBytes": 73
+      "jsGzipBytes": 13789,
+      "cssGzipBytes": 416
     },
     "src/pages/Templates.tsx": {
-      "jsGzipBytes": 14498,
+      "jsGzipBytes": 14506,
       "cssGzipBytes": 0
     },
     "src/pages/Users.tsx": {
-      "jsGzipBytes": 12462,
+      "jsGzipBytes": 12467,
       "cssGzipBytes": 0
     },
     "src/pages/Works.tsx": {
-      "jsGzipBytes": 10992,
+      "jsGzipBytes": 10997,
       "cssGzipBytes": 0
     }
   }

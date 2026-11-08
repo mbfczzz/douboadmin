@@ -1,15 +1,13 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { api, APIError } from "../api";
 import type { Notify } from "../navigation";
+import Badge from "../components/Badge";
 import Fields from "./Fields";
 import type { IntegrationGroup } from "./types";
 
 const initial = (group: IntegrationGroup) =>
   Object.fromEntries(
-    group.fields.map((f) => [
-      f.key,
-      f.kind === "secret" ? "" : group.values[f.key] || "",
-    ]),
+    group.fields.map((f) => [f.key, group.values[f.key] || ""]),
   );
 
 export default function GroupForm({
@@ -86,16 +84,15 @@ export default function GroupForm({
   }
   return (
     <details className="panel integration">
-      <summary className="edit-form">
+      <summary>
         <b>{group.name}</b>
-        {" · "}
-        <span className="quiet">
-          {group.pendingRestart
-            ? "已保存 · 待重启"
-            : group.source === "database"
-              ? "数据库配置"
-              : "服务器配置"}
-        </span>
+        {group.pendingRestart ? (
+          <Badge state="queued" label="已保存 · 待重启" />
+        ) : group.source === "database" ? (
+          <Badge state="succeeded" label="数据库配置" />
+        ) : (
+          <Badge state="muted" label="服务器配置" />
+        )}
       </summary>
       <form
         className="edit-form"
@@ -105,7 +102,7 @@ export default function GroupForm({
       >
         <p className="quiet">{group.hint}</p>
         {message && (
-          <p className="notice" role="alert">
+          <p className={error ? "error" : "notice warning"} role="alert">
             {message}
           </p>
         )}
@@ -123,7 +120,12 @@ export default function GroupForm({
           }}
         />
         <div className="modal-actions">
-          <button type="button" disabled={busy} onClick={() => void discard()}>
+          <button
+            type="button"
+            className="secondary"
+            disabled={busy}
+            onClick={() => void discard()}
+          >
             重新读取
           </button>
           <button className="primary" disabled={busy}>

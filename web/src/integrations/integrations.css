@@ -4,3 +4,50 @@
 .integration fieldset {
   min-width: 0;
 }
+.integration > summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 24px;
+  cursor: pointer;
+  list-style: none;
+}
+.integration > summary::-webkit-details-marker {
+  display: none;
+}
+.integration > summary::after {
+  content: "";
+  width: 7px;
+  height: 7px;
+  margin: -3px 4px 0 auto;
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  transform: rotate(45deg);
+  transition: transform 160ms;
+}
+.integration[open] > summary {
+  border-bottom: 1px solid var(--line);
+}
+.integration[open] > summary::after {
+  margin-top: 3px;
+  transform: rotate(-135deg);
+}
+.integration-item {
+  margin: 0 0 12px;
+  padding: 16px 18px 2px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-subtle);
+}
+.integration-item legend {
+  padding: 0 6px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+.integration-item > button {
+  margin-bottom: 14px;
+}
+.integration-add {
+  margin: 0 0 20px;
+}

@@ -47,12 +47,15 @@ func TestIntegrationAPIRejectsUsersAndOperators(t *testing.T) {
 	}
 }
 
-func TestIntegrationAPIPersistsWithoutCredentialEcho(t *testing.T) {
-	a, admin, _ := integrationAdmin(t)
+func TestIntegrationAPIShowsSecretsOnlyToSuperAdmins(t *testing.T) {
+	a, admin, user := integrationAdmin(t)
 	input := settings.Update{Values: settings.Values{"RELAY_API_KEY": "fixture-private-key"}}
 	w := call(a, "PUT", "/api/admin/integrations/relay", admin, "", input)
-	if w.Code != 200 || strings.Contains(w.Body.String(), "fixture-private-key") || !strings.Contains(w.Body.String(), `"pendingRestart":true`) {
-		t.Fatal(w.Code, w.Body.String())
+	if w.Code != 200 || !strings.Contains(w.Body.String(), "fixture-private-key") || !strings.Contains(w.Body.String(), `"pendingRestart":true`) {
+		t.Fatal("super administrator should see the configured secret", w.Code, w.Body.String())
+	}
+	if w := call(a, "GET", "/api/admin/integrations", user, "", nil); strings.Contains(w.Body.String(), "fixture-private-key") {
+		t.Fatal("non-administrator can read a configured secret", w.Code)
 	}
 	if w = call(a, "PUT", "/api/admin/integrations/relay", admin, "", input); w.Code != 409 {
 		t.Fatal("stale version overwrite accepted", w.Code)

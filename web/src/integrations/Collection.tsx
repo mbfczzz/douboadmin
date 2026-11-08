@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Plus, Trash2 } from "lucide-react";
 import type { IntegrationField } from "./types";
 
 type Row = { key: number; values: string[] };
@@ -65,7 +66,11 @@ export default function Collection({
     <section aria-label={title + "配置"}>
       <h3>{title}</h3>
       {rows.map((row, index) => (
-        <fieldset className="panel edit-form" key={row.key} disabled={disabled}>
+        <fieldset
+          className="integration-item"
+          key={row.key}
+          disabled={disabled}
+        >
           <legend>
             {title} {index + 1}
           </legend>
@@ -110,14 +115,17 @@ export default function Collection({
           </div>
           <button
             type="button"
+            className="secondary danger-text"
             onClick={() => update(rows.filter((r) => r.key !== row.key))}
           >
+            <Trash2 size={14} aria-hidden="true" />
             移除此项
           </button>
         </fieldset>
       ))}
       <button
         type="button"
+        className="secondary integration-add"
         disabled={disabled || rows.length >= (field.limit || 0)}
         onClick={() =>
           update([
@@ -126,6 +134,7 @@ export default function Collection({
           ])
         }
       >
+        <Plus size={15} aria-hidden="true" />
         添加{title}
       </button>
     </section>

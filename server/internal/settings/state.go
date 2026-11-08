@@ -30,9 +30,10 @@ func (m *Manager) states(values Values, records map[string]core.Record, producti
 		for _, f := range g.Fields {
 			if f.Kind == "secret" {
 				s.Secrets[f.Key] = values[f.Key] != ""
-			} else {
-				s.Values[f.Key] = values[f.Key]
 			}
+			// Product decision: super administrators see configured secrets in plain text.
+			// The API handler returns states only to super administrators.
+			s.Values[f.Key] = values[f.Key]
 		}
 		if err := validate(g, values, production); err != nil {
 			s.Validation = err.Error()
