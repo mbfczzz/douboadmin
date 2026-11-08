@@ -224,7 +224,7 @@ func requireSuperAdmin(w http.ResponseWriter, r *http.Request) bool {
 	if role == "" || role == "super_admin" {
 		return true
 	}
-	fail(w, 403, "仅超级管理员可管理后台账号")
+	fail(w, 403, "仅超级管理员可执行此操作")
 	return false
 }
 

@@ -17,6 +17,9 @@ func (a *Server) validateJob(ctx context.Context, user string, in *core.JobInput
 	if !a.Relay.Ready() {
 		return fmt.Errorf("生成服务尚未配置")
 	}
+	if a.Config.Production && core.IsWork(in.Kind) && a.Objects == nil {
+		return fmt.Errorf("请先在后台系统设置中配置 OSS 存储")
+	}
 	if len([]rune(strings.TrimSpace(in.Prompt))) == 0 || len([]rune(in.Prompt)) > 500 {
 		return fmt.Errorf("请输入 1–500 字的创作描述")
 	}

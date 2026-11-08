@@ -10,10 +10,14 @@ import (
 )
 
 func (a *Server) rechargeReady() bool {
-	if a.Config.PaymentChannel == virtualpay.Channel {
+	switch a.Config.PaymentChannel {
+	case virtualpay.Channel:
 		return a.Virtual.Enabled()
+	case "", "wechat_jsapi":
+		return a.Pay.Ready()
+	default:
+		return false
 	}
-	return a.Pay.Ready()
 }
 func (a *Server) rechargeIOS() bool {
 	if a.Config.PaymentChannel == virtualpay.Channel {

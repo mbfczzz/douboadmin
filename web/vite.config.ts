@@ -1,6 +1,6 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-const target = process.env.DOUBO_API_TARGET || "http://127.0.0.1:8080";
+const target = process.env.DOUBO_API_TARGET || "http://127.0.0.1:5173";
 const upstream = { target, changeOrigin: false };
 const proxy = { "/api": upstream, "/media": upstream, "^/s/": upstream };
 export default defineConfig({
@@ -31,6 +31,6 @@ export default defineConfig({
       },
     },
   },
-  server: { proxy },
+  server: { port: 5174, strictPort: true, proxy },
   preview: { proxy },
 });

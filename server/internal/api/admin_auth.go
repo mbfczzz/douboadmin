@@ -51,7 +51,7 @@ func (a *Server) adminLogin(w http.ResponseWriter, r *http.Request) {
 	if updated, updateErr := a.Store.Put(r.Context(), "admin_accounts", row, row.Version); updateErr == nil {
 		row = updated
 	}
-	t, e := a.Sessions.CreateAdmin(r.Context(), row.ID, account.Username, account.Role)
+	t, e := a.Sessions.CreateAdmin(r.Context(), row.ID, account.Username, account.Role, account.PasswordChangedAt)
 	if e != nil {
 		dbError(w, e)
 		return

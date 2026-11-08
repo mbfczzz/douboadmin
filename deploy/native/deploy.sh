@@ -76,7 +76,7 @@ systemctl start doubo-migrate
 systemctl enable doubo@serve doubo@worker
 systemctl restart doubo@serve doubo@worker
 for ((attempt = 0; attempt < 30; attempt++)); do
-  if curl --fail --silent --max-time 2 http://127.0.0.1:8080/health/ready >/dev/null && \
+  if curl --fail --silent --max-time 2 http://127.0.0.1:5173/health/ready >/dev/null && \
     systemctl is-active --quiet doubo@worker; then
     trap - ERR
     echo "Application ready: $(cat "$release/REVISION"). Check the HTTPS endpoint separately."

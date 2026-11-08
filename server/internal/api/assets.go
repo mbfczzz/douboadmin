@@ -12,6 +12,10 @@ import (
 )
 
 func (a *Server) upload(w http.ResponseWriter, r *http.Request) {
+	if a.Config.Production && a.Objects == nil {
+		fail(w, 503, "请先在后台系统设置中配置 OSS 存储")
+		return
+	}
 	avatar := r.URL.Query().Get("purpose") == "avatar" || r.URL.Query().Get("purpose") == "cover"
 	limit := int64(50 << 20)
 	message := "文件不能超过 50 MB"

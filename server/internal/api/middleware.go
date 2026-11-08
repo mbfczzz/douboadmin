@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"slices"
 	"strings"
+	"time"
 )
 
 func (a *Server) Handler() http.Handler {
@@ -69,10 +70,17 @@ func (a *Server) auth(role string, h http.HandlerFunc) http.HandlerFunc {
 				return
 			}
 			var account core.AdminAccount
-			if json.Unmarshal(row.Data, &account) != nil || account.Disabled || account.Archived {
+			if json.Unmarshal(row.Data, &account) != nil || account.Disabled || account.Archived || !validAdminRole(account.Role) {
 				fail(w, 403, "管理账号已停用")
 				return
 			}
+			changed := v.PasswordVersion != "" && v.PasswordVersion != account.PasswordChangedAt.UTC().Format(time.RFC3339Nano)
+			legacyExpired := v.PasswordVersion == "" && v.Expires.Add(-24*time.Hour).Before(account.PasswordChangedAt)
+			if changed || legacyExpired {
+				fail(w, 401, "密码已修改，请重新登录")
+				return
+			}
+			v.AdminRole = account.Role
 		}
 		// A user must be able to revoke a session even after exhausting the API quota.
 		if r.URL.Path == "/api/auth/logout" {

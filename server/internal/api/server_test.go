@@ -15,7 +15,7 @@ func setup(t *testing.T) (*Server, string, string) {
 	t.Helper()
 	s := store.NewMemory()
 	ss := NewSessions(nil)
-	a := New(s, ss, Config{AdminUser: "admin", AdminPassword: "test-pass", MediaDir: t.TempDir(), WebOrigin: "http://localhost:5173", RelayURL: "https://relay.test", RelayKey: "test-key"})
+	a := New(s, ss, Config{AdminUser: "admin", AdminPassword: "test-pass", MediaDir: t.TempDir(), WebOrigin: "http://localhost:5174", RelayURL: "https://relay.test", RelayKey: "test-key"})
 	m := core.Model{ID: "demo-image", Key: "fixture-image", Name: "Test model", Kind: "image", Published: true, Available: true, Resolutions: []string{"1K"}, Ratios: []string{"1:1"}, Modes: []string{"t2i", "i2i"}}
 	_, _ = s.Put(context.Background(), "models", core.Record{ID: m.ID, Data: core.Data(m)}, 0)
 	one, _ := ss.Create(context.Background(), "user-a", "user")

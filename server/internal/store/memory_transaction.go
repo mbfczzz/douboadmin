@@ -3,8 +3,18 @@ package store
 import (
 	"context"
 	"doubo/server/internal/core"
+	"strings"
 	"time"
 )
+
+func (t *memoryTransaction) HasRecords(ns string) (bool, error) {
+	for key := range t.records {
+		if strings.HasPrefix(key, ns+":") {
+			return true, nil
+		}
+	}
+	return false, nil
+}
 
 type memoryTransaction struct {
 	records map[string]core.Record

@@ -2,6 +2,7 @@ package main
 
 import (
 	"doubo/server/internal/api"
+	"doubo/server/internal/settings"
 	"testing"
 )
 
@@ -14,7 +15,7 @@ func emptyVirtualEnv(t *testing.T) {
 func TestBlankVirtualConfigurationDoesNotEnablePayment(t *testing.T) {
 	emptyVirtualEnv(t)
 	app := &api.Server{}
-	if e := virtualPayment(app); e != nil {
+	if e := virtualPayment(app, settings.Environment()); e != nil {
 		t.Fatal(e)
 	}
 	if app.Virtual.Enabled() || app.Virtual.Ready() || app.Config.PaymentChannel != "wechat_jsapi" {
@@ -25,7 +26,7 @@ func TestProductionRejectsSandboxCredentialsEvenWhenPurchasesAreDisabled(t *test
 	emptyVirtualEnv(t)
 	t.Setenv("WECHAT_VIRTUAL_SANDBOX_APP_KEY", "fixture-sandbox-key")
 	app := &api.Server{Config: api.Config{Production: true}}
-	if e := virtualPayment(app); e == nil {
+	if e := virtualPayment(app, settings.Environment()); e == nil {
 		t.Fatal("production sandbox key accepted")
 	}
 }

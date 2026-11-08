@@ -15,6 +15,12 @@ type mysqlTransaction struct {
 	tx  *sql.Tx
 }
 
+func (t *mysqlTransaction) HasRecords(ns string) (bool, error) {
+	var found bool
+	err := t.tx.QueryRowContext(t.ctx, `SELECT EXISTS(SELECT 1 FROM records WHERE namespace=? LIMIT 1)`, ns).Scan(&found)
+	return found, err
+}
+
 func (m *MySQL) Atomic(ctx context.Context, fn func(Transaction) error) error {
 	tx, err := m.db.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelReadCommitted})
 	if err != nil {

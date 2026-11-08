@@ -3,7 +3,7 @@
 const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const { harness } = require("./harness.cjs");
-const origin = process.env.DOUBO_TEST_API || "http://127.0.0.1:8080";
+const origin = process.env.DOUBO_TEST_API || "http://127.0.0.1:5173";
 
 function connected() {
   const h = harness();

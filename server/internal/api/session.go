@@ -13,11 +13,12 @@ import (
 )
 
 type Identity struct {
-	Account   string    `json:"account,omitempty"`
-	AdminRole string    `json:"adminRole,omitempty"`
-	ID        string    `json:"id"`
-	Role      string    `json:"role"`
-	Expires   time.Time `json:"expires"`
+	PasswordVersion string    `json:"passwordVersion,omitempty"`
+	Account         string    `json:"account,omitempty"`
+	AdminRole       string    `json:"adminRole,omitempty"`
+	ID              string    `json:"id"`
+	Role            string    `json:"role"`
+	Expires         time.Time `json:"expires"`
 }
 type Sessions struct {
 	Redis  *redis.Client
@@ -44,8 +45,12 @@ func (s *Sessions) Create(ctx context.Context, id, role string, account ...strin
 	}
 	return s.create(ctx, v)
 }
-func (s *Sessions) CreateAdmin(ctx context.Context, id, account, role string) (string, error) {
-	return s.create(ctx, Identity{ID: id, Role: "admin", AdminRole: role, Account: account, Expires: time.Now().Add(24 * time.Hour)})
+func (s *Sessions) CreateAdmin(ctx context.Context, id, account, role string, passwordChanged ...time.Time) (string, error) {
+	v := Identity{ID: id, Role: "admin", AdminRole: role, Account: account, Expires: time.Now().Add(24 * time.Hour)}
+	if len(passwordChanged) > 0 {
+		v.PasswordVersion = passwordChanged[0].UTC().Format(time.RFC3339Nano)
+	}
+	return s.create(ctx, v)
 }
 func (s *Sessions) create(ctx context.Context, v Identity) (string, error) {
 	token := core.NewID() + core.NewID()

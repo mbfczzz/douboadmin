@@ -27,7 +27,7 @@ Windows 的 `deploy/start-local.ps1` 会读取仓库根目录 `.env.local`，仅
 
 直接使用 `go run` 时仍需设置进程环境变量，Go 不会自动读取 `.env` 或 `.env.local`。使用 Docker Compose 时，填写仓库根目录 `.env` 中的同名变量，再重新创建 API 容器。不要把密钥写到小程序、`project.config.json`、代码或聊天记录中。
 
-开发者工具本机可使用 `http://127.0.0.1:8080` 并临时关闭域名校验；真机需使用电脑局域网地址/可访问域名。发布使用已配置的 HTTPS request 域名，上传/下载还需要对应域名。头像选填使用 `chooseAvatar` 和 `input type="nickname"`，建议使用近期稳定基础库；隐私保护指引需在微信公众平台配置。
+开发者工具本机可使用 `http://127.0.0.1:5173` 并临时关闭域名校验；真机需使用电脑局域网地址/可访问域名。发布使用已配置的 HTTPS request 域名，上传/下载还需要对应域名。头像选填使用 `chooseAvatar` 和 `input type="nickname"`，建议使用近期稳定基础库；隐私保护指引需在微信公众平台配置。
 
 ## 用户流程
 

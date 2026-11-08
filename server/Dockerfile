@@ -11,6 +11,6 @@ COPY --from=build /out/doubo-api /app/doubo-api
 COPY --chown=doubo:doubo media /app/media
 RUN mkdir -p /app/media/uploads && chown doubo:doubo /app/media/uploads
 USER doubo
-ENV HTTP_ADDR=0.0.0.0:8080 MEDIA_DIR=/app/media
-EXPOSE 8080
+ENV HTTP_ADDR=0.0.0.0:5173 MEDIA_DIR=/app/media
+EXPOSE 5173
 ENTRYPOINT ["/app/doubo-api"]

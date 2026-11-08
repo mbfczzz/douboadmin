@@ -5,6 +5,7 @@
 **/*.tsbuildinfo
 .git
 .runtime
+**/.secrets
 deploy/secrets
 deploy/certs
 deploy/backups

@@ -102,6 +102,7 @@ export class APIError extends Error {
   constructor(
     public status: number,
     message: string,
+    public field?: string,
   ) {
     super(message);
   }
@@ -129,7 +130,7 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
     throw new APIError(r.status, "服务暂时不可用，请稍后重试");
   });
   if (!r.ok) {
-    throw new APIError(r.status, data.error || "请求失败");
+    throw new APIError(r.status, data.error || "请求失败", data.field);
   }
   return data;
 }

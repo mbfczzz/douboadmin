@@ -7,6 +7,7 @@ import (
 
 // Every financial update locks the user's wallet before other mutable records/jobs.
 type Transaction interface {
+	HasRecords(string) (bool, error)
 	Get(string, string) (core.Record, error)
 	Lock(string, core.Record) (core.Record, error)
 	Put(string, core.Record, int64) (core.Record, error)

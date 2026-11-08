@@ -4,7 +4,7 @@ import (
 	"context"
 	"doubo/server/internal/api"
 	"doubo/server/internal/media"
-	"doubo/server/internal/objectstore"
+	"doubo/server/internal/settings"
 	"doubo/server/internal/store"
 	"doubo/server/internal/worker"
 	"fmt"
@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"strings"
 	"syscall"
 	"time"
@@ -75,13 +76,6 @@ func run() error {
 		}
 		return m.Migrate(check)
 	}
-	if production && (command == "serve" || command == "worker") {
-		for _, key := range []string{"WECHAT_APP_ID", "WECHAT_APP_SECRET", "OSS_BUCKET", "OSS_REGION", "OSS_ACCESS_KEY_ID", "OSS_ACCESS_KEY_SECRET"} {
-			if os.Getenv(key) == "" {
-				return fmt.Errorf("production API requires %s", key)
-			}
-		}
-	}
 	var rc *redis.Client
 	redisOptions, err := redisOptionsFromEnv()
 	if err != nil {
@@ -94,33 +88,45 @@ func run() error {
 			return err
 		}
 	}
-	cfg := api.Config{Production: production, DemoLogin: demoLogin, Storage: storage, AdminUser: env("ADMIN_USER", "admin"), AdminPassword: password, MediaDir: env("MEDIA_DIR", "../media"), WebOrigin: env("WEB_ORIGIN", "http://localhost:5173,http://127.0.0.1:5173"), WeChatAppID: os.Getenv("WECHAT_APP_ID"), WeChatSecret: os.Getenv("WECHAT_APP_SECRET"), RelayURL: env("RELAY_BASE_URL", "https://relay.tcmzhan.com"), RelayKey: os.Getenv("RELAY_API_KEY")}
-	cfg.RequireActivation = true
-	app := api.New(s, api.NewSessions(rc), cfg)
-	app.Config.PublicBaseURL = os.Getenv("PUBLIC_BASE_URL")
-	app.Config.CompletionTemplateID = os.Getenv("WECHAT_COMPLETION_TEMPLATE_ID")
-	if bucket := os.Getenv("OSS_BUCKET"); bucket != "" {
-		if os.Getenv("OSS_REGION") == "" || os.Getenv("OSS_ACCESS_KEY_ID") == "" || os.Getenv("OSS_ACCESS_KEY_SECRET") == "" {
-			return fmt.Errorf("OSS region and credentials are required")
-		}
-		app.Objects = objectstore.New(os.Getenv("OSS_REGION"), bucket, os.Getenv("OSS_ACCESS_KEY_ID"), os.Getenv("OSS_ACCESS_KEY_SECRET"))
+	mediaDir := env("MEDIA_DIR", "../media")
+	keyFile, err := filepath.Abs(env("INTEGRATION_SETTINGS_KEY_FILE", filepath.Join(mediaDir, ".secrets", "integrations.key")))
+	if err != nil {
+		return fmt.Errorf("无法确定接入配置加密密钥路径")
 	}
-	app.Media = &media.Service{Store: s, Objects: app.Objects, Dir: cfg.MediaDir}
-	generator, err := integrations(ctx, app)
+	connections := settings.New(s, keyFile, settings.Environment())
+	values, err := connections.LoadStartup(ctx)
 	if err != nil {
 		return err
 	}
-	background(ctx, app, command)
+	cfg := api.Config{Production: production, DemoLogin: demoLogin, Storage: storage,
+		AdminUser: env("ADMIN_USER", "admin"), AdminPassword: password, MediaDir: mediaDir,
+		WebOrigin: values["WEB_ORIGIN"], WeChatAppID: values["WECHAT_APP_ID"], WeChatSecret: values["WECHAT_APP_SECRET"],
+		RelayURL: values["RELAY_BASE_URL"], RelayKey: values["RELAY_API_KEY"]}
+	cfg.RequireActivation = true
+	app := api.New(s, api.NewSessions(rc), cfg)
+	app.Integrations = connections
+	app.Config.PublicBaseURL = values["PUBLIC_BASE_URL"]
+	app.Config.CompletionTemplateID = values["WECHAT_COMPLETION_TEMPLATE_ID"]
+	app.Media = &media.Service{Store: s, Objects: app.Objects, Dir: cfg.MediaDir}
+	generator, err := integrations(ctx, app, values)
+	if err != nil {
+		return err
+	}
+	background(ctx, app, command, values)
 	if env("RUN_WORKER", "true") == "true" || command == "worker" {
-		for range 2 {
-			go worker.Run(ctx, s, generator)
+		if production && app.Objects == nil {
+			slog.Warn("尚未配置 OSS，暂不领取生成任务；在后台保存配置并重启 API 和 Worker")
+		} else {
+			for range 2 {
+				go worker.Run(ctx, s, generator)
+			}
 		}
 	}
 	if command == "worker" {
 		<-ctx.Done()
 		return nil
 	}
-	addr := env("HTTP_ADDR", "127.0.0.1:8080")
+	addr := env("HTTP_ADDR", "127.0.0.1:5173")
 	if production && strings.HasPrefix(addr, "127.") {
 		slog.Info("API bound to loopback; use reverse proxy")
 	}

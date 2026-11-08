@@ -5,7 +5,7 @@
 ```text
 Gitee main → 云效构建 / 测试 → 上传制品 → 测试主机部署
                                          ├─ Nginx：HTTPS、React 静态文件、反向代理
-                                         ├─ doubo@serve：Go API，127.0.0.1:8080
+                                         ├─ doubo@serve：Go API，127.0.0.1:5173
                                          └─ doubo@worker：生成任务处理
                                                ↓
                                          MySQL / Redis / 阿里 OSS
@@ -40,7 +40,7 @@ sudo systemctl enable --now nginx
 - 真实小程序 AppID / AppSecret；测试 HTTPS 域名及有效证书。
 - 中转站 API Key，用于真实模型调用；支付、抖音 等可按需填写。
 
-数据库、Redis 可使用本机服务或云上实例。云实例应允许测试主机连接。Nginx 对外提供 80/443；API 8080 只监听本机。
+数据库、Redis 可使用本机服务或云上实例。云实例应允许测试主机连接。Nginx 对外提供 80/443；API 5173 只监听本机。
 
 ## 2. 配置服务器环境
 
@@ -50,6 +50,7 @@ sudo systemctl enable --now nginx
 
 ```dotenv
 APP_ENV=production
+HTTP_ADDR=127.0.0.1:5173
 ADMIN_PASSWORD=自行设置至少16位的新密码
 MYSQL_DSN="doubo:数据库密码@tcp(数据库地址:3306)/doubo_test?charset=utf8mb4&parseTime=true"
 REDIS_ADDR=Redis地址:6379
@@ -67,7 +68,7 @@ OSS_ACCESS_KEY_SECRET=实际AccessKeySecret
 RELAY_API_KEY=实际中转站密钥
 ```
 
-请保留示例文件中的其他配置，尤其是 `RUN_WORKER=false`、`ALLOW_DEMO_LOGIN=false`和 `MEDIA_DIR`。测试服务器也使用 production 校验，微信和 OSS 必填，否则 API / Worker 会拒绝启动。没有中转凭证时不会返回假生成结果。
+请保留示例文件中的其他配置，尤其是 `RUN_WORKER=false`、`ALLOW_DEMO_LOGIN=false`和 `MEDIA_DIR`。测试服务器也使用 production 校验，MySQL、Redis 和至少16位的首次管理员密码必填。微信、OSS、中转等可以先留空，启动后在「系统设置 → 服务接入配置」填写并加密存入数据库，再统一重启 API / Worker。未配置 OSS 时禁止生产媒体上传及生成；没有中转凭证时不会返回假生成结果。具体生效、密钥备份规则见[后台接入配置](admin-integration-settings.md)。
 
 这是 systemd 的 `EnvironmentFile`，不是 Shell 脚本。不要写 `export` 或变量替换；包含空格、特殊字符的值用符合 systemd 规则的引号包围。Go 程序不会自动加载仓库中的 `.env`。支付证书单独放到服务账号可读的位置，在配置中填写绝对路径。
 
@@ -135,6 +136,10 @@ bash "$release_dir/deploy/native/deploy.sh"
 
 ## 4. 配置 Nginx 和 HTTPS
 
+前端构建产物位于 `/opt/doubo/current/web`，由 Nginx 直接提供，不需要运行 Vite 或单独的前端服务。Nginx 将接口原路径转发至 `127.0.0.1:5173`。本地前端开发端口为 5174，与后端分开。
+
+已有部署改端口时，需将 `/etc/doubo/doubo.env` 中的 `HTTP_ADDR` 改为 `127.0.0.1:5173`，同步替换 Nginx 配置中的旧后端端口并重启 API。部署脚本会保留现有环境文件，不会自动覆盖此值。
+
 首次发布后，将 `current/deploy/native/nginx.conf.example` 复制到 Nginx 站点配置目录，例如 `/etc/nginx/conf.d/doubo.conf`。先替换其中域名和证书绝对路径，确认与已有站点没有重复配置，再执行：
 
 ```bash
@@ -147,6 +152,14 @@ curl --fail https://你的测试域名/health/ready
 后台地址：`https://你的测试域名`，账号为配置的 `ADMIN_USER` / `ADMIN_PASSWORD`。
 
 Nginx 将 `/api/`、`/media/`、`/s/`、`/health/` 原路径转给 Go；不把本地上传目录直接公开。静态文件启用 gzip，哈希资源长期缓存，HTML 每次重新验证。旧哈希资源保留在共享目录，防止已打开的网页在更新后加载子页面失败。部署脚本检查的是本机 API / Worker；HTTPS、证书和外部访问必须再按上面的命令验收。
+
+### 临时使用 IP 和 HTTP 端口
+
+临时使用 IP + HTTP 端口访问管理后台时，可使用 `deploy/native/nginx.ip.conf.example` 替换当前站点配置，监听 8088，将 `/api/` 等原路径反代到本机 5173，访问 `http://公网IP:8088`。阿里云安全组和启用的主机防火墙需放行 TCP 8088。后端 `HTTP_ADDR` 保持 `127.0.0.1:5173`，不需要改为测试模式或关闭生产环境校验。
+
+此配置需要 Nginx >=1.19.3：`proxy_cookie_flags doubo_session nosecure` 仅为该临时 HTTP 入口移除登录 Cookie 的 Secure 标记，保留 HttpOnly / SameSite，避免生产模式 Cookie 导致 HTTP 登录后无法保持会话。恢复 HTTPS 时改回 HTTPS 配置并移除该规则。配置是否有效以服务器 `nginx -t` 和实际登录为准，参考 [Nginx 官方说明](https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_cookie_flags)。
+
+同步将 `WEB_ORIGIN`、`PUBLIC_BASE_URL` 设置为当前 `http://公网IP:8088`；已在后台数据库保存站点地址时，需要在「系统设置 → 服务接入配置 → 站点地址」修改后重启。IP + HTTP 的临时管理入口不等同于小程序发布所需的 HTTPS 合法域名。
 
 ## 5. 连接小程序与验收
 
@@ -166,7 +179,7 @@ sudo systemctl restart doubo@serve doubo@worker
 readlink -f /opt/doubo/current
 ```
 
-发布版本保存在 `/srv/doubo/test-随机字符/`；部署成功后 `/opt/doubo/current` 链接到该版本，systemd 和 Nginx 通过这个固定入口运行。上传文件和历史前端资源在 `/opt/doubo/shared/`，制品下载路径为 `/opt/doubo/artifacts/package.tgz`，环境配置在 `/etc/doubo/doubo.env`。配置修改后重启两个服务。定期备份 MySQL 和 OSS，并按保留策略清理旧版本与无引用文件；发布脚本不会自动删除业务数据或历史版本。
+发布版本保存在 `/srv/doubo/test-随机字符/`；部署成功后 `/opt/doubo/current` 链接到该版本，systemd 和 Nginx 通过这个固定入口运行。上传文件和历史前端资源在 `/opt/doubo/shared/`，制品下载路径为 `/opt/doubo/artifacts/package.tgz`，环境配置在 `/etc/doubo/doubo.env`。配置修改后重启两个服务。定期备份 MySQL、OSS 和接入配置加密密钥文件（默认 `/opt/doubo/shared/media/.secrets/integrations.key`），并按保留策略清理旧版本与无引用文件；发布脚本不会自动删除业务数据或历史版本。
 
 以后扩容时，API 节点接同一 MySQL、Redis、OSS，Nginx / 负载均衡转发到多个 API；Worker 可在其他主机独立启动。迁移阶段只能执行一次，不要让多台主机同时执行部署迁移。当前这套脚本用于单主机，不宣称多主机滚动发布或零中断。
 

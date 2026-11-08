@@ -9,6 +9,7 @@ import (
 	"doubo/server/internal/partners"
 	"doubo/server/internal/payments"
 	"doubo/server/internal/relay"
+	"doubo/server/internal/settings"
 	"doubo/server/internal/store"
 	"doubo/server/internal/virtualpay"
 	"doubo/server/internal/wechat"
@@ -39,20 +40,21 @@ type Objects interface {
 	URL(context.Context, string) (string, error)
 }
 type Server struct {
-	Partners *partners.Service
-	Activity *analytics.Recorder
-	Hot      *hotvideo.Service
-	Billing  *billing.Service
-	Pay      *payments.Client
-	Virtual  *virtualpay.Service
-	Objects  Objects
-	Relay    *relay.Client
-	Media    *media.Service
-	WeChat   *wechat.Client
-	Store    store.Store
-	Sessions *Sessions
-	Config   Config
-	Mux      *http.ServeMux
+	Integrations *settings.Manager
+	Partners     *partners.Service
+	Activity     *analytics.Recorder
+	Hot          *hotvideo.Service
+	Billing      *billing.Service
+	Pay          *payments.Client
+	Virtual      *virtualpay.Service
+	Objects      Objects
+	Relay        *relay.Client
+	Media        *media.Service
+	WeChat       *wechat.Client
+	Store        store.Store
+	Sessions     *Sessions
+	Config       Config
+	Mux          *http.ServeMux
 }
 type ctxKey int
 
