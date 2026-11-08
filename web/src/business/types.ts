@@ -21,6 +21,7 @@ export interface Order {
     purchaseMode?: string;
     quantity?: number;
     unitFen?: number;
+    issued?: boolean;
   };
   userId: string;
   amountFen: number;

@@ -93,7 +93,7 @@ func (s *Service) Reconcile(ctx context.Context) {
 				err = s.RetryEvent(ctx, row.ID, "reconcile")
 			case "orders":
 				var order core.Order
-				if json.Unmarshal(row.Data, &order) != nil || order.Channel != Channel {
+				if json.Unmarshal(row.Data, &order) != nil || order.Channel != Channel || UnissuedPurchase(order) {
 					continue
 				}
 				err = s.Refresh(ctx, row.ID)

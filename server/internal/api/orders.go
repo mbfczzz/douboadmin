@@ -2,6 +2,7 @@ package api
 
 import (
 	"doubo/server/internal/core"
+	"doubo/server/internal/virtualpay"
 	"encoding/json"
 	"net/http"
 	"strings"
@@ -197,6 +198,10 @@ func (a *Server) refreshOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if o.Channel == "wechat_virtual" {
+		if virtualpay.UnissuedPurchase(o) {
+			reply(w, 200, publicOrder(row))
+			return
+		}
 		if !a.Virtual.Ready() {
 			fail(w, 503, "虚拟支付尚未配置")
 			return

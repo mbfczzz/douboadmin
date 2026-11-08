@@ -7,6 +7,13 @@ import (
 
 const MaxAmountFen = core.MaxOrderAmountFen
 
+// Only explicit new-format drafts can be skipped before signing. Legacy orders
+// and authenticated payment notifications must retain their reconciliation path.
+func UnissuedPurchase(o core.Order) bool {
+	return o.Status == "created" && o.Virtual != nil && !o.Virtual.Issued &&
+		(o.Virtual.PurchaseMode == "package" || o.Virtual.PurchaseMode == "custom")
+}
+
 // Purchase freezes unit price, quantity and total credit before signing a payment.
 func (p Product) Purchase(quantity int64, env int, platform, mode string) (core.VirtualOrder, int64, error) {
 	if quantity < 1 || p.AmountFen < 1 || quantity > MaxAmountFen/p.AmountFen ||

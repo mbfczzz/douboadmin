@@ -24,9 +24,18 @@ export default function Orders({ notify }: PageProps) {
   );
   async function refresh(row: Row<Order>) {
     try {
-      await api(`/admin/orders/${row.id}/refresh`, { method: "POST" });
+      const updated = await api<Row<Order>>(`/admin/orders/${row.id}/refresh`, {
+        method: "POST",
+      });
       await resource.reload();
-      notify("订单状态已更新");
+      if (
+        updated.data.channel === "wechat_virtual" &&
+        updated.data.status === "created" &&
+        updated.data.virtual?.issued === false &&
+        ["package", "custom"].includes(updated.data.virtual.purchaseMode || "")
+      )
+        notify("订单尚未发起微信支付，请先在小程序发起支付", "warning");
+      else notify("订单状态已更新");
     } catch (e) {
       notify((e as Error).message, "error");
     }
