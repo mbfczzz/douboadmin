@@ -6,7 +6,10 @@ const manifest = JSON.parse(
   fs.readFileSync(path.join(root, ".vite/manifest.json"), "utf8"),
 );
 const initial = new Set();
+const visited = new Set();
 function visit(key) {
+  if (visited.has(key)) return;
+  visited.add(key);
   const item = manifest[key];
   if (!item) return;
   initial.add(item.file);
