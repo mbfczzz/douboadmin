@@ -8,7 +8,7 @@ export default function Empty({
   return (
     <div className="empty">
       <h3>{text}</h3>
-      <p>{help}</p>
+      {help && <p>{help}</p>}
     </div>
   );
 }

@@ -1,15 +1,29 @@
 import { test, expect, type Page } from "@playwright/test";
 import { confirmSubmission, login, catalog } from "./helpers";
-import type { Model } from "../src/api";
+import type { Model, Row } from "../src/api";
+
+// Prefer the production models these checks were written for, but fall back
+// to any equivalent model so the suite also runs against a test relay.
+async function pickModel(
+  page: Page,
+  preferred: string,
+  fits: (m: Model) => boolean,
+): Promise<Row<Model>> {
+  const rows = await catalog(page),
+    row =
+      rows.find((r) => r.data.key === preferred) ||
+      rows.find((r) => r.data.published && fits(r.data));
+  expect(row, `需要一个可配置的模型（${preferred} 或同类）`).toBeTruthy();
+  return row!;
+}
+const escape = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 async function openModel(page: Page, key: string) {
   await page.getByRole("button", { name: "模型管理", exact: true }).click();
   await page.getByLabel("搜索模型").fill(key);
   const row = page.locator("tbody tr").filter({
     has: page.locator("small", {
-      hasText: new RegExp(
-        "^" + key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "$",
-      ),
+      hasText: new RegExp("^" + escape(key) + "$"),
     }),
   });
   await row.getByRole("button", { name: "配置", exact: true }).click();
@@ -20,10 +34,15 @@ test("FlowingLight configuration layout, independent scroll and narrow screens",
   page,
 }) => {
   await login(page);
-  const dialog = await openModel(page, "nano-banana-2-4k");
+  const model = await pickModel(
+    page,
+    "nano-banana-2-4k",
+    (m) => m.kind === "image",
+  );
+  const dialog = await openModel(page, model.data.key);
   await expect(dialog).toHaveAttribute(
     "aria-label",
-    /配置模型 · Nano Banana 2/,
+    new RegExp("配置模型 · " + escape(model.data.name)),
   );
   await expect(
     dialog.getByRole("heading", { name: "基础信息", exact: true }),
@@ -69,9 +88,14 @@ test("capability chips, prompts, pricing and metadata persist and survive upstre
   page,
 }) => {
   await login(page);
-  const original = (await catalog(page)).find(
-    (r) => r.data.key === "gpt-image-2",
-  )!;
+  const original = await pickModel(
+    page,
+    "gpt-image-2",
+    (m) =>
+      m.kind === "image" &&
+      m.qualities.includes("high") &&
+      m.resolutions.includes("1k"),
+  );
   const m = original.data;
   try {
     const dialog = await openModel(page, m.key);

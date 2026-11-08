@@ -133,6 +133,11 @@
 .monitor-events .table-scroll {
   max-height: 440px;
 }
+.monitor-events .empty {
+  /* An empty log list should not push the page down. */
+  min-height: 120px;
+  padding: 32px 24px;
+}
 .monitor-events summary {
   cursor: pointer;
 }

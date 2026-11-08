@@ -19,3 +19,6 @@
   font-size: 13px;
   line-height: 1.7;
 }
+.empty h3:only-child {
+  margin: 0;
+}

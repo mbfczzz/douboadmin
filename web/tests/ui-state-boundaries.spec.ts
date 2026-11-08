@@ -35,14 +35,23 @@ test("repeating a provider search retries the same failed query", async ({
       return route.fulfill({ status: 503, json: { error: "测试查询失败" } });
     return route.fulfill({ json: { items: [], page: 1, size: 20, total: 0 } });
   });
-  await page.getByRole("button", { name: "小程序用户", exact: true }).click();
+  // The provider list is a locally filtered tree; the server-side search
+  // lives in the child picker used for quota transfers.
   await page.getByRole("button", { name: "服务商管理", exact: true }).click();
-  await page.getByLabel("查询记录").fill("same");
-  await page.getByRole("button", { name: "查询", exact: true }).click();
-  await expect(page.getByRole("alert")).toBeVisible();
-  await page.getByRole("button", { name: "查询", exact: true }).click();
+  await page.getByRole("button", { name: "编辑", exact: true }).first().click();
+  await page.getByRole("tab", { name: "名额划拨", exact: true }).click();
+  await page
+    .getByRole("button", { name: "划拨 / 收回名额", exact: true })
+    .click();
+  await page.getByRole("button", { name: "选择直接下级服务商" }).click();
+  const picker = page.getByRole("dialog", { name: "选择直接下级服务商" });
+  await picker.getByLabel("查询记录").fill("same");
+  await picker.getByRole("button", { name: "查询", exact: true }).click();
+  await expect(picker.getByRole("alert")).toBeVisible();
+  await picker.getByRole("button", { name: "查询", exact: true }).click();
   await expect.poll(() => attempts).toBe(2);
-  await expect(page.getByRole("alert")).toHaveCount(0);
+  await expect(picker.getByRole("alert")).toHaveCount(0);
+  await expect(picker.getByLabel("查询记录")).toHaveValue("same");
 });
 
 test("repeating a payment search retries without changing the filters", async ({
