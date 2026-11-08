@@ -16,7 +16,9 @@
     display: flex;
     flex-wrap: wrap;
     gap: 16px 24px;
-    padding-left: calc(var(--tree-control) + 8px);
+    padding-left: calc(
+      min(var(--tree-depth), 5) * var(--tree-indent) + var(--tree-control) + 8px
+    );
   }
   .provider-tree-meta small {
     display: block;
@@ -24,6 +26,9 @@
   }
   .provider-quota {
     text-align: left;
+  }
+  .quota-bar {
+    margin-left: 0;
   }
 }
 @container (max-width: 520px) {
@@ -41,5 +46,8 @@
   }
   .provider-tree-actions button {
     min-height: 44px;
+  }
+  .provider-tree-children::before {
+    display: none;
   }
 }

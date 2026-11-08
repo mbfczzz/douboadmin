@@ -6,7 +6,7 @@
 .provider-tree-head,
 .provider-tree-row {
   display: grid;
-  grid-template-columns: minmax(240px, 1fr) 88px 104px 152px 160px;
+  grid-template-columns: minmax(260px, 1fr) 96px 220px 180px;
   align-items: center;
   gap: 24px;
 }
@@ -21,6 +21,81 @@
 }
 .provider-tree-head {
   background: var(--surface-subtle);
+  font-size: 12px;
+}
+.provider-tree-row {
+  cursor: pointer;
+  transition: background 120ms;
+}
+.provider-tree-row:hover {
+  background: var(--surface-subtle);
+}
+.provider-tree-children {
+  position: relative;
+}
+/* Guide line under the parent's toggle so nesting reads at a glance. */
+.provider-tree-children::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 28px;
+  left: calc(
+    var(--tree-inset) + min(var(--tree-depth), 5) * var(--tree-indent) +
+      var(--tree-control) / 2
+  );
+  width: 1px;
+  background: var(--line-strong);
+  pointer-events: none;
+}
+.provider-tree-identity b {
+  display: block;
+  color: var(--ink-strong);
+  font-size: 14px;
+}
+.provider-tree-row.child .provider-tree-identity b {
+  font-size: 13px;
+  font-weight: 600;
+}
+.provider-tree-detail {
+  margin-top: 3px;
+  font-size: 12px;
+}
+.provider-id {
+  color: var(--muted);
+  font-size: 12px;
+}
+.quota-figure {
+  display: block;
+  color: var(--text);
+  font-size: 12px;
+}
+.quota-figure b {
+  margin-right: 2px;
+  color: var(--ink-strong);
+  font-size: 16px;
+}
+.quota-bar {
+  display: flex;
+  width: 100%;
+  max-width: 200px;
+  height: 4px;
+  margin: 7px 0 6px auto;
+  overflow: hidden;
+  border-radius: 2px;
+  background: var(--line);
+}
+.quota-bar .used {
+  background: var(--accent);
+}
+.quota-bar .reserved {
+  background: var(--warning);
+}
+.quota-bar .allocated {
+  background: var(--info);
+}
+.quota-legend {
+  display: block;
+  font-size: 11.5px;
 }
 .provider-tree-head > :first-child {
   padding-left: calc(var(--tree-control) + 8px);
@@ -56,6 +131,18 @@
 }
 .provider-tree-actions {
   justify-content: flex-end;
+  gap: 16px;
+}
+.provider-tree-actions .text-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.provider-tree-actions .subtle {
+  color: var(--text);
+}
+.provider-tree-actions .subtle:hover {
+  color: var(--accent-text);
 }
 .provider-editor-tabs {
   flex-wrap: nowrap;

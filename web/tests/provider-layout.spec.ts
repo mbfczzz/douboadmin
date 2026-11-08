@@ -102,7 +102,7 @@ test("provider layout stays aligned and contained across desktop, tablet and mob
   }
 });
 
-test("search, expansion, copy success and fallback keep working", async ({
+test("search, expansion, expand-all and row editing keep working", async ({
   page,
 }) => {
   await page
@@ -116,39 +116,21 @@ test("search, expansion, copy success and fallback keep working", async ({
     page.getByText("没有匹配的服务商", { exact: true }),
   ).toBeVisible();
   await page.getByLabel("搜索服务商").fill("");
-  await page.evaluate(() =>
-    Object.defineProperty(navigator, "clipboard", {
-      configurable: true,
-      value: {
-        writeText: async (value: string) => {
-          sessionStorage.setItem("copied-provider", value);
-        },
-      },
-    }),
-  );
-  await page
-    .getByRole("button", { name: `复制服务商编号 ${ids[0]}`, exact: true })
-    .click();
+  await page.getByRole("button", { name: "全部展开", exact: true }).click();
+  await expect(page.locator(".provider-tree-row")).toHaveCount(8);
+  await page.getByRole("button", { name: "全部收起", exact: true }).click();
+  expect(await page.locator(".provider-tree-row").count()).toBeLessThan(8);
+  await page.getByRole("button", { name: "全部展开", exact: true }).click();
+  // Provider numbers are plain text; the full id is available on hover.
+  const titles = await page
+    .locator(".provider-id")
+    .evaluateAll((nodes) => nodes.map((node) => node.getAttribute("title")));
+  expect(titles.every((title) => ids.includes(title!))).toBeTruthy();
   await expect(
-    page.getByRole("status").filter({ hasText: "已复制" }),
-  ).toBeVisible();
-  expect(
-    await page.evaluate(() => sessionStorage.getItem("copied-provider")),
-  ).toBe(ids[0]);
-  await page.evaluate(() =>
-    Object.defineProperty(navigator, "clipboard", {
-      configurable: true,
-      value: {
-        writeText: async () => {
-          throw new Error("denied");
-        },
-      },
-    }),
-  );
-  await page
-    .getByRole("button", { name: `复制服务商编号 ${ids[6]}`, exact: true })
-    .click();
+    page.getByRole("button", { name: /复制服务商编号/ }),
+  ).toHaveCount(0);
+  await page.getByText(names[2], { exact: true }).click();
   await expect(
-    page.getByText(`复制失败，请手动复制：${ids[6]}`, { exact: true }),
+    page.getByRole("dialog", { name: "编辑服务商", exact: true }),
   ).toBeVisible();
 });

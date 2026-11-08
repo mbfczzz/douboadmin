@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { Plus } from "lucide-react";
 import PageHeader from "../components/PageHeader";
 import RequestState, { LoadingState } from "../components/RequestState";
@@ -25,18 +25,18 @@ export default function Providers({ notify }: { notify: Notify }) {
     }>(),
     initialized = useRef(false);
   const rows = resource.data || [];
+  const parentIds = useMemo(() => {
+    const parents = new Set(rows.map((item) => item.record.data.parentId));
+    return rows
+      .filter((item) => parents.has(item.record.id))
+      .map((item) => item.record.id);
+  }, [rows]);
+  const allOpen = parentIds.every((id) => expanded.has(id));
   useEffect(() => {
     if (initialized.current || !rows.length) return;
-    const parents = new Set(rows.map((item) => item.record.data.parentId));
-    setExpanded(
-      new Set(
-        rows
-          .filter((item) => parents.has(item.record.id))
-          .map((item) => item.record.id),
-      ),
-    );
+    setExpanded(new Set(parentIds));
     initialized.current = true;
-  }, [rows]);
+  }, [rows, parentIds]);
   const toggle = (id: string) =>
     setExpanded((current) => {
       const next = new Set(current);
@@ -71,6 +71,15 @@ export default function Providers({ notify }: { notify: Notify }) {
           value={query}
           onChange={(event) => setQuery(event.target.value)}
         />
+        {parentIds.length > 0 && !query && (
+          <button
+            type="button"
+            className="secondary"
+            onClick={() => setExpanded(new Set(allOpen ? [] : parentIds))}
+          >
+            {allOpen ? "全部收起" : "全部展开"}
+          </button>
+        )}
       </form>
       <RequestState
         loading={resource.loading && !resource.data}

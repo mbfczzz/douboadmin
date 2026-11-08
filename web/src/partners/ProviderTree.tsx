@@ -1,9 +1,10 @@
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { ChevronDown, ChevronRight, Pencil, Plus } from "lucide-react";
 import { useMemo, type CSSProperties } from "react";
 import Empty from "../components/Empty";
 import ProviderId from "./ProviderId";
+import ProviderQuota from "./ProviderQuota";
 import type { PartnerTreeItem } from "./types";
-import { available, labels } from "./types";
+import { labels } from "./types";
 
 type Node = { item: PartnerTreeItem; children: Node[] };
 type Props = {
@@ -60,7 +61,6 @@ function TreeNodes({
   return nodes.map(({ item, children }) => {
     const { record: row, quota } = item,
       open = Boolean(query) || expanded.has(row.id),
-      free = available(quota.users),
       style = { "--tree-depth": depth } as CSSProperties;
     return (
       <div
@@ -73,6 +73,10 @@ function TreeNodes({
         <div
           className={`provider-tree-row ${depth === 0 ? "root" : "child"}`}
           style={style}
+          onClick={(event) => {
+            // The whole row opens the editor; inner buttons keep their own action.
+            if (!(event.target as HTMLElement).closest("button")) edit(item);
+          }}
         >
           <div className="provider-tree-name">
             {children.length ? (
@@ -91,8 +95,10 @@ function TreeNodes({
             <div className="provider-tree-identity">
               <b>{row.data.name}</b>
               <div className="provider-tree-detail quiet">
-                <ProviderId id={row.id} />{" "}
-                {children.length > 0 && <span>{children.length} 个子级</span>}
+                <ProviderId id={row.id} />
+                {children.length > 0 && (
+                  <span> · {children.length} 个下级</span>
+                )}
               </div>
             </div>
           </div>
@@ -106,20 +112,15 @@ function TreeNodes({
                 {labels[row.data.status] || row.data.status}
               </span>
             </span>
-            <span className="provider-quota">
-              <small className="quiet">授权总额度</small>
-              {quota.users.granted}
-            </span>
-            <span className="provider-quota">
-              <small className="quiet">已用 / 下拨 / 可用</small>
-              {quota.users.used} / {quota.users.allocated} / {free}
-            </span>
+            <ProviderQuota pool={quota.users} />
           </div>
           <div className="provider-tree-actions">
-            <button className="text-button" onClick={() => add(item)}>
+            <button className="text-button subtle" onClick={() => add(item)}>
+              <Plus size={14} aria-hidden="true" />
               新增子级
             </button>
             <button className="text-button" onClick={() => edit(item)}>
+              <Pencil size={13} aria-hidden="true" />
               编辑
             </button>
           </div>
@@ -158,8 +159,7 @@ export default function ProviderTree(props: Props) {
       <div className="provider-tree-head quiet">
         <span>服务商</span>
         <span>状态</span>
-        <span className="provider-quota">授权总额度</span>
-        <span className="provider-quota">已用 / 下拨 / 可用</span>
+        <span className="provider-quota">授权名额</span>
         <span className="provider-quota">操作</span>
       </div>
       {visible.length ? (
