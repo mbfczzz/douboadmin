@@ -67,7 +67,7 @@
 .config-field > span {
   font-size: 12px;
   font-weight: 500;
-  color: #42544a;
+  color: var(--text);
 }
 .model-config small,
 .config-hint {

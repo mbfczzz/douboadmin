@@ -4,14 +4,14 @@
   gap: 12px;
   padding: 18px 20px;
   margin-bottom: 24px;
-  border: 1px solid var(--accent-border);
+  border: 1px solid var(--line);
   border-radius: var(--radius);
-  background: var(--accent-soft);
+  background: var(--surface);
 }
 .notice b {
   font-size: 14px;
   font-weight: 650;
-  color: #173e2d;
+  color: var(--ink-strong);
 }
 .notice p {
   margin: 4px 0 0;
@@ -19,8 +19,8 @@
   font-size: 12px;
 }
 .notice.warning {
-  border-color: #e6d3a8;
-  background: #fbf6ea;
+  border-color: var(--warning-border);
+  background: var(--warning-soft);
 }
 .panel {
   overflow: hidden;

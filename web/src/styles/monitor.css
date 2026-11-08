@@ -24,7 +24,7 @@
 .monitor-metrics strong {
   display: block;
   font-size: 32px;
-  color: #173b2b;
+  color: var(--ink-strong);
   font-weight: 680;
   font-variant-numeric: tabular-nums;
   margin: 10px 0 5px;
@@ -64,7 +64,7 @@
   background: none;
   border: 0;
   font-size: 12px;
-  color: var(--accent);
+  color: var(--accent-text);
   font-weight: 600;
 }
 .monitor-panel .panel {
@@ -96,14 +96,14 @@
   height: 6px;
   margin-right: 7px;
   border-radius: 50%;
-  background: #a6aeb4;
+  background: var(--muted);
 }
 .monitor-status.online {
-  color: var(--accent);
+  color: var(--success);
 }
 .monitor-status.online::before {
-  background: #44a070;
-  box-shadow: 0 0 0 3px #44a0701f;
+  background: var(--success);
+  box-shadow: 0 0 0 3px #34d27b26;
 }
 .monitor-danger {
   color: var(--danger);
@@ -127,7 +127,7 @@
   display: flex;
   justify-content: space-between;
   padding: 14px 0;
-  border-top: 1px solid #e7ede9;
+  border-top: 1px solid var(--line);
   font-size: 13px;
 }
 .monitor-events .table-scroll {
@@ -151,7 +151,7 @@
 .monitor-level[data-level="ERROR"] {
   color: var(--danger);
   background: var(--danger-soft);
-  border-color: #e8c6c0;
+  border-color: var(--danger-border);
 }
 @media (max-width: 1200px) {
   .monitor-grid {

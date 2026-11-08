@@ -1,87 +1,87 @@
 {
   "schemaVersion": 2,
-  "createdAt": "2026-11-08T10:59:05.135Z",
-  "revision": "7904acd86a894c3342a0b6f640650ebe1ae2be18",
-  "reason": "Styled integration settings groups, collection rows, pagination and reread buttons instead of browser-default controls; verified lazy loading",
-  "initialJSGzipBytes": 74296,
-  "initialCSSGzipBytes": 6909,
-  "totalJSGzipBytes": 132350,
-  "totalCSSGzipBytes": 9434,
+  "createdAt": "2026-11-08T13:23:49.678Z",
+  "revision": "13d0c29c0cd0f9a844bb47a8e58e28f51d0e5f71",
+  "reason": "Dark admin theme modelled on the reference site: magenta primary with AA text/button contrast, success tokens, eyebrow labels, accent strips, opaque topbar",
+  "initialJSGzipBytes": 74297,
+  "initialCSSGzipBytes": 6970,
+  "totalJSGzipBytes": 132580,
+  "totalCSSGzipBytes": 9473,
   "entries": {
     "chunk:partner-business": {
-      "jsGzipBytes": 21774,
+      "jsGzipBytes": 21996,
       "cssGzipBytes": 676
     },
     "src/Workspace.tsx": {
-      "jsGzipBytes": 9845,
+      "jsGzipBytes": 10066,
       "cssGzipBytes": 0
     },
     "src/business/PaymentRecords.tsx": {
-      "jsGzipBytes": 11111,
-      "cssGzipBytes": 0
-    },
-    "src/business/VirtualEvents.tsx": {
-      "jsGzipBytes": 11830,
-      "cssGzipBytes": 0
-    },
-    "src/components/CommandPalette.tsx": {
-      "jsGzipBytes": 10641,
-      "cssGzipBytes": 0
-    },
-    "src/overview/Details.tsx": {
-      "jsGzipBytes": 10328,
-      "cssGzipBytes": 0
-    },
-    "src/pages/AdminAccounts.tsx": {
-      "jsGzipBytes": 11632,
-      "cssGzipBytes": 0
-    },
-    "src/pages/Feedback.tsx": {
-      "jsGzipBytes": 10473,
-      "cssGzipBytes": 0
-    },
-    "src/pages/Jobs.tsx": {
-      "jsGzipBytes": 9845,
-      "cssGzipBytes": 0
-    },
-    "src/pages/Models.tsx": {
-      "jsGzipBytes": 17886,
-      "cssGzipBytes": 1433
-    },
-    "src/pages/Monitor.tsx": {
-      "jsGzipBytes": 11848,
-      "cssGzipBytes": 0
-    },
-    "src/pages/Orders.tsx": {
-      "jsGzipBytes": 11836,
-      "cssGzipBytes": 0
-    },
-    "src/pages/Overview.tsx": {
-      "jsGzipBytes": 12093,
-      "cssGzipBytes": 0
-    },
-    "src/pages/Payments.tsx": {
       "jsGzipBytes": 11334,
       "cssGzipBytes": 0
     },
+    "src/business/VirtualEvents.tsx": {
+      "jsGzipBytes": 12053,
+      "cssGzipBytes": 0
+    },
+    "src/components/CommandPalette.tsx": {
+      "jsGzipBytes": 10862,
+      "cssGzipBytes": 0
+    },
+    "src/overview/Details.tsx": {
+      "jsGzipBytes": 10548,
+      "cssGzipBytes": 0
+    },
+    "src/pages/AdminAccounts.tsx": {
+      "jsGzipBytes": 11852,
+      "cssGzipBytes": 0
+    },
+    "src/pages/Feedback.tsx": {
+      "jsGzipBytes": 10695,
+      "cssGzipBytes": 0
+    },
+    "src/pages/Jobs.tsx": {
+      "jsGzipBytes": 10066,
+      "cssGzipBytes": 0
+    },
+    "src/pages/Models.tsx": {
+      "jsGzipBytes": 18107,
+      "cssGzipBytes": 1411
+    },
+    "src/pages/Monitor.tsx": {
+      "jsGzipBytes": 12070,
+      "cssGzipBytes": 0
+    },
+    "src/pages/Orders.tsx": {
+      "jsGzipBytes": 12058,
+      "cssGzipBytes": 0
+    },
+    "src/pages/Overview.tsx": {
+      "jsGzipBytes": 12318,
+      "cssGzipBytes": 0
+    },
+    "src/pages/Payments.tsx": {
+      "jsGzipBytes": 11557,
+      "cssGzipBytes": 0
+    },
     "src/pages/Reviews.tsx": {
-      "jsGzipBytes": 11029,
+      "jsGzipBytes": 11253,
       "cssGzipBytes": 0
     },
     "src/pages/Settings.tsx": {
-      "jsGzipBytes": 13789,
+      "jsGzipBytes": 14001,
       "cssGzipBytes": 416
     },
     "src/pages/Templates.tsx": {
-      "jsGzipBytes": 14506,
+      "jsGzipBytes": 14727,
       "cssGzipBytes": 0
     },
     "src/pages/Users.tsx": {
-      "jsGzipBytes": 12467,
+      "jsGzipBytes": 12689,
       "cssGzipBytes": 0
     },
     "src/pages/Works.tsx": {
-      "jsGzipBytes": 10997,
+      "jsGzipBytes": 11219,
       "cssGzipBytes": 0
     }
   }

@@ -3,25 +3,29 @@
   display: grid;
   place-items: center;
   padding: 24px;
-  background: #12382b;
+  background:
+    radial-gradient(circle at 20% 15%, #f0177f1c, transparent 42%),
+    radial-gradient(circle at 85% 85%, #22d3ee17, transparent 40%),
+    var(--canvas);
 }
 .login > p {
-  color: #d9e9df;
+  color: var(--text);
 }
 .login-form {
   width: min(100%, 430px);
   padding: 34px;
   border-radius: 16px;
   background: var(--surface);
-  box-shadow: 0 28px 70px #071c145c;
+  border: 1px solid var(--line);
+  box-shadow: 0 28px 70px #000000a6;
 }
 .login-form .brand {
   padding: 0;
-  color: #183b2c;
+  color: var(--ink-strong);
 }
 .login-form .brand > span {
-  background: var(--accent);
-  color: #fff;
+  background: var(--brand-gradient);
+  color: #101113;
 }
 .login-form h1 {
   margin: 30px 0 9px;

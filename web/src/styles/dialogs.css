@@ -6,7 +6,7 @@
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: #0c21199e;
+  background: #000000b3;
 }
 .modal {
   width: 600px;
@@ -71,10 +71,10 @@
   border: 0;
   border-radius: 8px;
   background: transparent;
-  color: #6c7d74;
+  color: var(--muted);
 }
 .icon:hover {
-  color: var(--accent);
+  color: var(--accent-text);
   background: var(--accent-soft);
 }
 .icon svg {
@@ -91,7 +91,7 @@
   flex-direction: column;
   gap: 7px;
   margin-bottom: 16px;
-  color: #42534a;
+  color: var(--text);
   font-size: 13px;
   font-weight: 550;
 }
