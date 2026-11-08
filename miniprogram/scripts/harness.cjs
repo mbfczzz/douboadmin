@@ -64,7 +64,7 @@ function harness(timers = {}) {
         Math,
         Promise,
         Error,
-        console,
+        console: timers.console || console,
         setTimeout: timers.setTimeout || setTimeout,
         clearTimeout: timers.clearTimeout || clearTimeout,
         getCurrentPages: () => ctx.pages,

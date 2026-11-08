@@ -1,7 +1,7 @@
 const { harness } = require("./harness.cjs");
 
-async function fixture(outcome = "success") {
-  const h = harness({ setTimeout: () => 1, clearTimeout() {} });
+async function fixture(outcome = "success", options = {}) {
+  const h = harness({ setTimeout: () => 1, clearTimeout() {}, ...options });
   await h.api.signIn();
   const calls = [],
     native = [],

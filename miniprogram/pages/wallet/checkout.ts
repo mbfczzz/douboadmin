@@ -1,5 +1,6 @@
 import { error, cancelled } from "../../utils/api";
 import { PaymentCancelledError } from "../../services/errors";
+import { VirtualPaymentRejectedError } from "../../services/virtual-failure";
 import { recharge, amountFen } from "../../services/payment";
 import { pendingPayment, paymentMessage } from "../../services/payment-status";
 import { sessionToken, sessionUserId } from "../../services/session";
@@ -44,6 +45,8 @@ export async function checkout(page: Editor) {
     if (!current()) return page.load();
     if (e instanceof PaymentCancelledError)
       page.setData({ paymentNotice: "已取消本次支付，可在充值订单中查看结果" });
+    if (e instanceof VirtualPaymentRejectedError)
+      page.setData({ paymentNotice: e.message });
     if (!cancelled(e)) {
       error(e);
       if ((e as { status?: number }).status === 409) await page.load();

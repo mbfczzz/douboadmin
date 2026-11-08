@@ -7,6 +7,12 @@ import type { WalletInfo, Order } from "./business";
 import type { Row } from "./types";
 import { customError } from "./virtual-amount";
 import type { PurchaseMode } from "./virtual-amount";
+import {
+  virtualFailureCancelled,
+  virtualFailureCode,
+  virtualFailureDetail,
+  virtualFailureError,
+} from "./virtual-failure";
 
 export function supportsVirtualPayment(platform: string) {
   if (typeof wx.requestVirtualPayment !== "function") return false;
@@ -111,20 +117,28 @@ export async function invokeVirtualPayment(
       signature: params.signature,
       success: () => resolve(),
       fail: (failure) => {
-        if (failure.errCode === -2 || failure.errMsg?.includes("cancel")) {
+        if (virtualFailureCancelled(failure)) {
           clearPayment(row.id);
           reject(new PaymentCancelledError());
-        } else if (
-          [
-            1001, -15001, -15004, -15005, -15006, -15007, -15008, -15009,
-            -15010, -15011, -15013, -15014, -15016, -15018,
-          ].includes(failure.errCode)
-        ) {
-          clearPayment(row.id);
-          reject(new Error("支付未发起，请检查商品发布状态或重新登录后重试"));
         } else {
-          // Unknown outcomes must be reconciled, never converted into local credit or a retry charge.
-          resolve();
+          console.warn("[virtual-payment] 微信支付调用失败", {
+            errCode: virtualFailureCode(failure),
+            errMsg: virtualFailureDetail(failure, [
+              params.signData,
+              params.paySig,
+              params.signature,
+            ]),
+            orderId: row.id,
+            platform,
+          });
+          const error = virtualFailureError(failure);
+          if (error) {
+            clearPayment(row.id);
+            reject(error);
+          } else {
+            // Unknown outcomes still require reconciliation before another purchase.
+            resolve();
+          }
         }
       },
     }),
