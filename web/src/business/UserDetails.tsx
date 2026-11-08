@@ -13,6 +13,7 @@ import {
   type Profile,
   type Wallet,
 } from "./types";
+import { newId } from "../id";
 
 export default function UserDetails({
   user,
@@ -41,8 +42,7 @@ export default function UserDetails({
     setBusy(true);
     const body = { units: Math.round(n * 100), note };
     const hash = JSON.stringify(body);
-    if (attempt.current.hash !== hash)
-      attempt.current = { hash, key: crypto.randomUUID() };
+    if (attempt.current.hash !== hash) attempt.current = { hash, key: newId() };
     try {
       await api(`/admin/users/${user.id}/wallet`, {
         method: "POST",

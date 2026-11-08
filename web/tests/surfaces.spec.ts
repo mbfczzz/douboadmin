@@ -103,11 +103,15 @@ for (const width of [1440, 390, 320]) {
     await template
       .getByRole("combobox", { name: "模板栏目", exact: true })
       .focus();
-    await page.keyboard.press("ArrowDown");
+    // The themed select follows the combobox pattern: ↓ opens the list,
+    // arrows move and Enter picks.
+    for (const key of ["ArrowDown", "ArrowDown", "Enter"])
+      await page.keyboard.press(key);
     await expect(
       template.getByRole("combobox", { name: "模板栏目", exact: true }),
     ).toHaveValue("inspiration");
-    await page.keyboard.press("ArrowUp");
+    for (const key of ["ArrowDown", "ArrowUp", "Enter"])
+      await page.keyboard.press(key);
     await expect(
       template.getByRole("combobox", { name: "模板栏目", exact: true }),
     ).toHaveValue("style");

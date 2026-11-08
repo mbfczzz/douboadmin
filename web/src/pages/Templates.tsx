@@ -10,6 +10,7 @@ import Empty from "../components/Empty";
 import Pagination from "../components/Pagination";
 import TemplateCard from "../components/TemplateCard";
 import TemplateEditor from "../components/TemplateEditor";
+import { newId } from "../id";
 
 const blank: Template = {
   title: "",
@@ -60,7 +61,7 @@ export default function Templates({ notify }: PageProps) {
   const current = Math.min(page, Math.max(1, Math.ceil(filtered.length / 12)));
   function create(data = blank) {
     setEdit({
-      id: crypto.randomUUID(),
+      id: newId(),
       version: 0,
       createdAt: "",
       data: { ...data, kind, family, published: false },

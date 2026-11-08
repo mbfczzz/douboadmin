@@ -91,7 +91,7 @@
         data-id="{{item.id}}"
         bindtap="selectModel"
       >
-        <image wx:if="{{item.iconURL}}" class="model-logo" src="{{item.iconURL}}" mode="aspectFit" />
+        <image wx:if="{{item.iconURL}}" class="model-logo" src="{{item.iconURL}}" mode="aspectFit" data-index="{{index}}" binderror="hideModelIcon" />
         <text wx:elif="{{item.icon}}" class="model-glyph">{{item.icon}}</text>
         <view class="model-info"><text>{{item.label}}</text><text wx:if="{{item.description}}" class="model-description">{{item.description}}</text><view wx:if="{{item.badges.length}}" class="model-badges"><text wx:for="{{item.badges}}" wx:for-item="badge" wx:key="id" class="{{badge.tone}}">{{badge.text}}</text></view></view>
         <text wx:if="{{item.estimate}}" class="model-estimate">{{item.estimate}}</text>

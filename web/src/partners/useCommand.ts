@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { api, type APIInit } from "../api";
+import { newId } from "../id";
 export function useCommand() {
   const [busy, setBusy] = useState(false),
     pending = useRef({ hash: "", key: "" }),
@@ -28,7 +29,7 @@ export function useCommand() {
         pending.current =
           saved?.hash === hash && typeof saved.key === "string"
             ? saved
-            : { hash, key: crypto.randomUUID() };
+            : { hash, key: newId() };
       }
       const key = pending.current.key;
       try {

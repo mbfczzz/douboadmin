@@ -25,10 +25,17 @@ if ! id doubo >/dev/null 2>&1; then
   useradd --system --home-dir "$base" --shell /usr/sbin/nologin doubo
 fi
 chown doubo:doubo "$base/shared" "$base/shared/media"
+# Built-in covers and model icons must land where the API reads media, which
+# may be overridden in doubo.env (for example /srv/doubo/shared/media).
+media_dir="$(sed -n 's/^[[:space:]]*MEDIA_DIR=//p' /etc/doubo/doubo.env | tail -n 1 | tr -d "\"'\r")"
+media_dir="${media_dir:-$base/shared/media}"
+[[ "$media_dir" == /* ]] || die "MEDIA_DIR must be an absolute path: $media_dir"
+mkdir -p "$media_dir"
+chown doubo:doubo "$media_dir"
 for assets in design model-icons; do
-  mkdir -p "$base/shared/media/$assets"
-  cp -R "$release/media/$assets/." "$base/shared/media/$assets/"
-  chmod -R a+rX "$base/shared/media/$assets"
+  mkdir -p "$media_dir/$assets"
+  cp -R "$release/media/$assets/." "$media_dir/$assets/"
+  chmod -R a+rX "$media_dir/$assets"
 done
 # Keep old hashed chunks so an already-open browser can still lazy-load pages.
 cp -R "$release/web/assets/." "$base/shared/web/assets/"

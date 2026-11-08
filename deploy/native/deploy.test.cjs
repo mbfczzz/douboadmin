@@ -66,6 +66,7 @@ fs.writeFileSync(path.join(area, "mocks.sh"), mocks);
 
 for (const name of [
   "success",
+  "custom-media",
   "first-success",
   "unloaded-units",
   "broken-current",
@@ -121,8 +122,17 @@ for (const name of [
       );
     }
     if (name !== "missing-env")
-      write("etc/doubo/doubo.env", "ADMIN_PASSWORD=fixture-only");
-    const scenario = name === "first-fail" ? "health-fail" : name;
+      write(
+        "etc/doubo/doubo.env",
+        name === "custom-media"
+          ? `ADMIN_PASSWORD=fixture-only\nMEDIA_DIR="${base}/srv-media"\r\n`
+          : "ADMIN_PASSWORD=fixture-only",
+      );
+    const scenario = ["first-fail"].includes(name)
+      ? "health-fail"
+      : name === "custom-media"
+        ? "success"
+        : name;
     const run = spawnSync(bash, [`${release}/deploy/native/deploy.sh`], {
       encoding: "utf8",
       timeout: 20000,
@@ -140,11 +150,21 @@ for (const name of [
       : "";
     const targetFile = path.join(local, "app/current/.target");
     if (
-      ["success", "first-success", "unloaded-units", "broken-current"].includes(
-        name,
-      )
+      [
+        "success",
+        "custom-media",
+        "first-success",
+        "unloaded-units",
+        "broken-current",
+      ].includes(name)
     ) {
       assert.equal(run.status, 0, run.stdout + run.stderr);
+      // Built-in icons follow MEDIA_DIR so the API can serve them.
+      const icons = name === "custom-media" ? "srv-media" : "app/shared/media";
+      assert.ok(
+        fs.existsSync(path.join(local, icons, "model-icons/model.png")),
+        "model icons copied to " + icons,
+      );
       assert.equal(fs.readFileSync(targetFile, "utf8"), release);
       assert.ok(
         calls.indexOf("start doubo-migrate") <

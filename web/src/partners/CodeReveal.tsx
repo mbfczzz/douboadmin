@@ -1,6 +1,7 @@
 import Modal from "../components/Modal";
 import RequestState from "../components/RequestState";
 import { useResource } from "../hooks/useResource";
+import { copyText } from "../clipboard";
 export default function CodeReveal({
   id,
   onClose,
@@ -40,7 +41,7 @@ export default function CodeReveal({
                 className="secondary"
                 onClick={async () => {
                   try {
-                    await navigator.clipboard.writeText(resource.data!.code);
+                    await copyText(resource.data!.code);
                     notify("激活码已复制");
                   } catch {
                     notify("请手动选择并复制激活码");

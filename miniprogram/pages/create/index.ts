@@ -192,6 +192,15 @@ Page({
   closeModels() {
     this.setData({ showModels: false });
   },
+  // An icon that fails to load is dropped instead of leaving an empty white box.
+  hideModelIcon(e: WechatMiniprogram.CustomEvent) {
+    const index = Number(e.currentTarget.dataset.index);
+    if (this.data.availableModels[index])
+      this.setData({
+        [`availableModels[${index}].iconURL`]: "",
+        [`availableModels[${index}].icon`]: "",
+      });
+  },
   selectModel(e: WechatMiniprogram.TouchEvent) {
     if (this.data.uploading || this.data.restoring || this.data.busy) return;
     const m = this.data.availableModels.find(

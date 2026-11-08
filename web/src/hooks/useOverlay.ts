@@ -3,6 +3,12 @@ import { useEffect, useRef, type RefObject } from "react";
 let locks = 0;
 let originalOverflow = "";
 
+// Esc on an open select list (customizable select) only closes that list.
+const openSelect = (target: EventTarget | null) => {
+  const select = (target as Element | null)?.closest?.("select");
+  return !!select && CSS.supports("selector(:open)") && select.matches(":open");
+};
+
 // Dialogs and the mobile menu share focus, navigation and scroll ownership.
 export function useOverlay(
   anchor: RefObject<HTMLElement | null>,
@@ -44,7 +50,9 @@ export function useOverlay(
       const keyboard = e as KeyboardEvent;
       if (
         e.type === "workspace:navigate" ||
-        (keyboard.key === "Escape" && !document.fullscreenElement)
+        (keyboard.key === "Escape" &&
+          !document.fullscreenElement &&
+          !openSelect(e.target))
       ) {
         e.preventDefault();
         close.current();
