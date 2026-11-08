@@ -3,6 +3,8 @@
 微信原生 TypeScript + TDesign 小程序、React 管理后台、Go API 与 Worker。
 关系数据使用 MySQL，共享会话和限流使用 Redis，正式环境文件使用阿里云 OSS。
 
+管理后台使用首屏、按需入口和基线增量三层性能检查；正常新增页面不会争用固定总包额度。日常构建与基线更新方式见[管理后台性能预算](docs/web-performance-budget.md)。
+
 ## 当前本地环境
 
 - 管理后台开发服务：<http://127.0.0.1:5174>；正式部署由 Nginx 提供静态页面。

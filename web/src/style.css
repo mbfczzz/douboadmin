@@ -2,7 +2,6 @@
 @import "./styles/layout.css";
 @import "./styles/controls.css";
 @import "./styles/panels.css";
-@import "./integrations/integrations.css";
 @import "./styles/tables.css";
 
 @import "./styles/empty.css";
@@ -14,7 +13,4 @@
 @import "./styles/motion.css";
 @import "./styles/responsive.css";
 @import "./styles/catalog.css";
-@import "./styles/model-config.css";
 @import "./styles/monitor.css";
-@import "./partners/partners.css";
-@import "./partners/provider-layout.css";

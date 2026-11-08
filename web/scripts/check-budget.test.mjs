@@ -1,122 +1,161 @@
+import { test } from "node:test";
+import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
-import { spawnSync } from "node:child_process";
-import { randomBytes } from "node:crypto";
-import assert from "node:assert/strict";
-import { test } from "node:test";
+import { fixture, randomCode } from "./budget/fixtures.mjs";
+import { writeBaseline } from "./budget/baseline.mjs";
 
-const project = fileURLToPath(new URL("../../", import.meta.url));
-const runtime = path.join(project, ".runtime");
-fs.mkdirSync(runtime, { recursive: true });
-const checker = fileURLToPath(new URL("check-budget.mjs", import.meta.url));
-const routes = [
-  "Orders",
-  "Payments",
-  "Works",
-  "Reviews",
-  "Monitor",
-  "AdminAccounts",
-  "Overview",
-  "Workspace",
-  "CommandPalette",
-  "Users",
-  "partner-business",
-];
-
-function fixture(t, imports, code = "export default 1;", overrides = {}) {
-  const dir = fs.mkdtempSync(path.join(runtime, "budget-check-"));
-  t.after(() => {
-    if (!path.resolve(dir).startsWith(path.resolve(runtime) + path.sep))
-      throw new Error("Unexpected test directory");
-    fs.rmSync(dir, { recursive: true, force: true });
-  });
-  fs.mkdirSync(path.join(dir, "dist/assets"), { recursive: true });
-  fs.mkdirSync(path.join(dir, "dist/.vite"), { recursive: true });
-  const files = {
-    "assets/index.js": code,
-    "assets/common.js": "export const common = 1;",
-    "assets/other.js": "export const other = 1;",
-    ...Object.fromEntries(
-      routes.map((r) => [`assets/${r}-fixture.js`, "export default 1;"]),
-    ),
-  };
-  for (const [name, source] of Object.entries(files))
-    fs.writeFileSync(path.join(dir, "dist", name), source);
-  const manifest = {
-    "index.html": { file: "assets/index.js", imports },
-    common: { file: "assets/common.js", imports: ["index.html"] },
-    other: { file: "assets/other.js", imports: ["common"] },
-  };
-  fs.writeFileSync(
-    path.join(dir, "dist/.vite/manifest.json"),
-    JSON.stringify({ ...manifest, ...overrides }),
+test("normal builds emit readable reports and never rewrite the baseline", (t) => {
+  const f = fixture(t);
+  f.baseline();
+  const baseline = fs.readFileSync(
+    path.join(f.dir, "bundle-baseline.json"),
+    "utf8",
   );
-  const run = spawnSync(process.execPath, [checker], {
-    cwd: dir,
-    encoding: "utf8",
-    timeout: 5000,
-  });
-  return { dir, run, files };
-}
-
-test("manifest cycles terminate and each initial asset is counted once", (t) => {
-  const { dir, run, files } = fixture(t, ["common"]);
+  const run = f.run();
   assert.equal(run.status, 0, run.stdout + run.stderr);
-  const report = JSON.parse(
-    fs.readFileSync(path.join(dir, "dist/budget.json"), "utf8"),
-  );
   assert.equal(
-    report.initialJSBytes,
-    Buffer.byteLength(files["assets/index.js"] + files["assets/common.js"]),
+    fs.readFileSync(path.join(f.dir, "bundle-baseline.json"), "utf8"),
+    baseline,
+  );
+  assert.match(
+    fs.readFileSync(path.join(f.dir, "dist/budget.md"), "utf8"),
+    /Additional assets/,
+  );
+  assert.ok(
+    JSON.parse(fs.readFileSync(path.join(f.dir, "dist/budget.json"), "utf8"))
+      .entries["src/pages/A.tsx"],
   );
 });
 
-test("repeated shared dependencies do not change initial size totals", (t) => {
-  const { dir, run, files } = fixture(t, ["common", "other", "common"]);
+test("missing baselines fail closed without silently initializing one", (t) => {
+  const f = fixture(t),
+    run = f.run();
+  assert.notEqual(run.status, 0);
+  assert.match(run.stderr, /Missing bundle baseline/);
+  assert.equal(fs.existsSync(path.join(f.dir, "bundle-baseline.json")), false);
+});
+
+test("explicit baseline changes need a review reason", (t) => {
+  const f = fixture(t),
+    run = f.run("--update-baseline");
+  assert.notEqual(run.status, 0);
+  assert.match(run.stderr, /requires --reason/);
+  assert.equal(fs.existsSync(path.join(f.dir, "bundle-baseline.json")), false);
+});
+
+test("a reviewed update records new metrics and can replace an existing baseline", (t) => {
+  const f = fixture(t),
+    reason = "Add reviewed lazy settings editor";
+  let run = f.run("--update-baseline", "--reason", reason);
   assert.equal(run.status, 0, run.stdout + run.stderr);
-  const report = JSON.parse(
-    fs.readFileSync(path.join(dir, "dist/budget.json"), "utf8"),
+  let baseline = JSON.parse(
+    fs.readFileSync(path.join(f.dir, "bundle-baseline.json"), "utf8"),
   );
-  assert.equal(
-    report.initialJSBytes,
-    Buffer.byteLength(
-      files["assets/index.js"] +
-        files["assets/common.js"] +
-        files["assets/other.js"],
-    ),
+  assert.equal(baseline.reason, reason);
+  f.write("dist/assets/A-hash.js", randomCode(12000));
+  run = f.run(
+    "--update-baseline",
+    "--reason",
+    "Reviewed larger settings form and verified browser loading",
+  );
+  assert.equal(run.status, 0, run.stdout + run.stderr);
+  const updated = JSON.parse(
+    fs.readFileSync(path.join(f.dir, "bundle-baseline.json"), "utf8"),
+  );
+  assert.ok(
+    updated.entries["src/pages/A.tsx"].jsGzipBytes >
+      baseline.entries["src/pages/A.tsx"].jsGzipBytes,
   );
 });
 
-test("cyclic manifests still reject bundles above the unchanged limits", (t) => {
-  const { run } = fixture(
-    t,
-    ["common"],
-    "export default " + JSON.stringify(randomBytes(150000).toString("base64")),
+test("reviewed baseline updates cannot override absolute performance ceilings", (t) => {
+  const f = fixture(t);
+  f.baseline();
+  const before = fs.readFileSync(
+    path.join(f.dir, "bundle-baseline.json"),
+    "utf8",
+  );
+  f.write("dist/assets/index.js", randomCode(150000));
+  const run = f.run(
+    "--update-baseline",
+    "--reason",
+    "Attempt to approve excessive initial code",
   );
   assert.notEqual(run.status, 0);
-  assert.match(run.stderr, /Bundle budget exceeded/);
+  assert.match(run.stderr, /Initial JS/);
+  assert.equal(
+    fs.readFileSync(path.join(f.dir, "bundle-baseline.json"), "utf8"),
+    before,
+  );
 });
 
-test("aliases of one file still include every declared dependency", (t) => {
-  const { dir, run, files } = fixture(
-    t,
-    ["common", "alias"],
-    "export default 1;",
-    {
-      alias: { file: "assets/common.js", imports: ["other"] },
-    },
-  );
-  assert.equal(run.status, 0, run.stdout + run.stderr);
+test("large regressions fail with module details and still write both reports", (t) => {
+  const f = fixture(t);
+  f.baseline();
+  f.write("dist/assets/A-hash.js", randomCode(18000));
+  const run = f.run();
+  assert.notEqual(run.status, 0);
+  assert.match(run.stderr, /src\/pages\/A.tsx JS growth/);
+  assert.match(run.stderr, /assets\/A-hash.js/);
   const report = JSON.parse(
-    fs.readFileSync(path.join(dir, "dist/budget.json"), "utf8"),
+    fs.readFileSync(path.join(f.dir, "dist/budget.json"), "utf8"),
   );
-  assert.equal(
-    report.initialJSBytes,
-    Buffer.byteLength(
-      files["assets/index.js"] +
-        files["assets/common.js"] +
-        files["assets/other.js"],
-    ),
+  assert.ok(report.errors.length);
+  assert.match(
+    fs.readFileSync(path.join(f.dir, "dist/budget.md"), "utf8"),
+    /ERROR/,
   );
+});
+
+test("new lazy pages do not fail because a global sum exceeded the old quota", (t) => {
+  const f = fixture(t);
+  f.baseline();
+  for (let i = 0; i < 15; i++) {
+    const file = `assets/New${i}.js`,
+      key = `src/pages/New${i}.tsx`;
+    f.manifest[key] = {
+      file,
+      src: key,
+      isDynamicEntry: true,
+      imports: ["common"],
+    };
+    f.write("dist/" + file, randomCode(12000));
+  }
+  f.saveManifest();
+  const run = f.run();
+  assert.equal(run.status, 0, run.stdout + run.stderr);
+  assert.match(run.stdout, /Total JS trend/);
+});
+
+test("invalid baseline metrics cannot disable growth protection", (t) => {
+  const f = fixture(t);
+  f.baseline();
+  const file = path.join(f.dir, "bundle-baseline.json"),
+    baseline = JSON.parse(fs.readFileSync(file, "utf8"));
+  baseline.initialJSGzipBytes = "unlimited";
+  f.write("bundle-baseline.json", JSON.stringify(baseline));
+  assert.match(f.run().stderr, /Invalid bundle baseline/);
+});
+
+test("failed atomic writes do not delete an existing temporary file", (t) => {
+  const f = fixture(t),
+    file = path.join(f.dir, "bundle-baseline.json");
+  const temporary = `${file}.${process.pid}.tmp`;
+  fs.writeFileSync(temporary, "keep-existing-file");
+  assert.throws(
+    () => writeBaseline(file, { reason: "reviewed fixture" }),
+    /EEXIST/,
+  );
+  assert.equal(fs.readFileSync(temporary, "utf8"), "keep-existing-file");
+});
+
+test("corrupt or null baseline JSON produces an explicit configuration error", (t) => {
+  const f = fixture(t);
+  for (const content of ["{invalid", "null"]) {
+    f.write("bundle-baseline.json", content);
+    const run = f.run();
+    assert.notEqual(run.status, 0);
+    assert.match(run.stderr, /Invalid bundle baseline/);
+  }
 });

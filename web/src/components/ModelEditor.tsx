@@ -9,6 +9,7 @@ import PricingFields from "../models/PricingFields";
 import { ErrorFields, StatusFields } from "../models/StatusFields";
 import { modelDraft, type ModelSettings } from "../models/settings";
 import { canLeave } from "../hooks/unsaved";
+import "../styles/model-config.css";
 export { modelKinds, supportedModel } from "../models/settings";
 export { default as ModelImport } from "./ModelImport";
 

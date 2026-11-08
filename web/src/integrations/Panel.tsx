@@ -3,6 +3,7 @@ import RequestState from "../components/RequestState";
 import type { Notify } from "../navigation";
 import GroupForm from "./GroupForm";
 import type { IntegrationState } from "./types";
+import "./integrations.css";
 
 export default function Panel({ notify }: { notify: Notify }) {
   const resource = useResource<IntegrationState>("/admin/integrations");
