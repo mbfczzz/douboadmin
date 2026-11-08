@@ -15,9 +15,11 @@ import {
   isNavigating,
 } from "../../utils/api";
 import type { Template, Row, Asset } from "../../services/types";
+import { loadQuote } from "./quote";
 Page({
   data: {
     template: null as Row<Template> | null,
+    quoteText: "",
     loading: true,
     loadError: "",
     assets: [] as Row<Asset>[],
@@ -44,6 +46,7 @@ Page({
   },
   onUnload() {
     this.destroyed = true;
+    this.quoteAbort?.();
     this.visible = false;
     this.favoriteRevision++;
   },
@@ -68,6 +71,7 @@ Page({
       t.data.cover = media(t.data.cover);
       if (this.destroyed) return;
       this.setData({ template: t });
+      loadQuote(this, t);
       if (!hasSession()) {
         this.setData({ favorite: false, favoriteVersion: 0 });
         return;

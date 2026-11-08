@@ -116,8 +116,8 @@
 }
 .catalog-search:focus-within,
 .search:focus-within {
-  outline: 2px solid var(--accent-border);
   border-color: var(--accent);
+  box-shadow: 0 0 0 3px #1764471a;
 }
 .catalog-table th {
   position: sticky;
@@ -229,6 +229,9 @@
 }
 .danger-text {
   color: #ba5555 !important;
+}
+.modal-actions .danger-text {
+  margin-right: auto;
 }
 .catalog-pagination {
   display: flex;

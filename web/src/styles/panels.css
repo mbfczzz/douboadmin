@@ -18,6 +18,10 @@
   color: var(--muted);
   font-size: 12px;
 }
+.notice.warning {
+  border-color: #e6d3a8;
+  background: #fbf6ea;
+}
 .panel {
   overflow: hidden;
   border: 1px solid var(--line);

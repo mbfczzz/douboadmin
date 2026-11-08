@@ -1,39 +1,14 @@
 .model-config input,
 .model-config select {
-  height: 36px;
-  padding: 0 11px;
-  border-radius: 8px;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  color: var(--ink);
-  font-size: 12.5px;
   min-width: 0;
 }
 .model-config textarea {
-  padding: 7px 9px;
   min-height: 72px;
-  font-size: 12.5px;
-  line-height: 1.5;
-  color: var(--ink);
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  background: var(--surface);
-}
-.model-config input:focus,
-.model-config select:focus,
-.model-config textarea:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-soft);
-  outline: 0;
 }
 .model-config input[readonly],
 .model-config select:disabled {
   background: var(--surface-subtle);
   color: var(--muted);
-}
-.model-config input::placeholder,
-.model-config textarea::placeholder {
-  color: #8a8a94;
 }
 .config-chips {
   display: flex;
@@ -60,18 +35,6 @@
 .config-chips button:disabled {
   opacity: 0.38;
   cursor: not-allowed;
-}
-.config-save {
-  height: 36px;
-  padding: 0 14px;
-  background: var(--accent);
-  color: #fff;
-  border: 1px solid var(--accent);
-  border-radius: 8px;
-  font-size: 12.5px;
-}
-.config-save:hover {
-  background: var(--accent-hover);
 }
 .config-brands {
   display: flex;

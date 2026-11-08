@@ -7,9 +7,9 @@
       >去登录</t-button
     >
   </view>
-  <view wx:elif="{{loadError&&!job}}" class="error-box">
+  <view wx:elif="{{loadError&&!job}}" class="error-box" bindtap="load">
     {{loadError}}
-    <text bindtap="load">· 重试</text>
+    <text>· 重试</text>
   </view>
   <view wx:elif="{{job}}" class="content-reveal">
     <view wx:if="{{loadError}}" class="error-box" bindtap="load"
@@ -66,7 +66,7 @@
       wx:if="{{!job.deleted&&(job.status==='failed'||job.status==='succeeded')}}"
     >
       <view>
-        <t-button block variant="outline" bind:tap="edit">重新编辑</t-button>
+        <t-button block bind:tap="edit">重新编辑</t-button>
       </view>
       <view wx:if="{{job.retryable||job.status==='succeeded'}}">
         <t-button
@@ -92,13 +92,13 @@
     <view wx:if="{{job.status==='succeeded'&&!job.deleted}}" class="row result-actions"
       ><button class="text-button" bindtap="share">
         {{job.reviewStatus==='approved'?'分享作品':'待审核后分享'}}</button
-      ><button class="text-button" bindtap="remove">删除作品</button></view
+      ><button class="text-button danger-link" bindtap="remove">删除作品</button></view
     >
     <text class="section-title">提示词</text>
     <text class="full-prompt" selectable>{{job.input.prompt}}</text>
     <view class="row section-title">
       <text>参考文件</text>
-      <text class="muted small">{{job.input.assets.length}} 个附件</text>
+      <text wx:if="{{job.input.assets.length}}" class="muted small">{{job.input.assets.length}} 个附件</text>
     </view>
     <view wx:if="{{loadingAssets}}" class="muted small">正在加载参考素材…</view>
     <view wx:elif="{{assetError}}" class="error-box" bindtap="loadAssets"

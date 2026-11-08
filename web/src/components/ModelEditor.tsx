@@ -100,13 +100,13 @@ export default function ModelEditor({
           )}
           <button
             type="button"
-            className="config-ghost"
+            className="secondary"
             onClick={close}
             disabled={busy}
           >
             取消
           </button>
-          <button className="config-save" disabled={busy}>
+          <button className="primary" disabled={busy}>
             {busy ? "保存中…" : "保存"}
           </button>
         </footer>

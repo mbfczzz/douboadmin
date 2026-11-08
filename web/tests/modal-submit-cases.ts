@@ -7,6 +7,7 @@ export type SubmitCase = {
   fields: Record<string, string>;
   tab?: string;
   pick?: boolean;
+  reveal?: string;
   selection?: [string, string];
 };
 
@@ -15,7 +16,8 @@ export const submitCases: SubmitCase[] = [
     name: "订单退款",
     nav: "充值订单",
     open: "详情",
-    submit: "申请全额退款",
+    reveal: "申请全额退款",
+    submit: "确认全额退款",
     endpoint: "/orders/qa-order/refund",
     fields: { 退款原因: "仅验证输入保留" },
   },

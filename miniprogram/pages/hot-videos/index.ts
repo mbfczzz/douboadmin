@@ -89,7 +89,7 @@ Page({
       return;
     }
     if (!this.data.enabled) {
-      error(new Error("抖音数据接口尚未配置"));
+      error(new Error("热门视频暂不可用"));
       return;
     }
     const version = ++this.revision;

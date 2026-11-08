@@ -142,6 +142,7 @@ export default function Codes({ id, view, changed, notify }: Scope) {
       />
       {creating && (
         <Modal
+          className="form-modal"
           title="生成授权码"
           onClose={() => !command.busy && setCreating(false)}
         >
@@ -170,36 +171,46 @@ export default function Codes({ id, view, changed, notify }: Scope) {
               }
             }}
           >
-            <fieldset disabled={command.busy}>
-              <label>
-                备注
-                <input
-                  name="label"
-                  maxLength={80}
-                  placeholder="便于区分使用对象"
-                />
-              </label>
-              <label>
-                激活码有效天数
-                <input
-                  name="days"
-                  type="number"
-                  min="1"
-                  max="30"
-                  step="1"
-                  defaultValue="7"
-                  required
-                />
-              </label>
-              <p className="muted">
-                这里设置的是激活码领取期限。激活成功后长期绑定，停用仍占名额，解绑才释放。
-              </p>
-              <div className="modal-actions">
-                <button className="primary" disabled={command.busy}>
-                  生成并预留名额
-                </button>
-              </div>
-            </fieldset>
+            <div className="form-body">
+              <fieldset disabled={command.busy}>
+                <label>
+                  备注
+                  <input
+                    name="label"
+                    maxLength={80}
+                    placeholder="便于区分使用对象"
+                  />
+                </label>
+                <label>
+                  激活码有效天数
+                  <input
+                    name="days"
+                    type="number"
+                    min="1"
+                    max="30"
+                    step="1"
+                    defaultValue="7"
+                    required
+                  />
+                </label>
+                <p className="muted">
+                  这里设置的是激活码领取期限。激活成功后长期绑定，停用仍占名额，解绑才释放。
+                </p>
+              </fieldset>
+            </div>
+            <div className="modal-actions">
+              <button
+                type="button"
+                className="secondary"
+                disabled={command.busy}
+                onClick={() => !command.busy && setCreating(false)}
+              >
+                取消
+              </button>
+              <button className="primary" disabled={command.busy}>
+                生成并预留名额
+              </button>
+            </div>
           </form>
         </Modal>
       )}

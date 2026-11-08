@@ -33,6 +33,8 @@ for (const sample of submitCases) {
       ).toBeVisible();
     }
     const dialog = page.getByRole("dialog").last();
+    if (sample.reveal)
+      await dialog.getByRole("button", { name: sample.reveal }).click();
     const field = (label: string) =>
       dialog
         .getByLabel(label, { exact: true })

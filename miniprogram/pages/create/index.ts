@@ -219,7 +219,8 @@ Page({
     this.setData({ assetsOpen: false });
   },
   toggleExpanded() {
-    this.setData({ expanded: !this.data.expanded });
+    const bar = wx.getWindowInfo().statusBarHeight || 24;
+    this.setData({ expanded: !this.data.expanded, expandedTop: bar + 52 });
   },
   async addAsset(e?: WechatMiniprogram.TouchEvent) {
     await addReference(this, e?.currentTarget.dataset.kind || "image");

@@ -8,6 +8,7 @@ import Table from "../business/Table";
 import Modal from "../components/Modal";
 import MediaPreview from "../business/MediaPreview";
 import { statuses, type Review } from "../business/types";
+import StatusBadge from "../components/StatusBadge";
 type Item = { record: Row<Review>; job: Job };
 
 export default function Reviews({ notify }: PageProps) {
@@ -65,7 +66,10 @@ export default function Reviews({ notify }: PageProps) {
             render: (r) => r.job.input.prompt.slice(0, 36) || "混剪作品",
           },
           { title: "用户", render: (r) => r.job.userId },
-          { title: "状态", render: (r) => statuses[r.record.data.status] },
+          {
+            title: "状态",
+            render: (r) => <StatusBadge status={r.record.data.status} />,
+          },
           { title: "原因", render: (r) => r.record.data.reason || "—" },
           { title: "提交时间", render: (r) => date(r.job.createdAt) },
           {
@@ -87,11 +91,12 @@ export default function Reviews({ notify }: PageProps) {
       {detail && (
         <Modal title="作品审核" onClose={() => !busy && setDetail(null)}>
           <MediaPreview job={detail.job} />
-          <div className="edit-form">
+          <div className="edit-form" style={{ paddingTop: 0 }}>
             <label>
               审核说明（驳回必填）
               <textarea
                 disabled={busy}
+                placeholder="驳回时必填；审核通过可留空"
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 maxLength={300}

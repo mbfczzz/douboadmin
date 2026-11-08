@@ -90,6 +90,10 @@ tbody tr:hover {
   color: #286477;
   background: #e8f3f6;
 }
+.badge.muted {
+  color: var(--muted);
+  background: var(--surface-subtle);
+}
 .badge.failed {
   color: var(--danger);
   background: var(--danger-soft);
@@ -124,6 +128,7 @@ tbody tr:hover {
   color: #75857c;
   font-size: 13px;
   font-weight: 550;
+  white-space: nowrap;
 }
 .tabs button:hover {
   color: #32483c;
@@ -141,10 +146,6 @@ tbody tr:hover {
   border-radius: 8px;
   background: var(--surface);
   color: #72837a;
-}
-.search:focus-within {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px #17644714;
 }
 .search input {
   min-width: 180px;

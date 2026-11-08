@@ -7,6 +7,7 @@ import Modal from "../components/Modal";
 import ResourcePage from "../business/ResourcePage";
 import Table from "../business/Table";
 import { money, points, statuses, type Order } from "../business/types";
+import StatusBadge from "../components/StatusBadge";
 
 export default function Orders({ notify }: PageProps) {
   const resource = useResource<Row<Order>[]>("/admin/orders"),
@@ -14,7 +15,8 @@ export default function Orders({ notify }: PageProps) {
     [state, setState] = useRememberedState("orders.status", "");
   const [detail, setDetail] = useState<Row<Order> | null>(null),
     [reason, setReason] = useState(""),
-    [busy, setBusy] = useState(false);
+    [busy, setBusy] = useState(false),
+    [refunding, setRefunding] = useState(false);
   const rows = (resource.data || []).filter(
     (r) =>
       (!state || r.data.status === state) &&
@@ -102,7 +104,7 @@ export default function Orders({ notify }: PageProps) {
           },
           {
             title: "状态",
-            render: (r) => statuses[r.data.status] || r.data.status,
+            render: (r) => <StatusBadge status={r.data.status} />,
           },
           { title: "创建时间", render: (r) => date(r.createdAt) },
           {
@@ -113,6 +115,7 @@ export default function Orders({ notify }: PageProps) {
                 <button
                   onClick={() => {
                     setDetail(r);
+                    setRefunding(false);
                     setReason("");
                   }}
                 >
@@ -175,7 +178,17 @@ export default function Orders({ notify }: PageProps) {
             )}
             {detail.data.virtual?.platform !== "ios" &&
               (detail.data.status === "paid" ||
-                detail.data.status === "refunding") && (
+                detail.data.status === "refunding") &&
+              (!refunding && detail.data.status === "paid" ? (
+                <div className="modal-actions">
+                  <button
+                    className="secondary danger-text"
+                    onClick={() => setRefunding(true)}
+                  >
+                    申请全额退款
+                  </button>
+                </div>
+              ) : (
                 <>
                   <p className="quiet">
                     全额退款会回收该订单对应积分；可用积分不足时不能申请。重复提交使用同一退款单。
@@ -190,8 +203,17 @@ export default function Orders({ notify }: PageProps) {
                     />
                   </label>
                   <div className="modal-actions">
+                    {refunding && (
+                      <button
+                        className="secondary"
+                        disabled={busy}
+                        onClick={() => setRefunding(false)}
+                      >
+                        取消
+                      </button>
+                    )}
                     <button
-                      className="primary"
+                      className="primary danger"
                       disabled={busy}
                       onClick={() => void refund()}
                     >
@@ -199,11 +221,11 @@ export default function Orders({ notify }: PageProps) {
                         ? "提交中…"
                         : detail.data.status === "refunding"
                           ? "重试原退款申请"
-                          : "申请全额退款"}
+                          : "确认全额退款"}
                     </button>
                   </div>
                 </>
-              )}
+              ))}
           </div>
         </Modal>
       )}

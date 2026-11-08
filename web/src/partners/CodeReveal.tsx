@@ -29,13 +29,13 @@ export default function CodeReveal({
               width="240"
               height="240"
             />
-            <p className="mono">
+            <p className="mono" style={{ textAlign: "center" }}>
               <strong>{resource.data.code.match(/.{1,4}/g)?.join("-")}</strong>
             </p>
             <p>
               用户微信登录后，在豆播的授权页扫码或输入激活码。该码仅能激活一个微信账号。
             </p>
-            <div className="business-actions">
+            <div className="modal-actions">
               <button
                 className="secondary"
                 onClick={async () => {

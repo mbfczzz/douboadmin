@@ -4,6 +4,7 @@ import {
   openTask,
   enterPage,
   openTab,
+  openPage,
   hasSession,
   login,
   error,
@@ -110,6 +111,9 @@ Page({
   },
   onPullDownRefresh() {
     void this.load();
+  },
+  works() {
+    openPage(this, { url: "/pages/works/index" });
   },
   create() {
     openTab(this, "/pages/create/index");

@@ -8,13 +8,14 @@
   font-size: 12px;
 }
 .error button {
-  padding: 2px 4px;
-  border: 0;
-  background: transparent;
+  min-height: 30px;
+  margin: -6px 0 -6px 8px;
+  padding: 2px 12px;
+  border: 1px solid #e0b4ab;
+  border-radius: 7px;
+  background: var(--surface);
   color: inherit;
   font-weight: 650;
-  text-decoration: underline;
-  text-underline-offset: 3px;
 }
 .toast {
   position: fixed;

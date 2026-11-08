@@ -34,29 +34,36 @@ export default function PaymentRecords() {
           }
         }}
       >
-        <input
-          name="q"
-          aria-label="搜索支付记录"
-          placeholder="订单号 / 微信交易号 / 用户编号"
-          maxLength={100}
-        />
-        <select name="status" aria-label="支付记录状态">
-          <option value="">全部已支付订单</option>
-          {["paid", "refunding", "refunded"].map((v) => (
-            <option key={v} value={v}>
-              {statuses[v]}
-            </option>
-          ))}
-        </select>
         <label>
-          开始日期（北京时间）
+          关键词
+          <input
+            name="q"
+            aria-label="搜索支付记录"
+            placeholder="订单号 / 微信交易号 / 用户编号"
+            maxLength={100}
+            size={30}
+          />
+        </label>
+        <label>
+          订单状态
+          <select name="status" aria-label="支付记录状态">
+            <option value="">全部已支付订单</option>
+            {["paid", "refunding", "refunded"].map((v) => (
+              <option key={v} value={v}>
+                {statuses[v]}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          到账开始（北京时间）
           <input name="from" type="date" aria-label="到账开始日期" />
         </label>
         <label>
-          结束日期
+          到账结束（北京时间）
           <input name="to" type="date" aria-label="到账结束日期" />
         </label>
-        <button className="secondary" type="submit">
+        <button className="primary" type="submit">
           查询
         </button>
         <button

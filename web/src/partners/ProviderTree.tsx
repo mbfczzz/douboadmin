@@ -91,8 +91,7 @@ function TreeNodes({
             <div className="provider-tree-identity">
               <b>{row.data.name}</b>
               <div className="provider-tree-detail quiet">
-                <ProviderId id={row.id} />
-                {" "}
+                <ProviderId id={row.id} />{" "}
                 {children.length > 0 && <span>{children.length} 个子级</span>}
               </div>
             </div>
@@ -117,10 +116,10 @@ function TreeNodes({
             </span>
           </div>
           <div className="provider-tree-actions">
-            <button className="secondary" onClick={() => add(item)}>
+            <button className="text-button" onClick={() => add(item)}>
               新增子级
             </button>
-            <button className="secondary" onClick={() => edit(item)}>
+            <button className="text-button" onClick={() => edit(item)}>
               编辑
             </button>
           </div>
@@ -180,7 +179,9 @@ export default function ProviderTree(props: Props) {
           }
         />
       )}
-      <div className="provider-tree-count quiet">共 {props.rows.length} 个服务商</div>
+      <div className="provider-tree-count quiet">
+        共 {props.rows.length} 个服务商
+      </div>
     </section>
   );
 }

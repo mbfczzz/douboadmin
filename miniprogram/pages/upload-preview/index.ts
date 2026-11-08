@@ -44,4 +44,7 @@ Page({
   back() {
     wx.navigateBack();
   },
+  zoom() {
+    if (this.data.path) wx.previewImage({ urls: [this.data.path] });
+  },
 });

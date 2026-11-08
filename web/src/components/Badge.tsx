@@ -1,9 +1,15 @@
 import { stateText } from "../api";
-export default function Badge({ state }: { state: string }) {
+export default function Badge({
+  state,
+  label,
+}: {
+  state: string;
+  label?: string;
+}) {
   return (
     <span className={"badge " + state}>
       <i />
-      {stateText[state] || state}
+      {label ?? (stateText[state] || state)}
     </span>
   );
 }

@@ -148,7 +148,8 @@
   margin: 17px 0 12px;
 }
 .works-heading .small {
-  font-size: 11px;
+  font-size: 12px;
+  font-weight: 400;
 }
 .common-heading {
   font-size: 16px;

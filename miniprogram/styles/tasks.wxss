@@ -11,21 +11,6 @@
   display: block;
   margin: 20rpx 0 15rpx;
 }
-.progress-track {
-  height: 6rpx;
-  background: #353b3e;
-  border-radius: 8rpx;
-  margin: 24rpx 0;
-}
-.progress-fill {
-  height: 6rpx;
-  background: #9bcbaa;
-  border-radius: 8rpx;
-}
-.task-meta {
-  font-size: 22rpx;
-  color: #a0a8ac;
-}
 .foot-actions {
   display: flex;
   gap: 20rpx;

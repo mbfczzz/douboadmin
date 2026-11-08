@@ -1,3 +1,4 @@
+import Badge from "../components/Badge";
 import { useState } from "react";
 import { date, type Row } from "../api";
 import type { PageProps } from "../navigation";
@@ -54,8 +55,24 @@ export default function Users({ notify }: PageProps) {
           },
           {
             title: "状态",
-            render: (r) =>
-              r.data.archived ? "已归档" : r.data.disabled ? "已停用" : "正常",
+            render: (r) => (
+              <Badge
+                state={
+                  r.data.archived
+                    ? "muted"
+                    : r.data.disabled
+                      ? "failed"
+                      : "succeeded"
+                }
+                label={
+                  r.data.archived
+                    ? "已归档"
+                    : r.data.disabled
+                      ? "已停用"
+                      : "正常"
+                }
+              />
+            ),
           },
           {
             title: "使用授权",

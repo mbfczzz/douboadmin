@@ -3,18 +3,21 @@
   margin: 12rpx 0 18rpx;
 }
 .mix-materials {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 14rpx;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
 }
 .mix-material,
 .mix-add {
-  width: 170rpx;
-  height: 170rpx;
+  height: calc((100vw - 86px) / 3);
   border-radius: 14rpx;
-  background: #29322d;
+  background: #272b2d;
   position: relative;
   overflow: hidden;
+}
+.mix-upload-music {
+  display: block;
+  margin-bottom: 8px;
 }
 .mix-material image {
   width: 100%;
@@ -28,12 +31,12 @@
   align-items: center;
   justify-content: center;
   gap: 12rpx;
-  color: #a7cbb3;
+  color: #9bcbaa;
   font-size: 23rpx;
 }
 .mix-add {
   height: 170rpx;
-  border: 1rpx dashed #61786a;
+  border: 1px dashed #577b62;
 }
 .mix-video text {
   max-width: 150rpx;

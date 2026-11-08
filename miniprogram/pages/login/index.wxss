@@ -1,5 +1,5 @@
 .login-page {
-  padding: 40px 24px calc(24px + env(safe-area-inset-bottom));
+  padding: 40px 20px calc(24px + env(safe-area-inset-bottom));
   text-align: center;
 }
 .login-brand {

@@ -15,7 +15,7 @@
     ><view class="biz-row biz-picker-row"
       ><text>背景音乐</text><text class="accent">{{musicLabel}} ›</text></view
     ></picker
-  ><text class="biz-link" bindtap="uploadMusic">上传自己的音乐</text
+  ><view class="biz-link mix-upload-music" bindtap="uploadMusic">上传自己的音乐</view
   ><text class="biz-label">背景音乐音量 {{musicVolume}}%</text
   ><slider
     min="0"

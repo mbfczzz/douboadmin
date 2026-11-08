@@ -1,4 +1,4 @@
-import { Image, Pencil, Copy, Trash2 } from "lucide-react";
+import { Image, Pencil, Copy, Trash2, Eye, EyeOff } from "lucide-react";
 import type { Row, Template, Model } from "../api";
 interface Props {
   r: Row<Template>;
@@ -66,6 +66,7 @@ export default function TemplateCard({
             复制
           </button>
           <button disabled={!!busy} onClick={() => onToggle(r)}>
+            {r.data.published ? <EyeOff size={13} /> : <Eye size={13} />}
             {r.data.published ? "下架" : "上架"}
           </button>
           <button

@@ -49,6 +49,9 @@
   font-size: 13px;
   line-height: 1.7;
 }
+.stage-note + .waiting-note {
+  margin-top: 8px;
+}
 .continue-create {
   display: inline-block;
   margin-top: 8px;
@@ -69,20 +72,12 @@
 .result video {
   height: 320px;
 }
-.demo-watermark {
-  position: absolute;
-  left: 10px;
-  top: 10px;
-  background: #131516bb;
-  font-size: 10px;
-  padding: 4px 7px;
-  border-radius: 4px;
-  color: #d5e6db;
-  pointer-events: none;
-}
 .task-detail-page .foot-actions {
   gap: 10px;
   margin: 12px 0 0;
+}
+.result-actions .danger-link {
+  color: #dab0a3;
 }
 .result-actions {
   margin-top: 8px;

@@ -137,11 +137,6 @@ export default function UserDetails({
       <div className="edit-form" aria-busy={busy}>
         <h3>{user.data.nickname}</h3>
         <p className="cell-note mono">{user.id}</p>
-        <UserProfileForm
-          user={user}
-          busy={busy}
-          onSave={(form) => void saveProfile(form)}
-        />
         <div className="business-metrics">
           {(
             [
@@ -192,7 +187,12 @@ export default function UserDetails({
             {busy ? "处理中…" : "确认调整积分"}
           </button>
         </div>
-        <details className="overview-details">
+        <UserProfileForm
+          user={user}
+          busy={busy}
+          onSave={(form) => void saveProfile(form)}
+        />
+        <details>
           <summary>
             账号状态管理 ·{" "}
             {user.data.archived
@@ -204,26 +204,28 @@ export default function UserDetails({
           <p className="quiet">
             填写上方操作原因后再变更状态；停用不释放授权名额。
           </p>
-          {!user.data.archived && (
-            <button
-              className={
-                user.data.disabled ? "secondary" : "secondary danger-text"
-              }
-              disabled={busy}
-              onClick={() => void status()}
-            >
-              {user.data.disabled ? "启用账号" : "停用账号"}
-            </button>
-          )}
-          {!user.data.archived && (
-            <button
-              className="secondary danger-text"
-              disabled={busy}
-              onClick={() => void archive()}
-            >
-              归档用户
-            </button>
-          )}
+          <div className="business-actions">
+            {!user.data.archived && (
+              <button
+                className={
+                  user.data.disabled ? "secondary" : "secondary danger-text"
+                }
+                disabled={busy}
+                onClick={() => void status()}
+              >
+                {user.data.disabled ? "启用账号" : "停用账号"}
+              </button>
+            )}
+            {!user.data.archived && (
+              <button
+                className="secondary danger-text"
+                disabled={busy}
+                onClick={() => void archive()}
+              >
+                归档用户
+              </button>
+            )}
+          </div>
         </details>
         <h3 className="business-section-title">积分流水</h3>
         <Table

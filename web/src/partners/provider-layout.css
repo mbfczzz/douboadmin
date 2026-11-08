@@ -1,9 +1,6 @@
 .partner-hub {
   container-type: inline-size;
 }
-.provider-add {
-  margin-left: auto;
-}
 @container (max-width: 960px) {
   .provider-tree-head {
     display: none;

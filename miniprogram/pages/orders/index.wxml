@@ -9,16 +9,18 @@
   <view wx:if="{{loadError}}" class="biz-error" bindtap="load"
     >{{loadError}} · 重试</view
   >
-  <view wx:if="{{!loading&&!needsLogin&&!rows.length}}" class="biz-empty"
+  <view wx:if="{{loading&&!needsLogin&&!rows.length}}" class="biz-empty">正在加载充值订单…</view>
+  <view wx:elif="{{!needsLogin&&!loadError&&!rows.length}}" class="biz-empty"
     >暂无充值订单</view
   >
   <view wx:for="{{rows}}" wx:key="id" class="biz-card"
     ><view class="row biz-card-head"
       ><text class="biz-heading">{{item.points}} 积分</text
-      ><text class="accent">{{item.state}}</text></view
-    ><text class="biz-value">¥{{item.amount}}</text
-    ><text class="biz-small biz-record-meta">{{item.time}}</text
-    ><text class="biz-small biz-record-meta" selectable>{{item.id}}</text
+      ><text class="order-state {{item.data.status}}">{{item.state}}</text></view
+    ><view class="row order-meta"
+      ><text class="order-amount">¥{{item.amount}}</text
+      ><text class="biz-small">{{item.time}}</text></view
+    ><text class="biz-small biz-record-meta" selectable>订单号 {{item.id}}</text
     ><text wx:if="{{item.data.status==='created'&&item.data.virtual.issued}}" class="biz-note">此支付单不能再次拉起支付。若已取消，可返回积分页重新购买；已付款请先查支付结果。</text
     ><view wx:if="{{item.data.status==='created'}}" class="biz-pair"
       ><view

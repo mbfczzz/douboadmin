@@ -49,7 +49,7 @@
         >
           复制短链</button
         ><text class="biz-note"
-          >{{share.publicDomainConfigured?'链接有效期 30 天，删除作品后失效。':'当前尚未配置公网域名，短链需部署后启用。'}}</text
+          >{{share.publicDomainConfigured?'链接有效期 30 天，删除作品后失效。':'分享链接暂未开放，可以先保存作品后分享。'}}</text
         ></block
       ></view
     ></block

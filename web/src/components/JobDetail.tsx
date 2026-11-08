@@ -31,8 +31,8 @@ export default function JobDetail({
           <dt>轮询 / 处理次数</dt>
           <dd>{detail.attempts}</dd>
         </dl>
-        <JobExecution key={detail.id} job={detail} />
         {detail.error && <div className="error">{detail.error}</div>}
+        <JobExecution key={detail.id} job={detail} />
         {detail.result &&
           (detail.input.kind === "chat" ? (
             <pre>{detail.result}</pre>

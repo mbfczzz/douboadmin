@@ -18,7 +18,7 @@
       ><text class="biz-label">可用积分</text
       ><text class="biz-value">{{available}}</text
       ><view class="row wallet-links"
-        ><text class="biz-small" bindtap="load">预留积分 {{held}} · 刷新</text
+        ><text class="biz-small wallet-refresh" bindtap="load">预留积分 {{held}} · 刷新</text
         ><text class="biz-link" bindtap="orders">充值订单 ›</text></view
       ></view
     >
@@ -70,7 +70,7 @@
           ><text class="biz-list-title">{{item.title}}</text
           ><text wx:if="{{item.note}}" class="biz-small ledger-note">{{item.note}}</text
           ><text class="biz-small ledger-time">{{item.time}}</text></view
-        ><text class="ledger-change">{{item.change}}</text></view
+        ><text class="ledger-change {{item.tone}}">{{item.change}}</text></view
       ></view
     >
   </block>

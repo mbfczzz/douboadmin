@@ -53,6 +53,7 @@ export default function QuotaRequests({
       />
       {detail && (
         <Modal
+          className="form-modal"
           title="名额申请审批"
           onClose={() => !command.busy && setDetail(null)}
         >
@@ -82,30 +83,40 @@ export default function QuotaRequests({
               }
             }}
           >
-            <fieldset disabled={command.busy}>
-              <p>申请 {detail.data.users} 个用户额度。</p>
-              <label>
-                审批结果
-                <select name="decision">
-                  <option value="approve">批准并划拨</option>
-                  <option value="reject">拒绝申请</option>
-                </select>
-              </label>
-              <label>
-                审批说明
-                <textarea
-                  name="reason"
-                  minLength={2}
-                  maxLength={200}
-                  required
-                />
-              </label>
-              <div className="modal-actions">
-                <button className="primary" disabled={command.busy}>
-                  保存审批
-                </button>
-              </div>
-            </fieldset>
+            <div className="form-body">
+              <fieldset disabled={command.busy}>
+                <p>申请 {detail.data.users} 个用户额度。</p>
+                <label>
+                  审批结果
+                  <select name="decision">
+                    <option value="approve">批准并划拨</option>
+                    <option value="reject">拒绝申请</option>
+                  </select>
+                </label>
+                <label>
+                  审批说明
+                  <textarea
+                    name="reason"
+                    minLength={2}
+                    maxLength={200}
+                    required
+                  />
+                </label>
+              </fieldset>
+            </div>
+            <div className="modal-actions">
+              <button
+                type="button"
+                className="secondary"
+                disabled={command.busy}
+                onClick={() => !command.busy && setDetail(null)}
+              >
+                取消
+              </button>
+              <button className="primary" disabled={command.busy}>
+                保存审批
+              </button>
+            </div>
           </form>
         </Modal>
       )}

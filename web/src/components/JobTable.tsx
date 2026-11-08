@@ -14,9 +14,9 @@ export default function JobTable({
         <thead>
           <tr>
             <th>创作内容</th>
-            <th>类型</th>
+            <th className="wide-only">类型</th>
             <th>状态</th>
-            <th>创建时间</th>
+            <th className="wide-only">创建时间</th>
             <th className="table-actions">操作</th>
           </tr>
         </thead>
@@ -43,11 +43,11 @@ export default function JobTable({
                   </div>
                 </div>
               </td>
-              <td>{kindText[j.input.kind]}</td>
+              <td className="wide-only">{kindText[j.input.kind]}</td>
               <td>
                 <Badge state={j.status} />
               </td>
-              <td>{date(j.createdAt)}</td>
+              <td className="wide-only">{date(j.createdAt)}</td>
               <td className="table-actions">
                 <button className="text-button" onClick={() => onDetail(j)}>
                   详情 <ArrowUpRight size={14} />

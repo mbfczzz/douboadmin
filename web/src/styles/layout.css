@@ -107,7 +107,9 @@ nav button.active {
   margin-right: 7px;
   border-radius: 50%;
   background: #7bd19a;
-  box-shadow: 0 0 0 3px #7bd19a1f;
+}
+.live-dot.off {
+  background: #e3b45c;
 }
 .main {
   width: calc(100% - 244px);
@@ -152,6 +154,7 @@ nav button.active {
   font: inherit;
 }
 .command-palette .search {
+  flex-direction: row;
   margin-bottom: 8px;
 }
 .command-list {

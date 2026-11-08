@@ -5,12 +5,14 @@
       去登录
     </button></view
   ><block wx:else
-    ><view class="row"
+    ><view class="row notice-head"
       ><text class="biz-small">未读 {{unread}}</text
       ><text class="biz-link" bindtap="readAll">全部已读</text></view
     ><view wx:if="{{loadError}}" class="biz-error" bindtap="load"
       >{{loadError}} · 重试</view
-    ><view wx:if="{{!loading&&!items.length}}" class="biz-empty"
+    ><view wx:if="{{loading&&!items.length}}" class="biz-empty"
+      >正在加载消息…</view
+    ><view wx:elif="{{!loadError&&!items.length}}" class="biz-empty"
       >暂时没有新消息</view
     ><view
       wx:for="{{items}}"
@@ -19,8 +21,8 @@
       data-id="{{item.id}}"
       bindtap="open"
       ><view class="row biz-card-head"
-        ><text class="biz-list-title"
-          >{{item.data.read?'':'● '}}{{item.data.title}}</text
+        ><text class="biz-list-title {{item.data.read?'':'unread'}}"
+          >{{item.data.title}}</text
         ><text class="biz-small">{{item.time}}</text></view
       ><text class="biz-note">{{item.data.content}}</text></view
     ></block

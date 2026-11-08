@@ -82,9 +82,12 @@
 .completed-heading {
   font-size: 15px;
   font-weight: 500;
-  margin: 20px 0 12px;
+  margin: 20px 0 16px;
 }
-.empty t-button {
-  display: block;
-  margin-top: 20px;
+.completed-more {
+  margin: -12px 0;
+  padding: 12px 0;
+  font-size: 12px;
+  font-weight: 400;
+  color: #a4acb1;
 }

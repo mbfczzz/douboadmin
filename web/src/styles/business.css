@@ -6,14 +6,15 @@
   margin-bottom: 20px;
   flex-wrap: wrap;
 }
-.payments-page .business-filters > input {
-  max-width: 260px;
-}
 .business-filters input {
   max-width: 360px;
 }
 .business-filters select {
   max-width: 180px;
+}
+.business-filters > label {
+  display: grid;
+  gap: 6px;
 }
 .business-actions {
   display: flex;
@@ -22,6 +23,7 @@
   flex-wrap: wrap;
 }
 .business-actions button:not(.primary, .secondary),
+.mobile-record-actions button:not(.primary, .secondary),
 .catalog-table button {
   border: 0;
   background: transparent;
@@ -34,7 +36,7 @@
   display: none;
 }
 .business-preview {
-  padding: 20px;
+  padding: 24px;
 }
 .business-preview img,
 .business-preview video {
@@ -158,7 +160,7 @@
     border-top: 1px solid var(--line);
   }
   .business-metrics {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   }
   .business-metrics .panel {
     padding: 16px;

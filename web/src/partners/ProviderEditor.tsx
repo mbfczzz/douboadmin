@@ -51,7 +51,7 @@ export default function ProviderEditor({
       }
       className="partner-editor"
       style={{
-        width: tab === "basic" ? "min(840px, 100%)" : "min(1180px, 100%)",
+        width: "min(1040px, 100%)",
         maxHeight: "92vh",
         display: "flex",
         flexDirection: "column",
@@ -111,11 +111,8 @@ export default function ProviderEditor({
           role="tabpanel"
           aria-labelledby={`${panelId}-${tab}`}
           tabIndex={0}
-          style={{
-            minHeight: 0,
-            overflow: "auto",
-            padding: tab === "basic" ? 0 : "20px 24px 24px",
-          }}
+          className={tab === "basic" ? undefined : "form-body"}
+          style={{ minHeight: 0, overflow: "auto" }}
         >
           {(resource.error || (resource.loading && !view)) && (
             <div className={tab === "basic" ? "edit-form" : undefined}>

@@ -11,10 +11,11 @@ export default function UserProfileForm({
   onSave: (form: HTMLFormElement) => void;
 }) {
   return (
-    <details className="overview-details">
+    <details>
       <summary>编辑小程序用户资料</summary>
       <form
         className="edit-form"
+        style={{ padding: "12px 0 0" }}
         onSubmit={(event) => {
           event.preventDefault();
           onSave(event.currentTarget);

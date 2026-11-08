@@ -61,6 +61,7 @@ export default function Payouts({ id, view, changed, notify }: Scope) {
       />
       {create && (
         <Modal
+          className="form-modal"
           title="申请提现"
           onClose={() => !command.busy && setCreate(false)}
         >
@@ -85,32 +86,48 @@ export default function Payouts({ id, view, changed, notify }: Scope) {
               }
             }}
           >
-            <fieldset disabled={command.busy}>
-              <label>
-                提现金额（元）
-                <input
-                  name="amount"
-                  type="number"
-                  min="0.01"
-                  step="0.01"
-                  required
-                />
-              </label>
-              <label>
-                说明
-                <textarea name="note" minLength={2} maxLength={200} required />
-              </label>
-              <div className="modal-actions">
-                <button className="primary" disabled={command.busy}>
-                  预留提现佣金
-                </button>
-              </div>
-            </fieldset>
+            <div className="form-body">
+              <fieldset disabled={command.busy}>
+                <label>
+                  提现金额（元）
+                  <input
+                    name="amount"
+                    type="number"
+                    min="0.01"
+                    step="0.01"
+                    required
+                  />
+                </label>
+                <label>
+                  说明
+                  <textarea
+                    name="note"
+                    minLength={2}
+                    maxLength={200}
+                    required
+                  />
+                </label>
+              </fieldset>
+            </div>
+            <div className="modal-actions">
+              <button
+                type="button"
+                className="secondary"
+                disabled={command.busy}
+                onClick={() => !command.busy && setCreate(false)}
+              >
+                取消
+              </button>
+              <button className="primary" disabled={command.busy}>
+                预留提现佣金
+              </button>
+            </div>
           </form>
         </Modal>
       )}
       {detail && (
         <Modal
+          className="form-modal"
           title="处理提现"
           onClose={() => !command.busy && setDetail(null)}
         >
@@ -145,30 +162,40 @@ export default function Payouts({ id, view, changed, notify }: Scope) {
               }
             }}
           >
-            <fieldset disabled={command.busy}>
-              <p>{money(detail.data.amountFen)}</p>
-              <label>
-                处理结果
-                <select name="status">
-                  <option value="paid">确认已线下打款</option>
-                  <option value="cancelled">取消提现并解冻</option>
-                </select>
-              </label>
-              <label>
-                打款流水号 / 取消原因
-                <textarea
-                  name="reference"
-                  minLength={4}
-                  maxLength={200}
-                  required
-                />
-              </label>
-              <div className="modal-actions">
-                <button className="primary" disabled={command.busy}>
-                  保存提现结果
-                </button>
-              </div>
-            </fieldset>
+            <div className="form-body">
+              <fieldset disabled={command.busy}>
+                <p>{money(detail.data.amountFen)}</p>
+                <label>
+                  处理结果
+                  <select name="status">
+                    <option value="paid">确认已线下打款</option>
+                    <option value="cancelled">取消提现并解冻</option>
+                  </select>
+                </label>
+                <label>
+                  打款流水号 / 取消原因
+                  <textarea
+                    name="reference"
+                    minLength={4}
+                    maxLength={200}
+                    required
+                  />
+                </label>
+              </fieldset>
+            </div>
+            <div className="modal-actions">
+              <button
+                type="button"
+                className="secondary"
+                disabled={command.busy}
+                onClick={() => !command.busy && setDetail(null)}
+              >
+                取消
+              </button>
+              <button className="primary" disabled={command.busy}>
+                保存提现结果
+              </button>
+            </div>
           </form>
         </Modal>
       )}

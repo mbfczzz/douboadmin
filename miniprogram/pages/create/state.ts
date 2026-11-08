@@ -34,6 +34,7 @@ export const creationData = {
   modelMenuUp: false,
   assetsOpen: false,
   expanded: false,
+  expandedTop: 0,
   restoring: false,
   restoreError: "",
   modelsLoading: true,

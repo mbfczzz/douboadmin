@@ -1,1 +1,34 @@
 @import "../../styles/business.wxss";
+.biz-card-head .biz-heading {
+  margin-bottom: 0;
+}
+.order-state {
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: #272b2d;
+  color: #a0a8ac;
+  font-size: 12px;
+  line-height: 18px;
+}
+.order-state.paid {
+  background: #25372c;
+  color: #9bcbaa;
+}
+.order-state.created,
+.order-state.refunding {
+  background: #3a3122;
+  color: #e3c48a;
+}
+.order-meta {
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin-top: 10px;
+}
+.order-amount {
+  flex: 1;
+  min-width: 0;
+  font-size: 17px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}

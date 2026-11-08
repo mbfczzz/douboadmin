@@ -68,6 +68,7 @@ export default function Memberships({
       />
       {detail && (
         <Modal
+          className="form-modal"
           title="管理用户授权"
           onClose={() => !command.busy && setDetail(null)}
         >
@@ -105,36 +106,46 @@ export default function Memberships({
               }
             }}
           >
-            <fieldset disabled={command.busy}>
-              <p>{detail.id}</p>
-              <label>
-                操作
-                <select
-                  name="status"
-                  defaultValue={
-                    detail.data.status === "active" ? "disabled" : "active"
-                  }
-                >
-                  <option value="active">恢复授权</option>
-                  <option value="disabled">停用授权（保留名额）</option>
-                  <option value="unbound">解绑授权（释放名额）</option>
-                </select>
-              </label>
-              <label>
-                原因
-                <textarea
-                  name="reason"
-                  minLength={2}
-                  maxLength={200}
-                  required
-                />
-              </label>
-              <div className="modal-actions">
-                <button className="primary" disabled={command.busy}>
-                  保存授权状态
-                </button>
-              </div>
-            </fieldset>
+            <div className="form-body">
+              <fieldset disabled={command.busy}>
+                <p>{detail.id}</p>
+                <label>
+                  操作
+                  <select
+                    name="status"
+                    defaultValue={
+                      detail.data.status === "active" ? "disabled" : "active"
+                    }
+                  >
+                    <option value="active">恢复授权</option>
+                    <option value="disabled">停用授权（保留名额）</option>
+                    <option value="unbound">解绑授权（释放名额）</option>
+                  </select>
+                </label>
+                <label>
+                  原因
+                  <textarea
+                    name="reason"
+                    minLength={2}
+                    maxLength={200}
+                    required
+                  />
+                </label>
+              </fieldset>
+            </div>
+            <div className="modal-actions">
+              <button
+                type="button"
+                className="secondary"
+                disabled={command.busy}
+                onClick={() => !command.busy && setDetail(null)}
+              >
+                取消
+              </button>
+              <button className="primary" disabled={command.busy}>
+                保存授权状态
+              </button>
+            </div>
           </form>
         </Modal>
       )}

@@ -27,6 +27,7 @@
       </view>
     </view>
     <text wx:if="{{template.data.description}}" class="template-description">{{template.data.description}}</text>
+    <view class="detail-divider" />
     <view class="row">
       <text class="section-title upload-title">上传商品照片</text>
       <text class="small muted">
@@ -84,7 +85,7 @@
         <text class="submit-status">
           {{assets.length>=template.data.requiredImages?(template.data.requiredImages?'照片已就绪，可以生成':'可以直接生成'):'还需 '+(template.data.requiredImages-assets.length)+' 张照片'}}
         </text>
-        <text>已添加 {{assets.length}} 张</text>
+        <text wx:if="{{quoteText}}" class="submit-quote">{{quoteText}}</text>
       </view>
       <t-button
         theme="primary"
@@ -96,6 +97,7 @@
       >
         生成同款
       </t-button>
+      <text class="note muted">上传不扣费 · 确认生成后提交任务</text>
 
     </view>
   </view>

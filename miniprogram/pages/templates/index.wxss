@@ -7,6 +7,9 @@
 .templates-page .filter-scroll {
   margin: 0 0 16px;
 }
+.templates-page .filter.active {
+  font-weight: 700;
+}
 .templates-page .filter {
   font-size: 14px;
   line-height: 20px;
@@ -23,13 +26,15 @@
   padding: 18rpx 24rpx;
   gap: 20rpx;
   border-radius: 14rpx;
-  margin-top: 12rpx;
+  margin: 12rpx 0 12px;
 }
 .search-field input {
   flex: 1;
   font-size: 25rpx;
 }
 .search-field text {
+  margin: -12px -12px -12px 0;
+  padding: 12px;
   font-size: 25rpx;
   color: #9bcbaa;
 }

@@ -28,9 +28,6 @@
   display: block;
   line-height: 1.8;
 }
-.demo-label {
-  margin-top: 25rpx;
-}
 .suggestions {
   margin: 8rpx 0 45rpx;
 }

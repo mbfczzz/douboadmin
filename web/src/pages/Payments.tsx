@@ -24,7 +24,13 @@ export default function Payments({ notify, navigate }: PageProps) {
         </button>
       </PageHeader>
       <RequestState error={settings.error} retry={settings.reload} />
-      <div className="notice">
+      <div
+        className={
+          settings.loading || settings.data?.capabilities.payment
+            ? "notice"
+            : "notice warning"
+        }
+      >
         <div>
           <b>
             {settings.loading

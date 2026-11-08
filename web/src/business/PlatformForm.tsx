@@ -49,10 +49,11 @@ export default function PlatformForm({
       setBusy(false);
     }
   }
+  // Amounts are stored in fen; operators edit them in yuan (scale 100).
   const fields: [keyof Platform, string, number][] = [
     ["pointsPerYuan", "每 1 元兑换积分", 1],
-    ["minRechargeFen", "最低充值金额（分）", 1],
-    ["maxRechargeFen", "最高充值金额（分）", 1],
+    ["minRechargeFen", "最低充值金额（元）", 100],
+    ["maxRechargeFen", "最高充值金额（元）", 100],
     ["alarmFailures", "每小时失败告警阈值", 1],
     ["alarmQueueMinutes", "排队告警阈值（分钟）", 1],
   ];
@@ -66,16 +67,18 @@ export default function PlatformForm({
     >
       <h2>业务设置</h2>
       <div className="form-grid">
-        {fields.map(([key, label, min]) => (
+        {fields.map(([key, label, scale]) => (
           <label key={key}>
             {label}
             <input
               type="number"
               disabled={busy}
-              min={min}
-              step="1"
-              value={Number(value[key])}
-              onChange={(e) => patch({ [key]: Number(e.target.value) })}
+              min={1 / scale}
+              step={1 / scale}
+              value={Number(value[key]) / scale}
+              onChange={(e) =>
+                patch({ [key]: Math.round(Number(e.target.value) * scale) })
+              }
             />
           </label>
         ))}

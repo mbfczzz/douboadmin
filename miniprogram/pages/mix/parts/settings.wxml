@@ -49,6 +49,7 @@
       bindtap="option"
       >1:1</view
     ></view
+  ><view class="biz-label">分辨率</view
   ><view class="biz-tabs"
     ><view
       class="{{resolution==='720p'?'selected':''}}"

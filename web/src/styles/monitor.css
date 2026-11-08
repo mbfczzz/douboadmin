@@ -115,12 +115,15 @@
   grid-column: 2;
   grid-row: 1 / 3;
 }
-.monitor-connections ul {
+.monitor-connections ul,
+.service-config ul {
+  flex: 1;
   list-style: none;
   margin: 0;
   padding: 0 20px 6px;
 }
-.monitor-connections li {
+.monitor-connections li,
+.service-config li {
   display: flex;
   justify-content: space-between;
   padding: 14px 0;

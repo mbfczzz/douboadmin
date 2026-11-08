@@ -28,7 +28,7 @@
   gap: 16px;
   padding: 21px 24px;
   border-bottom: 1px solid var(--line);
-  background: #fffffff5;
+  background: var(--surface);
 }
 .modal h2 {
   margin: 0;
@@ -40,6 +40,16 @@
 }
 .modal > header .icon {
   flex-shrink: 0;
+}
+.modal details {
+  margin-top: 16px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+}
+.modal summary {
+  padding: 8px 0;
+  font-weight: 600;
+  cursor: pointer;
 }
 .modal fieldset {
   border: 0;
@@ -88,7 +98,7 @@
 .form-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
+  gap: 0 16px;
 }
 .edit-form .checkbox {
   flex-direction: row;
@@ -97,6 +107,7 @@
 input[type="checkbox"] {
   width: 16px;
   min-height: 16px;
+  margin: 0;
   accent-color: var(--accent);
 }
 .modal-actions {

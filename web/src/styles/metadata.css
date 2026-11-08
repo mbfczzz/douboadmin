@@ -1,6 +1,6 @@
 dl {
   display: grid;
-  grid-template-columns: 110px minmax(0, 1fr);
+  grid-template-columns: 140px minmax(0, 1fr);
   gap: 13px;
   font-size: 13px;
   margin: 20px 0;

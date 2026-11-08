@@ -63,7 +63,6 @@
     opacity: 0.85;
   }
 }
-.chip,
 .ratio,
 .resolution-option,
 .mode-tab {
@@ -93,7 +92,6 @@
   .skeleton {
     animation: none;
   }
-  .chip,
   .ratio,
   .resolution-option,
   .mode-tab,

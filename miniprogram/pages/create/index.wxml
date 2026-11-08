@@ -20,7 +20,7 @@
   </view>
   <view wx:if="{{modelError}}" class="error-box" bindtap="loadModels">{{modelError}}</view>
   <view wx:if="{{parameterError}}" class="error-box">{{parameterError}}</view>
-  <view class="workspace {{expanded?'expanded':''}} {{showModels?'model-open':''}}">
+  <view class="workspace {{expanded?'expanded':''}} {{showModels?'model-open':''}}" style="{{expanded&&expandedTop?'top:'+expandedTop+'px':''}}">
     <scroll-view scroll-x class="reference-strip">
       <view class="reference-items">
         <view

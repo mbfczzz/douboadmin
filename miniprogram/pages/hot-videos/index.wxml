@@ -13,7 +13,7 @@
       搜索
     </button></view
   ><view wx:if="{{!enabled}}" class="biz-error"
-    >抖音数据接口尚未配置，可以先上传自己的素材。<button
+    >热门视频暂不可用，可以先上传自己的素材。<button
       class="biz-action biz-secondary"
       bindtap="upload"
     >

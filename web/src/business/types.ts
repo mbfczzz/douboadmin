@@ -135,6 +135,18 @@ export const statuses: Record<string, string> = {
   approved: "已通过",
   rejected: "未通过",
 };
+// Badge tone for each business status; unknown states render neutral.
+export const statusTones: Record<string, string> = {
+  created: "queued",
+  pending: "queued",
+  refunding: "running",
+  processing: "running",
+  paid: "succeeded",
+  succeeded: "succeeded",
+  approved: "succeeded",
+  abnormal: "failed",
+  rejected: "failed",
+};
 export const ledgerLabels: Record<string, string> = {
   topup: "充值到账",
   admin_adjust: "管理员调整",

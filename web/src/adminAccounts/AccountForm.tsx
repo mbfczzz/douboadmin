@@ -75,6 +75,7 @@ export default function AccountForm({
   }
   return (
     <Modal
+      className="form-modal"
       title={row ? "编辑管理账号" : "添加管理账号"}
       onClose={() => !busy && onClose()}
     >
@@ -86,79 +87,78 @@ export default function AccountForm({
           void submit(e.currentTarget);
         }}
       >
-        <label>
-          登录账号
-          <input
-            name="username"
-            defaultValue={row?.data.username}
-            disabled={!!row || busy}
-            minLength={3}
-            maxLength={32}
-            required
-          />
-        </label>
-        <label>
-          姓名
-          <input
-            name="name"
-            defaultValue={row?.data.name}
-            disabled={busy}
-            maxLength={50}
-            required
-          />
-        </label>
-        <label>
-          手机号
-          <input
-            name="phone"
-            defaultValue={row?.data.phone}
-            disabled={busy}
-            inputMode="tel"
-          />
-        </label>
-        <label>
-          角色
-          <select
-            name="role"
-            defaultValue={row?.data.role || "operator"}
-            disabled={busy}
-          >
-            <option value="operator">平台运营</option>
-            <option value="super_admin">超级管理员</option>
-          </select>
-        </label>
-        <label>
-          {row ? "重置密码（不修改请留空）" : "初始密码"}
-          <input
-            name="password"
-            type="password"
-            minLength={16}
-            maxLength={128}
-            required={!row}
-            disabled={busy}
-            autoComplete="new-password"
-          />
-        </label>
-        {row && (
-          <label className="checkbox">
+        <div className="form-body">
+          <label>
+            登录账号
             <input
-              name="disabled"
-              type="checkbox"
-              defaultChecked={row.data.disabled}
-              disabled={busy}
-            />{" "}
-            停用账号
+              name="username"
+              defaultValue={row?.data.username}
+              disabled={!!row || busy}
+              minLength={3}
+              maxLength={32}
+              required
+            />
           </label>
-        )}
-        {error && (
-          <div className="error" role="alert">
-            {error}
-          </div>
-        )}
+          <label>
+            姓名
+            <input
+              name="name"
+              defaultValue={row?.data.name}
+              disabled={busy}
+              maxLength={50}
+              required
+            />
+          </label>
+          <label>
+            手机号
+            <input
+              name="phone"
+              defaultValue={row?.data.phone}
+              disabled={busy}
+              inputMode="tel"
+            />
+          </label>
+          <label>
+            角色
+            <select
+              name="role"
+              defaultValue={row?.data.role || "operator"}
+              disabled={busy}
+            >
+              <option value="operator">平台运营</option>
+              <option value="super_admin">超级管理员</option>
+            </select>
+          </label>
+          <label>
+            {row ? "重置密码（不修改请留空）" : "初始密码"}
+            <input
+              name="password"
+              type="password"
+              minLength={16}
+              maxLength={128}
+              required={!row}
+              disabled={busy}
+              autoComplete="new-password"
+            />
+          </label>
+          {row && (
+            <label className="checkbox">
+              <input
+                name="disabled"
+                type="checkbox"
+                defaultChecked={row.data.disabled}
+                disabled={busy}
+              />{" "}
+              停用账号
+            </label>
+          )}
+          {error && (
+            <div className="error" role="alert">
+              {error}
+            </div>
+          )}
+        </div>
         <div className="modal-actions">
-          <button className="primary" disabled={busy}>
-            {busy ? "保存中…" : "保存账号"}
-          </button>
           {row && (
             <button
               type="button"
@@ -169,6 +169,17 @@ export default function AccountForm({
               归档账号
             </button>
           )}
+          <button
+            type="button"
+            className="secondary"
+            disabled={busy}
+            onClick={onClose}
+          >
+            取消
+          </button>
+          <button className="primary" disabled={busy}>
+            {busy ? "保存中…" : "保存账号"}
+          </button>
         </div>
       </form>
     </Modal>

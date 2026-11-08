@@ -247,7 +247,7 @@ export default function Templates({ notify }: PageProps) {
           }
         />
       )}
-      <div className="panel">
+      <div>
         <Pagination
           total={filtered.length}
           size={12}

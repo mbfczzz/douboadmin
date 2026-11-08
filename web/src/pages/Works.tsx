@@ -1,3 +1,4 @@
+import Badge from "../components/Badge";
 import { useState } from "react";
 import { api, date, type Job } from "../api";
 import type { PageProps } from "../navigation";
@@ -62,13 +63,23 @@ export default function Works({ notify }: PageProps) {
           {
             title: "审核",
             render: (j) =>
-              j.reviewStatus === "approved"
-                ? "已通过"
-                : j.reviewStatus === "rejected"
-                  ? "未通过"
-                  : "待审核",
+              j.reviewStatus === "approved" ? (
+                <Badge state="succeeded" label="已通过" />
+              ) : j.reviewStatus === "rejected" ? (
+                <Badge state="failed" label="未通过" />
+              ) : (
+                <Badge state="queued" label="待审核" />
+              ),
           },
-          { title: "状态", render: (j) => (j.deleted ? "已删除" : "正常") },
+          {
+            title: "状态",
+            render: (j) => (
+              <Badge
+                state={j.deleted ? "muted" : "succeeded"}
+                label={j.deleted ? "已删除" : "正常"}
+              />
+            ),
+          },
           { title: "时间", render: (j) => date(j.createdAt) },
           {
             title: "操作",

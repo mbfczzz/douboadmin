@@ -34,6 +34,7 @@ export function ledgerView(row: Row<Ledger>) {
     change: settling
       ? "结算 " + points(-entry.heldDelta)
       : (entry.availableDelta > 0 ? "+" : "") + points(entry.availableDelta),
+    tone: !settling && entry.availableDelta > 0 ? "plus" : "",
     time: date(row.createdAt),
   };
 }

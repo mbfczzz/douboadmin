@@ -1,5 +1,8 @@
 .primary,
 .secondary {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
   min-height: 40px;
   padding: 9px 15px;
   border-radius: 8px;

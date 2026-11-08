@@ -1,1 +1,14 @@
 @import "../../styles/business.wxss";
+.notice-head {
+  margin-bottom: 8px;
+}
+.unread::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin: 0 8px 2px 0;
+  border-radius: 50%;
+  background: #9bcbaa;
+  vertical-align: middle;
+}

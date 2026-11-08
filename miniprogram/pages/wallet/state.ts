@@ -32,6 +32,7 @@ export const walletData = {
     title: string;
     note: string;
     change: string;
+    tone: string;
     time: string;
   }>,
 };

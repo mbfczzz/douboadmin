@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
-import { Plus, RefreshCw } from "lucide-react";
+import { Plus } from "lucide-react";
+import PageHeader from "../components/PageHeader";
 import RequestState, { LoadingState } from "../components/RequestState";
 import { useResource } from "../hooks/useResource";
 import type { Notify } from "../navigation";
@@ -45,6 +46,20 @@ export default function Providers({ notify }: { notify: Notify }) {
     });
   return (
     <>
+      <PageHeader
+        page="partners"
+        loading={resource.loading}
+        onRefresh={() => void resource.reload()}
+      >
+        <button
+          type="button"
+          className="primary"
+          onClick={() => setEditing({ parent: "root" })}
+        >
+          <Plus size={16} aria-hidden="true" />
+          新增服务商
+        </button>
+      </PageHeader>
       <h2>服务商列表</h2>
       <form
         className="business-filters provider-toolbar"
@@ -56,23 +71,6 @@ export default function Providers({ notify }: { notify: Notify }) {
           value={query}
           onChange={(event) => setQuery(event.target.value)}
         />
-        <button
-          type="button"
-          className="secondary"
-          disabled={resource.loading}
-          onClick={() => void resource.reload()}
-        >
-          <RefreshCw size={16} aria-hidden="true" />
-          {resource.loading ? "刷新中" : "刷新"}
-        </button>
-        <button
-          type="button"
-          className="primary provider-add"
-          onClick={() => setEditing({ parent: "root" })}
-        >
-          <Plus size={16} aria-hidden="true" />
-          新增服务商
-        </button>
       </form>
       <RequestState
         loading={resource.loading && !resource.data}

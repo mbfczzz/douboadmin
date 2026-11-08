@@ -154,9 +154,12 @@ export default function Models({ notify }: PageProps) {
               <tr>
                 <th>模型</th>
                 <th>类型</th>
-                <th>上游基础消耗</th>
-                <th>生成积分配置</th>
-                <th title="最近 200 条生成任务中的使用次数">
+                <th className="wide-only">上游基础消耗</th>
+                <th className="wide-only">生成积分配置</th>
+                <th
+                  className="wide-only"
+                  title="最近 200 条生成任务中的使用次数"
+                >
                   任务数<small className="cell-note">最近 200 条</small>
                 </th>
                 <th>状态</th>
@@ -185,12 +188,12 @@ export default function Models({ notify }: PageProps) {
                     </div>
                   </td>
                   <td>{modelKinds[r.data.kind] || r.data.kind}</td>
-                  <td>{r.data.creditCost} 点起</td>
-                  <td>
+                  <td className="wide-only">{r.data.creditCost} 点起</td>
+                  <td className="wide-only">
                     {r.data.points}
                     <small className="cell-note">尚未扣费</small>
                   </td>
-                  <td>{r.data.recentJobs}</td>
+                  <td className="wide-only">{r.data.recentJobs}</td>
                   <td>
                     <div className="model-state">
                       <button

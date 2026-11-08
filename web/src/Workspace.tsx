@@ -150,7 +150,9 @@ export default function Workspace({
           ))}
         </nav>
         <div className="sidebar-bottom">
-          <span className="live-dot" />
+          <span
+            className={config?.relayConfigured ? "live-dot" : "live-dot off"}
+          />
           {config?.relayConfigured ? "中转服务已配置" : "中转服务未配置"}
           <button onClick={logout}>
             <LogOut size={16} />

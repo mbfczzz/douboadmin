@@ -21,7 +21,9 @@ test("quote management pages load real APIs and report missing services", async 
     ).toBeVisible();
     await expect(page.getByRole("alert")).toHaveCount(0);
   }
-  await expect(page.getByText(/微信支付：待配置/)).toBeVisible();
+  await expect(
+    page.getByRole("listitem").filter({ hasText: "微信支付" }),
+  ).toContainText("未配置");
   await page.getByRole("button", { name: "运行监控", exact: true }).click();
   await expect(page.getByText("在线", { exact: true }).first()).toBeVisible();
   await page.screenshot({

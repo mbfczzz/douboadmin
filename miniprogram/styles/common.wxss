@@ -19,7 +19,7 @@ image {
   padding: 20rpx 38rpx calc(160rpx + env(safe-area-inset-bottom));
 }
 .subpage {
-  padding: 20rpx 38rpx calc(50rpx + env(safe-area-inset-bottom));
+  padding: 24px 20px calc(25px + env(safe-area-inset-bottom));
 }
 .muted {
   color: #a0a8ac;
@@ -39,11 +39,6 @@ image {
   justify-content: space-between;
   gap: 16rpx;
 }
-.flex {
-  display: flex;
-  align-items: center;
-  gap: 16rpx;
-}
 .section-title {
   display: block;
   font-size: 30rpx;
@@ -57,11 +52,6 @@ image {
 }
 .row.section-title {
   display: flex;
-}
-.divider {
-  height: 1rpx;
-  background: #353b3e;
-  margin: 32rpx 0;
 }
 .text-button {
   background: transparent;
@@ -77,16 +67,6 @@ image {
   margin: 24rpx 0;
   line-height: 1.7;
 }
-.demo-label {
-  display: inline-flex;
-  align-items: center;
-  gap: 8rpx;
-  background: #25372c;
-  color: #9bcbaa;
-  border-radius: 8rpx;
-  padding: 8rpx 14rpx;
-  font-size: 20rpx;
-}
 .empty {
   padding: 100rpx 20rpx;
   text-align: center;
@@ -95,8 +75,13 @@ image {
 .empty .title {
   display: block;
   color: #e9eceb;
+  font-weight: 500;
   font-size: 30rpx;
   margin: 24rpx 0 14rpx;
+}
+.empty t-button {
+  display: block;
+  margin-top: 20px;
 }
 .empty .desc {
   font-size: 24rpx;
@@ -117,29 +102,6 @@ image {
   justify-content: center;
   padding: 80rpx;
 }
-.chip-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 14rpx;
-}
-.chip {
-  background: #1c1f21;
-  border: 1rpx solid #353b3e;
-  color: #a0a8ac;
-  border-radius: 12rpx;
-  font-size: 25rpx;
-  line-height: 1.4;
-  padding: 18rpx 24rpx;
-  min-height: 72rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.chip.selected {
-  background: #25372c;
-  border-color: #577b62;
-  color: #bcdcc5;
-}
 .queue-link {
   display: flex;
   align-items: center;
@@ -158,11 +120,6 @@ image {
   font-size: 23rpx;
   margin-top: 8rpx;
 }
-.field-label {
-  font-size: 28rpx;
-  margin-bottom: 20rpx;
-  display: block;
-}
 .form-input {
   background: #1c1f21;
   border: 1rpx solid #353b3e;
@@ -175,21 +132,6 @@ image {
 .sheet {
   padding: 30rpx 38rpx calc(40rpx + env(safe-area-inset-bottom));
   color: #e9eceb;
-}
-.sheet-title {
-  font-size: 34rpx;
-  font-weight: 600;
-  margin-bottom: 30rpx;
-}
-.sheet-row {
-  padding: 28rpx 12rpx;
-  border-bottom: 1rpx solid #353b3e;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.sheet-row.selected {
-  color: #9bcbaa;
 }
 .pill {
   font-size: 21rpx;
@@ -209,50 +151,6 @@ image {
 .pill.running {
   background: #26373b;
   color: #a1cad1;
-}
-.attachment {
-  width: 112rpx;
-  position: relative;
-  flex-shrink: 0;
-}
-.attachment image {
-  width: 112rpx;
-  height: 112rpx;
-  border-radius: 14rpx;
-  object-fit: cover;
-}
-.attachment .remove {
-  position: absolute;
-  top: -9rpx;
-  right: -9rpx;
-  background: #404a46;
-  border-radius: 50%;
-  width: 36rpx;
-  height: 36rpx;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-.attachment .file-icon {
-  height: 112rpx;
-  background: #272b2d;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border-radius: 14rpx;
-}
-.attachment .filename {
-  font-size: 20rpx;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  margin-top: 10rpx;
-  color: #a0a8ac;
-}
-.attachments {
-  display: flex;
-  gap: 20rpx;
-  flex-wrap: wrap;
 }
 .filter-scroll {
   white-space: nowrap;

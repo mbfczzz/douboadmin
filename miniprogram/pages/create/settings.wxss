@@ -54,27 +54,27 @@
   gap: 8px;
 }
 .ratio {
-  height: 60px;
+  height: 58px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 4px;
-  color: #aeb9bc;
-  background: #1a1e20;
-  border: 1px solid #2d3437;
+  color: #a0a8ac;
+  background: transparent;
+  border: 1px solid #353b3e;
   border-radius: 8px;
 }
 .ratio.selected {
-  color: #c5e2ce;
-  border-color: #779c83;
+  color: #9bcbaa;
+  border-color: #577b62;
   background: #25372c;
 }
 .ratio-pressed {
   opacity: 0.75;
 }
 .ratio-label {
-  font-size: 12px;
+  font-size: 13px;
   line-height: 16px;
   font-weight: 500;
 }

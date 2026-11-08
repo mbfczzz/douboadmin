@@ -1,4 +1,6 @@
+import Badge from "../components/Badge";
 import { useState } from "react";
+import { Plus } from "lucide-react";
 import { date, type Row } from "../api";
 import type { PageProps } from "../navigation";
 import { useResource } from "../hooks/useResource";
@@ -20,6 +22,7 @@ export default function AdminAccounts({ notify }: PageProps) {
       actions={
         resource.data?.canManage ? (
           <button className="primary" onClick={() => setEditing(null)}>
+            <Plus size={16} />
             添加管理账号
           </button>
         ) : undefined
@@ -43,7 +46,12 @@ export default function AdminAccounts({ notify }: PageProps) {
           { title: "手机号", render: (row) => row.data.phone || "未填写" },
           {
             title: "状态",
-            render: (row) => (row.data.disabled ? "已停用" : "正常"),
+            render: (row) => (
+              <Badge
+                state={row.data.disabled ? "failed" : "succeeded"}
+                label={row.data.disabled ? "已停用" : "正常"}
+              />
+            ),
           },
           {
             title: "最后登录",

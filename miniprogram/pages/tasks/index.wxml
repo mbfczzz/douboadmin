@@ -54,7 +54,10 @@
         >
       </view>
     </view>
-    <view class="completed-heading" wx:if="{{completed.length}}">最近完成</view>
+    <view class="row completed-heading" wx:if="{{completed.length}}">
+      <text>最近完成</text>
+      <text class="completed-more" bindtap="works">查看更多 ›</text>
+    </view>
     <view class="completed-grid">
       <view
         class="completed-item content-reveal"

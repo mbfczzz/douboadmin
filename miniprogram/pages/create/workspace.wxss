@@ -53,6 +53,11 @@
   border-radius: 50%;
   background: #404a46;
 }
+.reference-remove::after {
+  content: "";
+  position: absolute;
+  inset: -12px;
+}
 .expand-editor {
   position: absolute;
   right: 8px;
