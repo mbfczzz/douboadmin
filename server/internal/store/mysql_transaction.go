@@ -41,6 +41,9 @@ func (t *mysqlTransaction) record(ns, id, lock string) (r core.Record, err error
 }
 func (t *mysqlTransaction) Get(ns, id string) (core.Record, error) { return t.record(ns, id, "") }
 func (t *mysqlTransaction) Lock(ns string, initial core.Record) (core.Record, error) {
+	if len(initial.Data) == 0 {
+		return t.record(ns, initial.ID, " FOR UPDATE")
+	}
 	_, err := t.tx.ExecContext(t.ctx, `INSERT INTO records(namespace,id,owner_id,version,data) VALUES(?,?,?,1,?) ON DUPLICATE KEY UPDATE id=id`, ns, initial.ID, initial.Owner, string(initial.Data))
 	if err != nil {
 		return initial, err

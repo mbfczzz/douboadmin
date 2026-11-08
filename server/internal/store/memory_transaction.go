@@ -46,6 +46,9 @@ func (t *memoryTransaction) Get(ns, id string) (core.Record, error) {
 	return copyRecord(r), nil
 }
 func (t *memoryTransaction) Lock(ns string, r core.Record) (core.Record, error) {
+	if len(r.Data) == 0 {
+		return t.Get(ns, r.ID)
+	}
 	if old, e := t.Get(ns, r.ID); e == nil {
 		return old, nil
 	}

@@ -87,6 +87,8 @@
 
 运行：服务端 `go test ./internal/virtualpay ./internal/api ./internal/billing ./internal/payments ./internal/wechat`；小程序 `npm run test:virtual-payment`、`npm run test:payment`、`npm run build`。
 
+支付签发还须使用真实 MySQL 回归：将 `MYSQL_TEST_DSN` 指向专用、名称含 `_test` 的测试数据库，在 `server` 目录运行 `go test ./internal/store ./internal/virtualpay -run 'TestRecordLockContracts|TestMySQLVirtualSignatureOnceAndSnapshotSettlement' -count=1`。用例验证已有订单行锁、缺失订单不创建占位记录、两实例并发只签发一次，以及套餐到账和退款幂等；不请求微信、不产生真实付款。未设置该变量时 MySQL 用例跳过，不能据此视为数据库支付链路已通过。
+
 ## 官方协议来源
 
 - https://developers.weixin.qq.com/miniprogram/dev/platform-capabilities/business-capabilities/virtual-payment.html

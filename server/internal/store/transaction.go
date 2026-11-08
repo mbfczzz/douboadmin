@@ -9,6 +9,7 @@ import (
 type Transaction interface {
 	HasRecords(string) (bool, error)
 	Get(string, string) (core.Record, error)
+	// Empty Data locks an existing record only; a provided initializer creates it if missing.
 	Lock(string, core.Record) (core.Record, error)
 	Put(string, core.Record, int64) (core.Record, error)
 	Job(string) (core.Job, error)
