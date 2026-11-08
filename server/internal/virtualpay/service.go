@@ -50,8 +50,10 @@ func (s *Service) Refresh(ctx context.Context, id string) error {
 	if remote.Status != 2 && remote.Status != 3 && remote.Status != 4 {
 		return nil
 	}
-	if remote.Status != 2 && o.Status != "paid" && o.Status != "refunding" && o.Status != "refunded" {
-		return fmt.Errorf("微信发货状态与本地订单不一致，请人工核对")
+	// A signed order can already be delivering when its callback or first query
+	// reaches us. Recover its verified payment without requiring prior local credit.
+	if remote.Status != 2 && !o.Virtual.Issued && o.Status != "paid" && o.Status != "refunding" && o.Status != "refunded" {
+		return fmt.Errorf("未签发订单的微信发货状态异常，请人工核对")
 	}
 	if remote.Paid != o.AmountFen || remote.WXID == "" || remote.PaidTime <= 0 {
 		return core.ErrPaymentMismatch

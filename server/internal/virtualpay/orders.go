@@ -35,7 +35,7 @@ func (c *Client) Query(ctx context.Context, id string, o core.Order) (RemoteOrde
 		return RemoteOrder{}, fmt.Errorf("虚拟支付订单尚未查到")
 	}
 	result := *response.Order
-	if result.ID != id || result.Env != o.Virtual.Env+1 || (result.Type != 0 && result.Type != 7) || result.Fee != o.AmountFen || result.Meta != id {
+	if result.ID != id || result.Env != o.Virtual.Env+1 || (result.Type != 0 && result.Type != 7) || result.Fee != o.AmountFen || !paymentMetaMatches(result.Meta, id) {
 		return RemoteOrder{}, core.ErrPaymentMismatch
 	}
 	return result, nil

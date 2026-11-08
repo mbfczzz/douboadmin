@@ -7,6 +7,8 @@ import (
 	"doubo/server/internal/store"
 	"encoding/json"
 	"errors"
+	"io"
+	"net/http"
 	"os"
 	"strings"
 	"sync"
@@ -95,10 +97,26 @@ func TestMySQLVirtualSignatureOnceAndSnapshotSettlement(t *testing.T) {
 	if err != nil || wallet.Available != 0 {
 		t.Fatal("signing credited an unpaid order", wallet, err)
 	}
-	paid := billing.PaymentResult{Channel: Channel, OrderID: row.ID, TransactionID: "tx-" + core.NewID(), AppID: cfg.AppID,
-		MerchantID: cfg.OfferID, OpenID: "openid", Currency: "CNY", AmountFen: 10, PaidAt: time.Now()}
+	remote := RemoteOrder{ID: row.ID, WXID: "tx-" + core.NewID(), Env: 1, Status: 3, Type: 0,
+		Fee: 10, Paid: 10, PaidTime: time.Now().Unix(), Meta: string(core.Data(map[string]string{"attach": row.ID}))}
+	client.HTTP = doFunc(func(req *http.Request) (*http.Response, error) {
+		if req.URL.Path == "/cgi-bin/stable_token" {
+			return response(200, map[string]any{"access_token": "fixture-token", "expires_in": 7200}), nil
+		}
+		body, _ := io.ReadAll(req.Body)
+		if req.URL.Query().Get("pay_sig") != MAC(cfg.AppKey, req.URL.Path+"&"+string(body)) {
+			t.Error("payment query signature changed")
+		}
+		if req.URL.Path == "/xpay/query_order" {
+			return response(200, map[string]any{"errcode": 0, "order": remote}), nil
+		}
+		if req.URL.Path != "/xpay/notify_provide_goods" {
+			t.Error("unexpected payment endpoint", req.URL.Path)
+		}
+		return response(200, map[string]int{"errcode": 0}), nil
+	})
 	for range 2 {
-		if err = one.Settle(ctx, paid); err != nil {
+		if err = services[0].Refresh(ctx, row.ID); err != nil {
 			t.Fatal(err)
 		}
 	}
