@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { login } from "./helpers";
+import { confirmSubmission, login } from "./helpers";
 import { surfaceFixtures } from "./surface-fixtures";
 
 test("quick jump and page filters remember recent work", async ({ page }) => {
@@ -84,6 +84,7 @@ test("failed commands stay visible until dismissed", async ({ page }) => {
     route.fulfill({ status: 503, json: { error: "同步服务暂时不可用" } }),
   );
   await page.getByRole("button", { name: "同步上游", exact: true }).click();
+  await confirmSubmission(page);
   const alert = page
     .getByRole("alert")
     .filter({ hasText: "同步服务暂时不可用" });

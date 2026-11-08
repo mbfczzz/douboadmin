@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { login } from "./helpers";
+import { confirmSubmission, login } from "./helpers";
 import { surfaceFixtures } from "./surface-fixtures";
 
 test("long model headings leave fields and save usable on a short screen", async ({
@@ -113,6 +113,7 @@ test("background notices remain above the model dialog without blocking it", asy
     await route.fulfill({ status: 503, json: { error: "测试同步失败提示" } });
   });
   await page.getByRole("button", { name: "同步上游", exact: true }).click();
+  await confirmSubmission(page);
   await expect.poll(() => started).toBeTruthy();
   try {
     await page

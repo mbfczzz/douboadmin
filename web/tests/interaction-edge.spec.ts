@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { readFileSync } from "node:fs";
-import { login } from "./helpers";
+import { confirmSubmission, login } from "./helpers";
 
 test("cover upload locks its URL and restores editing on failure", async ({
   page,
@@ -90,6 +90,7 @@ test("long error notifications remain inside a mobile viewport", async ({
     }),
   );
   await page.getByRole("button", { name: "同步上游", exact: true }).click();
+  await confirmSubmission(page);
   const toast = page.locator(".toast");
   await expect(toast).toBeVisible();
   const box = await toast.boundingBox();
