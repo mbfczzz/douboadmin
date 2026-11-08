@@ -5,6 +5,7 @@ Component({
     size: { type: Number, value: 19 },
     back: { type: Boolean, value: false },
     disabled: { type: Boolean, value: false },
+    interceptBack: { type: Boolean, value: false },
   },
   data: { top: 24, height: 44, actionsRight: 88, backing: false },
   pageLifetimes: {
@@ -39,6 +40,10 @@ Component({
     },
     goBack() {
       if (this.data.disabled || this.data.backing) return;
+      if (this.data.interceptBack) {
+        this.triggerEvent("back");
+        return;
+      }
       this.setData({ backing: true });
       wx.navigateBack({
         fail: () =>

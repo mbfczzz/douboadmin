@@ -44,15 +44,16 @@ test("profile conflict preserves the draft and refreshes version for explicit re
     version: 1,
     data: { nickname: "old", bio: "bio" },
   };
-  const page = h.page("mine");
-  page.data.me = { profile };
-  page.edit();
+  const page = h.page("profile");
   const writes = [];
-  let version = 2;
+  let version = 1;
   h.api.request = async (p, method, data) => {
     if (method === "PUT") {
       writes.push(data);
-      if (writes.length === 1) throw new h.api.RequestError(409, "conflict");
+      if (writes.length === 1) {
+        version = 2;
+        throw new h.api.RequestError(409, "conflict");
+      }
       version = 3;
       return {};
     }
@@ -64,11 +65,14 @@ test("profile conflict preserves the draft and refreshes version for explicit re
       favorites: 0,
     };
   };
+  await page.load();
+  h.wx.navigateBack = (o) => o.success?.({});
   await page.save({
     detail: { value: { nickname: "微信最新填写", bio: "new bio" } },
   });
   assert.equal(page.data.nickname, "微信最新填写");
-  assert.equal(page.data.profileOpen, true);
+  assert.equal(page.saved, false);
+  assert.equal(page.data.dirty, true);
   assert.equal(page.data.me.profile.version, 2);
   await page.save();
   assert.deepEqual(
@@ -86,10 +90,16 @@ test("oversize avatar is rejected before upload", async () => {
   h.api.upload = async () => {
     uploads++;
   };
-  const page = h.page("mine");
+  await h.api.signIn();
+  h.api.request = async () => ({
+    profile: { version: 1, data: { nickname: "小豆", bio: "" } },
+  });
+  const page = h.page("profile");
+  await page.load();
   await page.chooseAvatar({ detail: { avatarUrl: "large.jpg" } });
   assert.equal(uploads, 0);
   assert.equal(page.data.uploadingAvatar, false);
+  assert.match(page.data.avatarError, /5 MB/);
 });
 test("closing profile editor discards a late avatar selection", async () => {
   const h = harness();
@@ -103,10 +113,15 @@ test("closing profile editor discards a late avatar selection", async () => {
       resolve = r;
       started();
     });
-  const page = h.page("mine");
+  await h.api.signIn();
+  h.api.request = async () => ({
+    profile: { version: 1, data: { nickname: "小豆", bio: "" } },
+  });
+  const page = h.page("profile");
+  await page.load();
   const pending = page.chooseAvatar({ detail: { avatarUrl: "photo.jpg" } });
   await uploading;
-  page.close();
+  page.onUnload();
   resolve({ id: "late", data: { url: "/late.jpg" } });
   await pending;
   assert.equal(page.data.avatarId, "");

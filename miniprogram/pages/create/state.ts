@@ -39,4 +39,8 @@ export const creationData = {
   modelsLoading: true,
   modelError: "",
   parameterError: "",
+  quoteUnits: null as number | null,
+  quoteBusy: false,
+  quoteError: false,
+  quoteText: "正在加载积分…",
 };

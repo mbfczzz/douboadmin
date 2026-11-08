@@ -9,8 +9,6 @@ import {
   openTab,
   hasSession,
   login,
-  upload,
-  RequestError,
   AuthCancelledError,
 } from "../../utils/api";
 import type { Me, Job } from "../../services/types";
@@ -20,15 +18,6 @@ Page({
     jobs: [] as ReturnType<typeof jobView>[],
     loading: true,
     loadError: "",
-    profileOpen: false,
-    nickname: "",
-    bio: "",
-    name: "",
-    phone: "",
-    busy: false,
-    uploadingAvatar: false,
-    avatarId: "",
-    avatarUrl: "",
     avatarLetter: "豆",
     cover: "",
     menus: [
@@ -41,8 +30,6 @@ Page({
       { icon: "setting", label: "设置", mode: "settings" },
     ],
   },
-  editRevision: 0,
-  editVersion: 0,
   loadVersion: 0,
   visible: true,
   refreshTimer: undefined as ReturnType<typeof setTimeout> | undefined,
@@ -58,7 +45,6 @@ Page({
   onUnload() {
     this.visible = false;
     this.loadVersion++;
-    this.editRevision++;
     if (this.refreshTimer !== undefined) clearTimeout(this.refreshTimer);
   },
   async load() {
@@ -91,7 +77,7 @@ Page({
         loading: false,
         loadError: "",
       });
-      if (this.visible && me.running > 0 && !this.data.profileOpen)
+      if (this.visible && me.running > 0)
         this.refreshTimer = setTimeout(() => void this.load(), 3000);
     } catch (e) {
       if (version !== this.loadVersion) return;
@@ -109,29 +95,6 @@ Page({
       await this.load();
     } catch (e) {
       error(e);
-    }
-  },
-  async chooseAvatar(e: WechatMiniprogram.CustomEvent<{ avatarUrl: string }>) {
-    if (this.data.uploadingAvatar || !e.detail.avatarUrl) return;
-    this.setData({ uploadingAvatar: true });
-    const revision = this.editRevision;
-    try {
-      const size = await new Promise<number>((resolve, reject) =>
-        wx.getFileSystemManager().getFileInfo({
-          filePath: e.detail.avatarUrl,
-          success: (r) => resolve(r.size),
-          fail: () => reject(new Error("无法读取头像，请重新选择")),
-        }),
-      );
-      if (size > 5 * 1024 * 1024) throw new Error("请选择 5 MB 以内的头像");
-      if (revision !== this.editRevision) return;
-      const a = await upload(e.detail.avatarUrl, true);
-      if (revision === this.editRevision)
-        this.setData({ avatarId: a.id, avatarUrl: a.data.url });
-    } catch (e) {
-      error(e);
-    } finally {
-      this.setData({ uploadingAvatar: false });
     }
   },
   menu(e: WechatMiniprogram.TouchEvent) {
@@ -160,62 +123,7 @@ Page({
     openPage(this, { url: "/pages/library/index?mode=favorites" });
   },
   edit() {
-    if (!this.data.me || this.data.busy) return;
-    this.editRevision++;
-    if (this.refreshTimer !== undefined) clearTimeout(this.refreshTimer);
-    this.editVersion = this.data.me.profile.version;
-    this.setData({
-      profileOpen: true,
-      nickname: this.data.me.profile.data.nickname,
-      bio: this.data.me.profile.data.bio,
-      name: this.data.me.profile.data.name || "",
-      phone: this.data.me.profile.data.phone || "",
-      avatarId: this.data.me.profile.data.avatarId || "",
-      avatarUrl: this.data.me.profile.data.avatarUrl || "",
-    });
-  },
-  close() {
-    this.editRevision++;
-    this.setData({ profileOpen: false });
-    if (this.visible && this.data.me?.running > 0)
-      this.refreshTimer = setTimeout(() => void this.load(), 3000);
-  },
-  input(e: WechatMiniprogram.Input) {
-    this.setData({ [e.currentTarget.dataset.field]: e.detail.value });
-  },
-  async save(e?: WechatMiniprogram.FormSubmit) {
-    if (this.data.busy || this.data.uploadingAvatar || !this.data.me) return;
-    const values = e?.detail.value as
-      | { nickname?: string; bio?: string; name?: string; phone?: string }
-      | undefined;
-    if (values)
-      this.setData({
-        nickname: values.nickname ?? this.data.nickname,
-        bio: values.bio ?? this.data.bio,
-        name: values.name ?? this.data.name,
-        phone: values.phone ?? this.data.phone,
-      });
-    this.setData({ busy: true });
-    try {
-      await request("/me", "PUT", {
-        version: this.editVersion,
-        nickname: this.data.nickname,
-        bio: this.data.bio,
-        name: this.data.name,
-        phone: this.data.phone,
-        avatarId: this.data.avatarId,
-      });
-      this.setData({ profileOpen: false });
-      await this.load();
-    } catch (e) {
-      if (e instanceof RequestError && e.status === 409) {
-        await this.load();
-        this.editVersion = this.data.me?.profile.version || this.editVersion;
-        error(new Error("资料已在其他地方更新，请确认当前内容后重新保存"));
-      } else error(e);
-    } finally {
-      this.setData({ busy: false });
-    }
+    if (this.data.me) openPage(this, { url: "/pages/profile/index" });
   },
   create() {
     openTab(this, "/pages/create/index");

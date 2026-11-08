@@ -40,12 +40,15 @@ test("balance cards no longer separate editor parameters or profile statistics",
 });
 
 test("profile fields share explicit grouping while preserving form field names", () => {
-  const mine = source("mine");
-  assert.equal((mine.match(/class="profile-field"/g) || []).length, 4);
+  const profile = source("profile");
+  assert.equal(
+    (profile.match(/class="profile-field(?:\s|")/g) || []).length,
+    3,
+  );
   for (const field of ["nickname", "name", "phone", "bio"])
-    assert.ok(mine.includes(`name="${field}"`));
-  assert.ok(mine.includes('scroll-y class="profile-sheet-scroll"'));
-  assert.ok(!mine.includes("bio-label"));
+    assert.ok(profile.includes(`name="${field}"`));
+  assert.ok(profile.includes('class="profile-bio'));
+  assert.ok(!source("mine").includes("<t-popup"));
 });
 
 test("missing covers have a distinct media-aware placeholder separate from status", () => {

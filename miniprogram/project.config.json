@@ -2,7 +2,7 @@
   "description": "豆播 AI 微信原生小程序",
   "miniprogramRoot": "./",
   "compileType": "miniprogram",
-  "appid": "wx3092a0164328c739",
+  "appid": "wx0ab97e7996a7aca9",
   "projectname": "doubo-ai",
   "setting": {
     "es6": true,

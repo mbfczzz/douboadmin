@@ -15,6 +15,7 @@ export function request<T>(
   data?: unknown,
   key?: string,
   auth = true,
+  expectedToken?: string,
 ): Promise<T> {
   return (
     auth ? login(requestPurpose(path, method, data)) : Promise.resolve()
@@ -23,6 +24,10 @@ export function request<T>(
       new Promise<T>((resolve, reject) => {
         const sentToken = sessionToken();
         const storedAtSend = storedToken();
+        if (expectedToken !== undefined && sentToken !== expectedToken) {
+          reject(new AuthCancelledError());
+          return;
+        }
         if (auth && !sentToken) {
           reject(
             storedToken()
@@ -98,11 +103,19 @@ export function request<T>(
       }),
   );
 }
-export function upload(path: string, avatar = false): Promise<Row<Asset>> {
+export function upload(
+  path: string,
+  avatar = false,
+  expectedToken?: string,
+): Promise<Row<Asset>> {
   return login(avatar ? "profile" : "upload").then(
     () =>
       new Promise((resolve, reject) => {
         const sentToken = sessionToken();
+        if (expectedToken !== undefined && sentToken !== expectedToken) {
+          reject(new AuthCancelledError());
+          return;
+        }
         if (!sentToken) {
           reject(
             storedToken()

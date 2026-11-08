@@ -16,7 +16,7 @@ type PlatformSettings struct {
 }
 
 func DefaultPlatform() PlatformSettings {
-	return PlatformSettings{PointsPerYuan: 100, MinRechargeFen: 100, MaxRechargeFen: 100000, ReviewRequired: true, HotKeywords: []string{}, AlarmFailures: 5, AlarmQueueMinutes: 10}
+	return PlatformSettings{BillingEnabled: true, PointsPerYuan: 100, MinRechargeFen: 100, MaxRechargeFen: 100000, ReviewRequired: true, HotKeywords: []string{}, AlarmFailures: 5, AlarmQueueMinutes: 10}
 }
 func (s PlatformSettings) Validate() error {
 	if s.PointsPerYuan < 1 || s.PointsPerYuan > 100000 || s.MinRechargeFen < 1 || s.MaxRechargeFen < s.MinRechargeFen || s.MaxRechargeFen > 10000000 {

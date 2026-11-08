@@ -1,0 +1,194 @@
+<nav-bar
+  title="编辑资料"
+  back
+  intercept-back
+  bind:back="back"
+  disabled="{{busy}}"
+/>
+<view class="subpage profile-page page-motion {{pageMotion}}">
+  <view wx:if="{{loading}}" class="loading"
+    ><t-loading text="正在读取资料"
+  /></view>
+  <view wx:elif="{{needsLogin}}" class="profile-login"
+    ><text class="profile-note">登录后编辑你的个人资料</text
+    ><button
+      class="biz-action"
+      bindtap="signIn"
+      loading="{{busy}}"
+      disabled="{{busy}}"
+    >
+      微信登录
+    </button></view
+  >
+  <view wx:elif="{{loadError&&!me}}" class="biz-error" bindtap="load"
+    >{{loadError}} · 点击重试</view
+  >
+  <form wx:elif="{{me}}" bindsubmit="save">
+    <button
+      class="profile-avatar-row"
+      open-type="chooseAvatar"
+      bindchooseavatar="chooseAvatar"
+      disabled="{{busy||uploadingAvatar}}"
+      hover-class="profile-pressed"
+      aria-label="更换头像"
+    >
+      <view class="profile-avatar"
+        ><image
+          wx:if="{{avatarUrl}}"
+          src="{{avatarUrl}}"
+          mode="aspectFill"
+        /><t-icon wx:else name="user" size="30" />
+        <view class="profile-camera"><t-icon name="camera" size="12" /></view>
+      </view>
+      <view class="profile-avatar-copy"
+        ><text class="profile-avatar-label"
+          >{{uploadingAvatar?'正在上传头像…':'更换头像'}}</text
+        >
+        <text class="profile-note {{avatarError?'profile-error':''}}"
+          >{{avatarError||'点击更换，图片不超过 5 MB'}}</text
+        ></view
+      >
+      <t-icon name="chevron-right" size="18" class="profile-chevron" />
+    </button>
+    <text class="profile-section"
+      >基础资料<text class="profile-optional">姓名、手机号选填</text></text
+    >
+    <view class="profile-fields">
+      <view
+        class="profile-field {{focusedField==='nickname'?'focused':''}} {{fieldErrors.nickname?'invalid':''}}"
+        data-field="nickname"
+        bindtap="focus"
+      >
+        <text class="profile-label">昵称</text
+        ><view class="profile-field-content">
+          <input
+            type="nickname"
+            name="nickname"
+            value="{{nickname}}"
+            data-field="nickname"
+            data-next="name"
+            aria-label="{{fieldErrors.nickname?'昵称，'+fieldErrors.nickname:'昵称'}}"
+            maxlength="30"
+            disabled="{{busy}}"
+            focus="{{focusedField==='nickname'}}"
+            bindfocus="focus"
+            bindblur="blur"
+            bindinput="input"
+            confirm-type="next"
+            bindconfirm="next"
+            placeholder-class="profile-placeholder"
+            placeholder="填写昵称"
+            cursor-spacing="24"
+          />
+          <text wx:if="{{fieldErrors.nickname}}" class="profile-field-error"
+            >{{fieldErrors.nickname}}</text
+          >
+        </view>
+      </view>
+      <view
+        class="profile-field {{focusedField==='name'?'focused':''}} {{fieldErrors.name?'invalid':''}}"
+        data-field="name"
+        bindtap="focus"
+      >
+        <text class="profile-label">姓名</text
+        ><view class="profile-field-content">
+          <input
+            name="name"
+            value="{{name}}"
+            data-field="name"
+            data-next="phone"
+            aria-label="{{fieldErrors.name?'姓名，'+fieldErrors.name:'姓名（选填）'}}"
+            maxlength="50"
+            disabled="{{busy}}"
+            focus="{{focusedField==='name'}}"
+            bindfocus="focus"
+            bindblur="blur"
+            bindinput="input"
+            confirm-type="next"
+            bindconfirm="next"
+            placeholder-class="profile-placeholder"
+            placeholder="选填姓名"
+            cursor-spacing="24"
+          />
+          <text wx:if="{{fieldErrors.name}}" class="profile-field-error"
+            >{{fieldErrors.name}}</text
+          >
+        </view>
+      </view>
+      <view
+        class="profile-field {{focusedField==='phone'?'focused':''}} {{fieldErrors.phone?'invalid':''}}"
+        data-field="phone"
+        bindtap="focus"
+      >
+        <text class="profile-label">手机号</text
+        ><view class="profile-field-content">
+          <input
+            name="phone"
+            value="{{phone}}"
+            data-field="phone"
+            data-next="bio"
+            aria-label="{{fieldErrors.phone?'手机号，'+fieldErrors.phone:'手机号（选填）'}}"
+            maxlength="16"
+            disabled="{{busy}}"
+            focus="{{focusedField==='phone'}}"
+            bindfocus="focus"
+            bindblur="blur"
+            bindinput="input"
+            confirm-type="next"
+            bindconfirm="next"
+            placeholder-class="profile-placeholder"
+            placeholder="选填手机号"
+            cursor-spacing="24"
+          />
+          <text wx:if="{{fieldErrors.phone}}" class="profile-field-error"
+            >{{fieldErrors.phone}}</text
+          >
+        </view>
+      </view>
+    </view>
+    <text class="profile-section"
+      >个人简介<text class="profile-optional">选填</text></text
+    >
+    <view
+      class="profile-bio {{focusedField==='bio'?'focused':''}} {{fieldErrors.bio?'invalid':''}}"
+    >
+      <textarea
+        name="bio"
+        value="{{bio}}"
+        data-field="bio"
+        aria-label="{{fieldErrors.bio?'个人简介，'+fieldErrors.bio:'个人简介（选填）'}}"
+        maxlength="120"
+        disabled="{{busy}}"
+        focus="{{focusedField==='bio'}}"
+        bindfocus="focus"
+        bindblur="blur"
+        bindinput="input"
+        confirm-type="done"
+        bindconfirm="done"
+        placeholder-class="profile-placeholder"
+        placeholder="简单介绍一下自己"
+        cursor-spacing="24"
+      />
+      <view class="profile-bio-footer"
+        ><text class="profile-field-error">{{fieldErrors.bio}}</text
+        ><text class="profile-count">{{bio.length}} / 120</text></view
+      >
+    </view>
+    <view
+      wx:if="{{saveError}}"
+      class="biz-error profile-save-error"
+      role="alert"
+      >{{saveError}}</view
+    >
+    <view class="profile-footer"
+      ><button
+        class="biz-action profile-submit"
+        form-type="submit"
+        loading="{{busy}}"
+        disabled="{{busy||uploadingAvatar}}"
+      >
+        {{busy?'正在保存…':uploadingAvatar?'头像上传中…':'保存修改'}}
+      </button></view
+    >
+  </form>
+</view>

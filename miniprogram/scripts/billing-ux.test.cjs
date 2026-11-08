@@ -49,11 +49,15 @@ test("an uncertain submit retry reuses both its idempotency key and approved pri
   assert.equal(requests[1].data.expectedCostUnits, 300);
 });
 
-test("insufficient balance never submits a generation and can lead to the wallet", async () => {
+test("insufficient balance reports its reason without a modal or wallet navigation", async () => {
   const h = harness();
   await h.api.signIn();
-  let submitted = 0;
-  h.wx.showModal = async () => ({ confirm: true });
+  let submitted = 0,
+    modals = 0;
+  h.wx.showModal = async () => {
+    modals++;
+    return { confirm: true };
+  };
   h.wx.request = (o) => {
     if (o.url.endsWith("/jobs/quote"))
       o.success({
@@ -69,9 +73,11 @@ test("insufficient balance never submits a generation and can lead to the wallet
   };
   await assert.rejects(
     h.api.submitInput({ kind: "image", model: "m", prompt: "作品" }, "create"),
+    /可用积分不足/,
   );
   assert.equal(submitted, 0);
-  assert.equal(h.nav[0].url, "/pages/wallet/index");
+  assert.equal(modals, 0);
+  assert.deepEqual(h.nav, []);
 });
 
 test("unconfigured recharge cannot open the native payment sheet", async () => {

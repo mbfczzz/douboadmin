@@ -8,6 +8,7 @@
 | --- | --- | --- |
 | GET | /wallet | 可用/预留积分、充值规则、设置版本、支付通道是否已配置 |
 | GET | /wallet/ledger | 本人最近积分流水 |
+| GET | /jobs/estimate | 传 kind、model、resolution、ratio、quality、duration，返回 units、billingEnabled；仅预估当前参数，无需描述或素材，不创建任务或扣积分 |
 | POST | /jobs/quote | 传任务输入，返回 units、configuredUnits、billingEnabled、availableUnits、sufficient |
 | GET / POST | /orders | 本人订单 / `{amountFen,settingsVersion,platform}`，创建充值订单需 Idempotency-Key |
 | GET | /orders/{id} | 本人订单，不泄露 OpenID 或 prepayId |
@@ -26,6 +27,8 @@
 | POST | /admin/jobs/{id}/release | `{verified:true,reason}`，管理员核实后释放失败任务待确认积分 |
 
 任务提交 `POST /jobs` 和重试需确认报价，传 `expectedCostUnits`。价格变化返回 409，积分不足返回 402；网络结果未知时保留原幂等键及已确认输入，不能新建第二笔任务。
+
+生成积分扣减默认启用；后台可显式关闭并持久保存。模型费用按后台配置计算，明确配置为 0 的档位仍为免费。微信充值需完成支付配置后另行启用。
 
 账本操作引用唯一，订单金额/积分为创建时快照。钱包锁、流水、订单或任务状态在同一个 MySQL 事务提交；支付交易号防止跨订单重复到账。任务失去租约后不能结算。退款成功回收冻结积分，CLOSED 退回可用积分，ABNORMAL 保留待处理。
 

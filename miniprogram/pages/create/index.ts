@@ -1,23 +1,12 @@
-import {
-  request,
-  error,
-  tab,
-  submitInput,
-  openTask,
-  openPage,
-  isNavigating,
-} from "../../utils/api";
+import { request, tab, openPage } from "../../utils/api";
 import type { Config, Row, Asset, Input } from "../../services/types";
 import { creationData } from "./state";
+import { generate } from "./submit";
+import { cancelEstimate, updateEstimate } from "./estimate";
 import { openModelMenu } from "./model-menu";
 import { modelChoices, modelSettings, resolutionSettings } from "./models";
 import type { ModelChoice } from "./models";
-import {
-  addReference,
-  selectedModel,
-  referenceError,
-  creationMode,
-} from "./references";
+import { addReference, selectedModel } from "./references";
 import {
   restoreEditorAssets,
   clearEditorAssets,
@@ -31,6 +20,7 @@ Page({
   destroyed: false,
   onHide() {
     this.visible = false;
+    cancelEstimate(this, true);
     this.closeModels();
   },
   onResize() {
@@ -62,6 +52,7 @@ Page({
   onUnload() {
     this.destroyed = true;
     this.visible = false;
+    cancelEstimate(this);
     this.assetRevision++;
     this.modelVersion++;
   },
@@ -81,10 +72,15 @@ Page({
   refreshParameters() {
     const model = selectedModel(this);
     if (model) this.setData(resolutionSettings(model, this.data));
+    updateEstimate(this);
+  },
+  retryEstimate() {
+    if (this.data.quoteError) updateEstimate(this, true);
   },
   async loadModels() {
     const version = ++this.modelVersion;
     this.setData({ modelsLoading: true, modelError: "" });
+    updateEstimate(this);
     try {
       const c = await request<Config>(
         "/config",
@@ -123,7 +119,10 @@ Page({
       if (version === this.modelVersion)
         this.setData({ modelError: "模型加载失败，请点击重试" });
     } finally {
-      if (version === this.modelVersion) this.setData({ modelsLoading: false });
+      if (version === this.modelVersion && !this.destroyed) {
+        this.setData({ modelsLoading: false });
+        updateEstimate(this, true);
+      }
     }
   },
   mode(e: WechatMiniprogram.TouchEvent) {
@@ -155,22 +154,28 @@ Page({
     this.setData({ prompt, hasPrompt: true });
   },
   chooseResolution(e: WechatMiniprogram.TouchEvent) {
-    if (this.data.modelsLoading) return;
+    if (this.data.modelsLoading || this.data.busy) return;
     this.setData({ resolution: e.currentTarget.dataset.value });
+    updateEstimate(this);
   },
   chooseRatio(e: WechatMiniprogram.TouchEvent) {
-    if (this.data.modelsLoading) return;
+    if (this.data.modelsLoading || this.data.busy) return;
     this.setData({ ratio: e.currentTarget.dataset.value });
+    updateEstimate(this);
   },
   duration(e: WechatMiniprogram.SliderChange) {
+    if (this.data.modelsLoading || this.data.busy) return;
     const index = e.detail.value;
     this.setData({
       durationIndex: index,
       duration: this.data.durations[index] || 0,
     });
+    updateEstimate(this);
   },
   chooseQuality(e: WechatMiniprogram.TouchEvent) {
+    if (this.data.modelsLoading || this.data.busy) return;
     this.setData({ quality: e.currentTarget.dataset.value });
+    updateEstimate(this);
   },
   showModels() {
     if (
@@ -197,6 +202,7 @@ Page({
         ...modelSettings(m, this.data),
         showModels: false,
       });
+    updateEstimate(this);
   },
   showAssets() {
     if (
@@ -227,63 +233,7 @@ Page({
     this.refreshParameters();
   },
   async generate() {
-    if (
-      this.data.busy ||
-      this.data.uploading ||
-      this.data.restoring ||
-      isNavigating(this)
-    )
-      return;
-    if (this.data.modelsLoading || this.data.modelError || !this.data.model) {
-      error(new Error("请先加载并选择可用模型"));
-      return;
-    }
-    if (this.data.restoreError) {
-      error(new Error(this.data.restoreError));
-      return;
-    }
-    const model = selectedModel(this);
-    if (!model || this.data.parameterError) {
-      error(new Error(this.data.parameterError || "请先选择可用模型"));
-      return;
-    }
-    const problem = referenceError(model, this.data.assets, true);
-    if (problem) {
-      error(new Error(problem));
-      return;
-    }
-    if (Array.from(this.data.prompt).length > this.data.maxPromptChars) {
-      error(new Error("此模型最多支持 " + this.data.maxPromptChars + " 字"));
-      return;
-    }
-    if (!this.data.prompt.trim()) {
-      error(new Error("先描述你想创作的画面"));
-      return;
-    }
-    this.setData({ busy: true });
-    try {
-      const d = this.data;
-      const j = await submitInput(
-        {
-          kind: d.kind,
-          prompt: d.prompt,
-          model: d.model,
-          mode: creationMode(model, d.assets),
-          resolution: d.resolution,
-          quality: d.quality,
-          ratio: d.ratio,
-          duration: d.kind === "video" ? d.duration : 0,
-          assets: d.assets.map((a: Row<Asset>) => a.id),
-        },
-        "create",
-      );
-      if (this.visible) openTask(j.id, this);
-      else wx.showToast({ title: "任务已加入队列", icon: "success" });
-    } catch (e) {
-      error(e);
-    } finally {
-      if (!this.destroyed) this.setData({ busy: false });
-    }
+    await generate(this);
   },
   queue() {
     openPage(this, { url: "/pages/tasks/index" });

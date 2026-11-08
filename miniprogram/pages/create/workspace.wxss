@@ -86,6 +86,27 @@
   font-size: 11px;
   color: #85948b;
 }
+.quote-note {
+  position: absolute;
+  left: 16px;
+  right: 76px;
+  bottom: 64px;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  font-size: 11px;
+  line-height: 18px;
+  color: #a0a8ac;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.quote-note.has-cost {
+  color: #9bcbaa;
+}
+.quote-note.quote-retry {
+  color: #b6c4bb;
+}
 .workspace-foot {
   position: absolute;
   bottom: 14px;

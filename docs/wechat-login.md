@@ -4,6 +4,10 @@
 
 ## 配置真实账号
 
+当前项目使用 AppID `wx0ab97e7996a7aca9`；对应虚拟支付 OfferID 为 `1450713037`。仓库中的环境配置示例已同步，真实 AppSecret 和支付 AppKey 仍须在运行环境中配置。
+
+更换 AppID 时，应同时更新开发者工具与后端，并换用新小程序的 AppSecret。旧 AppSecret 不可复用。更换后需重新打开开发者工具项目并登录；用户身份包含 AppID，因此新小程序会生成独立用户身份，原用户、授权及积分记录保留，不自动合并或转移。
+
 1. 在微信公众平台获取小程序 AppID 和 AppSecret。
 2. 检查 `miniprogram/project.config.json` 的 `appid` 为对应的真实 AppID。
 3. 配置后端 `WECHAT_APP_ID` 与 `WECHAT_APP_SECRET`，两端 AppID 必须一致；AppSecret 只放服务端。
@@ -72,3 +76,9 @@ OpenID、session_key、AppSecret 不返回客户端。微信网络异常不原�
 这些测试通过模拟微信服务响应完成，不冒充真实微信授权。真实凭据仅保存在本机或部署环境中；真实登录仍需使用 `wx.login` 返回的一次性 code 验收。共享 Redis 会话和 MySQL 用户写入沿用既有多实例设计。
 
 参考：[微信登录流程](https://developers.weixin.qq.com/miniprogram/dev/framework/open-ability/login.html)、[微信官方头像昵称组件说明](https://github.com/wechat-miniprogram/mp-user-avatar#readme)。
+
+## 独立资料编辑页
+
+“我的”页点击头像或资料区域，通过原生页面跳转进入 `pages/profile/index`。头像、昵称、姓名、手机号和简介在独立页面编辑；保存成功后返回“我的”并重新读取资料。输入使用正常页面滚动，头像整行可点击，键盘“下一项”切换至后续字段；“完成”只收起键盘，保存修改需点击保存按钮。字段校验失败在对应输入行提示，保存成功返回后显示确认。资料编辑不再使用底部弹层。
+
+返回按钮对未保存内容进行确认；系统返回使用页面离开提醒，编辑页关闭 iOS 滑动返回以避免绕过草稿确认。头像上传失败与保存失败保留草稿，版本冲突只刷新版本号，待用户确认后重试。页面卸载或账号变化后，旧请求结果不会写回编辑器。

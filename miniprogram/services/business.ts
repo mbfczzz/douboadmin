@@ -84,13 +84,9 @@ export async function confirmBudget(input: Input): Promise<Input> {
   }>("/jobs/quote", "POST", input);
   if (!q.billingEnabled || !q.units) return { ...input, expectedCostUnits: 0 };
   if (!q.sufficient) {
-    const choice = await wx.showModal({
-      title: "可用积分不足",
-      content: `本次需要 ${points(q.units)} 积分，当前可用 ${points(q.availableUnits)}。`,
-      confirmText: "查看积分",
-    });
-    if (choice.confirm) wx.navigateTo({ url: "/pages/wallet/index" });
-    throw new AuthCancelledError();
+    throw new Error(
+      `可用积分不足，需 ${points(q.units)}，当前 ${points(q.availableUnits)}`,
+    );
   }
   const choice = await wx.showModal({
     title: "确认使用积分",

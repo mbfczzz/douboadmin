@@ -1,0 +1,6 @@
+{
+  "disableSwipeBack": true,
+  "usingComponents": {
+    "t-loading": "tdesign-miniprogram/loading/loading"
+  }
+}

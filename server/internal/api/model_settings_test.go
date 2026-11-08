@@ -53,6 +53,11 @@ func TestModelConfigurationReachesPublicCapabilitiesAndSurvivesSync(t *testing.T
 		t.Fatal("prompt limit ignored")
 	}
 	input.Prompt = "hello"
+	if _, err := a.Billing.Adjust(ctx, "configuration-user", "model-settings-credit", "admin", "测试配置模型扣费", 750); err != nil {
+		t.Fatal(err)
+	}
+	approvedCost := int64(750)
+	input.ExpectedCostUnits = &approvedCost
 	if w = call(a, "POST", "/api/jobs", user, "valid-quality", input); w.Code != 202 {
 		t.Fatal(w.Body.String())
 	}

@@ -21,6 +21,8 @@
 
 复用 `WECHAT_APP_ID` / `WECHAT_APP_SECRET`。AppSecret、AppKey、推送 Token 和 EncodingAESKey 各不相同。关闭新订单开关后，已配置凭证仍可用于旧订单通知和对账；不要立即删除旧环境凭证。
 
+当前项目的 AppID 为 `wx0ab97e7996a7aca9`，OfferID 为 `1450713037`，二者来自同一个小程序后台。环境示例选择 `wechat_virtual`、现网 `env=0`，支付开关仍默认关闭；补齐新小程序的 AppSecret、现网 AppKey、消息推送凭证和已发布商品后再开启。iOS 支付开关须与微信后台实际开通状态一致。
+
 商品示例仅展示格式，ID 需替换为微信后台已经发布的道具 ID：
 
 ```json
@@ -43,7 +45,7 @@
 
 ## 微信后台回调配置
 
-配置已部署的 HTTPS 地址：`https://你的域名/api/payments/virtual/notify`。
+配置公网可访问的消息推送地址，推荐 `https://你的域名/api/payments/virtual/notify`。官方消息推送支持 HTTP 80 端口及 HTTPS 443 端口；联调可用公网 IP 的 HTTP 地址，并以微信后台 URL 验证通过为准。若后端监听 8080，应通过反向代理将公网 80/443 转发至后端。
 
 - 必须选择**安全模式**，Token / EncodingAESKey 与服务器一致。
 - 支持 XML、JSON 加密推送，以及 GET URL 验证；拒绝未加密的业务 POST。

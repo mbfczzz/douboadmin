@@ -18,6 +18,7 @@
     "pages/orders/index",
     "pages/notifications/index",
     "pages/preferences/index",
+    "pages/profile/index",
     "pages/share/index",
     "pages/shared-work/index",
     "pages/hot-videos/index",

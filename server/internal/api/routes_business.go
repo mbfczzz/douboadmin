@@ -15,6 +15,7 @@ func (a *Server) businessRoutes() {
 	m.HandleFunc("GET /api/wallet", a.auth("user", a.wallet))
 	m.HandleFunc("GET /api/wallet/ledger", a.auth("user", a.ledger))
 	m.HandleFunc("POST /api/jobs/quote", a.auth("user", a.quoteJob))
+	m.HandleFunc("GET /api/jobs/estimate", a.auth("user", a.estimateJob))
 	m.HandleFunc("GET /api/preferences", a.auth("user", a.preferences))
 	m.HandleFunc("PUT /api/preferences", a.auth("user", a.savePreferences))
 	m.HandleFunc("GET /api/admin/platform", a.auth("admin", a.platformSettings))

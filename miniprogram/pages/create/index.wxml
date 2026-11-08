@@ -62,6 +62,7 @@
         cursor-spacing="100"
         fixed="{{expanded}}"
       />
+      <view class="quote-note {{quoteUnits>0?'has-cost':''}} {{quoteError?'quote-retry':''}}" bindtap="retryEstimate" aria-role="{{quoteError?'button':'text'}}" aria-label="{{quoteText}}">{{quoteText}}</view>
       <view class="count">{{prompt.length}} / {{maxPromptChars}}</view>
     </view>
     <view class="workspace-foot">
@@ -111,7 +112,7 @@
       <text bindtap="clearReferences">清空重选</text>
     </view>
   </view>
-  <view class="settings {{modelsLoading?'controls-busy':''}}">
+  <view class="settings {{modelsLoading||busy?'controls-busy':''}}">
     <text wx:if="{{resolutions.length}}" class="setting-title first-setting">分辨率</text>
     <view class="resolution-options">
       <view

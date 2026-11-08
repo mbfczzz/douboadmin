@@ -30,8 +30,11 @@ test("My works refresh while generation is pending and stop after leaving the pa
   await page.load();
   assert.equal(timers.size, 1);
   page.edit();
+  assert.equal(h.nav.at(-1).url, "/pages/profile/index");
+  page.onHide();
   assert.equal(timers.size, 0);
-  page.close();
+  page.onShow();
+  await new Promise(setImmediate);
   assert.equal(timers.size, 1);
   page.onHide();
   assert.equal(timers.size, 0);
@@ -41,10 +44,10 @@ test("My works refresh while generation is pending and stop after leaving the pa
   assert.equal(timers.size, 0);
 });
 
-test("background refresh does not silently change the version of an open profile draft", async () => {
+test("returning from an avatar picker does not reload an edited profile", async () => {
   const h = harness();
   await h.api.signIn();
-  const page = h.page("mine");
+  const page = h.page("profile");
   let version = 1,
     written;
   h.api.request = async (p, method, body) => {
@@ -62,9 +65,12 @@ test("background refresh does not silently change the version of an open profile
         };
   };
   await page.load();
-  page.edit();
+  page.input({
+    currentTarget: { dataset: { field: "nickname" } },
+    detail: { value: "草稿" },
+  });
   version = 2;
-  await page.load();
+  page.onShow();
   page.setData({ nickname: "我的新昵称" });
   await page.save();
   assert.equal(written, 1);

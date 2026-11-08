@@ -75,7 +75,11 @@ Page({
     this.setData({ prompt: e.currentTarget.dataset.value });
   },
   async send() {
-    if (this.data.busy || !this.data.prompt.trim()) return;
+    if (this.data.busy) return;
+    if (!this.data.prompt.trim()) {
+      error(new Error("请输入要发送的内容"));
+      return;
+    }
     this.setData({ busy: true });
     const submitted = this.data.prompt;
     try {
