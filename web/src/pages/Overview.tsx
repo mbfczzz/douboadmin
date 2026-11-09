@@ -9,6 +9,8 @@ import Trend from "../overview/Trend";
 import Kpis from "../overview/Kpis";
 import Generation from "../overview/Generation";
 import Business from "../overview/Business";
+import Traffic from "../overview/Traffic";
+import ServiceStats from "../overview/ServiceStats";
 import "../overview/charts.css";
 import "../overview/tip.css";
 const Details = lazy(() => import("../overview/Details"));
@@ -143,6 +145,14 @@ export default function Overview({ config, navigate }: PageProps) {
             )}
           </section>
         </div>
+        {data && (
+          <Traffic
+            t={data.breakdown?.traffic}
+            byClient={data.breakdown?.trafficByClient}
+            days={series}
+            extra={<ServiceStats s={data.api} days={days} />}
+          />
+        )}
         {data?.breakdown && <Generation b={data.breakdown} />}
         {data?.breakdown && <Business b={data.breakdown} />}
         <section className="panel overview-section">

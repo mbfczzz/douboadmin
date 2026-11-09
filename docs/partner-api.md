@@ -4,8 +4,10 @@
 
 | 方法 | 路径 | 用途 |
 | --- | --- | --- |
-| GET | /access | 当前身份是否已激活、归属与停用原因 |
-| POST | /access/direct | 直接申请并自动开通，不建立服务商归属 |
+| GET | /access | 当前身份是否已激活、归属与停用原因；`profileRequired`、`openSignup` 见 [注册与开通](registration.md) |
+| POST | /access/sms | `{phone}` 发送短信验证码 |
+| POST | /access/profile | `{name,phone,code}` 验证手机号并保存资料（开通前的第一步） |
+| POST | /access/direct | 跳过激活码，以普通用户开通，不建立服务商归属；需后台开放普通用户注册 |
 | POST | /access/redeem | `{code,method?}`；method 为 qr/code，旧客户端未报则记 unknown；同一兑换流程，限流及单次占位 |
 | GET / POST | /admin/accounts | 管理平台账号列表与创建；小程序用户不能通过此接口创建 |
 | PUT | /admin/accounts/{id} | 编辑管理账号姓名、手机号、角色和启停状态 |

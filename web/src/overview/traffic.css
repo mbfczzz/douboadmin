@@ -1,0 +1,61 @@
+/* Visit statistics: a titled group of the existing strip and bar panels. */
+.traffic-section {
+  margin-top: 28px;
+}
+.traffic-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  padding: 0 2px 12px;
+}
+.traffic-head h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 650;
+}
+/* Doubled class: charts.css loads after this file. */
+.kpi-strip.traffic-kpis {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 0;
+}
+@media (max-width: 1100px) {
+  .kpi-strip.traffic-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.traffic-sub {
+  margin: 20px 2px 12px;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+}
+.kpi-strip.service-kpis {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  margin: 0;
+}
+@media (max-width: 1100px) {
+  .kpi-strip.service-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+/* 全部 / 小程序 / 网页 / APP switch, at the right end of the heading. */
+.traffic-clients {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}
+.traffic-clients button {
+  min-height: 30px;
+  padding: 4px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+}
+.traffic-clients button[aria-selected="true"] {
+  border-color: var(--accent-border);
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}

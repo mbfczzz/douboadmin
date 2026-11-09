@@ -39,6 +39,12 @@ var definitions = []Group{
 		{Key: "RELAY_BASE_URL", Label: "API 基础地址", Kind: "url", Default: "https://relay.tcmzhan.com", Hint: "例如 https://relay.tcmzhan.com，不追加 /v1/models。"},
 		{Key: "RELAY_API_KEY", Label: "API Key", Kind: "secret"},
 	}},
+	{ID: "sms", Name: "短信验证码", Hint: "小程序用户注册时验证手机号，使用阿里云短信服务。模板须包含 ${code} 变量；RAM 账号需授予短信发送权限。保存后重启服务生效。", Fields: []Field{
+		{Key: "SMS_ACCESS_KEY_ID", Label: "AccessKey ID", Kind: "secret"},
+		{Key: "SMS_ACCESS_KEY_SECRET", Label: "AccessKey Secret", Kind: "secret"},
+		{Key: "SMS_SIGN_NAME", Label: "短信签名", Kind: "text", Hint: "与阿里云短信控制台审核通过的签名一致。"},
+		{Key: "SMS_TEMPLATE_CODE", Label: "验证码模板 CODE", Kind: "text", Hint: "例如 SMS_123456789。"},
+	}},
 	{ID: "oss", Name: "阿里云 OSS", Hint: "API 和 Worker 需使用同一个存储配置。更换地域或存储桶前，需要迁移已有媒体文件。", Fields: []Field{
 		{Key: "OSS_REGION", Label: "地域 Region", Kind: "text", Hint: "例如 cn-shanghai。"},
 		{Key: "OSS_BUCKET", Label: "存储桶 Bucket", Kind: "text"},

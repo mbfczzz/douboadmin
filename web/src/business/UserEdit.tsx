@@ -94,7 +94,11 @@ export default function UserEdit({
                   inputMode="tel"
                   pattern="\+?[0-9]{7,15}"
                   title="7–15 位数字，可带 + 号"
+                  aria-describedby="user-phone-hint"
                 />
+                <small id="user-phone-hint" className="quiet field-hint">
+                  不能清空；修改后用户需用新号码重新短信验证
+                </small>
               </label>
             </div>
             <label>

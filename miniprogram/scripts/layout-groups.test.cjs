@@ -45,8 +45,11 @@ test("profile fields share explicit grouping while preserving form field names",
     (profile.match(/class="profile-field(?:\s|")/g) || []).length,
     3,
   );
-  for (const field of ["nickname", "name", "phone", "bio"])
+  for (const field of ["nickname", "name", "bio"])
     assert.ok(profile.includes(`name="${field}"`));
+  // The SMS-verified phone is shown, not edited.
+  assert.ok(!profile.includes('name="phone"'));
+  assert.ok(profile.includes('class="profile-readonly"'));
   assert.ok(profile.includes('class="profile-bio'));
   assert.ok(!source("mine").includes("<t-popup"));
 });

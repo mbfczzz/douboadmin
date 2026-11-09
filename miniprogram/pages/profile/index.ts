@@ -120,7 +120,7 @@ Page({
   input(e: WechatMiniprogram.Input) {
     if (this.data.busy) return;
     const field = e.currentTarget.dataset.field;
-    if (!["nickname", "name", "phone", "bio"].includes(field)) return;
+    if (!["nickname", "name", "bio"].includes(field)) return;
     this.setData({
       [field]: e.detail.value,
       saveError: "",
@@ -140,7 +140,11 @@ Page({
     this.setData({
       fieldErrors: {
         ...this.data.fieldErrors,
-        [field]: profileErrors(profileDraft(this.data))[field] || "",
+        [field]:
+          profileErrors(
+            profileDraft(this.data),
+            !!this.data.me?.profile.data.verifiedPhone,
+          )[field] || "",
       },
     });
   },

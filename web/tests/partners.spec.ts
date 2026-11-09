@@ -1,6 +1,11 @@
 import { test, expect } from "@playwright/test";
 import { confirmSubmission, login } from "./helpers";
-import { createProvider, selectProvider, issueCode } from "./partner-helpers";
+import {
+  createProvider,
+  selectProvider,
+  issueCode,
+  miniUser,
+} from "./partner-helpers";
 
 test.skip(
   process.env.PARTNER_ACCEPTANCE !== "true",
@@ -34,12 +39,8 @@ test("fixed user quotas, QR activation, suspension, unbinding and configurable m
   expect(view.quota.users.allocated).toBe(10);
   await selectProvider(page, "验收 S2");
   const code = await issueCode(page);
-  const signIn = await page.request.post("/api/auth/login", {
-    data: { demoId: crypto.randomUUID() },
-  });
-  expect(signIn.status()).toBe(200);
-  const user = await signIn.json(),
-    headers = { Authorization: "Bearer " + user.token };
+  const user = await miniUser(page.request),
+    headers = user.headers;
   expect((await page.request.get("/api/templates", { headers })).status()).toBe(
     403,
   );
@@ -52,11 +53,7 @@ test("fixed user quotas, QR activation, suspension, unbinding and configurable m
   expect((await page.request.get("/api/templates", { headers })).status()).toBe(
     200,
   );
-  const other = await (
-    await page.request.post("/api/auth/login", {
-      data: { demoId: crypto.randomUUID() },
-    })
-  ).json();
+  const other = await miniUser(page.request);
   expect(
     (
       await page.request.post("/api/access/redeem", {

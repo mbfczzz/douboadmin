@@ -107,3 +107,33 @@ test("a replayed code for a disabled account does not enter the app", async () =
   assert.equal(enters, 0);
   assert.equal(page.data.busy, false);
 });
+
+test("registration sends an SMS code, then verifies name and phone before activation", async () => {
+  const h = harness(),
+    page = h.page("activate"),
+    requests = [];
+  page.setData({
+    logged: true,
+    status: { active: false, status: "pending", profileRequired: true },
+  });
+  h.wx.showToast = () => {};
+  h.api.request = async (path, method, body) => {
+    requests.push([path, body]);
+    if (path === "/access/sms") return { resendIn: 60, debugCode: "123456" };
+    return { active: false, status: "pending", openSignup: true };
+  };
+  page.setData({ name: " 张三 ", phone: "13800138000" });
+  await page.sendCode();
+  assert.equal(page.data.smsCode, "123456");
+  assert.equal(page.data.countdown, 60);
+  await page.sendCode(); // still counting down
+  await page.register();
+  assert.deepEqual(JSON.parse(JSON.stringify(requests)), [
+    ["/access/sms", { phone: "13800138000" }],
+    ["/access/profile", { name: "张三", phone: "13800138000", code: "123456" }],
+  ]);
+  assert.equal(page.data.status.profileRequired, undefined);
+  assert.equal(page.data.status.openSignup, true);
+  assert.equal(page.data.countdown, 0);
+  page.onUnload();
+});

@@ -18,6 +18,10 @@ func (a *Server) dashboard(w http.ResponseWriter, r *http.Request) {
 		dbError(w, e)
 		return
 	}
+	// Service metrics ride along, so the overview needs no extra request.
+	if stats, err := a.apiStats(r.Context(), days); err == nil {
+		data.API = stats
+	}
 	reply(w, 200, data)
 }
 func (a *Server) track(w http.ResponseWriter, r *http.Request) {

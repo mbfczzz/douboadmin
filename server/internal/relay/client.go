@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -16,6 +17,9 @@ import (
 type Client struct {
 	Base, Key string
 	HTTP      *http.Client
+	// Observe, when set, is told about every upstream call (for the model
+	// call log). It runs on the caller's goroutine and must be quick.
+	Observe func(context.Context, Call)
 }
 
 func New(base, key string) *Client {
@@ -37,6 +41,22 @@ func (e *HTTPError) Error() string {
 }
 
 func (c *Client) Do(ctx context.Context, method, path string, body any) ([]byte, error) {
+	start := time.Now()
+	raw, err := c.send(ctx, method, path, body)
+	if c.Observe != nil {
+		status := 200
+		var httpErr *HTTPError
+		if errors.As(err, &httpErr) {
+			status = httpErr.Status
+		} else if err != nil {
+			status = 0
+		}
+		c.Observe(ctx, Call{Method: method, Path: path, Body: body, Status: status, Response: raw, Err: err, Took: time.Since(start)})
+	}
+	return raw, err
+}
+
+func (c *Client) send(ctx context.Context, method, path string, body any) ([]byte, error) {
 	if !c.Ready() {
 		return nil, fmt.Errorf("中转服务尚未配置")
 	}

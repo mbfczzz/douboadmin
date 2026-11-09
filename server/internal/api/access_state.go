@@ -8,21 +8,6 @@ import (
 	"fmt"
 )
 
-func (a *Server) userDisabled(ctx context.Context, id string) (bool, error) {
-	row, e := a.Store.Get(ctx, "users", id)
-	if e != nil {
-		return false, e
-	}
-	var profile *struct {
-		Disabled bool `json:"disabled"`
-		Archived bool `json:"archived"`
-	}
-	if json.Unmarshal(row.Data, &profile) != nil || profile == nil {
-		return false, fmt.Errorf("账号状态异常")
-	}
-	return profile.Disabled || profile.Archived, nil
-}
-
 // Authorization must not depend on presentJob's best-effort display enrichment.
 func (a *Server) checkShareAccess(ctx context.Context, j core.Job) error {
 	if j.Status != "succeeded" || !core.IsWork(j.Input.Kind) {
@@ -40,20 +25,7 @@ func (a *Server) checkShareAccess(ctx context.Context, j core.Job) error {
 	} else if !errors.Is(e, core.ErrNotFound) {
 		return e
 	}
-	row, e = a.Store.Get(ctx, "reviews", j.ID)
-	if errors.Is(e, core.ErrNotFound) {
-		return core.ErrConflict
-	}
-	if e != nil {
-		return e
-	}
-	var review core.Review
-	if e = json.Unmarshal(row.Data, &review); e != nil {
-		return e
-	}
-	if review.Status != "approved" {
-		return core.ErrConflict
-	}
+	// Works are shareable once finished; there is no content review step.
 	disabled, e := a.userDisabled(ctx, j.UserID)
 	if e != nil {
 		return e

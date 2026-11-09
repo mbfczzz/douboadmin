@@ -2,29 +2,45 @@
 <view class="subpage activation-page">
   <view class="activation-logo">豆</view>
   <text class="activation-title">开通你的创作空间</text>
-  <text class="biz-note activation-intro">{{logged?'可直接申请使用，或通过服务商激活码建立归属。':'微信登录后，可直接申请或使用服务商激活码。'}}</text>
+  <text wx:if="{{!logged}}" class="biz-note activation-intro">微信登录后，填写姓名并验证手机号。</text>
+  <text wx:elif="{{status.profileRequired}}" class="biz-note activation-intro">第 1 步：填写姓名并验证手机号。</text>
+  <text wx:elif="{{status.openSignup}}" class="biz-note activation-intro">第 2 步：使用服务商激活码开通，或跳过直接使用。</text>
+  <text wx:else class="biz-note activation-intro">第 2 步：使用服务商激活码或二维码开通。</text>
   <view wx:if="{{loading}}" class="biz-note">正在确认授权状态…</view>
   <view wx:if="{{loadError}}" class="biz-error" bindtap="load">{{loadError}} · 点击重试</view>
   <button wx:if="{{!logged}}" class="biz-action" loading="{{busy}}" disabled="{{busy||loading||!wechatReady}}" bindtap="login">微信登录</button>
   <block wx:else>
-    <view wx:if="{{status.message&&status.status!=='pending'}}" class="biz-card activation-status">
-      <text class="biz-list-title">授权状态</text>
-      <text class="biz-note">{{status.message}}</text>
-    </view>
-    <view wx:if="{{!loadError&&(!status||status.status==='pending'||status.status==='unbound')}}" class="biz-card activation-options">
+    <view wx:if="{{status.profileRequired}}" class="biz-card activation-options">
       <view class="activation-path">
-      <text class="biz-heading">申请使用</text>
-      <button class="biz-action" loading="{{busy}}" disabled="{{busy||loading}}" bindtap="direct">直接申请使用</button>
-      <text class="biz-note">直接申请自动开通，不关联服务商。</text>
-      </view>
-      <view class="activation-path">
-      <text class="biz-heading">服务商激活</text>
-      <input class="biz-input" placeholder="输入 20 位激活码" value="{{code}}" maxlength="64" bindinput="input" disabled="{{busy}}" />
-      <button class="biz-action biz-secondary" loading="{{busy}}" disabled="{{busy||loading||!code}}" bindtap="activate">确认激活</button>
-      <button class="biz-action biz-secondary" disabled="{{busy||loading}}" bindtap="scan">扫码激活</button>
-      <text class="biz-note">二维码请在此页面内扫描。每个激活码仅能绑定一个微信账号。</text>
+        <text class="biz-heading">填写资料</text>
+        <input class="biz-input" placeholder="姓名" value="{{name}}" maxlength="30" data-field="name" bindinput="field" disabled="{{busy}}" />
+        <input class="biz-input" type="number" placeholder="手机号" value="{{phone}}" maxlength="11" data-field="phone" bindinput="field" disabled="{{busy}}" />
+        <view class="activation-sms">
+          <input class="biz-input" type="number" placeholder="短信验证码" value="{{smsCode}}" maxlength="6" data-field="smsCode" bindinput="field" disabled="{{busy}}" />
+          <button class="biz-action biz-secondary" loading="{{sending}}" disabled="{{busy||sending||countdown>0||phone.length!==11}}" bindtap="sendCode">{{countdown>0?countdown+' 秒后重发':'获取验证码'}}</button>
+        </view>
+        <button class="biz-action" loading="{{busy}}" disabled="{{busy||loading||!name||phone.length!==11||smsCode.length!==6}}" bindtap="register">下一步</button>
       </view>
     </view>
+    <block wx:else>
+      <view wx:if="{{status.message&&status.status!=='pending'}}" class="biz-card activation-status">
+        <text class="biz-list-title">授权状态</text>
+        <text class="biz-note">{{status.message}}</text>
+      </view>
+      <view wx:if="{{!loadError&&(!status||status.status==='pending'||status.status==='unbound')}}" class="biz-card activation-options">
+        <view class="activation-path">
+          <text class="biz-heading">服务商激活</text>
+          <input class="biz-input" placeholder="输入 20 位激活码" value="{{code}}" maxlength="64" bindinput="input" disabled="{{busy}}" />
+          <button class="biz-action" loading="{{busy}}" disabled="{{busy||loading||!code}}" bindtap="activate">确认激活</button>
+          <button class="biz-action biz-secondary" disabled="{{busy||loading}}" bindtap="scan">扫码激活</button>
+          <text class="biz-note">二维码请在此页面内扫描。每个激活码仅能绑定一个微信账号。</text>
+        </view>
+        <view wx:if="{{status.openSignup}}" class="activation-path activation-skip">
+          <button class="biz-action biz-secondary" loading="{{busy}}" disabled="{{busy||loading}}" bindtap="direct">跳过，直接使用</button>
+          <text class="biz-note">跳过后作为普通用户使用，不关联服务商。</text>
+        </view>
+      </view>
+    </block>
     <view class="activation-links"><text bindtap="load">刷新授权状态</text><text bindtap="signOut">退出登录</text></view>
   </block>
   <text class="activation-privacy" bindtap="privacy">隐私保护指引</text>

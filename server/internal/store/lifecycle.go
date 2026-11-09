@@ -25,17 +25,6 @@ func completeLifecycle(tx Transaction, j core.Job, failure string) error {
 	if !core.IsWork(j.Input.Kind) {
 		return nil
 	}
-	if failure == "" {
-		if _, e := tx.Get("reviews", j.ID); errors.Is(e, core.ErrNotFound) {
-			state := "pending"
-			_, e = tx.Put("reviews", core.Record{ID: j.ID, Owner: j.UserID, Data: core.Data(core.Review{JobID: j.ID, Kind: j.Input.Kind, Status: state})}, 0)
-			if e != nil {
-				return e
-			}
-		} else if e != nil {
-			return e
-		}
-	}
 	preferences := core.DefaultPreferences()
 	if row, e := tx.Get("preferences", j.UserID); e == nil {
 		_ = json.Unmarshal(row.Data, &preferences)

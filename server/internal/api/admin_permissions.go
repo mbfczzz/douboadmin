@@ -27,6 +27,7 @@ var adminRouteMenus = map[string][]string{
 	"/api/admin/commission-payouts": {"partners"},
 	"/api/admin/alerts":             {"monitor"},
 	"/api/admin/logs":               {"monitor"},
+	"/api/admin/audit":              {"logs"},
 	"/api/admin/monitor":            {"monitor"},
 	"/api/admin/assets":             {"templates", "models"},
 	"/api/admin/dashboard":          {"overview"},
@@ -40,9 +41,9 @@ var adminRouteMenus = map[string][]string{
 	"/api/admin/payments":           {"payments"},
 	"/api/admin/refunds":            {"payments"},
 	"/api/admin/virtual-payments":   {"payments"},
-	"/api/admin/reviews":            {"reviews"},
 	"/api/admin/templates":          {"templates"},
 	"/api/admin/users":              {"users"},
+	"/api/admin/signup":             {"users"},
 	"/api/admin/works":              {"works"},
 }
 
@@ -54,6 +55,9 @@ func routeMenus(method, path string) ([]string, bool) {
 	case method == http.MethodGet && path == "/api/admin/models":
 		// The template editor needs the model catalogue.
 		return []string{"models", "templates"}, true
+	case method == http.MethodGet && path == "/api/admin/audit/stats":
+		// Request volume and errors also appear on the overview.
+		return []string{"overview", "logs"}, true
 	case strings.HasPrefix(path, "/api/admin/orders/") && strings.HasSuffix(path, "/distribution"):
 		return []string{"orders", "partners"}, true
 	}

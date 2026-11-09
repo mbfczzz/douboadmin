@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { login } from "./helpers";
-import { issueCode } from "./partner-helpers";
+import { issueCode, miniUser } from "./partner-helpers";
 test.skip(
   process.env.PARTNER_ACCEPTANCE !== "true",
   "Requires isolated partner acceptance database and API",
@@ -12,12 +12,8 @@ test("code trace shows issuer, activation user and retained history after unbind
   await page.getByRole("button", { name: "小程序用户", exact: true }).click();
   await page.getByRole("button", { name: "服务商管理", exact: true }).click();
   const code = await issueCode(page, "来源记录验收");
-  const registered = await page.request.post("/api/auth/login", {
-    data: { demoId: crypto.randomUUID() },
-  });
-  expect(registered.status()).toBe(200);
-  const user = await registered.json(),
-    headers = { Authorization: "Bearer " + user.token };
+  const user = await miniUser(page.request),
+    headers = user.headers;
   const activated = await page.request.post("/api/access/redeem", {
     headers,
     data: { code, method: "qr" },

@@ -30,13 +30,9 @@ func (a *Server) presentJob(ctx context.Context, j *core.Job) {
 		}
 	}
 	if core.IsWork(j.Input.Kind) {
-		j.ReviewStatus = "pending"
-		if row, e := a.Store.Get(ctx, "reviews", j.ID); e == nil {
-			var review core.Review
-			if json.Unmarshal(row.Data, &review) == nil {
-				j.ReviewStatus = review.Status
-			}
-		}
+		// No review step: older mini-program builds still read this field
+		// before offering 分享, so report every work as shareable.
+		j.ReviewStatus = "approved"
 	}
 	verifiedRefund := false
 	if row, e := a.Store.Get(ctx, "job_billing", j.ID); e == nil {

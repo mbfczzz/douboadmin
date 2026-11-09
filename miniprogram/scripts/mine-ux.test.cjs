@@ -58,7 +58,7 @@ test("returning from an avatar picker does not reload an edited profile", async 
     return p === "/jobs"
       ? []
       : {
-          profile: { version, data: { nickname: "小豆", bio: "" } },
+          profile: { version, data: { nickname: "小豆", name: "张三", bio: "" } },
           works: 0,
           running: 0,
           favorites: 0,

@@ -10,7 +10,15 @@ import (
 	"encoding/json"
 	"log/slog"
 	"os"
+	"strconv"
 )
+
+func envDays(key string, fallback int) int {
+	if n, err := strconv.Atoi(os.Getenv(key)); err == nil && n > 0 {
+		return n
+	}
+	return fallback
+}
 
 func background(ctx context.Context, app *api.Server, role string, values settings.Values) {
 	var fields map[string]string
@@ -26,6 +34,9 @@ func background(ctx context.Context, app *api.Server, role string, values settin
 		}
 	}
 	slog.SetDefault(slog.New(monitor.NewLogHandler(ctx, slog.NewTextHandler(os.Stderr, nil), app.Store, metrics.ID, secrets)))
+	// Operation logs mask the same secret values, whatever field they sit in.
+	app.Audit.SetSecrets(secrets)
+	go app.RunLogRetention(ctx, envDays("LOG_RETENTION_DAYS", 180), envDays("LOG_READ_RETENTION_DAYS", 14))
 	go metrics.Run(ctx)
 	go payments.Reconcile(ctx, app.Store, app.Pay, app.Billing)
 	go app.Virtual.Run(ctx)

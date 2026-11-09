@@ -116,6 +116,8 @@ func (a *Server) saveAdminRole(w http.ResponseWriter, r *http.Request) {
 	}
 	id := r.PathValue("id")
 	input.Name = strings.TrimSpace(input.Name)
+	// Menus of retired pages (内容审核) may linger in older roles; drop them.
+	input.Menus = slices.DeleteFunc(input.Menus, func(m string) bool { return m == "reviews" })
 	if id == core.SuperAdminRole {
 		fail(w, 400, "超级管理员角色不可修改")
 		return

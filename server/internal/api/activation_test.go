@@ -15,14 +15,21 @@ func activationFixture(t *testing.T) (*Server, string, string) {
 	t.Helper()
 	a, user, _ := setup(t)
 	a.Config.RequireActivation = true
+	a.Config.DemoLogin = true // SMS codes are shown instead of sent
 	a.Billing.RequireActivation = true
-	_, _ = a.Store.Put(context.Background(), "users", core.Record{ID: "user-a", Owner: "user-a", Data: core.Data(map[string]string{"nickname": "test"})}, 0)
+	_, _ = a.Store.Put(context.Background(), "users", core.Record{ID: "user-a", Owner: "user-a", Data: core.Data(registeredProfile("test"))}, 0)
 	admin, e := a.Sessions.Create(context.Background(), "admin", "admin")
 	if e != nil {
 		t.Fatal(e)
 	}
 	return a, user, admin
 }
+
+// registeredProfile is a user who finished the SMS registration step.
+func registeredProfile(nickname string) map[string]string {
+	return map[string]string{"nickname": nickname, "name": "测试用户", "phone": "13800138000", "verifiedPhone": "13800138000"}
+}
+
 func TestWechatIdentityAloneCannotUseBusinessEndpoints(t *testing.T) {
 	a, user, admin := activationFixture(t)
 	for _, path := range []string{"/api/templates", "/api/hot/discovery", "/api/jobs", "/api/wallet", "/api/me", "/api/shares/123"} {

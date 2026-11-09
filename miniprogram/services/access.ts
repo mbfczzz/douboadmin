@@ -8,6 +8,11 @@ export interface AccessStatus {
   partnerId?: string;
   partnerName?: string;
   message?: string;
+  // Registration step: name and SMS-verified phone are still missing.
+  profileRequired?: boolean;
+  openSignup?: boolean;
+  name?: string;
+  phone?: string;
 }
 let redirecting = false;
 let pending: { token: string; promise: Promise<AccessStatus> } | undefined;

@@ -15,12 +15,10 @@ export default function Works({ notify }: PageProps) {
   const resource = useResource<Job[]>("/admin/works"),
     [detail, setDetail] = useState<Job | null>(null),
     [query, setQuery] = useRememberedState("works.query", ""),
-    [review, setReview] = useRememberedState("works.review", ""),
     [state, setState] = useRememberedState("works.state", "");
   const rows = (resource.data || []).filter(
     (j) =>
       (j.input.prompt.includes(query) || j.userId.includes(query)) &&
-      (!review || (j.reviewStatus || "pending") === review) &&
       (!state || (state === "deleted") === !!j.deleted),
   );
   async function remove(j: Job) {
@@ -50,16 +48,6 @@ export default function Works({ notify }: PageProps) {
           onChange={(e) => setQuery(e.target.value)}
         />
         <select
-          aria-label="审核状态"
-          value={review}
-          onChange={(e) => setReview(e.target.value)}
-        >
-          <option value="">全部审核状态</option>
-          <option value="pending">待审核</option>
-          <option value="approved">已通过</option>
-          <option value="rejected">未通过</option>
-        </select>
-        <select
           aria-label="作品状态"
           value={state}
           onChange={(e) => setState(e.target.value)}
@@ -70,7 +58,7 @@ export default function Works({ notify }: PageProps) {
         </select>
       </div>
       <Table
-        key={query + review + state}
+        key={query + state}
         rows={rows}
         empty={query ? "没有匹配的作品，请调整搜索条件" : "暂无作品"}
         id={(j) => j.id}
@@ -87,17 +75,6 @@ export default function Works({ notify }: PageProps) {
             ),
           },
           { title: "用户", render: (j) => <IdChip>{j.userId}</IdChip> },
-          {
-            title: "审核",
-            render: (j) =>
-              j.reviewStatus === "approved" ? (
-                <Badge state="succeeded" label="已通过" />
-              ) : j.reviewStatus === "rejected" ? (
-                <Badge state="failed" label="未通过" />
-              ) : (
-                <Badge state="queued" label="待审核" />
-              ),
-          },
           {
             title: "状态",
             render: (j) => (

@@ -31,12 +31,6 @@ func approvedShare(t *testing.T) (*Server, string, string) {
 	if e := a.Store.Finish(ctx, claimed, "https://cdn.example/private.png", ""); e != nil {
 		t.Fatal(e)
 	}
-	review, e := a.Store.Get(ctx, "reviews", j.ID)
-	if e != nil {
-		t.Fatal(e)
-	}
-	review.Data = core.Data(core.Review{JobID: j.ID, Status: "approved"})
-	_, _ = a.Store.Put(ctx, "reviews", review, review.Version)
 	w := call(a, "POST", "/api/shares", user, "", map[string]any{"jobId": j.ID})
 	var result struct {
 		Token string `json:"token"`
@@ -47,7 +41,7 @@ func approvedShare(t *testing.T) (*Server, string, string) {
 	return a, j.ID, result.Token
 }
 func TestPublicSharingFailsClosedWhenAccessChecksCannotBeRead(t *testing.T) {
-	for _, ns := range []string{"work_meta", "users", "reviews"} {
+	for _, ns := range []string{"work_meta", "users"} {
 		t.Run(ns, func(t *testing.T) {
 			a, _, token := approvedShare(t)
 			a.Store = failedNamespace{Store: a.Store, namespace: ns}

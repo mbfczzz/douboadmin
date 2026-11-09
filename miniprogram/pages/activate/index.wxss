@@ -55,3 +55,26 @@
   color: #a0a8ac;
   margin-top: 36rpx;
 }
+.activation-path .biz-input + .biz-input {
+  margin-top: 12px;
+}
+.activation-sms {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+.activation-sms .biz-input {
+  flex: 1;
+  min-width: 0;
+}
+.activation-sms button.biz-action {
+  flex-shrink: 0;
+  width: 120px;
+  margin: 0;
+  padding: 11px 8px;
+  font-size: 14px;
+  white-space: nowrap;
+}
+.activation-skip button.biz-action {
+  margin-top: 0;
+}

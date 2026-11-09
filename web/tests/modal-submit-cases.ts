@@ -20,14 +20,6 @@ export const submitCases: SubmitCase[] = [
     fields: { 退款原因: "仅验证输入保留" },
   },
   {
-    name: "作品审核",
-    nav: "内容审核",
-    open: "查看并审核",
-    submit: "审核通过",
-    endpoint: "/reviews/qa-job",
-    fields: { "审核说明（驳回必填）": "仅验证输入保留" },
-  },
-  {
     name: "管理账号",
     nav: "管理账号",
     open: "添加管理账号",

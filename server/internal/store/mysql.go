@@ -39,6 +39,7 @@ func (m *MySQL) Migrate(ctx context.Context) error {
 	for _, q := range []string{
 		`CREATE TABLE IF NOT EXISTS records (namespace VARCHAR(32) NOT NULL,id VARCHAR(64) NOT NULL,owner_id VARCHAR(64) NOT NULL DEFAULT '',version BIGINT NOT NULL,data JSON NOT NULL,created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),PRIMARY KEY(namespace,id),KEY owner_list(namespace,owner_id,created_at)) ENGINE=InnoDB`,
 		`CREATE TABLE IF NOT EXISTS jobs (id CHAR(32) PRIMARY KEY,user_id VARCHAR(64) NOT NULL,input JSON NOT NULL,request_hash CHAR(64) NOT NULL,status VARCHAR(16) NOT NULL,progress INT NOT NULL DEFAULT 0,result MEDIUMTEXT NOT NULL,error TEXT NOT NULL,attempts INT NOT NULL DEFAULT 0,lease_token VARCHAR(32) NOT NULL DEFAULT '',lease_until DATETIME(6) NULL,created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),updated_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),KEY queue_claim(status,lease_until,created_at),KEY user_jobs(user_id,created_at)) ENGINE=InnoDB`,
+		auditTable,
 	} {
 		if _, err := m.db.ExecContext(ctx, q); err != nil {
 			return err

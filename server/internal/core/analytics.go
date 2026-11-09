@@ -13,6 +13,9 @@ type DailyMetric struct {
 	PaidOrders  int64  `json:"paidOrders"`
 	// Points (hundredths) charged for jobs that succeeded that day.
 	SpentUnits int64 `json:"spentUnits"`
+	// Anonymous page views and distinct visitors, by visit start day.
+	PV int64 `json:"pv"`
+	UV int64 `json:"uv"`
 }
 type ModelCost struct {
 	Model           string `json:"model"`
@@ -26,6 +29,8 @@ type Dashboard struct {
 	Events    map[string]int64 `json:"events"`
 	Period    int              `json:"period"`
 	Breakdown Breakdown        `json:"breakdown"`
+	// API is request volume/errors/latency from the operation log, when kept.
+	API *APIStats `json:"api,omitempty"`
 }
 
 // KindStat summarises one generation type within the report period.
@@ -67,4 +72,7 @@ type Breakdown struct {
 	CodesIssued         int64                   `json:"codesIssued"`
 	CodesRedeemed       int64                   `json:"codesRedeemed"`
 	Providers           []ProviderStat          `json:"providers"`
+	Traffic             Traffic                 `json:"traffic"`
+	// The same visit statistics per client (miniprogram/web/app).
+	TrafficByClient map[string]Traffic `json:"trafficByClient,omitempty"`
 }

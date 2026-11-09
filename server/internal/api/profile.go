@@ -152,10 +152,19 @@ func (a *Server) updateMe(w http.ResponseWriter, r *http.Request) {
 			fail(w, 400, "姓名不能超过 50 字")
 			return
 		}
+		if value == "" && a.registrationRequired() {
+			fail(w, 400, "请填写姓名")
+			return
+		}
 		profile["name"] = value
 	}
-	if v.Phone != nil {
+	if current, _ := profile["phone"].(string); v.Phone != nil && strings.TrimSpace(*v.Phone) != current {
+		// With SMS registration the phone is set by verification only.
 		value := strings.TrimSpace(*v.Phone)
+		if a.registrationRequired() {
+			fail(w, 400, "手机号已通过短信验证，不能在此修改")
+			return
+		}
 		if value != "" && !validPhone.MatchString(value) {
 			fail(w, 400, "请填写有效手机号")
 			return

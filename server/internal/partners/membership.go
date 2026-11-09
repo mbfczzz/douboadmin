@@ -73,7 +73,7 @@ func (s *Service) Redeem(ctx context.Context, user, input string, source ...stri
 			return e
 		}
 		if _, _, directErr := get[core.DirectAccess](tx, "direct_access", user); directErr == nil {
-			return rulef("账号已通过直接申请开通，无需使用激活码")
+			return rulef("账号已作为普通用户开通，不能再使用激活码")
 		} else if !errors.Is(directErr, core.ErrNotFound) {
 			return directErr
 		}

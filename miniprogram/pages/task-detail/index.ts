@@ -242,16 +242,6 @@ Page({
   },
   share() {
     if (!this.data.job || this.data.job.deleted) return;
-    if (this.data.job.reviewStatus !== "approved") {
-      error(
-        new Error(
-          this.data.job.reviewStatus === "rejected"
-            ? "作品未通过审核，不能分享；原因见消息通知"
-            : "作品审核通过后可公开分享",
-        ),
-      );
-      return;
-    }
     openPage(this, { url: "/pages/share/index?id=" + this.id });
   },
   async remove() {

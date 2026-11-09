@@ -25,17 +25,19 @@ export const profileState = {
   fieldErrors: {} as Record<string, string>,
 };
 
-export function profileErrors(profile: ReturnType<typeof profileDraft>) {
+// Registered users (SMS-verified) must keep a name.
+export function profileErrors(
+  profile: ReturnType<typeof profileDraft>,
+  nameRequired = false,
+) {
   const errors: Record<string, string> = {};
   const nickname = profile.nickname.trim();
   if (!nickname) errors.nickname = "请填写昵称";
   else if (Array.from(nickname).length > 30)
     errors.nickname = "昵称不能超过 30 字";
-  if (Array.from(profile.name.trim()).length > 50)
-    errors.name = "姓名不能超过 50 字";
-  const phone = profile.phone.trim();
-  if (phone && !/^\+?[0-9]{7,15}$/.test(phone))
-    errors.phone = "请填写有效手机号";
+  const name = profile.name.trim();
+  if (!name && nameRequired) errors.name = "请填写姓名";
+  else if (Array.from(name).length > 50) errors.name = "姓名不能超过 50 字";
   if (Array.from(profile.bio).length > 120) errors.bio = "简介不能超过 120 字";
   return errors;
 }

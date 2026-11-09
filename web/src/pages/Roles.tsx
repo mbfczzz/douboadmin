@@ -72,9 +72,10 @@ export default function Roles({ notify }: PageProps) {
           {
             title: "可见菜单",
             render: (row) => {
-              const names = row.data.menus.map(
-                (id) => pageInfo[id as PageId]?.[0] || id,
-              );
+              // Menus of retired pages (e.g. 内容审核) are not shown.
+              const names = row.data.menus
+                .filter((id) => id in pageInfo)
+                .map((id) => pageInfo[id as PageId][0]);
               return names.length > 4
                 ? `${names.slice(0, 3).join("、")} 等 ${names.length} 个菜单`
                 : names.join("、");

@@ -3,7 +3,6 @@ import {
   Layers,
   Film,
   Image,
-  ShieldCheck,
   Users,
   Handshake,
   ReceiptText,
@@ -14,6 +13,7 @@ import {
   MessageSquare,
   Settings2,
   KeyRound,
+  ScrollText,
 } from "lucide-react";
 import type { Config } from "./api";
 export const pageInfo = {
@@ -25,10 +25,14 @@ export const pageInfo = {
   ],
   jobs: ["生成任务", "查看任务进度、生成结果与失败原因。", Film],
   works: ["作品管理", "预览、管理作品与公开分享状态。", Image],
-  reviews: ["内容审核", "审核作品内容，处理公开展示申请。", ShieldCheck],
   orders: ["充值订单", "查看真实支付状态、到账积分与退款。", ReceiptText],
   payments: ["支付管理", "查询支付流水、到账积分与退款记录。", CreditCard],
   monitor: ["运行监控", "查看节点、队列、错误日志和异常告警。", Activity],
+  logs: [
+    "日志管理",
+    "业务操作、接口调用、模型调用、积分变动与登录记录。",
+    ScrollText,
+  ],
   users: ["小程序用户", "管理微信用户资料、使用授权与积分。", Users],
   partners: [
     "服务商管理",
@@ -51,7 +55,7 @@ export type Notify = (message: string, tone?: NoticeTone) => void;
 export const navGroups: { label: string; pages: PageId[] }[] = [
   {
     label: "内容与创作",
-    pages: ["overview", "templates", "jobs", "works", "reviews"],
+    pages: ["overview", "templates", "jobs", "works"],
   },
   {
     label: "用户与交易",
@@ -59,7 +63,15 @@ export const navGroups: { label: string; pages: PageId[] }[] = [
   },
   {
     label: "平台管理",
-    pages: ["accounts", "roles", "models", "monitor", "feedback", "settings"],
+    pages: [
+      "accounts",
+      "roles",
+      "models",
+      "monitor",
+      "logs",
+      "feedback",
+      "settings",
+    ],
   },
 ];
 // Navigation groups limited to the menus granted to the signed-in role.

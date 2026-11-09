@@ -14,7 +14,15 @@ import {
   scannedActivation,
 } from "../../services/access";
 import type { AccessStatus } from "../../services/access";
+import { trackVisit } from "../../services/analytics";
 import type { Config } from "../../services/types";
+import {
+  registerState,
+  prefill,
+  sendCode,
+  register,
+  stopCountdown,
+} from "./register";
 
 Page({
   data: {
@@ -25,10 +33,12 @@ Page({
     loadError: "",
     wechatReady: false,
     status: null as AccessStatus | null,
+    ...registerState,
   },
   revision: 0,
   destroyed: false,
   entering: false,
+  timer: undefined as number | undefined,
   onLoad(options: Record<string, string>) {
     if (options.code || options.scene) {
       try {
@@ -41,12 +51,14 @@ Page({
     }
   },
   onShow() {
+    trackVisit(this);
     resetAccessNavigation();
     void this.load();
   },
   onUnload() {
     this.destroyed = true;
     this.revision++;
+    stopCountdown(this);
   },
   async load() {
     const revision = ++this.revision;
@@ -71,6 +83,7 @@ Page({
         return;
       }
       this.setData({ status, logged: hasSession() });
+      prefill(this, status);
       if (status.active) this.enter();
     } catch (e) {
       if (revision === this.revision)
@@ -81,6 +94,19 @@ Page({
   },
   input(e: WechatMiniprogram.Input) {
     this.setData({ code: e.detail.value });
+  },
+  field(e: WechatMiniprogram.Input) {
+    const key = e.currentTarget.dataset.field as string;
+    if (["name", "phone", "smsCode"].includes(key))
+      this.setData({ [key]: e.detail.value });
+  },
+  async sendCode() {
+    if (!this.data.busy && this.data.logged) await sendCode(this);
+  },
+  async register() {
+    if (this.data.busy || !this.data.logged) return;
+    const status = await register(this);
+    if (status?.active) this.enter();
   },
   async login() {
     if (this.data.busy) return;
@@ -159,7 +185,8 @@ Page({
     try {
       await logout();
       if (!this.destroyed) {
-        this.setData({ code: "", status: null });
+        stopCountdown(this);
+        this.setData({ code: "", status: null, ...registerState });
         await this.load();
       }
     } catch (e) {

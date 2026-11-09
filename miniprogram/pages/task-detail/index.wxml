@@ -91,7 +91,7 @@
     </view>
     <view wx:if="{{job.status==='succeeded'&&!job.deleted}}" class="row result-actions"
       ><button class="text-button" bindtap="share">
-        {{job.reviewStatus==='approved'?'分享作品':job.reviewStatus==='rejected'?'审核未通过':'待审核后分享'}}</button
+        分享作品</button
       ><button class="text-button danger-link" bindtap="remove">删除作品</button></view
     >
     <text class="section-title">提示词</text>

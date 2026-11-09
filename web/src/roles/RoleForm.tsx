@@ -23,7 +23,9 @@ export default function RoleForm({
   onSaved: () => unknown;
 }) {
   const [scope, setScope] = useState<RoleScope>(row?.data.scope || "platform"),
-    [menus, setMenus] = useState<string[]>(row?.data.menus || []),
+    [menus, setMenus] = useState<string[]>(
+      (row?.data.menus || []).filter((id) => id in pageInfo),
+    ),
     [busy, setBusy] = useState(false),
     [error, setError] = useState(""),
     [dirty, setDirty] = useState(false);

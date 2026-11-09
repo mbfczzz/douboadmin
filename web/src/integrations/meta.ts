@@ -7,6 +7,7 @@ import {
   Globe,
   MessageCircle,
   Siren,
+  Smartphone,
   type LucideIcon,
 } from "lucide-react";
 import type { IntegrationGroup } from "./types";
@@ -18,6 +19,7 @@ export const groupMeta: Record<
 > = {
   wechat: { icon: MessageCircle, desc: "小程序登录与用户身份" },
   relay: { icon: Bot, desc: "AI 生成模型的上游服务" },
+  sms: { icon: Smartphone, desc: "注册时验证用户手机号", capability: "sms" },
   oss: { icon: Cloud, desc: "图片、视频等媒体文件存储", capability: "oss" },
   virtual: {
     icon: CreditCard,

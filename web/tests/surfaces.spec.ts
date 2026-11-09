@@ -168,8 +168,6 @@ for (const width of [1440, 390, 320]) {
     await modal("详情", "任务详情");
     await nav("作品管理");
     await modal("预览", "作品预览");
-    await nav("内容审核");
-    await modal("查看并审核", "作品审核");
     await nav("充值订单");
     await modal("详情", "充值订单详情");
     await modal("退款", "申请全额退款");

@@ -34,6 +34,27 @@ func (a *Server) updateUser(w http.ResponseWriter, r *http.Request) {
 		fail(w, 500, "用户资料异常")
 		return
 	}
+	// A changed phone must be verified again by SMS, which needs a mainland
+	// number; clearing name or phone would send the user back to registration.
+	oldName, _ := profile["name"].(string)
+	oldPhone, _ := profile["phone"].(string)
+	switch {
+	case input.Phone != oldPhone && input.Phone != "" && !mainlandPhone.MatchString(input.Phone):
+		fail(w, 400, "请填写 11 位手机号（短信验证仅支持中国大陆号码）")
+		return
+	case a.registrationRequired() && (oldName != "" && input.Name == "" || oldPhone != "" && input.Phone == ""):
+		fail(w, 400, "姓名和手机号是用户使用的必填资料，不能清空")
+		return
+	}
+	if input.Phone != oldPhone && input.Phone != "" {
+		if taken, e := a.phoneTaken(r.Context(), input.Phone, row.ID); e != nil {
+			dbError(w, e)
+			return
+		} else if taken {
+			fail(w, 400, errPhoneTaken)
+			return
+		}
+	}
 	profile["nickname"], profile["name"], profile["phone"], profile["bio"] = input.Nickname, input.Name, input.Phone, input.Bio
 	row.Data = core.Data(profile)
 	err = a.Store.Atomic(r.Context(), func(tx store.Transaction) error {
@@ -85,6 +106,12 @@ func (a *Server) archiveUser(w http.ResponseWriter, r *http.Request) {
 		row, e = tx.Put("users", row, input.Version)
 		if e != nil {
 			return e
+		}
+		// An archived (deregistered) account frees its phone for a new account.
+		if phone, _ := profile["verifiedPhone"].(string); phone != "" {
+			if e = releasePhone(tx, phone, row.ID); e != nil {
+				return e
+			}
 		}
 		_, e = tx.Put("user_audit", core.Record{ID: core.NewID(), Owner: row.ID, Data: core.Data(map[string]any{"actor": identity(r).ID, "kind": "archive", "reason": input.Reason})}, 0)
 		return e

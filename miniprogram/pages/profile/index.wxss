@@ -211,3 +211,21 @@ button.profile-submit {
 .profile-bio.invalid {
   border-color: #836044;
 }
+.profile-readonly {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  color: #a0a8ac;
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
+}
+.profile-verified {
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: #22332a;
+  color: #9bcbaa;
+  font-size: 12px;
+  line-height: 18px;
+}

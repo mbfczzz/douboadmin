@@ -42,7 +42,7 @@ test("profile conflict preserves the draft and refreshes version for explicit re
   const profile = {
     id: "wx-user",
     version: 1,
-    data: { nickname: "old", bio: "bio" },
+    data: { nickname: "old", name: "张三", bio: "bio" },
   };
   const page = h.page("profile");
   const writes = [];

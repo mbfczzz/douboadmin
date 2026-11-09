@@ -29,10 +29,10 @@ const routes = {
   feedback: lazy(() => import("./pages/Feedback")),
   settings: lazy(() => import("./pages/Settings")),
   works: lazy(() => import("./pages/Works")),
-  reviews: lazy(() => import("./pages/Reviews")),
   orders: lazy(() => import("./pages/Orders")),
   payments: lazy(() => import("./pages/Payments")),
   monitor: lazy(() => import("./pages/Monitor")),
+  logs: lazy(() => import("./pages/Logs")),
 };
 const CommandPalette = lazy(() => import("./components/CommandPalette"));
 export default function Workspace({

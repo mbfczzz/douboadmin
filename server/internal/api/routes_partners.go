@@ -3,6 +3,10 @@ package api
 func (a *Server) partnerRoutes() {
 	m := a.Mux
 	m.HandleFunc("GET /api/access", a.auth("user", a.myAccess))
+	m.HandleFunc("POST /api/access/sms", a.auth("user", a.sendSMSCode))
+	m.HandleFunc("POST /api/access/profile", a.auth("user", a.register))
+	m.HandleFunc("GET /api/admin/signup", a.auth("admin", a.signupSettings))
+	m.HandleFunc("PUT /api/admin/signup", a.auth("admin", a.saveSignupSettings))
 	m.HandleFunc("POST /api/access/direct", a.auth("user", a.directAccess))
 	m.HandleFunc("POST /api/access/redeem", a.auth("user", a.redeemAccess))
 	m.HandleFunc("GET /api/admin/partners", a.auth("admin", a.partnerList("partners")))

@@ -1,6 +1,8 @@
 import { resetNavigation } from "./navigation";
+import { trackVisit } from "../services/analytics";
 
 interface MotionPage {
+  route?: string;
   data: Record<string, unknown>;
   setData(data: Record<string, unknown>): void;
 }
@@ -11,6 +13,7 @@ let visiblePage: MotionPage | undefined;
 
 export function enterPage(page: MotionPage) {
   resetNavigation(page);
+  trackVisit(page);
   // Returning from the camera, album or app background is not a new route.
   if (visiblePage === page) return;
   visiblePage = page;

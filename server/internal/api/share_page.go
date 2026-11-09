@@ -15,6 +15,7 @@ func (a *Server) shareHTML(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "分享已失效或作品不可用", 404)
 		return
 	}
+	a.countWebView(w, r, "/s/*")
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Header().Set("Content-Security-Policy", "default-src 'none'; img-src 'self' https:; media-src 'self' https:; style-src 'unsafe-inline'; frame-ancestors 'none'; base-uri 'none'")
 	_ = sharePage.Execute(w, data)

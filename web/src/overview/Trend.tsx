@@ -16,6 +16,20 @@ const metrics: {
     unit: "次",
   },
   {
+    key: "pv",
+    name: "浏览量",
+    value: (d) => d.pv || 0,
+    text: String,
+    unit: "次",
+  },
+  {
+    key: "uv",
+    name: "访客数",
+    value: (d) => d.uv || 0,
+    text: String,
+    unit: "人",
+  },
+  {
     key: "new",
     name: "新增用户",
     value: (d) => d.newUsers,

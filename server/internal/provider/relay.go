@@ -49,6 +49,8 @@ func (p *Relay) checkpoint(ctx context.Context, row *core.Record, e Execution) e
 }
 
 func (p *Relay) Generate(ctx context.Context, j core.Job) (string, error) {
+	// Upstream calls made for this job are attributed to it in the model log.
+	ctx = relay.WithJob(ctx, relay.Job{ID: j.ID, User: j.UserID, Model: j.Input.Model, Kind: j.Input.Kind})
 	row, err := p.Store.Get(ctx, "executions", j.ID)
 	var e Execution
 	var raw []byte

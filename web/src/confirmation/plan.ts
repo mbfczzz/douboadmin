@@ -7,11 +7,11 @@ const names: Record<string, string> = {
   templates: "模板",
   accounts: "管理账号",
   users: "用户资料",
+  signup: "普通用户注册",
   partners: "服务商",
   memberships: "用户归属",
   "partner-policy": "分销规则",
   "commission-payouts": "结算记录",
-  reviews: "审核结果",
   "quota-requests": "名额申请",
   "quota-moves": "名额分配",
   roles: "角色",
@@ -48,6 +48,7 @@ const labels: Record<string, string> = {
   parentId: "上级服务商",
   childId: "下级服务商",
   kind: "类型",
+  openSignup: "开放普通用户注册",
 };
 export function needsConfirmation(path: string, method: string, body: unknown) {
   if (!path.startsWith("/admin/")) return false;

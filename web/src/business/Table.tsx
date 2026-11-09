@@ -20,6 +20,7 @@ export default function Table<T>({
   help = "",
   pagination,
   framed = true,
+  paged = true,
 }: {
   rows: T[];
   columns: Column<T>[];
@@ -27,6 +28,9 @@ export default function Table<T>({
   empty?: string;
   help?: string;
   framed?: boolean;
+  // false: show every row given and no page bar (the caller pages itself,
+  // e.g. with cursors).
+  paged?: boolean;
   pagination?: {
     page: number;
     total: number;
@@ -40,7 +44,10 @@ export default function Table<T>({
     current =
       pagination?.page ??
       Math.min(page, Math.max(1, Math.ceil(rows.length / 20))),
-    visible = pagination ? rows : rows.slice((current - 1) * 20, current * 20);
+    visible =
+      pagination || !paged
+        ? rows
+        : rows.slice((current - 1) * 20, current * 20);
   useEffect(() => {
     const media = matchMedia("(max-width: 640px)"),
       update = () => setMobile(media.matches);
@@ -134,11 +141,13 @@ export default function Table<T>({
         </div>
       )}
       {!rows.length && <Empty text={empty} help={help} />}
-      <Pagination
-        total={pagination?.total ?? rows.length}
-        page={current}
-        onChange={pagination?.onChange ?? setPage}
-      />
+      {paged && (
+        <Pagination
+          total={pagination?.total ?? rows.length}
+          page={current}
+          onChange={pagination?.onChange ?? setPage}
+        />
+      )}
     </section>
   );
 }

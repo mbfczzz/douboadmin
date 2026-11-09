@@ -96,8 +96,8 @@
             name="name"
             value="{{name}}"
             data-field="name"
-            data-next="phone"
-            aria-label="{{fieldErrors.name?'姓名，'+fieldErrors.name:'姓名（选填）'}}"
+            data-next="bio"
+            aria-label="{{fieldErrors.name?'姓名，'+fieldErrors.name:'姓名'}}"
             maxlength="50"
             disabled="{{busy}}"
             focus="{{focusedField==='name'}}"
@@ -107,7 +107,7 @@
             confirm-type="next"
             bindconfirm="next"
             placeholder-class="profile-placeholder"
-            placeholder="选填姓名"
+            placeholder="请填写姓名"
             cursor-spacing="24"
           />
           <text wx:if="{{fieldErrors.name}}" class="profile-field-error"
@@ -115,34 +115,17 @@
           >
         </view>
       </view>
-      <view
-        class="profile-field {{focusedField==='phone'?'focused':''}} {{fieldErrors.phone?'invalid':''}}"
-        data-field="phone"
-        bindtap="focus"
-      >
+      <view class="profile-field">
         <text class="profile-label">手机号</text
         ><view class="profile-field-content">
-          <input
-            name="phone"
-            value="{{phone}}"
-            data-field="phone"
-            data-next="bio"
-            aria-label="{{fieldErrors.phone?'手机号，'+fieldErrors.phone:'手机号（选填）'}}"
-            maxlength="16"
-            disabled="{{busy}}"
-            focus="{{focusedField==='phone'}}"
-            bindfocus="focus"
-            bindblur="blur"
-            bindinput="input"
-            confirm-type="next"
-            bindconfirm="next"
-            placeholder-class="profile-placeholder"
-            placeholder="选填手机号"
-            cursor-spacing="24"
-          />
-          <text wx:if="{{fieldErrors.phone}}" class="profile-field-error"
-            >{{fieldErrors.phone}}</text
-          >
+          <view class="profile-readonly">
+            <text>{{phone||'未填写'}}</text
+            ><text
+              wx:if="{{phone&&me.profile.data.verifiedPhone===phone}}"
+              class="profile-verified"
+              >已验证</text
+            >
+          </view>
         </view>
       </view>
     </view>

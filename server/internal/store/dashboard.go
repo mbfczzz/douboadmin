@@ -10,12 +10,13 @@ import (
 var reportZone = time.FixedZone("Asia/Shanghai", 8*60*60)
 
 type reportBuilder struct {
-	days   map[string]*core.DailyMetric
-	models map[string]*core.ModelCost
-	events map[string]int64
-	extra  *breakdownBuilder
-	period int
-	since  time.Time
+	days    map[string]*core.DailyMetric
+	models  map[string]*core.ModelCost
+	events  map[string]int64
+	extra   *breakdownBuilder
+	traffic *trafficSet
+	period  int
+	since   time.Time
 }
 
 func newReport(days int) *reportBuilder {
@@ -29,10 +30,12 @@ func newReport(days int) *reportBuilder {
 		key := start.AddDate(0, 0, i).Format("2006-01-02")
 		r.days[key] = &core.DailyMetric{Date: key}
 	}
+	r.traffic = newTrafficSet(r.days, now.Format("2006-01-02"))
 	return r
 }
 func (r *reportBuilder) record(ns string, row core.Record) {
 	r.extra.record(ns, row)
+	r.traffic.record(ns, row)
 	day := r.days[row.CreatedAt.In(reportZone).Format("2006-01-02")]
 	switch ns {
 	case "users":
@@ -102,6 +105,7 @@ func (r *reportBuilder) job(j core.Job) {
 }
 func (r *reportBuilder) result() core.Dashboard {
 	out := core.Dashboard{Days: []core.DailyMetric{}, Models: []core.ModelCost{}, Events: r.events, Period: r.period, Breakdown: r.extra.result()}
+	out.Breakdown.Traffic, out.Breakdown.TrafficByClient = r.traffic.result()
 	for _, d := range r.days {
 		d.RevenueFen = d.PaidFen - d.RefundFen
 		out.Days = append(out.Days, *d)

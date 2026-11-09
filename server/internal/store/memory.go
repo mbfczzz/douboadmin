@@ -14,6 +14,7 @@ type Memory struct {
 	mu      sync.Mutex
 	records map[string]core.Record
 	jobs    map[string]core.Job
+	logs    []core.AuditEntry // oldest first, capped (see audit.go)
 }
 
 func NewMemory() *Memory {

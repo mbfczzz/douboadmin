@@ -41,7 +41,9 @@ export default function UserActivation({ userId }: { userId: string }) {
         retry={resource.reload}
       />
       {source?.kind === "none" && (
-        <p className="quiet">尚未开通：用户需直接申请或使用服务商激活码。</p>
+        <p className="quiet">
+          尚未开通：用户验证手机号后，需使用服务商激活码开通；开放普通用户注册时也可跳过。
+        </p>
       )}
       {source?.kind === "direct" && (
         <div className="source-head">

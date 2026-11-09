@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { confirmSubmission, login, answerAsk } from "./helpers";
-import { selectProvider, issueCode } from "./partner-helpers";
+import { selectProvider, issueCode, miniUser } from "./partner-helpers";
 test.skip(
   process.env.PARTNER_ACCEPTANCE !== "true",
   "Requires isolated partner acceptance database and API",
@@ -60,11 +60,7 @@ test("quota requests approve against the parent pool and unused codes can be rev
   ).json();
   expect(view.quota.users.reserved).toBe(0);
   expect(view.quota.users.used).toBe(0);
-  const user = await (
-    await page.request.post("/api/auth/login", {
-      data: { demoId: crypto.randomUUID() },
-    })
-  ).json();
+  const user = await miniUser(page.request);
   const redeemed = await page.request.post("/api/access/redeem", {
     headers: { Authorization: "Bearer " + user.token },
     data: { code },

@@ -60,7 +60,7 @@ Page({
       const job = await request<Job>("/jobs/" + this.id);
       if (revision !== this.revision) return;
       if (job.result) job.result = media(job.result);
-      if (job.deleted || job.reviewStatus !== "approved") {
+      if (job.deleted) {
         this.shareRevision++;
         this.setData({ share: null });
       }
@@ -87,8 +87,7 @@ Page({
       this.data.busy ||
       this.destroyed ||
       !this.data.job ||
-      this.data.job.deleted ||
-      this.data.job.reviewStatus !== "approved"
+      this.data.job.deleted
     )
       return;
     const revision = ++this.shareRevision;

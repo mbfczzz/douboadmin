@@ -17,9 +17,9 @@
         src="{{job.result}}"
         controls /></view
     ><view
-      wx:if="{{job.reviewStatus!=='approved'||job.deleted}}"
+      wx:if="{{job.deleted}}"
       class="biz-error"
-      >{{job.deleted?'作品已删除':'作品通过审核后可以公开分享。'}}</view
+      >作品已删除</view
     ><view wx:else class="biz-card"
       ><text class="biz-label">分享标题</text
       ><input

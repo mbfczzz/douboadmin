@@ -1,4 +1,5 @@
 import type { Tone } from "../components/Tag";
+import type { Traffic } from "./traffic";
 export interface Wallet {
   userId: string;
   availableUnits: number;
@@ -92,6 +93,8 @@ export interface Profile {
   nickname: string;
   name?: string;
   phone?: string;
+  verifiedPhone?: string;
+  phoneVerifiedAt?: string;
   bio?: string;
   disabled?: boolean;
   archived?: boolean;
@@ -109,6 +112,8 @@ export interface Daily {
   revenueFen: number;
   paidOrders?: number;
   spentUnits?: number;
+  pv?: number;
+  uv?: number;
 }
 export interface KindStat {
   jobs: number;
@@ -136,6 +141,16 @@ export interface Breakdown {
   codesIssued: number;
   codesRedeemed: number;
   providers: { id: string; name: string; activations: number }[];
+  traffic?: Traffic;
+  trafficByClient?: Record<string, Traffic>;
+}
+export interface APIStats {
+  requests: number;
+  errors: number;
+  rejected: number;
+  slow: number;
+  avgMs: number;
+  users: number;
 }
 export interface Dashboard {
   breakdown?: Breakdown;
@@ -148,6 +163,8 @@ export interface Dashboard {
   }[];
   events: Record<string, number>;
   period: number;
+  // Request volume and errors from the operation log (when kept).
+  api?: APIStats;
 }
 export const points = (units: number) =>
   new Intl.NumberFormat("zh-CN", { maximumFractionDigits: 2 }).format(

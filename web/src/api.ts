@@ -33,7 +33,6 @@ export interface Template {
 }
 export interface Job {
   deleted?: boolean;
-  reviewStatus?: string;
   costUnits?: number;
   billingState?: string;
   stage?: string;

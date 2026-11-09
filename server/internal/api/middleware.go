@@ -40,6 +40,10 @@ func (a *Server) Handler() http.Handler {
 				fail(w, 500, "服务异常")
 			}
 		}()
+		if a.Audit != nil && audited(r) {
+			a.serveAudited(w, r)
+			return
+		}
 		a.Mux.ServeHTTP(w, r)
 	})
 }
@@ -59,6 +63,8 @@ func (a *Server) auth(role string, h http.HandlerFunc) http.HandlerFunc {
 			}
 			return
 		}
+		// Known caller from here on, so even refused requests are attributed.
+		auditActor(r, v)
 		if role != "" && v.Role != role {
 			fail(w, 403, "没有操作权限")
 			return
@@ -101,16 +107,16 @@ func (a *Server) auth(role string, h http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 		if v.Role == "user" {
-			disabled, e := a.userDisabled(r.Context(), v.ID)
+			flags, e := a.userState(r.Context(), v.ID)
 			if e != nil && !errors.Is(e, core.ErrNotFound) { // Legacy private sessions can predate profiles; public shares cannot.
 				dbError(w, e)
 				return
 			}
-			if disabled {
+			if flags.Disabled {
 				fail(w, 403, "账号已停用，请联系管理员")
 				return
 			}
-			if !a.allowActivation(w, r, v.ID) {
+			if !a.allowActivation(w, r, v.ID, flags.Registered) {
 				return
 			}
 		}
@@ -126,6 +132,7 @@ func (a *Server) auth(role string, h http.HandlerFunc) http.HandlerFunc {
 		if v.Role == "user" && a.Activity != nil {
 			a.Activity.Active(r.Context(), v.ID)
 		}
+		auditActor(r, v) // now with provider scope resolved
 		h(w, r.WithContext(context.WithValue(r.Context(), identityKey, v)))
 	}
 }

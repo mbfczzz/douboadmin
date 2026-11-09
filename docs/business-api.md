@@ -36,7 +36,7 @@
 
 支付流水从已确认的 `payment_transactions` 关联订单读取，未支付订单、人工调整积分不会混入。`q` 搜索订单号/微信交易号/用户编号；`status` 为 paid/refunding/refunded；`from/to` 按北京时间到账日期筛选，结束日期包含当天。返回 `{items,total,page,size}`，每页 20 条，不受通用列表 500 条上限限制；每条包含实付金额、到账积分、渠道、支付/到账时间、订单状态与关联退款单，不返回 OpenID、预支付凭据或密钥。
 
-## 用户、作品、审核与通知
+## 用户、作品与通知
 
 | 方法 | 路径 | 说明 |
 | --- | --- | --- |
@@ -48,13 +48,11 @@
 | POST | /notifications/read-all | 当前列表全部已读 |
 | GET | /works、/admin/works | 本人/管理端已完成媒体作品 |
 | DELETE | /works/{id}、/admin/works/{id} | 逻辑删除作品，保留账本和任务审计，分享立即失效 |
-| POST | /shares | `{jobId,title,showPrompt}`，本人已审核作品，默认不分享提示词 |
+| POST | /shares | `{jobId,title,showPrompt}`，本人已完成作品，默认不分享提示词 |
 | GET | /shares/{token} | 无需登录，分享失效/删除/驳回时不可访问 |
 | GET | /s/{token} | H5 分享页（此路径无 `/api` 前缀） |
-| GET | /admin/reviews | 待审与已审核作品 |
-| PUT | /admin/reviews/{id} | `{version,status,reason}`，approved/rejected，驳回必填原因 |
 
-作品公开分享须审核通过；关闭平台人工审核开关后新作品自动通过。短链 30 天到期，每次读取重新核验作品/用户/审核状态。私有 OSS 使用短期签名链接；本地媒体目录仅用于开发。
+作品生成完成即可公开分享（已取消人工内容审核，接口为兼容旧版小程序仍返回 `reviewStatus: "approved"`）。短链 30 天到期，每次读取重新核验作品/用户/开通状态，作品删除或用户停用后分享立即失效。私有 OSS 使用短期签名链接；本地媒体目录仅用于开发。
 
 ## 热门视频与运营
 

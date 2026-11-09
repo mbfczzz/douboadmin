@@ -6,6 +6,7 @@ import RequestState from "../components/RequestState";
 import Badge from "../components/Badge";
 import Tag, { Delta, IdChip } from "../components/Tag";
 import UserActivation from "./UserActivation";
+import { phoneVerified } from "../users/registration";
 import {
   points,
   ledgerLabels,
@@ -33,7 +34,8 @@ export default function UserDetails({
 }) {
   const ledger = useResource<Row<Ledger>[]>(`/admin/users/${user.id}/ledger`),
     wallet = useResource<{ wallet: Wallet }>(`/admin/users/${user.id}/wallet`),
-    [tone, label] = userState(user.data);
+    [tone, label] = userState(user.data),
+    verified = phoneVerified(user.data);
   return (
     <Modal
       title="用户详情"
@@ -52,7 +54,17 @@ export default function UserDetails({
           <dt>姓名</dt>
           <dd>{user.data.name || "未填写"}</dd>
           <dt>手机号</dt>
-          <dd>{user.data.phone || "未填写"}</dd>
+          <dd>
+            {user.data.phone
+              ? `${user.data.phone}（${verified ? "已验证" : "未验证"}）`
+              : "未填写"}
+          </dd>
+          {verified && user.data.phoneVerifiedAt && (
+            <>
+              <dt>验证时间</dt>
+              <dd>{date(user.data.phoneVerifiedAt)}</dd>
+            </>
+          )}
           <dt>注册时间</dt>
           <dd>{date(user.createdAt)}</dd>
         </dl>

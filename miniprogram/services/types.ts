@@ -68,7 +68,6 @@ export interface Job {
   stage?: string;
   resultAssetId?: string;
   deleted?: boolean;
-  reviewStatus?: string;
   modelName?: string;
   retryable?: boolean;
   id: string;
@@ -129,6 +128,7 @@ export interface Config {
 export interface Profile {
   name?: string;
   phone?: string;
+  verifiedPhone?: string;
   avatarId?: string;
   avatarUrl?: string;
   authProvider?: string;

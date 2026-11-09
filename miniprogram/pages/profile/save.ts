@@ -38,7 +38,10 @@ export async function saveProfile(
       bio: values.bio ?? page.data.bio,
     });
   page.updateDirty();
-  const fieldErrors = profileErrors(profileDraft(page.data));
+  const fieldErrors = profileErrors(
+    profileDraft(page.data),
+    !!page.data.me.profile.data.verifiedPhone,
+  );
   page.setData({ fieldErrors, saveError: "" });
   if (Object.keys(fieldErrors).length) {
     page.setData({ focusedField: Object.keys(fieldErrors)[0] });

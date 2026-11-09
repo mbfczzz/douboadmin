@@ -28,7 +28,7 @@ func TestActivationTraceUsesSessionAccountAndIsAdminOnly(t *testing.T) {
 	if grant.CreatorAccount != "verified-account" || grant.Actor == "" {
 		t.Fatal("issuer came from mutable config instead of session", grant)
 	}
-	_, _ = a.Store.Put(ctx, "users", core.Record{ID: "user-a", Data: core.Data(map[string]string{"nickname": "激活用户", "phone": "private-phone", "openid": "private-openid"})}, 0)
+	_, _ = a.Store.Put(ctx, "users", core.Record{ID: "user-a", Data: core.Data(map[string]string{"nickname": "激活用户", "name": "激活用户", "phone": "private-phone", "verifiedPhone": "private-phone", "openid": "private-openid"})}, 0)
 	code, e := a.Partners.Reveal(ctx, row.ID)
 	if e != nil {
 		t.Fatal(e)

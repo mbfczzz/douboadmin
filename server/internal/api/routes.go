@@ -12,6 +12,7 @@ func (a *Server) routes() {
 	a.paymentRoutes()
 	a.contentRoutes()
 	a.hotRoutes()
+	a.auditRoutes()
 	m := a.Mux
 	m.HandleFunc("GET /health/live", func(w http.ResponseWriter, r *http.Request) { reply(w, 200, map[string]bool{"ok": true}) })
 	m.HandleFunc("GET /health/ready", func(w http.ResponseWriter, r *http.Request) {

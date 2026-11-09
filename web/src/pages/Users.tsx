@@ -11,6 +11,8 @@ import UserDetails from "../business/UserDetails";
 import UserPoints from "../business/UserPoints";
 import UserEdit from "../business/UserEdit";
 import UserStatus from "../business/UserStatus";
+import SignupSwitch from "../users/SignupSwitch";
+import { phoneVerified, registered } from "../users/registration";
 
 type Dialog = "detail" | "points" | "edit" | "status";
 import type { Profile } from "../business/types";
@@ -71,6 +73,7 @@ export default function Users({ notify }: PageProps) {
           <option value="direct">直接开通</option>
           <option value="none">未开通</option>
         </select>
+        <SignupSwitch notify={notify} />
       </div>
       <Table
         key={query + state + access}
@@ -96,7 +99,12 @@ export default function Users({ notify }: PageProps) {
             render: (r) => (
               <>
                 {r.data.name || "未填写"}
-                <small className="cell-note">{r.data.phone || "未填写"}</small>
+                <small className="cell-note">
+                  {r.data.phone
+                    ? r.data.phone +
+                      (phoneVerified(r.data) ? " · 已验证" : " · 未验证")
+                    : "未填写"}
+                </small>
               </>
             ),
           },
@@ -135,9 +143,11 @@ export default function Users({ notify }: PageProps) {
                   <Tag>未开通</Tag>
                 )}
                 <small className="cell-note">
-                  {r.data.access?.active
-                    ? r.data.access.partnerName
-                    : r.data.access?.message}
+                  {!registered(r.data)
+                    ? "待填写姓名并验证手机号"
+                    : r.data.access?.active
+                      ? r.data.access.partnerName
+                      : r.data.access?.message}
                 </small>
               </>
             ),

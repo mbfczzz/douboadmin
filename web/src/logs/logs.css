@@ -1,0 +1,55 @@
+/* 日志管理 */
+.log-intro {
+  margin: -8px 0 16px;
+}
+.log-filters .log-writes {
+  align-self: center;
+  margin: 18px 0 0;
+}
+.log-action {
+  color: var(--ink);
+  font-weight: 600;
+}
+.log-path {
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.log-slow {
+  color: var(--warning);
+  font-weight: 600;
+}
+.log-pager {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 12px 20px;
+  border-top: 1px solid var(--line);
+}
+.log-detail .log-body {
+  margin-bottom: 14px;
+}
+.log-detail .log-body h4 {
+  margin: 0 0 8px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+.log-detail pre {
+  max-height: 320px;
+  margin: 0;
+  overflow: auto;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface-subtle);
+  color: var(--text);
+  font-size: 12px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.log-note {
+  margin: 4px 0 0;
+  font-size: 12px;
+}

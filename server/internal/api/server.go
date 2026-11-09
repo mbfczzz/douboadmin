@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"doubo/server/internal/analytics"
+	"doubo/server/internal/audit"
 	"doubo/server/internal/billing"
 	"doubo/server/internal/hotvideo"
 	"doubo/server/internal/media"
@@ -43,6 +44,7 @@ type Server struct {
 	Integrations *settings.Manager
 	Partners     *partners.Service
 	Activity     *analytics.Recorder
+	Visits       *analytics.Visits
 	Hot          *hotvideo.Service
 	Billing      *billing.Service
 	Pay          *payments.Client
@@ -51,10 +53,15 @@ type Server struct {
 	Relay        *relay.Client
 	Media        *media.Service
 	WeChat       *wechat.Client
+	SMS          SMSSender
 	Store        store.Store
 	Sessions     *Sessions
 	Config       Config
 	Mux          *http.ServeMux
+	// Audit queues operation logs; nil when the store cannot keep them.
+	Audit      *audit.Writer
+	statsCache auditStatsCache
+	visitLimit visitLimit
 }
 type ctxKey int
 
@@ -66,6 +73,11 @@ func New(s store.Store, sessions *Sessions, c Config) *Server {
 	a.Billing = &billing.Service{Store: s, RequireActivation: c.RequireActivation, BeforePayment: a.paymentAdmission}
 	a.Partners = &partners.Service{Store: s}
 	a.Activity = &analytics.Recorder{Store: s}
+	a.Visits = &analytics.Visits{Store: s}
+	if logs, ok := s.(store.AuditLogs); ok {
+		a.Audit = audit.NewWriter(logs, a.auditName)
+		a.Relay.Observe = a.modelLog
+	}
 	a.routes()
 	return a
 }

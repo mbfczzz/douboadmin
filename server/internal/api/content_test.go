@@ -9,11 +9,10 @@ import (
 	"testing"
 )
 
-func TestReviewShareDeleteAndNotificationOwnership(t *testing.T) {
+func TestShareDeleteAndNotificationOwnership(t *testing.T) {
 	a, user, other := setup(t)
 	ctx := context.Background()
 	_, _ = a.Store.Put(ctx, "users", core.Record{ID: "user-a", Data: core.Data(map[string]any{"disabled": false})}, 0)
-	admin, _ := a.Sessions.Create(ctx, "admin", "admin")
 	j := core.NewJob("user-a", "content-fixture", core.JobInput{Kind: "image", Model: "demo-image", Prompt: "private description"})
 	_, _ = a.Store.CreateJob(ctx, j)
 	claimed, _ := a.Store.Claim(ctx)
@@ -24,15 +23,8 @@ func TestReviewShareDeleteAndNotificationOwnership(t *testing.T) {
 	if w := call(a, "POST", "/api/shares", other, "", share); w.Code != 404 {
 		t.Fatal("other user shared work", w.Code)
 	}
-	if w := call(a, "POST", "/api/shares", user, "", share); w.Code != 409 {
-		t.Fatal("unreviewed share allowed", w.Code)
-	}
-	review, _ := a.Store.Get(ctx, "reviews", j.ID)
-	w := call(a, "PUT", "/api/admin/reviews/"+j.ID, admin, "", map[string]any{"version": review.Version, "status": "approved", "reason": "checked"})
-	if w.Code != 200 {
-		t.Fatal(w.Body.String())
-	}
-	w = call(a, "POST", "/api/shares", user, "", share)
+	// No review step: a finished work can be shared right away.
+	w := call(a, "POST", "/api/shares", user, "", share)
 	if w.Code != 201 {
 		t.Fatal(w.Body.String())
 	}
@@ -50,8 +42,8 @@ func TestReviewShareDeleteAndNotificationOwnership(t *testing.T) {
 		t.Fatal("short link unavailable")
 	}
 	notices, _ := a.Store.List(ctx, "notifications", "user-a")
-	if len(notices) < 2 {
-		t.Fatal("completion/review notifications missing")
+	if len(notices) < 1 {
+		t.Fatal("completion notification missing")
 	}
 	if w = call(a, "PUT", "/api/notifications/"+notices[0].ID+"/read", other, "", nil); w.Code != 404 {
 		t.Fatal("cross-user notification access")
