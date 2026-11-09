@@ -177,3 +177,8 @@ tbody tr:hover {
 .catalog-table .table-actions {
   width: 1%;
 }
+/* Secondary notes are sentences ("待填写姓名并验证手机号"), not names: they
+   may wrap so a long note never forces the whole table into cards. */
+.catalog-table td .cell-note:not(.mono) {
+  word-break: normal;
+}

@@ -1,0 +1,202 @@
+/* Generation detail: result, prompt, materials, parameters, model calls. */
+.gen-detail {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 18px;
+}
+/* Long JSON lines and URLs wrap instead of widening the dialog. */
+.gen-detail > *,
+.gen-calls details {
+  min-width: 0;
+}
+.gen-calls pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.gen-detail h4 {
+  margin: 0 0 8px;
+  font-size: 14px;
+}
+.gen-detail h5 {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin: 0 0 8px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+.gen-count {
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--surface-raised);
+  font-size: 11px;
+}
+.gen-error {
+  padding: 12px 14px;
+  border: 1px solid var(--danger);
+  border-radius: var(--radius);
+  background: var(--danger-soft);
+}
+.gen-error h4 {
+  color: var(--danger);
+}
+.gen-error p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.gen-error p + p {
+  margin-top: 6px;
+}
+.gen-result {
+  display: grid;
+  gap: 6px;
+  justify-items: start;
+}
+.gen-result img,
+.gen-result video {
+  display: block;
+  max-width: 100%;
+  max-height: 420px;
+  border-radius: var(--radius);
+  background: #000;
+}
+.gen-result audio {
+  width: min(480px, 100%);
+}
+.gen-result pre,
+.gen-prompt {
+  width: 100%;
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.7;
+}
+.gen-open {
+  font-size: 12px;
+}
+.gen-empty {
+  margin: 0;
+  padding: 18px;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius);
+  text-align: center;
+}
+.gen-inputs {
+  display: grid;
+  gap: 14px;
+}
+.gen-media {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+}
+.gen-media.video {
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+}
+.gen-media.audio,
+.gen-media.file {
+  grid-template-columns: minmax(0, 1fr);
+}
+.gen-media figure {
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.gen-media img,
+.gen-media video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  background: #000;
+}
+.gen-media.video video {
+  aspect-ratio: 16 / 9;
+  object-fit: contain;
+}
+.gen-media audio {
+  display: block;
+  width: 100%;
+  padding: 8px;
+}
+.gen-media figcaption {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 7px 10px;
+  font-size: 12px;
+}
+.gen-media figcaption .quiet {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.gen-missing {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 4 / 3;
+  color: var(--muted);
+  font-size: 12px;
+}
+.gen-params {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+.gen-params > div {
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+.gen-params dt {
+  color: var(--muted);
+  font-size: 12px;
+}
+.gen-params dd {
+  margin: 4px 0 0;
+  overflow-wrap: anywhere;
+  font-weight: 600;
+}
+.gen-calls {
+  display: grid;
+  gap: 8px;
+}
+.gen-calls details {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.gen-calls summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  padding: 10px 12px;
+  cursor: pointer;
+}
+.gen-calls summary .quiet {
+  font-size: 12px;
+}
+.gen-calls details > :not(summary) {
+  margin: 0 12px 12px;
+}
+.gen-endpoint {
+  color: var(--muted);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.gen-calls > p {
+  margin: 0;
+  font-size: 12px;
+}

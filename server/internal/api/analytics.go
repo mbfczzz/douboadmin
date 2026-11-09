@@ -10,8 +10,8 @@ import (
 
 func (a *Server) dashboard(w http.ResponseWriter, r *http.Request) {
 	days, _ := strconv.Atoi(r.URL.Query().Get("days"))
-	if !slices.Contains([]int{7, 30, 90}, days) {
-		days = 30
+	if !slices.Contains([]int{1, 7, 30, 90}, days) {
+		days = 1 // today
 	}
 	data, e := a.Store.Dashboard(r.Context(), days)
 	if e != nil {

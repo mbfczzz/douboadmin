@@ -20,7 +20,9 @@
   top: calc(100% + 8px);
   right: 0;
   z-index: 30;
-  width: 240px;
+  width: min(320px, calc(100vw - 24px));
+  max-height: calc(100vh - 90px);
+  overflow-y: auto;
   padding: 6px;
   border: 1px solid var(--line-strong);
   border-radius: var(--radius);
@@ -28,19 +30,120 @@
   box-shadow: var(--shadow-float);
 }
 .account-who {
-  padding: 10px 10px 12px;
-  border-bottom: 1px solid var(--line);
-  margin-bottom: 6px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 10px;
 }
-.account-who b,
-.account-who small {
-  display: block;
+.account-who > div {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
 }
-.account-who small {
-  margin-top: 3px;
+.account-who b {
+  overflow: hidden;
+  font-size: 15px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.avatar.large {
+  width: 42px;
+  height: 42px;
+  font-size: 16px;
+}
+.account-sub {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  min-width: 0;
   color: var(--muted);
   font-size: 12px;
+}
+.account-role {
+  flex-shrink: 0;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent-text);
+  font-size: 11px;
+  line-height: 18px;
+}
+.account-facts {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 7px;
+  margin: 0 4px 6px;
+  padding: 10px 6px;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  font-size: 12px;
+}
+.account-facts > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+.account-facts dt {
+  color: var(--muted);
+}
+.account-facts dd {
+  margin: 0;
   overflow-wrap: anywhere;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.account-warn {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin: 0 4px 6px;
+  padding: 7px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--warning-soft);
+  color: var(--warning);
+  font-size: 12px;
+}
+.account-logins {
+  margin: 0 4px 6px;
+  padding: 4px 6px 10px;
+  border-bottom: 1px solid var(--line);
+}
+.account-logins h4 {
+  margin: 0 0 6px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+.account-logins p {
+  margin: 0;
+  font-size: 12px;
+}
+.account-logins ul {
+  display: grid;
+  gap: 5px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 12px;
+}
+.account-logins li {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 8px;
+  align-items: baseline;
+}
+.account-logins li .mono {
+  overflow: hidden;
+  color: var(--muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.account-logins li small {
+  color: var(--muted);
+  white-space: nowrap;
+}
+.account-logins li.failed small {
+  color: var(--danger);
 }
 .account-popover [role="menuitem"] {
   justify-content: flex-start;
@@ -80,6 +183,10 @@
 }
 .password-input .icon:hover {
   color: var(--accent-text);
+}
+/* The popover lives in the top bar, whose mobile rule hides bold labels. */
+.topbar .account-who b {
+  display: block;
 }
 @media (max-width: 640px) {
   .account-trigger b,

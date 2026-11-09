@@ -12,15 +12,22 @@ export default function Kpis({ data }: { data: Dashboard }) {
     paid = sum((d) => d.paidFen),
     spent = sum((d) => d.spentUnits || 0),
     activeDays = data.days.length || 1,
+    today = data.days.length === 1,
     kinds = Object.values(b.kinds || {}),
     duration = kinds.reduce((a, k) => a + k.durationMs, 0),
     timed = kinds.reduce((a, k) => a + k.timed, 0);
   const items: [string, string, string][] = [
-    ["累计用户", count(b.totalUsers), `周期新增 ${sum((d) => d.newUsers)}`],
+    [
+      "累计用户",
+      count(b.totalUsers),
+      `${today ? "今日" : "周期"}新增 ${sum((d) => d.newUsers)}`,
+    ],
     [
       "活跃用户",
       count(b.activeUsers),
-      `日均 ${(sum((d) => d.activeUsers) / activeDays).toFixed(1)} 人`,
+      today
+        ? `其中新用户 ${sum((d) => d.newUsers)} 人`
+        : `日均 ${(sum((d) => d.activeUsers) / activeDays).toFixed(1)} 人`,
     ],
     ["生成成功率", pct(succeeded, jobs), `失败 ${sum((d) => d.failed)} 次`],
     ["平均生成耗时", seconds(duration, timed), `统计 ${timed} 个成功任务`],

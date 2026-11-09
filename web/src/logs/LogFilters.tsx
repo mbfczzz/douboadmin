@@ -5,9 +5,11 @@ import type { LogTab } from "./types";
 // One filter row per tab; submitting builds the query string.
 export default function LogFilters({
   tab,
+  actor = "",
   onSearch,
 }: {
   tab: LogTab;
+  actor?: string;
   onSearch: (query: string) => void;
 }) {
   const points = tab === "points";
@@ -32,7 +34,12 @@ export default function LogFilters({
       ) : (
         <label>
           {tab === "auth" ? "账号 / 用户" : "操作人"}
-          <input name="actor" placeholder="名称或编号" maxLength={64} />
+          <input
+            name="actor"
+            placeholder="名称或编号"
+            maxLength={64}
+            defaultValue={actor}
+          />
         </label>
       )}
       {!points && tab !== "auth" && (

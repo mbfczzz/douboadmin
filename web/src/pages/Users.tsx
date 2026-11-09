@@ -1,7 +1,6 @@
 import Badge from "../components/Badge";
-import Tag from "../components/Tag";
 import { useState } from "react";
-import { date, type Row } from "../api";
+import type { Row } from "../api";
 import type { PageProps } from "../navigation";
 import { useResource } from "../hooks/useResource";
 import { useRememberedState } from "../hooks/useRememberedState";
@@ -12,9 +11,12 @@ import UserPoints from "../business/UserPoints";
 import UserEdit from "../business/UserEdit";
 import UserStatus from "../business/UserStatus";
 import SignupSwitch from "../users/SignupSwitch";
-import { phoneVerified, registered } from "../users/registration";
+import "../users/users.css";
+import UserModels from "../users/UserModels";
+import UserActivity from "../users/UserActivity";
+import { accessCell, createdCell, nameCell } from "../users/cells";
 
-type Dialog = "detail" | "points" | "edit" | "status";
+type Dialog = "detail" | "models" | "activity" | "points" | "edit" | "status";
 import type { Profile } from "../business/types";
 
 export default function Users({ notify }: PageProps) {
@@ -90,24 +92,13 @@ export default function Users({ notify }: PageProps) {
             render: (r) => (
               <>
                 {r.data.nickname}
-                <small className="cell-note mono">{r.id}</small>
-              </>
-            ),
-          },
-          {
-            title: "姓名 / 手机号",
-            render: (r) => (
-              <>
-                {r.data.name || "未填写"}
-                <small className="cell-note">
-                  {r.data.phone
-                    ? r.data.phone +
-                      (phoneVerified(r.data) ? " · 已验证" : " · 未验证")
-                    : "未填写"}
+                <small className="cell-note mono user-id" title={r.id}>
+                  {r.id}
                 </small>
               </>
             ),
           },
+          { title: "姓名 / 手机号", render: nameCell },
           {
             title: "状态",
             render: (r) => (
@@ -129,36 +120,16 @@ export default function Users({ notify }: PageProps) {
               />
             ),
           },
-          {
-            title: "使用授权",
-            render: (r) => (
-              <>
-                {r.data.access?.active ? (
-                  r.data.access.status === "direct" ? (
-                    <Tag tone="info">直接开通</Tag>
-                  ) : (
-                    <Tag tone="accent">服务商激活</Tag>
-                  )
-                ) : (
-                  <Tag>未开通</Tag>
-                )}
-                <small className="cell-note">
-                  {!registered(r.data)
-                    ? "待填写姓名并验证手机号"
-                    : r.data.access?.active
-                      ? r.data.access.partnerName
-                      : r.data.access?.message}
-                </small>
-              </>
-            ),
-          },
-          { title: "注册时间", render: (r) => date(r.createdAt) },
+          { title: "使用授权", render: accessCell },
+          { title: "注册时间", render: createdCell },
           {
             title: "操作",
             action: true,
             render: (r) => (
               <div className="business-actions">
                 <button onClick={() => show("detail", r)}>详情</button>
+                <button onClick={() => show("models", r)}>模型记录</button>
+                <button onClick={() => show("activity", r)}>行为日志</button>
                 {!r.data.archived && (
                   <>
                     <button onClick={() => show("points", r)}>积分</button>
@@ -178,6 +149,12 @@ export default function Users({ notify }: PageProps) {
       />
       {open?.kind === "detail" && (
         <UserDetails user={open.row} onClose={close} />
+      )}
+      {open?.kind === "models" && (
+        <UserModels user={open.row} onClose={close} />
+      )}
+      {open?.kind === "activity" && (
+        <UserActivity user={open.row} onClose={close} />
       )}
       {open?.kind === "points" && (
         <UserPoints user={open.row} onClose={close} notify={notify} />

@@ -27,8 +27,9 @@ test("failed jobs offer resume and refund as separate row actions", async ({
 
   // The detail dialog is read-only.
   await row.getByRole("button", { name: /详情/ }).click();
-  const detail = page.getByRole("dialog", { name: "任务详情" });
-  await expect(detail.getByText("上游执行")).toBeVisible();
+  const detail = page.getByRole("dialog", { name: "生成记录详情" });
+  await expect(detail.getByText("界面异常展示样例")).toBeVisible();
+  await expect(detail.getByText("图片 1")).toBeVisible();
   await expect(detail.getByRole("button", { name: /恢复|退回/ })).toHaveCount(
     0,
   );

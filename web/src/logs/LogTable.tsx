@@ -64,7 +64,12 @@ const action = (e: LogEntry) => (
   </>
 );
 
-function columns(tab: LogTab, open: (e: LogEntry) => void): Column<LogEntry>[] {
+type Columns = LogTab | "user";
+
+function columns(
+  tab: Columns,
+  open: (e: LogEntry) => void,
+): Column<LogEntry>[] {
   const time = { title: "时间", render: (e: LogEntry) => date(e.at, true) };
   const detail = {
     title: "操作",
@@ -95,6 +100,14 @@ function columns(tab: LogTab, open: (e: LogEntry) => void): Column<LogEntry>[] {
       { title: "状态", render: result },
       { title: "耗时", render: took },
     ],
+    // One user's own records: the actor is implied.
+    user: [
+      time,
+      { title: "操作", render: action },
+      { title: "请求", render: request },
+      { title: "结果", render: result },
+      { title: "IP", render: (e) => e.ip || "—" },
+    ],
     auth: [
       time,
       { title: "账号", render: actor },
@@ -111,15 +124,18 @@ function columns(tab: LogTab, open: (e: LogEntry) => void): Column<LogEntry>[] {
 export default function LogTable({
   tab,
   query,
+  source,
 }: {
-  tab: LogTab;
+  tab: Columns;
   query: string;
+  // Another list endpoint (already carrying "?") and its detail path prefix.
+  source?: { list: string; detail: string };
 }) {
   const [cursors, setCursors] = useState<string[]>([""]),
     [open, setOpen] = useState<LogEntry>();
   const before = cursors[cursors.length - 1];
   const resource = useResource<LogPage>(
-    `/admin/audit?tab=${tab}&limit=30${query ? "&" + query : ""}${before ? "&before=" + before : ""}`,
+    `${source?.list || "/admin/audit?tab=" + tab}&limit=30${query ? "&" + query : ""}${before ? "&before=" + before : ""}`,
   );
   const page = resource.data;
   return (
@@ -157,7 +173,13 @@ export default function LogTable({
           </button>
         </div>
       )}
-      {open && <LogDetail entry={open} onClose={() => setOpen(undefined)} />}
+      {open && (
+        <LogDetail
+          entry={open}
+          path={source && source.detail + open.id}
+          onClose={() => setOpen(undefined)}
+        />
+      )}
     </>
   );
 }

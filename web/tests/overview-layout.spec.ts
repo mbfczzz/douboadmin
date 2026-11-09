@@ -29,6 +29,8 @@ test("overview exposes daily detail and fits a 90-day chart on mobile", async ({
     });
   });
   await page.getByRole("button", { name: "刷新", exact: true }).click();
+  await expect(page.getByText("今日经营数据", { exact: true })).toBeVisible();
+  await page.getByLabel("统计周期").selectOption("30");
   await expect(page.getByText("所选时段暂无生成任务")).toBeVisible();
   await page.getByText("每日经营数据 · 30 天", { exact: true }).click();
   await expect(
@@ -119,4 +121,22 @@ test("overview groups real metrics and marks incomplete costs without a false ze
   await expect(
     page.getByRole("heading", { name: "生成任务", exact: true }),
   ).toBeVisible();
+});
+
+test("overview opens on today and can switch to a longer period", async ({
+  page,
+}) => {
+  const asked: string[] = [];
+  page.on("request", (r) => {
+    const url = new URL(r.url());
+    if (url.pathname === "/api/admin/dashboard")
+      asked.push(url.searchParams.get("days") || "");
+  });
+  await login(page);
+  const period = page.getByLabel("统计周期");
+  await expect(period).toHaveValue("1");
+  await expect(period.locator("option:checked")).toHaveText("今天");
+  await period.selectOption("7");
+  await expect.poll(() => asked.at(-1)).toBe("7");
+  expect(asked[0]).toBe("1");
 });

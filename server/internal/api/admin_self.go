@@ -2,6 +2,7 @@ package api
 
 import (
 	"doubo/server/internal/core"
+	"doubo/server/internal/store"
 	"encoding/json"
 	"net/http"
 	"time"
@@ -59,4 +60,31 @@ func (a *Server) changeOwnPassword(w http.ResponseWriter, r *http.Request) {
 	}
 	http.SetCookie(w, &http.Cookie{Name: "doubo_session", Value: token, Path: "/api", HttpOnly: true, Secure: a.Config.Production, SameSite: http.SameSiteStrictMode, MaxAge: 86400})
 	reply(w, 200, map[string]bool{"ok": true})
+}
+
+// myLogins lists this account's latest sign-in attempts (time, IP, device,
+// result) from the operation log, newest first. Failed attempts are kept so
+// the owner notices someone guessing the password.
+func (a *Server) myLogins(w http.ResponseWriter, r *http.Request) {
+	type login struct {
+		At        time.Time `json:"at"`
+		IP        string    `json:"ip"`
+		UserAgent string    `json:"userAgent"`
+		OK        bool      `json:"ok"`
+	}
+	out := []login{}
+	account := identity(r).Account
+	if logs, ok := a.Store.(store.AuditLogs); ok && account != "" {
+		page, e := logs.Logs(r.Context(), core.AuditQuery{Categories: []string{core.LogAuth}, Actor: account, Limit: 50})
+		if e != nil {
+			dbError(w, e)
+			return
+		}
+		for _, e := range page.Items {
+			if e.Route == "POST /api/admin/login" && e.ActorName == account && len(out) < 5 {
+				out = append(out, login{e.At, e.IP, e.UserAgent, e.Status < 400})
+			}
+		}
+	}
+	reply(w, 200, out)
 }

@@ -37,7 +37,7 @@ test("signup switch decides whether registered users may skip the provider code"
   expect(allowed.status()).toBe(200);
   await page.getByRole("button", { name: "刷新", exact: true }).first().click();
   const row = page.locator("tbody tr").filter({ hasText: user.userId });
-  await expect(row).toContainText("已验证");
+  await expect(row).not.toContainText("未验证");
   await expect(row).toContainText("直接开通");
   if (!initially) await flip(false);
 });

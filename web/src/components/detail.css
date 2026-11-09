@@ -79,13 +79,6 @@
     margin-bottom: 8px;
   }
 }
-.job-detail .job-tags {
-  margin-bottom: 12px;
-}
-.job-detail h3 {
-  margin: 0 0 16px;
-  line-height: 1.6;
-}
 .detail-card .id-chip {
   background: var(--surface-raised);
 }

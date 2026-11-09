@@ -9,7 +9,7 @@ import Empty from "../components/Empty";
 import JobTable, { type JobAction } from "../components/JobTable";
 import { JobResume, releaseJob } from "../components/JobRecovery";
 import type { PageProps } from "../navigation";
-import JobDetail from "../components/JobDetail";
+import GenerationDetail from "../generation/GenerationDetail";
 export default function Jobs({ notify }: PageProps) {
   const resource = useResource<Job[]>("/admin/jobs", 15000);
   const jobs = resource.data || [];
@@ -72,8 +72,8 @@ export default function Jobs({ notify }: PageProps) {
         )}
       </section>
       {detail && (
-        <JobDetail
-          detail={jobs.find((j) => j.id === detail.id) || detail}
+        <GenerationDetail
+          path={`/admin/jobs/${encodeURIComponent(detail.id)}/detail`}
           onClose={() => setDetail(null)}
         />
       )}

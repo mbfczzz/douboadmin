@@ -36,6 +36,7 @@ func (a *Server) routes() {
 	m.HandleFunc("POST /api/admin/login", a.adminLogin)
 	m.HandleFunc("GET /api/admin/me", a.auth("admin", a.adminMe))
 	m.HandleFunc("PUT /api/admin/me/password", a.auth("admin", a.changeOwnPassword))
+	m.HandleFunc("GET /api/admin/me/logins", a.auth("admin", a.myLogins))
 	m.HandleFunc("GET /api/admin/roles", a.auth("admin", a.listAdminRoles))
 	m.HandleFunc("POST /api/admin/roles", a.superAdmin(a.saveAdminRole))
 	m.HandleFunc("PUT /api/admin/roles/{id}", a.superAdmin(a.saveAdminRole))

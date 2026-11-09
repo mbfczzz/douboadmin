@@ -1,0 +1,19 @@
+/* 小程序用户 list: long WeChat ids are shortened in the table (full id on
+   hover, in 详情 and searchable) and six row actions sit a little closer, so
+   the table still fits a 1280px screen instead of switching to cards. */
+.catalog-table td .user-id {
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.catalog-table td .business-actions:has(> button:nth-child(6)) {
+  gap: 8px;
+}
+.user-unverified {
+  margin-left: 6px;
+  padding: 0 5px;
+  border-radius: 4px;
+  background: var(--warning-soft);
+  color: var(--warning);
+  font-family: inherit;
+}

@@ -72,14 +72,20 @@ export default function Trend({ series }: { series: Daily[] }) {
     m = metrics.find((x) => x.key === key) || metrics[0],
     values = series.map(m.value),
     peak = Math.max(0, ...values),
-    label = `每日${m.name}趋势`;
+    single = series.length === 1,
+    label = single ? `今日${m.name}` : `每日${m.name}趋势`;
   return (
     <section className="panel">
       <div className="section-head">
-        <h2>每日{m.name}</h2>
+        <h2>
+          {single ? "今日" : "每日"}
+          {m.name}
+        </h2>
         <span className="quiet">
-          峰值 {m.text(peak)}
-          {m.unit && " " + m.unit} / 日
+          {single ? "合计 " : "峰值 "}
+          {m.text(peak)}
+          {m.unit && " " + m.unit}
+          {!single && " / 日"}
         </span>
       </div>
       <div className="trend-switch" role="tablist" aria-label="趋势指标">
@@ -123,7 +129,7 @@ export default function Trend({ series }: { series: Daily[] }) {
       <p className="chart-axis quiet">
         <span>{series[0]?.date}</span>
         <span>北京时间</span>
-        <span>{series.at(-1)?.date}</span>
+        <span>{single ? "" : series.at(-1)?.date}</span>
       </p>
     </section>
   );

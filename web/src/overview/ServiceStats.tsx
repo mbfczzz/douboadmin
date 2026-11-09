@@ -15,7 +15,7 @@ export default function ServiceStats({
     [
       "接口请求量",
       count(s.requests),
-      `日均 ${count(Math.round(s.requests / days))}`,
+      days === 1 ? "今日累计" : `日均 ${count(Math.round(s.requests / days))}`,
     ],
     ["服务错误率", pct(s.errors, s.requests), `5xx ${count(s.errors)} 次`],
     ["请求被拒", pct(s.rejected, s.requests), `4xx ${count(s.rejected)} 次`],

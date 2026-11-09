@@ -27,4 +27,9 @@ func (a *Server) businessRoutes() {
 	m.HandleFunc("GET /api/admin/users/{id}/activation", a.auth("admin", a.userActivation))
 	m.HandleFunc("POST /api/admin/users/{id}/wallet", a.auth("admin", a.adjustWallet))
 	m.HandleFunc("GET /api/admin/users/{id}/wallet", a.auth("admin", a.wallet))
+	m.HandleFunc("GET /api/admin/users/{id}/models", a.auth("admin", a.userModels))
+	m.HandleFunc("GET /api/admin/users/{id}/jobs/{job}", a.auth("admin", a.userGeneration))
+	m.HandleFunc("GET /api/admin/jobs/{id}/detail", a.auth("admin", a.jobGeneration))
+	m.HandleFunc("GET /api/admin/users/{id}/activity", a.auth("admin", a.userActivity))
+	m.HandleFunc("GET /api/admin/users/{id}/activity/{log}", a.auth("admin", a.userActivityEntry))
 }

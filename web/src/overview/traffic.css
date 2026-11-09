@@ -38,6 +38,10 @@
   .kpi-strip.service-kpis {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+  /* Five tiles in two columns: the last one spans, leaving no empty cell. */
+  .kpi-strip.service-kpis > div:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
 }
 /* 全部 / 小程序 / 网页 / APP switch, at the right end of the heading. */
 .traffic-clients {

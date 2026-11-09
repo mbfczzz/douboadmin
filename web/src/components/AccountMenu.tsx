@@ -1,19 +1,22 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { ChevronDown, KeyRound, LogOut } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import type { Me } from "../session";
 import type { Notify } from "../navigation";
 import ChangePassword from "./ChangePassword";
+import AccountPanel from "./AccountPanel";
 import "./account-menu.css";
 
-// Signed-in account: who you are, change your password, sign out.
+// Signed-in account: who you are, recent sign-ins, password, own logs, sign out.
 export default function AccountMenu({
   me,
   notify,
+  onLogs,
   onLogout,
 }: {
   me: Me;
   notify: Notify;
+  onLogs?: () => void;
   onLogout: () => void;
 }) {
   const [open, setOpen] = useState(false),
@@ -50,36 +53,26 @@ export default function AccountMenu({
         <ChevronDown size={14} aria-hidden="true" />
       </button>
       {open && (
-        <div className="account-popover" role="menu">
-          <div className="account-who">
-            <b>{name}</b>
-            <small>
-              {me.account} · {me.partnerName || me.roleName || "管理员"}
-            </small>
-          </div>
-          <button
-            type="button"
-            role="menuitem"
-            onClick={() => {
+        <div className="account-popover" role="menu" aria-label="账号">
+          <AccountPanel
+            me={me}
+            name={name}
+            onPassword={() => {
               setOpen(false);
               setPassword(true);
             }}
-          >
-            <KeyRound size={15} />
-            修改密码
-          </button>
-          <button
-            type="button"
-            role="menuitem"
-            className="danger-text"
-            onClick={() => {
+            onLogs={
+              onLogs &&
+              (() => {
+                setOpen(false);
+                onLogs();
+              })
+            }
+            onLogout={() => {
               setOpen(false);
               onLogout();
             }}
-          >
-            <LogOut size={15} />
-            退出登录
-          </button>
+          />
         </div>
       )}
       {password &&

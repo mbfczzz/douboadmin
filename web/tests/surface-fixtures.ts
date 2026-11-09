@@ -134,6 +134,28 @@ export async function surfaceFixtures(page: Page) {
     },
     "/users/qa-user/ledger": [],
     "/jobs": [job],
+    "/jobs/qa-job/detail": {
+      job,
+      inputs: [
+        {
+          id: "qa-img",
+          kind: "image",
+          mime: "image/jpeg",
+          size: 2048,
+          url: "/media/design/cover-1.jpg",
+          label: "图片 1",
+        },
+      ],
+      execution: {
+        phase: "polling",
+        taskId: "test-task",
+        modelKey: "test-model",
+        startedAt: now,
+      },
+      calls: [],
+      polls: 0,
+      morePolls: false,
+    },
     "/jobs/qa-job/execution": {
       phase: "polling",
       taskId: "test-task",

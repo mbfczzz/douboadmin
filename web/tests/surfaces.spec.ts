@@ -165,7 +165,7 @@ for (const width of [1440, 390, 320]) {
       }
     }
     await nav("生成任务");
-    await modal("详情", "任务详情");
+    await modal("详情", "生成记录详情");
     await nav("作品管理");
     await modal("预览", "作品预览");
     await nav("充值订单");

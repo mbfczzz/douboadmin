@@ -11,6 +11,10 @@ export interface Me {
   menus: string[];
   partnerId?: string;
   partnerName?: string;
+  phone?: string;
+  createdAt?: string;
+  passwordChangedAt?: string;
+  sessionExpires?: string;
 }
 
 export const MeContext = createContext<Me | null>(null);

@@ -30,7 +30,7 @@ test("quick jump and page filters remember recent work", async ({ page }) => {
 });
 
 test("overview prioritizes operational exceptions", async ({ page }) => {
-  await page.route("**/api/admin/dashboard?days=30", (route) =>
+  await page.route("**/api/admin/dashboard?days=1", (route) =>
     route.fulfill({
       json: {
         days: [
@@ -50,7 +50,7 @@ test("overview prioritizes operational exceptions", async ({ page }) => {
           { model: "seedance", calls: 4, known: 1, estimatedMicros: 1000 },
         ],
         events: {},
-        period: 30,
+        period: 1,
       },
     }),
   );

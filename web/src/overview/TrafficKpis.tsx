@@ -20,11 +20,21 @@ export default function TrafficKpis({
   const n = days.length || 1,
     dailyUV = days.reduce((a, d) => a + (d.uv || 0), 0) / n;
   const tiles: [string, string, string][] = [
-    ["浏览量 PV", count(t.pv), `日均 ${(t.pv / n).toFixed(1)}`],
+    [
+      "浏览量 PV",
+      count(t.pv),
+      n === 1
+        ? `人均 ${(t.pv / (t.uv || 1)).toFixed(1)} 页`
+        : `日均 ${(t.pv / n).toFixed(1)}`,
+    ],
     [
       "访客数 UV",
       count(t.uv),
-      whole ? `日均 ${dailyUV.toFixed(1)} 人` : `占全部 ${pct(t.uv, all.uv)}`,
+      !whole
+        ? `占全部 ${pct(t.uv, all.uv)}`
+        : n === 1
+          ? `回访 ${count(t.uv - t.newVisitors)} 人`
+          : `日均 ${dailyUV.toFixed(1)} 人`,
     ],
     [
       "访问次数",

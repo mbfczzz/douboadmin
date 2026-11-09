@@ -175,6 +175,7 @@ func object(s string) map[string]any {
 func describe(r *http.Request, info *auditInfo, e *core.AuditEntry) {
 	o, known := ops[r.Pattern]
 	if !known {
+		e.Action = reads[r.Pattern]
 		return
 	}
 	req, resp := object(e.Request), object(e.Response)

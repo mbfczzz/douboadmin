@@ -81,8 +81,7 @@
   width: 19px;
   height: 19px;
 }
-.edit-form,
-.job-detail {
+.edit-form {
   padding: 24px;
 }
 .edit-form label,

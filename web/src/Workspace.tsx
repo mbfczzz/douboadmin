@@ -15,6 +15,7 @@ import { canLeave } from "./hooks/unsaved";
 import ConfirmationHost from "./confirmation/Host";
 import AskHost from "./confirm/AskHost";
 import AccountMenu from "./components/AccountMenu";
+import { presetActor } from "./logs/preset";
 import { MeContext, type Me } from "./session";
 import { confirmationPending } from "./confirmation/request";
 const routes = {
@@ -209,6 +210,14 @@ export default function Workspace({
               <AccountMenu
                 me={me}
                 notify={notify}
+                onLogs={
+                  me.menus.includes("logs")
+                    ? () => {
+                        presetActor(me.account || me.id);
+                        navigate("logs");
+                      }
+                    : undefined
+                }
                 onLogout={() => void logout()}
               />
             </div>

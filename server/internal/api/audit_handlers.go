@@ -134,8 +134,8 @@ func (a *Server) auditStats(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	days, _ := strconv.Atoi(r.URL.Query().Get("days"))
-	if days != 7 && days != 30 && days != 90 {
-		days = 30
+	if days != 1 && days != 7 && days != 30 && days != 90 {
+		days = 1
 	}
 	stats, err := a.apiStats(r.Context(), days)
 	if err != nil {

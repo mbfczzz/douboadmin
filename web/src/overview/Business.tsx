@@ -9,7 +9,13 @@ const channels: Record<string, [string, string]> = {
 };
 
 // Conversion, revenue mix and provider activations.
-export default function Business({ b }: { b: Breakdown }) {
+export default function Business({
+  b,
+  today = false,
+}: {
+  b: Breakdown;
+  today?: boolean;
+}) {
   const mix = Object.entries(b.channels || {}),
     mixTotal = mix.reduce((a, [, c]) => a + c.amountFen, 0),
     base = b.totalUsers;
@@ -24,7 +30,7 @@ export default function Business({ b }: { b: Breakdown }) {
           label="用户转化"
           rows={[
             ["累计用户", b.totalUsers],
-            ["周期活跃", b.activeUsers],
+            [today ? "今日活跃" : "周期活跃", b.activeUsers],
             ["发起生成", b.creatorUsers],
             ["完成付费", b.payers],
           ].map(([name, n]) => ({

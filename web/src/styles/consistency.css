@@ -64,9 +64,7 @@ input[type="search"]:not(.catalog-search input) {
   overflow-wrap: anywhere;
 }
 /* Actions placed in a dialog body read as that dialog's footer. */
-.modal:not(.form-modal)
-  :is(.edit-form, .job-detail)
-  > .modal-actions:last-child {
+.modal:not(.form-modal) .edit-form > .modal-actions:last-child {
   margin-top: 20px;
   padding-top: 16px;
   border-top: 1px solid var(--line);

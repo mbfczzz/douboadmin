@@ -16,7 +16,7 @@ import "../overview/tip.css";
 const Details = lazy(() => import("../overview/Details"));
 
 export default function Overview({ config, navigate }: PageProps) {
-  const [days, setDays] = useState(30),
+  const [days, setDays] = useState(1),
     [expanded, setExpanded] = useState<Record<string, boolean>>({}),
     resource = useResource<Dashboard>("/admin/dashboard?days=" + days, 30000);
   const data = resource.data,
@@ -87,7 +87,12 @@ export default function Overview({ config, navigate }: PageProps) {
       "实收金额 " + money(total.paid),
       CreditCard,
     ],
-    ["退款金额", money(total.refund), "周期内累计退款", RotateCcw],
+    [
+      "退款金额",
+      money(total.refund),
+      days === 1 ? "今日累计退款" : "周期内累计退款",
+      RotateCcw,
+    ],
   ] as const;
   return (
     <div className="overview-page">
@@ -100,6 +105,7 @@ export default function Overview({ config, navigate }: PageProps) {
             value={days}
             onChange={(e) => setDays(Number(e.target.value))}
           >
+            <option value={1}>今天</option>
             <option value={7}>近 7 天</option>
             <option value={30}>近 30 天</option>
             <option value={90}>近 90 天</option>
@@ -154,7 +160,7 @@ export default function Overview({ config, navigate }: PageProps) {
           />
         )}
         {data?.breakdown && <Generation b={data.breakdown} />}
-        {data?.breakdown && <Business b={data.breakdown} />}
+        {data?.breakdown && <Business b={data.breakdown} today={days === 1} />}
         <section className="panel overview-section">
           <div className="section-head">
             <h2>AI 调用成本</h2>
@@ -195,7 +201,9 @@ export default function Overview({ config, navigate }: PageProps) {
             >
               <summary>
                 {kind === "daily"
-                  ? "每日经营数据 · " + days + " 天"
+                  ? days === 1
+                    ? "今日经营数据"
+                    : "每日经营数据 · " + days + " 天"
                   : "行为事件"}
               </summary>
               {expanded[kind] && data && (

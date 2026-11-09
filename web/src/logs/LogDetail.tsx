@@ -27,12 +27,14 @@ function Body({ title, text }: { title: string; text?: string }) {
 // Full record of one log line, including the redacted request and response.
 export default function LogDetail({
   entry,
+  path,
   onClose,
 }: {
   entry: LogEntry;
+  path?: string;
   onClose: () => void;
 }) {
-  const full = useResource<LogEntry>(`/admin/audit/${entry.id}`),
+  const full = useResource<LogEntry>(path || `/admin/audit/${entry.id}`),
     e = full.data || entry,
     [who, tone] = actorLabels[e.actorType] || actorLabels.guest;
   return (

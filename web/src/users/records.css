@@ -1,0 +1,37 @@
+/* User model and activity record dialogs. */
+.user-records {
+  display: grid;
+  gap: 12px;
+}
+.records-summary {
+  margin: 0;
+  font-size: 13px;
+}
+.records-title {
+  margin: 8px 0 0;
+  font-size: 14px;
+}
+.records-prompt {
+  display: -webkit-box;
+  max-width: 360px;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.records-scopes {
+  display: flex;
+  gap: 6px;
+}
+.records-scopes button {
+  padding: 5px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+}
+.records-scopes button[aria-selected="true"] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}

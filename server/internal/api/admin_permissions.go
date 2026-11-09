@@ -141,8 +141,10 @@ func (a *Server) adminMe(w http.ResponseWriter, r *http.Request) {
 	if row, err := a.Store.Get(r.Context(), "admin_accounts", v.ID); err == nil {
 		var account core.AdminAccount
 		if json.Unmarshal(row.Data, &account) == nil {
-			out["name"] = account.Name
+			out["name"], out["phone"], out["createdAt"] = account.Name, account.Phone, row.CreatedAt
+			out["passwordChangedAt"] = account.PasswordChangedAt
 		}
 	}
+	out["sessionExpires"] = v.Expires
 	reply(w, 200, out)
 }
