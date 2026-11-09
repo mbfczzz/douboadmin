@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import { login } from "./helpers";
 import { surfaceFixtures, longName } from "./surface-fixtures";
 
@@ -41,41 +41,41 @@ test.beforeEach(async ({ page }) => {
     }),
   );
   await page.getByRole("button", { name: "服务商管理", exact: true }).click();
-  await page.getByRole("button", { name: "编辑", exact: true }).first().click();
-  await expect(
-    page.getByRole("dialog", { name: "编辑服务商", exact: true }),
-  ).toBeVisible();
 });
 
-test("all provider editor tabs are grouped, readable and contained", async ({
+const row = (page: Page) => page.locator(".provider-tree-row").first();
+// Each row button opens one dialog with one job.
+const functions = [
+  ["编辑", "编辑服务商", ""],
+  ["名额划拨", "名额划拨", "名额划拨记录"],
+  ["授权码", "授权激活", "授权码"],
+  ["分佣", "算力分佣", "佣金流水"],
+] as const;
+
+test("each provider function opens its own readable, contained dialog", async ({
   page,
 }) => {
-  const editor = page.getByRole("dialog", { name: "编辑服务商", exact: true });
   for (const width of [1440, 390]) {
     await page.setViewportSize({ width, height: 1000 });
-    for (const [index, name] of [
-      "基本信息",
-      "名额划拨",
-      "授权激活",
-      "算力分佣",
-    ].entries()) {
-      await editor.getByRole("tab", { name, exact: true }).click();
-      const panel = editor.getByRole("tabpanel");
-      await expect(panel).toBeVisible();
-      if (index === 0) {
-        await expect(panel.getByLabel("服务商名称")).toHaveValue(longName);
+    for (const [index, [button, title, heading]] of functions.entries()) {
+      await row(page)
+        .getByRole("button", { name: button, exact: true })
+        .click();
+      const dialog = page.getByRole("dialog", { name: title, exact: true });
+      await expect(dialog).toBeVisible();
+      if (!heading) {
+        await expect(dialog.getByLabel("服务商名称")).toHaveValue(longName);
         await expect(
-          panel.getByRole("button", { name: "保存服务商" }),
+          dialog.getByRole("button", { name: "保存服务商" }),
         ).toBeEnabled();
+        // Profile only: login, quotas and codes have their own buttons.
+        await expect(dialog.getByText("登录账号")).toHaveCount(0);
       } else {
+        const panel = dialog.locator(".provider-panel");
         await expect(
-          panel.getByRole("heading", {
-            name: ["", "名额划拨记录", "授权码", "佣金流水"][index],
-            exact: true,
-          }),
+          panel.getByRole("heading", { name: heading, exact: true }),
         ).toBeVisible();
         await expect(panel.locator(".partner-records")).toHaveCount(2);
-        await expect(panel.locator(".catalog-pagination")).toHaveCount(2);
         const sections = await panel
           .locator(".partner-records")
           .evaluateAll((nodes) =>
@@ -86,57 +86,53 @@ test("all provider editor tabs are grouped, readable and contained", async ({
           );
         expect(sections[1].top - sections[0].bottom).toBeGreaterThanOrEqual(20);
         expect(await panel.locator(".panel .panel").count()).toBe(0);
+        expect(
+          await panel.evaluate((el) => el.scrollWidth <= el.clientWidth + 1),
+        ).toBe(true);
+        if (index === 1) {
+          await expect(
+            panel.getByText("质检子级服务商", { exact: true }),
+          ).toBeVisible();
+          await expect(
+            panel.getByRole("region", { name: "名额申请", exact: true }),
+          ).toContainText("审批说明");
+        }
+        if (index === 2)
+          await expect(
+            panel.getByLabel("查看全部服务商的授权码"),
+          ).not.toBeChecked();
+        if (width === 390) {
+          const nativeButtons = await panel
+            .locator(".mobile-record button")
+            .evaluateAll((buttons) =>
+              buttons
+                .filter((b) => getComputedStyle(b).borderTopStyle !== "none")
+                .map((b) => b.textContent),
+            );
+          expect(nativeButtons).toEqual([]);
+        }
       }
-      if (index === 1) {
-        await expect(
-          panel.getByText("质检子级服务商", { exact: true }),
-        ).toBeVisible();
-        await expect(panel.getByText("平台", { exact: true })).toBeVisible();
-        await expect(
-          panel.getByRole("region", { name: "名额申请", exact: true }),
-        ).toContainText("审批说明");
-      }
-      if (index === 2) {
-        await expect(
-          panel.getByLabel("查看全部服务商的授权码"),
-        ).not.toBeChecked();
-      }
-      expect(
-        await panel.evaluate((el) => el.scrollWidth <= el.clientWidth + 1),
-      ).toBe(true);
-      if (width === 390) {
-        const nativeButtons = await panel
-          .locator(".mobile-record button")
-          .evaluateAll((buttons) =>
-            buttons
-              .filter(
-                (button) => getComputedStyle(button).borderTopStyle !== "none",
-              )
-              .map((button) => button.textContent),
-          );
-        expect(nativeButtons).toEqual([]);
-      }
-      await panel.evaluate((el) => {
-        el.scrollTop = 0;
-      });
       await page.screenshot({
-        path: `../.runtime/provider-editor-${width}-${index}.png`,
+        path: `../.runtime/provider-dialog-${width}-${index}.png`,
         animations: "disabled",
       });
+      await dialog
+        .getByRole("button", { name: "关闭", exact: true })
+        .first()
+        .click();
+      await expect(dialog).toHaveCount(0);
     }
   }
 });
 
-test("tabs support keyboard navigation and record actions keep their original workflow", async ({
+test("provider function dialogs keep their record workflows", async ({
   page,
 }) => {
-  const editor = page.getByRole("dialog", { name: "编辑服务商", exact: true });
-  await editor.getByRole("tab", { name: "基本信息", exact: true }).focus();
-  await page.keyboard.press("ArrowRight");
-  await expect(
-    editor.getByRole("tab", { name: "名额划拨", exact: true }),
-  ).toBeFocused();
-  const moves = editor.getByRole("region", {
+  await row(page)
+    .getByRole("button", { name: "名额划拨", exact: true })
+    .click();
+  const quotas = page.getByRole("dialog", { name: "名额划拨", exact: true });
+  const moves = quotas.getByRole("region", {
     name: "名额划拨记录",
     exact: true,
   });
@@ -148,24 +144,40 @@ test("tabs support keyboard navigation and record actions keep their original wo
   );
   await moves.getByRole("button", { name: "查询", exact: true }).click();
   await query;
-  await moves
-    .getByRole("button", { name: "划拨 / 收回名额", exact: true })
+  // Grant and reclaim are separate buttons with their own dialog.
+  for (const name of ["划拨名额", "收回名额"]) {
+    await quotas.getByRole("button", { name, exact: true }).click();
+    const form = page.getByRole("dialog", { name, exact: true });
+    await expect(
+      form.getByRole("button", { name: "选择直接下级服务商" }),
+    ).toBeVisible();
+    await expect(form.getByLabel("操作")).toHaveCount(0);
+    await form.getByRole("button", { name: "关闭", exact: true }).click();
+  }
+  await quotas
+    .getByRole("button", { name: "关闭", exact: true })
+    .first()
     .click();
-  const form = page.getByRole("dialog", {
-    name: "名额划拨 / 收回",
-    exact: true,
-  });
-  await expect(
-    form.getByRole("button", { name: "选择直接下级服务商" }),
-  ).toBeVisible();
-  await form.getByRole("button", { name: "关闭", exact: true }).click();
-  await editor.getByRole("tab", { name: "授权激活", exact: true }).click();
-  await editor.getByRole("button", { name: "生成授权码", exact: true }).click();
+
+  await row(page).getByRole("button", { name: "授权码", exact: true }).click();
+  const codes = page.getByRole("dialog", { name: "授权激活", exact: true });
+  await codes.getByRole("button", { name: "生成授权码", exact: true }).click();
   const code = page.getByRole("dialog", { name: "生成授权码", exact: true });
   await expect(code.getByLabel("激活码有效天数")).toHaveValue("7");
   await code.getByRole("button", { name: "关闭", exact: true }).click();
-  await editor.getByRole("tab", { name: "算力分佣", exact: true }).click();
-  await editor.getByRole("button", { name: "申请提现", exact: true }).click();
+  await codes
+    .getByRole("button", { name: "关闭", exact: true })
+    .first()
+    .click();
+
+  await row(page).getByRole("button", { name: "分佣", exact: true }).click();
+  const commissions = page.getByRole("dialog", {
+    name: "算力分佣",
+    exact: true,
+  });
+  await commissions
+    .getByRole("button", { name: "申请提现", exact: true })
+    .click();
   const payout = page.getByRole("dialog", { name: "申请提现", exact: true });
   await expect(payout.getByLabel("提现金额（元）")).toBeVisible();
   await payout.getByRole("button", { name: "关闭", exact: true }).click();

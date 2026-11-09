@@ -153,6 +153,9 @@ export async function api<T>(path: string, options: APIInit = {}): Promise<T> {
   }
   if (r.status === 401 && path !== "/admin/login")
     window.dispatchEvent(new Event("session-expired"));
+  // A role edited by a super admin shows up as 403 here; refresh the menus.
+  if (r.status === 403 && path.startsWith("/admin/") && path !== "/admin/me")
+    window.dispatchEvent(new Event("permissions-changed"));
   const data = await r.json().catch(() => {
     throw new APIError(r.status, "服务暂时不可用，请稍后重试");
   });
@@ -173,10 +176,13 @@ export const kindText: Record<string, string> = {
   mix: "视频混剪",
   chat: "Agent 对话",
 };
-export const date = (s: string) =>
-  new Date(s).toLocaleString("zh-CN", {
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+// One date format across the admin, in Beijing time: 2026-11-02 09:00
+// (with seconds where precision matters, e.g. payments and audit trails).
+export const date = (s?: string | null, seconds = false) => {
+  const d = s ? new Date(s) : undefined;
+  // Go's zero time (0001-01-01) means "never", not a real date.
+  if (!d || Number.isNaN(d.getTime()) || d.getUTCFullYear() < 2000) return "—";
+  return d
+    .toLocaleString("sv-SE", { timeZone: "Asia/Shanghai", hour12: false })
+    .slice(0, seconds ? 19 : 16);
+};

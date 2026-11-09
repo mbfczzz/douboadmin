@@ -8,15 +8,16 @@ import ResourcePage from "../business/ResourcePage";
 import Table from "../business/Table";
 import { money, points, statuses, type Order } from "../business/types";
 import StatusBadge from "../components/StatusBadge";
+import Tag, { IdChip } from "../components/Tag";
+import OrderSummary from "../business/OrderSummary";
+import { canRefund, refundOrder } from "../business/orderRefund";
 
 export default function Orders({ notify }: PageProps) {
   const resource = useResource<Row<Order>[]>("/admin/orders"),
     [query, setQuery] = useRememberedState("orders.query", ""),
     [state, setState] = useRememberedState("orders.status", "");
   const [detail, setDetail] = useState<Row<Order> | null>(null),
-    [reason, setReason] = useState(""),
-    [busy, setBusy] = useState(false),
-    [refunding, setRefunding] = useState(false);
+    [busy, setBusy] = useState(false);
   const rows = (resource.data || []).filter(
     (r) =>
       (!state || r.data.status === state) &&
@@ -40,32 +41,24 @@ export default function Orders({ notify }: PageProps) {
       notify((e as Error).message, "error");
     }
   }
-  async function refund() {
-    if (!detail || busy) return;
-    if (!reason.trim()) {
-      notify("请填写退款原因", "warning");
-      return;
-    }
+  async function refund(row: Row<Order>) {
+    if (busy) return;
     setBusy(true);
     try {
-      await api(`/admin/orders/${detail.id}/refund`, {
-        method: "POST",
-        body: JSON.stringify({ reason }),
-      });
-      setDetail(null);
-      await resource.reload();
-      notify("退款申请已提交，到账以微信最终结果为准");
+      if (await refundOrder(row))
+        notify("退款申请已提交，到账以微信最终结果为准");
     } catch (e) {
       notify((e as Error).message, "error");
-      void resource.reload();
     } finally {
       setBusy(false);
+      void resource.reload();
     }
   }
   return (
     <ResourcePage page="orders" resource={resource}>
       <div className="business-filters">
         <input
+          type="search"
           placeholder="搜索订单号或用户编号"
           aria-label="搜索订单"
           value={query}
@@ -98,16 +91,16 @@ export default function Orders({ notify }: PageProps) {
           },
           {
             title: "用户",
-            render: (r) => <span className="mono">{r.data.userId}</span>,
+            render: (r) => <IdChip>{r.data.userId}</IdChip>,
           },
           {
             title: "金额 / 积分",
             render: (r) => (
               <>
-                {money(r.data.amountFen)}
-                <small className="cell-note">
-                  {points(r.data.pointsUnits)} 积分
-                </small>
+                <span className="amount">{money(r.data.amountFen)}</span>
+                <span className="cell-tags">
+                  <Tag tone="accent">+{points(r.data.pointsUnits)} 积分</Tag>
+                </span>
               </>
             ),
           },
@@ -121,17 +114,18 @@ export default function Orders({ notify }: PageProps) {
             action: true,
             render: (r) => (
               <div className="business-actions">
-                <button
-                  onClick={() => {
-                    setDetail(r);
-                    setRefunding(false);
-                    setReason("");
-                  }}
-                >
-                  详情
-                </button>
+                <button onClick={() => setDetail(r)}>详情</button>
                 {r.data.status === "created" && (
                   <button onClick={() => void refresh(r)}>查单</button>
+                )}
+                {canRefund(r) && (
+                  <button
+                    className="danger-text"
+                    disabled={busy}
+                    onClick={() => void refund(r)}
+                  >
+                    {r.data.status === "refunding" ? "重试退款" : "退款"}
+                  </button>
                 )}
               </div>
             ),
@@ -139,102 +133,15 @@ export default function Orders({ notify }: PageProps) {
         ]}
       />
       {detail && (
-        <Modal title="充值订单详情" onClose={() => !busy && setDetail(null)}>
+        <Modal title="充值订单详情" onClose={() => setDetail(null)}>
           <div className="edit-form">
-            <dl>
-              <dt>订单编号</dt>
-              <dd className="mono">{detail.id}</dd>
-              <dt>微信交易号</dt>
-              <dd>{detail.data.transactionId || "尚未支付"}</dd>
-              <dt>支付金额</dt>
-              <dd>{money(detail.data.amountFen)}</dd>
-              <dt>充值积分</dt>
-              <dd>{points(detail.data.pointsUnits)}</dd>
-              <dt>状态</dt>
-              <dd>{statuses[detail.data.status]}</dd>
-              <dt>支付通道</dt>
-              <dd>
-                {detail.data.channel === "wechat_virtual"
-                  ? "微信虚拟支付"
-                  : "微信支付"}
-              </dd>
-              {detail.data.virtual && (
-                <>
-                  <dt>积分商品</dt>
-                  <dd>{detail.data.virtual.productName}</dd>
-                  <dt>购买方式</dt>
-                  <dd>
-                    {detail.data.virtual.purchaseMode === "custom"
-                      ? "自定义金额"
-                      : "积分套餐"}
-                  </dd>
-                  <dt>购买份数</dt>
-                  <dd>{detail.data.virtual.quantity || 1}</dd>
-                  <dt>商品单价</dt>
-                  <dd>
-                    {money(
-                      detail.data.virtual.unitFen || detail.data.amountFen,
-                    )}
-                  </dd>
-                </>
-              )}
-            </dl>
+            <OrderSummary row={detail} />
             {detail.data.virtual?.platform === "ios" && (
               <p className="quiet">
                 Apple 支付订单由用户在 App Store
                 申请退款，平台通知后核对积分回收。
               </p>
             )}
-            {detail.data.virtual?.platform !== "ios" &&
-              (detail.data.status === "paid" ||
-                detail.data.status === "refunding") &&
-              (!refunding && detail.data.status === "paid" ? (
-                <div className="modal-actions">
-                  <button
-                    className="secondary danger-text"
-                    onClick={() => setRefunding(true)}
-                  >
-                    申请全额退款
-                  </button>
-                </div>
-              ) : (
-                <>
-                  <p className="quiet">
-                    全额退款会回收该订单对应积分；可用积分不足时不能申请。重复提交使用同一退款单。
-                  </p>
-                  <label>
-                    退款原因
-                    <input
-                      disabled={busy}
-                      value={reason}
-                      maxLength={25}
-                      onChange={(e) => setReason(e.target.value)}
-                    />
-                  </label>
-                  <div className="modal-actions">
-                    {refunding && (
-                      <button
-                        className="secondary"
-                        disabled={busy}
-                        onClick={() => setRefunding(false)}
-                      >
-                        取消
-                      </button>
-                    )}
-                    <button
-                      className="primary danger"
-                      disabled={busy}
-                      onClick={() => void refund()}
-                    >
-                      {busy
-                        ? "提交中…"
-                        : detail.data.status === "refunding"
-                          ? "重试原退款申请"
-                          : "确认全额退款"}
-                    </button>
-                  </div>
-                </>
-              ))}
           </div>
         </Modal>
       )}

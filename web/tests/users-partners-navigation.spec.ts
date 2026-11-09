@@ -53,19 +53,31 @@ test("users and providers are isolated sidebar routes", async ({ page }) => {
   await page.screenshot({ path: "../.runtime/provider-create-quota.png" });
   await createChild.getByRole("button", { name: "关闭", exact: true }).click();
   expect(requests).toContain("/api/admin/partners/tree");
-  await page.getByRole("button", { name: "编辑", exact: true }).first().click();
-  const editor = page.getByRole("dialog", { name: "编辑服务商" });
-  await expect(editor.getByRole("tab", { name: "基本信息" })).toBeVisible();
-  await page.screenshot({ path: "../.runtime/provider-editor-desktop.png" });
-  await editor.getByRole("tab", { name: "名额划拨" }).click();
-  await expect(
-    editor.getByRole("heading", { name: "名额划拨记录" }),
-  ).toBeVisible();
-  await editor.getByRole("tab", { name: "授权激活" }).click();
-  await expect(editor.getByRole("heading", { name: "授权码" })).toBeVisible();
-  await editor.getByRole("tab", { name: "算力分佣" }).click();
-  await expect(editor.getByRole("heading", { name: "佣金流水" })).toBeVisible();
-  await editor.getByRole("button", { name: "关闭", exact: true }).click();
+  // Every provider function has its own row button and dialog.
+  const row = page.locator(".provider-tree-row").first();
+  for (const [button, title, heading] of [
+    ["编辑", "编辑服务商", ""],
+    ["名额划拨", "名额划拨", "名额划拨记录"],
+    ["授权码", "授权激活", "授权码"],
+    ["分佣", "算力分佣", "佣金流水"],
+  ]) {
+    await row.getByRole("button", { name: button, exact: true }).click();
+    const dialog = page.getByRole("dialog", { name: title, exact: true });
+    await expect(dialog).toBeVisible();
+    if (heading)
+      await expect(
+        dialog.getByRole("heading", { name: heading, exact: true }),
+      ).toBeVisible();
+    else
+      await page.screenshot({
+        path: "../.runtime/provider-editor-desktop.png",
+      });
+    await expect(dialog.getByRole("tab")).toHaveCount(0);
+    await dialog
+      .getByRole("button", { name: "关闭", exact: true })
+      .first()
+      .click();
+  }
   await page.screenshot({
     path: "../.runtime/users-partners-desktop.png",
     fullPage: true,

@@ -1,132 +1,146 @@
 import { useState } from "react";
-import { api, type Row } from "../api";
+import type { Row } from "../api";
 import { useResource } from "../hooks/useResource";
+import Modal from "../components/Modal";
+import Badge from "../components/Badge";
+import Tag from "../components/Tag";
 import RequestState from "../components/RequestState";
-import RoleSelect from "../roles/RoleSelect";
-import type { AdminAccount } from "../adminAccounts/types";
+import PasswordReset from "../components/PasswordReset";
+import { useRoles } from "../roles/types";
+import { lastLogin, type AdminAccount } from "../adminAccounts/types";
 import type { Notify } from "../navigation";
+import type { Partner } from "./types";
+import { AccountCreate, RoleChange } from "./ProviderAccountForms";
+import { saveAccount } from "./accountActions";
 
-// Login account of one provider: create it, reset the password, change role or disable.
+type Sub = "role" | "password";
+
+// Login account of one provider. Each change is its own button and dialog:
+// open the account, change its role, reset its password, disable/enable it.
 export default function ProviderAccount({
-  id,
+  row,
   notify,
+  onClose,
 }: {
-  id: string;
+  row: Row<Partner>;
   notify: Notify;
+  onClose: () => void;
 }) {
   const resource = useResource<{ account: Row<AdminAccount> | null }>(
-      `/admin/partners/${id}/account`,
+      `/admin/partners/${row.id}/account`,
     ),
-    [busy, setBusy] = useState(false),
-    [error, setError] = useState("");
-  const account = resource.data?.account;
-  async function save(form: HTMLFormElement) {
-    const data = new FormData(form),
-      body = {
-        version: account?.version || 0,
-        username: String(data.get("username") || "").trim(),
-        password: String(data.get("password") || ""),
-        role: String(data.get("role") || "partner"),
-        disabled: !!data.get("disabled"),
-      };
-    setBusy(true);
-    setError("");
+    roles = useRoles("partner"),
+    [sub, setSub] = useState<Sub>(),
+    account = resource.data?.account;
+  const done = async (message: string) => {
+    await resource.reload();
+    notify(message);
+  };
+  async function toggle(current: Row<AdminAccount>) {
     try {
-      await api(`/admin/partners/${id}/account`, {
-        method: "PUT",
-        body: JSON.stringify(body),
-        confirmation: account
-          ? {
-              before: account.data,
-              extra: body.password ? { password: body.password } : undefined,
-            }
-          : false,
-      });
-      form.reset();
-      await resource.reload();
-      notify(account ? "登录账号已更新" : "登录账号已开通");
+      await saveAccount(row.id, current, { disabled: !current.data.disabled });
+      await done(current.data.disabled ? "登录已启用" : "登录已停用");
     } catch (e) {
-      setError((e as Error).message);
-    } finally {
-      setBusy(false);
+      notify((e as Error).message, "error");
+      void resource.reload();
     }
   }
   return (
-    <form
-      className="edit-form provider-account"
-      onSubmit={(e) => {
-        e.preventDefault();
-        void save(e.currentTarget);
-      }}
+    <Modal
+      className="form-modal provider-account"
+      title="登录账号"
+      subtitle={row.data.name}
+      onClose={onClose}
     >
-      <h3>登录账号</h3>
       <RequestState
         loading={resource.loading && !resource.data}
         error={resource.error}
         retry={resource.reload}
       />
-      {resource.data && (
-        <fieldset disabled={busy}>
-          {account ? (
-            <p className="quiet">
-              账号 <b className="mono">{account.data.username}</b>
-              {account.data.lastLoginAt ? "" : " · 尚未登录"}
-            </p>
-          ) : (
-            <p className="quiet">
-              该服务商还没有登录账号，开通后即可登录后台。
-            </p>
-          )}
-          <div className="form-grid">
-            {!account && (
-              <label>
-                账号
-                <input
-                  name="username"
-                  pattern="[A-Za-z0-9._-]{3,32}"
-                  autoComplete="off"
-                  required
+      {resource.data && !account && (
+        <AccountCreate
+          id={row.id}
+          onClose={onClose}
+          onSaved={() => done("登录账号已开通")}
+        />
+      )}
+      {account && (
+        <div className="edit-form">
+          <div className="form-body">
+            <dl className="detail-grid compact account-facts">
+              <dt>账号</dt>
+              <dd className="mono">{account.data.username}</dd>
+              <dt>角色</dt>
+              <dd>
+                <Tag tone="accent">
+                  {roles.rows.find((r) => r.id === account.data.role)?.data
+                    .name || account.data.role}
+                </Tag>
+              </dd>
+              <dt>状态</dt>
+              <dd>
+                <Badge
+                  state={account.data.disabled ? "failed" : "succeeded"}
+                  label={account.data.disabled ? "已停用" : "正常"}
                 />
-              </label>
-            )}
-            <label>
-              {account ? "重置密码（不修改请留空）" : "初始密码"}
-              <input
-                name="password"
-                type="password"
-                autoComplete="new-password"
-                minLength={16}
-                maxLength={128}
-                required={!account}
-              />
-            </label>
-            <label>
-              角色
-              <RoleSelect scope="partner" value={account?.data.role} />
-            </label>
+              </dd>
+              <dt>最后登录</dt>
+              <dd>{lastLogin(account.data.lastLoginAt)}</dd>
+            </dl>
           </div>
-          {account && (
-            <label className="checkbox">
-              <input
-                type="checkbox"
-                name="disabled"
-                defaultChecked={account.data.disabled}
-              />
-              停用登录
-            </label>
-          )}
-          {error && (
-            <div className="error" role="alert">
-              {error}
-            </div>
-          )}
           <div className="modal-actions">
-            <button className="primary" disabled={busy}>
-              {busy ? "保存中…" : account ? "保存账号" : "开通账号"}
+            <button
+              type="button"
+              className={
+                account.data.disabled ? "secondary" : "secondary danger-text"
+              }
+              onClick={() => void toggle(account)}
+            >
+              {account.data.disabled ? "启用登录" : "停用登录"}
+            </button>
+            <button
+              type="button"
+              className="secondary"
+              onClick={() => setSub("role")}
+            >
+              修改角色
+            </button>
+            <button
+              type="button"
+              className="primary"
+              onClick={() => setSub("password")}
+            >
+              重置密码
             </button>
           </div>
-        </fieldset>
+        </div>
       )}
-    </form>
+      {account && sub === "role" && (
+        <RoleChange
+          partnerId={row.id}
+          account={account}
+          onClose={() => setSub(undefined)}
+          onFailed={() => void resource.reload()}
+          onSaved={() => done("账号角色已更新")}
+        />
+      )}
+      {account && sub === "password" && (
+        <PasswordReset
+          account={`${row.data.name} · ${account.data.username}`}
+          onClose={() => setSub(undefined)}
+          onSubmit={async (password) => {
+            try {
+              await saveAccount(row.id, account, { password });
+            } catch (e) {
+              // A login in the meantime changes the version; refresh so a
+              // retry uses the current one.
+              void resource.reload();
+              throw e;
+            }
+            await done("密码已重置");
+          }}
+        />
+      )}
+    </Modal>
   );
 }

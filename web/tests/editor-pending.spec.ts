@@ -6,7 +6,10 @@ test("model fields cannot change while a save is pending; failure preserves the 
 }) => {
   await login(page);
   await page.getByRole("button", { name: "模型管理", exact: true }).click();
-  await page.getByRole("button", { name: "配置", exact: true }).first().click();
+  await page
+    .getByRole("button", { name: "基础信息", exact: true })
+    .first()
+    .click();
   const dialog = page.getByRole("dialog"),
     name = dialog.getByLabel("名称", { exact: true });
   await name.fill("待保存的模型名称");

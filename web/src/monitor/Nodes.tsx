@@ -2,12 +2,21 @@ import { useState } from "react";
 import type { Row } from "../api";
 import Table from "../business/Table";
 import type { Node } from "./types";
-import { online, timestamp } from "./types";
+import { ago, online, timestamp } from "./types";
+import Badge from "../components/Badge";
+import Tag from "../components/Tag";
+
+const roles: Record<string, [string, "info" | "accent" | "muted"]> = {
+  serve: ["API", "info"],
+  worker: ["Worker", "accent"],
+};
 export default function Nodes({ nodes }: { nodes: Row<Node>[] }) {
   const [all, setAll] = useState(false),
-    active = nodes.filter(online);
+    active = nodes.filter(online),
+    // Bars compare nodes with each other rather than a fixed ceiling.
+    peak = Math.max(1, ...nodes.map((n) => n.data.heapBytes));
   return (
-    <section className="panel monitor-panel monitor-nodes">
+    <section className="panel monitor-panel monitor-nodes" id="monitor-nodes">
       <header>
         <div>
           <h2>运行节点</h2>
@@ -28,47 +37,68 @@ export default function Nodes({ nodes }: { nodes: Row<Node>[] }) {
         columns={[
           {
             title: "节点 / 实例",
-            render: (r) => (
-              <>
-                <b>{r.data.host}</b>
-                <small className="cell-note">
-                  {r.id.slice(0, 8)} · {r.data.role} · {r.data.goVersion}
-                </small>
-              </>
-            ),
+            render: (r) => {
+              const [role, tone] = roles[r.data.role] || [r.data.role, "muted"];
+              return (
+                <>
+                  <span className="node-name">
+                    <b>{r.data.host}</b>
+                    <Tag tone={tone}>{role}</Tag>
+                  </span>
+                  <small className="cell-note">
+                    {r.id.slice(0, 8)} · {r.data.goVersion}
+                  </small>
+                </>
+              );
+            },
           },
           {
             title: "状态",
             render: (r) => (
-              <span
-                className={
-                  online(r) ? "monitor-status online" : "monitor-status"
-                }
-              >
-                {online(r) ? "在线" : "离线"}
-              </span>
+              <Badge
+                state={online(r) ? "succeeded" : "muted"}
+                label={online(r) ? "在线" : "离线"}
+              />
             ),
           },
           {
             title: "内存 / 协程",
-            render: (r) => (
-              <>
-                {(r.data.heapBytes / 1048576).toFixed(1)} MiB
-                <small className="cell-note">{r.data.goroutines} 个协程</small>
-              </>
-            ),
+            render: (r) => {
+              const mib = r.data.heapBytes / 1048576;
+              return (
+                <>
+                  <span className="amount">{mib.toFixed(1)} MiB</span>
+                  <span className="node-meter" aria-hidden="true">
+                    <i
+                      style={{
+                        width: `${Math.max(4, (r.data.heapBytes / peak) * 100)}%`,
+                      }}
+                    />
+                  </span>
+                  <small className="cell-note">
+                    {r.data.goroutines} 个协程
+                  </small>
+                </>
+              );
+            },
           },
           {
             title: "数据库连接",
             render: (r) => (
               <>
-                {r.data.dbInUse} 使用 / {r.data.dbOpen} 打开
+                <span className="amount">{r.data.dbInUse}</span>
+                <span className="quiet"> 使用 / {r.data.dbOpen} 打开</span>
               </>
             ),
           },
           {
             title: "最近心跳",
-            render: (r) => timestamp(r.data.seenAt),
+            render: (r) => (
+              <span title={timestamp(r.data.seenAt)}>
+                {ago(r.data.seenAt)}
+                <small className="cell-note">{timestamp(r.data.seenAt)}</small>
+              </span>
+            ),
           },
         ]}
       />

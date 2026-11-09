@@ -110,7 +110,7 @@ func (a *Server) asset(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if row.Owner != identity(r).ID {
-		fail(w, 404, "Asset not found")
+		fail(w, 404, "素材不存在或已删除")
 		return
 	}
 	if a.Objects != nil {

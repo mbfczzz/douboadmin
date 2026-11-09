@@ -77,9 +77,9 @@ test("model editor styles load on first entry and survive refresh and mobile lay
     }),
   );
   await page.getByRole("button", { name: "模型管理", exact: true }).click();
-  await page.getByRole("button", { name: "配置", exact: true }).click();
+  await page.getByRole("button", { name: "基础信息", exact: true }).click();
   const dialog = page.getByRole("dialog", {
-    name: "配置模型 · Performance Model",
+    name: "基础信息 · Performance Model",
     exact: true,
   });
   await expect(dialog).toBeVisible();
@@ -90,7 +90,7 @@ test("model editor styles load on first entry and survive refresh and mobile lay
   expect((await dialog.boundingBox())!.width).toBe(1040);
   await dialog.getByRole("button", { name: "关闭", exact: true }).click();
   await page.reload();
-  await page.getByRole("button", { name: "配置", exact: true }).click();
+  await page.getByRole("button", { name: "基础信息", exact: true }).click();
   await expect(dialog).toBeVisible();
   await page.setViewportSize({ width: 390, height: 844 });
   expect(

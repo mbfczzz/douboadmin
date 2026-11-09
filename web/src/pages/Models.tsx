@@ -11,9 +11,15 @@ import Pagination from "../components/Pagination";
 import ModelEditor, {
   ModelImport,
   modelKinds,
-  supportedModel,
 } from "../components/ModelEditor";
 import { ModelIcon } from "../models/brands";
+import ModelState from "../models/ModelState";
+import {
+  modelSections,
+  sectionsFor,
+  type ModelSection,
+} from "../models/sections";
+import { ask } from "../confirm/ask";
 
 export default function Models({ notify }: PageProps) {
   const resource = useResource<Row<Model>[]>("/admin/models");
@@ -21,7 +27,7 @@ export default function Models({ notify }: PageProps) {
     [q, setQ] = useRememberedState("models.query", ""),
     [page, setPage] = useState(1);
   const [busy, setBusy] = useState(""),
-    [edit, setEdit] = useState<Row<Model> | null>(null),
+    [edit, setEdit] = useState<{ row: Row<Model>; section: ModelSection }>(),
     [adding, setAdding] = useState(false);
   const rows = resource.data || [];
   const filtered = rows.filter(
@@ -55,9 +61,12 @@ export default function Models({ notify }: PageProps) {
     if (busy) return;
     if (
       remove &&
-      !confirm(
-        `删除「${r.data.name}」？历史任务会保留，关联模板将无法继续生成。`,
-      )
+      (await ask({
+        title: "删除模型？",
+        message: `「${r.data.name}」删除后，历史任务会保留，关联模板将无法继续生成。`,
+        confirmText: "删除",
+        danger: true,
+      })) === false
     )
       return;
     setBusy(r.id);
@@ -154,7 +163,7 @@ export default function Models({ notify }: PageProps) {
             <thead>
               <tr>
                 <th>模型</th>
-                <th>类型</th>
+                <th className="wide-only">类型</th>
                 <th className="wide-only">上游基础消耗</th>
                 <th className="wide-only">生成积分配置</th>
                 <th
@@ -188,7 +197,9 @@ export default function Models({ notify }: PageProps) {
                       </div>
                     </div>
                   </td>
-                  <td>{modelKinds[r.data.kind] || r.data.kind}</td>
+                  <td className="wide-only">
+                    {modelKinds[r.data.kind] || r.data.kind}
+                  </td>
                   <td className="wide-only">{r.data.creditCost} 点起</td>
                   <td className="wide-only">
                     {r.data.points}
@@ -196,44 +207,22 @@ export default function Models({ notify }: PageProps) {
                   </td>
                   <td className="wide-only">{r.data.recentJobs}</td>
                   <td>
-                    <div className="model-state">
-                      <button
-                        type="button"
-                        role="switch"
-                        aria-label={`${r.data.name} 上架状态`}
-                        aria-checked={r.data.published && r.data.available}
-                        disabled={
-                          !!busy || !supportedModel(r.data) || !r.data.available
-                        }
-                        onClick={() => void mutate(r)}
-                        className={
-                          "catalog-switch " +
-                          (r.data.published && r.data.available ? "on" : "")
-                        }
-                      >
-                        <span />
-                      </button>
-                      <span
-                        className={
-                          "catalog-status " +
-                          (r.data.published && r.data.available ? "live" : "")
-                        }
-                      >
-                        {r.data.settings?.availabilityStatus === "maintenance"
-                          ? "维护中"
-                          : !r.data.available
-                            ? "上游不可用"
-                            : !supportedModel(r.data)
-                              ? "未开放创作"
-                              : r.data.published
-                                ? "已上架"
-                                : "已下架"}
-                      </span>
-                    </div>
+                    <ModelState
+                      model={r.data}
+                      busy={!!busy}
+                      onToggle={() => void mutate(r)}
+                    />
                   </td>
                   <td className="table-actions">
-                    <div className="catalog-actions">
-                      <button onClick={() => setEdit(r)}>配置</button>
+                    <div className="catalog-actions model-row-actions">
+                      {sectionsFor(r.data).map((section) => (
+                        <button
+                          key={section}
+                          onClick={() => setEdit({ row: r, section })}
+                        >
+                          {modelSections[section].button}
+                        </button>
+                      ))}
                       <button
                         className="danger-text"
                         disabled={!!busy}
@@ -262,8 +251,10 @@ export default function Models({ notify }: PageProps) {
       </section>
       {edit && (
         <ModelEditor
-          row={edit}
-          onClose={() => setEdit(null)}
+          key={edit.row.id + edit.section}
+          row={edit.row}
+          section={edit.section}
+          onClose={() => setEdit(undefined)}
           onSaved={() => void resource.reload()}
         />
       )}

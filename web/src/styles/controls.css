@@ -38,3 +38,13 @@
 .danger:hover {
   background: #b23c34;
 }
+/* Destructive primary action: same size and shape as .primary, danger colour. */
+.primary.danger {
+  border-color: var(--danger-strong);
+  background: var(--danger-strong);
+  box-shadow: 0 6px 18px #c9473e33;
+}
+.primary.danger:hover {
+  border-color: #b23c34;
+  background: #b23c34;
+}

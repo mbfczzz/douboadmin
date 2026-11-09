@@ -1,6 +1,8 @@
 import { useState, type FormEvent } from "react";
 import { ArrowUpRight } from "lucide-react";
 import { api } from "../api";
+import PasswordInput from "../components/PasswordInput";
+import "../components/account-menu.css";
 export default function Login({ onSuccess }: { onSuccess: () => void }) {
   const [saving, setSaving] = useState(false),
     [error, setError] = useState("");
@@ -32,21 +34,15 @@ export default function Login({ onSuccess }: { onSuccess: () => void }) {
           <span>豆</span>豆播 AI
         </div>
         <h1>登录管理后台</h1>
-        <p>使用管理员账号登录，管理模型、模板与用户。</p>
+        <p>平台管理员和服务商均使用后台账号登录。</p>
         <label>
-          管理员账号
-          <input
-            name="username"
-            autoComplete="username"
-            defaultValue="admin"
-            required
-          />
+          账号
+          <input name="username" autoComplete="username" required />
         </label>
         <label>
           密码
-          <input
+          <PasswordInput
             name="password"
-            type="password"
             autoComplete="current-password"
             required
           />

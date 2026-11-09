@@ -21,7 +21,7 @@ test("real catalog, template upload, publish, copy, unpublish and delete", async
   await page
     .locator("tbody tr")
     .first()
-    .getByRole("button", { name: "配置", exact: true })
+    .getByRole("button", { name: "基础信息", exact: true })
     .click();
   await expect(page.getByLabel("模型 ID", { exact: true })).toHaveValue(
     m.data.key,

@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { readFileSync } from "node:fs";
-import { confirmSubmission, login } from "./helpers";
+import { confirmSubmission, login, answerAsk } from "./helpers";
 
 test("cover upload locks its URL and restores editing on failure", async ({
   page,
@@ -60,21 +60,16 @@ test("collapsed account actions do not trap keyboard focus", async ({
     route.fulfill({ json: [] }),
   );
   await page.getByRole("button", { name: "小程序用户", exact: true }).click();
-  await page.getByRole("button", { name: "详情 / 积分", exact: true }).click();
+  await page.getByRole("button", { name: "停用", exact: true }).click();
   const dialog = page.getByRole("dialog"),
-    close = dialog.getByRole("button", { name: "关闭", exact: true });
-  const summary = dialog.getByText("账号状态管理 · 正常", { exact: true });
+    close = dialog.getByRole("button", { name: "关闭", exact: true }),
+    confirm = dialog.getByRole("button", { name: "停用账号", exact: true });
+  // Focus wraps between the last action and the close button.
   await close.focus();
   await page.keyboard.press("Shift+Tab");
-  await expect(summary).toBeFocused();
+  await expect(confirm).toBeFocused();
   await page.keyboard.press("Tab");
   await expect(close).toBeFocused();
-  await summary.click();
-  await close.focus();
-  await page.keyboard.press("Shift+Tab");
-  await expect(
-    dialog.getByRole("button", { name: "归档用户", exact: true }),
-  ).toBeFocused();
 });
 
 test("long error notifications remain inside a mobile viewport", async ({
@@ -129,8 +124,8 @@ test("an unresponsive cover upload can be cancelled without affecting the next e
   try {
     const cancel = dialog.getByRole("button", { name: "取消", exact: true });
     await expect(cancel).toBeEnabled();
-    page.once("dialog", (prompt) => prompt.accept());
     await cancel.click();
+    await answerAsk(page, true);
     await expect(dialog).toHaveCount(0);
   } finally {
     release();

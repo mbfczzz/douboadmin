@@ -30,3 +30,23 @@ func (p *Relay) failure(ctx context.Context, j core.Job, err error) (message, ca
 	}
 	return
 }
+
+// redact shortens an error for the admin task note and removes the relay key.
+func (p *Relay) redact(err error) string {
+	text := err.Error()
+	if p.Client != nil && p.Client.Key != "" {
+		text = strings.ReplaceAll(text, p.Client.Key, "[redacted]")
+	}
+	if runes := []rune(text); len(runes) > 300 {
+		text = string(runes[:300]) + "…"
+	}
+	return text
+}
+
+// waiting records why a task is still pending; only changes are written.
+func (p *Relay) waiting(ctx context.Context, row *core.Record, e Execution, note string) {
+	if e.Note != note {
+		e.Note = note
+		_ = p.checkpoint(ctx, row, e)
+	}
+}

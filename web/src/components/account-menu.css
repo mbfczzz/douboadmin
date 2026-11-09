@@ -1,0 +1,89 @@
+/* Top-right account menu and the shared password field. */
+.account-menu {
+  position: relative;
+}
+.account-trigger {
+  gap: 10px;
+  padding: 4px 8px 4px 4px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+}
+.account-trigger:hover,
+.account-trigger[aria-expanded="true"] {
+  border-color: var(--line-strong);
+  background: var(--surface);
+}
+.account-popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 30;
+  width: 240px;
+  padding: 6px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-float);
+}
+.account-who {
+  padding: 10px 10px 12px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 6px;
+}
+.account-who b,
+.account-who small {
+  display: block;
+}
+.account-who small {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.account-popover [role="menuitem"] {
+  justify-content: flex-start;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 10px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text);
+  font-size: 13px;
+}
+.account-popover [role="menuitem"]:hover {
+  background: #ffffff0f;
+  color: var(--ink-strong);
+}
+.account-popover .danger-text {
+  color: var(--danger);
+}
+.password-input {
+  position: relative;
+  display: block;
+}
+.password-input input {
+  padding-right: 44px;
+}
+.password-input .icon {
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  min-width: 34px;
+  min-height: 34px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  transform: translateY(-50%);
+}
+.password-input .icon:hover {
+  color: var(--accent-text);
+}
+@media (max-width: 640px) {
+  .account-trigger b,
+  .account-trigger svg {
+    display: none;
+  }
+}

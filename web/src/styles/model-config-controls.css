@@ -148,3 +148,7 @@
   background: var(--info-soft);
   color: var(--info);
 }
+/* A free-form icon value never needs the full 4-column row. */
+.config-brands + input {
+  max-width: 640px;
+}

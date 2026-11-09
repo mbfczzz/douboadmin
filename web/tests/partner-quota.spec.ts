@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { confirmSubmission, login } from "./helpers";
+import { confirmSubmission, login, answerAsk } from "./helpers";
 import { selectProvider, issueCode } from "./partner-helpers";
 test.skip(
   process.env.PARTNER_ACCEPTANCE !== "true",
@@ -52,8 +52,8 @@ test("quota requests approve against the parent pool and unused codes can be rev
     await page.request.get("/api/admin/partners/" + partner.id)
   ).json();
   expect(view.quota.users.reserved).toBe(1);
-  page.once("dialog", (d) => d.accept());
   await page.getByRole("button", { name: "撤销", exact: true }).click();
+  await answerAsk(page, true);
   await expect(page.getByText("已撤销", { exact: true })).toBeVisible();
   view = await (
     await page.request.get("/api/admin/partners/" + partner.id)

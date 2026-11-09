@@ -6,6 +6,8 @@ import RequestState from "../components/RequestState";
 import { useResource } from "../hooks/useResource";
 import type { PageData } from "./types";
 import type { ReactNode } from "react";
+import { RefreshCw, Search } from "lucide-react";
+import "./records.css";
 
 export function useRecords<T>(path: string, pollMs = 0) {
   const [page, setPage] = useState(1),
@@ -65,7 +67,8 @@ export default function Records<T>({
           </>
         )}
         <form
-          className="business-filters"
+          className="records-toolbar"
+          role="search"
           onSubmit={(e) => {
             e.preventDefault();
             resource.search(
@@ -73,22 +76,36 @@ export default function Records<T>({
             );
           }}
         >
-          <input
-            name="q"
-            aria-label="查询记录"
-            placeholder="输入名称、编号或备注"
-            maxLength={100}
-          />
-          <button className="secondary">查询</button>
+          <div className="records-search">
+            <span>
+              <Search size={15} aria-hidden="true" />
+              <input
+                name="q"
+                aria-label="查询记录"
+                placeholder="搜索名称、编号或备注"
+                maxLength={100}
+              />
+            </span>
+            <button className="secondary">查询</button>
+          </div>
           <button
             type="button"
-            className="secondary"
+            className="icon"
+            aria-label="刷新"
+            title="刷新"
             onClick={() => void resource.reload()}
           >
-            刷新
+            <RefreshCw
+              size={15}
+              className={resource.loading ? "spinning" : ""}
+            />
           </button>
-          {!title && actions}
-          {controls}
+          {(controls || (!title && actions)) && (
+            <div className="records-controls">
+              {controls}
+              {!title && actions}
+            </div>
+          )}
         </form>
       </div>
       <RequestState

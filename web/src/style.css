@@ -4,10 +4,12 @@
 @import "./styles/select.css";
 @import "./styles/panels.css";
 @import "./styles/tables.css";
+@import "./styles/tags.css";
 
 @import "./styles/empty.css";
 @import "./styles/metadata.css";
 @import "./styles/dialogs.css";
+@import "./styles/disclosure.css";
 @import "./styles/feedback.css";
 @import "./styles/results.css";
 @import "./styles/login.css";
@@ -15,3 +17,5 @@
 @import "./styles/responsive.css";
 @import "./styles/catalog.css";
 @import "./styles/monitor.css";
+@import "./styles/monitor-events.css";
+@import "./styles/consistency.css";

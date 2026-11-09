@@ -22,10 +22,18 @@ export default function App() {
         if (!controller.signal.aborted) setChecking(false);
       });
     const expired = () => setMe(null);
+    // Menus follow role changes made while this tab is open.
+    const refresh = () => {
+      if (document.visibilityState === "visible") void loadMe().catch(() => {});
+    };
     window.addEventListener("session-expired", expired);
+    window.addEventListener("permissions-changed", refresh);
+    document.addEventListener("visibilitychange", refresh);
     return () => {
       controller.abort();
       window.removeEventListener("session-expired", expired);
+      window.removeEventListener("permissions-changed", refresh);
+      document.removeEventListener("visibilitychange", refresh);
     };
   }, []);
   if (checking)

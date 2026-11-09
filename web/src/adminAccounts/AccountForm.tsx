@@ -18,78 +18,51 @@ export default function AccountForm({
 }) {
   const [busy, setBusy] = useState(false),
     [error, setError] = useState("");
-  const [version, setVersion] = useState(row?.version || 0);
-  const [before, setBefore] = useState<unknown>(row?.data);
   async function submit(form: HTMLFormElement) {
     if (busy) return;
     setError("");
     setBusy(true);
     const data = new FormData(form),
-      password = String(data.get("password") || ""),
       body = {
-        username: String(data.get("username")),
         name: String(data.get("name")),
         phone: String(data.get("phone")),
         role: String(data.get("role")),
-        disabled: !!data.get("disabled"),
       };
     try {
-      let saved: Row<AdminAccount>;
-      if (row) {
-        saved = await api(`/admin/accounts/${row.id}`, {
+      if (row)
+        await api(`/admin/accounts/${row.id}`, {
           method: "PUT",
+          // Status has its own row action; keep it unchanged here.
           body: JSON.stringify({
-            name: body.name,
-            phone: body.phone,
-            role: body.role,
-            disabled: body.disabled,
-            version,
+            ...body,
+            disabled: !!row.data.disabled,
+            version: row.version,
           }),
-          confirmation: { before, extra: password ? { password } : undefined },
+          confirmation: { before: row.data },
         });
-        setVersion(saved.version);
-        setBefore(saved.data);
-        if (password)
-          await api(`/admin/accounts/${row.id}/password`, {
-            method: "PUT",
-            confirmation: false,
-            body: JSON.stringify({ version: saved.version, password }),
-          });
-      } else
-        saved = await api("/admin/accounts", {
+      else
+        await api("/admin/accounts", {
           method: "POST",
-          body: JSON.stringify({ ...body, password }),
+          body: JSON.stringify({
+            ...body,
+            username: String(data.get("username")),
+            password: String(data.get("password")),
+          }),
         });
       await onSaved();
       onClose();
-      notify(row ? "管理账号已更新" : "管理账号已创建");
+      notify(row ? "账号资料已更新" : "管理账号已创建");
     } catch (error) {
       setError((error as Error).message);
     } finally {
       setBusy(false);
     }
   }
-  async function archive() {
-    if (!row || !confirm("归档后该账号将无法登录，确认继续吗？")) return;
-    setBusy(true);
-    setError("");
-    try {
-      await api(`/admin/accounts/${row.id}`, {
-        method: "DELETE",
-        body: JSON.stringify({ version: row.version }),
-      });
-      await onSaved();
-      onClose();
-      notify("管理账号已归档");
-    } catch (error) {
-      setError((error as Error).message);
-      setBusy(false);
-    }
-  }
   return (
     <Modal
       className="form-modal"
-      title={row ? "编辑管理账号" : "添加管理账号"}
+      title={row ? "编辑账号资料" : "添加管理账号"}
+      subtitle={row?.data.username}
       onClose={() => !busy && onClose()}
     >
       <form
@@ -139,27 +112,18 @@ export default function AccountForm({
               disabled={busy}
             />
           </label>
-          <label>
-            {row ? "重置密码（不修改请留空）" : "初始密码"}
-            <input
-              name="password"
-              type="password"
-              minLength={16}
-              maxLength={128}
-              required={!row}
-              disabled={busy}
-              autoComplete="new-password"
-            />
-          </label>
-          {row && (
-            <label className="checkbox">
+          {!row && (
+            <label>
+              初始密码
               <input
-                name="disabled"
-                type="checkbox"
-                defaultChecked={row.data.disabled}
+                name="password"
+                spellCheck={false}
+                minLength={16}
+                maxLength={128}
+                required
                 disabled={busy}
-              />{" "}
-              停用账号
+                autoComplete="off"
+              />
             </label>
           )}
           {error && (
@@ -169,16 +133,6 @@ export default function AccountForm({
           )}
         </div>
         <div className="modal-actions">
-          {row && (
-            <button
-              type="button"
-              className="secondary danger-text"
-              disabled={busy}
-              onClick={() => void archive()}
-            >
-              归档账号
-            </button>
-          )}
           <button
             type="button"
             className="secondary"
@@ -188,7 +142,7 @@ export default function AccountForm({
             取消
           </button>
           <button className="primary" disabled={busy}>
-            {busy ? "保存中…" : "保存账号"}
+            {busy ? "保存中…" : row ? "保存资料" : "创建账号"}
           </button>
         </div>
       </form>

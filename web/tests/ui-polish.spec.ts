@@ -57,7 +57,7 @@ test("mobile user actions stay accessible and failed balances remain unknown", a
   );
   await page.getByRole("button", { name: "小程序用户", exact: true }).click();
   await page.setViewportSize({ width: 390, height: 844 });
-  const action = page.getByRole("button", { name: "详情 / 积分", exact: true });
+  const action = page.getByRole("button", { name: "详情", exact: true });
   await action.scrollIntoViewIfNeeded();
   await expect(action).toBeInViewport();
   const before = await action.boundingBox();
@@ -72,17 +72,14 @@ test("mobile user actions stay accessible and failed balances remain unknown", a
     "—",
     "—",
   ]);
-  await expect(
-    dialog.getByRole("button", { name: "停用账号", exact: true }),
-  ).toBeHidden();
   failed = false;
   await dialog.getByRole("button", { name: "重试", exact: true }).click();
   await expect(dialog.locator(".business-metrics strong")).toHaveText([
     "123.45",
     "2",
   ]);
-  await dialog.getByText("账号状态管理 · 正常", { exact: true }).click();
+  // Details are read-only; changes live in the row actions.
   await expect(
     dialog.getByRole("button", { name: "停用账号", exact: true }),
-  ).toBeVisible();
+  ).toHaveCount(0);
 });

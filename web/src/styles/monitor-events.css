@@ -1,0 +1,76 @@
+/* Monitor log rows and node details. */
+.monitor-events summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  list-style: none;
+}
+.monitor-events summary::-webkit-details-marker {
+  display: none;
+}
+.monitor-events summary::before {
+  content: "";
+  flex-shrink: 0;
+  width: 7px;
+  height: 7px;
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  transform: rotate(-45deg);
+  transition: transform 160ms;
+}
+.monitor-events details[open] > summary::before {
+  margin-top: -4px;
+  transform: rotate(45deg);
+}
+.monitor-events pre {
+  margin: 8px 0 0 14px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-subtle);
+  color: var(--text);
+}
+.repeat-count {
+  flex-shrink: 0;
+  margin-left: 8px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: var(--warning-soft);
+  color: var(--warning);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 18px;
+}
+.tab-count {
+  margin-left: 6px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--surface-subtle);
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 17px;
+}
+.tab-count.alerts {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+.node-name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.node-meter {
+  display: block;
+  width: 88px;
+  height: 4px;
+  margin-top: 6px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: var(--surface-subtle);
+}
+.node-meter i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--info);
+}

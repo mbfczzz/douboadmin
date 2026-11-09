@@ -5,8 +5,10 @@ import Records, { useRecords } from "./Records";
 import PolicyForm from "./PolicyForm";
 import Payouts from "./Payouts";
 import type { Scope, CommissionEntry } from "./types";
-import { labels } from "./types";
+import { kindTones, labels } from "./types";
+import Tag, { Delta } from "../components/Tag";
 import OrderDistribution from "./OrderDistribution";
+import TabSummary from "./TabSummary";
 export default function Commissions(scope: Scope) {
   const [order, setOrder] = useState("");
   const { id, view, notify, changed } = scope,
@@ -15,29 +17,37 @@ export default function Commissions(scope: Scope) {
     );
   return (
     <>
-      <div className="business-metrics">
-        {[
-          ["可提现 / 待抵扣", view.commission.balanceFen],
-          ["预留佣金", view.commission.heldFen],
-          ["已线下打款", view.commission.paidOutFen],
-        ].map(([label, value]) => (
-          <div className="panel" key={String(label)}>
-            <span>{label}</span>
-            <strong>{money(Number(value))}</strong>
-          </div>
-        ))}
-      </div>
+      <TabSummary
+        stats={[
+          {
+            label: "可提现 / 待抵扣",
+            value: money(view.commission.balanceFen),
+            tone: view.commission.balanceFen < 0 ? "danger" : "success",
+          },
+          { label: "预留佣金", value: money(view.commission.heldFen) },
+          { label: "已线下打款", value: money(view.commission.paidOutFen) },
+        ]}
+      />
       {id === "root" && <PolicyForm notify={notify} changed={changed} />}
       <Records
         title="佣金流水"
         resource={resource}
         columns={[
-          { title: "类型", render: (r) => labels[r.data.kind] || r.data.kind },
+          {
+            title: "类型",
+            render: (r) => (
+              <Tag tone={kindTones[r.data.kind]}>
+                {labels[r.data.kind] || r.data.kind}
+              </Tag>
+            ),
+          },
           {
             title: "可用变动 / 预留变动",
             render: (r) => (
               <>
-                {money(r.data.amountFen)}
+                <Delta value={r.data.amountFen}>
+                  {money(r.data.amountFen)}
+                </Delta>
                 <small className="cell-note">{money(r.data.heldDelta)}</small>
               </>
             ),

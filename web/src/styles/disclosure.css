@@ -1,0 +1,65 @@
+/* Native widget polish: disclosure cards in dialogs, number inputs, scrollbars. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}
+input[type="number"] {
+  appearance: textfield;
+}
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  margin: 0;
+  appearance: none;
+}
+.modal details {
+  margin-top: 12px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-subtle);
+  transition: border-color 160ms;
+}
+.modal details:hover,
+.modal details[open] {
+  border-color: var(--line-strong);
+}
+.modal summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  color: var(--ink);
+  font-weight: 600;
+  list-style: none;
+  cursor: pointer;
+}
+.modal summary::-webkit-details-marker {
+  display: none;
+}
+.modal summary::after {
+  content: "";
+  flex-shrink: 0;
+  width: 7px;
+  height: 7px;
+  margin: -3px 2px 0 auto;
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  transform: rotate(45deg);
+  transition: transform 160ms;
+}
+.modal details[open] > summary {
+  border-bottom: 1px solid var(--line);
+}
+.modal details[open] > summary::after {
+  margin-top: 3px;
+  transform: rotate(-135deg);
+}
+.modal details > :not(summary) {
+  margin-inline: 14px;
+}
+.modal details > :last-child:not(summary) {
+  margin-bottom: 14px;
+}
+.modal details > summary + * {
+  margin-top: 12px;
+}

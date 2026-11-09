@@ -94,7 +94,6 @@ test("fixed user quotas, QR activation, suspension, unbinding and configurable m
     .getByRole("combobox", { name: "操作", exact: true })
     .selectOption("unbound");
   await dialog.getByLabel("原因", { exact: true }).fill("测试解绑释放名额");
-  page.once("dialog", (d) => d.accept());
   await dialog
     .getByRole("button", { name: "保存授权状态", exact: true })
     .click();

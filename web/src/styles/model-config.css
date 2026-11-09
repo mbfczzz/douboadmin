@@ -157,3 +157,12 @@
     display: none;
   }
 }
+/* One button per settings part, laid out as a compact 3-column grid so the
+   actions take two short rows instead of one tall column. */
+.catalog-actions.model-row-actions {
+  display: grid;
+  grid-template-columns: repeat(3, max-content);
+  justify-content: end;
+  gap: 2px 12px;
+  min-width: 190px;
+}

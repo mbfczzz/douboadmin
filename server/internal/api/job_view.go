@@ -8,6 +8,9 @@ import (
 	"strings"
 )
 
+// Uncertain submissions may carry extra detail after the standard sentence.
+var uncertainPrefix = strings.SplitN(provider.ErrUncertain.Error(), "，", 2)[0]
+
 func (a *Server) presentJob(ctx context.Context, j *core.Job) {
 	if strings.HasPrefix(j.Result, "asset:") {
 		j.ResultAssetID = strings.TrimPrefix(j.Result, "asset:")
@@ -40,6 +43,9 @@ func (a *Server) presentJob(ctx context.Context, j *core.Job) {
 		if json.Unmarshal(row.Data, &bill) == nil {
 			j.CostUnits = bill.Units
 			j.BillingState = bill.State
+			if j.Status == "failed" && bill.State == "released" && strings.HasPrefix(j.Error, uncertainPrefix) {
+				j.Error = "已核实上游未生成结果，预留积分已退回，可重新提交创作"
+			}
 		}
 	}
 	if m, e := a.model(ctx, j.Input.Model); e == nil {

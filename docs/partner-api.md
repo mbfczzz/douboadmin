@@ -27,6 +27,7 @@
 | GET | /admin/activation-codes/{id}/trace | 生成账号/时间、归属、首次激活用户/昵称/时间/方式、当前用户资料及绑定；已使用/撤销码也可查询 |
 | DELETE | /admin/activation-codes/{id} | 撤销未使用码，释放预留 |
 | GET | /admin/memberships | 按 provider/用户编号/状态查询授权绑定 |
+| GET | /admin/users/{id}/activation | 用户开通来源：直接开通 / 服务商激活、绑定状态、服务商链路（总账号至激活服务商）及所用激活码；已兑换的码返回完整码 |
 | PUT | /admin/memberships/{id} | `{version,status,reason}`；active/disabled/unbound |
 | GET | /admin/commission-ledger | 不可变佣金流水 |
 | GET | /admin/orders/{id}/distribution | 订单分佣快照，不返回 OpenID 或支付凭据 |
@@ -35,7 +36,7 @@
 
 服务商账号的所有 `/admin` 请求按角色菜单校验，并限定在本服务商子树内；越权返回 `403`；所属服务商或其上级停用时登录与会话均返回 `403`。`partner-policy`、名额申请审批、提现处理仅限平台账号。`/admin/accounts` 只管理平台账号。
 
-列表支持 `page`、`q`、`status`、`owner`，返回 `{items,total,page,size}`，每页 20 条。授权绑定另支持 `provider` 精确筛选归属。创建服务商、名额划拨/申请、生成码、申请提现需要 `Idempotency-Key`，相同键不同输入返回冲突。
+列表支持 `page`、`q`、`status`、`owner`，返回 `{items,total,page,size}`，每页 20 条。授权绑定另支持 `provider` 精确筛选归属。名额划拨与名额申请支持 `around={服务商编号}`，只返回该服务商自身及其直接下级的记录（即划入、划出该服务商的名额和它与直接下级的申请）。创建服务商、名额划拨/申请、生成码、申请提现需要 `Idempotency-Key`，相同键不同输入返回冲突。
 
 授权码的 `actor` 来自登录身份，`creatorAccount` 来自该登录会话的账号快照，不能由发码请求指定。首次兑换记录 `userId/usedAt/activatedNickname/activationMethod`，原码记录不随用户改名、解绑或更换服务商而被覆盖。trace 仅可查询本服务商子树内的码，不返回完整激活凭证或额外用户隐私字段。
 

@@ -5,6 +5,7 @@ import Modal from "./Modal";
 import TemplateOptions from "./TemplateOptions";
 import CoverUpload from "./CoverUpload";
 import { canLeave } from "../hooks/unsaved";
+import { ask } from "../confirm/ask";
 import type { Notify } from "../navigation";
 interface Props {
   initial: Row<Template>;
@@ -35,14 +36,17 @@ export default function TemplateEditor({
     setData((d) => ({ ...d, ...part }));
     setDirty(true);
   }
-  function close() {
+  async function close() {
     if (busy) return;
-    if (
-      uploading
-        ? confirm("封面正在上传，确定取消上传并放弃本次修改？")
-        : canLeave()
-    )
-      onClose();
+    const ok = uploading
+      ? (await ask({
+          title: "取消封面上传？",
+          message: "封面正在上传，关闭后将取消上传并放弃本次修改。",
+          confirmText: "放弃修改",
+          danger: true,
+        })) !== false
+      : await canLeave();
+    if (ok) onClose();
   }
   async function save(e: FormEvent) {
     e.preventDefault();

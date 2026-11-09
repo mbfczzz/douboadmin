@@ -6,6 +6,10 @@ import RequestState from "../components/RequestState";
 import Modal from "../components/Modal";
 import Table from "./Table";
 import { money } from "./types";
+import Badge from "../components/Badge";
+import Tag, { IdChip } from "../components/Tag";
+import DetailCard, { Field } from "../components/DetailCard";
+import { ask } from "../confirm/ask";
 
 type PaymentEvent = {
   event: string;
@@ -25,6 +29,13 @@ const states: Record<string, string> = {
   done: "已处理",
   reviewed: "已人工核对",
 };
+const stateTones: Record<string, string> = {
+  pending: "queued",
+  needs_review: "queued",
+  failed: "failed",
+  done: "succeeded",
+  reviewed: "succeeded",
+};
 const events: Record<string, string> = {
   refund_submission: "退款提交未确认",
   refund_abnormal: "平台退款异常",
@@ -41,29 +52,50 @@ export default function VirtualEvents({ notify }: { notify: Notify }) {
     total: number;
     page: number;
   }>(`/admin/virtual-payments/events?status=${status}&page=${page}`);
-  const [detail, setDetail] = useState<Row<PaymentEvent> | null>(null);
-  const [note, setNote] = useState(""),
+  const [detail, setDetail] = useState<Row<PaymentEvent> | null>(null),
     [busy, setBusy] = useState(false);
-  const [actionError, setActionError] = useState("");
-  async function act(action: "retry" | "review") {
-    if (!detail || busy) return;
-    setBusy(true);
-    setActionError("");
-    try {
-      await api(`/admin/virtual-payments/events/${detail.id}/${action}`, {
-        method: "POST",
-        confirmation: { before: detail.data },
-        body: JSON.stringify({ version: detail.version, note: note.trim() }),
-      });
-      setDetail(null);
-      notify(
+  // 重试处理 and 人工核对 are separate row actions with their own dialogs.
+  const send = (
+    row: Row<PaymentEvent>,
+    action: "retry" | "review",
+    note = "",
+  ) =>
+    api(`/admin/virtual-payments/events/${row.id}/${action}`, {
+      method: "POST",
+      confirmation: {
+        before: row.data,
+        title: action === "retry" ? "重试处理通知" : "确认保存核对说明",
+      },
+      body: JSON.stringify(
         action === "retry"
-          ? "已重新处理，请查看最新订单和退款状态"
-          : "核对说明已保存，资金状态未改变",
-      );
+          ? { version: row.version }
+          : { version: row.version, note },
+      ),
+    });
+  // 重试处理 and 人工核对 are separate row actions with their own dialogs.
+  async function act(row: Row<PaymentEvent>, action: "retry" | "review") {
+    if (busy) return;
+    setBusy(true);
+    try {
+      if (action === "retry") {
+        await send(row, "retry");
+        notify("已重新处理，请查看最新订单和退款状态");
+      } else {
+        const note = await ask({
+          title: "人工核对",
+          message: "保存核对说明后停止自动重试，不会执行退款或增减积分。",
+          confirmText: "保存核对说明",
+          reason: {
+            label: "核对说明",
+            placeholder: "填写微信交易核对结果及后续处理记录",
+            maxLength: 500,
+          },
+          run: (note) => send(row, "review", note),
+        });
+        if (note !== false) notify("核对说明已保存，资金状态未改变");
+      }
     } catch (e) {
       notify((e as Error).message, "error");
-      setActionError((e as Error).message);
     } finally {
       setBusy(false);
       void resource.reload();
@@ -123,7 +155,12 @@ export default function VirtualEvents({ notify }: { notify: Notify }) {
             },
             {
               title: "处理状态",
-              render: (r) => states[r.data.status] || r.data.status,
+              render: (r) => (
+                <Badge
+                  state={stateTones[r.data.status] || "muted"}
+                  label={states[r.data.status] || r.data.status}
+                />
+              ),
             },
             {
               title: "最近原因",
@@ -135,96 +172,82 @@ export default function VirtualEvents({ notify }: { notify: Notify }) {
               title: "操作",
               action: true,
               render: (r) => (
-                <button
-                  onClick={() => {
-                    setDetail(r);
-                    setNote("");
-                    setActionError("");
-                  }}
-                >
-                  查看处理
-                </button>
+                <div className="business-actions">
+                  <button onClick={() => setDetail(r)}>详情</button>
+                  {!["done", "reviewed"].includes(r.data.status) && (
+                    <>
+                      <button
+                        disabled={busy}
+                        onClick={() => void act(r, "retry")}
+                      >
+                        重试处理
+                      </button>
+                      <button
+                        disabled={busy}
+                        onClick={() => void act(r, "review")}
+                      >
+                        人工核对
+                      </button>
+                    </>
+                  )}
+                </div>
               ),
             },
           ]}
         />
       )}
       {detail && (
-        <Modal
-          title="虚拟支付异常处理"
-          onClose={() => !busy && setDetail(null)}
-        >
+        <Modal title="虚拟支付异常详情" onClose={() => setDetail(null)}>
           <div className="edit-form">
-            {actionError && (
-              <p className="error" role="alert">
-                {actionError}
-              </p>
-            )}
-            <dl>
-              <dt>事件</dt>
-              <dd>{events[detail.data.event] || detail.data.event}</dd>
-              <dt>订单号</dt>
-              <dd className="mono">{detail.data.orderId || "未关联"}</dd>
-              <dt>退款单号</dt>
-              <dd className="mono">{detail.data.refundId || "—"}</dd>
-              <dt>通知退款金额</dt>
-              <dd>
-                {detail.data.amountFen
-                  ? money(detail.data.amountFen)
-                  : "未提供"}
-              </dd>
-              <dt>状态</dt>
-              <dd>{states[detail.data.status]}</dd>
-              <dt>最近原因</dt>
-              <dd>{detail.data.lastError || "—"}</dd>
+            <DetailCard title="通知信息">
+              <Field label="事件">
+                <Tag tone="info">
+                  {events[detail.data.event] || detail.data.event}
+                </Tag>
+              </Field>
+              <Field label="状态">
+                <Badge
+                  state={stateTones[detail.data.status] || "muted"}
+                  label={states[detail.data.status] || detail.data.status}
+                />
+              </Field>
+              <Field label="订单号">
+                {detail.data.orderId ? (
+                  <IdChip>{detail.data.orderId}</IdChip>
+                ) : (
+                  <Tag>未关联</Tag>
+                )}
+              </Field>
+              <Field label="退款单号">
+                {detail.data.refundId ? (
+                  <IdChip>{detail.data.refundId}</IdChip>
+                ) : (
+                  "—"
+                )}
+              </Field>
+              <Field label="通知退款金额">
+                {detail.data.amountFen ? (
+                  <span className="amount">{money(detail.data.amountFen)}</span>
+                ) : (
+                  "未提供"
+                )}
+              </Field>
+              <Field label="最近原因">
+                {detail.data.lastError ? (
+                  <span className="danger-text">{detail.data.lastError}</span>
+                ) : (
+                  "—"
+                )}
+              </Field>
               {detail.data.note && (
-                <>
-                  <dt>核对说明</dt>
-                  <dd>{detail.data.note}</dd>
-                </>
+                <Field label="核对说明">{detail.data.note}</Field>
               )}
               {detail.data.actor && (
-                <>
-                  <dt>处理人 / 时间</dt>
-                  <dd>
-                    {detail.data.actor} / {date(detail.data.handledAt || "")}
-                  </dd>
-                </>
+                <Field label="处理人 / 时间">
+                  {detail.data.actor} · {date(detail.data.handledAt || "")}
+                </Field>
               )}
-            </dl>
-            {!["done", "reviewed"].includes(detail.data.status) && (
-              <>
-                <label>
-                  人工核对说明
-                  <textarea
-                    value={note}
-                    maxLength={500}
-                    disabled={busy}
-                    onChange={(e) => setNote(e.target.value)}
-                    placeholder="填写微信交易核对结果及后续处理记录"
-                  />
-                </label>
-                <p className="quiet">
-                  重试沿用原订单。保存核对说明后停止自动重试，不会执行退款或增减积分。
-                </p>
-                <div className="modal-actions">
-                  <button
-                    className="secondary"
-                    disabled={busy || !note.trim()}
-                    onClick={() => void act("review")}
-                  >
-                    保存核对说明
-                  </button>
-                  <button
-                    className="primary"
-                    disabled={busy}
-                    onClick={() => void act("retry")}
-                  >
-                    {busy ? "处理中…" : "重试处理"}
-                  </button>
-                </div>
-              </>
-            )}
+            </DetailCard>
           </div>
         </Modal>
       )}

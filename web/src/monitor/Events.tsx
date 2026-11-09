@@ -3,22 +3,38 @@ import type { Row } from "../api";
 import Table from "../business/Table";
 import RequestState from "../components/RequestState";
 import type { Event, Resource } from "./types";
-import { timestamp } from "./types";
+import { ago, timestamp } from "./types";
+import Tag, { type Tone } from "../components/Tag";
+
+const levelTones: Record<string, Tone> = { ERROR: "danger", WARN: "warning" };
+// Latest activity first; folded repeats carry their last occurrence time.
+const latest = (r: Row<Event>) => r.data.lastAt || r.createdAt;
 export default function Events({
   logs,
   alerts,
   ack,
+  tab,
+  setTab,
 }: {
   logs: Resource<Row<Event>[]>;
   alerts: Resource<Row<Event>[]>;
   ack: (id: string) => Promise<void>;
+  // Controlled by the page so the health summary can open a tab.
+  tab: string;
+  setTab: (tab: string) => void;
 }) {
-  const [tab, setTab] = useState("logs"),
-    [busy, setBusy] = useState("");
+  const [busy, setBusy] = useState("");
   const resource = tab === "logs" ? logs : alerts,
-    rows = resource.data || [];
+    rows = [...(resource.data || [])].sort((a, b) =>
+      latest(b).localeCompare(latest(a)),
+    ),
+    pending = (alerts.data || []).filter((r) => !r.data.acknowledged).length,
+    counts: Record<string, number | undefined> = {
+      logs: logs.data?.length,
+      alerts: alerts.data ? pending : undefined,
+    };
   return (
-    <section className="panel monitor-panel monitor-events">
+    <section className="panel monitor-panel monitor-events" id="monitor-events">
       <header>
         <div className="tabs" role="tablist" aria-label="监控记录">
           {[
@@ -27,11 +43,15 @@ export default function Events({
           ].map(([key, label]) => (
             <button
               role="tab"
+              aria-label={label}
               aria-selected={tab === key}
               key={key}
               onClick={() => setTab(String(key))}
             >
               {label}
+              {!!counts[key] && (
+                <span className={"tab-count " + key}>{counts[key]}</span>
+              )}
             </button>
           ))}
         </div>
@@ -49,34 +69,61 @@ export default function Events({
           columns={[
             {
               title: "级别 / 状态",
-              render: (r) => (
-                <span
-                  className="monitor-level"
-                  data-level={r.data.level || "alert"}
-                >
-                  {r.data.level || (r.data.acknowledged ? "已确认" : "待处理")}
-                </span>
-              ),
+              render: (r) =>
+                r.data.level ? (
+                  <Tag tone={levelTones[r.data.level] || "muted"}>
+                    {r.data.level}
+                  </Tag>
+                ) : (
+                  <Tag tone={r.data.acknowledged ? "muted" : "warning"}>
+                    {r.data.acknowledged ? "已确认" : "待处理"}
+                  </Tag>
+                ),
             },
             {
               title: "内容",
-              render: (r) =>
-                r.data.detail ? (
+              render: (r) => {
+                const repeat = (r.data.count || 1) > 1 && (
+                  <span className="repeat-count" title="1 小时内重复次数">
+                    ×{r.data.count}
+                  </span>
+                );
+                return r.data.detail ? (
                   <details>
-                    <summary>{r.data.message}</summary>
+                    <summary>
+                      {r.data.message}
+                      {repeat}
+                    </summary>
                     <pre>{r.data.detail}</pre>
                   </details>
                 ) : (
-                  r.data.message
-                ),
+                  <>
+                    {r.data.message}
+                    {repeat}
+                  </>
+                );
+              },
             },
-            { title: "记录时间", render: (r) => timestamp(r.createdAt) },
+            {
+              title: "记录时间",
+              render: (r) => (
+                <span title={timestamp(latest(r))}>
+                  {ago(latest(r))}
+                  {(r.data.count || 1) > 1 && (
+                    <small className="cell-note">
+                      首次 {timestamp(r.createdAt)}
+                    </small>
+                  )}
+                </span>
+              ),
+            },
             ...(tab === "alerts"
               ? [
                   {
                     title: "处理",
                     render: (r: Row<Event>) => (
                       <button
+                        className="text-button"
                         disabled={!!busy || r.data.acknowledged}
                         onClick={async () => {
                           setBusy(r.id);

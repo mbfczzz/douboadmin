@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { writeFileSync } from "node:fs";
 import type { Row, Model } from "../src/api";
-import { login } from "./helpers";
+import { login, answerAsk } from "./helpers";
 import { surfaceFixtures, longName } from "./surface-fixtures";
 import { inspectModal } from "./modal-audit";
 
@@ -57,7 +57,7 @@ for (const width of [1440, 390, 320]) {
       surfaces.push({ name, selects: count, ...shape });
       if (await dialog.count()) await inspectModal(page, `${width}-${name}`);
       if (
-        name === "名额划拨 / 收回" ||
+        name === "名额划拨" ||
         name === "长名称服务商" ||
         name === "分佣子页面"
       )
@@ -128,8 +128,8 @@ for (const width of [1440, 390, 320]) {
         .selectOption(model.id);
       await inspect(kind === "image" ? "图片模板参数" : "视频模板参数");
     }
-    page.once("dialog", (d) => d.accept());
     await template.getByRole("button", { name: "关闭", exact: true }).click();
+    await answerAsk(page, true);
     await nav("模型管理");
     await modal("新增模型", "添加上游模型");
     for (const kind of [...new Set(models.map((m) => m.data.kind))]) {
@@ -138,25 +138,31 @@ for (const width of [1440, 390, 320]) {
       const item = page
         .locator("tbody tr")
         .filter({ has: page.getByText(model.data.key, { exact: true }) });
-      await item
-        .getByRole("button", { name: "配置", exact: true })
-        .first()
-        .click();
-      await expect(page.getByRole("dialog")).toBeVisible();
-      let edited = false;
-      const addTag = page
-        .getByRole("dialog")
-        .getByRole("button", { name: "添加标签", exact: true });
-      if (kind === "image" && (await addTag.isEnabled())) {
-        await addTag.click();
-        edited = true;
+      // One dialog per settings part, each from its own row button.
+      for (const part of ["基础信息", "生成能力", "提示词", "定价", "状态"]) {
+        const button = item.getByRole("button", { name: part, exact: true });
+        if (!(await button.count())) continue;
+        await button.click();
+        await expect(page.getByRole("dialog")).toBeVisible();
+        let edited = false;
+        const addTag = page
+          .getByRole("dialog")
+          .getByRole("button", { name: "添加标签", exact: true });
+        if (
+          kind === "image" &&
+          (await addTag.count()) &&
+          (await addTag.isEnabled())
+        ) {
+          await addTag.click();
+          edited = true;
+        }
+        await inspect(`${part} · ${kind}`);
+        await page
+          .getByRole("dialog")
+          .getByRole("button", { name: "关闭", exact: true })
+          .click();
+        if (edited) await answerAsk(page, true);
       }
-      await inspect("配置模型 · " + kind);
-      if (edited) page.once("dialog", (d) => d.accept());
-      await page
-        .getByRole("dialog")
-        .getByRole("button", { name: "关闭", exact: true })
-        .click();
     }
     await nav("生成任务");
     await modal("详情", "任务详情");
@@ -166,11 +172,16 @@ for (const width of [1440, 390, 320]) {
     await modal("查看并审核", "作品审核");
     await nav("充值订单");
     await modal("详情", "充值订单详情");
+    await modal("退款", "申请全额退款");
     await nav("管理账号");
     await modal("添加管理账号", "添加管理账号");
-    await modal("编辑", "编辑管理账号");
+    await modal("编辑", "编辑账号资料");
+    await modal("重置密码", "重置密码");
     await nav("小程序用户");
-    await modal("详情 / 积分", "小程序用户与积分");
+    await modal("详情", "用户详情");
+    await modal("积分", "调整积分");
+    await modal("编辑", "编辑用户资料");
+    await modal("停用", "停用账号");
     await nav("服务商管理");
     const providerName = page.locator(".provider-tree-name b:visible").first();
     await expect(providerName).toBeVisible();
@@ -186,6 +197,10 @@ for (const width of [1440, 390, 320]) {
       .locator(".provider-tree-row")
       .filter({ hasText: longName });
     await modal("编辑", "编辑服务商", provider);
+    await modal("登录账号", "登录账号", provider);
+    await modal("名额划拨", "名额划拨", provider);
+    await modal("授权码", "授权激活", provider);
+    await modal("分佣", "算力分佣", provider);
     await inspect("长名称服务商");
     await info.attach("surface-inventory", {
       body: JSON.stringify({ surfaces, issues }, null, 2),

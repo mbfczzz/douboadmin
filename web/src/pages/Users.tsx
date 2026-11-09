@@ -1,4 +1,5 @@
 import Badge from "../components/Badge";
+import Tag from "../components/Tag";
 import { useState } from "react";
 import { date, type Row } from "../api";
 import type { PageProps } from "../navigation";
@@ -7,16 +8,38 @@ import { useRememberedState } from "../hooks/useRememberedState";
 import ResourcePage from "../business/ResourcePage";
 import Table from "../business/Table";
 import UserDetails from "../business/UserDetails";
+import UserPoints from "../business/UserPoints";
+import UserEdit from "../business/UserEdit";
+import UserStatus from "../business/UserStatus";
+
+type Dialog = "detail" | "points" | "edit" | "status";
 import type { Profile } from "../business/types";
 
 export default function Users({ notify }: PageProps) {
   const resource = useResource<Row<Profile>[]>("/admin/users"),
     [query, setQuery] = useRememberedState("users.query", ""),
-    [detail, setDetail] = useState<Row<Profile> | null>(null);
-  const rows = (resource.data || []).filter((r) =>
-    [r.id, r.data.nickname, r.data.name, r.data.phone].some((v) =>
-      v?.includes(query),
+    [state, setState] = useRememberedState("users.state", ""),
+    [access, setAccess] = useRememberedState("users.access", ""),
+    [open, setOpen] = useState<{ kind: Dialog; row: Row<Profile> } | null>(
+      null,
     ),
+    show = (kind: Dialog, row: Row<Profile>) => setOpen({ kind, row }),
+    close = () => setOpen(null);
+  const userState = (p: Profile) =>
+      p.archived ? "archived" : p.disabled ? "disabled" : "active",
+    userAccess = (p: Profile) =>
+      !p.access?.active
+        ? "none"
+        : p.access.status === "direct"
+          ? "direct"
+          : "provider";
+  const rows = (resource.data || []).filter(
+    (r) =>
+      [r.id, r.data.nickname, r.data.name, r.data.phone].some((v) =>
+        v?.includes(query),
+      ) &&
+      (!state || userState(r.data) === state) &&
+      (!access || userAccess(r.data) === access),
   );
   return (
     <ResourcePage page="users" resource={resource}>
@@ -28,11 +51,35 @@ export default function Users({ notify }: PageProps) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
+        <select
+          aria-label="账号状态"
+          value={state}
+          onChange={(e) => setState(e.target.value)}
+        >
+          <option value="">全部状态</option>
+          <option value="active">正常</option>
+          <option value="disabled">已停用</option>
+          <option value="archived">已归档</option>
+        </select>
+        <select
+          aria-label="开通方式"
+          value={access}
+          onChange={(e) => setAccess(e.target.value)}
+        >
+          <option value="">全部开通方式</option>
+          <option value="provider">服务商激活</option>
+          <option value="direct">直接开通</option>
+          <option value="none">未开通</option>
+        </select>
       </div>
       <Table
-        key={query}
+        key={query + state + access}
         rows={rows}
-        empty={query ? "没有匹配的用户，请调整搜索条件" : "暂无用户"}
+        empty={
+          query || state || access
+            ? "没有匹配的用户，请调整搜索条件"
+            : "暂无用户"
+        }
         id={(r) => r.id}
         columns={[
           {
@@ -78,13 +125,19 @@ export default function Users({ notify }: PageProps) {
             title: "使用授权",
             render: (r) => (
               <>
-                {r.data.access?.active
-                  ? r.data.access.status === "direct"
-                    ? "直接开通"
-                    : "服务商激活"
-                  : r.data.access?.message || "待激活"}
+                {r.data.access?.active ? (
+                  r.data.access.status === "direct" ? (
+                    <Tag tone="info">直接开通</Tag>
+                  ) : (
+                    <Tag tone="accent">服务商激活</Tag>
+                  )
+                ) : (
+                  <Tag>未开通</Tag>
+                )}
                 <small className="cell-note">
-                  {r.data.access?.partnerName}
+                  {r.data.access?.active
+                    ? r.data.access.partnerName
+                    : r.data.access?.message}
                 </small>
               </>
             ),
@@ -94,15 +147,43 @@ export default function Users({ notify }: PageProps) {
             title: "操作",
             action: true,
             render: (r) => (
-              <button onClick={() => setDetail(r)}>详情 / 积分</button>
+              <div className="business-actions">
+                <button onClick={() => show("detail", r)}>详情</button>
+                {!r.data.archived && (
+                  <>
+                    <button onClick={() => show("points", r)}>积分</button>
+                    <button onClick={() => show("edit", r)}>编辑</button>
+                    <button
+                      className={r.data.disabled ? "" : "danger-text"}
+                      onClick={() => show("status", r)}
+                    >
+                      {r.data.disabled ? "启用" : "停用"}
+                    </button>
+                  </>
+                )}
+              </div>
             ),
           },
         ]}
       />
-      {detail && (
-        <UserDetails
-          user={detail}
-          onClose={() => setDetail(null)}
+      {open?.kind === "detail" && (
+        <UserDetails user={open.row} onClose={close} />
+      )}
+      {open?.kind === "points" && (
+        <UserPoints user={open.row} onClose={close} notify={notify} />
+      )}
+      {open?.kind === "edit" && (
+        <UserEdit
+          user={open.row}
+          onClose={close}
+          onSaved={resource.reload}
+          notify={notify}
+        />
+      )}
+      {open?.kind === "status" && (
+        <UserStatus
+          user={open.row}
+          onClose={close}
           onSaved={resource.reload}
           notify={notify}
         />

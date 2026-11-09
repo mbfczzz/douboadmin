@@ -3,12 +3,16 @@ import { api, date, type Row } from "../api";
 import Modal from "../components/Modal";
 import Records, { useRecords } from "./Records";
 import type { Code, Scope } from "./types";
-import { activationMethod, traceTime } from "./types";
+import { activationMethod, available, traceTime } from "./types";
+import TabSummary from "./TabSummary";
 import { PartnerIdentity, PartnerStatus } from "./PartnerIdentity";
+import Badge from "../components/Badge";
+import Tag from "../components/Tag";
 import { useCommand } from "./useCommand";
 import CodeReveal from "./CodeReveal";
 import Memberships from "./Memberships";
 import ActivationTrace from "./ActivationTrace";
+import { ask } from "../confirm/ask";
 export default function Codes({ id, view, changed, notify }: Scope) {
   const [all, setAll] = useState(false);
   const resource = useRecords<Code>(
@@ -20,17 +24,47 @@ export default function Codes({ id, view, changed, notify }: Scope) {
     [trace, setTrace] = useState(""),
     command = useCommand();
   async function revoke(row: Row<Code>) {
-    if (!confirm("撤销后二维码和激活码失效，并释放预留名额。继续吗？")) return;
+    const ok = await ask({
+      title: "撤销授权码？",
+      message: `「${row.data.label || "未备注"}」（尾号 ${row.data.suffix}）撤销后二维码和激活码立即失效，并释放预留名额。`,
+      confirmText: "撤销",
+      danger: true,
+    });
+    if (ok === false) return;
     try {
       await api("/admin/activation-codes/" + row.id, { method: "DELETE" });
       await resource.reload();
       await changed();
+      notify("授权码已撤销，预留名额已释放");
     } catch (e) {
       notify((e as Error).message, "error");
     }
   }
+  const pool = view.quota.users;
   return (
     <>
+      <TabSummary
+        stats={[
+          {
+            label: "可生成授权码",
+            value: available(pool),
+            note: "个名额",
+            tone: available(pool) > 0 ? "accent" : "warning",
+          },
+          { label: "待激活（已预留）", value: pool.reserved },
+          { label: "已激活", value: pool.used },
+        ]}
+        actions={
+          <button
+            type="button"
+            className="primary"
+            disabled={available(pool) <= 0}
+            onClick={() => setCreating(true)}
+          >
+            生成授权码
+          </button>
+        }
+      />
       <Records
         title="授权码"
         description={`新生成的码归属「${view.record.data.name}」。可按生成账号、激活用户编号、当时昵称或备注查询。`}
@@ -49,15 +83,6 @@ export default function Codes({ id, view, changed, notify }: Scope) {
           </label>
         }
         resource={resource}
-        actions={
-          <button
-            type="button"
-            className="primary"
-            onClick={() => setCreating(true)}
-          >
-            生成授权码
-          </button>
-        }
         columns={[
           {
             title: "备注 / 尾号",
@@ -83,7 +108,7 @@ export default function Codes({ id, view, changed, notify }: Scope) {
             render: (r) =>
               r.data.status === "pending" &&
               Date.parse(r.data.expiresAt) <= Date.now() ? (
-                "已过期，等待释放"
+                <Badge state="muted" label="已过期，等待释放" />
               ) : (
                 <PartnerStatus state={r.data.status} />
               ),
@@ -107,9 +132,17 @@ export default function Codes({ id, view, changed, notify }: Scope) {
                   <>
                     <small className="cell-note">{r.data.userId}</small>
                     <small className="cell-note">
-                      {traceTime(r.data.usedAt)} ·{" "}
-                      {activationMethod(r.data.activationMethod)}
+                      {traceTime(r.data.usedAt)}
                     </small>
+                    <span className="cell-tags">
+                      <Tag
+                        tone={
+                          r.data.activationMethod === "qr" ? "info" : "muted"
+                        }
+                      >
+                        {activationMethod(r.data.activationMethod)}
+                      </Tag>
+                    </span>
                   </>
                 )}
               </>
@@ -193,7 +226,7 @@ export default function Codes({ id, view, changed, notify }: Scope) {
                     required
                   />
                 </label>
-                <p className="muted">
+                <p className="quiet">
                   这里设置的是激活码领取期限。激活成功后长期绑定，停用仍占名额，解绑才释放。
                 </p>
               </fieldset>

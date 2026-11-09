@@ -13,7 +13,6 @@ export default function ProviderForm({
   onSaved,
   onClose,
   notify,
-  embedded = false,
   parentAvailable,
 }: {
   parent: string;
@@ -21,7 +20,6 @@ export default function ProviderForm({
   onSaved: () => Promise<void>;
   onClose: () => void;
   notify: Notify;
-  embedded?: boolean;
   parentAvailable?: number;
 }) {
   const command = useCommand(),
@@ -76,7 +74,7 @@ export default function ProviderForm({
         }
       }}
     >
-      <div className={embedded ? undefined : "form-body"}>
+      <div className="form-body">
         <fieldset disabled={command.busy}>
           <label>
             服务商名称
@@ -142,7 +140,7 @@ export default function ProviderForm({
                   required
                 />
               </label>
-              <p className="muted" aria-live="polite">
+              <p className="quiet" aria-live="polite">
                 {limited
                   ? noAvailable
                     ? "上级当前没有可划拨额度，请先补充或收回额度。"
@@ -174,13 +172,13 @@ export default function ProviderForm({
       </div>
     </form>
   );
-  if (embedded) return form;
   return (
     <Modal
       className="form-modal"
       title={
         row ? "编辑服务商" : parent === "root" ? "新增服务商" : "新增下级服务商"
       }
+      subtitle={row?.data.name}
       onClose={() => !command.busy && onClose()}
     >
       {form}

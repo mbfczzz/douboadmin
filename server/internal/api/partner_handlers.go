@@ -41,7 +41,7 @@ func (a *Server) partnerList(ns string) http.HandlerFunc {
 			}
 			page = n
 		}
-		if len([]rune(q.Get("q"))) > 100 || len(q.Get("owner")) > 64 || len(q.Get("provider")) > 64 || len(q.Get("status")) > 30 {
+		if len([]rune(q.Get("q"))) > 100 || len(q.Get("owner")) > 64 || len(q.Get("provider")) > 64 || len(q.Get("around")) > 64 || len(q.Get("status")) > 30 {
 			fail(w, 400, "查询条件无效")
 			return
 		}
@@ -50,6 +50,22 @@ func (a *Server) partnerList(ns string) http.HandlerFunc {
 		if e != nil {
 			dbError(w, e)
 			return
+		}
+		if around := q.Get("around"); around != "" {
+			// Records owned by the provider or its direct children: quota moves
+			// into it and out of it, and requests from it and its children.
+			if scope != nil && !a.inPartnerScope(w, r, around) {
+				return
+			}
+			children, e := a.Store.List(r.Context(), "partners", around)
+			if e != nil {
+				dbError(w, e)
+				return
+			}
+			query.OwnerIn = []string{around}
+			for _, child := range children {
+				query.OwnerIn = append(query.OwnerIn, child.ID)
+			}
 		}
 		if scope != nil {
 			for _, id := range []string{query.Owner, query.PartnerID} {
@@ -60,6 +76,8 @@ func (a *Server) partnerList(ns string) http.HandlerFunc {
 			// Memberships are keyed by user and carry the provider in data.
 			if ns == "memberships" {
 				query.PartnerIn = scope
+			} else if query.OwnerIn != nil {
+				query.OwnerIn = slices.DeleteFunc(query.OwnerIn, func(id string) bool { return !slices.Contains(scope, id) })
 			} else {
 				query.OwnerIn = scope
 			}

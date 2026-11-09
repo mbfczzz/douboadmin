@@ -4,6 +4,8 @@ import (
 	"context"
 	"doubo/server/internal/core"
 	"doubo/server/internal/store"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"log/slog"
 	"strings"
@@ -27,7 +29,7 @@ func NewLogHandler(ctx context.Context, base slog.Handler, s store.Store, node s
 				return
 			case entry := <-h.queue:
 				write, cancel := context.WithTimeout(ctx, 2*time.Second)
-				_, _ = s.Put(write, "error_logs", core.Record{ID: core.NewID(), Data: core.Data(entry)}, 0)
+				saveLog(write, s, entry, time.Now().UTC())
 				cancel()
 			}
 		}
@@ -82,4 +84,25 @@ func (h *LogHandler) WithGroup(name string) slog.Handler {
 	copy := *h
 	copy.base = h.base.WithGroup(name)
 	return &copy
+}
+
+// saveLog folds repeats of the same entry from one node within an hour into a
+// single row with a count, so a retry loop cannot bury other errors.
+func saveLog(ctx context.Context, s store.Store, entry core.ErrorLog, now time.Time) {
+	id := core.Digest(strings.Join([]string{entry.Node, entry.Level, entry.Message, entry.Detail, now.Format("2006010215")}, "\x00"))[:32]
+	entry.Count, entry.LastAt = 1, now
+	row, err := s.Get(ctx, "error_logs", id)
+	if errors.Is(err, core.ErrNotFound) {
+		_, _ = s.Put(ctx, "error_logs", core.Record{ID: id, Data: core.Data(entry)}, 0)
+		return
+	}
+	if err != nil {
+		return
+	}
+	var old core.ErrorLog
+	if json.Unmarshal(row.Data, &old) == nil {
+		entry.Count = max(old.Count, 1) + 1
+	}
+	row.Data = core.Data(entry)
+	_, _ = s.Put(ctx, "error_logs", row, row.Version)
 }

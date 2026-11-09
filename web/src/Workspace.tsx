@@ -13,6 +13,8 @@ import { usePage } from "./hooks/usePage";
 import { useDrawer } from "./hooks/useDrawer";
 import { canLeave } from "./hooks/unsaved";
 import ConfirmationHost from "./confirmation/Host";
+import AskHost from "./confirm/AskHost";
+import AccountMenu from "./components/AccountMenu";
 import { MeContext, type Me } from "./session";
 import { confirmationPending } from "./confirmation/request";
 const routes = {
@@ -83,6 +85,11 @@ export default function Workspace({
       );
   };
   const navigate = (id: PageId) => {
+    // Shortcuts to pages outside the role's menus explain instead of bouncing.
+    if (!allowed.includes(id)) {
+      notify("当前角色没有该页面的访问权限，请联系超级管理员", "warning");
+      return;
+    }
     if (id !== page) {
       const next = [page, ...recent.filter((value) => value !== page)].slice(
         0,
@@ -104,7 +111,7 @@ export default function Workspace({
     if (!allowed.includes(page) && allowed[0]) setPage(allowed[0]);
   }, [allowed, page, setPage]);
   async function logout() {
-    if (!canLeave()) return;
+    if (!(await canLeave())) return;
     try {
       await api("/auth/logout", { method: "POST" });
       onLogout();
@@ -199,10 +206,11 @@ export default function Workspace({
                 <span>快速跳转</span>
                 <kbd>Ctrl K</kbd>
               </button>
-              <span className="avatar">
-                {(me.name || me.account || "管")[0]}
-              </span>
-              <b>{me.name || me.account || "管理员"}</b>
+              <AccountMenu
+                me={me}
+                notify={notify}
+                onLogout={() => void logout()}
+              />
             </div>
           </header>
           <div className="content">
@@ -242,6 +250,7 @@ export default function Workspace({
           </div>
         )}
         <ConfirmationHost />
+        <AskHost />
       </div>
     </MeContext.Provider>
   );

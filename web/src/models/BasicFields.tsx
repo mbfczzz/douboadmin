@@ -132,6 +132,7 @@ export default function BasicFields({
               aria-label={`标签 ${i + 1} 文本`}
               value={b.text}
               maxLength={16}
+              required
               onChange={(e) =>
                 patch({
                   badges: badges.map((x, n) =>

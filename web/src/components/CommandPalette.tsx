@@ -47,7 +47,23 @@ export default function CommandPalette({
   );
   return (
     <Modal title="快速跳转" onClose={onClose} className="command-palette">
-      <div className="edit-form">
+      <div
+        className="edit-form"
+        onKeyDown={(e) => {
+          if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
+          const buttons = [
+              ...e.currentTarget.querySelectorAll<HTMLButtonElement>(
+                ".command-list button",
+              ),
+            ],
+            index = buttons.indexOf(
+              document.activeElement as HTMLButtonElement,
+            );
+          if (index < 0) return;
+          e.preventDefault();
+          buttons[index + (e.key === "ArrowDown" ? 1 : -1)]?.focus();
+        }}
+      >
         <label className="search">
           <Search size={16} />
           <input
@@ -56,6 +72,20 @@ export default function CommandPalette({
             placeholder="搜索页面或功能，按 Esc 关闭"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={(e) => {
+              // Enter opens the first match; arrow keys move into the list.
+              const first = groups.flatMap((g) => g.pages).find(matches);
+              if (e.key === "Enter" && query && first) {
+                e.preventDefault();
+                choose(first);
+              } else if (e.key === "ArrowDown") {
+                e.preventDefault();
+                e.currentTarget
+                  .closest(".modal")
+                  ?.querySelector<HTMLButtonElement>(".command-list button")
+                  ?.focus();
+              }
+            }}
           />
         </label>
         {!query && recent.length > 0 && (

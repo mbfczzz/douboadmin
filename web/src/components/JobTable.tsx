@@ -1,12 +1,15 @@
 import { Image, Bot, Film, ArrowUpRight } from "lucide-react";
 import { date, kindText, type Job } from "../api";
 import Badge from "./Badge";
+import { recoverable } from "./JobRecovery";
+
+export type JobAction = "detail" | "resume" | "release";
 export default function JobTable({
   jobs,
-  onDetail,
+  onAction,
 }: {
   jobs: Job[];
-  onDetail: (j: Job) => void;
+  onAction: (kind: JobAction, j: Job) => void;
 }) {
   return (
     <div className="table-wrap">
@@ -35,10 +38,7 @@ export default function JobTable({
                     )}
                   </span>
                   <div>
-                    <b>
-                      {j.input.prompt.slice(0, 32)}
-                      {j.input.prompt.length > 32 ? "…" : ""}
-                    </b>
+                    <b title={j.input.prompt}>{j.input.prompt}</b>
                     <small>{j.id.slice(0, 12)}</small>
                   </div>
                 </div>
@@ -49,9 +49,30 @@ export default function JobTable({
               </td>
               <td className="wide-only">{date(j.createdAt)}</td>
               <td className="table-actions">
-                <button className="text-button" onClick={() => onDetail(j)}>
-                  详情 <ArrowUpRight size={14} />
-                </button>
+                <div className="business-actions">
+                  <button
+                    className="text-button"
+                    onClick={() => onAction("detail", j)}
+                  >
+                    详情 <ArrowUpRight size={14} />
+                  </button>
+                  {recoverable(j) && (
+                    <>
+                      <button
+                        className="text-button"
+                        onClick={() => onAction("resume", j)}
+                      >
+                        恢复查询
+                      </button>
+                      <button
+                        className="text-button danger-text"
+                        onClick={() => onAction("release", j)}
+                      >
+                        退回积分
+                      </button>
+                    </>
+                  )}
+                </div>
               </td>
             </tr>
           ))}

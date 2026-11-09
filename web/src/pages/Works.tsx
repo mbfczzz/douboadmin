@@ -8,21 +8,29 @@ import ResourcePage from "../business/ResourcePage";
 import Table from "../business/Table";
 import Modal from "../components/Modal";
 import MediaPreview from "../business/MediaPreview";
+import { IdChip } from "../components/Tag";
+import { ask } from "../confirm/ask";
 
 export default function Works({ notify }: PageProps) {
   const resource = useResource<Job[]>("/admin/works"),
     [detail, setDetail] = useState<Job | null>(null),
-    [query, setQuery] = useRememberedState("works.query", "");
+    [query, setQuery] = useRememberedState("works.query", ""),
+    [review, setReview] = useRememberedState("works.review", ""),
+    [state, setState] = useRememberedState("works.state", "");
   const rows = (resource.data || []).filter(
-    (j) => j.input.prompt.includes(query) || j.userId.includes(query),
+    (j) =>
+      (j.input.prompt.includes(query) || j.userId.includes(query)) &&
+      (!review || (j.reviewStatus || "pending") === review) &&
+      (!state || (state === "deleted") === !!j.deleted),
   );
   async function remove(j: Job) {
-    if (
-      !confirm(
-        "删除后作品不再展示，分享链接会失效，订单与积分记录保留。继续吗？",
-      )
-    )
-      return;
+    const ok = await ask({
+      title: "删除作品？",
+      message: `「${j.input.prompt.slice(0, 40) || "混剪作品"}」删除后不再展示，分享链接会失效；订单与积分记录保留。`,
+      confirmText: "删除",
+      danger: true,
+    });
+    if (ok === false) return;
     try {
       await api("/admin/works/" + j.id, { method: "DELETE" });
       await resource.reload();
@@ -41,9 +49,28 @@ export default function Works({ notify }: PageProps) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
+        <select
+          aria-label="审核状态"
+          value={review}
+          onChange={(e) => setReview(e.target.value)}
+        >
+          <option value="">全部审核状态</option>
+          <option value="pending">待审核</option>
+          <option value="approved">已通过</option>
+          <option value="rejected">未通过</option>
+        </select>
+        <select
+          aria-label="作品状态"
+          value={state}
+          onChange={(e) => setState(e.target.value)}
+        >
+          <option value="">全部作品</option>
+          <option value="active">正常</option>
+          <option value="deleted">已删除</option>
+        </select>
       </div>
       <Table
-        key={query}
+        key={query + review + state}
         rows={rows}
         empty={query ? "没有匹配的作品，请调整搜索条件" : "暂无作品"}
         id={(j) => j.id}
@@ -59,7 +86,7 @@ export default function Works({ notify }: PageProps) {
               </>
             ),
           },
-          { title: "用户", render: (j) => j.userId },
+          { title: "用户", render: (j) => <IdChip>{j.userId}</IdChip> },
           {
             title: "审核",
             render: (j) =>

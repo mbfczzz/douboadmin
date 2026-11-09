@@ -11,6 +11,7 @@ import Pagination from "../components/Pagination";
 import TemplateCard from "../components/TemplateCard";
 import TemplateEditor from "../components/TemplateEditor";
 import { newId } from "../id";
+import { ask } from "../confirm/ask";
 
 const blank: Template = {
   title: "",
@@ -69,7 +70,16 @@ export default function Templates({ notify }: PageProps) {
   }
   async function action(row: Row<Template>, remove = false) {
     if (busy) return;
-    if (remove && !confirm(`删除模板「${row.data.title}」？`)) return;
+    if (
+      remove &&
+      (await ask({
+        title: "删除模板？",
+        message: `「${row.data.title}」删除后小程序将不再展示该模板，已生成的作品不受影响。`,
+        confirmText: "删除",
+        danger: true,
+      })) === false
+    )
+      return;
     setBusy(row.id);
     try {
       await api("/admin/templates/" + row.id, {

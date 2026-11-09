@@ -1,0 +1,24 @@
+/* Provider function dialogs (名额划拨 / 授权激活 / 算力分佣): the header stays
+   put and the content scrolls on its own. */
+.modal.partner-editor {
+  display: flex;
+  flex-direction: column;
+  max-height: 92vh;
+  overflow: hidden;
+}
+.provider-panel {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 24px;
+  overscroll-behavior: contain;
+}
+@media (max-width: 640px) {
+  .provider-panel {
+    padding: 14px;
+  }
+}
+/* Login account card: facts on the left, its own actions underneath. */
+.provider-account .account-facts {
+  margin: 0 0 4px;
+}

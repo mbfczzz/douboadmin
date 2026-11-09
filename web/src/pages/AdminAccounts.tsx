@@ -1,14 +1,21 @@
 import Badge from "../components/Badge";
+import Tag from "../components/Tag";
 import { useState } from "react";
 import { Plus } from "lucide-react";
-import { date, type Row } from "../api";
+import type { Row } from "../api";
 import type { PageProps } from "../navigation";
 import { useResource } from "../hooks/useResource";
 import ResourcePage from "../business/ResourcePage";
 import Table from "../business/Table";
 import AccountForm from "../adminAccounts/AccountForm";
+import PasswordReset from "../components/PasswordReset";
+import { archive, resetPassword, setDisabled } from "../adminAccounts/actions";
 import { useRoles } from "../roles/types";
-import { adminRoleLabel, type AdminAccount } from "../adminAccounts/types";
+import {
+  adminRoleLabel,
+  lastLogin,
+  type AdminAccount,
+} from "../adminAccounts/types";
 
 export default function AdminAccounts({ notify }: PageProps) {
   const resource = useResource<{
@@ -16,11 +23,23 @@ export default function AdminAccounts({ notify }: PageProps) {
       canManage: boolean;
     }>("/admin/accounts"),
     [editing, setEditing] = useState<Row<AdminAccount> | null | undefined>(),
+    [resetting, setResetting] = useState<Row<AdminAccount>>(),
     roles = useRoles(),
     roleName = (id: string) =>
       roles.rows.find((row) => row.id === id)?.data.name ||
       adminRoleLabel[id] ||
       id;
+  // Each row action runs on its own; failures surface as a toast.
+  const run = async (action: () => Promise<unknown>, done: string) => {
+    try {
+      if ((await action()) === false) return;
+      await resource.reload();
+      notify(done);
+    } catch (e) {
+      notify((e as Error).message, "error");
+      void resource.reload();
+    }
+  };
   return (
     <ResourcePage
       page="accounts"
@@ -48,7 +67,22 @@ export default function AdminAccounts({ notify }: PageProps) {
               </>
             ),
           },
-          { title: "角色", render: (row) => roleName(row.data.role) },
+          {
+            title: "角色",
+            render: (row) => (
+              <Tag
+                tone={
+                  row.data.role === "super_admin"
+                    ? "accent"
+                    : row.data.role === "operator"
+                      ? "info"
+                      : "muted"
+                }
+              >
+                {roleName(row.data.role)}
+              </Tag>
+            ),
+          },
           { title: "手机号", render: (row) => row.data.phone || "未填写" },
           {
             title: "状态",
@@ -61,15 +95,36 @@ export default function AdminAccounts({ notify }: PageProps) {
           },
           {
             title: "最后登录",
-            render: (row) =>
-              row.data.lastLoginAt ? date(row.data.lastLoginAt) : "尚未登录",
+            render: (row) => lastLogin(row.data.lastLoginAt),
           },
           {
             title: "操作",
             action: true,
             render: (row) =>
               resource.data?.canManage ? (
-                <button onClick={() => setEditing(row)}>编辑</button>
+                <div className="business-actions">
+                  <button onClick={() => setEditing(row)}>编辑</button>
+                  <button onClick={() => setResetting(row)}>重置密码</button>
+                  <button
+                    className={row.data.disabled ? "" : "danger-text"}
+                    onClick={() =>
+                      void run(
+                        () => setDisabled(row, !row.data.disabled),
+                        row.data.disabled ? "账号已启用" : "账号已停用",
+                      )
+                    }
+                  >
+                    {row.data.disabled ? "启用" : "停用"}
+                  </button>
+                  <button
+                    className="danger-text"
+                    onClick={() =>
+                      void run(() => archive(row), "管理账号已归档")
+                    }
+                  >
+                    归档
+                  </button>
+                </div>
               ) : (
                 "—"
               ),
@@ -82,6 +137,24 @@ export default function AdminAccounts({ notify }: PageProps) {
           notify={notify}
           onClose={() => setEditing(undefined)}
           onSaved={resource.reload}
+        />
+      )}
+      {resetting && (
+        <PasswordReset
+          account={`${resetting.data.name} · ${resetting.data.username}`}
+          onClose={() => setResetting(undefined)}
+          onSubmit={async (password) => {
+            // Use the latest row so a retry after a reload has its version.
+            const current =
+              resource.data?.items.find((r) => r.id === resetting.id) ||
+              resetting;
+            await resetPassword(current, password).catch((e) => {
+              void resource.reload();
+              throw e;
+            });
+            await resource.reload();
+            notify("密码已重置");
+          }}
         />
       )}
     </ResourcePage>

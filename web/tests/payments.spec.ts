@@ -67,8 +67,8 @@ test("isolated payment UI fixtures verify server pagination, filters and refunde
   ).toBeVisible();
   await page.getByLabel("搜索支付记录").fill("test-transaction");
   await page.getByLabel("支付记录状态").selectOption("refunded");
-  await page.getByLabel("到账开始日期").fill("2026-11-01");
-  await page.getByLabel("到账结束日期").fill("2026-11-01");
+  await page.getByLabel("到账开始日期", { exact: true }).fill("2026-11-01");
+  await page.getByLabel("到账结束日期", { exact: true }).fill("2026-11-01");
   await page.getByRole("button", { name: "查询", exact: true }).click();
   await expect(
     page.getByText("退款单：test-refund", { exact: true }),

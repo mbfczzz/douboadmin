@@ -25,6 +25,9 @@ type ErrorLog struct {
 	Message string `json:"message"`
 	Detail  string `json:"detail"`
 	Node    string `json:"node"`
+	// Repeats of the same entry within an hour fold into one row.
+	Count  int       `json:"count,omitempty"`
+	LastAt time.Time `json:"lastAt,omitzero"`
 }
 type Alert struct {
 	Kind         string `json:"kind"`

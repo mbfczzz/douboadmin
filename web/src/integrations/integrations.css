@@ -1,5 +1,7 @@
 .integration {
-  margin: 16px 0;
+  margin: 12px 0;
+  /* Keep the opened header clear of the sticky top bar. */
+  scroll-margin-top: 80px;
 }
 .integration fieldset {
   min-width: 0;
@@ -17,9 +19,10 @@
 }
 .integration > summary::after {
   content: "";
+  flex-shrink: 0;
   width: 7px;
   height: 7px;
-  margin: -3px 4px 0 auto;
+  margin: -3px 4px 0 8px;
   border-right: 2px solid var(--muted);
   border-bottom: 2px solid var(--muted);
   transform: rotate(45deg);
@@ -50,4 +53,75 @@
 }
 .integration-add {
   margin: 0 0 20px;
+}
+.integration-icon {
+  display: inline-grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  background: var(--surface-subtle);
+  color: var(--muted);
+}
+.integration[open] .integration-icon {
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+.integration > summary .integration-title {
+  min-width: 0;
+}
+.integration-badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+.integration-key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin: 0 0 6px;
+  font-size: 12.5px;
+}
+.integration-key .mono {
+  overflow-wrap: anywhere;
+}
+@media (max-width: 640px) {
+  .integration > summary {
+    position: relative;
+    flex-wrap: wrap;
+    padding: 14px 40px 14px 16px;
+  }
+  .integration > summary::after {
+    position: absolute;
+    top: 30px;
+    right: 18px;
+  }
+  .integration-badges {
+    margin-left: 48px;
+    order: 3;
+    flex-basis: 100%;
+  }
+}
+/* Text for screen readers only (the pill colour also carries the state). */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.integration-title b {
+  display: block;
+  font-size: 14px;
+}
+.integration-title small {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 400;
 }

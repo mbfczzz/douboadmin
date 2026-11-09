@@ -43,9 +43,12 @@ func (s ModelSettings) Validate(m Model) error {
 			return fmt.Errorf("成本价无效")
 		}
 	}
-	for _, b := range s.Badges {
-		if strings.TrimSpace(b.Text) == "" || len([]rune(b.Text)) > 16 || !slices.Contains([]string{"hot", "new", "info"}, b.Tone) {
-			return fmt.Errorf("模型标签无效")
+	for i, b := range s.Badges {
+		if strings.TrimSpace(b.Text) == "" || len([]rune(b.Text)) > 16 {
+			return fmt.Errorf("第 %d 个模型标签需填写 1–16 个字，或删除该标签", i+1)
+		}
+		if !slices.Contains([]string{"hot", "new", "info"}, b.Tone) {
+			return fmt.Errorf("第 %d 个模型标签样式无效", i+1)
 		}
 	}
 	if !validSelection(s.Modes, m.Modes) || !validSelection(s.Resolutions, m.Resolutions) || !validSelection(s.Ratios, m.Ratios) || !validSelection(s.Qualities, m.Qualities) || !validSelection(s.Durations, m.Durations) {

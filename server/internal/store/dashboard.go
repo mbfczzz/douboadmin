@@ -13,6 +13,7 @@ type reportBuilder struct {
 	days   map[string]*core.DailyMetric
 	models map[string]*core.ModelCost
 	events map[string]int64
+	extra  *breakdownBuilder
 	period int
 	since  time.Time
 }
@@ -23,7 +24,7 @@ func newReport(days int) *reportBuilder {
 	}
 	now := time.Now().In(reportZone)
 	start := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, reportZone).AddDate(0, 0, 1-days)
-	r := &reportBuilder{days: map[string]*core.DailyMetric{}, models: map[string]*core.ModelCost{}, events: map[string]int64{}, period: days, since: start.UTC()}
+	r := &reportBuilder{days: map[string]*core.DailyMetric{}, models: map[string]*core.ModelCost{}, events: map[string]int64{}, extra: newBreakdown(start.UTC()), period: days, since: start.UTC()}
 	for i := 0; i < days; i++ {
 		key := start.AddDate(0, 0, i).Format("2006-01-02")
 		r.days[key] = &core.DailyMetric{Date: key}
@@ -31,6 +32,7 @@ func newReport(days int) *reportBuilder {
 	return r
 }
 func (r *reportBuilder) record(ns string, row core.Record) {
+	r.extra.record(ns, row)
 	day := r.days[row.CreatedAt.In(reportZone).Format("2006-01-02")]
 	switch ns {
 	case "users":
@@ -55,6 +57,7 @@ func (r *reportBuilder) record(ns string, row core.Record) {
 		if json.Unmarshal(row.Data, &o) == nil && o.PaidAt != nil {
 			if d := r.days[o.PaidAt.In(reportZone).Format("2006-01-02")]; d != nil {
 				d.PaidFen += o.AmountFen
+				d.PaidOrders++
 			}
 		}
 	case "refunds":
@@ -85,7 +88,9 @@ func (r *reportBuilder) record(ns string, row core.Record) {
 	}
 }
 func (r *reportBuilder) job(j core.Job) {
-	if d := r.days[j.CreatedAt.In(reportZone).Format("2006-01-02")]; d != nil && j.Input.Kind != "import" {
+	d := r.days[j.CreatedAt.In(reportZone).Format("2006-01-02")]
+	r.extra.job(j, d)
+	if d != nil && j.Input.Kind != "import" {
 		d.Jobs++
 		if j.Status == "succeeded" {
 			d.Succeeded++
@@ -96,7 +101,7 @@ func (r *reportBuilder) job(j core.Job) {
 	}
 }
 func (r *reportBuilder) result() core.Dashboard {
-	out := core.Dashboard{Days: []core.DailyMetric{}, Models: []core.ModelCost{}, Events: r.events, Period: r.period}
+	out := core.Dashboard{Days: []core.DailyMetric{}, Models: []core.ModelCost{}, Events: r.events, Period: r.period, Breakdown: r.extra.result()}
 	for _, d := range r.days {
 		d.RevenueFen = d.PaidFen - d.RefundFen
 		out.Days = append(out.Days, *d)

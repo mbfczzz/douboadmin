@@ -27,8 +27,8 @@ export default function ProviderLoginFields({
           初始密码
           <input
             name="accountPassword"
-            type="password"
-            autoComplete="new-password"
+            spellCheck={false}
+            autoComplete="off"
             minLength={16}
             maxLength={128}
             required

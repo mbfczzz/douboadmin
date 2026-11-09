@@ -21,8 +21,9 @@ test("quote management pages load real APIs and report missing services", async 
     ).toBeVisible();
     await expect(page.getByRole("alert")).toHaveCount(0);
   }
+  // Settings shows each service as a status pill in the overview.
   await expect(
-    page.getByRole("listitem").filter({ hasText: "微信支付" }),
+    page.getByRole("button", { name: /微信虚拟支付/ }),
   ).toContainText("未配置");
   await page.getByRole("button", { name: "运行监控", exact: true }).click();
   await expect(page.getByText("在线", { exact: true }).first()).toBeVisible();
@@ -43,15 +44,21 @@ test("admin adjusts points with an immutable visible ledger", async ({
   await page.getByLabel("搜索用户").fill(id!);
   await page
     .locator("tbody tr")
-    .getByRole("button", { name: "详情 / 积分", exact: true })
+    .getByRole("button", { name: "积分", exact: true })
     .click();
-  const dialog = page.getByRole("dialog");
+  let dialog = page.getByRole("dialog");
   await dialog.getByLabel("积分变动（负数为扣减）").fill("12.5");
   await dialog.getByLabel("操作原因").fill("浏览器验收临时积分");
   await dialog
     .getByRole("button", { name: "确认调整积分", exact: true })
     .click();
   await confirmSubmission(page);
+  await expect(dialog).toHaveCount(0);
+  await page
+    .locator("tbody tr")
+    .getByRole("button", { name: "详情", exact: true })
+    .click();
+  dialog = page.getByRole("dialog");
   await expect(
     dialog.getByText("浏览器验收临时积分", { exact: true }),
   ).toBeVisible();

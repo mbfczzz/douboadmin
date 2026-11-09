@@ -52,6 +52,7 @@
 }
 .actions select {
   width: auto;
+  min-width: 120px;
 }
 .overview-page .business-metrics {
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -66,4 +67,47 @@
   .overview-page .business-metrics {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+}
+.kind-table {
+  display: grid;
+  grid-template-columns: 1fr repeat(3, auto);
+  gap: 8px 18px;
+  margin: 0 22px 20px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  font-size: 12.5px;
+}
+.kind-table span {
+  color: var(--muted);
+}
+.kind-table b {
+  color: var(--ink);
+  font-weight: 500;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.overview-details > summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  list-style: none;
+}
+.overview-details > summary::-webkit-details-marker {
+  display: none;
+}
+.overview-details > summary::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  transform: rotate(-45deg);
+  transition: transform 160ms;
+}
+.overview-details[open] > summary::before {
+  transform: rotate(45deg);
+}
+/* The attention card matches the trend card's height in its row. */
+.overview-summary > .attention-panel {
+  margin-bottom: 0;
 }

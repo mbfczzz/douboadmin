@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Plus } from "lucide-react";
 import { api } from "../api";
 import Badge from "../components/Badge";
+import Tag from "../components/Tag";
 import { pageInfo, type PageId, type PageProps } from "../navigation";
 import ResourcePage from "../business/ResourcePage";
 import Table from "../business/Table";
@@ -9,6 +10,7 @@ import RoleForm from "../roles/RoleForm";
 import { roleScopeLabel, useRoles, type RoleRow } from "../roles/types";
 import { useMe } from "../session";
 import "../roles/roles.css";
+import { ask } from "../confirm/ask";
 
 export default function Roles({ notify }: PageProps) {
   const roles = useRoles(),
@@ -16,7 +18,13 @@ export default function Roles({ notify }: PageProps) {
     manage = useMe()?.role === "super_admin",
     [editing, setEditing] = useState<RoleRow | null | undefined>();
   async function remove(row: RoleRow) {
-    if (!confirm(`确认删除角色「${row.data.name}」吗？`)) return;
+    const ok = await ask({
+      title: "删除角色？",
+      message: `「${row.data.name}」删除后不能再分配给账号。`,
+      confirmText: "删除",
+      danger: true,
+    });
+    if (ok === false) return;
     try {
       await api(`/admin/roles/${row.id}`, { method: "DELETE" });
       await roles.reload();
@@ -79,9 +87,9 @@ export default function Roles({ notify }: PageProps) {
             render: (row) =>
               row.id === "super_admin" || !manage ? (
                 row.id === "super_admin" ? (
-                  "全部权限"
+                  <Tag tone="accent">全部权限</Tag>
                 ) : (
-                  "仅超级管理员可修改"
+                  <span className="quiet">仅超级管理员可修改</span>
                 )
               ) : (
                 <div className="business-actions">

@@ -11,13 +11,14 @@ import ProviderId from "./ProviderId";
 
 export default function QuotaForm({
   view,
-  request,
+  mode,
   onClose,
   onSaved,
   notify,
 }: {
   view: Overview;
-  request: boolean;
+  // grant / reclaim move quota to or from a child; request asks the parent.
+  mode: "grant" | "reclaim" | "request";
   onClose: () => void;
   onSaved: () => Promise<void>;
   notify: Notify;
@@ -27,7 +28,6 @@ export default function QuotaForm({
     [targetError, setTargetError] = useState(""),
     [targetRevision, setTargetRevision] = useState(0),
     [picking, setPicking] = useState(false),
-    [kind, setKind] = useState("grant"),
     [users, setUsers] = useState(1),
     [error, setError] = useState(""),
     command = useCommand();
@@ -46,6 +46,8 @@ export default function QuotaForm({
       });
     return () => controller.abort();
   }, [target, targetRevision]);
+  const request = mode === "request",
+    kind = mode;
   const sourceAvailable = available(view.quota.users),
     targetAvailable = targetView ? available(targetView.quota.users) : 0,
     limit = kind === "grant" ? sourceAvailable : targetAvailable,
@@ -92,7 +94,14 @@ export default function QuotaForm({
     <>
       <Modal
         className="form-modal"
-        title={request ? "向上级申请名额" : "名额划拨 / 收回"}
+        title={
+          request
+            ? "向上级申请名额"
+            : kind === "grant"
+              ? "划拨名额"
+              : "收回名额"
+        }
+        subtitle={view.record.data.name}
         onClose={() => !command.busy && onClose()}
       >
         <form
@@ -108,7 +117,8 @@ export default function QuotaForm({
             <fieldset disabled={command.busy}>
               {!request && (
                 <>
-                  <p>
+                  <div className="field-block">
+                    <span className="field-label">下级服务商</span>
                     <button
                       type="button"
                       className="secondary"
@@ -116,7 +126,7 @@ export default function QuotaForm({
                     >
                       {target ? "更换下级服务商" : "选择直接下级服务商"}
                     </button>
-                  </p>
+                  </div>
                   {target && (
                     <div className="notice quota-target">
                       <div>
@@ -126,16 +136,6 @@ export default function QuotaForm({
                       </div>
                     </div>
                   )}
-                  <label>
-                    操作
-                    <select
-                      value={kind}
-                      onChange={(e) => setKind(e.target.value)}
-                    >
-                      <option value="grant">划拨给下级</option>
-                      <option value="reclaim">收回下级可用名额</option>
-                    </select>
-                  </label>
                 </>
               )}
               <label>
@@ -186,7 +186,9 @@ export default function QuotaForm({
               <p className="quiet">
                 {request
                   ? "申请批准后才会增加当前服务商可用名额。"
-                  : "已激活、已预留或继续划拨给更下级的额度不能收回。"}
+                  : kind === "grant"
+                    ? "划拨后名额进入下级可用名额，可随时收回未使用部分。"
+                    : "已激活、已预留或继续划拨给更下级的额度不能收回。"}
               </p>
               <label>
                 原因

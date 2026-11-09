@@ -5,6 +5,7 @@ import {
   createTemplate,
   removeTemplate,
   catalog,
+  answerAsk,
 } from "./helpers";
 import type { Row, Model } from "../src/api";
 
@@ -62,11 +63,11 @@ test("unsaved edits survive cancel, focus stays in dialog and returns to opener"
   await expect(
     dialog.getByRole("button", { name: "保存模板", exact: true }),
   ).toBeFocused();
-  page.once("dialog", (d) => d.dismiss());
   await page.keyboard.press("Escape");
+  await answerAsk(page, false);
   await expect(title).toHaveValue("这份草稿不能丢");
-  page.once("dialog", (d) => d.accept());
   await dialog.getByRole("button", { name: "取消", exact: true }).click();
+  await answerAsk(page, true);
   await expect(opener).toBeFocused();
 });
 
@@ -143,11 +144,11 @@ test("a failed login can be corrected without losing the account field", async (
   page,
 }) => {
   await page.goto("/");
-  await page.getByLabel("管理员账号").fill("admin");
+  await page.getByLabel("账号", { exact: true }).fill("admin");
   await page.getByLabel("密码", { exact: true }).fill("wrong-password");
   await page.getByRole("button", { name: "登录管理台" }).click();
   await expect(page.getByRole("alert")).toContainText("账号或密码不正确");
-  await expect(page.getByLabel("管理员账号")).toHaveValue("admin");
+  await expect(page.getByLabel("账号", { exact: true })).toHaveValue("admin");
   await page
     .getByLabel("密码", { exact: true })
     .fill(process.env.ADMIN_PASSWORD || "doubo-demo-2026");

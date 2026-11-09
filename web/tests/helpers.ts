@@ -10,7 +10,9 @@ export async function confirmSubmission(page: Page) {
 
 export async function login(page: Page) {
   await page.goto("/");
-  await page.getByLabel("管理员账号").fill(process.env.ADMIN_USER || "admin");
+  await page
+    .getByLabel("账号", { exact: true })
+    .fill(process.env.ADMIN_USER || "admin");
   await page
     .getByLabel("密码", { exact: true })
     .fill(process.env.ADMIN_PASSWORD || "doubo-demo-2026");
@@ -84,4 +86,16 @@ export async function removeTemplate(page: Page, id: string) {
         })
       ).ok(),
     ).toBeTruthy();
+}
+
+// Answers the in-app confirmation dialog (replaces browser confirm/prompt).
+export async function answerAsk(page: Page, accept: boolean) {
+  const dialog = page.locator('[role="dialog"].ask-dialog');
+  await expect(dialog).toBeVisible();
+  await (
+    accept
+      ? dialog.locator(".modal-actions .primary")
+      : dialog.getByRole("button", { name: "取消", exact: true })
+  ).click();
+  await expect(dialog).toHaveCount(0);
 }

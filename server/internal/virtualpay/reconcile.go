@@ -107,7 +107,7 @@ func (s *Service) Reconcile(ctx context.Context) {
 				err = s.RefreshRefund(ctx, row.ID)
 			}
 			if err != nil {
-				slog.Warn("virtual payment reconciliation pending", "kind", ns, "id", row.ID)
+				slog.Warn("virtual payment reconciliation pending", "kind", ns, "id", row.ID, "error", err)
 			}
 		}
 	}

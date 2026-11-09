@@ -23,6 +23,7 @@ func (a *Server) businessRoutes() {
 	m.HandleFunc("GET /api/admin/integrations", a.auth("admin", a.integrationSettings))
 	m.HandleFunc("PUT /api/admin/integrations/{group}", a.superAdmin(a.saveIntegrationSettings))
 	m.HandleFunc("GET /api/admin/users/{id}/ledger", a.auth("admin", a.ledger))
+	m.HandleFunc("GET /api/admin/users/{id}/activation", a.auth("admin", a.userActivation))
 	m.HandleFunc("POST /api/admin/users/{id}/wallet", a.auth("admin", a.adjustWallet))
 	m.HandleFunc("GET /api/admin/users/{id}/wallet", a.auth("admin", a.wallet))
 }

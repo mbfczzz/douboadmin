@@ -1,0 +1,203 @@
+/* System-wide spacing and control consistency, loaded last on purpose. */
+
+/* Tables line up with their card headings (22px), not 16px. */
+.catalog-table th:first-child,
+.catalog-table td:first-child,
+.panel .catalog-pagination {
+  padding-left: 22px;
+}
+.catalog-table th:last-child,
+.catalog-table td:last-child,
+.panel .catalog-pagination {
+  padding-right: 22px;
+}
+/* Text actions start exactly under their column header. */
+.catalog-table td > button:first-child:not(.primary, .secondary),
+.catalog-table
+  td
+  > .business-actions
+  > button:first-child:not(.primary, .secondary) {
+  margin-left: -5px;
+}
+@media (min-width: 901px) {
+  .catalog-table th {
+    white-space: nowrap;
+  }
+}
+/* One quiet empty-state style everywhere. */
+.empty h3 {
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Dropdowns: the arrow keeps its distance and the list is never cramped. */
+.business-filters select,
+.catalog-toolbar select,
+.catalog-caption select {
+  min-width: 150px;
+}
+@supports (appearance: base-select) {
+  select::picker-icon {
+    margin-left: auto;
+  }
+  ::picker(select) {
+    min-inline-size: max(anchor-size(self-inline), 180px);
+    max-height: min(300px, 45vh);
+  }
+}
+
+/* Search boxes share one look: a magnifier inside the field. */
+input[type="search"]:not(.catalog-search input) {
+  padding-left: 36px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='15' height='15' fill='none' stroke='%23959ca1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.3-4.3'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: 12px center;
+}
+
+/* Short numbers do not need the full dialog width. */
+.edit-form label:not(.form-grid > label) > input[type="number"] {
+  max-width: 280px;
+}
+/* Long ids and prompts wrap instead of running past the dialog. */
+.modal {
+  overflow-wrap: anywhere;
+}
+/* Actions placed in a dialog body read as that dialog's footer. */
+.modal:not(.form-modal)
+  :is(.edit-form, .job-detail)
+  > .modal-actions:last-child {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+/* Badges inside detail rows keep the row height. */
+.detail-grid dd > .badge {
+  padding-block: 2px;
+}
+
+@media (max-width: 640px) {
+  /* Phones: one clear filter rule - fields full width, buttons share a row. */
+  .business-filters > label,
+  .business-filters > input,
+  .business-filters > select,
+  .business-filters > .date-field {
+    flex: 1 1 100%;
+    max-width: none;
+  }
+  .business-filters > label :is(input, select),
+  .business-filters .date-field {
+    width: 100%;
+    max-width: none;
+  }
+  .business-filters > button {
+    flex: 1 1 0;
+  }
+  :is(.catalog-toolbar, .records-toolbar, .business-filters, .catalog-caption)
+    :is(input, select) {
+    font-size: 16px;
+  }
+  /* Record cards: labels take about a third, values get the rest. */
+  .mobile-record dl > div {
+    grid-template-columns: minmax(72px, 0.45fr) minmax(0, 1fr);
+  }
+}
+
+/* A labelled non-input field (picker button) reads like the other fields. */
+.edit-form .field-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 7px;
+  margin-bottom: 16px;
+}
+.edit-form .field-label {
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 550;
+}
+/* Compact label/value rows at the top of small action dialogs. */
+.edit-form .detail-grid.compact {
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-subtle);
+}
+/* Toolbar tab buttons match the 40px selects beside them. */
+.catalog-toolbar .catalog-tabs button {
+  min-height: 40px;
+}
+/* Space between a page toolbar or caption and the content below. */
+.catalog-caption {
+  margin-bottom: 14px;
+}
+/* Job recovery actions sit right under the execution card. */
+.execution-actions {
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+/* Long prompts use the column width, clamped to two lines. */
+.task-name > div {
+  min-width: 0;
+}
+.task-name b {
+  display: -webkit-box;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+/* A toolbar inside a card is a band of that card, not a second card. */
+.panel > .catalog-toolbar {
+  margin: 0;
+  border-width: 1px 0;
+  border-radius: 0;
+}
+/* Model config fields that span two of the four grid columns. */
+.config-grid > .col-2 {
+  grid-column: span 2;
+}
+@media (max-width: 520px) {
+  .config-grid > .col-2 {
+    grid-column: auto;
+  }
+}
+/* The provider tree header matches regular table headers. */
+.provider-tree-head {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+/* Model status: switch and status stay together; on phones they stack. */
+.model-state .catalog-status {
+  white-space: nowrap;
+}
+@media (max-width: 640px) {
+  .model-state {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+}
+/* Tab labels never break inside a tab; narrow bars scroll instead. */
+[role="tab"],
+.tabs button {
+  white-space: nowrap;
+}
+/* Destructive secondary actions read as red outline buttons, not disabled. */
+.secondary.danger-text {
+  border-color: var(--danger-border);
+  color: var(--danger);
+}
+.secondary.danger-text:hover:not(:disabled) {
+  border-color: var(--danger);
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+/* Hint below a labelled field (kept outside the label so it is not part of
+   the field's name); pulls up into the label's bottom margin. */
+.edit-form .field-hint {
+  display: block;
+  margin: -9px 0 16px;
+}

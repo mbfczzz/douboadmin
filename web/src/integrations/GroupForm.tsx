@@ -2,6 +2,8 @@ import { useEffect, useState, type FormEvent } from "react";
 import { api, APIError } from "../api";
 import type { Notify } from "../navigation";
 import Badge from "../components/Badge";
+import Tag from "../components/Tag";
+import { configured, groupMeta, sourceLabel } from "./meta";
 import Fields from "./Fields";
 import type { IntegrationGroup } from "./types";
 
@@ -12,13 +14,17 @@ const initial = (group: IntegrationGroup) =>
 
 export default function GroupForm({
   group,
+  capabilities,
   reload,
   notify,
 }: {
   group: IntegrationGroup;
+  capabilities?: Record<string, boolean>;
   reload: () => Promise<void>;
   notify: Notify;
 }) {
+  const Icon = groupMeta[group.id]?.icon,
+    ready = configured(group, capabilities);
   const [values, setValues] = useState(() => initial(group));
   const [version, setVersion] = useState(group.version);
   const [reset, setReset] = useState(0);
@@ -91,16 +97,28 @@ export default function GroupForm({
     }
   }
   return (
-    <details className="panel integration">
+    <details className="panel integration" id={"integration-" + group.id}>
       <summary>
-        <b>{group.name}</b>
-        {group.pendingRestart ? (
-          <Badge state="queued" label="已保存 · 待重启" />
-        ) : group.source === "database" ? (
-          <Badge state="succeeded" label="数据库配置" />
-        ) : (
-          <Badge state="muted" label="服务器配置" />
-        )}
+        <span className="integration-icon" aria-hidden="true">
+          {Icon && <Icon size={18} />}
+        </span>
+        <span className="integration-title">
+          <b>{group.name}</b>
+          <small>{groupMeta[group.id]?.desc}</small>
+        </span>
+        <span className="integration-badges">
+          {group.pendingRestart ? (
+            <Badge state="queued" label="已保存 · 待重启" />
+          ) : (
+            <Badge
+              state={ready ? "succeeded" : "muted"}
+              label={ready ? "已配置" : "未配置"}
+            />
+          )}
+          <Tag tone={group.source === "database" ? "accent" : "muted"}>
+            {sourceLabel(group)}
+          </Tag>
+        </span>
       </summary>
       <form
         className="edit-form"

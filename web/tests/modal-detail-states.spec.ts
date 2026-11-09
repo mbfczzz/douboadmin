@@ -5,19 +5,19 @@ import { inspectModal, closeTop } from "./modal-audit";
 
 const samples = [
   {
-    tab: "授权激活",
+    module: ["授权码", "授权激活"],
     button: "查看二维码",
     path: "/activation-codes/qa-code",
     loaded: "复制激活码",
   },
   {
-    tab: "授权激活",
+    module: ["授权码", "授权激活"],
     button: "来源记录",
     path: "/activation-codes/qa-code/trace",
     loaded: "生成账号",
   },
   {
-    tab: "算力分佣",
+    module: ["分佣", "算力分佣"],
     button: "qa-order",
     path: "/orders/qa-order/distribution",
     loaded: "分佣对象",
@@ -30,12 +30,12 @@ for (const sample of samples) {
     await login(page);
     await modalPartnerFixtures(page);
     await page.getByRole("button", { name: "服务商管理", exact: true }).click();
-    await page
-      .getByRole("button", { name: "编辑", exact: true })
-      .first()
-      .click();
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.getByRole("tab", { name: sample.tab, exact: true }).click();
+    await page
+      .locator(".provider-tree-row")
+      .first()
+      .getByRole("button", { name: sample.module[0], exact: true })
+      .click();
     let fail = true,
       release!: () => void;
     const pending = new Promise<void>((resolve) => {
@@ -68,7 +68,7 @@ for (const sample of samples) {
     await expect(child.getByText(sample.loaded, { exact: true })).toBeVisible();
     await closeTop(page);
     await expect(
-      page.getByRole("dialog", { name: "编辑服务商", exact: true }),
+      page.getByRole("dialog", { name: sample.module[1], exact: true }),
     ).toBeVisible();
   });
 }

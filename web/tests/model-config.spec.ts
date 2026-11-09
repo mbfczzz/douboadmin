@@ -1,4 +1,4 @@
-import { test, expect, type Page } from "@playwright/test";
+import { test, expect, type Locator, type Page } from "@playwright/test";
 import { confirmSubmission, login, catalog } from "./helpers";
 import type { Model, Row } from "../src/api";
 
@@ -18,7 +18,8 @@ async function pickModel(
 }
 const escape = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-async function openModel(page: Page, key: string) {
+// Each settings part has its own row button and dialog.
+async function openModel(page: Page, key: string, part = "基础信息") {
   await page.getByRole("button", { name: "模型管理", exact: true }).click();
   await page.getByLabel("搜索模型").fill(key);
   const row = page.locator("tbody tr").filter({
@@ -26,7 +27,7 @@ async function openModel(page: Page, key: string) {
       hasText: new RegExp("^" + escape(key) + "$"),
     }),
   });
-  await row.getByRole("button", { name: "配置", exact: true }).click();
+  await row.getByRole("button", { name: part, exact: true }).click();
   return page.getByRole("dialog");
 }
 
@@ -42,11 +43,13 @@ test("FlowingLight configuration layout, independent scroll and narrow screens",
   const dialog = await openModel(page, model.data.key);
   await expect(dialog).toHaveAttribute(
     "aria-label",
-    new RegExp("配置模型 · " + escape(model.data.name)),
+    new RegExp("^基础信息 · " + escape(model.data.name)),
   );
   await expect(
     dialog.getByRole("heading", { name: "基础信息", exact: true }),
   ).toBeVisible();
+  // Only this part's fields are in the dialog.
+  await expect(dialog.getByLabel("运行状态", { exact: true })).toHaveCount(0);
   await expect(dialog.locator("pre")).toHaveCount(0);
   const box = await dialog.boundingBox();
   expect(box?.width).toBe(1040);
@@ -62,9 +65,8 @@ test("FlowingLight configuration layout, independent scroll and narrow screens",
   await dialog
     .locator(".model-config-body")
     .evaluate((e) => (e.scrollTop = e.scrollHeight));
-  await expect(dialog.getByLabel("运行状态", { exact: true })).toBeVisible();
   await expect(
-    dialog.getByRole("heading", { name: /配置模型 ·/ }),
+    dialog.getByRole("heading", { name: /^基础信息 ·/ }),
   ).toBeVisible();
   await page.screenshot({
     path: "../.runtime/flowlight-model-config-bottom.png",
@@ -98,9 +100,16 @@ test("capability chips, prompts, pricing and metadata persist and survive upstre
   );
   const m = original.data;
   try {
-    const dialog = await openModel(page, m.key);
+    const save = async (dialog: Locator) => {
+      await dialog.getByRole("button", { name: "保存", exact: true }).click();
+      await confirmSubmission(page);
+      await expect(dialog).toHaveCount(0);
+    };
+    let dialog = await openModel(page, m.key, "基础信息");
     await dialog.getByLabel("描述", { exact: true }).fill("配置回归测试");
     await dialog.getByLabel("成本价（USD）", { exact: true }).fill("0.023456");
+    await save(dialog);
+    dialog = await openModel(page, m.key, "生成能力");
     await dialog.getByLabel("最大参考图数量", { exact: true }).fill("2");
     const group = dialog.getByRole("group", { name: "支持画质", exact: true });
     for (const label of ["低画质", "标准画质"]) {
@@ -108,6 +117,8 @@ test("capability chips, prompts, pricing and metadata persist and survive upstre
       if ((await button.getAttribute("aria-pressed")) === "true")
         await button.click();
     }
+    await save(dialog);
+    dialog = await openModel(page, m.key, "提示词");
     await dialog
       .getByRole("textbox", { name: "默认提示词", exact: true })
       .fill("窗边静物，自然光与细腻质感。");
@@ -117,15 +128,18 @@ test("capability chips, prompts, pricing and metadata persist and survive upstre
     await dialog
       .getByLabel("灵感提示词 1", { exact: true })
       .fill("电影感的城市雨夜");
+    await save(dialog);
+    dialog = await openModel(page, m.key, "定价");
     await dialog.getByLabel("高画质 1K 积分", { exact: true }).fill("7.5");
+    await save(dialog);
+    dialog = await openModel(page, m.key, "状态");
+    await expect(dialog.getByLabel("运行状态", { exact: true })).toBeVisible();
     await dialog.getByRole("button", { name: "添加映射", exact: true }).click();
     await dialog.getByLabel("错误匹配片段 1", { exact: true }).fill("balance");
     await dialog
       .getByLabel("用户提示文案 1", { exact: true })
       .fill("服务额度暂时不足，请稍后再试");
-    await dialog.getByRole("button", { name: "保存", exact: true }).click();
-    await confirmSubmission(page);
-    await expect(dialog).toHaveCount(0);
+    await save(dialog);
     const sync = await page.request.post("/api/admin/models/sync");
     expect(sync.ok()).toBeTruthy();
     const current = (await catalog(page)).find((r) => r.id === original.id)!;
@@ -141,12 +155,14 @@ test("capability chips, prompts, pricing and metadata persist and survive upstre
     expect(exposed.settings?.costUsd).toBeUndefined();
     expect(exposed.settings?.errorHints).toBeUndefined();
     await page.getByRole("button", { name: "刷新", exact: true }).click();
-    const reopened = await openModel(page, m.key);
+    const prompts = await openModel(page, m.key, "提示词");
     await expect(
-      reopened.getByRole("textbox", { name: "默认提示词", exact: true }),
+      prompts.getByRole("textbox", { name: "默认提示词", exact: true }),
     ).toHaveValue("窗边静物，自然光与细腻质感。");
+    await prompts.getByRole("button", { name: "取消", exact: true }).click();
+    const prices = await openModel(page, m.key, "定价");
     await expect(
-      reopened.getByLabel("高画质 1K 积分", { exact: true }),
+      prices.getByLabel("高画质 1K 积分", { exact: true }),
     ).toHaveValue("7.5");
   } finally {
     const latest = (await catalog(page)).find((r) => r.id === original.id)!;

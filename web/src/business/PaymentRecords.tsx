@@ -3,13 +3,13 @@ import type { PaymentPage } from "./types";
 import { useResource } from "../hooks/useResource";
 import Table from "./Table";
 import RequestState from "../components/RequestState";
-import { money, points, statuses } from "./types";
+import { channels, money, points, statuses } from "./types";
+import Tag, { IdChip } from "../components/Tag";
+import StatusBadge from "../components/StatusBadge";
+import DateField from "../components/DateField";
+import { date } from "../api";
 
-const time = (value: string) =>
-  new Date(value).toLocaleString("zh-CN", {
-    timeZone: "Asia/Shanghai",
-    hour12: false,
-  });
+const time = (value: string) => date(value, true);
 export default function PaymentRecords() {
   const [filters, setFilters] = useState(""),
     [page, setPage] = useState(1);
@@ -37,6 +37,7 @@ export default function PaymentRecords() {
         <label>
           关键词
           <input
+            type="search"
             name="q"
             aria-label="搜索支付记录"
             placeholder="订单号 / 微信交易号 / 用户编号"
@@ -57,11 +58,11 @@ export default function PaymentRecords() {
         </label>
         <label>
           到账开始（北京时间）
-          <input name="from" type="date" aria-label="到账开始日期" />
+          <DateField name="from" label="到账开始日期" />
         </label>
         <label>
           到账结束（北京时间）
-          <input name="to" type="date" aria-label="到账结束日期" />
+          <DateField name="to" label="到账结束日期" />
         </label>
         <button className="primary" type="submit">
           查询
@@ -99,15 +100,15 @@ export default function PaymentRecords() {
                 </>
               ),
             },
-            { title: "用户", render: (r) => r.userId },
+            { title: "用户", render: (r) => <IdChip>{r.userId}</IdChip> },
             {
               title: "实付 / 到账积分",
               render: (r) => (
                 <>
-                  {money(r.amountFen)}
-                  <small className="cell-note">
-                    {points(r.pointsUnits)} 积分
-                  </small>
+                  <span className="amount">{money(r.amountFen)}</span>
+                  <span className="cell-tags">
+                    <Tag tone="accent">+{points(r.pointsUnits)} 积分</Tag>
+                  </span>
                 </>
               ),
             },
@@ -115,7 +116,7 @@ export default function PaymentRecords() {
               title: "订单状态",
               render: (r) => (
                 <>
-                  {statuses[r.status]}
+                  <StatusBadge status={r.status} />
                   {r.refundId && (
                     <small className="cell-note">退款单：{r.refundId}</small>
                   )}
@@ -133,12 +134,13 @@ export default function PaymentRecords() {
             },
             {
               title: "渠道",
-              render: (r) =>
-                r.channel === "wechat_jsapi"
-                  ? "微信支付"
-                  : r.channel === "wechat_virtual"
-                    ? "微信虚拟支付"
-                    : r.channel,
+              render: (r) => {
+                const [label, tone] = channels[r.channel] || [
+                  r.channel,
+                  "muted",
+                ];
+                return <Tag tone={tone}>{label}</Tag>;
+              },
             },
           ]}
         />

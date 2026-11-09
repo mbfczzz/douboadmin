@@ -19,20 +19,25 @@ for (const width of [1440, 390, 320]) {
       .click();
     await audit("新增下级服务商");
     await closeTop(page);
-    await page
-      .getByRole("button", { name: "编辑", exact: true })
-      .first()
-      .click();
-    const editor = page.getByRole("dialog", {
-      name: "编辑服务商",
-      exact: true,
-    });
+    const row = page.locator(".provider-tree-row").first();
+    const open = async (button: string, title: string) => {
+      await row.getByRole("button", { name: button, exact: true }).click();
+      const dialog = page.getByRole("dialog", { name: title, exact: true });
+      await expect(dialog).toBeVisible();
+      return dialog;
+    };
+    const editor = await open("编辑", "编辑服务商");
     await expect(editor.getByLabel("服务商名称")).toBeVisible();
-    await editor.getByRole("tab", { name: "名额划拨", exact: true }).click();
-    await editor
-      .getByRole("button", { name: "划拨 / 收回名额", exact: true })
-      .click();
-    await audit("名额划拨-未选择");
+    await audit("编辑服务商");
+    await closeTop(page);
+    await open("登录账号", "登录账号");
+    await audit("登录账号");
+    await closeTop(page);
+
+    const quotas = await open("名额划拨", "名额划拨");
+    await audit("名额划拨");
+    await quotas.getByRole("button", { name: "划拨名额", exact: true }).click();
+    await audit("划拨名额-未选择");
     await top().getByRole("button", { name: "选择直接下级服务商" }).click();
     await expect(
       top().getByRole("button", { name: "选择", exact: true }),
@@ -42,55 +47,73 @@ for (const width of [1440, 390, 320]) {
     await expect(
       top().getByText("目标可用名额", { exact: true }),
     ).toBeVisible();
-    await audit("名额划拨-已选择");
-    await top()
-      .getByRole("combobox", { name: "操作", exact: true })
-      .selectOption("reclaim");
+    await audit("划拨名额-已选择");
+    await closeTop(page);
+    await quotas.getByRole("button", { name: "收回名额", exact: true }).click();
+    await top().getByRole("button", { name: "选择直接下级服务商" }).click();
+    await top().getByRole("button", { name: "选择", exact: true }).click();
     await expect(
       top().getByRole("button", { name: "确认收回 1 个名额" }),
     ).toHaveClass(/primary danger/);
-    await audit("名额收回");
+    await audit("收回名额");
     await closeTop(page);
-    await editor
+    await quotas
       .getByRole("button", { name: "向上级申请", exact: true })
       .click();
     await audit("向上级申请名额");
     await closeTop(page);
-    await editor.getByRole("button", { name: "审批", exact: true }).click();
-    await audit("名额申请审批");
+    await quotas.getByRole("button", { name: "批准", exact: true }).click();
+    await audit("批准名额申请");
     await closeTop(page);
-    await editor.getByRole("tab", { name: "授权激活", exact: true }).click();
-    await editor
+    await quotas.getByRole("button", { name: "拒绝", exact: true }).click();
+    await audit("拒绝名额申请");
+    await closeTop(page);
+    await closeTop(page);
+
+    const codes = await open("授权码", "授权激活");
+    await codes
       .getByRole("button", { name: "生成授权码", exact: true })
       .click();
     await audit("生成授权码");
     await closeTop(page);
-    await editor
+    await codes
       .getByRole("button", { name: "查看二维码", exact: true })
       .click();
     await expect(top().getByAltText("豆播授权二维码")).toBeVisible();
     await audit("授权二维码-激活码");
     await closeTop(page);
-    await editor.getByRole("button", { name: "来源记录", exact: true }).click();
+    await codes.getByRole("button", { name: "来源记录", exact: true }).click();
     await expect(top().getByText("生成账号", { exact: true })).toBeVisible();
     await expect(top().locator("dl > dt")).toHaveCount(13);
     await expect(top().locator("dl > dd")).toHaveCount(13);
     await audit("二维码生成与激活记录");
     await closeTop(page);
-    await editor.getByRole("button", { name: "管理授权", exact: true }).click();
-    await audit("管理用户授权");
+    for (const action of ["停用", "解绑"]) {
+      await codes.getByRole("button", { name: action, exact: true }).click();
+      await audit(`${action}用户授权`);
+      await closeTop(page);
+    }
     await closeTop(page);
-    await editor.getByRole("tab", { name: "算力分佣", exact: true }).click();
-    await editor.getByRole("button", { name: "qa-order", exact: true }).click();
+
+    const commissions = await open("分佣", "算力分佣");
+    await commissions
+      .getByRole("button", { name: "qa-order", exact: true })
+      .click();
     await expect(top().getByText("分佣对象", { exact: true })).toBeVisible();
     await audit("充值分佣快照");
     await closeTop(page);
-    await editor.getByRole("button", { name: "申请提现", exact: true }).click();
+    await commissions
+      .getByRole("button", { name: "申请提现", exact: true })
+      .click();
     await audit("申请提现");
     await closeTop(page);
-    await editor.getByRole("button", { name: "处理提现", exact: true }).click();
-    await audit("处理提现");
-    await closeTop(page);
+    for (const action of ["确认打款", "取消提现"]) {
+      await commissions
+        .getByRole("button", { name: action, exact: true })
+        .click();
+      await audit(action);
+      await closeTop(page);
+    }
     await closeTop(page);
     await page.getByRole("button", { name: "快速跳转", exact: true }).click();
     await audit("快速跳转");

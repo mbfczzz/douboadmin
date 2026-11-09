@@ -9,7 +9,10 @@ test("long model headings leave fields and save usable on a short screen", async
   const models = await surfaceFixtures(page);
   models[0].data.name = "长".repeat(100);
   await page.getByRole("button", { name: "模型管理", exact: true }).click();
-  await page.getByRole("button", { name: "配置", exact: true }).first().click();
+  await page
+    .getByRole("button", { name: "基础信息", exact: true })
+    .first()
+    .click();
   await page.setViewportSize({ width: 390, height: 360 });
   const dialog = page.getByRole("dialog");
   await expect(dialog.getByLabel("名称", { exact: true })).toBeInViewport({
@@ -38,11 +41,12 @@ test("repeating a provider search retries the same failed query", async ({
   // The provider list is a locally filtered tree; the server-side search
   // lives in the child picker used for quota transfers.
   await page.getByRole("button", { name: "服务商管理", exact: true }).click();
-  await page.getByRole("button", { name: "编辑", exact: true }).first().click();
-  await page.getByRole("tab", { name: "名额划拨", exact: true }).click();
   await page
-    .getByRole("button", { name: "划拨 / 收回名额", exact: true })
+    .locator(".provider-tree-row")
+    .first()
+    .getByRole("button", { name: "名额划拨", exact: true })
     .click();
+  await page.getByRole("button", { name: "划拨名额", exact: true }).click();
   await page.getByRole("button", { name: "选择直接下级服务商" }).click();
   const picker = page.getByRole("dialog", { name: "选择直接下级服务商" });
   await picker.getByLabel("查询记录").fill("same");
@@ -126,7 +130,7 @@ test("background notices remain above the model dialog without blocking it", asy
   await expect.poll(() => started).toBeTruthy();
   try {
     await page
-      .getByRole("button", { name: "配置", exact: true })
+      .getByRole("button", { name: "基础信息", exact: true })
       .first()
       .click();
   } finally {

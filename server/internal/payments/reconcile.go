@@ -123,7 +123,7 @@ func reconcileBatch(ctx context.Context, s store.Store, ns string, check func(co
 			return
 		}
 		if e := check(item); e != nil {
-			slog.Warn("payment reconciliation pending", "kind", ns, "id", item.ID)
+			slog.Warn("payment reconciliation pending", "kind", ns, "id", item.ID, "error", e)
 		}
 	}
 }

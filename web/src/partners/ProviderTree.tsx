@@ -1,8 +1,9 @@
-import { ChevronDown, ChevronRight, Pencil, Plus } from "lucide-react";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import { useMemo, type CSSProperties } from "react";
 import Empty from "../components/Empty";
 import ProviderId from "./ProviderId";
 import ProviderQuota from "./ProviderQuota";
+import ProviderActions, { type ProviderAction } from "./ProviderActions";
 import type { PartnerTreeItem } from "./types";
 import { labels } from "./types";
 
@@ -24,7 +25,7 @@ type Props = {
   query: string;
   expanded: Set<string>;
   toggle: (id: string) => void;
-  edit: (item: PartnerTreeItem) => void;
+  open: (kind: ProviderAction, item: PartnerTreeItem) => void;
   add: (item: PartnerTreeItem) => void;
 };
 
@@ -66,7 +67,7 @@ function TreeNodes({
   query,
   expanded,
   toggle,
-  edit,
+  open: openDialog,
   add,
   rows,
 }: Props & { nodes: Node[]; depth: number }) {
@@ -86,10 +87,6 @@ function TreeNodes({
         <div
           className={`provider-tree-row ${depth === 0 ? "root" : "child"}`}
           style={style}
-          onClick={(event) => {
-            // The whole row opens the editor; inner buttons keep their own action.
-            if (!(event.target as HTMLElement).closest("button")) edit(item);
-          }}
         >
           <div className="provider-tree-name">
             {children.length ? (
@@ -128,18 +125,12 @@ function TreeNodes({
             </span>
             <ProviderQuota pool={quota.users} />
           </div>
-          <div className="provider-tree-actions">
-            {level < MAX_LEVELS && (
-              <button className="text-button subtle" onClick={() => add(item)}>
-                <Plus size={14} aria-hidden="true" />
-                新增子级
-              </button>
-            )}
-            <button className="text-button" onClick={() => edit(item)}>
-              <Pencil size={13} aria-hidden="true" />
-              编辑
-            </button>
-          </div>
+          <ProviderActions
+            item={item}
+            canAdd={level < MAX_LEVELS}
+            open={openDialog}
+            add={add}
+          />
         </div>
         {children.length > 0 && open && (
           <div className="provider-tree-children" role="group" style={style}>
@@ -150,7 +141,7 @@ function TreeNodes({
               query={query}
               expanded={expanded}
               toggle={toggle}
-              edit={edit}
+              open={openDialog}
               add={add}
             />
           </div>

@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { RefreshCw } from "lucide-react";
-import { pageEyebrow, pageInfo, type PageId } from "../navigation";
+import { pageInfo, type PageId } from "../navigation";
 export default function PageHeader({
   page,
   loading = false,
@@ -18,7 +18,6 @@ export default function PageHeader({
   return (
     <div className="page-heading">
       <div>
-        <span className="eyebrow">{pageEyebrow[page]}</span>
         <h1>{title || defaultTitle}</h1>
         <p>{description}</p>
       </div>

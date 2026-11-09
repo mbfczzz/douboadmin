@@ -1,0 +1,113 @@
+/* Themed calendar for DateField; matches the dark select list panel. */
+.date-field {
+  position: relative;
+  width: 172px;
+}
+.date-field > input {
+  padding-right: 40px;
+  font-variant-numeric: tabular-nums;
+}
+.date-field > .icon {
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--muted);
+  transform: translateY(-50%);
+}
+.date-field > .icon:hover,
+.date-field > .icon[aria-expanded="true"] {
+  background: #ffffff0f;
+  color: var(--accent-text);
+}
+.date-popover {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 40;
+  width: 284px;
+  padding: 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-float);
+}
+.date-popover header,
+.date-popover footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.date-popover header {
+  margin-bottom: 8px;
+}
+.date-popover header strong {
+  color: var(--ink-strong);
+  font-size: 14px;
+}
+.date-popover header .icon {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text);
+}
+.date-popover header .icon:hover {
+  border-color: var(--accent-border);
+  color: var(--accent-text);
+}
+.date-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+.date-grid > span {
+  padding: 6px 0;
+  color: var(--muted);
+  font-size: 12px;
+  text-align: center;
+}
+.date-grid button {
+  height: 34px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.date-grid button:hover {
+  background: #ffffff0f;
+  color: var(--ink-strong);
+}
+.date-grid button.outside {
+  color: #5d646a;
+}
+.date-grid button.today {
+  border-color: var(--accent-border);
+  color: var(--accent-text);
+}
+.date-grid button.selected {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 700;
+}
+.date-popover footer {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+}
+@media (max-width: 640px) {
+  .date-field {
+    width: 100%;
+  }
+}

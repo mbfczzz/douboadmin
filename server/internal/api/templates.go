@@ -15,11 +15,12 @@ func (a *Server) templates(w http.ResponseWriter, r *http.Request) {
 		dbError(w, e)
 		return
 	}
-	out := []core.Record{}
+	out, admin, ready := []core.Record{}, strings.Contains(r.URL.Path, "/admin/"), a.modelReady(r)
 	for _, row := range rows {
 		var t core.Template
 		_ = json.Unmarshal(row.Data, &t)
-		if t.Deleted || (!strings.Contains(r.URL.Path, "/admin/") && !t.Published) {
+		// Users only see templates they can actually submit with.
+		if t.Deleted || (!admin && (!t.Published || !ready(t.Model))) {
 			continue
 		}
 		q := r.URL.Query()
@@ -53,7 +54,7 @@ func (a *Server) template(w http.ResponseWriter, r *http.Request) {
 	}
 	var t core.Template
 	_ = json.Unmarshal(row.Data, &t)
-	if !t.Published || t.Deleted {
+	if !t.Published || t.Deleted || !a.modelReady(r)(t.Model) {
 		fail(w, 404, "模板已下架")
 		return
 	}
@@ -90,4 +91,19 @@ func (a *Server) saveTemplate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	reply(w, 200, row)
+}
+
+// modelReady reports whether a template's model is published and usable,
+// remembering each lookup for the rest of the request.
+func (a *Server) modelReady(r *http.Request) func(string) bool {
+	seen := map[string]bool{}
+	return func(id string) bool {
+		ok, cached := seen[id]
+		if !cached {
+			m, err := a.model(r.Context(), id)
+			ok = err == nil && m.Usable()
+			seen[id] = ok
+		}
+		return ok
+	}
 }

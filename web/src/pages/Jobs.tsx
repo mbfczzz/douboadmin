@@ -6,14 +6,29 @@ import { useState } from "react";
 import { stateText, type Job } from "../api";
 import FilterBar from "../components/FilterBar";
 import Empty from "../components/Empty";
-import JobTable from "../components/JobTable";
+import JobTable, { type JobAction } from "../components/JobTable";
+import { JobResume, releaseJob } from "../components/JobRecovery";
+import type { PageProps } from "../navigation";
 import JobDetail from "../components/JobDetail";
-export default function Jobs() {
+export default function Jobs({ notify }: PageProps) {
   const resource = useResource<Job[]>("/admin/jobs", 15000);
   const jobs = resource.data || [];
   const [filter, setFilter] = useRememberedState("jobs.status", "all"),
     [search, setSearch] = useRememberedState("jobs.query", ""),
-    [detail, setDetail] = useState<Job | null>(null);
+    [detail, setDetail] = useState<Job | null>(null),
+    [resuming, setResuming] = useState<Job>();
+  const act = async (kind: JobAction, job: Job) => {
+    if (kind === "detail") return setDetail(job);
+    if (kind === "resume") return setResuming(job);
+    try {
+      if (await releaseJob(job)) {
+        notify("预留积分已退回，此任务不会再次扣费或恢复生成");
+        void resource.reload();
+      }
+    } catch (e) {
+      notify((e as Error).message, "error");
+    }
+  };
   const filteredJobs = jobs.filter(
     (j) =>
       (filter === "all" || j.status === filter) &&
@@ -44,7 +59,7 @@ export default function Jobs() {
           placeholder="搜索提示词或任务编号"
         />
         {filteredJobs.length ? (
-          <JobTable jobs={filteredJobs} onDetail={setDetail} />
+          <JobTable jobs={filteredJobs} onAction={(k, j) => void act(k, j)} />
         ) : !resource.data || resource.error ? null : (
           <Empty text="暂无匹配的任务" />
         )}
@@ -53,6 +68,16 @@ export default function Jobs() {
         <JobDetail
           detail={jobs.find((j) => j.id === detail.id) || detail}
           onClose={() => setDetail(null)}
+        />
+      )}
+      {resuming && (
+        <JobResume
+          job={resuming}
+          onClose={() => setResuming(undefined)}
+          onDone={(message) => {
+            notify(message);
+            void resource.reload();
+          }}
         />
       )}
     </>

@@ -1,18 +1,22 @@
+import { useState } from "react";
 import { api } from "../api";
 import type { Row } from "../api";
 import type { PageProps } from "../navigation";
 import { useResource } from "../hooks/useResource";
 import PageHeader from "../components/PageHeader";
+import Badge from "../components/Badge";
 import RequestState from "../components/RequestState";
 import Nodes from "../monitor/Nodes";
 import Events from "../monitor/Events";
 import type { Health, Event } from "../monitor/types";
-import { online } from "../monitor/types";
+import Metrics from "../monitor/Metrics";
+import HealthSummary from "../monitor/HealthSummary";
 
-export default function Monitor({ notify }: PageProps) {
+export default function Monitor({ notify, navigate }: PageProps) {
   const resource = useResource<Health>("/admin/monitor", 15000),
     alerts = useResource<Row<Event>[]>("/admin/alerts", 15000),
     logs = useResource<Row<Event>[]>("/admin/logs", 15000);
+  const [tab, setTab] = useState("logs");
   const h = resource.data,
     busy = resource.loading || alerts.loading || logs.loading;
   async function refresh() {
@@ -42,27 +46,32 @@ export default function Monitor({ notify }: PageProps) {
         error={resource.error}
         retry={refresh}
       />
-      <div className="monitor-metrics">
-        {[
-          ["在线节点", h ? h.instances.filter(online).length : undefined],
-          ["排队任务", h?.queue.queued],
-          ["正在处理", h?.queue.running],
-          ["近 1 小时失败", h?.queue.failedHour],
-        ].map(([label, value], i) => (
-          <div key={String(label)}>
-            <span>{label}</span>
-            <strong
-              className={i === 3 && Number(value) > 0 ? "monitor-danger" : ""}
-            >
-              {value ?? "—"}
-            </strong>
-          </div>
-        ))}
-      </div>
+      <HealthSummary
+        health={h}
+        logs={logs.data}
+        alerts={alerts.data}
+        navigate={navigate}
+        showEvents={(next) => {
+          setTab(next);
+          document
+            .getElementById("monitor-events")
+            ?.scrollIntoView({ behavior: "smooth", block: "start" });
+        }}
+      />
+      <Metrics health={h} />
       <div className="monitor-grid">
         {h && <Nodes nodes={h.instances} />}
-        <Events logs={logs} alerts={alerts} ack={ack} />
-        <section className="panel monitor-panel monitor-connections">
+        <Events
+          logs={logs}
+          alerts={alerts}
+          ack={ack}
+          tab={tab}
+          setTab={setTab}
+        />
+        <section
+          className="panel monitor-panel monitor-connections"
+          id="monitor-connections"
+        >
           <header>
             <h2>服务接入</h2>
           </header>
@@ -70,17 +79,16 @@ export default function Monitor({ notify }: PageProps) {
             {connections.map(([label, ready, yes, no]) => (
               <li key={label}>
                 <span>{label}</span>
-                <span
-                  className={
+                <Badge
+                  state={
                     ready
-                      ? "monitor-status online"
+                      ? "succeeded"
                       : label === "MySQL" && ready === false
-                        ? "monitor-status monitor-danger"
-                        : "monitor-status"
+                        ? "failed"
+                        : "muted"
                   }
-                >
-                  {ready === undefined ? "未读取" : ready ? yes : no}
-                </span>
+                  label={ready === undefined ? "未读取" : ready ? yes : no}
+                />
               </li>
             ))}
           </ul>

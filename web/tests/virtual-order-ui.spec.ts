@@ -38,16 +38,16 @@ for (const platform of ["wechat", "ios"]) {
     const dialog = page.getByRole("dialog", { name: "充值订单详情" });
     await expect(dialog).toContainText("微信虚拟支付");
     await expect(dialog).toContainText("1000积分");
+    // Refund is a row action of its own; the detail stays read-only.
+    await expect(dialog.getByRole("button", { name: /退款/ })).toHaveCount(0);
+    const refund = page
+      .locator("tbody tr")
+      .first()
+      .getByRole("button", { name: "退款", exact: true });
     if (platform === "ios") {
       await expect(dialog).toContainText("App Store");
-      await expect(
-        dialog.getByRole("button", { name: "申请全额退款" }),
-      ).toHaveCount(0);
-    } else {
-      await expect(
-        dialog.getByRole("button", { name: "申请全额退款" }),
-      ).toBeVisible();
-    }
+      await expect(refund).toHaveCount(0);
+    } else await expect(refund).toBeVisible();
   });
 }
 

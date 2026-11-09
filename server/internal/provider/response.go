@@ -3,14 +3,13 @@ package provider
 import (
 	"encoding/json"
 	"fmt"
-	"net/url"
 	"slices"
 	"strings"
 )
 
 type Response struct {
-	TaskID, Result string
-	Pending        bool
+	TaskID, Result, Status string
+	Pending                bool
 }
 
 type Rejected struct{ Message, Details string }
@@ -41,13 +40,13 @@ func Parse(raw []byte, kind string) (Response, error) {
 	if json.Unmarshal(raw, &v) != nil {
 		return Response{}, fmt.Errorf("上游响应格式异常，请核实任务状态")
 	}
-	r := Response{TaskID: v.ID}
+	r := Response{TaskID: v.ID, Status: v.Status}
 	state := strings.ToLower(v.Status)
 	if (len(v.Error) > 0 && string(v.Error) != "null") || slices.Contains([]string{"failed", "error", "cancelled", "canceled"}, state) {
 		// Keep upstream payloads and possible credentials out of user-visible messages.
 		return r, &Rejected{Message: fmt.Sprintf("上游生成失败，请检查素材和模型参数；任务编号 %s", v.ID), Details: string(v.Error) + " " + v.ErrorMessage}
 	}
-	if state != "" && !slices.Contains([]string{"succeeded", "completed", "success", "done"}, state) {
+	if state != "" && !slices.Contains([]string{"succeeded", "succeed", "completed", "complete", "success", "finished", "done"}, state) {
 		r.Pending = true
 		return r, nil
 	}
@@ -66,14 +65,18 @@ func Parse(raw []byte, kind string) (Response, error) {
 		if len(v.Data) > 0 && v.Data[0].URL != "" {
 			r.Result = v.Data[0].URL
 		}
-		if r.Result != "" {
-			u, err := url.Parse(r.Result)
-			if err != nil || u.Scheme != "https" || u.Hostname() == "" || u.User != nil {
-				return r, fmt.Errorf("上游结果地址无效")
-			}
+		if r.Result == "" {
+			r.Result = nestedResult(raw)
+		}
+		if r.Result != "" && !strings.HasPrefix(r.Result, "data:") && !httpsURL(r.Result) {
+			return r, fmt.Errorf("上游结果地址无效")
 		}
 	}
 	if r.Result == "" {
+		if state != "" {
+			// A finished task with nothing usable must stop, not poll for an hour.
+			return r, &Unreadable{Fields: fieldNames(raw)}
+		}
 		if v.ID != "" {
 			r.Pending = true
 			return r, nil

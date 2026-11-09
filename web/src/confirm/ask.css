@@ -1,0 +1,22 @@
+.modal.ask-dialog {
+  width: min(460px, 100%);
+}
+.ask-message {
+  display: flex;
+  gap: 10px;
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.7;
+}
+.ask-message.is-danger svg {
+  flex-shrink: 0;
+  margin-top: 3px;
+  color: var(--danger);
+}
+.ask-message + label {
+  margin-top: 16px;
+}
+.ask-hint {
+  display: block;
+  margin-top: -9px;
+}

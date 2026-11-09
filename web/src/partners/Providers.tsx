@@ -11,7 +11,12 @@ import { available } from "./types";
 import { MAX_LEVELS } from "./ProviderTree";
 import { useMe } from "../session";
 
-const ProviderEditor = lazy(() => import("./ProviderEditor"));
+import ProviderAccount from "./ProviderAccount";
+import ProviderSelf from "./ProviderSelf";
+import Modal from "../components/Modal";
+import type { ProviderAction } from "./ProviderActions";
+
+const ProviderModule = lazy(() => import("./ProviderModule"));
 
 export default function Providers({ notify }: { notify: Notify }) {
   const resource = useResource<PartnerTreeItem[]>(
@@ -20,10 +25,14 @@ export default function Providers({ notify }: { notify: Notify }) {
     ),
     [query, setQuery] = useState(""),
     [expanded, setExpanded] = useState<Set<string>>(new Set()),
-    [editing, setEditing] = useState<{
+    // New provider (create form) or one row action on an existing provider.
+    [creating, setCreating] = useState<{
       parent: string;
-      row?: PartnerTreeItem["record"];
       parentAvailable?: number;
+    }>(),
+    [action, setAction] = useState<{
+      kind: ProviderAction;
+      row: PartnerTreeItem["record"];
     }>(),
     initialized = useRef(false);
   const rows = resource.data || [];
@@ -44,6 +53,12 @@ export default function Providers({ notify }: { notify: Notify }) {
     setExpanded(new Set(parentIds));
     initialized.current = true;
   }, [rows, parentIds]);
+  const close = () => setAction(undefined),
+    kind = action?.kind,
+    moduleKind =
+      kind === "quotas" || kind === "codes" || kind === "commissions"
+        ? kind
+        : undefined;
   const toggle = (id: string) =>
     setExpanded((current) => {
       const next = new Set(current);
@@ -65,7 +80,7 @@ export default function Providers({ notify }: { notify: Notify }) {
             onClick={() => {
               if (own)
                 setExpanded((current) => new Set(current).add(own.record.id));
-              setEditing(
+              setCreating(
                 own
                   ? {
                       parent: own.record.id,
@@ -86,6 +101,7 @@ export default function Providers({ notify }: { notify: Notify }) {
         onSubmit={(event) => event.preventDefault()}
       >
         <input
+          type="search"
           aria-label="搜索服务商"
           placeholder="搜索服务商名称或编号"
           value={query}
@@ -112,43 +128,62 @@ export default function Providers({ notify }: { notify: Notify }) {
           query={query}
           expanded={expanded}
           toggle={toggle}
-          edit={(item) =>
-            setEditing({
-              parent: item.record.data.parentId,
-              row: item.record,
-            })
-          }
+          open={(kind, item) => setAction({ kind, row: item.record })}
           add={(item) => {
             setExpanded((current) => new Set(current).add(item.record.id));
-            setEditing({
+            setCreating({
               parent: item.record.id,
               parentAvailable: available(item.quota.users),
             });
           }}
         />
       )}
-      {editing?.row ? (
-        <Suspense fallback={<LoadingState label="正在加载服务商编辑" />}>
-          <ProviderEditor
-            row={editing.row}
-            rows={rows}
-            notify={notify}
-            onClose={() => setEditing(undefined)}
-            onSaved={resource.reload}
-          />
-        </Suspense>
-      ) : editing ? (
+      {creating && (
         <ProviderForm
-          parent={editing.parent}
-          parentAvailable={editing.parentAvailable}
-          onClose={() => setEditing(undefined)}
+          parent={creating.parent}
+          parentAvailable={creating.parentAvailable}
+          onClose={() => setCreating(undefined)}
           notify={notify}
           onSaved={async () => {
             await resource.reload();
-            setEditing(undefined);
+            setCreating(undefined);
           }}
         />
-      ) : null}
+      )}
+      {action?.kind === "edit" && (
+        <ProviderForm
+          parent={action.row.data.parentId}
+          row={action.row}
+          onClose={close}
+          notify={notify}
+          onSaved={resource.reload}
+        />
+      )}
+      {action?.kind === "account" && (
+        <ProviderAccount row={action.row} notify={notify} onClose={close} />
+      )}
+      {action?.kind === "profile" && (
+        <Modal
+          className="form-modal"
+          title="本服务商资料"
+          subtitle={action.row.data.name}
+          onClose={close}
+        >
+          <ProviderSelf partner={action.row.data} />
+        </Modal>
+      )}
+      {action && moduleKind && (
+        <Suspense fallback={<LoadingState label="正在加载服务商功能" />}>
+          <ProviderModule
+            kind={moduleKind}
+            row={action.row}
+            rows={rows}
+            notify={notify}
+            onClose={close}
+            onSaved={resource.reload}
+          />
+        </Suspense>
+      )}
     </>
   );
 }

@@ -1,5 +1,7 @@
+import type { Tone } from "../components/Tag";
 import type { Row } from "../api";
 import type { Notify } from "../navigation";
+import { date } from "../api";
 export type Partner = {
   name: string;
   parentId: string;
@@ -62,13 +64,7 @@ export type Code = {
 };
 export const activationMethod = (method?: string) =>
   method === "qr" ? "扫码" : method === "code" ? "激活码" : "未记录";
-export const traceTime = (value?: string) =>
-  value
-    ? new Date(value).toLocaleString("zh-CN", {
-        timeZone: "Asia/Shanghai",
-        hour12: false,
-      })
-    : "—";
+export const traceTime = (value?: string) => date(value, true);
 export type Move = {
   parentId: string;
   childId: string;
@@ -146,3 +142,15 @@ export function hundredths(value: FormDataEntryValue | null) {
     throw Error("请输入最多两位小数的非负数字");
   return Math.round(Number(text) * 100);
 }
+// Tag tones for quota moves and commission ledger kinds.
+export const kindTones: Record<string, Tone> = {
+  grant: "success",
+  reclaim: "warning",
+  recharge: "success",
+  refund_hold: "warning",
+  refund_cancel: "muted",
+  refund_reverse: "danger",
+  payout_hold: "warning",
+  payout_paid: "info",
+  payout_cancel: "muted",
+};

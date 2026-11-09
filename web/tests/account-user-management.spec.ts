@@ -23,14 +23,20 @@ test("admin accounts and mini users have separate management controls", async ({
   await account.getByRole("button", { name: "关闭", exact: true }).click();
 
   await page.getByRole("button", { name: "小程序用户", exact: true }).click();
-  await page.getByRole("button", { name: "详情 / 积分", exact: true }).click();
-  const user = page.getByRole("dialog", { name: "小程序用户与积分" });
-  await user.getByText("编辑小程序用户资料", { exact: true }).click();
+  // Each user action has its own button in the row and its own small dialog.
+  const row = page.locator("tbody tr").first();
+  await row.getByRole("button", { name: "编辑", exact: true }).click();
+  const profile = page.getByRole("dialog", { name: "编辑用户资料" });
   await expect(
-    user.getByRole("button", { name: "保存用户资料" }),
+    profile.getByRole("button", { name: "保存用户资料" }),
   ).toBeVisible();
-  await user.getByText("账号状态管理 · 正常", { exact: true }).click();
-  await expect(user.getByRole("button", { name: "归档用户" })).toBeVisible();
+  await profile.getByRole("button", { name: "关闭", exact: true }).click();
+  await row.getByRole("button", { name: "停用", exact: true }).click();
+  const status = page.getByRole("dialog", { name: "停用账号" });
+  await expect(status.getByRole("button", { name: "停用账号" })).toBeVisible();
+  await status.getByRole("button", { name: "关闭", exact: true }).click();
+  // Users are only disabled, never archived.
+  await expect(page.getByRole("button", { name: /归档/ })).toHaveCount(0);
   await page.screenshot({
     path: "../.runtime/account-user-management.png",
     fullPage: true,

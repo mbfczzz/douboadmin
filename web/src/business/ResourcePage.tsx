@@ -20,7 +20,7 @@ export default function ResourcePage({
   children: ReactNode;
 }) {
   const refresh = () => {
-    if (canLeave()) void resource.reload();
+    void canLeave().then((ok) => ok && resource.reload());
   };
   return (
     <div className="catalog-page">

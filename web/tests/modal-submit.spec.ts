@@ -10,14 +10,13 @@ for (const sample of submitCases) {
     await login(page);
     await modalPartnerFixtures(page);
     await page.getByRole("button", { name: sample.nav, exact: true }).click();
-    if (sample.tab) {
+    if (sample.module)
       await page
-        .getByRole("button", { name: "编辑", exact: true })
+        .locator(".provider-tree-row")
         .first()
+        .getByRole("button", { name: sample.module, exact: true })
         .click();
-      await page.getByRole("tab", { name: sample.tab, exact: true }).click();
-    }
-    await page
+    await (sample.module ? page.getByRole("dialog").last() : page)
       .getByRole("button", { name: sample.open, exact: true })
       .first()
       .click();
@@ -33,18 +32,12 @@ for (const sample of submitCases) {
       ).toBeVisible();
     }
     const dialog = page.getByRole("dialog").last();
-    if (sample.reveal)
-      await dialog.getByRole("button", { name: sample.reveal }).click();
     const field = (label: string) =>
       dialog
         .getByLabel(label, { exact: true })
         .or(dialog.getByRole("textbox", { name: label, exact: true }));
     for (const [label, value] of Object.entries(sample.fields))
       await field(label).fill(value);
-    if (sample.selection)
-      await dialog
-        .getByRole("combobox", { name: sample.selection[0], exact: true })
-        .selectOption(sample.selection[1]);
     const count = await page.getByRole("dialog").count();
     let release!: () => void,
       submitted = 0;

@@ -72,7 +72,10 @@ test("mobile records expose every field without horizontal discovery", async ({
   await expect(record).toContainText("使用授权");
   await expect(record).toContainText("注册时间");
   await expect(
-    record.getByRole("button", { name: "详情 / 积分", exact: true }),
+    record.getByRole("button", { name: "详情", exact: true }),
+  ).toBeVisible();
+  await expect(
+    record.getByRole("button", { name: "积分", exact: true }),
   ).toBeVisible();
   await expect(page.locator(".record-table > .table-scroll")).toHaveCount(0);
 });

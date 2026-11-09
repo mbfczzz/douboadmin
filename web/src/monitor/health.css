@@ -1,0 +1,90 @@
+/* Monitor verdict banner: tone follows the worst open issue. */
+.health-summary {
+  --tone: var(--success);
+  --tone-soft: var(--success-soft);
+  display: grid;
+  grid-template-columns: minmax(260px, auto) minmax(0, 1fr);
+  align-items: center;
+  gap: 16px 28px;
+  margin-bottom: 18px;
+  padding: 18px 22px;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--tone);
+  border-radius: var(--radius);
+  background: linear-gradient(90deg, var(--tone-soft), var(--surface) 55%);
+}
+.health-summary.warning {
+  --tone: var(--warning);
+  --tone-soft: var(--warning-soft);
+}
+.health-summary.critical {
+  --tone: var(--danger);
+  --tone-soft: var(--danger-soft);
+}
+.health-summary.ok {
+  grid-template-columns: 1fr;
+}
+.health-verdict {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.health-verdict svg {
+  flex-shrink: 0;
+  color: var(--tone);
+}
+.health-verdict h2 {
+  margin: 0;
+  color: var(--ink-strong);
+  font-size: 20px;
+}
+.health-verdict p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+.health-issues {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.health-issues button {
+  gap: 8px;
+  padding: 7px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 13px;
+}
+.health-issues button:hover {
+  border-color: var(--accent-border);
+  color: var(--accent-text);
+}
+.health-issues i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--warning);
+}
+.health-issues .critical i {
+  background: var(--danger);
+}
+.health-issues svg {
+  color: var(--muted);
+}
+.monitor-panel {
+  scroll-margin-top: 80px;
+}
+@media (max-width: 900px) {
+  .health-summary {
+    grid-template-columns: 1fr;
+  }
+  .health-issues {
+    justify-content: flex-start;
+  }
+}

@@ -63,6 +63,9 @@ func (s *Service) Save(ctx context.Context, j core.Job, u string) (string, error
 	if _, err := s.Store.Get(ctx, "assets", id); err == nil {
 		return "asset:" + id, nil
 	}
+	if strings.HasPrefix(u, "data:") {
+		return s.saveInline(ctx, j, u)
+	}
 	req, err := http.NewRequestWithContext(ctx, "GET", u, nil)
 	if err != nil {
 		return "", err

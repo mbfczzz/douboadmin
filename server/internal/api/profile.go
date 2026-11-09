@@ -57,6 +57,8 @@ func (a *Server) me(w http.ResponseWriter, r *http.Request) {
 		dbError(w, e)
 		return
 	}
+	// The reason an administrator gave for disabling the account is internal.
+	delete(profile, "statusReason")
 	if avatarID, ok := profile["avatarId"].(string); ok && avatarID != "" {
 		asset, err := a.Store.Get(r.Context(), "assets", avatarID)
 		if err != nil && !errors.Is(err, core.ErrNotFound) {

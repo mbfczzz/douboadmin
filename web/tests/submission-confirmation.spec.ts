@@ -105,12 +105,8 @@ test("existing user profile requires approval and cancellation leaves the editor
   await login(page);
   await surfaceFixtures(page);
   await page.getByRole("button", { name: "小程序用户", exact: true }).click();
-  await page
-    .getByRole("button", { name: "详情 / 积分", exact: true })
-    .first()
-    .click();
-  const editor = page.getByRole("dialog", { name: "小程序用户与积分" });
-  await editor.getByText("编辑小程序用户资料", { exact: true }).click();
+  await page.getByRole("button", { name: "编辑", exact: true }).first().click();
+  const editor = page.getByRole("dialog", { name: "编辑用户资料" });
   await editor.getByLabel("昵称", { exact: true }).fill("保留的资料草稿");
   let writes = 0;
   await page.route("**/api/admin/users/*", async (route) => {
@@ -144,7 +140,7 @@ test("session expiry dismisses pending confirmation without submitting", async (
   await card.getByRole("button", { name: "保存配置", exact: true }).click();
   await expect(confirmation(page)).toBeVisible();
   await page.evaluate(() => window.dispatchEvent(new Event("session-expired")));
-  await expect(page.getByLabel("管理员账号")).toBeVisible();
+  await expect(page.getByLabel("账号", { exact: true })).toBeVisible();
   await expect(page.locator(".save-confirmation")).toHaveCount(0);
   expect(writes).toBe(0);
 });

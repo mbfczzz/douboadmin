@@ -2,7 +2,8 @@ import { api, date, type Row } from "../api";
 import { useResource } from "../hooks/useResource";
 import Table from "./Table";
 import RequestState from "../components/RequestState";
-import { money, statuses, type Refund } from "./types";
+import { money, type Refund } from "./types";
+import StatusBadge from "../components/StatusBadge";
 import type { Notify } from "../navigation";
 
 export default function RefundRecords({ notify }: { notify: Notify }) {
@@ -18,9 +19,11 @@ export default function RefundRecords({ notify }: { notify: Notify }) {
   }
   return (
     <>
-      <button className="secondary" onClick={() => void resource.reload()}>
-        刷新退款记录
-      </button>
+      <div className="business-filters">
+        <button className="secondary" onClick={() => void resource.reload()}>
+          刷新退款记录
+        </button>
+      </div>
       <RequestState
         loading={resource.loading && !resource.data}
         error={resource.error}
@@ -41,11 +44,16 @@ export default function RefundRecords({ notify }: { notify: Notify }) {
                 </>
               ),
             },
-            { title: "金额", render: (r) => money(r.data.amountFen) },
+            {
+              title: "金额",
+              render: (r) => (
+                <span className="amount">{money(r.data.amountFen)}</span>
+              ),
+            },
             { title: "原因", render: (r) => r.data.reason },
             {
               title: "状态",
-              render: (r) => statuses[r.data.status] || r.data.status,
+              render: (r) => <StatusBadge status={r.data.status} />,
             },
             { title: "申请时间", render: (r) => date(r.createdAt) },
             {

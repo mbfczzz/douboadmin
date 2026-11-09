@@ -46,24 +46,6 @@ export const pageInfo = {
   settings: ["系统设置", "部署状态与服务连接信息。", Settings2],
 } as const;
 export type PageId = keyof typeof pageInfo;
-// Small English section labels shown above page titles (theme decoration).
-export const pageEyebrow: Record<PageId, string> = {
-  overview: "OVERVIEW",
-  templates: "TEMPLATES",
-  jobs: "GENERATION JOBS",
-  works: "WORKS",
-  reviews: "CONTENT REVIEW",
-  orders: "RECHARGE ORDERS",
-  payments: "PAYMENTS",
-  monitor: "MONITORING",
-  users: "MINI-PROGRAM USERS",
-  partners: "SERVICE PROVIDERS",
-  accounts: "ADMIN ACCOUNTS",
-  roles: "ROLES",
-  models: "MODELS",
-  feedback: "FEEDBACK",
-  settings: "SETTINGS",
-};
 export type NoticeTone = "success" | "error" | "warning";
 export type Notify = (message: string, tone?: NoticeTone) => void;
 export const navGroups: { label: string; pages: PageId[] }[] = [

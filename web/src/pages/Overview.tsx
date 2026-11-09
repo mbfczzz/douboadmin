@@ -5,6 +5,12 @@ import { useResource } from "../hooks/useResource";
 import ResourcePage from "../business/ResourcePage";
 import Table from "../business/Table";
 import { money, type Dashboard } from "../business/types";
+import Trend from "../overview/Trend";
+import Kpis from "../overview/Kpis";
+import Generation from "../overview/Generation";
+import Business from "../overview/Business";
+import "../overview/charts.css";
+import "../overview/tip.css";
 const Details = lazy(() => import("../overview/Details"));
 
 export default function Overview({ config, navigate }: PageProps) {
@@ -33,7 +39,6 @@ export default function Overview({ config, navigate }: PageProps) {
       paid: 0,
     },
   );
-  const peak = Math.max(0, ...series.map((d) => d.jobs));
   const unknownCost = (data?.models || []).reduce(
     (sum, m) => sum + Math.max(0, m.calls - m.known),
     0,
@@ -109,39 +114,9 @@ export default function Overview({ config, navigate }: PageProps) {
             </div>
           ))}
         </div>
+        {data && <Kpis data={data} />}
         <div className="overview-summary">
-          <section className="panel">
-            <div className="section-head">
-              <h2>每日生成量</h2>
-              <span className="quiet">峰值 {peak} 次 / 日</span>
-            </div>
-            <div
-              className="business-trend"
-              role="img"
-              aria-label="每日生成量趋势"
-            >
-              {!peak && <span className="quiet">所选时段暂无生成任务</span>}
-              {!!peak && (
-                <span className="trend-scale quiet" aria-hidden="true">
-                  <span>{peak}</span>
-                  <span>0</span>
-                </span>
-              )}
-              {!!peak &&
-                series.map((d) => (
-                  <div
-                    key={d.date}
-                    title={d.date + "：" + d.jobs + " 次"}
-                    style={{ height: peak ? (d.jobs / peak) * 180 : 0 }}
-                  />
-                ))}
-            </div>
-            <p className="chart-axis quiet">
-              <span>{series[0]?.date}</span>
-              <span>北京时间</span>
-              <span>{series.at(-1)?.date}</span>
-            </p>
-          </section>
+          <Trend series={series} />
           <section className="panel attention-panel">
             <div className="section-head">
               <h2>需要处理</h2>
@@ -168,6 +143,8 @@ export default function Overview({ config, navigate }: PageProps) {
             )}
           </section>
         </div>
+        {data?.breakdown && <Generation b={data.breakdown} />}
+        {data?.breakdown && <Business b={data.breakdown} />}
         <section className="panel overview-section">
           <div className="section-head">
             <h2>AI 调用成本</h2>

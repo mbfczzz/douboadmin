@@ -17,11 +17,17 @@ export function useOverlay(
 ) {
   const close = useRef(onClose);
   close.current = onClose;
+  // The element that opened the overlay, read before any autoFocus inside it
+  // moves focus, so closing returns focus to the opener.
+  const opener = useRef<HTMLElement | null>(null);
+  if (!open) opener.current = null;
+  else opener.current ??= document.activeElement as HTMLElement | null;
   useEffect(() => {
     if (!open) return;
     const panel = anchor.current?.closest<HTMLElement>('[role="dialog"]');
     if (!panel) return;
-    const previous = document.activeElement as HTMLElement | null;
+    const active = document.activeElement as HTMLElement | null,
+      previous = active && panel.contains(active) ? opener.current : active;
     if (!locks++) originalOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     const focusable = () =>

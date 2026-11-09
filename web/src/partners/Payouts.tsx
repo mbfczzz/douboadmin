@@ -3,18 +3,48 @@ import { isProviderAccount, useMe } from "../session";
 import { date, type Row } from "../api";
 import { money } from "../business/types";
 import Modal from "../components/Modal";
+import { ask } from "../confirm/ask";
 import Records, { useRecords } from "./Records";
 import { useCommand } from "./useCommand";
 import type { Payout, Scope } from "./types";
 import { hundredths } from "./types";
 import { PartnerStatus } from "./PartnerIdentity";
+import "../components/detail.css";
 export default function Payouts({ id, view, changed, notify }: Scope) {
   const resource = useRecords<Payout>("/admin/commission-payouts?owner=" + id),
     [create, setCreate] = useState(false),
-    [detail, setDetail] = useState<Row<Payout> | null>(null),
     command = useCommand(),
     // Confirming offline payouts is a platform task.
     provider = isProviderAccount(useMe());
+  // 确认打款 and 取消提现 are separate buttons, each asking for its own record.
+  async function settle(row: Row<Payout>, status: "paid" | "cancelled") {
+    const paid = status === "paid",
+      amount = money(row.data.amountFen);
+    const reference = await ask({
+      title: paid ? "确认已线下打款" : "取消提现",
+      message: paid
+        ? `确认已向服务商线下打款 ${amount}。本操作仅登记打款结果，不会自动转账。`
+        : `取消后 ${amount} 佣金解冻，回到服务商可提现余额。`,
+      confirmText: paid ? "登记打款" : "取消提现",
+      danger: !paid,
+      reason: {
+        label: paid ? "打款流水号" : "取消原因",
+        placeholder: paid ? "银行或支付平台的转账流水号" : undefined,
+        minLength: 4,
+      },
+      run: (reference) =>
+        command.send(
+          "/admin/commission-payouts/" + row.id,
+          { version: row.version, status, reference },
+          "PUT",
+          { before: row.data },
+        ),
+    });
+    if (reference === false) return;
+    notify(paid ? "打款结果已登记" : "提现已取消，佣金已解冻");
+    await resource.reload();
+    await changed();
+  }
   return (
     <>
       <Records
@@ -33,7 +63,12 @@ export default function Payouts({ id, view, changed, notify }: Scope) {
           </button>
         }
         columns={[
-          { title: "金额", render: (r) => money(r.data.amountFen) },
+          {
+            title: "金额",
+            render: (r) => (
+              <span className="amount">{money(r.data.amountFen)}</span>
+            ),
+          },
           {
             title: "状态",
             render: (r) => <PartnerStatus state={r.data.status} />,
@@ -53,9 +88,22 @@ export default function Payouts({ id, view, changed, notify }: Scope) {
             action: true,
             render: (r) =>
               r.data.status === "pending" && !provider ? (
-                <button className="text-button" onClick={() => setDetail(r)}>
-                  处理提现
-                </button>
+                <div className="business-actions">
+                  <button
+                    className="text-button"
+                    disabled={command.busy}
+                    onClick={() => void settle(r, "paid")}
+                  >
+                    确认打款
+                  </button>
+                  <button
+                    className="text-button danger-text"
+                    disabled={command.busy}
+                    onClick={() => void settle(r, "cancelled")}
+                  >
+                    取消提现
+                  </button>
+                </div>
               ) : (
                 "—"
               ),
@@ -123,76 +171,6 @@ export default function Payouts({ id, view, changed, notify }: Scope) {
               </button>
               <button className="primary" disabled={command.busy}>
                 预留提现佣金
-              </button>
-            </div>
-          </form>
-        </Modal>
-      )}
-      {detail && (
-        <Modal
-          className="form-modal"
-          title="处理提现"
-          onClose={() => !command.busy && setDetail(null)}
-        >
-          <form
-            className="edit-form"
-            aria-busy={command.busy}
-            data-unsaved={command.busy || undefined}
-            onSubmit={async (e) => {
-              e.preventDefault();
-              const f = new FormData(e.currentTarget),
-                status = String(f.get("status"));
-              try {
-                await command.send(
-                  "/admin/commission-payouts/" + detail.id,
-                  {
-                    version: detail.version,
-                    status,
-                    reference: String(f.get("reference")),
-                  },
-                  "PUT",
-                  { before: detail.data },
-                );
-                setDetail(null);
-                await resource.reload();
-                await changed();
-              } catch (e) {
-                notify((e as Error).message, "error");
-              }
-            }}
-          >
-            <div className="form-body">
-              <fieldset disabled={command.busy}>
-                <p>{money(detail.data.amountFen)}</p>
-                <label>
-                  处理结果
-                  <select name="status">
-                    <option value="paid">确认已线下打款</option>
-                    <option value="cancelled">取消提现并解冻</option>
-                  </select>
-                </label>
-                <label>
-                  打款流水号 / 取消原因
-                  <textarea
-                    name="reference"
-                    minLength={4}
-                    maxLength={200}
-                    required
-                  />
-                </label>
-              </fieldset>
-            </div>
-            <div className="modal-actions">
-              <button
-                type="button"
-                className="secondary"
-                disabled={command.busy}
-                onClick={() => !command.busy && setDetail(null)}
-              >
-                取消
-              </button>
-              <button className="primary" disabled={command.busy}>
-                保存提现结果
               </button>
             </div>
           </form>

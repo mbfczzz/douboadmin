@@ -113,7 +113,7 @@ export default function TemplateOptions({
         </div>
       )}
       {!available.length && (
-        <p className="muted">请先在模型管理中同步此类型的模型。</p>
+        <p className="quiet">请先在模型管理中同步此类型的模型。</p>
       )}
     </>
   );

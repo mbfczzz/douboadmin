@@ -1,3 +1,4 @@
+import type { Tone } from "../components/Tag";
 export interface Wallet {
   userId: string;
   availableUnits: number;
@@ -106,8 +107,38 @@ export interface Daily {
   paidFen: number;
   refundFen: number;
   revenueFen: number;
+  paidOrders?: number;
+  spentUnits?: number;
+}
+export interface KindStat {
+  jobs: number;
+  succeeded: number;
+  failed: number;
+  spentUnits: number;
+  durationMs: number;
+  timed: number;
+}
+export interface Breakdown {
+  totalUsers: number;
+  activeUsers: number;
+  creatorUsers: number;
+  payers: number;
+  kinds: Record<string, KindStat>;
+  hours: number[];
+  weekdays: number[];
+  ordersCreated: number;
+  ordersPaid: number;
+  pointsSold: number;
+  channels: Record<string, { orders: number; amountFen: number }>;
+  refunds: number;
+  directActivations: number;
+  providerActivations: number;
+  codesIssued: number;
+  codesRedeemed: number;
+  providers: { id: string; name: string; activations: number }[];
 }
 export interface Dashboard {
+  breakdown?: Breakdown;
   days: Daily[];
   models: {
     model: string;
@@ -157,4 +188,26 @@ export const ledgerLabels: Record<string, string> = {
   refund_hold: "退款预留",
   refund_complete: "退款回收",
   refund_cancel: "退款关闭",
+};
+// Tag tones for categories that were plain text in tables.
+export const ledgerTones: Record<string, Tone> = {
+  topup: "success",
+  admin_adjust: "info",
+  job_hold: "warning",
+  job_charge: "accent",
+  job_release: "info",
+  refund_hold: "warning",
+  refund_complete: "danger",
+  refund_cancel: "muted",
+};
+export const channels: Record<string, [string, Tone]> = {
+  wechat_jsapi: ["微信支付", "success"],
+  wechat_virtual: ["微信虚拟支付", "accent"],
+};
+export const kindNames: Record<string, string> = {
+  image: "图片",
+  video: "视频",
+  chat: "Agent 对话",
+  audio: "配音",
+  mix: "混剪",
 };

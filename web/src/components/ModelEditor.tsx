@@ -9,16 +9,19 @@ import PricingFields from "../models/PricingFields";
 import { ErrorFields, StatusFields } from "../models/StatusFields";
 import { modelDraft, type ModelSettings } from "../models/settings";
 import { canLeave } from "../hooks/unsaved";
+import { modelSections, type ModelSection } from "../models/sections";
 import "../styles/model-config.css";
 export { modelKinds, supportedModel } from "../models/settings";
 export { default as ModelImport } from "./ModelImport";
 
 export default function ModelEditor({
   row,
+  section,
   onClose,
   onSaved,
 }: {
   row: Row<Model>;
+  section: ModelSection;
   onClose: () => void;
   onSaved: () => void;
 }) {
@@ -31,7 +34,7 @@ export default function ModelEditor({
     if (record.error) errorRef.current?.focus();
   }, [record.error]);
   function close() {
-    if (!busy && canLeave()) onClose();
+    if (!busy) void canLeave().then((ok) => ok && onClose());
   }
   function patch(value: Partial<ModelSettings>) {
     setModel((m) => ({ ...m, settings: { ...m.settings, ...value } }));
@@ -52,8 +55,8 @@ export default function ModelEditor({
   }
   return (
     <Modal
-      title={`配置模型 · ${row.data.name}`}
-      subtitle="基础信息 · 生成能力 · 积分定价（每个模型独立配置，同步至小程序创作页）"
+      title={`${modelSections[section].title} · ${row.data.name}`}
+      subtitle="保存后同步至小程序创作页"
       className="model-config"
       onClose={close}
     >
@@ -66,24 +69,36 @@ export default function ModelEditor({
       >
         <div className="model-config-body">
           <fieldset disabled={busy}>
-            <BasicFields
-              model={model}
-              onChange={(m) => {
-                setModel(m);
-                setDirty(true);
-              }}
-            />
-            <Capabilities model={model} onChange={patch} />
-            <PromptFields model={model} onChange={patch} />
-            <PricingFields model={model} onChange={patch} />
-            <ErrorFields model={model} onChange={patch} />
-            <StatusFields
-              model={model}
-              onChange={(m) => {
-                setModel(m);
-                setDirty(true);
-              }}
-            />
+            {section === "basic" && (
+              <BasicFields
+                model={model}
+                onChange={(m) => {
+                  setModel(m);
+                  setDirty(true);
+                }}
+              />
+            )}
+            {section === "capabilities" && (
+              <Capabilities model={model} onChange={patch} />
+            )}
+            {section === "prompt" && (
+              <PromptFields model={model} onChange={patch} />
+            )}
+            {section === "pricing" && (
+              <PricingFields model={model} onChange={patch} />
+            )}
+            {section === "status" && (
+              <>
+                <StatusFields
+                  model={model}
+                  onChange={(m) => {
+                    setModel(m);
+                    setDirty(true);
+                  }}
+                />
+                <ErrorFields model={model} onChange={patch} />
+              </>
+            )}
           </fieldset>
         </div>
         <footer className="model-config-footer">

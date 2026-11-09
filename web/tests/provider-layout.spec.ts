@@ -102,7 +102,7 @@ test("provider layout stays aligned and contained across desktop, tablet and mob
   }
 });
 
-test("search, expansion, expand-all and row editing keep working", async ({
+test("search, expansion, expand-all and the edit action keep working", async ({
   page,
 }) => {
   await page
@@ -129,7 +129,14 @@ test("search, expansion, expand-all and row editing keep working", async ({
   await expect(
     page.getByRole("button", { name: /复制服务商编号/ }),
   ).toHaveCount(0);
+  // Only the row buttons open dialogs; clicking the row does nothing.
   await page.getByText(names[2], { exact: true }).click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await page
+    .locator(".provider-tree-row")
+    .filter({ hasText: names[2] })
+    .getByRole("button", { name: "编辑", exact: true })
+    .click();
   await expect(
     page.getByRole("dialog", { name: "编辑服务商", exact: true }),
   ).toBeVisible();

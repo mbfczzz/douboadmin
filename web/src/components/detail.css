@@ -1,0 +1,91 @@
+/* Detail dialogs: a headline strip, then grouped key/value cards. */
+.detail-hero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 20px;
+  margin-bottom: 16px;
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: linear-gradient(
+    135deg,
+    var(--accent-soft),
+    var(--surface-subtle) 60%
+  );
+}
+.detail-hero strong {
+  display: block;
+  color: var(--ink-strong);
+  font-size: 28px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.15;
+}
+.detail-hero small {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.detail-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.detail-card {
+  margin-bottom: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-subtle);
+}
+.detail-card h4 {
+  margin: 0;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.detail-grid {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  gap: 10px 14px;
+  margin: 0;
+  padding: 14px 16px;
+}
+.detail-grid dt {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 22px;
+}
+.detail-grid dd {
+  min-width: 0;
+  margin: 0;
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 22px;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 520px) {
+  .detail-grid {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+  .detail-grid dd {
+    margin-bottom: 8px;
+  }
+}
+.job-detail .job-tags {
+  margin-bottom: 12px;
+}
+.job-detail h3 {
+  margin: 0 0 16px;
+  line-height: 1.6;
+}
+.detail-card .id-chip {
+  background: var(--surface-raised);
+}

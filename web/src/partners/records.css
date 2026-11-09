@@ -1,0 +1,153 @@
+/* Editor tab layout: summary card, then compact record sections. */
+.tab-summary {
+  margin-bottom: 20px;
+  padding: 18px 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, var(--surface-raised), var(--surface));
+}
+.tab-summary-main {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px 24px;
+}
+.tab-summary dl {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 32px;
+  margin: 0;
+}
+.tab-summary dt {
+  color: var(--muted);
+  font-size: 12px;
+}
+.tab-summary dd {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin: 4px 0 0;
+  color: var(--ink-strong);
+  font-size: 24px;
+  font-weight: 680;
+  font-variant-numeric: tabular-nums;
+}
+.tab-summary dd small {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+}
+.tab-summary .accent dd {
+  color: var(--accent-text);
+}
+.tab-summary .success dd {
+  color: var(--success);
+}
+.tab-summary .warning dd {
+  color: var(--warning);
+}
+.tab-summary .danger dd {
+  color: var(--danger);
+}
+.tab-summary .quota-bar {
+  max-width: none;
+  height: 6px;
+  margin: 16px 0 0;
+  border-radius: 3px;
+}
+.tab-summary dt i {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 6px;
+  border-radius: 50%;
+  vertical-align: 1px;
+}
+.tab-summary dt .used {
+  background: var(--accent);
+}
+.tab-summary dt .reserved {
+  background: var(--warning);
+}
+.tab-summary dt .allocated {
+  background: var(--info);
+}
+.partner-records > .catalog-head h2 {
+  font-size: 16px;
+}
+.records-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  flex-basis: 100%;
+}
+.records-search {
+  display: flex;
+  flex: 0 1 360px;
+  min-width: 0;
+}
+.records-search > span {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+.records-search svg {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  color: var(--muted);
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+.records-search input {
+  padding-left: 36px;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.records-search > button {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  margin-left: -1px;
+}
+.records-toolbar > .icon {
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text);
+}
+.records-toolbar > .icon:hover {
+  border-color: var(--accent-border);
+  color: var(--accent-text);
+}
+.records-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+@media (max-width: 640px) {
+  .records-search {
+    flex: 1 1 0;
+  }
+  /* Options such as checkboxes get their own row so search keeps its width. */
+  .records-controls {
+    flex-basis: 100%;
+  }
+  .partner-records > .catalog-head {
+    padding: 16px 14px;
+  }
+  .tab-summary {
+    padding: 14px;
+  }
+  .tab-summary dl {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+  }
+  .records-controls {
+    margin-left: 0;
+  }
+}

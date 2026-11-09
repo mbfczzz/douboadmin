@@ -9,6 +9,7 @@ import Modal from "../components/Modal";
 import MediaPreview from "../business/MediaPreview";
 import { statuses, type Review } from "../business/types";
 import StatusBadge from "../components/StatusBadge";
+import { IdChip } from "../components/Tag";
 type Item = { record: Row<Review>; job: Job };
 
 export default function Reviews({ notify }: PageProps) {
@@ -19,6 +20,11 @@ export default function Reviews({ notify }: PageProps) {
     [busy, setBusy] = useState(false);
   async function decide(status: string) {
     if (!detail || busy) return;
+    if (status === "rejected" && !reason.trim()) {
+      notify("驳回需要填写审核说明，方便用户修改后重新提交", "warning");
+      document.querySelector<HTMLTextAreaElement>("#review-reason")?.focus();
+      return;
+    }
     setBusy(true);
     try {
       await api(`/admin/reviews/${detail.job.id}`, {
@@ -66,7 +72,7 @@ export default function Reviews({ notify }: PageProps) {
             title: "作品",
             render: (r) => r.job.input.prompt.slice(0, 36) || "混剪作品",
           },
-          { title: "用户", render: (r) => r.job.userId },
+          { title: "用户", render: (r) => <IdChip>{r.job.userId}</IdChip> },
           {
             title: "状态",
             render: (r) => <StatusBadge status={r.record.data.status} />,
@@ -96,6 +102,7 @@ export default function Reviews({ notify }: PageProps) {
             <label>
               审核说明（驳回必填）
               <textarea
+                id="review-reason"
                 disabled={busy}
                 placeholder="驳回时必填；审核通过可留空"
                 value={reason}
@@ -106,7 +113,7 @@ export default function Reviews({ notify }: PageProps) {
             <div className="modal-actions">
               <button
                 className="secondary danger-text"
-                disabled={busy || !reason.trim()}
+                disabled={busy}
                 onClick={() => void decide("rejected")}
               >
                 驳回

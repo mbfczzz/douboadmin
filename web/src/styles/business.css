@@ -22,6 +22,15 @@
   align-items: center;
   flex-wrap: wrap;
 }
+/* Row actions stay on one line in desktop tables. */
+.catalog-table td .business-actions {
+  flex-wrap: nowrap;
+  gap: 4px;
+}
+.catalog-table button.danger-text,
+.mobile-record-actions button.danger-text {
+  color: var(--danger);
+}
 .business-actions button:not(.primary, .secondary),
 .mobile-record-actions button:not(.primary, .secondary),
 .catalog-table button {
@@ -168,6 +177,15 @@
     margin-top: 14px;
     padding-top: 10px;
     border-top: 1px solid var(--line);
+  }
+  /* Several row actions sit side by side; each keeps a 44px touch target. */
+  .mobile-record-actions .business-actions {
+    gap: 4px 6px;
+  }
+  .mobile-record-actions button:not(.primary, .secondary) {
+    min-width: 44px;
+    padding-inline: 10px;
+    font-size: 13px;
   }
   .business-metrics {
     grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));

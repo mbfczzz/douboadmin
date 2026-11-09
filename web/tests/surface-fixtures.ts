@@ -138,6 +138,7 @@ export async function surfaceFixtures(page: Page) {
       phase: "polling",
       taskId: "test-task",
       modelKey: "test-model",
+      note: "上游状态：processing",
       startedAt: now,
     },
     "/works": [

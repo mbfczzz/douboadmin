@@ -7,6 +7,7 @@ import PageHeader from "../components/PageHeader";
 import RequestState, { LoadingState } from "../components/RequestState";
 import type { Platform } from "../business/types";
 import RefundRecords from "../business/RefundRecords";
+import { useMe } from "../session";
 const PaymentRecords = lazy(() => import("../business/PaymentRecords"));
 const VirtualEvents = lazy(() => import("../business/VirtualEvents"));
 
@@ -16,12 +17,16 @@ export default function Payments({ notify, navigate }: PageProps) {
     record: Row<Platform>;
     capabilities: { payment: boolean };
   }>("/admin/platform");
+  // Only roles that can open 系统设置 get the shortcut.
+  const canSettings = !!useMe()?.menus.includes("settings");
   return (
     <div className="catalog-page payments-page">
       <PageHeader page="payments">
-        <button className="secondary" onClick={() => navigate("settings")}>
-          充值与积分设置
-        </button>
+        {canSettings && (
+          <button className="secondary" onClick={() => navigate("settings")}>
+            充值与积分设置
+          </button>
+        )}
       </PageHeader>
       <RequestState error={settings.error} retry={settings.reload} />
       <div
