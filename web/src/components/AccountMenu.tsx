@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { ChevronDown, KeyRound, LogOut } from "lucide-react";
 import type { Me } from "../session";
 import type { Notify } from "../navigation";
@@ -81,9 +82,13 @@ export default function AccountMenu({
           </button>
         </div>
       )}
-      {password && (
-        <ChangePassword notify={notify} onClose={() => setPassword(false)} />
-      )}
+      {password &&
+        // Rendered on <body>: inside the sticky top bar the dialog would sit
+        // under the sidebar's stacking layer.
+        createPortal(
+          <ChangePassword notify={notify} onClose={() => setPassword(false)} />,
+          document.body,
+        )}
     </div>
   );
 }

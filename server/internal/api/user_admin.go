@@ -20,8 +20,8 @@ func (a *Server) updateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	input.Nickname, input.Name, input.Phone, input.Bio = strings.TrimSpace(input.Nickname), strings.TrimSpace(input.Name), strings.TrimSpace(input.Phone), strings.TrimSpace(input.Bio)
-	if input.Nickname == "" || len([]rune(input.Nickname)) > 30 || len([]rune(input.Name)) > 50 || len([]rune(input.Bio)) > 120 || (input.Phone != "" && !validPhone.MatchString(input.Phone)) {
-		fail(w, 400, "小程序用户资料无效")
+	if problem := userProfileProblem(input.Nickname, input.Name, input.Phone, input.Bio); problem != "" {
+		fail(w, 400, problem)
 		return
 	}
 	row, err := a.Store.Get(r.Context(), "users", r.PathValue("id"))
@@ -94,4 +94,19 @@ func (a *Server) archiveUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	reply(w, 200, row)
+}
+
+// userProfileProblem names the first invalid field instead of a generic error.
+func userProfileProblem(nickname, name, phone, bio string) string {
+	switch {
+	case nickname == "" || len([]rune(nickname)) > 30:
+		return "昵称需为 1–30 字"
+	case len([]rune(name)) > 50:
+		return "姓名不能超过 50 字"
+	case phone != "" && !validPhone.MatchString(phone):
+		return "手机号格式不正确"
+	case len([]rune(bio)) > 120:
+		return "简介不能超过 120 字"
+	}
+	return ""
 }

@@ -49,8 +49,7 @@
         bindinput="input"
         placeholder="输入充值金额"
       /><text class="biz-note"
-        >1 元约 {{displayRate}} 积分，预计获得 {{estimated}}
-        积分</text></block
+        >1 元约 {{displayRate}} 积分，预计获得 {{estimated}} 积分</text></block
       ><button
         class="biz-action"
         loading="{{busy}}"

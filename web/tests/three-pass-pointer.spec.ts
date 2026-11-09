@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { login } from "./helpers";
+import { answerAsk, login } from "./helpers";
 
 test("dragging a selection out of a dialog does not dismiss it", async ({
   page,
@@ -17,6 +17,8 @@ test("dragging a selection out of a dialog does not dismiss it", async ({
   await page.mouse.up();
   await expect(dialog).toBeVisible();
   await expect(input).toHaveValue("draft-model-id");
+  // A real backdrop click closes it, asking first because of the typed text.
   await page.mouse.click(5, 5);
+  await answerAsk(page, true);
   await expect(dialog).toHaveCount(0);
 });

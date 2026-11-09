@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { guardedClose } from "../hooks/unsaved";
-import { api, type Row } from "../api";
+import { api, APIError, type Row } from "../api";
 import Modal from "../components/Modal";
 import type { Notify } from "../navigation";
 import type { AdminAccount } from "./types";
@@ -61,9 +61,13 @@ export default function AccountForm({
       onClose();
       notify(row ? "账号资料已更新" : "管理账号已创建");
     } catch (error) {
-      setError((error as Error).message);
-      // A login in the meantime bumps the version; refresh so a retry works.
-      if (row) void onSaved();
+      if (row && error instanceof APIError && error.status === 409) {
+        // Someone else changed this account: load their version into the
+        // form instead of letting a second click overwrite it.
+        setError("账号资料已被其他人修改，已载入最新内容，请核对后重新保存");
+        await onSaved();
+        setDirty(false);
+      } else setError((error as Error).message);
     } finally {
       setBusy(false);
     }
@@ -76,6 +80,8 @@ export default function AccountForm({
       onClose={guardedClose(busy, onClose)}
     >
       <form
+        // A new version (after a conflict) remounts the fields with its values.
+        key={row?.version}
         className="edit-form"
         onChange={() => setDirty(true)}
         data-unsaved={dirty || busy || undefined}

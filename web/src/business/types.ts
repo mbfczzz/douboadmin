@@ -153,7 +153,12 @@ export const points = (units: number) =>
   new Intl.NumberFormat("zh-CN", { maximumFractionDigits: 2 }).format(
     (units || 0) / 100,
   );
-export const money = (fen: number) => "¥" + ((fen || 0) / 100).toFixed(2);
+// Thousands separators like points, so large amounts read the same way.
+const yuan = new Intl.NumberFormat("zh-CN", {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
+export const money = (fen: number) => "¥" + yuan.format((fen || 0) / 100);
 export const statuses: Record<string, string> = {
   created: "待支付",
   paid: "已支付",

@@ -1,5 +1,5 @@
 import { money, points, type Dashboard } from "../business/types";
-import { pct, seconds } from "./format";
+import { count, pct, seconds } from "./format";
 
 // Secondary indicators derived from the period breakdown.
 export default function Kpis({ data }: { data: Dashboard }) {
@@ -16,10 +16,10 @@ export default function Kpis({ data }: { data: Dashboard }) {
     duration = kinds.reduce((a, k) => a + k.durationMs, 0),
     timed = kinds.reduce((a, k) => a + k.timed, 0);
   const items: [string, string, string][] = [
-    ["累计用户", String(b.totalUsers), `周期新增 ${sum((d) => d.newUsers)}`],
+    ["累计用户", count(b.totalUsers), `周期新增 ${sum((d) => d.newUsers)}`],
     [
       "活跃用户",
-      String(b.activeUsers),
+      count(b.activeUsers),
       `日均 ${(sum((d) => d.activeUsers) / activeDays).toFixed(1)} 人`,
     ],
     ["生成成功率", pct(succeeded, jobs), `失败 ${sum((d) => d.failed)} 次`],
@@ -29,7 +29,7 @@ export default function Kpis({ data }: { data: Dashboard }) {
       points(spent),
       `人均 ${b.creatorUsers ? points(spent / b.creatorUsers) : "—"}`,
     ],
-    ["付费用户", String(b.payers), `付费率 ${pct(b.payers, b.activeUsers)}`],
+    ["付费用户", count(b.payers), `付费率 ${pct(b.payers, b.activeUsers)}`],
     [
       "客单价",
       b.ordersPaid ? money(paid / b.ordersPaid) : "—",
@@ -43,7 +43,7 @@ export default function Kpis({ data }: { data: Dashboard }) {
     ["退款率", pct(b.refunds, b.ordersPaid), `退款 ${b.refunds} 笔`],
     [
       "新开通用户",
-      String(b.directActivations + b.providerActivations),
+      count(b.directActivations + b.providerActivations),
       `服务商 ${b.providerActivations} · 直接 ${b.directActivations}`,
     ],
   ];

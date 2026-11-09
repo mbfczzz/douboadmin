@@ -7,11 +7,8 @@
   <view wx:elif="{{!me}}" class="guest-profile">
     <view class="avatar"><t-icon name="user" size="34" /></view>
     <text class="guest-title">欢迎来到你的创作空间</text>
-    <text class="guest-copy">
-      登录后，保存作品、收藏灵感，
-      <view />
-      继续每一个未完成的好想法。
-    </text>
+    <text class="guest-copy">登录后，保存作品、收藏灵感，
+继续每一个未完成的好想法。</text>
     <t-button theme="primary" block bind:tap="signIn">微信登录</t-button>
     <text class="note">登录不会自动获取你的头像、昵称或手机号</text>
   </view>

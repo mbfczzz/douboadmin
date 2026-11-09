@@ -1,7 +1,6 @@
 import {
   request,
   error,
-  logout,
   media,
   jobView,
   openTask,
@@ -38,7 +37,6 @@ Page({
       favorites: "我的收藏",
       notifications: "消息通知",
       help: "帮助与反馈",
-      settings: "设置",
     };
     const mode = names[o.mode] ? o.mode : "help";
     this.setData({ mode, title: names[mode] });
@@ -179,32 +177,5 @@ Page({
     } finally {
       if (!this.destroyed) this.setData({ busy: false });
     }
-  },
-  logout() {
-    wx.showModal({
-      title: "退出登录",
-      content: "退出后，下次使用需要重新登录。",
-      success: async (r) => {
-        if (!r.confirm) return;
-        try {
-          await logout();
-          wx.showToast({ title: "已退出", icon: "success" });
-          wx.reLaunch({
-            url: "/pages/templates/index",
-            fail: () => error(new Error("已退出登录，请重新打开小程序")),
-          });
-        } catch (e) {
-          error(e);
-        }
-      },
-    });
-  },
-  privacy() {
-    wx.showModal({
-      title: "服务使用说明",
-      content:
-        "创作内容通过服务端提交给模型处理，作品和任务记录保存在服务端。豆播积分支付与扣费尚未启用。",
-      showCancel: false,
-    });
   },
 });

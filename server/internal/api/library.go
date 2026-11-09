@@ -26,10 +26,17 @@ func (a *Server) favorite(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	tid := r.PathValue("id")
-	// Only templates users can see may be favorited; removing always works.
+	// Only templates users can see may be favorited. Removing works for any
+	// existing favorite or template, but never creates records for unknown ids.
 	if v.Active && !a.templateVisible(r, a.modelReady(r), tid) {
 		fail(w, 404, "模板已下架")
 		return
+	}
+	if !v.Active && v.Version == 0 {
+		if _, e := a.Store.Get(r.Context(), "templates", tid); e != nil {
+			dbError(w, e)
+			return
+		}
 	}
 	id := identity(r).ID
 	row, e := a.Store.Put(r.Context(), "favorites", core.Record{ID: core.Digest(id + ":" + tid)[:32], Owner: id, Data: core.Data(map[string]any{"templateId": tid, "active": v.Active})}, v.Version)

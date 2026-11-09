@@ -1,0 +1,29 @@
+/* 用户反馈: one row per message — icon, text, then who/when underneath. */
+.feedback-list article {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px 22px;
+  border-top: 1px solid var(--line);
+}
+.feedback-list .avatar {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+.feedback-list p {
+  margin: 0 0 6px;
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+.feedback-list small {
+  color: var(--muted);
+  font-size: 12px;
+}

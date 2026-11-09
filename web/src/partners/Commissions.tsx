@@ -40,7 +40,7 @@ export default function Commissions(scope: Scope) {
             ),
           },
           {
-            title: "可用变动 / 预留变动",
+            title: "可用 / 预留变动",
             render: (r) => (
               <>
                 <Delta value={r.data.amountFen}>

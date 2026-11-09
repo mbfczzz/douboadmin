@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { guardedClose } from "../hooks/unsaved";
 import { api } from "../api";
 import Modal from "../components/Modal";
 import { navGroups, pageInfo, type Notify, type PageId } from "../navigation";
@@ -24,7 +25,8 @@ export default function RoleForm({
   const [scope, setScope] = useState<RoleScope>(row?.data.scope || "platform"),
     [menus, setMenus] = useState<string[]>(row?.data.menus || []),
     [busy, setBusy] = useState(false),
-    [error, setError] = useState("");
+    [error, setError] = useState(""),
+    [dirty, setDirty] = useState(false);
   const groups =
     scope === "partner"
       ? [{ label: "服务商菜单", pages: partnerMenus as PageId[] }]
@@ -73,10 +75,12 @@ export default function RoleForm({
     <Modal
       className="form-modal"
       title={row ? "编辑角色" : "新增角色"}
-      onClose={() => !busy && onClose()}
+      onClose={guardedClose(busy, onClose)}
     >
       <form
         className="edit-form"
+        onChange={() => setDirty(true)}
+        data-unsaved={dirty || busy || undefined}
         onSubmit={(e) => {
           e.preventDefault();
           void save(e.currentTarget);

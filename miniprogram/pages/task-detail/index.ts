@@ -35,8 +35,9 @@ Page({
   destroyed: false,
   onLoad(o: Record<string, string>) {
     this.id = o.id;
+    // The key is only stored once a retry is attempted, so opening task
+    // details does not leave storage entries behind.
     this.retryKey = wx.getStorageSync("retry-" + this.id) || uid();
-    wx.setStorageSync("retry-" + this.id, this.retryKey);
     const approval = wx.getStorageSync("retry-approval-" + this.id);
     if (typeof approval === "number") this.retryApproval = approval;
   },
@@ -100,7 +101,7 @@ Page({
       if (j.status === "succeeded" || j.status === "failed")
         clearInterval(this.timer);
       if (
-        j.input.assets.length &&
+        (j.input.assets || []).length &&
         !this.data.assets.length &&
         !this.data.assetError
       )
@@ -165,6 +166,7 @@ Page({
         this.retryApproval = approved.expectedCostUnits || 0;
         wx.setStorageSync("retry-approval-" + this.id, this.retryApproval);
       }
+      wx.setStorageSync("retry-" + this.id, this.retryKey);
       const j = await request<Job>(
         "/jobs/" + this.id + "/retry",
         "POST",
@@ -241,7 +243,13 @@ Page({
   share() {
     if (!this.data.job || this.data.job.deleted) return;
     if (this.data.job.reviewStatus !== "approved") {
-      error(new Error("作品审核通过后可公开分享"));
+      error(
+        new Error(
+          this.data.job.reviewStatus === "rejected"
+            ? "作品未通过审核，不能分享；原因见消息通知"
+            : "作品审核通过后可公开分享",
+        ),
+      );
       return;
     }
     openPage(this, { url: "/pages/share/index?id=" + this.id });

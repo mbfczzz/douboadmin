@@ -24,6 +24,7 @@ Page({
     loadError: "",
     assets: [] as Row<Asset>[],
     optionalNames: ["场景照片", "品牌标识", "商品特写", "宣传文案图"],
+    fixedCount: false,
     busy: false,
     uploading: false,
     favorite: false,
@@ -70,7 +71,12 @@ Page({
       );
       t.data.cover = media(t.data.cover);
       if (this.destroyed) return;
-      this.setData({ template: t });
+      // Image-to-video and keyframe take an exact photo count; extra
+      // photos would only be rejected at submit.
+      this.setData({
+        template: t,
+        fixedCount: ["i2v", "keyframe"].includes(t.data.mode),
+      });
       loadQuote(this, t);
       if (!hasSession()) {
         this.setData({ favorite: false, favoriteVersion: 0 });

@@ -17,7 +17,7 @@ export default function PasswordReset({
   onSubmit,
   onClose,
 }: {
-  account: string;
+  account: React.ReactNode;
   onSubmit: (password: string) => Promise<void>;
   onClose: () => void;
 }) {

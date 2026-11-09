@@ -166,7 +166,8 @@
   right: 0;
   bottom: 0;
   z-index: 80;
-  padding: 12px 20px calc(12px + env(safe-area-inset-bottom));
+  /* Design: 14 / 20 / 24 / 20. */
+  padding: 14px 20px calc(24px + env(safe-area-inset-bottom));
   border-top: 1px solid #353b3e;
   background: #1c1f21;
   --td-button-border-radius: 7px;
@@ -183,19 +184,17 @@
   font-size: 12px;
   margin-top: 3px;
 }
-.submit-area t-button {
-  display: block;
+.submit-action {
   margin-top: 10px;
-  min-height: 48px;
 }
 .submit-area .note {
   display: block;
   margin: 8px 0 0;
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.5;
 }
 .submit-caption {
-  font-size: 12px;
+  font-size: 13px;
   line-height: 18px;
   color: #a0a8ac;
 }

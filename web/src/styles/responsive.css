@@ -141,6 +141,7 @@
   .edit-form,
   .job-detail,
   .form-body,
+  .modal fieldset.form-body,
   .form-modal .modal-actions {
     padding-inline: 18px;
   }

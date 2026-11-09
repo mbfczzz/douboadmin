@@ -8,7 +8,7 @@
   </view>
   <view wx:elif="{{loadError}}" class="empty">
     <text>{{loadError}}</text>
-    <t-button bind:tap="load">重试</t-button>
+    <t-button t-class="empty-action" wx:if="{{loadError!=='模板已下架'}}" bind:tap="load">重试</t-button>
   </view>
   <view wx:elif="{{template}}" class="content-reveal">
     <view wx:if="{{template.data.kind==='video'&&template.data.preview}}" class="hero"><video src="{{template.data.preview}}" poster="{{template.data.cover}}" controls object-fit="contain" /></view>
@@ -30,15 +30,9 @@
     <view class="detail-divider" />
     <view class="row">
       <text class="section-title upload-title">上传商品照片</text>
-      <text class="small muted">
-        {{template.data.requiredImages?'必填':'选填'}}
-        <block wx:if="{{template.data.requiredImages}}">{{assets.length>=template.data.requiredImages?template.data.requiredImages:assets.length}} / {{template.data.requiredImages}}</block>
-      </text>
+      <text class="small muted">{{template.data.requiredImages?'必填':'选填'}} <block wx:if="{{template.data.requiredImages}}">{{assets.length>=template.data.requiredImages?template.data.requiredImages:assets.length}} / {{template.data.requiredImages}}</block></text>
     </view>
-    <text class="upload-description">
-      <block wx:if="{{template.data.requiredImages}}">只需 {{template.data.requiredImages}} 张照片，即可制作同款{{template.data.kind==='image'?'图片':'视频'}}</block>
-      <block wx:else>可以直接生成，也可以添加参考照片。</block>
-    </text>
+    <text class="upload-description"><block wx:if="{{template.data.requiredImages}}">只需 {{template.data.requiredImages}} 张照片，即可制作同款{{template.data.kind==='image'?'图片':'视频'}}</block><block wx:else>可以直接生成，也可以添加参考照片。</block></text>
     <view class="required-upload" wx:if="{{!assets.length||assets.length<template.data.requiredImages}}" bindtap="choose">
       <view class="upload-icon"><t-icon name="image-add" size="25" /></view>
       <view>
@@ -46,9 +40,7 @@
         <text class="upload-hint">正面清晰，效果更好</text>
         <text class="upload-text">{{assets.length?'＋ 继续添加照片':'＋ 上传商品照片'}}</text>
       </view>
-      <text class="required">
-        {{template.data.requiredImages?'必填':'选填'}}
-      </text>
+      <text class="required">{{template.data.requiredImages?'必填':'选填'}}</text>
     </view>
     <view class="uploaded" wx:for="{{assets}}" wx:key="id">
       <image src="{{item.data.url}}" mode="aspectFill" />
@@ -61,6 +53,7 @@
       </view>
     </view>
     <text class="format">JPG / PNG / WebP · 单张不超过 50 MB</text>
+    <block wx:if="{{!fixedCount}}">
     <view class="row section-title">
       <text>补充素材</text>
       <text class="muted small">选填，可跳过</text>
@@ -72,6 +65,7 @@
         <t-icon name="add" size="17" />
       </view>
     </view>
+    </block>
     <view class="queue-link" bindtap="queue">
       <t-icon name="task" size="23" />
       <view class="copy">
@@ -82,12 +76,11 @@
     </view>
     <view class="submit-area {{assets.length>=template.data.requiredImages?'is-ready':''}}">
       <view class="row submit-caption">
-        <text class="submit-status">
-          {{assets.length>=template.data.requiredImages?(template.data.requiredImages?'照片已就绪，可以生成':'可以直接生成'):'还需 '+(template.data.requiredImages-assets.length)+' 张照片'}}
-        </text>
+        <text class="submit-status">{{assets.length>=template.data.requiredImages?(template.data.requiredImages?'照片已就绪，可以生成':'可以直接生成'):'还需 '+(template.data.requiredImages-assets.length)+' 张照片'}}</text>
         <text wx:if="{{quoteText}}" class="submit-quote">{{quoteText}}</text>
       </view>
       <t-button
+        t-class="submit-action"
         theme="primary"
         block
         size="large"

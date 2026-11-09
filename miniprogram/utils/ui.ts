@@ -39,6 +39,8 @@ export const kinds: Record<string, string> = {
 export function jobView(j: Job) {
   return {
     ...j,
+    // Import jobs come without reference assets (null from older servers).
+    input: { ...j.input, assets: j.input.assets || [] },
     stateText: states[j.status],
     kindText: kinds[j.input.kind],
     modelName: j.modelName || j.input.model,

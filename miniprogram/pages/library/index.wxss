@@ -14,9 +14,13 @@
   height: 170rpx;
   border-radius: 12rpx;
 }
-.favorite-card > t-icon,
-.unavailable-favorite > t-button {
+.favorite-card > t-icon {
   flex-shrink: 0;
+}
+/* Small text button: keep its own width next to the message. */
+.unfavorite-action {
+  flex-shrink: 0;
+  width: auto;
 }
 .unavailable-favorite > view {
   flex: 1;
@@ -58,17 +62,6 @@
 }
 .send {
   margin-top: 30rpx;
-}
-.setting-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 35rpx 0;
-  border-bottom: 1rpx solid #353b3e;
-  font-size: 28rpx;
-}
-.logout {
-  margin-top: 65rpx;
 }
 .unavailable-favorite {
   display: flex;

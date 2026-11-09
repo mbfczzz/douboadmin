@@ -6,7 +6,7 @@
 .provider-tree-head,
 .provider-tree-row {
   display: grid;
-  grid-template-columns: minmax(260px, 1fr) 96px 200px 230px;
+  grid-template-columns: minmax(220px, 1fr) 96px 180px 384px;
   align-items: center;
   gap: 24px;
 }
@@ -128,22 +128,35 @@
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
-/* Two short rows: the provider's business functions, then its own record. */
+/* One row of compact actions: business functions, a thin divider, then the
+   provider's own record. */
 .provider-tree-actions {
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 6px;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0;
+  white-space: nowrap;
 }
 .provider-action-group {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 4px 14px;
+  align-items: center;
+  gap: 2px;
+}
+.provider-action-group + .provider-action-group {
+  margin-left: 6px;
+  padding-left: 6px;
+  border-left: 1px solid var(--line);
 }
 .provider-tree-actions .text-button {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
+  padding: 5px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 12.5px;
+  transition: background 120ms;
+}
+.provider-tree-actions .text-button:hover {
+  background: var(--accent-soft);
 }
 .provider-tree-actions .subtle {
   color: var(--text);
@@ -177,4 +190,10 @@
   color: var(--muted);
   font-size: 12px;
   font-weight: 600;
+}
+/* Platform-wide buttons sit at the right end of the list toolbar. */
+.provider-platform {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
 }

@@ -35,7 +35,11 @@ export default function UserDetails({
     wallet = useResource<{ wallet: Wallet }>(`/admin/users/${user.id}/wallet`),
     [tone, label] = userState(user.data);
   return (
-    <Modal title="用户详情" onClose={onClose}>
+    <Modal
+      title="用户详情"
+      onClose={onClose}
+      style={{ width: "min(780px, 100%)" }}
+    >
       <div className="edit-form user-detail">
         <header className="user-head">
           <div>

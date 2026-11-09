@@ -129,10 +129,11 @@ export async function api<T>(path: string, options: APIInit = {}): Promise<T> {
     confirmation !== false &&
     needsConfirmation(path, (init.method || "GET").toUpperCase(), body)
   ) {
-    const approved = await requestConfirmation(
-      confirmationPlan(path, body, confirmation),
-      init.signal,
-    );
+    const plan = confirmationPlan(path, body, confirmation);
+    // An edit that changes nothing is not sent (no empty approval, no write).
+    if (confirmation && confirmation.before !== undefined && !plan.rows.length)
+      throw new APIError(0, "没有需要保存的修改");
+    const approved = await requestConfirmation(plan, init.signal);
     if (!approved) throw new APIError(0, "");
   }
   let r: Response;
@@ -183,7 +184,12 @@ export const date = (s?: string | null, seconds = false) => {
   const d = s ? new Date(s) : undefined;
   // Go's zero time (0001-01-01) means "never", not a real date.
   if (!d || Number.isNaN(d.getTime()) || d.getUTCFullYear() < 2000) return "—";
-  return d
-    .toLocaleString("sv-SE", { timeZone: "Asia/Shanghai", hour12: false })
-    .slice(0, seconds ? 19 : 16);
+  return (
+    d
+      .toLocaleString("sv-SE", { timeZone: "Asia/Shanghai", hour12: false })
+      .slice(0, seconds ? 19 : 16)
+      // Non-breaking space and hyphens: a date never splits across lines.
+      .replace(" ", "\u00a0")
+      .replace(/-/g, "\u2011")
+  );
 };

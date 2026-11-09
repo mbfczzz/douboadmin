@@ -91,15 +91,17 @@ export default function Events({
                 return r.data.detail ? (
                   <details>
                     <summary>
-                      {r.data.message}
-                      {repeat}
+                      <span>
+                        {repeat}
+                        {r.data.message}
+                      </span>
                     </summary>
                     <pre>{r.data.detail}</pre>
                   </details>
                 ) : (
                   <>
-                    {r.data.message}
                     {repeat}
+                    {r.data.message}
                   </>
                 );
               },

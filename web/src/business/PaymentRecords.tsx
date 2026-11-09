@@ -34,7 +34,7 @@ export default function PaymentRecords() {
           }
         }}
       >
-        <label>
+        <label className="filter-grow">
           关键词
           <input
             type="search"
@@ -42,7 +42,6 @@ export default function PaymentRecords() {
             aria-label="搜索支付记录"
             placeholder="订单号 / 微信交易号 / 用户编号"
             maxLength={100}
-            size={30}
           />
         </label>
         <label>
@@ -56,14 +55,15 @@ export default function PaymentRecords() {
             ))}
           </select>
         </label>
-        <label>
-          到账开始（北京时间）
-          <DateField name="from" label="到账开始日期" />
-        </label>
-        <label>
-          到账结束（北京时间）
-          <DateField name="to" label="到账结束日期" />
-        </label>
+        {/* One date-range group keeps the filters on a single line. */}
+        <div className="date-range">
+          <span className="field-label">到账时间（北京时间）</span>
+          <div>
+            <DateField name="from" label="到账开始日期" />
+            <span className="quiet">至</span>
+            <DateField name="to" label="到账结束日期" />
+          </div>
+        </div>
         <button className="primary" type="submit">
           查询
         </button>

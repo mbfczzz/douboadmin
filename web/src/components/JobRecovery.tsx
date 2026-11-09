@@ -7,7 +7,8 @@ import JobExecution, { useExecution } from "./JobExecution";
 const resumePhases = ["polling", "output", "succeeded"];
 // Any failed job may resume an existing upstream task (the dialog checks the
 // phase); only jobs still holding points can have them released.
-export const resumable = (job: Job) => job.status === "failed";
+export const resumable = (job: Job) =>
+  job.status === "failed" && job.billingState !== "released";
 export const releasable = (job: Job) =>
   job.status === "failed" && job.billingState === "reserved";
 

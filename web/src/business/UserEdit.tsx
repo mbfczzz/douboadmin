@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { guardedClose } from "../hooks/unsaved";
 import { api, type Row } from "../api";
 import Modal from "../components/Modal";
 import type { Notify } from "../navigation";
@@ -25,7 +26,11 @@ export default function UserEdit({
     try {
       await api(`/admin/users/${user.id}`, {
         method: "PUT",
-        confirmation: { before: user.data },
+        confirmation: {
+          before: user.data,
+          title: "确认修改用户资料",
+          labels: { name: "姓名", bio: "简介" },
+        },
         body: JSON.stringify({
           version: user.version,
           nickname: data.get("nickname"),
@@ -49,7 +54,7 @@ export default function UserEdit({
       className="form-modal"
       title="编辑用户资料"
       subtitle={user.id}
-      onClose={() => !busy && onClose()}
+      onClose={guardedClose(busy, onClose)}
     >
       <form
         className="edit-form"
@@ -87,6 +92,8 @@ export default function UserEdit({
                   name="phone"
                   defaultValue={user.data.phone}
                   inputMode="tel"
+                  pattern="\+?[0-9]{7,15}"
+                  title="7–15 位数字，可带 + 号"
                 />
               </label>
             </div>

@@ -49,3 +49,13 @@
     grid-template-columns: 72px minmax(0, 1fr) 96px;
   }
 }
+/* Tooltips of the first/last bars stay inside the panel. */
+.business-trend .tip:nth-child(-n + 3):hover::after {
+  left: 0;
+  transform: none;
+}
+.business-trend .tip:nth-last-child(-n + 3):hover::after {
+  left: auto;
+  right: 0;
+  transform: none;
+}

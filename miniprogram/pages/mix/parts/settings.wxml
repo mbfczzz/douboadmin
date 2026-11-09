@@ -70,7 +70,7 @@
     type="number"
     value="{{duration}}"
     bindinput="duration"
-  /><text class="biz-note"
+  /><text wx:if="{{!config.enabled}}" class="biz-note"
     >混剪服务暂未开放，当前设置不会提交生成任务。</text
   ></view
 >

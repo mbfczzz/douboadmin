@@ -126,7 +126,8 @@ input[type="checkbox"] {
 .form-modal > form {
   padding: 0;
 }
-.form-body {
+.form-body,
+.modal fieldset.form-body {
   overflow: auto;
   padding: 24px;
 }

@@ -21,9 +21,7 @@
     >
       {{returning?'登录成功，正在返回':'微信登录并继续'}}
     </t-button>
-    <text class="login-explain">
-      头像和昵称可稍后填写，不会自动获取手机号。
-    </text>
+    <text class="login-explain">头像和昵称可稍后填写，不会自动获取手机号。</text>
     <button
       wx:if="{{demoAllowed}}"
       class="demo-entry"

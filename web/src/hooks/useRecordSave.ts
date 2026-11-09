@@ -8,11 +8,14 @@ export function useRecordSave<T>(
   namespace: string,
   initial: Row<T>,
   onConflict?: (latest: T, base: T) => void,
-  summary?: Pick<ConfirmationOptions, "labels" | "title">,
+  summary?: Pick<ConfirmationOptions, "labels" | "title" | "format">,
+  // Shapes server data like the editor's draft (e.g. filled-in defaults), so
+  // the change summary compares like with like, also after a conflict.
+  normalize: (data: T) => T = (data) => data,
 ) {
   const [version, setVersion] = useState(initial.version);
   const [error, setError] = useState("");
-  const before = useRef(initial.data);
+  const before = useRef(normalize(initial.data));
   async function save(data: T) {
     setError("");
     try {
@@ -33,7 +36,7 @@ export function useRecordSave<T>(
           }
           setVersion(latest.version);
           const base = before.current;
-          before.current = latest.data;
+          before.current = normalize(latest.data);
           onConflict?.(latest.data, base);
           setError(
             onConflict

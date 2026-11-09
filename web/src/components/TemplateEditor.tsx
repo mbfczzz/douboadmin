@@ -3,6 +3,7 @@ import { type Row, type Template, type Model } from "../api";
 import { useRecordSave } from "../hooks/useRecordSave";
 import Modal from "./Modal";
 import TemplateOptions from "./TemplateOptions";
+import { templateSummary } from "./templateSummary";
 import CoverUpload from "./CoverUpload";
 import { canLeave } from "../hooks/unsaved";
 import { ask } from "../confirm/ask";
@@ -26,7 +27,12 @@ export default function TemplateEditor({
     [busy, setBusy] = useState(false),
     [uploading, setUploading] = useState(false),
     [dirty, setDirty] = useState(false);
-  const record = useRecordSave("templates", initial),
+  const record = useRecordSave(
+      "templates",
+      initial,
+      undefined,
+      templateSummary(models),
+    ),
     error = record.error;
   const errorRef = useRef<HTMLDivElement>(null);
   useEffect(() => {

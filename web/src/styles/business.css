@@ -25,7 +25,7 @@
 /* Row actions stay on one line in desktop tables. */
 .catalog-table td .business-actions {
   flex-wrap: nowrap;
-  gap: 4px;
+  gap: 12px;
 }
 .catalog-table button.danger-text,
 .mobile-record-actions button.danger-text {
@@ -40,9 +40,6 @@
   padding: 5px;
   font-size: 12px;
   white-space: nowrap;
-}
-.mobile-records {
-  display: none;
 }
 .business-preview {
   padding: 24px;
@@ -121,7 +118,9 @@
 }
 .business-metrics strong {
   display: block;
-  font-size: 30px;
+  /* Large figures shrink with the screen instead of breaking mid-number. */
+  font-size: clamp(22px, 2.1vw, 30px);
+  white-space: nowrap;
   margin: 8px 0;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
@@ -142,42 +141,51 @@
   color: var(--accent-text);
   border-bottom-color: var(--accent);
 }
+/* Card layout for records: phones, and any table too wide for its panel. */
+.mobile-records {
+  display: grid;
+}
+.mobile-record {
+  padding: 16px;
+  border-bottom: 1px solid var(--line);
+}
+.mobile-record:last-child {
+  border-bottom: 0;
+}
+.mobile-record dl {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 11px;
+  margin: 0;
+}
+.mobile-record dl > div {
+  display: grid;
+  grid-template-columns: minmax(90px, 0.8fr) minmax(0, 1.2fr);
+  gap: 12px;
+}
+.mobile-record dt {
+  color: var(--muted);
+  font-size: 12px;
+}
+.mobile-record dd {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.mobile-record-actions {
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+/* Wider screens: two label/value pairs per line. */
+.mobile-records.wide .mobile-record dl {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 32px;
+}
+.mobile-records.wide .mobile-record {
+  padding: 16px 20px;
+}
 @media (max-width: 640px) {
-  .mobile-records {
-    display: grid;
-  }
-  .mobile-record {
-    padding: 16px;
-    border-bottom: 1px solid var(--line);
-  }
-  .mobile-record:last-child {
-    border-bottom: 0;
-  }
-  .mobile-record dl {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: 11px;
-    margin: 0;
-  }
-  .mobile-record dl > div {
-    display: grid;
-    grid-template-columns: minmax(90px, 0.8fr) minmax(0, 1.2fr);
-    gap: 12px;
-  }
-  .mobile-record dt {
-    color: var(--muted);
-    font-size: 12px;
-  }
-  .mobile-record dd {
-    min-width: 0;
-    margin: 0;
-    overflow-wrap: anywhere;
-  }
-  .mobile-record-actions {
-    margin-top: 14px;
-    padding-top: 10px;
-    border-top: 1px solid var(--line);
-  }
   /* Several row actions sit side by side; each keeps a 44px touch target. */
   .mobile-record-actions .business-actions {
     gap: 4px 6px;
@@ -197,4 +205,26 @@
 .catalog-table audio {
   width: 220px;
   height: 32px;
+}
+.business-filters .date-range {
+  display: grid;
+  gap: 6px;
+}
+.business-filters .date-range > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.business-filters .date-range .field-label {
+  font-size: 13px;
+  font-weight: 550;
+}
+/* A wide search field takes the spare space in a filter row. */
+.business-filters > .filter-grow {
+  flex: 1 1 300px;
+  max-width: 400px;
+}
+.business-filters > .filter-grow input {
+  width: 100%;
+  max-width: none;
 }

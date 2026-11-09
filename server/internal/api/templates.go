@@ -103,6 +103,22 @@ func (a *Server) templateVisible(r *http.Request, ready func(string) bool, id st
 	return json.Unmarshal(row.Data, &t) == nil && t.Published && !t.Deleted && ready(t.Model)
 }
 
+// visibleTemplates lists the ids users can open, in one read of templates.
+func (a *Server) visibleTemplates(r *http.Request) (map[string]bool, error) {
+	rows, err := a.Store.List(r.Context(), "templates", "")
+	if err != nil {
+		return nil, err
+	}
+	ready, out := a.modelReady(r), map[string]bool{}
+	for _, row := range rows {
+		var t core.Template
+		if json.Unmarshal(row.Data, &t) == nil && t.Published && !t.Deleted && ready(t.Model) {
+			out[row.ID] = true
+		}
+	}
+	return out, nil
+}
+
 // modelReady reports whether a template's model is published and usable,
 // remembering each lookup for the rest of the request.
 func (a *Server) modelReady(r *http.Request) func(string) bool {

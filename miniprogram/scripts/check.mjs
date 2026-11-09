@@ -66,6 +66,11 @@ for (const p of app.pages) {
     ...Object.keys(app.usingComponents),
     ...Object.keys(local),
   ]);
+  // WeChat <text> renders line breaks literally: an indented break inside one
+  // is formatting, not copy, and shows users a broken line.
+  for (const match of wxml.matchAll(/<text\b[^>]*>([^<]*)/g))
+    if (/\n[ \t]+\S/.test(match[1]) || /^\s*\n/.test(match[1]))
+      errors.push(`${p}.wxml: line break inside <text> (keep its text on one line)`);
   for (const match of wxml.matchAll(/<\/?([a-z][a-z-]*)\b/g)) {
     if (!tags.has(match[1]))
       errors.push(`${p}: unsupported native tag ${match[1]}`);

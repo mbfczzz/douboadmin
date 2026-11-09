@@ -31,13 +31,11 @@ test("page location survives reload, supports history and resets scroll", async 
     .boundingBox();
   expect(thumb!.x).toBeGreaterThanOrEqual(track!.x);
   expect(thumb!.x + thumb!.width).toBeLessThanOrEqual(track!.x + track!.width);
+  // The list has no inner scroll box; paging brings its top back into view.
   const modelTable = page.locator(".table-scroll");
-  await modelTable.evaluate((el) => {
-    el.scrollTop = el.scrollHeight;
-  });
-  expect(await modelTable.evaluate((el) => el.scrollTop)).toBeGreaterThan(0);
   await page.getByRole("button", { name: "下一页", exact: true }).click();
-  await expect.poll(() => modelTable.evaluate((el) => el.scrollTop)).toBe(0);
+  await expect(modelTable).toBeInViewport();
+  expect((await modelTable.boundingBox())!.y).toBeGreaterThanOrEqual(0);
   await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
   await page.getByRole("button", { name: "小程序用户", exact: true }).click();
   await expect(page).toHaveURL(/#users$/);
@@ -166,12 +164,12 @@ test("local filters return to page one and single page lists hide useless contro
   await page.getByRole("button", { name: "小程序用户", exact: true }).click();
   const userTable = page.locator(".table-scroll");
   await expect(page.getByText("user-0", { exact: true })).toBeVisible();
-  await userTable.evaluate((el) => {
-    el.scrollTop = el.scrollHeight;
-  });
-  expect(await userTable.evaluate((el) => el.scrollTop)).toBeGreaterThan(0);
+  // The page scrolls (no inner box); paging brings the list top back.
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
   await page.getByRole("button", { name: "下一页", exact: true }).click();
-  await expect.poll(() => userTable.evaluate((el) => el.scrollTop)).toBe(0);
+  await expect(userTable).toBeInViewport();
+  expect((await userTable.boundingBox())!.y).toBeGreaterThanOrEqual(0);
   await expect(page.getByText("user-20", { exact: true })).toBeVisible();
   await page.getByLabel("搜索用户").fill("A");
   await expect(page.getByText("user-0", { exact: true })).toBeVisible();

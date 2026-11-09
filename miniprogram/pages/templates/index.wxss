@@ -90,9 +90,13 @@
   align-items: center;
   justify-content: center;
 }
+/* At most two lines, so long titles keep the two columns aligned. */
 .title {
   word-break: break-all;
-  display: block;
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
   font-size: 14px;
   font-weight: 700;
   line-height: 1.25;

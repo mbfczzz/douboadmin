@@ -1,6 +1,7 @@
 import { request } from "../../services/request";
 import { hasSession } from "../../services/session";
 import { points } from "../../services/business";
+import { canRecharge } from "../../services/payment";
 import type { WalletInfo } from "../../services/business";
 import { openPage, resetNavigation } from "../../utils/navigation";
 
@@ -70,7 +71,8 @@ Component({
           loaded: true,
           available: points(info.wallet.availableUnits),
           held: points(info.wallet.heldUnits),
-          rechargeEnabled: info.paymentReady && info.settings.rechargeEnabled,
+          // Same rule as the wallet page (channel, platform, pricing).
+          rechargeEnabled: canRecharge(info),
           loadError: "",
         });
         if (info.wallet.heldUnits > 0) delay = 3000;

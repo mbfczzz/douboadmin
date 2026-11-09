@@ -43,7 +43,11 @@ func (a *Server) me(w http.ResponseWriter, r *http.Request) {
 			running++
 		}
 	}
-	ready := a.modelReady(r)
+	visible, e := a.visibleTemplates(r)
+	if e != nil {
+		dbError(w, e)
+		return
+	}
 	for _, f := range fav {
 		var v struct {
 			Active     bool   `json:"active"`
@@ -51,7 +55,7 @@ func (a *Server) me(w http.ResponseWriter, r *http.Request) {
 		}
 		_ = json.Unmarshal(f.Data, &v)
 		// Count only favorites the user can still open.
-		if v.Active && a.templateVisible(r, ready, v.TemplateID) {
+		if v.Active && visible[v.TemplateID] {
 			count++
 		}
 	}
@@ -95,7 +99,7 @@ func (a *Server) updateMe(w http.ResponseWriter, r *http.Request) {
 	var v struct {
 		Version  int64   `json:"version"`
 		Nickname string  `json:"nickname"`
-		Bio      string  `json:"bio"`
+		Bio      *string `json:"bio"` // omitted keeps the current bio
 		AvatarID *string `json:"avatarId"`
 		Name     *string `json:"name"`
 		Phone    *string `json:"phone"`
@@ -104,7 +108,7 @@ func (a *Server) updateMe(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	v.Nickname = strings.TrimSpace(v.Nickname)
-	if len([]rune(v.Nickname)) < 1 || len([]rune(v.Nickname)) > 30 || len([]rune(v.Bio)) > 120 {
+	if len([]rune(v.Nickname)) < 1 || len([]rune(v.Nickname)) > 30 || (v.Bio != nil && len([]rune(*v.Bio)) > 120) {
 		fail(w, 400, "昵称或简介长度无效")
 		return
 	}
@@ -139,7 +143,9 @@ func (a *Server) updateMe(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	profile["nickname"] = v.Nickname
-	profile["bio"] = v.Bio
+	if v.Bio != nil {
+		profile["bio"] = *v.Bio
+	}
 	if v.Name != nil {
 		value := strings.TrimSpace(*v.Name)
 		if len([]rune(value)) > 50 {

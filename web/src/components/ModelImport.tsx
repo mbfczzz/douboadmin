@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react";
+import { guardedClose } from "../hooks/unsaved";
 import { api } from "../api";
 import Modal from "./Modal";
 export default function ModelImport({
@@ -9,7 +10,8 @@ export default function ModelImport({
   onSaved: () => void;
 }) {
   const [busy, setBusy] = useState(false),
-    [error, setError] = useState("");
+    [error, setError] = useState(""),
+    [dirty, setDirty] = useState(false);
   async function save(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (busy) return;
@@ -30,8 +32,13 @@ export default function ModelImport({
     }
   }
   return (
-    <Modal title="添加上游模型" onClose={() => !busy && onClose()}>
-      <form className="edit-form" onSubmit={save}>
+    <Modal title="添加上游模型" onClose={guardedClose(busy, onClose)}>
+      <form
+        className="edit-form"
+        onSubmit={save}
+        onChange={() => setDirty(true)}
+        data-unsaved={dirty || busy || undefined}
+      >
         <p>
           输入中转站模型 ID，后端会核验并导入真实参数，也可恢复此前删除的模型。
         </p>

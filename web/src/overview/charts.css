@@ -63,6 +63,15 @@
 .overview-grid.three {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
+/* Three panels get cramped below ~1500px: two per row, the third full width. */
+@media (max-width: 1500px) {
+  .overview-grid.three {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .overview-grid.three > :nth-child(3):last-child {
+    grid-column: 1 / -1;
+  }
+}
 .overview-grid .section-head.sub {
   padding-top: 4px;
 }
@@ -78,20 +87,23 @@
 }
 .hbars {
   display: grid;
-  gap: 10px;
+  grid-template-columns: auto minmax(60px, 1fr) auto;
+  gap: 10px 12px;
   margin: 0;
   padding: 4px 22px 20px;
   list-style: none;
 }
+/* Rows share one grid (subgrid), so labels and values size to their content
+   and every bar still starts and ends at the same place. */
 .hbars li {
   display: grid;
-  /* Fixed label and value columns keep every track the same length. */
-  grid-template-columns: 96px minmax(0, 1fr) 112px;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
   align-items: center;
-  gap: 10px;
   font-size: 13px;
 }
 .hbar-label {
+  max-width: 11em;
   overflow: hidden;
   color: var(--text);
   text-overflow: ellipsis;

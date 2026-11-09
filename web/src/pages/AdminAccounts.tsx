@@ -152,7 +152,12 @@ export default function AdminAccounts({ notify }: PageProps) {
       )}
       {resetting && (
         <PasswordReset
-          account={`${resetting.data.name} · ${resetting.data.username}`}
+          account={
+            <>
+              {resetting.data.name} ·{" "}
+              <span className="nowrap">{resetting.data.username}</span>
+            </>
+          }
           onClose={() => setResetting(undefined)}
           onSubmit={async (password) => {
             // Use the latest row so a retry after a reload has its version.

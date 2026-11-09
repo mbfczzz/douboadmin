@@ -126,9 +126,11 @@ export default function PolicyForm({
             再保留剩余毛利的 50%，S2 进价为
             95。用户售价改变时按比例折算积分和分佣，金额以订单快照为准。
           </p>
-          <button className="primary" disabled={busy}>
-            {busy ? "保存中…" : "保存分佣规则"}
-          </button>
+          <div className="modal-actions">
+            <button className="primary" disabled={busy}>
+              {busy ? "保存中…" : "保存分佣规则"}
+            </button>
+          </div>
         </form>
       )}
     </section>

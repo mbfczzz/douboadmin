@@ -35,7 +35,8 @@
   font-size: 23rpx;
 }
 .mix-add {
-  height: 170rpx;
+  /* Same size as the material tiles beside it. */
+  height: calc((100vw - 86px) / 3);
   border: 1px dashed #577b62;
 }
 .mix-video text {

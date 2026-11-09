@@ -46,7 +46,7 @@
 .health-issues {
   display: flex;
   flex-wrap: wrap;
-  justify-content: flex-end;
+  justify-content: flex-start;
   gap: 8px;
   margin: 0;
   padding: 0;
@@ -86,5 +86,12 @@
   }
   .health-issues {
     justify-content: flex-start;
+  }
+}
+/* Narrower screens: the issue buttons go under the verdict, left-aligned,
+   instead of a right-pushed staircase beside it. */
+@media (max-width: 1200px) {
+  .health-summary {
+    grid-template-columns: minmax(0, 1fr);
   }
 }

@@ -15,6 +15,8 @@ async function fixture() {
       timers.delete(id);
     },
   });
+  // The widget uses the wallet page's recharge rule, which reads the platform.
+  h.wx.getDeviceInfo = () => ({ platform: "android" });
   await h.api.signIn();
   const balance = h.component("components/points-balance");
   balance._visible = true;

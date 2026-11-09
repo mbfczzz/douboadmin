@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { guardedClose } from "../hooks/unsaved";
 import { api } from "../api";
 import Modal from "./Modal";
 import PasswordInput from "./PasswordInput";
@@ -13,7 +14,8 @@ export default function ChangePassword({
   notify: Notify;
 }) {
   const [busy, setBusy] = useState(false),
-    [error, setError] = useState("");
+    [error, setError] = useState(""),
+    [dirty, setDirty] = useState(false);
   async function save(form: HTMLFormElement) {
     const data = new FormData(form),
       current = String(data.get("current") || ""),
@@ -40,10 +42,12 @@ export default function ChangePassword({
     <Modal
       className="form-modal"
       title="修改密码"
-      onClose={() => !busy && onClose()}
+      onClose={guardedClose(busy, onClose)}
     >
       <form
         className="edit-form"
+        onChange={() => setDirty(true)}
+        data-unsaved={dirty || busy || undefined}
         aria-busy={busy}
         onSubmit={(e) => {
           e.preventDefault();

@@ -23,15 +23,18 @@ Page({
   },
   timer: 0,
   fetching: false,
+  failed: false,
   loadVersion: 0,
   destroyed: false,
   onShow() {
     tab(this, 3);
     void this.load();
+    this.poll();
+  },
+  // Poll only while a reply may still arrive; load() stops it when idle.
+  poll() {
     clearInterval(this.timer);
-    this.timer = setInterval(() => {
-      void this.load();
-    }, 3000);
+    this.timer = setInterval(() => void this.load(), 3000);
   },
   onHide() {
     clearInterval(this.timer);
@@ -54,6 +57,13 @@ Page({
     try {
       const jobs = await request<Job[]>("/jobs");
       if (version !== this.loadVersion) return;
+      this.failed = false;
+      if (
+        !jobs.some(
+          (j) => j.input.kind === "chat" && /queued|running/.test(j.status),
+        )
+      )
+        clearInterval(this.timer);
       const messages = chatMessages(jobs);
       const changed =
         JSON.stringify(messages) !== JSON.stringify(this.data.messages);
@@ -63,7 +73,9 @@ Page({
           bottom: messages.length ? "m" + messages[messages.length - 1].id : "",
         });
     } catch (e) {
-      if (version === this.loadVersion && !this.data.messages.length) error(e);
+      // One toast per outage, not one every poll.
+      if (version === this.loadVersion && !this.failed) error(e);
+      this.failed = true;
     } finally {
       if (version === this.loadVersion) this.fetching = false;
     }
@@ -119,6 +131,7 @@ Page({
       });
       if (this.data.prompt === submitted) this.setData({ prompt: "" });
       await this.load(true);
+      this.poll();
     } catch (e) {
       error(e);
     } finally {

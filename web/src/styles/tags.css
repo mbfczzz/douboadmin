@@ -1,8 +1,11 @@
 /* Category tags, signed amounts and id chips that break up text-only tables. */
+/* Long tags end in "…" inside their cell or card instead of overflowing. */
 .tag {
-  display: inline-flex;
-  align-items: center;
+  display: inline-block;
+  overflow: hidden;
   max-width: 100%;
+  text-overflow: ellipsis;
+  vertical-align: middle;
   padding: 1px 8px;
   border: 1px solid var(--line-strong);
   border-radius: 999px;

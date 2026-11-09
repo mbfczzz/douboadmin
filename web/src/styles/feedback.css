@@ -79,3 +79,16 @@
     background-position: -200% 0;
   }
 }
+/* Load errors: message on the left, 重试 at the right end of the banner. */
+.error.with-action {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.error.with-action > button {
+  flex-shrink: 0;
+  margin: -6px 0 -6px auto;
+}
+.nowrap {
+  white-space: nowrap;
+}

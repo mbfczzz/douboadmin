@@ -28,8 +28,9 @@ export default function UserPoints({
     balance = wallet.data?.wallet.availableUnits;
   async function adjust() {
     const n = Number(amount);
-    if (!Number.isFinite(n) || n === 0) {
-      notify("请填写非 0 的积分变动", "warning");
+    // Points have two decimals; anything that rounds to 0 changes nothing.
+    if (!Number.isFinite(n) || Math.round(n * 100) === 0) {
+      notify("请填写非 0 的积分变动（最小 0.01）", "warning");
       return;
     }
     if (note.trim().length < 3) {
@@ -47,6 +48,16 @@ export default function UserPoints({
         method: "POST",
         headers: { "Idempotency-Key": attempt.current.key },
         body,
+        confirmation: {
+          title: n > 0 ? "确认增加积分" : "确认扣减积分",
+          labels: { units: "积分变动", note: "操作原因" },
+          format: {
+            units: (v) => {
+              const value = Number(v) / 100;
+              return (value > 0 ? "+" : "") + value.toLocaleString("zh-CN");
+            },
+          },
+        },
       });
       notify("积分调整已记录");
       onClose();

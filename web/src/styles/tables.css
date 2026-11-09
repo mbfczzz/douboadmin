@@ -158,3 +158,22 @@ tbody tr:hover {
 .search input:focus-visible {
   outline: 0;
 }
+/* Data cells wrap so a table fits its panel; short tokens stay whole. */
+.catalog-table td {
+  white-space: normal;
+  /* Short Chinese values (names, "图片生成") never split mid-word; a table
+     that then cannot fit switches to cards. */
+  word-break: keep-all;
+  /* Break inside a word only if it cannot fit on a line of its own, so
+     dates, hosts and ids are not cut mid-way. */
+  overflow-wrap: break-word;
+}
+.catalog-table td :is(.badge, .tag, .amount, .cell-tags, .id-chip),
+.catalog-table td .cell-note.mono,
+.catalog-table td.table-actions {
+  white-space: nowrap;
+  overflow-wrap: normal;
+}
+.catalog-table .table-actions {
+  width: 1%;
+}

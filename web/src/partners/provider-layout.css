@@ -5,9 +5,16 @@
   .provider-tree-head {
     display: none;
   }
+  /* Name, then status/quota, then the actions: every row the same shape. */
   .provider-tree-row {
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: 16px;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+  .provider-tree-actions {
+    justify-content: flex-start;
+    padding-left: calc(
+      min(var(--tree-depth), 5) * var(--tree-indent) + var(--tree-control) + 2px
+    );
   }
   .provider-tree-name {
     grid-column: 1 / -1;
@@ -43,6 +50,15 @@
   }
   .provider-tree-actions {
     grid-column: 1 / -1;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    row-gap: 4px;
+    padding-left: 0;
+  }
+  .provider-action-group + .provider-action-group {
+    margin-left: 0;
+    padding-left: 0;
+    border-left: 0;
   }
   .provider-tree-actions button {
     min-height: 44px;

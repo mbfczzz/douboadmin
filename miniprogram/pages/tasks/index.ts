@@ -76,6 +76,9 @@ Page({
         .filter((j) => j.input.kind !== "chat")
         .map(jobView);
       if (this.destroyed) return;
+      // Nothing in progress: stop polling until the page is shown again.
+      if (!jobs.some((j) => /queued|running/.test(j.status)))
+        clearInterval(this.timer);
       this.setData({
         jobs,
         loading: false,

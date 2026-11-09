@@ -1,7 +1,10 @@
 import Modal from "../components/Modal";
 import RequestState from "../components/RequestState";
 import { useResource } from "../hooks/useResource";
-import { money, points, statuses } from "../business/types";
+import { money, points } from "../business/types";
+import DetailCard, { Field } from "../components/DetailCard";
+import StatusBadge from "../components/StatusBadge";
+import { IdChip } from "../components/Tag";
 export default function OrderDistribution({
   id,
   onClose,
@@ -32,18 +35,29 @@ export default function OrderDistribution({
         />
         {row && (
           <>
-            <p className="mono">{row.orderId}</p>
-            <p className="mono">用户：{row.userId}</p>
-            <p>
-              {statuses[row.status]} · 实付 {money(row.amountFen)} · 到账{" "}
-              {points(row.pointsUnits)} 积分
-            </p>
+            <DetailCard title="充值订单">
+              <Field label="订单号">
+                <IdChip>{row.orderId}</IdChip>
+              </Field>
+              <Field label="用户">
+                <IdChip>{row.userId}</IdChip>
+              </Field>
+              <Field label="状态">
+                <StatusBadge status={row.status} />
+              </Field>
+              <Field label="实付 / 到账">
+                <span className="amount">{money(row.amountFen)}</span> ·{" "}
+                {points(row.pointsUnits)} 积分
+              </Field>
+              {row.distribution && (
+                <Field label="成本 / 基准售价">
+                  {money(row.distribution.costFen)} /{" "}
+                  {money(row.distribution.retailPer100Fen)}
+                </Field>
+              )}
+            </DetailCard>
             {row.distribution ? (
               <>
-                <p>
-                  成本 {money(row.distribution.costFen)} · 基准算力售价{" "}
-                  {money(row.distribution.retailPer100Fen)}
-                </p>
                 <div className="table-scroll">
                   <table className="catalog-table">
                     <thead>

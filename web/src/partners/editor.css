@@ -22,3 +22,15 @@
 .provider-account .account-facts {
   margin: 0 0 4px;
 }
+/* Platform policy form: a padded card with its own footer. */
+.partner-policy {
+  padding: 20px 24px;
+}
+.partner-policy > h3 {
+  margin: 0 0 16px;
+}
+.partner-policy .modal-actions {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}

@@ -5,7 +5,7 @@
     <t-icon name="task" size="40" />
     <text class="title">登录后查看任务</text>
     <text class="desc">生成进度和历史作品都会保存在这里。</text>
-    <t-button theme="primary" loading="{{signingIn}}" bind:tap="signIn">去登录</t-button>
+    <t-button t-class="empty-action" theme="primary" loading="{{signingIn}}" bind:tap="signIn">去登录</t-button>
   </view>
   <view wx:elif="{{loadError&&!jobs.length}}" class="error-box" bindtap="load"
     >{{loadError}} · 点击重试</view
@@ -13,7 +13,7 @@
   <view wx:elif="{{!jobs.length}}" class="empty">
     <t-icon name="task" size="40" /><text class="title">这里还没有任务</text>
     <text class="desc">每个作品，都从一个想法开始。</text>
-    <t-button theme="primary" variant="outline" bind:tap="create"
+    <t-button t-class="empty-action" theme="primary" variant="outline" bind:tap="create"
       >去创作</t-button
     >
   </view>
@@ -44,8 +44,7 @@
           ></view
         >
         <text class="queue-spec" wx:if="{{item.status!=='failed'}}"
-          >{{item.kindText}} · {{item.input.ratio}} ·
-          {{item.input.resolution}}<text wx:if="{{item.input.duration}}"> · {{item.input.duration}}秒</text></text
+          >{{item.kindText}} · {{item.input.ratio}} · {{item.input.resolution}}<text wx:if="{{item.input.duration}}"> · {{item.input.duration}}秒</text></text
         >
         <text class="queue-spec" wx:else>{{item.error}}</text>
         <view class="queue-time"

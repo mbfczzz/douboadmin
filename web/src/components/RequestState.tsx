@@ -19,8 +19,9 @@ export default function RequestState({
 }) {
   if (error)
     return (
-      <div className="error" role="alert">
-        {error} <button onClick={retry}>重试</button>
+      <div className="error with-action" role="alert">
+        <span>{error}</span>
+        <button onClick={retry}>重试</button>
       </div>
     );
   return loading ? <LoadingState /> : null;

@@ -74,9 +74,6 @@ export default function Providers({ notify }: { notify: Notify }) {
         loading={resource.loading}
         onRefresh={() => void resource.reload()}
       >
-        {!ownId && (
-          <PlatformActions notify={notify} changed={resource.reload} />
-        )}
         {canAddTop && (
           <button
             type="button"
@@ -100,10 +97,8 @@ export default function Providers({ notify }: { notify: Notify }) {
         )}
       </PageHeader>
       <h2>服务商列表</h2>
-      <form
-        className="business-filters provider-toolbar"
-        onSubmit={(event) => event.preventDefault()}
-      >
+      {/* Not a <form>: the platform dialogs opened from here contain forms. */}
+      <div className="business-filters provider-toolbar" role="search">
         <input
           type="search"
           aria-label="搜索服务商"
@@ -120,7 +115,12 @@ export default function Providers({ notify }: { notify: Notify }) {
             {allOpen ? "全部收起" : "全部展开"}
           </button>
         )}
-      </form>
+        {!ownId && (
+          <span className="provider-platform">
+            <PlatformActions notify={notify} changed={resource.reload} />
+          </span>
+        )}
+      </div>
       <RequestState
         loading={resource.loading && !resource.data}
         error={resource.error}

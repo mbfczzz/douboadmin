@@ -1,7 +1,7 @@
 @import "../../styles/business.wxss";
 .hot-search {
   display: flex;
-  gap: 14rpx;
+  gap: 24rpx;
   align-items: center;
   margin-bottom: 24rpx;
 }
@@ -14,7 +14,7 @@
   flex: 0 0 auto;
   min-height: 86rpx;
   white-space: nowrap;
-  padding: 20rpx;
+  padding: 20rpx 32rpx;
   margin: 0;
 }
 .hot-words {

@@ -31,14 +31,23 @@
   margin: 0;
   min-width: 0;
 }
+/* The chain reads top-down, one level per line, indented like a tree. */
 .source-chain {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px 20px;
+  display: grid;
+  justify-items: start;
+  gap: 6px;
   margin: 0;
   padding: 0;
   list-style: none;
+}
+.source-chain li:nth-child(2) {
+  margin-left: 22px;
+}
+.source-chain li:nth-child(3) {
+  margin-left: 44px;
+}
+.source-chain li:nth-child(n + 4) {
+  margin-left: 66px;
 }
 .source-chain li {
   position: relative;
@@ -52,10 +61,10 @@
   font-size: 13px;
 }
 .source-chain li + li::before {
-  content: "›";
+  content: "↳";
   position: absolute;
   top: 50%;
-  left: -14px;
+  left: -18px;
   color: var(--muted);
   transform: translateY(-52%);
 }

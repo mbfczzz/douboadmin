@@ -3,7 +3,7 @@
   <view wx:if="{{loading}}" class="loading"><t-loading /></view>
   <view wx:elif="{{needsLogin}}" class="empty">
     <text class="title">登录后查看{{title}}</text>
-    <t-button theme="primary" loading="{{signingIn}}" bind:tap="signIn">去登录</t-button>
+    <t-button t-class="empty-action" theme="primary" loading="{{signingIn}}" bind:tap="signIn">去登录</t-button>
   </view>
   <view wx:elif="{{loadError&&!templates.length&&!unavailableFavorites.length&&!notifications.length}}" class="error-box" bindtap="load">
     {{loadError}} · 点击重试
@@ -18,7 +18,7 @@
       </view>
       <view class="unavailable-favorite" wx:for="{{unavailableFavorites}}" wx:key="id">
         <view><text>模板暂不可用</text><text class="muted small">可能已下架，可取消收藏</text></view>
-        <t-button size="small" variant="text" data-id="{{item.id}}" disabled="{{!!removingFavorite}}" loading="{{removingFavorite===item.id}}" bind:tap="removeFavorite">取消收藏</t-button>
+        <t-button t-class="unfavorite-action" size="small" variant="text" data-id="{{item.id}}" disabled="{{!!removingFavorite}}" loading="{{removingFavorite===item.id}}" bind:tap="removeFavorite">取消收藏</t-button>
       </view>
       <view
         class="favorite-card"
@@ -60,8 +60,7 @@
       <text class="section-title">关于当前版本</text>
       <view class="help-card surface">
         <text class="help-title">生成需要多久？</text>
-        <text>
-          图片、视频与创作助手通过服务端连接真实模型。生成耗时取决于模型和排队情况。</text>
+        <text>图片、视频与创作助手通过服务端连接真实模型。生成耗时取决于模型和排队情况。</text>
         <text class="help-title">生成失败怎么办？</text>
         <text>可以在任务详情重试，或重新编辑提示词后提交。</text>
         <text class="help-title">如何保存作品？</text>
@@ -86,19 +85,6 @@
         >
           提交反馈
         </t-button>
-      </view>
-    </block>
-    <block wx:else>
-      <view class="setting-row">
-        <text>当前版本</text>
-        <text class="muted">1.0.0</text>
-      </view>
-      <view class="setting-row" bindtap="privacy">
-        <text>服务使用说明</text>
-        <t-icon name="chevron-right" />
-      </view>
-      <view class="logout">
-        <t-button block variant="outline" bind:tap="logout">退出登录</t-button>
       </view>
     </block>
   </block>

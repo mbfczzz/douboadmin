@@ -201,3 +201,8 @@ input[type="search"]:not(.catalog-search input) {
   display: block;
   margin: -9px 0 16px;
 }
+/* Prompt column: wide enough to read, never so wide it pushes others out. */
+.catalog-table .task-name {
+  min-width: 200px;
+  max-width: 420px;
+}

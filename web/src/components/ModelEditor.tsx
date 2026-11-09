@@ -42,7 +42,7 @@ export default function ModelEditor({
   // defaults do not show up as changes.
   const record = useRecordSave(
       "models",
-      { ...row, data: modelDraft(row.data) },
+      row,
       (latest, base) =>
         setModel((edited) =>
           rebaseDraft(modelDraft(base), edited, modelDraft(latest)),
@@ -51,6 +51,7 @@ export default function ModelEditor({
         title: `确认修改${modelSections[section].title}`,
         labels: modelFieldLabels,
       },
+      modelDraft,
     ),
     errorRef = useRef<HTMLSpanElement>(null);
   useEffect(() => {
@@ -85,6 +86,7 @@ export default function ModelEditor({
     >
       <form
         className="model-config-form"
+        data-section={section}
         onSubmit={save}
         onChange={() => setDirty(true)}
         aria-busy={busy}

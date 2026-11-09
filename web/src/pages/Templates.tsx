@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Plus, Layers, Lightbulb, Search, Image, Film } from "lucide-react";
 import { api, type Row, type Template, type Model } from "../api";
 import type { PageProps } from "../navigation";
@@ -45,6 +45,15 @@ export default function Templates({ notify }: PageProps) {
     [busy, setBusy] = useState("");
   const rows = resource.data || [],
     modelRows = models.data || [];
+  // A remembered category whose templates are all gone no longer filters.
+  useEffect(() => {
+    if (
+      category &&
+      resource.data &&
+      !resource.data.some((r) => r.data.category === category)
+    )
+      setCategory("");
+  }, [category, resource.data, setCategory]);
   const filtered = rows
     .filter(
       (r) =>

@@ -4,6 +4,7 @@ import { canLeave } from "../hooks/unsaved";
 import type { Notify } from "../navigation";
 import PolicyForm from "./PolicyForm";
 import QuotaRequests from "./QuotaRequests";
+import "./editor.css";
 
 // Platform-wide functions that belong to no single provider row: the
 // distribution policy and the approval inbox for all quota requests.

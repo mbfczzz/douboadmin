@@ -29,9 +29,6 @@
   line-height: 1.7;
   color: #a0a8ac;
 }
-.login-page t-button {
-  display: block;
-}
 .login-explain {
   display: block;
   margin: 16px 0;
@@ -49,6 +46,8 @@
   line-height: 1.6;
 }
 .login-page .demo-entry {
+  width: auto;
+  margin: 0 auto;
   background: transparent;
   color: #a0a8ac;
   font-size: 13px;

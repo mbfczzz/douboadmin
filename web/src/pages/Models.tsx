@@ -164,16 +164,16 @@ export default function Models({ notify }: PageProps) {
               <tr>
                 <th>模型</th>
                 <th className="wide-only">类型</th>
-                <th className="wide-only">上游基础消耗</th>
+                <th className="wide-only xl-only">上游基础消耗</th>
                 <th className="wide-only">生成积分配置</th>
                 <th
-                  className="wide-only"
+                  className="wide-only xl-only"
                   title="最近 200 条生成任务中的使用次数"
                 >
                   任务数<small className="cell-note">最近 200 条</small>
                 </th>
                 <th>状态</th>
-                <th className="table-actions">操作</th>
+                <th className="table-actions model-actions-head">操作</th>
               </tr>
             </thead>
             <tbody>
@@ -200,12 +200,14 @@ export default function Models({ notify }: PageProps) {
                   <td className="wide-only">
                     {modelKinds[r.data.kind] || r.data.kind}
                   </td>
-                  <td className="wide-only">{r.data.creditCost} 点起</td>
+                  <td className="wide-only xl-only">
+                    {r.data.creditCost} 点起
+                  </td>
                   <td className="wide-only">
                     {r.data.points}
                     <small className="cell-note">尚未扣费</small>
                   </td>
-                  <td className="wide-only">{r.data.recentJobs}</td>
+                  <td className="wide-only xl-only">{r.data.recentJobs}</td>
                   <td>
                     <ModelState
                       model={r.data}
@@ -224,7 +226,7 @@ export default function Models({ notify }: PageProps) {
                         </button>
                       ))}
                       <button
-                        className="danger-text"
+                        className="danger-text model-delete"
                         disabled={!!busy}
                         onClick={() => void mutate(r, true)}
                       >

@@ -33,8 +33,9 @@
 }
 .virtual-products {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
-  gap: 8px;
+  /* Two packages per row so long package names fit on one line. */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
 }
 button.virtual-product {
   width: 100%;

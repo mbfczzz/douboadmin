@@ -131,7 +131,12 @@ export default function ProviderAccount({
       )}
       {account && sub === "password" && (
         <PasswordReset
-          account={`${row.data.name} · ${account.data.username}`}
+          account={
+            <>
+              {row.data.name} ·{" "}
+              <span className="nowrap">{account.data.username}</span>
+            </>
+          }
           onClose={() => setSub(undefined)}
           onSubmit={async (password) => {
             try {

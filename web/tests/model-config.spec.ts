@@ -45,9 +45,13 @@ test("FlowingLight configuration layout, independent scroll and narrow screens",
     "aria-label",
     new RegExp("^基础信息 · " + escape(model.data.name)),
   );
+  // The dialog title names the part; no repeated section heading inside.
+  await expect(
+    dialog.getByRole("heading", { name: /^基础信息 ·/ }),
+  ).toBeVisible();
   await expect(
     dialog.getByRole("heading", { name: "基础信息", exact: true }),
-  ).toBeVisible();
+  ).toHaveCount(0);
   // Only this part's fields are in the dialog.
   await expect(dialog.getByLabel("运行状态", { exact: true })).toHaveCount(0);
   await expect(dialog.locator("pre")).toHaveCount(0);

@@ -59,3 +59,26 @@ func TestTemplateImageCountWithinModelLimits(t *testing.T) {
 		}
 	}
 }
+
+func TestOmniTemplateRespectsZeroImageLimit(t *testing.T) {
+	m := core.Model{Kind: "video"}
+	m.ParamsSchema = core.Data(map[string]any{"ref_limits": map[string]int{"image": 0}})
+	if templateImageLimits(m, "omni_ref", 2) == nil {
+		t.Fatal("a model that takes no reference images accepted an image template")
+	}
+}
+
+func TestUnfavoriteNeverCreatesRecordsForUnknownTemplates(t *testing.T) {
+	a, user, _ := activationFixture(t)
+	if w := call(a, "POST", "/api/access/direct", user, "", map[string]any{}); w.Code != 200 {
+		t.Fatal(w.Code, w.Body.String())
+	}
+	for range 3 {
+		if w := call(a, "PUT", "/api/favorites/no-such-template", user, "", map[string]any{"version": 0, "active": false}); w.Code != 404 {
+			t.Fatal("unknown template accepted", w.Code, w.Body.String())
+		}
+	}
+	if rows, _ := a.Store.List(t.Context(), "favorites", ""); len(rows) != 0 {
+		t.Fatal("junk favorites stored", len(rows))
+	}
+}

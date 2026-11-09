@@ -4,6 +4,7 @@ import { useResource } from "../hooks/useResource";
 import { MessageSquare } from "lucide-react";
 import { date, type Row } from "../api";
 import Empty from "../components/Empty";
+import "../styles/feedback-list.css";
 export default function Feedback() {
   const resource = useResource<Row[]>("/admin/feedback");
   const feedback = resource.data || [];

@@ -10,9 +10,7 @@
       <view class="agent-intro">
         <view class="agent-mark"><t-icon name="chat" size="27" /></view>
         <text class="headline">让想法，再往前一步。</text>
-        <text class="muted small">
-          从一个模糊的念头，到一份清晰的创作脚本。
-        </text>
+        <text class="muted small">从一个模糊的念头，到一份清晰的创作脚本。</text>
 
       </view>
       <view class="suggestions">

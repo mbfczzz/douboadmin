@@ -24,7 +24,7 @@ func (a *Server) validateTemplate(r *http.Request, t *core.Template) error {
 	}
 	if t.CoverAssetID != "" {
 		row, err := a.Store.Get(r.Context(), "assets", t.CoverAssetID)
-		if err != nil || row.Owner != identity(r).ID {
+		if err != nil || !a.adminAsset(r, row.Owner) {
 			return fmt.Errorf("封面素材不可用，请重新上传")
 		}
 		var v struct {
@@ -98,14 +98,16 @@ func templateImageLimits(m core.Model, mode string, n int) error {
 	}
 	var schema relay.Schema
 	_ = json.Unmarshal(m.ParamsSchema, &schema)
-	max := schema.EditImages.Max
+	max, limited := schema.EditImages.Max, m.Kind == "image" && schema.EditImages.Max > 0
 	if mode == "omni_ref" {
-		max = 0
-		if raw, ok := schema.RefLimits["image"]; ok {
+		// Submit enforces any listed image limit, including 0.
+		var raw json.RawMessage
+		if raw, limited = schema.RefLimits["image"]; limited {
+			max = 0
 			_ = json.Unmarshal(raw, &max)
 		}
 	}
-	if (m.Kind == "image" || mode == "omni_ref") && max > 0 && n > max {
+	if limited && n > max {
 		return fmt.Errorf("该模型最多支持 %d 张参考图，请调整模板要求的图片数量", max)
 	}
 	if mode == "i2i" && n < schema.EditImages.Min {
@@ -136,4 +138,14 @@ func (a *Server) templateCover(r *http.Request, t *core.Template) {
 			t.Cover = u
 		}
 	}
+}
+
+// adminAsset: covers uploaded by any admin can be reused by other admins
+// (templates are shared); assets uploaded by mini-program users cannot.
+func (a *Server) adminAsset(r *http.Request, owner string) bool {
+	if owner == identity(r).ID {
+		return true
+	}
+	_, err := a.Store.Get(r.Context(), "admin_accounts", owner)
+	return err == nil
 }

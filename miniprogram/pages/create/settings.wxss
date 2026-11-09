@@ -16,9 +16,10 @@
   flex-wrap: wrap;
   gap: 4px;
 }
+/* Equal widths, four to a row even at 320px (design: one row, gap 4). */
 .resolution-option {
-  flex: 1 1 72px;
-  min-width: 0;
+  flex: 1 1 0;
+  min-width: 62px;
   min-height: 42px;
   padding: 10px 6px;
   text-align: center;

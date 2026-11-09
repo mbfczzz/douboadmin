@@ -116,7 +116,7 @@ export default function HealthSummary({
           </h2>
           <p>
             在线节点 {live.length} 个 · 正在处理 {h.queue.running} · 排队{" "}
-            {h.queue.queued} · 每 15 秒自动刷新
+            {h.queue.queued} · 每{"\u00a0"}15{"\u00a0"}秒自动刷新
           </p>
         </div>
       </div>

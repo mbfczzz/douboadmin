@@ -3,7 +3,7 @@
   <view class="loading" wx:if="{{loading}}"><t-loading /></view>
   <view wx:elif="{{needsLogin}}" class="empty">
     <text class="title">登录后查看这份作品</text>
-    <t-button theme="primary" loading="{{signingIn}}" bind:tap="signIn"
+    <t-button t-class="empty-action" theme="primary" loading="{{signingIn}}" bind:tap="signIn"
       >去登录</t-button
     >
   </view>
@@ -91,7 +91,7 @@
     </view>
     <view wx:if="{{job.status==='succeeded'&&!job.deleted}}" class="row result-actions"
       ><button class="text-button" bindtap="share">
-        {{job.reviewStatus==='approved'?'分享作品':'待审核后分享'}}</button
+        {{job.reviewStatus==='approved'?'分享作品':job.reviewStatus==='rejected'?'审核未通过':'待审核后分享'}}</button
       ><button class="text-button danger-link" bindtap="remove">删除作品</button></view
     >
     <text class="section-title">提示词</text>

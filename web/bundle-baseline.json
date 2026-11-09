@@ -1,96 +1,96 @@
 {
   "schemaVersion": 2,
-  "createdAt": "2026-11-08T18:27:35.004Z",
-  "revision": "d73e72aaca84b13adc912315b3b59dbb625415f2",
-  "reason": "Reviewed: overview analytics charts, monitor redesign, themed select/date picker, table tags and editor tabs; page CSS stays lazy-loaded",
-  "initialJSGzipBytes": 76537,
-  "initialCSSGzipBytes": 7937,
-  "totalJSGzipBytes": 146175,
-  "totalCSSGzipBytes": 14744,
+  "createdAt": "2026-11-09T04:28:37.166Z",
+  "revision": "0d6d5b9ea06bb5ebc892ed983919ec6615f708a2",
+  "reason": "Anti-crowding layout pass: card fallback for wide tables, one-line provider/model actions, feedback list dark styles, health banner, date-range filter, tag ellipsis, dialog spacing",
+  "initialJSGzipBytes": 78067,
+  "initialCSSGzipBytes": 9203,
+  "totalJSGzipBytes": 158218,
+  "totalCSSGzipBytes": 19053,
   "entries": {
     "chunk:partner-business": {
-      "jsGzipBytes": 26465,
-      "cssGzipBytes": 2180
+      "jsGzipBytes": 31686,
+      "cssGzipBytes": 3167
     },
     "src/Workspace.tsx": {
-      "jsGzipBytes": 11198,
-      "cssGzipBytes": 441
+      "jsGzipBytes": 14664,
+      "cssGzipBytes": 1099
     },
     "src/business/PaymentRecords.tsx": {
-      "jsGzipBytes": 13755,
-      "cssGzipBytes": 1128
+      "jsGzipBytes": 16993,
+      "cssGzipBytes": 1786
     },
     "src/business/VirtualEvents.tsx": {
-      "jsGzipBytes": 13259,
-      "cssGzipBytes": 441
+      "jsGzipBytes": 16846,
+      "cssGzipBytes": 1099
     },
     "src/components/CommandPalette.tsx": {
-      "jsGzipBytes": 11997,
-      "cssGzipBytes": 441
+      "jsGzipBytes": 15692,
+      "cssGzipBytes": 1099
     },
     "src/overview/Details.tsx": {
-      "jsGzipBytes": 11681,
-      "cssGzipBytes": 441
+      "jsGzipBytes": 15144,
+      "cssGzipBytes": 1099
     },
     "src/pages/AdminAccounts.tsx": {
-      "jsGzipBytes": 13917,
-      "cssGzipBytes": 441
+      "jsGzipBytes": 18628,
+      "cssGzipBytes": 1274
     },
     "src/pages/Feedback.tsx": {
-      "jsGzipBytes": 11828,
-      "cssGzipBytes": 441
+      "jsGzipBytes": 15292,
+      "cssGzipBytes": 1370
     },
     "src/pages/Jobs.tsx": {
-      "jsGzipBytes": 11198,
-      "cssGzipBytes": 441
+      "jsGzipBytes": 14664,
+      "cssGzipBytes": 1099
     },
     "src/pages/Models.tsx": {
-      "jsGzipBytes": 19264,
-      "cssGzipBytes": 1852
+      "jsGzipBytes": 23299,
+      "cssGzipBytes": 2773
     },
     "src/pages/Monitor.tsx": {
-      "jsGzipBytes": 14224,
-      "cssGzipBytes": 441
+      "jsGzipBytes": 18271,
+      "cssGzipBytes": 1698
     },
     "src/pages/Orders.tsx": {
-      "jsGzipBytes": 13577,
-      "cssGzipBytes": 441
+      "jsGzipBytes": 16946,
+      "cssGzipBytes": 1099
     },
     "src/pages/Overview.tsx": {
-      "jsGzipBytes": 15923,
-      "cssGzipBytes": 1701
+      "jsGzipBytes": 19418,
+      "cssGzipBytes": 2402
     },
     "src/pages/Payments.tsx": {
-      "jsGzipBytes": 12755,
-      "cssGzipBytes": 441
+      "jsGzipBytes": 16312,
+      "cssGzipBytes": 1099
     },
     "src/pages/Reviews.tsx": {
-      "jsGzipBytes": 12669,
-      "cssGzipBytes": 441
+      "jsGzipBytes": 15998,
+      "cssGzipBytes": 1099
     },
     "src/pages/Roles.tsx": {
-      "jsGzipBytes": 13417,
-      "cssGzipBytes": 673
+      "jsGzipBytes": 17088,
+      "cssGzipBytes": 1331
     },
     "src/pages/Settings.tsx": {
-      "jsGzipBytes": 14462,
-      "cssGzipBytes": 857
+      "jsGzipBytes": 18772,
+      "cssGzipBytes": 2158
     },
     "src/pages/Templates.tsx": {
-      "jsGzipBytes": 16121,
-      "cssGzipBytes": 441
+      "jsGzipBytes": 20000,
+      "cssGzipBytes": 1099
     },
     "src/pages/Users.tsx": {
-      "jsGzipBytes": 14961,
-      "cssGzipBytes": 1062
+      "jsGzipBytes": 19290,
+      "cssGzipBytes": 1957
     },
     "src/pages/Works.tsx": {
-      "jsGzipBytes": 12617,
-      "cssGzipBytes": 441
+      "jsGzipBytes": 16066,
+      "cssGzipBytes": 1099
     },
     "src/partners/Codes.tsx": {
-      "jsGzipBytes": 26465,
-      "cssGzipBytes": 2180
+      "jsGzipBytes": 31686,
+      "cssGzipBytes": 3167
     }
   }
 }

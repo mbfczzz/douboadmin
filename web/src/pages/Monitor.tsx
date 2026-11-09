@@ -25,6 +25,7 @@ export default function Monitor({ notify, navigate }: PageProps) {
   async function ack(id: string) {
     try {
       await api(`/admin/alerts/${id}/ack`, { method: "PUT" });
+      notify("告警已确认");
       await alerts.reload();
     } catch (e) {
       notify((e as Error).message, "error");
@@ -36,7 +37,7 @@ export default function Monitor({ notify, navigate }: PageProps) {
     ["阿里云 OSS", h?.ossConfigured, "已配置", "未配置"],
     ["AI 中转", h?.relayConfigured, "已配置", "未配置"],
     ["微信支付", h?.paymentConfigured, "已配置", "未配置"],
-    ["抖音接口", h?.hotConfigured, "已配置", "未配置"],
+    ["热门视频接口", h?.hotConfigured, "已配置", "未配置"],
   ] as const;
   return (
     <div className="monitor-page">

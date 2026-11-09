@@ -77,9 +77,11 @@
   display: flex;
   gap: 12rpx;
   align-items: center;
+  /* Touch target: 44px tall without moving the text. */
+  min-height: 44px;
   font-size: 23rpx;
   color: #9bcbaa;
-  margin: 18rpx 0;
+  margin: 0;
 }
 .composer {
   margin: 12rpx 38rpx 24rpx;

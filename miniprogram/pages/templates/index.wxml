@@ -36,7 +36,7 @@
   </view>
   <view wx:elif="{{loadError}}" class="empty">
     <text>{{loadError}}</text>
-    <t-button variant="outline" bind:tap="load">重试</t-button>
+    <t-button t-class="empty-action" variant="outline" bind:tap="load">重试</t-button>
   </view>
   <view wx:elif="{{!items.length}}" class="empty">
     <t-icon name="image" size="38" />

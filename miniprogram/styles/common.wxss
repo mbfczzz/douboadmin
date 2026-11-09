@@ -79,8 +79,9 @@ image {
   font-size: 30rpx;
   margin: 24rpx 0 14rpx;
 }
-.empty t-button {
-  display: block;
+/* TDesign buttons have no host element (virtualHost); style them through
+   their t-class external class rather than a "t-button" tag selector. */
+.empty-action {
   margin-top: 20px;
 }
 .empty .desc {

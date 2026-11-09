@@ -12,6 +12,14 @@ export default function Pagination({
 }) {
   const pages = Math.max(1, Math.ceil(total / size));
   if (!total) return null;
+  // Lists grow with the page (no inner scroll box), so a page change brings
+  // the list's top back into view under the sticky top bar.
+  const go = (next: number, from: HTMLElement) => {
+    onChange(next);
+    const list = from.closest<HTMLElement>(".panel, .record-table");
+    const top = list?.getBoundingClientRect().top ?? 0;
+    if (top < 72) window.scrollBy({ top: top - 80 });
+  };
   return (
     <div className="catalog-pagination">
       <span>共 {total} 条</span>
@@ -20,7 +28,7 @@ export default function Pagination({
           <button
             aria-label="上一页"
             disabled={page <= 1}
-            onClick={() => onChange(page - 1)}
+            onClick={(e) => go(page - 1, e.currentTarget)}
           >
             <ChevronLeft size={16} />
           </button>
@@ -30,7 +38,7 @@ export default function Pagination({
           <button
             aria-label="下一页"
             disabled={page >= pages}
-            onClick={() => onChange(page + 1)}
+            onClick={(e) => go(page + 1, e.currentTarget)}
           >
             <ChevronRight size={16} />
           </button>

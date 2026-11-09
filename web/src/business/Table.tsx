@@ -1,4 +1,10 @@
-import { useEffect, useState, type ReactNode } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import Pagination from "../components/Pagination";
 import Empty from "../components/Empty";
 export interface Column<T> {
@@ -41,9 +47,33 @@ export default function Table<T>({
     media.addEventListener("change", update);
     return () => media.removeEventListener("change", update);
   }, []);
+  // A table wider than its panel would slide under the pinned action column,
+  // so it switches to cards until the panel is wide enough again.
+  const box = useRef<HTMLElement>(null),
+    need = useRef(0),
+    [narrow, setNarrow] = useState(false);
+  useLayoutEffect(() => {
+    const el = box.current;
+    if (!el || mobile) return;
+    const check = () => {
+      const scroll = el.querySelector<HTMLElement>(":scope > .table-scroll");
+      if (scroll && scroll.scrollWidth > scroll.clientWidth + 1) {
+        need.current = scroll.scrollWidth;
+        setNarrow(true);
+      } else if (!scroll && el.clientWidth >= need.current) setNarrow(false);
+    };
+    check();
+    const observer = new ResizeObserver(check);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [mobile, narrow, visible]);
+  const cards = mobile || narrow;
   return (
-    <section className={framed ? "panel record-table" : "record-table"}>
-      {!mobile && (
+    <section
+      ref={box}
+      className={framed ? "panel record-table" : "record-table"}
+    >
+      {!cards && (
         <div className="table-scroll" key={current}>
           <table className="catalog-table">
             <thead>
@@ -75,8 +105,11 @@ export default function Table<T>({
           </table>
         </div>
       )}
-      {mobile && (
-        <div className="mobile-records" key={"mobile-" + current}>
+      {cards && (
+        <div
+          className={"mobile-records" + (mobile ? "" : " wide")}
+          key={"mobile-" + current}
+        >
           {visible.map((row) => (
             <article className="mobile-record" key={id(row)}>
               <dl>

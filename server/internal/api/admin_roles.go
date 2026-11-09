@@ -136,6 +136,13 @@ func (a *Server) saveAdminRole(w http.ResponseWriter, r *http.Request) {
 		fail(w, 400, "请填写 1–20 字的角色名称，并至少选择一个可用菜单")
 		return
 	}
+	if taken, err := a.roleNameTaken(r.Context(), id, input.Name); err != nil {
+		dbError(w, err)
+		return
+	} else if taken {
+		fail(w, 409, "已有同名角色，请换一个名称")
+		return
+	}
 	if id == "" {
 		id = core.NewID()
 	}
@@ -183,4 +190,24 @@ func (a *Server) deleteAdminRole(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	reply(w, 200, map[string]bool{"ok": true})
+}
+
+// roleNameTaken keeps role names unique so accounts can be told apart by role.
+func (a *Server) roleNameTaken(ctx context.Context, id, name string) (bool, error) {
+	for key, role := range core.BuiltinAdminRoles() {
+		if key != id && role.Name == name {
+			return true, nil
+		}
+	}
+	rows, err := a.Store.List(ctx, rolesNamespace, "")
+	if err != nil {
+		return false, err
+	}
+	for _, row := range rows {
+		var role core.AdminRole
+		if row.ID != id && json.Unmarshal(row.Data, &role) == nil && role.Name == name {
+			return true, nil
+		}
+	}
+	return false, nil
 }

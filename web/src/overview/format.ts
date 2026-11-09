@@ -4,3 +4,5 @@ export const pct = (part: number, whole: number) =>
 export const seconds = (ms: number, count: number) =>
   count ? `${(ms / count / 1000).toFixed(1)} 秒` : "—";
 export { kindNames } from "../business/types";
+// Counts use thousands separators, matching points and money.
+export const count = (n: number) => (n || 0).toLocaleString("zh-CN");

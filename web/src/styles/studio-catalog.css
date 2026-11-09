@@ -42,6 +42,8 @@
 }
 .studio-card {
   position: relative;
+  display: flex;
+  flex-direction: column;
   border: 1px solid var(--line);
   border-radius: var(--radius);
   overflow: hidden;
@@ -67,6 +69,9 @@
   object-fit: cover;
 }
 .studio-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
   padding: 16px;
 }
 .studio-body .caption {
@@ -89,12 +94,12 @@
 .studio-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 5px;
+  gap: 8px;
   min-height: 25px;
 }
 .studio-tags span {
   font-size: 12px;
-  padding: 3px 5px;
+  padding: 3px 8px;
   background: var(--surface-subtle);
   border: 1px solid var(--line);
   border-radius: 3px;
@@ -111,7 +116,9 @@
 }
 .studio-actions {
   display: flex;
-  gap: 5px;
+  gap: 8px;
+  /* Actions line up at the bottom of every card, whatever the title length. */
+  margin-top: auto;
   padding-top: 10px;
   border-top: 1px solid var(--line);
 }
@@ -180,5 +187,10 @@
   }
   .studio-grid {
     grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  }
+}
+@media (max-width: 640px) {
+  .template-families small {
+    display: none;
   }
 }

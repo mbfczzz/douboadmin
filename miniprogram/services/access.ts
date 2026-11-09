@@ -83,7 +83,9 @@ export async function enforceAccess(path: string) {
   try {
     if (!(await accessStatus()).active) activationRedirect();
   } catch (e) {
-    if (!(e instanceof AuthCancelledError)) activationRedirect();
+    // Only a definite refusal leaves the page. Network, 5xx and 429 keep the
+    // user where they are so drafts and uploads survive a brief outage.
+    if (e instanceof RequestError && e.status === 403) activationRedirect();
   }
 }
 export function scannedActivation(value: string) {

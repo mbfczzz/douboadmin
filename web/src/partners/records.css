@@ -151,3 +151,8 @@
     margin-left: 0;
   }
 }
+/* Standalone record lists (e.g. the provider picker) keep their search bar
+   off the table frame. */
+:not(.partner-records) > .records-toolbar {
+  margin-bottom: 12px;
+}

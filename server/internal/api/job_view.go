@@ -61,7 +61,11 @@ func (a *Server) presentJob(ctx context.Context, j *core.Job) {
 		}
 	}
 	j.Retryable = false
-	if j.Status == "failed" && (core.IsGeneration(j.Input.Kind) || j.Input.Kind == "import") {
+	if j.Input.Assets == nil {
+		j.Input.Assets = []string{}
+	}
+	// Import jobs cannot be retried through /jobs/{id}/retry (not a generation).
+	if j.Status == "failed" && core.IsGeneration(j.Input.Kind) {
 		r, err := a.Store.Get(ctx, "executions", j.ID)
 		if err == core.ErrNotFound {
 			j.Retryable = true
