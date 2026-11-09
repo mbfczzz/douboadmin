@@ -9,6 +9,7 @@ interface Execution {
   modelKey: string;
   startedAt: string;
   note?: string;
+  errorCause?: string;
 }
 const phases: Record<string, string> = {
   submitting: "提交中",
@@ -49,6 +50,11 @@ export default function JobExecution({
           {data.taskId ? <IdChip>{data.taskId}</IdChip> : "未返回"}
         </Field>
         {data.note && <Field label="最近状态">{data.note}</Field>}
+        {data.errorCause && (
+          <Field label="上游错误">
+            <span className="danger-text">{data.errorCause}</span>
+          </Field>
+        )}
       </DetailCard>
     </div>
   );

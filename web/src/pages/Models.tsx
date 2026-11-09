@@ -255,7 +255,10 @@ export default function Models({ notify }: PageProps) {
           row={edit.row}
           section={edit.section}
           onClose={() => setEdit(undefined)}
-          onSaved={() => void resource.reload()}
+          onSaved={() => {
+            notify(`${modelSections[edit.section].title}已保存`);
+            void resource.reload();
+          }}
         />
       )}
       {adding && (

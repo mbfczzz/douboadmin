@@ -43,12 +43,15 @@ func (a *Server) me(w http.ResponseWriter, r *http.Request) {
 			running++
 		}
 	}
+	ready := a.modelReady(r)
 	for _, f := range fav {
 		var v struct {
-			Active bool `json:"active"`
+			Active     bool   `json:"active"`
+			TemplateID string `json:"templateId"`
 		}
 		_ = json.Unmarshal(f.Data, &v)
-		if v.Active {
+		// Count only favorites the user can still open.
+		if v.Active && a.templateVisible(r, ready, v.TemplateID) {
 			count++
 		}
 	}
@@ -162,5 +165,8 @@ func (a *Server) updateMe(w http.ResponseWriter, r *http.Request) {
 		dbError(w, e)
 		return
 	}
+	// Same rule as GET /api/me: the admin's status reason stays internal.
+	delete(profile, "statusReason")
+	row.Data = core.Data(profile)
 	reply(w, 200, row)
 }

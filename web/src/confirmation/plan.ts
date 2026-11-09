@@ -1,4 +1,5 @@
 import type { ConfirmationOptions, ConfirmationPlan } from "./request";
+import { isPlain, sameValue, valueFormats } from "./values";
 
 const names: Record<string, string> = {
   integrations: "服务接入配置",
@@ -13,6 +14,8 @@ const names: Record<string, string> = {
   reviews: "审核结果",
   "quota-requests": "名额申请",
   "quota-moves": "名额分配",
+  roles: "角色",
+  jobs: "生成任务",
 };
 const labels: Record<string, string> = {
   name: "名称",
@@ -29,15 +32,22 @@ const labels: Record<string, string> = {
   points: "积分价格",
   sort: "排序",
   status: "状态",
+  menus: "可见菜单",
+  amountFen: "金额",
   reason: "原因",
   note: "备注",
   units: "积分变动（百分之一积分）",
   partnerId: "服务商",
-  amountFen: "金额（分）",
   pointsUnits: "积分（百分之一积分）",
   productId: "商品 ID",
   enabled: "启用",
   prompt: "提示词",
+  approve: "批准申请",
+  reference: "打款流水号 / 原因",
+  users: "用户额度",
+  parentId: "上级服务商",
+  childId: "下级服务商",
+  kind: "类型",
 };
 export function needsConfirmation(path: string, method: string, body: unknown) {
   if (!path.startsWith("/admin/")) return false;
@@ -56,7 +66,7 @@ export function needsConfirmation(path: string, method: string, body: unknown) {
   );
 }
 const secret = (key: string, options: ConfirmationOptions) =>
-  /password|secret|token|app.?key|api.?key|access.?key|aes.?key|private.?key/i.test(
+  /password|secret|token|app.?key|api.?key|access.?key|aes.?key|private.?key|^current$|^next$/i.test(
     key,
   ) || options.secrets?.includes(key);
 function safe(
@@ -75,7 +85,12 @@ function safe(
   return value ?? "";
 }
 function display(value: unknown, key: string, options: ConfirmationOptions) {
-  const v = safe(value, key, options);
+  const field = key.split(".").pop()!;
+  if (!secret(field, options) && value !== undefined && value !== null) {
+    const custom = (options.format?.[key] || valueFormats[field])?.(value);
+    if (custom) return custom;
+  }
+  const v = safe(value, field, options);
   return (
     (typeof v === "object" ? JSON.stringify(v, null, 2) : String(v)) || "未填写"
   );
@@ -105,21 +120,46 @@ export function confirmationPlan(
       if (secret(key, options) && !value && !clear.includes(key))
         data[key] = before[key];
     });
-  const rows = Object.entries(data)
-    .filter(
-      ([key, value]) =>
-        !["version", "id", "clear"].includes(key) &&
-        (options.before === undefined ||
-          JSON.stringify(before[key]) !== JSON.stringify(value)),
+  // Nested objects (e.g. model settings) are compared field by field so the
+  // summary lists only what changed instead of a JSON dump.
+  const entries: [string, unknown, unknown][] = [];
+  for (const [key, value] of Object.entries(data)) {
+    if (["version", "id", "clear"].includes(key)) continue;
+    const old = before[key];
+    if (
+      isPlain(value) &&
+      options.before !== undefined &&
+      (isPlain(old) || old == null)
     )
-    .map(([key, value]) => ({
-      label: options.labels?.[key] || labels[key] || key,
-      before:
-        options.before === undefined
-          ? undefined
-          : display(before[key], key, options),
-      after: clear.includes(key) ? "清除" : display(value, key, options),
-    }));
+      for (const [sub, v] of Object.entries(value))
+        entries.push([`${key}.${sub}`, v, isPlain(old) ? old[sub] : undefined]);
+    else entries.push([key, value, before[key]]);
+  }
+  const rows = entries
+    .filter(
+      ([, value, old]) =>
+        options.before === undefined || !sameValue(old, value),
+    )
+    .map(([key, value, old]) => {
+      const field = key.split(".").pop()!;
+      return {
+        label:
+          options.labels?.[key] ||
+          options.labels?.[field] ||
+          labels[key] ||
+          labels[field] ||
+          field,
+        before:
+          options.before === undefined
+            ? undefined
+            : display(
+                old ?? (typeof value === "boolean" ? false : old),
+                key,
+                options,
+              ),
+        after: clear.includes(key) ? "清除" : display(value, key, options),
+      };
+    });
   const warning =
     path.includes("/memberships/") && data.status === "unbound"
       ? "解绑将停止使用权限并释放名额；历史作品、订单和分佣归属保留。"

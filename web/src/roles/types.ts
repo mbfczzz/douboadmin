@@ -25,5 +25,8 @@ export function useRoles(scope?: RoleScope) {
   const rows = (resource.data || []).filter(
     (row) => !scope || row.data.scope === scope,
   );
-  return { ...resource, rows };
+  // Role id → name for change summaries and labels.
+  const name = (id: unknown) =>
+    rows.find((row) => row.id === id)?.data.name || String(id);
+  return { ...resource, rows, name };
 }

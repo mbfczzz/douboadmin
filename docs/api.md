@@ -66,7 +66,7 @@
 `data` 包括 `title/category/kind/family/description/prompt/coverAssetId/cover/preview/model/resolution/ratio/quality/duration/mode/requiredImages/sort/published`。
 `family` 为 `style` 或 `inspiration`，`kind` 为 `image` 或 `video`。
 封面可使用后台上传得到的 `coverAssetId` 或 HTTPS 地址；签名 URL 不作为持久标识。
-发布前校验模型状态与参数。已删除或已下架的模板不能继续提交任务。
+发布前校验模型状态与参数，`requiredImages` 须在模型参考图数量上下限内。已删除或已下架的模板不能继续提交任务；关联模型下架、维护或删除时，模板对用户隐藏（列表不返回、详情 404），也不能被收藏，收藏数只统计仍可打开的模板。
 
 开发测试仍保留受 `ALLOW_DEMO_LOGIN` 控制的兼容登录端点；默认关闭，production 禁止开启。这只服务于隔离测试，应用没有模拟生成器。
 

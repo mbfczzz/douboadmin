@@ -7,9 +7,17 @@ import Capabilities from "../models/Capabilities";
 import PromptFields from "../models/PromptFields";
 import PricingFields from "../models/PricingFields";
 import { ErrorFields, StatusFields } from "../models/StatusFields";
-import { modelDraft, type ModelSettings } from "../models/settings";
+import {
+  modelDraft,
+  rebaseDraft,
+  type ModelSettings,
+} from "../models/settings";
 import { canLeave } from "../hooks/unsaved";
-import { modelSections, type ModelSection } from "../models/sections";
+import {
+  modelFieldLabels,
+  modelSections,
+  type ModelSection,
+} from "../models/sections";
 import "../styles/model-config.css";
 export { modelKinds, supportedModel } from "../models/settings";
 export { default as ModelImport } from "./ModelImport";
@@ -28,7 +36,22 @@ export default function ModelEditor({
   const [model, setModel] = useState(() => modelDraft(row.data)),
     [busy, setBusy] = useState(false),
     [dirty, setDirty] = useState(false);
-  const record = useRecordSave("models", row),
+  // Each dialog edits one part; on a conflict keep only this part's changes
+  // on top of the latest record instead of re-sending a stale full draft.
+  // Compare against the same defaults the form starts from, so untouched
+  // defaults do not show up as changes.
+  const record = useRecordSave(
+      "models",
+      { ...row, data: modelDraft(row.data) },
+      (latest, base) =>
+        setModel((edited) =>
+          rebaseDraft(modelDraft(base), edited, modelDraft(latest)),
+        ),
+      {
+        title: `确认修改${modelSections[section].title}`,
+        labels: modelFieldLabels,
+      },
+    ),
     errorRef = useRef<HTMLSpanElement>(null);
   useEffect(() => {
     if (record.error) errorRef.current?.focus();

@@ -45,3 +45,17 @@ func TestTemplateHiddenWhenModelUnpublished(t *testing.T) {
 		t.Fatal("admins still manage the template")
 	}
 }
+
+func TestTemplateImageCountWithinModelLimits(t *testing.T) {
+	m := core.Model{Kind: "image"}
+	m.ParamsSchema = core.Data(map[string]any{"edit_images": map[string]int{"min": 2, "max": 4}})
+	for n, ok := range map[int]bool{0: true, 1: false, 2: true, 4: true, 5: false} {
+		mode := "t2i"
+		if n > 0 {
+			mode = "i2i"
+		}
+		if err := templateImageLimits(m, mode, n); (err == nil) != ok {
+			t.Fatalf("%d images: got %v, want ok=%v", n, err, ok)
+		}
+	}
+}

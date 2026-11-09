@@ -70,7 +70,11 @@ func (a *Server) submit(w http.ResponseWriter, r *http.Request, in core.JobInput
 	j.EstimatedCostMicros = cost
 	j.Input = in
 	if billed && identity(r).Role == "user" {
-		if units > 0 && (in.ExpectedCostUnits == nil || units > *in.ExpectedCostUnits) {
+		if units > 0 && in.ExpectedCostUnits == nil {
+			fail(w, 409, "请先确认本次创作消耗的积分后再提交")
+			return
+		}
+		if units > 0 && units > *in.ExpectedCostUnits {
 			fail(w, 409, "积分价格已更新，请确认后重新提交")
 			return
 		}

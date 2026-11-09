@@ -11,6 +11,7 @@ import AccountForm from "../adminAccounts/AccountForm";
 import PasswordReset from "../components/PasswordReset";
 import { archive, resetPassword, setDisabled } from "../adminAccounts/actions";
 import { useRoles } from "../roles/types";
+import { useMe } from "../session";
 import {
   adminRoleLabel,
   lastLogin,
@@ -25,6 +26,7 @@ export default function AdminAccounts({ notify }: PageProps) {
     [editing, setEditing] = useState<Row<AdminAccount> | null | undefined>(),
     [resetting, setResetting] = useState<Row<AdminAccount>>(),
     roles = useRoles(),
+    me = useMe(),
     roleName = (id: string) =>
       roles.rows.find((row) => row.id === id)?.data.name ||
       adminRoleLabel[id] ||
@@ -105,25 +107,30 @@ export default function AdminAccounts({ notify }: PageProps) {
                 <div className="business-actions">
                   <button onClick={() => setEditing(row)}>编辑</button>
                   <button onClick={() => setResetting(row)}>重置密码</button>
-                  <button
-                    className={row.data.disabled ? "" : "danger-text"}
-                    onClick={() =>
-                      void run(
-                        () => setDisabled(row, !row.data.disabled),
-                        row.data.disabled ? "账号已启用" : "账号已停用",
-                      )
-                    }
-                  >
-                    {row.data.disabled ? "启用" : "停用"}
-                  </button>
-                  <button
-                    className="danger-text"
-                    onClick={() =>
-                      void run(() => archive(row), "管理账号已归档")
-                    }
-                  >
-                    归档
-                  </button>
+                  {/* Your own account cannot be disabled or archived here. */}
+                  {row.id !== me?.id && (
+                    <>
+                      <button
+                        className={row.data.disabled ? "" : "danger-text"}
+                        onClick={() =>
+                          void run(
+                            () => setDisabled(row, !row.data.disabled),
+                            row.data.disabled ? "账号已启用" : "账号已停用",
+                          )
+                        }
+                      >
+                        {row.data.disabled ? "启用" : "停用"}
+                      </button>
+                      <button
+                        className="danger-text"
+                        onClick={() =>
+                          void run(() => archive(row), "管理账号已归档")
+                        }
+                      >
+                        归档
+                      </button>
+                    </>
+                  )}
                 </div>
               ) : (
                 "—"
@@ -133,7 +140,11 @@ export default function AdminAccounts({ notify }: PageProps) {
       />
       {editing !== undefined && (
         <AccountForm
-          row={editing}
+          // Latest copy of the row, so a retry after a refresh has its version.
+          row={
+            editing &&
+            (resource.data?.items.find((r) => r.id === editing.id) || editing)
+          }
           notify={notify}
           onClose={() => setEditing(undefined)}
           onSaved={resource.reload}

@@ -65,3 +65,24 @@ export function modelDraft(m: Model): ModelDraft {
     },
   };
 }
+
+// After a version conflict: start from the latest record and re-apply only
+// the fields this dialog changed, so other parts edited elsewhere survive.
+export function rebaseDraft(
+  base: ModelDraft,
+  edited: ModelDraft,
+  latest: ModelDraft,
+): ModelDraft {
+  const same = (a: unknown, b: unknown) =>
+    JSON.stringify(a) === JSON.stringify(b);
+  const out: ModelDraft = { ...latest, settings: { ...latest.settings } };
+  const top = out as unknown as Record<string, unknown>,
+    settings = out.settings as unknown as Record<string, unknown>;
+  for (const [key, value] of Object.entries(edited))
+    if (key !== "settings" && !same(value, base[key as keyof ModelDraft]))
+      top[key] = value;
+  for (const [key, value] of Object.entries(edited.settings))
+    if (!same(value, base.settings[key as keyof ModelSettings]))
+      settings[key] = value;
+  return out;
+}

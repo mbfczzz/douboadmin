@@ -7,7 +7,7 @@
 | 方法 | 路径 | 说明 |
 | --- | --- | --- |
 | GET | /wallet | 可用/预留积分、充值规则、设置版本、支付通道是否已配置 |
-| GET | /wallet/ledger | 本人最近积分流水 |
+| GET | /wallet/ledger | 本人最近积分流水（不含操作管理员与内部引用编号） |
 | GET | /jobs/estimate | 传 kind、model、resolution、ratio、quality、duration，返回 units、billingEnabled；仅预估当前参数，无需描述或素材，不创建任务或扣积分 |
 | POST | /jobs/quote | 传任务输入，返回 units、configuredUnits、billingEnabled、availableUnits、sufficient |
 | GET / POST | /orders | 本人订单 / `{amountFen,settingsVersion,platform}`，创建充值订单需 Idempotency-Key |

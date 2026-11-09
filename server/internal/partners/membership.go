@@ -29,7 +29,10 @@ func access(r Reader, user string) (core.Access, error) {
 	}
 	out.PartnerName = p.Name
 	if m.Status != "active" {
-		out.Message = "授权已停用或解绑，请联系管理员"
+		out.Message = "授权已停用，请联系服务商或管理员"
+		if m.Status == "unbound" {
+			out.Message = "授权已解绑，请使用新的激活码或重新申请开通"
+		}
 		return out, nil
 	}
 	if e = activeChain(r, m.PartnerID); errors.Is(e, core.ErrPartnerDisabled) {
@@ -83,6 +86,10 @@ func (s *Service) Redeem(ctx context.Context, user, input string, source ...stri
 			return lookup
 		}
 		if v.Status == "used" && v.UserID == user && m.CodeID == row.ID {
+			// An unbound membership released its seat; the old code stays used.
+			if m.Status == "unbound" {
+				return rulef("该激活码已使用，请使用新的激活码重新授权")
+			}
 			returnAccess, e := access(tx, user)
 			out = returnAccess
 			return e

@@ -26,8 +26,9 @@ func (a *Server) favorite(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	tid := r.PathValue("id")
-	if _, e := a.Store.Get(r.Context(), "templates", tid); e != nil {
-		dbError(w, e)
+	// Only templates users can see may be favorited; removing always works.
+	if v.Active && !a.templateVisible(r, a.modelReady(r), tid) {
+		fail(w, 404, "模板已下架")
 		return
 	}
 	id := identity(r).ID

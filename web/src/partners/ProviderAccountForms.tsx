@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { Row } from "../api";
 import Modal from "../components/Modal";
 import RoleSelect from "../roles/RoleSelect";
+import { useRoles } from "../roles/types";
 import type { AdminAccount } from "../adminAccounts/types";
 import { createAccount, saveAccount } from "./accountActions";
 
@@ -119,9 +120,15 @@ export function RoleChange({
   onSaved: () => Promise<void>;
   onFailed: () => void;
 }) {
+  const roles = useRoles("partner");
   const { busy, error, submit } = useSubmit(
     (data) =>
-      saveAccount(partnerId, account, { role: String(data.get("role")) }),
+      saveAccount(
+        partnerId,
+        account,
+        { role: String(data.get("role")) },
+        roles.name,
+      ),
     onFailed,
   );
   return (

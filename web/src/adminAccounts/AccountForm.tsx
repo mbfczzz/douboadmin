@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { guardedClose } from "../hooks/unsaved";
 import { api, type Row } from "../api";
 import Modal from "../components/Modal";
 import type { Notify } from "../navigation";
 import type { AdminAccount } from "./types";
 import RoleSelect from "../roles/RoleSelect";
+import { useRoles } from "../roles/types";
 
 export default function AccountForm({
   row,
@@ -16,6 +18,8 @@ export default function AccountForm({
   onClose: () => void;
   onSaved: () => unknown;
 }) {
+  const roles = useRoles("platform");
+  const [dirty, setDirty] = useState(false);
   const [busy, setBusy] = useState(false),
     [error, setError] = useState("");
   async function submit(form: HTMLFormElement) {
@@ -38,7 +42,11 @@ export default function AccountForm({
             disabled: !!row.data.disabled,
             version: row.version,
           }),
-          confirmation: { before: row.data },
+          confirmation: {
+            before: row.data,
+            title: "确认修改账号资料",
+            format: { role: roles.name },
+          },
         });
       else
         await api("/admin/accounts", {
@@ -54,6 +62,8 @@ export default function AccountForm({
       notify(row ? "账号资料已更新" : "管理账号已创建");
     } catch (error) {
       setError((error as Error).message);
+      // A login in the meantime bumps the version; refresh so a retry works.
+      if (row) void onSaved();
     } finally {
       setBusy(false);
     }
@@ -63,10 +73,12 @@ export default function AccountForm({
       className="form-modal"
       title={row ? "编辑账号资料" : "添加管理账号"}
       subtitle={row?.data.username}
-      onClose={() => !busy && onClose()}
+      onClose={guardedClose(busy, onClose)}
     >
       <form
         className="edit-form"
+        onChange={() => setDirty(true)}
+        data-unsaved={dirty || busy || undefined}
         aria-busy={busy}
         onSubmit={(e) => {
           e.preventDefault();

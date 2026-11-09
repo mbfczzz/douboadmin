@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { guardedClose } from "../hooks/unsaved";
 import { api, type Row } from "../api";
 import Modal from "../components/Modal";
 import type { Notify } from "../navigation";
@@ -51,7 +52,7 @@ export default function UserStatus({
       className="form-modal"
       title={action}
       subtitle={user.data.nickname || user.id}
-      onClose={() => !busy && onClose()}
+      onClose={guardedClose(busy, onClose)}
     >
       <form
         className="edit-form"

@@ -154,3 +154,6 @@ export const kindTones: Record<string, Tone> = {
   payout_paid: "info",
   payout_cancel: "muted",
 };
+
+// Matches the server rule: providers go at most three levels below the platform.
+export const MAX_LEVELS = 3;

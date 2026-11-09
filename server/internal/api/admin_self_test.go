@@ -30,3 +30,20 @@ func TestAdminChangesOwnPassword(t *testing.T) {
 	}
 	adminLoginToken(t, a, "self-pw", "new-password-2026-ok")
 }
+
+// Signing in records the time without bumping the account version, so an
+// admin's open edit of that account does not hit a version conflict.
+func TestLoginKeepsAccountVersion(t *testing.T) {
+	a, _, _ := setup(t)
+	admin := adminLoginToken(t, a, "admin", "test-pass")
+	id := createProvider(t, a, admin, "ver-key", "root", "V1", 3, map[string]string{"username": "ver-login", "password": "ver-login-password-2026"})
+	before := call(a, "GET", "/api/admin/partners/"+id+"/account", admin, "", nil).Body.String()
+	adminLoginToken(t, a, "ver-login", "ver-login-password-2026")
+	after := call(a, "GET", "/api/admin/partners/"+id+"/account", admin, "", nil).Body.String()
+	if !strings.Contains(before, `"version":1`) || !strings.Contains(after, `"version":1`) {
+		t.Fatal("login changed the account version", before, after)
+	}
+	if !strings.Contains(after, `"lastLoginAt":"20`) {
+		t.Fatal("login time not shown", after)
+	}
+}

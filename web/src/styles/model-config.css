@@ -166,3 +166,12 @@
   gap: 2px 12px;
   min-width: 190px;
 }
+@media (max-width: 640px) {
+  .catalog-table td.table-actions:has(.model-row-actions) {
+    width: auto;
+  }
+  .catalog-actions.model-row-actions {
+    grid-template-columns: repeat(2, max-content);
+    min-width: 0;
+  }
+}

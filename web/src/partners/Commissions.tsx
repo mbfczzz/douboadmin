@@ -2,7 +2,6 @@ import { useState } from "react";
 import { date } from "../api";
 import { money } from "../business/types";
 import Records, { useRecords } from "./Records";
-import PolicyForm from "./PolicyForm";
 import Payouts from "./Payouts";
 import type { Scope, CommissionEntry } from "./types";
 import { kindTones, labels } from "./types";
@@ -11,7 +10,7 @@ import OrderDistribution from "./OrderDistribution";
 import TabSummary from "./TabSummary";
 export default function Commissions(scope: Scope) {
   const [order, setOrder] = useState("");
-  const { id, view, notify, changed } = scope,
+  const { id, view, changed } = scope,
     resource = useRecords<CommissionEntry>(
       "/admin/commission-ledger?owner=" + id,
     );
@@ -28,7 +27,6 @@ export default function Commissions(scope: Scope) {
           { label: "已线下打款", value: money(view.commission.paidOutFen) },
         ]}
       />
-      {id === "root" && <PolicyForm notify={notify} changed={changed} />}
       <Records
         title="佣金流水"
         resource={resource}

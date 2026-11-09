@@ -175,6 +175,7 @@ export const kindText: Record<string, string> = {
   image: "图片生成",
   mix: "视频混剪",
   chat: "Agent 对话",
+  audio: "配音",
 };
 // One date format across the admin, in Beijing time: 2026-11-02 09:00
 // (with seconds where precision matters, e.g. payments and audit trails).

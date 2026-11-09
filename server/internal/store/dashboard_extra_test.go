@@ -27,8 +27,13 @@ func TestDashboardBreakdown(t *testing.T) {
 	rec("memberships", "u0", "u0", old, core.Membership{PartnerID: "p1", ActivatedAt: old})
 	rec("activation_codes", "c1", "p1", now, core.ActivationCode{Status: "used", UsedAt: &now})
 	rec("activation_codes", "c2", "p1", now, core.ActivationCode{Status: "pending"})
+	// Spent points come from job_billing (the MySQL job row has no cost), so
+	// the job's own CostUnits is deliberately left empty here.
 	job := func(kind, status string, cost int64, took time.Duration) {
-		r.job(core.Job{UserID: "u1", Input: core.JobInput{Kind: kind}, Status: status, CostUnits: cost, CreatedAt: now.Add(-took), UpdatedAt: now})
+		id := kind + "-" + status
+		state := map[string]string{"succeeded": "charged", "failed": "released"}[status]
+		rec("job_billing", id, "u1", now, core.JobBilling{Units: cost, State: state})
+		r.job(core.Job{ID: id, UserID: "u1", Input: core.JobInput{Kind: kind}, Status: status, CreatedAt: now.Add(-took), UpdatedAt: now})
 	}
 	job("image", "succeeded", 200, 20*time.Second)
 	job("image", "failed", 200, time.Second)

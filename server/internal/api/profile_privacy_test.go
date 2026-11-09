@@ -21,4 +21,12 @@ func TestAdminStatusReasonStaysOutOfOwnProfile(t *testing.T) {
 	if w.Code != 200 || strings.Contains(w.Body.String(), "内部风控备注") {
 		t.Fatal("internal status reason leaked to the user", w.Code, w.Body.String())
 	}
+	current, _ := a.Store.Get(t.Context(), "users", "user-a")
+	w = call(a, "PUT", "/api/me", user, "", map[string]any{"version": current.Version, "nickname": "新昵称"})
+	if w.Code != 200 || strings.Contains(w.Body.String(), "内部风控备注") {
+		t.Fatal("profile save echoed the internal status reason", w.Code, w.Body.String())
+	}
+	if saved, _ := a.Store.Get(t.Context(), "users", "user-a"); !strings.Contains(string(saved.Data), "内部风控备注") {
+		t.Fatal("the reason must stay stored for admins")
+	}
 }

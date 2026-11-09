@@ -13,13 +13,14 @@ type breakdownBuilder struct {
 	active    map[string]bool
 	creators  map[string]bool
 	payers    map[string]bool
+	charged   map[string]int64 // job id → points charged
 	providers map[string]int64
 	names     map[string]string
 	since     time.Time
 }
 
 func newBreakdown(since time.Time) *breakdownBuilder {
-	return &breakdownBuilder{out: core.Breakdown{Kinds: map[string]*core.KindStat{}, Channels: map[string]*core.ChannelStat{}, Providers: []core.ProviderStat{}}, active: map[string]bool{}, creators: map[string]bool{}, payers: map[string]bool{}, providers: map[string]int64{}, names: map[string]string{}, since: since}
+	return &breakdownBuilder{out: core.Breakdown{Kinds: map[string]*core.KindStat{}, Channels: map[string]*core.ChannelStat{}, Providers: []core.ProviderStat{}}, active: map[string]bool{}, creators: map[string]bool{}, payers: map[string]bool{}, charged: map[string]int64{}, providers: map[string]int64{}, names: map[string]string{}, since: since}
 }
 
 func (b *breakdownBuilder) inPeriod(t *time.Time) bool { return t != nil && !t.Before(b.since) }
@@ -38,6 +39,13 @@ func (b *breakdownBuilder) record(ns string, row core.Record) {
 	case "daily_activity":
 		if b.inPeriod(&created) {
 			b.active[row.Owner] = true
+		}
+	case "job_billing":
+		// Points actually charged live here, not on the job row (MySQL jobs
+		// have no cost column). Records are read before jobs.
+		var bill core.JobBilling
+		if json.Unmarshal(row.Data, &bill) == nil && bill.State == "charged" {
+			b.charged[row.ID] = bill.Units
 		}
 	case "orders":
 		var o core.Order
@@ -106,9 +114,9 @@ func (b *breakdownBuilder) job(j core.Job, day *core.DailyMetric) {
 	switch j.Status {
 	case "succeeded":
 		k.Succeeded++
-		k.SpentUnits += j.CostUnits
+		k.SpentUnits += b.charged[j.ID]
 		if day != nil {
-			day.SpentUnits += j.CostUnits
+			day.SpentUnits += b.charged[j.ID]
 		}
 		if d := j.UpdatedAt.Sub(j.CreatedAt); d > 0 && d < 24*time.Hour {
 			k.DurationMs += d.Milliseconds()

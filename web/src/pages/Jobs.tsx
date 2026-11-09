@@ -61,7 +61,14 @@ export default function Jobs({ notify }: PageProps) {
         {filteredJobs.length ? (
           <JobTable jobs={filteredJobs} onAction={(k, j) => void act(k, j)} />
         ) : !resource.data || resource.error ? null : (
-          <Empty text="暂无匹配的任务" />
+          <Empty
+            text={jobs.length ? "暂无匹配的任务" : "暂无生成任务"}
+            help={
+              jobs.length
+                ? "请调整状态或搜索条件。"
+                : "用户开始创作后，内容会显示在这里。"
+            }
+          />
         )}
       </section>
       {detail && (

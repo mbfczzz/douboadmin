@@ -38,6 +38,7 @@ func (a *Server) presentJob(ctx context.Context, j *core.Job) {
 			}
 		}
 	}
+	verifiedRefund := false
 	if row, e := a.Store.Get(ctx, "job_billing", j.ID); e == nil {
 		var bill core.JobBilling
 		if json.Unmarshal(row.Data, &bill) == nil {
@@ -45,6 +46,7 @@ func (a *Server) presentJob(ctx context.Context, j *core.Job) {
 			j.BillingState = bill.State
 			if j.Status == "failed" && bill.State == "released" && strings.HasPrefix(j.Error, uncertainPrefix) {
 				j.Error = "已核实上游未生成结果，预留积分已退回，可重新提交创作"
+				verifiedRefund = true
 			}
 		}
 	}
@@ -68,7 +70,8 @@ func (a *Server) presentJob(ctx context.Context, j *core.Job) {
 		var e provider.Execution
 		if err == nil && json.Unmarshal(r.Data, &e) == nil {
 			j.Retryable = e.Phase == "failed"
-			if e.ErrorCause != "" {
+			// An error hint must not hide the refund outcome shown above.
+			if e.ErrorCause != "" && !verifiedRefund {
 				if m, lookup := a.model(ctx, j.Input.Model); lookup == nil {
 					j.Error = m.Settings.ErrorMessage(e.ErrorCause, j.Error)
 				}

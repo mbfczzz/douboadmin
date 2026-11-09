@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { login } from "./helpers";
+import { login, answerAsk } from "./helpers";
 import { longName, surfaceFixtures } from "./surface-fixtures";
 
 test("users and providers are isolated sidebar routes", async ({ page }) => {
@@ -52,6 +52,8 @@ test("users and providers are isolated sidebar routes", async ({ page }) => {
   ).toBeDisabled();
   await page.screenshot({ path: "../.runtime/provider-create-quota.png" });
   await createChild.getByRole("button", { name: "关闭", exact: true }).click();
+  // Typed edits ask before they are discarded.
+  await answerAsk(page, true);
   expect(requests).toContain("/api/admin/partners/tree");
   // Every provider function has its own row button and dialog.
   const row = page.locator(".provider-tree-row").first();

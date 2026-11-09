@@ -62,10 +62,15 @@ export default function VirtualEvents({ notify }: { notify: Notify }) {
   ) =>
     api(`/admin/virtual-payments/events/${row.id}/${action}`, {
       method: "POST",
-      confirmation: {
-        before: row.data,
-        title: action === "retry" ? "重试处理通知" : "确认保存核对说明",
-      },
+      confirmation:
+        action === "retry"
+          ? {
+              title: "重试处理通知",
+              extra: {
+                处理方式: "沿用原订单和原通知重新处理，不会重复发放积分",
+              },
+            }
+          : { before: row.data, title: "确认保存核对说明" },
       body: JSON.stringify(
         action === "retry"
           ? { version: row.version }

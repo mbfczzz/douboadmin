@@ -93,6 +93,16 @@ func (a *Server) saveTemplate(w http.ResponseWriter, r *http.Request) {
 	reply(w, 200, row)
 }
 
+// templateVisible is the user-side rule: published, not deleted, live model.
+func (a *Server) templateVisible(r *http.Request, ready func(string) bool, id string) bool {
+	row, err := a.Store.Get(r.Context(), "templates", id)
+	if err != nil {
+		return false
+	}
+	var t core.Template
+	return json.Unmarshal(row.Data, &t) == nil && t.Published && !t.Deleted && ready(t.Model)
+}
+
 // modelReady reports whether a template's model is published and usable,
 // remembering each lookup for the rest of the request.
 func (a *Server) modelReady(r *http.Request) func(string) bool {

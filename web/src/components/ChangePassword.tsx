@@ -25,6 +25,8 @@ export default function ChangePassword({
       await api("/admin/me/password", {
         method: "PUT",
         body: JSON.stringify({ current, next }),
+        // This dialog is the confirmation; passwords never enter a summary.
+        confirmation: false,
       });
       notify("密码已修改，其他设备需重新登录");
       onClose();

@@ -1,7 +1,15 @@
 import { useRef, useState } from "react";
 import { api, APIError, type Row } from "../api";
+import type { ConfirmationOptions } from "../confirmation/request";
 
-export function useRecordSave<T>(namespace: string, initial: Row<T>) {
+// onConflict lets an editor rebuild its draft on top of the latest record
+// (e.g. keep only the fields this dialog changed) after a version conflict.
+export function useRecordSave<T>(
+  namespace: string,
+  initial: Row<T>,
+  onConflict?: (latest: T, base: T) => void,
+  summary?: Pick<ConfirmationOptions, "labels" | "title">,
+) {
   const [version, setVersion] = useState(initial.version);
   const [error, setError] = useState("");
   const before = useRef(initial.data);
@@ -11,7 +19,7 @@ export function useRecordSave<T>(namespace: string, initial: Row<T>) {
       await api(`/admin/${namespace}/${initial.id}`, {
         method: "PUT",
         body: JSON.stringify({ version, data }),
-        confirmation: { before: before.current },
+        confirmation: { ...summary, before: before.current },
       });
       return true;
     } catch (e) {
@@ -24,9 +32,13 @@ export function useRecordSave<T>(namespace: string, initial: Row<T>) {
             return false;
           }
           setVersion(latest.version);
+          const base = before.current;
           before.current = latest.data;
+          onConflict?.(latest.data, base);
           setError(
-            "记录已被其他人修改。你的草稿已保留，再次保存会覆盖最新版本，请确认后操作。",
+            onConflict
+              ? "记录已被其他人修改。已载入最新版本并保留你在此弹窗中的修改，请确认后再次保存。"
+              : "记录已被其他人修改。你的草稿已保留，再次保存会覆盖最新版本，请确认后操作。",
           );
         } catch {
           setError("保存冲突，草稿已保留。请恢复网络后重试。");

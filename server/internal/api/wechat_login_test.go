@@ -146,3 +146,20 @@ func TestProfileAvatarOwnershipAndIdentityPreservation(t *testing.T) {
 		t.Fatal("stale profile accepted")
 	}
 }
+func TestDisabledUserGetsNoNewSession(t *testing.T) {
+	a, _, _ := setup(t)
+	a.Config.DemoLogin = true
+	body := map[string]string{"demoId": "disabled-test-device"}
+	if call(a, "POST", "/api/auth/login", "", "", body).Code != 200 {
+		t.Fatal("first login failed")
+	}
+	id := "demo-" + core.Digest(body["demoId"])[:24]
+	row, _ := a.Store.Get(context.Background(), "users", id)
+	row.Data = core.Data(map[string]any{"nickname": "x", "disabled": true})
+	if _, e := a.Store.Put(context.Background(), "users", row, row.Version); e != nil {
+		t.Fatal(e)
+	}
+	if w := call(a, "POST", "/api/auth/login", "", "", body); w.Code != 403 || !strings.Contains(w.Body.String(), "账号已停用") {
+		t.Fatal("disabled user signed in", w.Code, w.Body.String())
+	}
+}

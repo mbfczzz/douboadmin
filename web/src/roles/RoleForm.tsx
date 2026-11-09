@@ -46,7 +46,19 @@ export default function RoleForm({
       await api(row ? `/admin/roles/${row.id}` : "/admin/roles", {
         method: row ? "PUT" : "POST",
         body: JSON.stringify(body),
-        confirmation: row ? { before: row.data } : undefined,
+        confirmation: row
+          ? {
+              before: row.data,
+              title: "确认修改角色",
+              format: {
+                menus: (v) =>
+                  (v as PageId[])
+                    .map((id) => pageInfo[id]?.[0] || id)
+                    .join("、"),
+                scope: (v) => roleScopeLabel[v as RoleScope] || String(v),
+              },
+            }
+          : undefined,
       });
       await onSaved();
       notify(row ? "角色已更新" : "角色已创建");

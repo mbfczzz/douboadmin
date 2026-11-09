@@ -4,13 +4,14 @@ import Records, { useRecords } from "./Records";
 import QuotaForm from "./QuotaForm";
 import QuotaRequests from "./QuotaRequests";
 import type { Move, Scope } from "./types";
-import { available, kindTones, labels } from "./types";
+import { MAX_LEVELS, available, kindTones, labels } from "./types";
 import TabSummary from "./TabSummary";
 import Tag from "../components/Tag";
 import { PartnerIdentity } from "./PartnerIdentity";
 export default function Quotas({ id, view, changed, notify }: Scope) {
   const resource = useRecords<Move>("/admin/quota-moves?around=" + id),
     pool = view.quota.users,
+    leaf = (view.record.data.path?.length || 0) >= MAX_LEVELS,
     share = (n: number) =>
       `${pool.granted ? Math.min(100, (n / pool.granted) * 100) : 0}%`,
     [form, setForm] = useState<"grant" | "reclaim" | "request" | null>(null),
@@ -31,20 +32,25 @@ export default function Quotas({ id, view, changed, notify }: Scope) {
         ]}
         actions={
           <>
-            <button
-              type="button"
-              className="primary"
-              onClick={() => setForm("grant")}
-            >
-              划拨名额
-            </button>
-            <button
-              type="button"
-              className="secondary"
-              onClick={() => setForm("reclaim")}
-            >
-              收回名额
-            </button>
+            {/* The last level has no children to move quota to or from. */}
+            {!leaf && (
+              <>
+                <button
+                  type="button"
+                  className="primary"
+                  onClick={() => setForm("grant")}
+                >
+                  划拨名额
+                </button>
+                <button
+                  type="button"
+                  className="secondary"
+                  onClick={() => setForm("reclaim")}
+                >
+                  收回名额
+                </button>
+              </>
+            )}
             <button
               type="button"
               className="secondary"

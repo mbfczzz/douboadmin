@@ -20,7 +20,8 @@ func (a *Server) execution(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Result URLs may be transient signed URLs. Return only operational metadata.
-	reply(w, 200, map[string]any{"phase": e.Phase, "taskId": e.TaskID, "modelKey": e.ModelKey, "startedAt": e.StartedAt, "note": e.Note})
+	// errorCause is the redacted upstream error; only admins reach this route.
+	reply(w, 200, map[string]any{"phase": e.Phase, "taskId": e.TaskID, "modelKey": e.ModelKey, "startedAt": e.StartedAt, "note": e.Note, "errorCause": e.ErrorCause})
 }
 
 func (a *Server) releaseJob(w http.ResponseWriter, r *http.Request) {

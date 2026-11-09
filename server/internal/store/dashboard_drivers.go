@@ -23,7 +23,7 @@ func (m *MySQL) Dashboard(ctx context.Context, days int) (core.Dashboard, error)
 	r := newReport(days)
 	day := r.since.Format("2006-01-02")
 	// Period rows only, plus the small partners table for provider names.
-	rows, e := m.db.QueryContext(ctx, `SELECT namespace,id,owner_id,version,data,created_at FROM records WHERE (namespace IN ('users','daily_activity','analytics','executions','orders','direct_access','activation_codes') AND created_at>=?) OR namespace='partners' OR (namespace='orders' AND JSON_UNQUOTE(JSON_EXTRACT(data,'$.paidAt'))>=?) OR (namespace='refunds' AND JSON_UNQUOTE(JSON_EXTRACT(data,'$.completedAt'))>=?) OR (namespace='memberships' AND JSON_UNQUOTE(JSON_EXTRACT(data,'$.activatedAt'))>=?) OR (namespace='activation_codes' AND JSON_UNQUOTE(JSON_EXTRACT(data,'$.usedAt'))>=?)`, r.since, day, day, day, day)
+	rows, e := m.db.QueryContext(ctx, `SELECT namespace,id,owner_id,version,data,created_at FROM records WHERE (namespace IN ('users','daily_activity','analytics','executions','orders','direct_access','activation_codes','job_billing') AND created_at>=?) OR namespace='partners' OR (namespace='orders' AND JSON_UNQUOTE(JSON_EXTRACT(data,'$.paidAt'))>=?) OR (namespace='refunds' AND JSON_UNQUOTE(JSON_EXTRACT(data,'$.completedAt'))>=?) OR (namespace='memberships' AND JSON_UNQUOTE(JSON_EXTRACT(data,'$.activatedAt'))>=?) OR (namespace='activation_codes' AND JSON_UNQUOTE(JSON_EXTRACT(data,'$.usedAt'))>=?)`, r.since, day, day, day, day)
 	if e != nil {
 		return core.Dashboard{}, e
 	}

@@ -102,13 +102,15 @@
 .catalog-table .table-actions {
   position: sticky;
   right: 0;
+  /* Above in-row stacking (e.g. the switch knob) when it scrolls under. */
+  z-index: 2;
   background: var(--surface);
   box-shadow:
     -8px 0 var(--surface),
     -9px 0 var(--line);
 }
 .catalog-table th.table-actions {
-  z-index: 2;
+  z-index: 3;
   background: var(--surface-subtle);
   box-shadow:
     -8px 0 var(--surface-subtle),

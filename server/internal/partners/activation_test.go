@@ -3,6 +3,7 @@ package partners
 import (
 	"doubo/server/internal/core"
 	"encoding/json"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -65,7 +66,8 @@ func TestActivationSingleUseDisableAndUnbind(t *testing.T) {
 	if p.Quota.Users.Used != 0 || p.Quota.Users.Available() != 8 {
 		t.Fatal(p.Quota)
 	}
-	if access, e := s.Redeem(ctx, user, code); e != nil || access.Active {
+	// After an unbind the old code is spent: a clear error, never a rebind.
+	if access, e := s.Redeem(ctx, user, code); e == nil || access.Active || !strings.Contains(e.Error(), "新的激活码") {
 		t.Fatal("old code rebound account", access, e)
 	}
 }

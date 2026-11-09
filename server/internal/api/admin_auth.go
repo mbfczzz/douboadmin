@@ -7,7 +7,6 @@ import (
 	"net"
 	"net/http"
 	"strings"
-	"time"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -53,11 +52,7 @@ func (a *Server) adminLogin(w http.ResponseWriter, r *http.Request) {
 		fail(w, 403, denied)
 		return
 	}
-	account.LastLoginAt = time.Now().UTC()
-	row.Data = core.Data(account)
-	if updated, updateErr := a.Store.Put(r.Context(), "admin_accounts", row, row.Version); updateErr == nil {
-		row = updated
-	}
+	a.recordLogin(r.Context(), row.ID)
 	t, e := a.Sessions.CreateAdmin(r.Context(), row.ID, account.Username, account.Role, account.PasswordChangedAt)
 	if e != nil {
 		dbError(w, e)

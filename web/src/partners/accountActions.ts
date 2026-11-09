@@ -9,6 +9,7 @@ export function saveAccount(
   partnerId: string,
   account: Row<AdminAccount>,
   change: Change,
+  roleName?: (id: unknown) => string,
 ) {
   const body = {
     version: account.version,
@@ -30,6 +31,7 @@ export function saveAccount(
               : change.disabled
                 ? "停用服务商登录"
                 : "启用服务商登录",
+          format: roleName ? { role: roleName } : undefined,
         },
   });
 }

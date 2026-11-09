@@ -38,7 +38,12 @@ export default function ProviderAccount({
   };
   async function toggle(current: Row<AdminAccount>) {
     try {
-      await saveAccount(row.id, current, { disabled: !current.data.disabled });
+      await saveAccount(
+        row.id,
+        current,
+        { disabled: !current.data.disabled },
+        roles.name,
+      );
       await done(current.data.disabled ? "登录已启用" : "登录已停用");
     } catch (e) {
       notify((e as Error).message, "error");

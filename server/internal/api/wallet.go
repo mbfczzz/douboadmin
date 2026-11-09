@@ -4,6 +4,7 @@ import (
 	"doubo/server/internal/billing"
 	"doubo/server/internal/core"
 	"doubo/server/internal/partners"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -67,6 +68,17 @@ func (a *Server) ledger(w http.ResponseWriter, r *http.Request) {
 	if e != nil {
 		dbError(w, e)
 		return
+	}
+	if identity(r).Role != "admin" {
+		// Users see amounts and the note, not which admin acted or the
+		// internal reference (idempotency keys, job/order ids).
+		for i := range rows {
+			var entry core.LedgerEntry
+			if json.Unmarshal(rows[i].Data, &entry) == nil {
+				entry.Actor, entry.Reference = "", ""
+				rows[i].Data = core.Data(entry)
+			}
+		}
 	}
 	reply(w, 200, rows)
 }

@@ -12,6 +12,7 @@ import { MAX_LEVELS } from "./ProviderTree";
 import { useMe } from "../session";
 
 import ProviderAccount from "./ProviderAccount";
+import PlatformActions from "./PlatformActions";
 import ProviderSelf from "./ProviderSelf";
 import Modal from "../components/Modal";
 import type { ProviderAction } from "./ProviderActions";
@@ -73,6 +74,9 @@ export default function Providers({ notify }: { notify: Notify }) {
         loading={resource.loading}
         onRefresh={() => void resource.reload()}
       >
+        {!ownId && (
+          <PlatformActions notify={notify} changed={resource.reload} />
+        )}
         {canAddTop && (
           <button
             type="button"

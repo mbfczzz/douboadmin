@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"doubo/server/internal/core"
+	"doubo/server/internal/relay"
 	"encoding/json"
 	"errors"
 	"strings"
@@ -22,6 +23,12 @@ func (p *Relay) failure(ctx context.Context, j core.Job, err error) (message, ca
 		cause = string(runes[:2000])
 	}
 	message = err.Error()
+	// Relay HTTP errors carry operator wording ("检查模型配置或账户额度") or the
+	// upstream's own text; users get a plain message, admins keep the cause.
+	var httpErr *relay.HTTPError
+	if errors.As(err, &httpErr) {
+		message = UserFailure
+	}
 	if row, e := p.Store.Get(ctx, "models", j.Input.Model); e == nil {
 		var m core.Model
 		if json.Unmarshal(row.Data, &m) == nil {
@@ -30,6 +37,9 @@ func (p *Relay) failure(ctx context.Context, j core.Job, err error) (message, ca
 	}
 	return
 }
+
+// UserFailure is what end users see when the relay refuses a request.
+const UserFailure = "生成服务暂时无法完成该任务，请稍后重试或更换模型"
 
 // redact shortens an error for the admin task note and removes the relay key.
 func (p *Relay) redact(err error) string {

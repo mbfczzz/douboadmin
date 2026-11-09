@@ -24,3 +24,9 @@ export function warnUnload(e: BeforeUnloadEvent) {
     e.returnValue = "";
   }
 }
+
+// Close handler for a dialog with a form: blocked while saving, and asks
+// before discarding edits (Escape, backdrop and the close button).
+export const guardedClose = (busy: boolean, close: () => void) => () => {
+  if (!busy) void canLeave().then((ok) => ok && close());
+};

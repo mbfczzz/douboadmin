@@ -40,14 +40,12 @@ test("provider login: open, role, password and status are separate actions", asy
   });
   expect(signIn.status()).toBe(200);
 
-  // The login above changed the account version; the stale action fails
-  // once, the dialog refreshes itself and the retry goes through.
-  await dialog.getByRole("button", { name: "停用登录" }).click();
-  await confirmSubmission(page);
-  await expect(page.locator(".toast")).toContainText("数据已发生变化");
+  // The provider signing in above must not make the open dialog stale.
   await dialog.getByRole("button", { name: "停用登录" }).click();
   const approval = page.getByRole("dialog", { name: "停用服务商登录" });
   await expect(approval).toContainText("停用");
+  await expect(approval).toContainText("否");
+  await expect(approval).not.toContainText("未填写");
   await expect(approval).not.toContainText("密码");
   await confirmSubmission(page);
   await expect(dialog).toContainText("已停用");

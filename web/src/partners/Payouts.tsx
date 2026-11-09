@@ -124,11 +124,20 @@ export default function Payouts({ id, view, changed, notify }: Scope) {
               e.preventDefault();
               const f = new FormData(e.currentTarget);
               try {
-                await command.send("/admin/commission-payouts", {
-                  partnerId: id,
-                  amountFen: hundredths(f.get("amount")),
-                  note: String(f.get("note")),
-                });
+                await command.send(
+                  "/admin/commission-payouts",
+                  {
+                    partnerId: id,
+                    amountFen: hundredths(f.get("amount")),
+                    note: String(f.get("note")),
+                  },
+                  "POST",
+                  {
+                    title: "确认申请提现",
+                    format: { partnerId: () => view.record.data.name },
+                  },
+                );
+                notify("提现申请已提交，佣金已预留");
                 setCreate(false);
                 await resource.reload();
                 await changed();

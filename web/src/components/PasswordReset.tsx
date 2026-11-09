@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { guardedClose } from "../hooks/unsaved";
 import Modal from "./Modal";
 import "./password-reset.css";
 
@@ -41,7 +42,7 @@ export default function PasswordReset({
       className="form-modal"
       title="重置密码"
       subtitle={account}
-      onClose={() => !busy && onClose()}
+      onClose={guardedClose(busy, onClose)}
     >
       <form
         className="edit-form"

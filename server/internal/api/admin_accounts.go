@@ -26,15 +26,6 @@ func hashPassword(password string) (string, error) {
 	return string(b), err
 }
 
-func adminView(row core.Record) core.Record {
-	var account core.AdminAccount
-	if json.Unmarshal(row.Data, &account) == nil {
-		account.PasswordHash = ""
-		row.Data = core.Data(account)
-	}
-	return row
-}
-
 func (a *Server) bootstrapAdmin(r *http.Request, username, password string) (core.Record, core.AdminAccount, error) {
 	if username != a.Config.AdminUser || password != a.Config.AdminPassword {
 		return core.Record{}, core.AdminAccount{}, core.ErrNotFound
@@ -73,7 +64,7 @@ func (a *Server) adminAccounts(w http.ResponseWriter, r *http.Request) {
 		// Provider login accounts are managed under 服务商管理, not here.
 		var account core.AdminAccount
 		if json.Unmarshal(row.Data, &account) == nil && account.PartnerID == "" {
-			items = append(items, adminView(row))
+			items = append(items, a.adminView(r.Context(), row))
 		}
 	}
 	rows = items
@@ -109,7 +100,7 @@ func (a *Server) createAdminAccount(w http.ResponseWriter, r *http.Request) {
 		dbError(w, err)
 		return
 	}
-	reply(w, 201, adminView(row))
+	reply(w, 201, a.adminView(r.Context(), row))
 }
 
 func (a *Server) updateAdminAccount(w http.ResponseWriter, r *http.Request) {
@@ -153,7 +144,7 @@ func (a *Server) updateAdminAccount(w http.ResponseWriter, r *http.Request) {
 		dbError(w, err)
 		return
 	}
-	reply(w, 200, adminView(row))
+	reply(w, 200, a.adminView(r.Context(), row))
 }
 
 func (a *Server) resetAdminPassword(w http.ResponseWriter, r *http.Request) {
@@ -186,7 +177,7 @@ func (a *Server) resetAdminPassword(w http.ResponseWriter, r *http.Request) {
 		dbError(w, err)
 		return
 	}
-	reply(w, 200, adminView(row))
+	reply(w, 200, a.adminView(r.Context(), row))
 }
 
 func (a *Server) archiveAdminAccount(w http.ResponseWriter, r *http.Request) {

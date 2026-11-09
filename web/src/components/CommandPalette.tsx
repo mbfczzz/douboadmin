@@ -61,7 +61,12 @@ export default function CommandPalette({
             );
           if (index < 0) return;
           e.preventDefault();
-          buttons[index + (e.key === "ArrowDown" ? 1 : -1)]?.focus();
+          // Up from the first result returns to the search box.
+          if (index === 0 && e.key === "ArrowUp")
+            e.currentTarget
+              .querySelector<HTMLInputElement>('input[type="search"], input')
+              ?.focus();
+          else buttons[index + (e.key === "ArrowDown" ? 1 : -1)]?.focus();
         }}
       >
         <label className="search">

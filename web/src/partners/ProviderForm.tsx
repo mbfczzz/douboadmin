@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { guardedClose } from "../hooks/unsaved";
 import type { Row } from "../api";
 import Modal from "../components/Modal";
 import ProviderLoginFields from "./ProviderLoginFields";
@@ -22,6 +23,7 @@ export default function ProviderForm({
   notify: Notify;
   parentAvailable?: number;
 }) {
+  const [dirty, setDirty] = useState(false);
   const command = useCommand(),
     [users, setUsers] = useState(""),
     limited = !row && parent !== "root",
@@ -34,7 +36,8 @@ export default function ProviderForm({
     <form
       className="edit-form"
       aria-busy={command.busy}
-      data-unsaved={command.busy || undefined}
+      onChange={() => setDirty(true)}
+      data-unsaved={dirty || command.busy || undefined}
       onSubmit={async (event) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
@@ -179,7 +182,7 @@ export default function ProviderForm({
         row ? "编辑服务商" : parent === "root" ? "新增服务商" : "新增下级服务商"
       }
       subtitle={row?.data.name}
-      onClose={() => !command.busy && onClose()}
+      onClose={guardedClose(command.busy, onClose)}
     >
       {form}
     </Modal>

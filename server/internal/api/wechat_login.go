@@ -71,6 +71,14 @@ func (a *Server) login(w http.ResponseWriter, r *http.Request) {
 		dbError(w, err)
 		return
 	}
+	// A disabled account gets no new session (every API call would be refused).
+	if disabled, e := a.userDisabled(r.Context(), id); e != nil {
+		dbError(w, e)
+		return
+	} else if disabled {
+		fail(w, 403, "账号已停用，请联系管理员")
+		return
+	}
 	token, err := a.Sessions.Create(r.Context(), id, "user")
 	if err != nil {
 		dbError(w, err)

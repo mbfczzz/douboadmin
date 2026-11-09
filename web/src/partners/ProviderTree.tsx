@@ -8,8 +8,8 @@ import type { PartnerTreeItem } from "./types";
 import { labels } from "./types";
 
 type Node = { item: PartnerTreeItem; children: Node[] };
-// Matches the server rule: providers go at most three levels below the platform.
-export const MAX_LEVELS = 3;
+import { MAX_LEVELS } from "./types";
+export { MAX_LEVELS };
 const levelNames = [
   "一级",
   "二级",

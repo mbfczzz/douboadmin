@@ -1,7 +1,7 @@
-import { Image, Bot, Film, ArrowUpRight } from "lucide-react";
+import { Image, Bot, Film, Music, ArrowUpRight } from "lucide-react";
 import { date, kindText, type Job } from "../api";
 import Badge from "./Badge";
-import { recoverable } from "./JobRecovery";
+import { releasable, resumable } from "./JobRecovery";
 
 export type JobAction = "detail" | "resume" | "release";
 export default function JobTable({
@@ -33,6 +33,8 @@ export default function JobTable({
                       <Image size={18} />
                     ) : j.input.kind === "chat" ? (
                       <Bot size={18} />
+                    ) : j.input.kind === "audio" ? (
+                      <Music size={18} />
                     ) : (
                       <Film size={18} />
                     )}
@@ -56,21 +58,21 @@ export default function JobTable({
                   >
                     详情 <ArrowUpRight size={14} />
                   </button>
-                  {recoverable(j) && (
-                    <>
-                      <button
-                        className="text-button"
-                        onClick={() => onAction("resume", j)}
-                      >
-                        恢复查询
-                      </button>
-                      <button
-                        className="text-button danger-text"
-                        onClick={() => onAction("release", j)}
-                      >
-                        退回积分
-                      </button>
-                    </>
+                  {resumable(j) && (
+                    <button
+                      className="text-button"
+                      onClick={() => onAction("resume", j)}
+                    >
+                      恢复查询
+                    </button>
+                  )}
+                  {releasable(j) && (
+                    <button
+                      className="text-button danger-text"
+                      onClick={() => onAction("release", j)}
+                    >
+                      退回积分
+                    </button>
                   )}
                 </div>
               </td>

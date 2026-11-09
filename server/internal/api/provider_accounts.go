@@ -81,7 +81,7 @@ func (a *Server) getProviderAccount(w http.ResponseWriter, r *http.Request) {
 		reply(w, 200, map[string]any{"account": nil})
 		return
 	}
-	reply(w, 200, map[string]any{"account": adminView(row)})
+	reply(w, 200, map[string]any{"account": a.adminView(r.Context(), row)})
 }
 
 // saveProviderAccount creates the login for an existing provider or changes
@@ -119,7 +119,7 @@ func (a *Server) saveProviderAccount(w http.ResponseWriter, r *http.Request) {
 			dbError(w, e)
 			return
 		}
-		reply(w, 201, map[string]any{"account": adminView(created)})
+		reply(w, 201, map[string]any{"account": a.adminView(r.Context(), created)})
 		return
 	}
 	if in.Role == "" {
@@ -144,7 +144,7 @@ func (a *Server) saveProviderAccount(w http.ResponseWriter, r *http.Request) {
 		dbError(w, err)
 		return
 	}
-	reply(w, 200, map[string]any{"account": adminView(saved)})
+	reply(w, 200, map[string]any{"account": a.adminView(r.Context(), saved)})
 }
 
 // platformAccountOnly keeps provider logins out of the 管理账号 endpoints.

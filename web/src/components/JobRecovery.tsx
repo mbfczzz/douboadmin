@@ -4,9 +4,11 @@ import { ask } from "../confirm/ask";
 import Modal from "./Modal";
 import JobExecution, { useExecution } from "./JobExecution";
 
-const resumable = ["polling", "output", "succeeded"];
-// Failed jobs that still hold points can be recovered from the task list.
-export const recoverable = (job: Job) =>
+const resumePhases = ["polling", "output", "succeeded"];
+// Any failed job may resume an existing upstream task (the dialog checks the
+// phase); only jobs still holding points can have them released.
+export const resumable = (job: Job) => job.status === "failed";
+export const releasable = (job: Job) =>
   job.status === "failed" && job.billingState === "reserved";
 
 // 恢复查询: only continues polling/saving an upstream task that exists; it
@@ -50,9 +52,11 @@ export function JobResume({
       <div className="edit-form">
         <div className="form-body">
           <JobExecution execution={execution} />
-          {execution.data && !resumable.includes(phase) && (
+          {execution.data && !resumePhases.includes(phase) && (
             <p className="quiet">
-              上游没有可安全恢复的任务，请先在中转站核实提交情况；确认未生成后可使用“退回积分”。
+              上游没有可安全恢复的任务，无需恢复。
+              {releasable(job) &&
+                "请先在中转站核实提交情况，确认未生成后可使用“退回积分”。"}
             </p>
           )}
           {error && (
@@ -67,7 +71,7 @@ export function JobResume({
           </button>
           <button
             className="primary"
-            disabled={busy || !resumable.includes(phase)}
+            disabled={busy || !resumePhases.includes(phase)}
             onClick={() => void resume()}
           >
             {busy ? "正在恢复…" : "恢复查询 / 保存"}

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { guardedClose } from "../hooks/unsaved";
 import { api, type Row } from "../api";
 import Modal from "../components/Modal";
 import { LoadingState } from "../components/RequestState";
@@ -30,6 +31,7 @@ export default function QuotaForm({
     [picking, setPicking] = useState(false),
     [users, setUsers] = useState(1),
     [error, setError] = useState(""),
+    [dirty, setDirty] = useState(false),
     command = useCommand();
   useEffect(() => {
     if (!target) return;
@@ -76,13 +78,24 @@ export default function QuotaForm({
           partnerId: view.record.id,
         });
       else
-        await command.send("/admin/quota-moves", {
-          users,
-          reason,
-          parentId: view.record.id,
-          childId: target!.id,
-          kind,
-        });
+        await command.send(
+          "/admin/quota-moves",
+          {
+            users,
+            reason,
+            parentId: view.record.id,
+            childId: target!.id,
+            kind,
+          },
+          "POST",
+          {
+            title: kind === "grant" ? "确认划拨名额" : "确认收回名额",
+            format: {
+              parentId: () => view.record.data.name,
+              childId: () => target!.data.name,
+            },
+          },
+        );
       await onSaved();
       onClose();
       notify(request ? "名额申请已提交" : "名额操作已保存");
@@ -102,12 +115,13 @@ export default function QuotaForm({
               : "收回名额"
         }
         subtitle={view.record.data.name}
-        onClose={() => !command.busy && onClose()}
+        onClose={guardedClose(command.busy, onClose)}
       >
         <form
           className="edit-form"
           aria-busy={command.busy}
-          data-unsaved={command.busy || undefined}
+          onChange={() => setDirty(true)}
+          data-unsaved={dirty || command.busy || undefined}
           onSubmit={(event) => {
             event.preventDefault();
             void submit(event.currentTarget);

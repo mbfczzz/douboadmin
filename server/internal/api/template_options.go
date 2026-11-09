@@ -2,6 +2,7 @@ package api
 
 import (
 	"doubo/server/internal/core"
+	"doubo/server/internal/relay"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -85,6 +86,33 @@ func (a *Server) validateTemplate(r *http.Request, t *core.Template) error {
 	}
 	if (mode == "i2v" && t.RequiredImages != 1) || (mode == "keyframe" && t.RequiredImages != 2) || (slices.Contains([]string{"t2i", "t2v"}, mode) && t.RequiredImages != 0) {
 		return fmt.Errorf("模板参考图数量与生成方式不一致")
+	}
+	return templateImageLimits(m, mode, t.RequiredImages)
+}
+
+// templateImageLimits keeps a template's required image count inside what its
+// model accepts at submit time; otherwise the template could never be used.
+func templateImageLimits(m core.Model, mode string, n int) error {
+	if n == 0 {
+		return nil
+	}
+	var schema relay.Schema
+	_ = json.Unmarshal(m.ParamsSchema, &schema)
+	max := schema.EditImages.Max
+	if mode == "omni_ref" {
+		max = 0
+		if raw, ok := schema.RefLimits["image"]; ok {
+			_ = json.Unmarshal(raw, &max)
+		}
+	}
+	if (m.Kind == "image" || mode == "omni_ref") && max > 0 && n > max {
+		return fmt.Errorf("该模型最多支持 %d 张参考图，请调整模板要求的图片数量", max)
+	}
+	if mode == "i2i" && n < schema.EditImages.Min {
+		return fmt.Errorf("该模型至少需要 %d 张参考图，请调整模板要求的图片数量", schema.EditImages.Min)
+	}
+	if validateModelReferences(m, mode, map[string]int{"image": n}, nil) != nil {
+		return fmt.Errorf("模板要求的图片数量超过模型配置的参考图上限")
 	}
 	return nil
 }

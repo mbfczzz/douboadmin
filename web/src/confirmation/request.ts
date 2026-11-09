@@ -4,6 +4,8 @@ export interface ConfirmationOptions {
   labels?: Record<string, string>;
   secrets?: string[];
   extra?: Record<string, unknown>;
+  // Display a field's value, e.g. role id → role name.
+  format?: Record<string, (value: unknown) => string>;
 }
 export interface ConfirmationPlan {
   title: string;

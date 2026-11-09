@@ -36,7 +36,7 @@ test("profile edits are approved; password reset is its own action", async ({
     await expect(editor.getByLabel(/密码/)).toHaveCount(0);
     await editor.getByLabel("姓名", { exact: true }).fill("修改后的账号名称");
     await editor.getByRole("button", { name: "保存资料" }).click();
-    const dialog = page.getByRole("dialog", { name: "确认修改管理账号" });
+    const dialog = page.getByRole("dialog", { name: "确认修改账号资料" });
     await expect(dialog).toContainText("修改后的账号名称");
     await expect(dialog).not.toContainText("密码");
     expect(writes).toHaveLength(0);
