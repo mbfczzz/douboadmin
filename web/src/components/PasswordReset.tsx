@@ -1,14 +1,8 @@
 import { useState } from "react";
 import { guardedClose } from "../hooks/unsaved";
 import Modal from "./Modal";
+import { randomPassword } from "./credentials";
 import "./password-reset.css";
-
-const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
-// 20 characters from an unambiguous alphabet: easy to read out, hard to guess.
-export function randomPassword(length = 20) {
-  const bytes = crypto.getRandomValues(new Uint8Array(length));
-  return Array.from(bytes, (n) => alphabet[n % alphabet.length]).join("");
-}
 
 // Single-purpose dialog: set a new login password for one account. The
 // password stays visible so it can be handed over to the account owner.

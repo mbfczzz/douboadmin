@@ -122,19 +122,5 @@ test("fixed user quotas, QR activation, suspension, unbinding and configurable m
     path: "../.runtime/partners-pricing-isolated-test.png",
     fullPage: true,
   });
-  await page.getByRole("tab", { name: "下级服务商", exact: true }).click();
-  await page
-    .getByRole("button", { name: "编辑当前服务商", exact: true })
-    .click();
-  const edit = page.getByRole("dialog", { name: "编辑服务商", exact: true });
-  await edit
-    .getByLabel("子账号售价（每 100 元基准算力）", { exact: true })
-    .fill("94");
-  await edit.getByRole("button", { name: "保存服务商", exact: true }).click();
-  await confirmSubmission(page);
-  await expect(
-    page.getByText("服务商售价低于进价，请先调整价格链", { exact: true }),
-  ).toBeVisible();
-  await edit.getByRole("button", { name: "关闭", exact: true }).click();
   expect(errors).toEqual([]);
 });

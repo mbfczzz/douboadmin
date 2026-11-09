@@ -1,11 +1,16 @@
+import { useState } from "react";
 import RoleSelect from "../roles/RoleSelect";
+import { randomAccount, randomPassword } from "../components/credentials";
 
-// Login account created together with a new provider.
+// Login account created together with a new provider, prefilled with a
+// generated account and password the admin may keep or change.
 export default function ProviderLoginFields({
   disabled,
 }: {
   disabled?: boolean;
 }) {
+  const [account] = useState(randomAccount),
+    [password] = useState(() => randomPassword());
   return (
     <fieldset className="provider-login" disabled={disabled}>
       <legend>登录账号</legend>
@@ -17,6 +22,7 @@ export default function ProviderLoginFields({
           账号
           <input
             name="accountUsername"
+            defaultValue={account}
             autoComplete="off"
             pattern="[A-Za-z0-9._-]{3,32}"
             title="3–32 位字母、数字、点、横线或下划线"
@@ -27,6 +33,7 @@ export default function ProviderLoginFields({
           初始密码
           <input
             name="accountPassword"
+            defaultValue={password}
             spellCheck={false}
             autoComplete="off"
             minLength={16}

@@ -121,11 +121,6 @@ export default function PolicyForm({
             />{" "}
             已确认成本与价格，启用按充值分佣
           </label>
-          <p className="quiet">
-            示例成本 80、总账号保留 50% 毛利，则 S1 进价为 90；S1
-            再保留剩余毛利的 50%，S2 进价为
-            95。用户售价改变时按比例折算积分和分佣，金额以订单快照为准。
-          </p>
           <div className="modal-actions">
             <button className="primary" disabled={busy}>
               {busy ? "保存中…" : "保存分佣规则"}

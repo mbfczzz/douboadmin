@@ -4,6 +4,7 @@ import Modal from "../components/Modal";
 import RoleSelect from "../roles/RoleSelect";
 import { useRoles } from "../roles/types";
 import type { AdminAccount } from "../adminAccounts/types";
+import { randomAccount, randomPassword } from "../components/credentials";
 import { createAccount, saveAccount } from "./accountActions";
 
 // Shared submit wrapper: busy state and inline error for the small forms.
@@ -48,6 +49,8 @@ export function AccountCreate({
   onClose: () => void;
   onSaved: () => Promise<void>;
 }) {
+  const [account] = useState(randomAccount),
+    [password] = useState(() => randomPassword());
   const { busy, error, submit } = useSubmit((data) =>
     createAccount(id, {
       username: String(data.get("username") || "").trim(),
@@ -71,6 +74,7 @@ export function AccountCreate({
             账号
             <input
               name="username"
+              defaultValue={account}
               pattern="[A-Za-z0-9._-]{3,32}"
               autoComplete="off"
               required
@@ -80,6 +84,7 @@ export function AccountCreate({
             初始密码
             <input
               name="password"
+              defaultValue={password}
               spellCheck={false}
               autoComplete="off"
               minLength={16}

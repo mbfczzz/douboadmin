@@ -182,3 +182,17 @@ test("provider function dialogs keep their record workflows", async ({
   await expect(payout.getByLabel("提现金额（元）")).toBeVisible();
   await payout.getByRole("button", { name: "关闭", exact: true }).click();
 });
+
+test("a new provider's login comes prefilled with a generated account", async ({
+  page,
+}) => {
+  await page.getByRole("button", { name: "新增服务商", exact: true }).click();
+  const dialog = page.getByRole("dialog", { name: "新增服务商" }),
+    account = dialog.getByLabel("账号", { exact: true }),
+    password = dialog.getByLabel("初始密码");
+  await expect(account).toHaveValue(/^sp\d{6}$/);
+  await expect(password).toHaveValue(/^[A-Za-z2-9]{20}$/);
+  // Both stay editable.
+  await account.fill("own-account");
+  await expect(account).toHaveValue("own-account");
+});

@@ -5,7 +5,6 @@ import Modal from "../components/Modal";
 import ProviderLoginFields from "./ProviderLoginFields";
 import type { Notify } from "../navigation";
 import type { Partner } from "./types";
-import { hundredths } from "./types";
 import { useCommand } from "./useCommand";
 
 export default function ProviderForm({
@@ -51,8 +50,6 @@ export default function ProviderForm({
                   ...row.data,
                   name: String(data.get("name")),
                   status: data.get("enabled") ? "active" : "disabled",
-                  retailPer100Fen: hundredths(data.get("retail")),
-                  childMarginBps: hundredths(data.get("margin")),
                 },
               },
               "PUT",
@@ -90,31 +87,6 @@ export default function ProviderForm({
           </label>
           {row ? (
             <>
-              <div className="form-grid">
-                <label>
-                  子账号售价（每 100 元基准算力）
-                  <input
-                    name="retail"
-                    type="number"
-                    min="0.01"
-                    step="0.01"
-                    defaultValue={row.data.retailPer100Fen / 100}
-                    required
-                  />
-                </label>
-                <label>
-                  向下级供货时保留毛利（%）
-                  <input
-                    name="margin"
-                    type="number"
-                    min="0"
-                    max="100"
-                    step="0.01"
-                    defaultValue={row.data.childMarginBps / 100}
-                    required
-                  />
-                </label>
-              </div>
               <label className="checkbox">
                 <input
                   name="enabled"
@@ -124,7 +96,7 @@ export default function ProviderForm({
                 启用服务商
               </label>
               <p className="quiet">
-                停用会暂停整个下级链路的使用权限，但不释放名额。上级调价后，低于进价的下级将暂停充值，需调整售价。
+                停用会暂停整个下级链路的使用权限，但不释放名额。
               </p>
             </>
           ) : (

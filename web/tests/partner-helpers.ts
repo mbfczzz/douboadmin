@@ -8,6 +8,11 @@ export async function createProvider(page: Page, name: string) {
   });
   await dialog.getByLabel("服务商名称").fill(name);
   await dialog.getByLabel("可授权账号额度").fill("10");
+  // The login account and password come prefilled; keep the defaults.
+  await expect(dialog.getByLabel("账号", { exact: true })).toHaveValue(
+    /^sp\d{6}$/,
+  );
+  await expect(dialog.getByLabel("初始密码")).toHaveValue(/^[A-Za-z2-9]{20}$/);
   const response = page.waitForResponse(
     (r) =>
       new URL(r.url()).pathname === "/api/admin/partners" &&
