@@ -1,6 +1,7 @@
 import Badge from "../components/Badge";
 import { useState } from "react";
 import type { Row } from "../api";
+import { useMe } from "../session";
 import type { PageProps } from "../navigation";
 import { useResource } from "../hooks/useResource";
 import { useRememberedState } from "../hooks/useRememberedState";
@@ -20,6 +21,8 @@ type Dialog = "detail" | "models" | "activity" | "points" | "edit" | "status";
 import type { Profile } from "../business/types";
 
 export default function Users({ notify }: PageProps) {
+  // A user's operation log keeps the 日志管理 menu.
+  const canLogs = !!useMe()?.menus.includes("logs");
   const resource = useResource<Row<Profile>[]>("/admin/users"),
     [query, setQuery] = useRememberedState("users.query", ""),
     [state, setState] = useRememberedState("users.state", ""),
@@ -129,7 +132,9 @@ export default function Users({ notify }: PageProps) {
               <div className="business-actions">
                 <button onClick={() => show("detail", r)}>详情</button>
                 <button onClick={() => show("models", r)}>模型记录</button>
-                <button onClick={() => show("activity", r)}>行为日志</button>
+                {canLogs && (
+                  <button onClick={() => show("activity", r)}>行为日志</button>
+                )}
                 {!r.data.archived && (
                   <>
                     <button onClick={() => show("points", r)}>积分</button>

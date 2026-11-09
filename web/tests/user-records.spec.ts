@@ -66,3 +66,57 @@ test("user rows open model use and activity records", async ({ page }) => {
     page.getByRole("dialog", { name: "完善注册信息" }),
   ).toBeVisible();
 });
+
+test("without 日志管理 / 生成任务 the user records hide those views", async ({
+  page,
+}) => {
+  const user = await miniUser(page.request);
+  await login(page);
+  await page.route("**/api/admin/me", async (route) => {
+    const me = await (await route.fetch()).json();
+    await route.fulfill({ json: { ...me, role: "custom", menus: ["users"] } });
+  });
+  await page.route(`**/api/admin/users/${user.userId}/models`, (route) =>
+    route.fulfill({
+      json: {
+        models: [
+          {
+            model: "m",
+            name: "模型",
+            kind: "image",
+            calls: 1,
+            succeeded: 1,
+            failed: 0,
+            active: 0,
+            pointsUnits: 100,
+            lastAt: "2026-11-09T08:00:00Z",
+          },
+        ],
+        jobs: [
+          {
+            id: "job-1",
+            model: "m",
+            name: "模型",
+            kind: "image",
+            status: "succeeded",
+            pointsUnits: 100,
+            billing: "charged",
+            prompt: "猫",
+            createdAt: "2026-11-09T08:00:00Z",
+            updatedAt: "2026-11-09T08:00:00Z",
+          },
+        ],
+        limited: false,
+      },
+    }),
+  );
+  await page.reload();
+  await page.getByRole("button", { name: "小程序用户", exact: true }).click();
+  const row = page.locator("tbody tr").filter({ hasText: user.userId });
+  await expect(row.getByRole("button", { name: "模型记录" })).toBeVisible();
+  await expect(row.getByRole("button", { name: "行为日志" })).toHaveCount(0);
+  await row.getByRole("button", { name: "模型记录" }).click();
+  const dialog = page.getByRole("dialog", { name: "模型使用记录" });
+  await expect(dialog.getByText("猫")).toBeVisible();
+  await expect(dialog.getByRole("button", { name: "详情" })).toHaveCount(0);
+});

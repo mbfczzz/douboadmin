@@ -58,6 +58,12 @@ func routeMenus(method, path string) ([]string, bool) {
 	case method == http.MethodGet && path == "/api/admin/audit/stats":
 		// Request volume and errors also appear on the overview.
 		return []string{"overview", "logs"}, true
+	// A user's operation log and full generation records (raw model calls,
+	// materials) keep the menus that guard them elsewhere.
+	case strings.HasPrefix(path, "/api/admin/users/") && strings.Contains(path, "/activity"):
+		return []string{"logs"}, true
+	case strings.HasPrefix(path, "/api/admin/users/") && strings.Contains(path, "/jobs/"):
+		return []string{"jobs"}, true
 	case strings.HasPrefix(path, "/api/admin/orders/") && strings.HasSuffix(path, "/distribution"):
 		return []string{"orders", "partners"}, true
 	}

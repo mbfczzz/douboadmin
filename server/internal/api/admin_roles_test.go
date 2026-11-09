@@ -66,3 +66,42 @@ func TestProviderRolesCannotHoldPlatformMenus(t *testing.T) {
 		t.Fatal("builtin role deleted", w.Code)
 	}
 }
+
+// The 小程序用户 menu alone shows model summaries, not a user's operation log
+// or full generation records; those keep the 日志管理 / 生成任务 menus.
+func TestUserRecordsKeepLogsAndJobsMenus(t *testing.T) {
+	a, _, _ := setup(t)
+	admin := adminLoginToken(t, a, "admin", "test-pass")
+	login := func(name string, menus []string) string {
+		role := call(a, "POST", "/api/admin/roles", admin, "", map[string]any{"name": name, "scope": "platform", "menus": menus})
+		var created struct {
+			ID string `json:"id"`
+		}
+		_ = json.Unmarshal(role.Body.Bytes(), &created)
+		if w := call(a, "POST", "/api/admin/accounts", admin, "", map[string]any{"username": name, "password": name + "-password-2026", "name": name, "role": created.ID}); w.Code != 201 {
+			t.Fatal(w.Code, w.Body.String())
+		}
+		a.Sessions.limits = map[string]bucket{}
+		return adminLoginToken(t, a, name, name+"-password-2026")
+	}
+	only := login("users-only", []string{"users"})
+	full := login("users-logs-jobs", []string{"users", "logs", "jobs"})
+	for path, want := range map[string]int{
+		"/api/admin/users/user-a/models":       200,
+		"/api/admin/users/user-a/activity":     403,
+		"/api/admin/users/user-a/activity/x":   403,
+		"/api/admin/users/user-a/jobs/missing": 403,
+	} {
+		if w := call(a, "GET", path, only, "", nil); w.Code != want {
+			t.Fatal("users-only", path, w.Code, w.Body.String())
+		}
+	}
+	for _, path := range []string{"/api/admin/users/user-a/activity", "/api/admin/users/user-a/models"} {
+		if w := call(a, "GET", path, full, "", nil); w.Code != 200 {
+			t.Fatal("granted", path, w.Code, w.Body.String())
+		}
+	}
+	if w := call(a, "GET", "/api/admin/users/user-a/jobs/missing", full, "", nil); w.Code != 404 {
+		t.Fatal("jobs menu should reach the detail", w.Code)
+	}
+}

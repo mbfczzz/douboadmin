@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { date, type Row } from "../api";
 import { useResource } from "../hooks/useResource";
+import { useMe } from "../session";
 import Modal from "../components/Modal";
 import Badge from "../components/Badge";
 import RequestState from "../components/RequestState";
@@ -58,6 +59,7 @@ export default function UserModels({
     }>(`/admin/users/${encodeURIComponent(user.id)}/models`),
     models = data.data?.models || [],
     [open, setOpen] = useState(""),
+    canJobs = !!useMe()?.menus.includes("jobs"),
     total = models.reduce(
       (a, m) => ({ calls: a.calls + m.calls, units: a.units + m.pointsUnits }),
       { calls: 0, units: 0 },
@@ -142,13 +144,18 @@ export default function UserModels({
                     </>
                   ),
                 },
-                {
-                  title: "操作",
-                  action: true,
-                  render: (j) => (
-                    <button onClick={() => setOpen(j.id)}>详情</button>
-                  ),
-                },
+                // Full generation records keep the 生成任务 menu.
+                ...(canJobs
+                  ? [
+                      {
+                        title: "操作",
+                        action: true,
+                        render: (j: ModelJob) => (
+                          <button onClick={() => setOpen(j.id)}>详情</button>
+                        ),
+                      },
+                    ]
+                  : []),
               ]}
             />
           </>
