@@ -13,6 +13,11 @@ import (
 )
 
 var ErrPending = errors.New("上游任务处理中")
+
+// ErrRetryLater is a pending task whose last step failed (saving the result,
+// querying upstream): the worker waits longer before the next try instead of
+// repeating the same failure every few seconds.
+var ErrRetryLater = fmt.Errorf("%w，稍后重试", ErrPending)
 var ErrUncertain = errors.New("提交结果暂未确认，请联系管理员核实；为避免重复扣费，已停止自动重试")
 
 type Provider interface {
@@ -135,7 +140,7 @@ func (p *Relay) Generate(ctx context.Context, j core.Job) (string, error) {
 		raw, err = p.Client.Poll(ctx, e.TaskID)
 		if err != nil {
 			p.waiting(ctx, &row, e, "查询上游任务失败："+p.redact(err))
-			return "", ErrPending
+			return "", ErrRetryLater
 		}
 	}
 	res, err := Parse(raw, j.Input.Kind)
@@ -207,7 +212,7 @@ func (p *Relay) save(ctx context.Context, j core.Job, row *core.Record, e Execut
 				return "", fmt.Errorf("生成已完成，但结果保存失败，请联系管理员恢复任务")
 			}
 			p.waiting(ctx, row, e, "结果保存失败，将自动重试："+p.redact(err))
-			return "", ErrPending
+			return "", ErrRetryLater
 		}
 		e.Result = result
 	}

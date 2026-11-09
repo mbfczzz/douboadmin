@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 
 export type HBar = {
   key: string;
@@ -28,7 +28,10 @@ export default function HBars({
         <li key={r.key} className="tip" data-tip={r.tip} title={r.tip}>
           <span className="hbar-label">{r.label}</span>
           <span className="hbar-track" aria-hidden="true">
-            <i style={{ width: `${(r.value / max) * 100}%` }} />
+            {/* A zero row shows an empty track, not a sliver of bar. */}
+            {r.value > 0 && (
+              <i style={{ width: `${(r.value / max) * 100}%` }} />
+            )}
           </span>
           <span className="hbar-value">{r.display ?? r.value}</span>
         </li>
@@ -52,7 +55,15 @@ export function Columns({
   const max = Math.max(0, ...values);
   if (!max) return <p className="chart-empty quiet">所选时段暂无数据</p>;
   return (
-    <div className="columns" role="img" aria-label={label}>
+    <div
+      className="columns"
+      role="img"
+      aria-label={label}
+      // Few buckets (weekdays) get wider bars than many (hours).
+      style={
+        { "--bar-max": values.length > 12 ? "14px" : "34px" } as CSSProperties
+      }
+    >
       {values.map((v, i) => (
         <span key={i} className="tip" data-tip={tip(i)} title={tip(i)}>
           <i style={{ height: `${Math.max(v ? 4 : 0, (v / max) * 100)}%` }} />

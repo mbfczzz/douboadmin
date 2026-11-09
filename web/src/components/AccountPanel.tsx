@@ -1,8 +1,18 @@
 import { useEffect, useState } from "react";
-import { KeyRound, LogOut, ScrollText, ShieldAlert } from "lucide-react";
-import { api, date } from "../api";
+import {
+  Building2,
+  Clock,
+  KeyRound,
+  LayoutGrid,
+  LogOut,
+  ScrollText,
+  ShieldAlert,
+  ShieldCheck,
+} from "lucide-react";
+import { api } from "../api";
 import type { Me } from "../session";
 import { device } from "./device";
+import "./account-panel.css";
 
 type Login = { at: string; ip: string; userAgent: string; ok: boolean };
 
@@ -13,9 +23,26 @@ const daysSince = (s?: string) => {
     ? Math.floor((Date.now() - t) / 864e5)
     : undefined;
 };
+// "今天 11:21" / "昨天 …" / "明天 …", else "11-08 11:21" (Beijing time).
+const local = (t: number) =>
+  new Date(t).toLocaleString("sv-SE", {
+    timeZone: "Asia/Shanghai",
+    hour12: false,
+  });
+function when(s?: string) {
+  const t = s ? Date.parse(s) : NaN;
+  if (!(t > Date.UTC(2000, 0))) return "—";
+  const [day, time] = local(t).split(" "),
+    words: Record<string, string> = {
+      [local(Date.now()).slice(0, 10)]: "今天",
+      [local(Date.now() - 864e5).slice(0, 10)]: "昨天",
+      [local(Date.now() + 864e5).slice(0, 10)]: "明天",
+    };
+  return `${words[day] || day.slice(5)} ${time.slice(0, 5)}`;
+}
 
-// Contents of the account popover: identity, account facts, recent sign-ins
-// (failures included) and the account's own actions.
+// Contents of the account popover: identity card, account facts, recent
+// sign-ins (failures included) and the account's own actions.
 export default function AccountPanel({
   me,
   name,
@@ -42,34 +69,40 @@ export default function AccountPanel({
     return () => c.abort();
   }, []);
   const age = daysSince(me.passwordChangedAt),
+    account = me.account || me.id,
     role = me.roleName || (me.role === "super_admin" ? "超级管理员" : "管理员"),
-    facts: [string, string][] = [
-      ["所属", me.partnerName ? "服务商 · " + me.partnerName : "平台"],
-      ...(me.phone ? ([["手机号", me.phone]] as [string, string][]) : []),
-      ["可见菜单", `${me.menus.length} 个`],
-      ["密码更新", age === undefined ? "—" : age ? `${age} 天前` : "今天"],
-      ["会话有效至", date(me.sessionExpires)],
+    facts: [typeof Clock, string, string][] = [
+      [Building2, "所属", me.partnerName || "平台"],
+      [LayoutGrid, "可见菜单", `${me.menus.length} 个`],
+      [
+        KeyRound,
+        "密码更新",
+        age === undefined ? "—" : age ? `${age} 天前` : "今天",
+      ],
+      [Clock, "会话到期", when(me.sessionExpires)],
     ];
   return (
     <>
-      <div className="account-who">
-        <span className="avatar large" aria-hidden="true">
+      <div className="account-card">
+        <span className="avatar account-avatar" aria-hidden="true">
           {name[0]}
         </span>
         <div>
           <b>{name}</b>
           <span className="account-sub">
             <span className="account-role">{role}</span>
-            {name !== (me.account || me.id) && (
-              <span className="mono">{me.account || me.id}</span>
-            )}
+            {name !== account && <span className="mono">{account}</span>}
           </span>
+          {me.phone && <small className="quiet">{me.phone}</small>}
         </div>
       </div>
       <dl className="account-facts">
-        {facts.map(([k, v]) => (
+        {facts.map(([Icon, k, v]) => (
           <div key={k}>
-            <dt>{k}</dt>
+            <dt>
+              <Icon size={12} aria-hidden="true" />
+              {k}
+            </dt>
             <dd>{v}</dd>
           </div>
         ))}
@@ -81,20 +114,33 @@ export default function AccountPanel({
         </p>
       )}
       <section className="account-logins" aria-label="最近登录">
-        <h4>最近登录</h4>
+        <h4>
+          最近登录<span className="quiet">近 5 次</span>
+        </h4>
         {failed ? (
-          <p className="quiet">登录记录暂时无法读取</p>
+          <p className="account-empty quiet">登录记录暂时无法读取</p>
         ) : !logins ? (
-          <p className="quiet">正在读取…</p>
+          <p className="account-empty quiet">正在读取…</p>
         ) : !logins.length ? (
-          <p className="quiet">暂无登录记录</p>
+          <p className="account-empty">
+            <ShieldCheck size={16} aria-hidden="true" />
+            <span>
+              还没有登录记录
+              <small className="quiet">
+                之后每次登录（包括失败）都会显示在这里
+              </small>
+            </span>
+          </p>
         ) : (
           <ul>
             {logins.map((l) => (
-              <li key={l.at} className={l.ok ? "" : "failed"}>
-                <span>{date(l.at)}</span>
-                <span className="mono">{l.ip || "—"}</span>
-                <small>{l.ok ? device(l.userAgent) : "登录失败"}</small>
+              <li key={l.at} className={l.ok ? "ok" : "failed"}>
+                <i aria-hidden="true" />
+                <span>{when(l.at)}</span>
+                <span className="quiet">
+                  {l.ok ? device(l.userAgent) : "密码错误"}
+                </span>
+                <span className="mono quiet">{l.ip || "—"}</span>
               </li>
             ))}
           </ul>
@@ -111,6 +157,8 @@ export default function AccountPanel({
             我的操作日志
           </button>
         )}
+      </div>
+      <div className="account-actions account-exit">
         <button type="button" className="danger-text" onClick={onLogout}>
           <LogOut size={15} />
           退出登录

@@ -210,7 +210,20 @@
   .catalog-table td.table-actions:has(.model-row-actions) {
     min-width: 0;
   }
+  /* Two buttons per line (3 rows) instead of one per line (6 rows). */
   .catalog-actions.model-row-actions {
-    max-width: 150px;
+    display: grid;
+    grid-template-columns: repeat(2, auto);
+    justify-content: end;
+    gap: 0 10px;
+    max-width: none;
+  }
+  .model-row-actions button {
+    padding: 4px 5px;
+  }
+  .model-row-actions .model-delete {
+    margin-left: 0;
+    padding-left: 5px;
+    border-left: 0;
   }
 }

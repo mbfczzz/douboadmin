@@ -152,9 +152,24 @@ export interface APIStats {
   avgMs: number;
   users: number;
 }
+export interface PeriodTotals {
+  newUsers: number;
+  activeUsers: number;
+  jobs: number;
+  succeeded: number;
+  paidFen: number;
+  refundFen: number;
+  revenueFen: number;
+  pv: number;
+  uv: number;
+}
 export interface Dashboard {
   breakdown?: Breakdown;
   days: Daily[];
+  // Per hour (date "HH:00"), only for the 1-day view.
+  hours?: Daily[];
+  // The period before, of the same length, for 较上期.
+  previous?: PeriodTotals;
   models: {
     model: string;
     calls: number;

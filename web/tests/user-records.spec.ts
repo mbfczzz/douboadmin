@@ -42,23 +42,27 @@ test("user rows open model use and activity records", async ({ page }) => {
   const row = page.locator("tbody tr").filter({ hasText: user.userId });
   await row.getByRole("button", { name: "模型记录", exact: true }).click();
   let dialog = page.getByRole("dialog", { name: "模型使用记录" });
-  await expect(dialog).toContainText(
-    "共使用 1 个模型 · 生成 3 次 · 实际扣除 24 积分",
-  );
-  await expect(dialog).toContainText("2 / 1 / 0");
-  await expect(dialog).toContainText("上游超时");
+  // Totals, per-model outcome bar, then the latest tasks.
+  const stats = dialog.locator(".records-stats");
+  await expect(stats).toContainText("使用模型1个");
+  await expect(stats).toContainText("生成次数3次");
+  await expect(stats).toContainText("成功率66.7%");
+  await expect(stats).toContainText("实际扣除24积分");
+  await expect(
+    dialog.getByRole("img", { name: "成功 2，失败 1，进行中 0" }),
+  ).toBeVisible();
+  await expect(dialog.locator(".recent-jobs")).toContainText("上游超时");
   await dialog.getByRole("button", { name: "关闭" }).click();
   await row.getByRole("button", { name: "行为日志", exact: true }).click();
   dialog = page.getByRole("dialog", { name: "行为日志" });
-  await expect(
-    dialog.locator("tbody tr").filter({ hasText: "完善注册信息" }),
-  ).toBeVisible({ timeout: 10000 });
+  const entries = dialog.locator(".timeline li");
+  await expect(entries.filter({ hasText: "完善注册信息" })).toBeVisible({
+    timeout: 10000,
+  });
   await dialog.getByRole("tab", { name: "全部请求" }).click();
-  await expect(
-    dialog.locator("tbody tr").filter({ hasText: "发送短信验证码" }),
-  ).toBeVisible();
-  await dialog
-    .locator("tbody tr")
+  await expect(entries.filter({ hasText: "发送短信验证码" })).toBeVisible();
+  await expect(dialog.getByText(/^今天 · /)).toBeVisible();
+  await entries
     .filter({ hasText: "完善注册信息" })
     .getByRole("button", { name: "详情" })
     .click();

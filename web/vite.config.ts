@@ -4,7 +4,9 @@ import { fileURLToPath } from "node:url";
 const webDirectory = fileURLToPath(new URL(".", import.meta.url));
 // Keep common UI helpers together; route components still load independently.
 const sharedModules = [
-  /src[\\/]components[\\/](Badge|StatusBadge|Empty|JobDetail|JobTable|FilterBar|Modal|PageHeader|RequestState|Pagination)/,
+  // JobTable is used by 生成任务 only and pulls that page's recovery helpers,
+  // so it stays with the page rather than dragging it into every page.
+  /src[\\/]components[\\/](Badge|StatusBadge|Empty|FilterBar|Modal|PageHeader|RequestState|Pagination)/,
   /src[\\/]business[\\/](Table|ResourcePage|MediaPreview|types)/,
   /src[\\/]models[\\/]settings\.ts/,
   /src[\\/]hooks[\\/](useRememberedState|useRecordSave)/,

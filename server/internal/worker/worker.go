@@ -41,6 +41,10 @@ func Run(ctx context.Context, s store.Store, p provider.Provider) {
 			if ctx.Err() != nil {
 				return
 			}
+			if errors.Is(err, provider.ErrRetryLater) {
+				_ = s.Hold(ctx, j, 60, true) // the last step failed; give it a minute
+				continue
+			}
 			if errors.Is(err, provider.ErrPending) {
 				_ = s.Hold(ctx, j, 5, true)
 				continue

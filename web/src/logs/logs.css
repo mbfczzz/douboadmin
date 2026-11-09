@@ -2,9 +2,11 @@
 .log-intro {
   margin: -8px 0 16px;
 }
-.log-filters .log-writes {
-  align-self: center;
-  margin: 18px 0 0;
+/* 查询 / 重置 stay together at the right end, also when the row wraps. */
+.log-filter-actions {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
 }
 .log-action {
   color: var(--ink);
@@ -52,4 +54,12 @@
 .log-note {
   margin: 4px 0 0;
   font-size: 12px;
+}
+/* The keyword box takes the spare width, so the first row ends flush. */
+.log-filters.business-filters > .filter-grow {
+  flex: 1 1 220px;
+  max-width: none;
+}
+.log-filters .filter-grow input {
+  max-width: none;
 }

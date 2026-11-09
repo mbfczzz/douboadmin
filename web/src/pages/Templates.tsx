@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Plus, Layers, Lightbulb, Search, Image, Film } from "lucide-react";
+import { Plus, Search, Image, Film } from "lucide-react";
 import { api, type Row, type Template, type Model } from "../api";
 import type { PageProps } from "../navigation";
 import { useResource } from "../hooks/useResource";
@@ -34,8 +34,7 @@ const blank: Template = {
 export default function Templates({ notify }: PageProps) {
   const resource = useResource<Row<Template>[]>("/admin/templates"),
     models = useResource<Row<Model>[]>("/admin/models");
-  const [family, setFamily] = useRememberedState("templates.family", "style"),
-    [kind, setKind] = useRememberedState("templates.kind", "image"),
+  const [kind, setKind] = useRememberedState("templates.kind", "image"),
     [status, setStatus] = useRememberedState("templates.status", ""),
     [category, setCategory] = useRememberedState("templates.category", ""),
     [q, setQ] = useRememberedState("templates.query", ""),
@@ -57,7 +56,6 @@ export default function Templates({ notify }: PageProps) {
   const filtered = rows
     .filter(
       (r) =>
-        (r.data.family || "style") === family &&
         r.data.kind === kind &&
         (!status || (status === "published") === r.data.published) &&
         (!category || r.data.category === category) &&
@@ -74,7 +72,7 @@ export default function Templates({ notify }: PageProps) {
       id: newId(),
       version: 0,
       createdAt: "",
-      data: { ...data, kind, family, published: false },
+      data: { ...data, kind, published: false },
     });
   }
   async function action(row: Row<Template>, remove = false) {
@@ -139,35 +137,6 @@ export default function Templates({ notify }: PageProps) {
           void models.reload();
         }}
       />
-      <div className="template-families">
-        {[
-          ["style", "风格主题", "预设画面风格、生成参数与参考素材", Layers],
-          [
-            "inspiration",
-            "灵感做同款",
-            "展示作品，使用模板提示词创作",
-            Lightbulb,
-          ],
-        ].map(([id, title, desc, Icon]) => {
-          const I = Icon as typeof Layers;
-          return (
-            <button
-              key={String(id)}
-              className={family === id ? "selected" : ""}
-              onClick={() => {
-                setFamily(String(id));
-                setPage(1);
-              }}
-            >
-              <I size={21} />
-              <span>
-                <b>{String(title)}</b>
-                <small>{String(desc)}</small>
-              </span>
-            </button>
-          );
-        })}
-      </div>
       <div className="catalog-toolbar panel">
         <div className="catalog-tabs">
           {[

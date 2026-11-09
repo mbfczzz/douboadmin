@@ -1,0 +1,154 @@
+/* 模型记录: per-model rows and the latest generations. */
+.model-usage,
+.recent-jobs {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  list-style: none;
+}
+.model-usage li {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) 104px;
+  gap: 14px;
+  align-items: center;
+  padding: 14px 16px;
+  background: var(--surface);
+}
+.model-usage li + li,
+.recent-jobs li + li {
+  border-top: 1px solid var(--line);
+}
+.model-initial {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-weight: 700;
+}
+.model-usage-main {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+}
+.model-usage-title {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.model-usage-title .quiet {
+  overflow: hidden;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.model-usage-figures {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 2px 4px;
+  align-items: baseline;
+  justify-items: end;
+  font-variant-numeric: tabular-nums;
+}
+.model-usage-figures b {
+  font-size: 15px;
+}
+.model-usage-figures .quiet {
+  justify-self: start;
+  font-size: 12px;
+}
+/* Latest generations. */
+.recent-jobs li {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr) auto auto;
+  gap: 12px;
+  align-items: center;
+  padding: 11px 14px;
+  background: var(--surface);
+}
+.job-state {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  font-size: 12px;
+}
+.job-state i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--muted);
+}
+.job-succeeded .job-state i {
+  background: var(--success);
+}
+.job-failed .job-state i {
+  background: var(--danger);
+}
+:is(.job-running, .job-queued) .job-state i {
+  background: var(--info);
+}
+.job-main {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+.job-meta {
+  font-size: 12px;
+}
+.job-prompt,
+.job-error {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.job-error {
+  color: var(--danger);
+  font-size: 12px;
+}
+.job-points {
+  display: grid;
+  justify-items: end;
+  font-variant-numeric: tabular-nums;
+}
+.job-points small {
+  font-size: 11px;
+}
+@media (max-width: 640px) {
+  .model-usage li {
+    grid-template-columns: 34px minmax(0, 1fr);
+  }
+  .model-usage-figures {
+    display: flex;
+    grid-column: 2;
+    gap: 4px;
+  }
+  .model-usage-figures .quiet + b {
+    margin-left: 10px;
+  }
+  /* State and 详情 on top, the task and its points below. */
+  .recent-jobs li {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "state open" "main points";
+    gap: 6px 12px;
+  }
+  .recent-jobs .job-state {
+    grid-area: state;
+  }
+  .recent-jobs .job-main {
+    grid-area: main;
+  }
+  .recent-jobs .job-points {
+    grid-area: points;
+  }
+  .recent-jobs .link-button {
+    grid-area: open;
+    justify-self: end;
+    min-height: 0;
+  }
+}

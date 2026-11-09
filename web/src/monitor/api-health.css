@@ -1,0 +1,59 @@
+/* 运行监控 · 接口健康: four figures for today's API traffic. */
+.api-health {
+  margin-bottom: 20px;
+  padding: 18px 22px 20px;
+}
+.api-health header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  align-items: baseline;
+  margin-bottom: 14px;
+}
+.api-health h2 {
+  margin: 0;
+  font-size: 15px;
+}
+.api-health header .quiet {
+  font-size: 12px;
+}
+.api-health dl {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+}
+.api-health dl > div {
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface-subtle);
+}
+.api-health dt {
+  color: var(--muted);
+  font-size: 12px;
+}
+.api-health dd {
+  margin: 0;
+  color: var(--ink-strong);
+  font-size: 20px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.api-health small {
+  color: var(--muted);
+  font-size: 12px;
+}
+.api-health .bad dd {
+  color: var(--danger);
+}
+.api-health .warn dd {
+  color: var(--warning);
+}
+@media (max-width: 900px) {
+  .api-health dl {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

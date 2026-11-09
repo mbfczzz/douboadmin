@@ -21,10 +21,14 @@ export default function LogFilters({
         const params = new URLSearchParams();
         new FormData(e.currentTarget).forEach((value, key) => {
           const v = String(value).trim();
-          if (v) params.set(key, v);
+          if (!v) return;
+          // "只看写操作" lives in the method list; the API takes writes=1.
+          if (key === "method" && v === "writes") params.set("writes", "1");
+          else params.set(key, v);
         });
         onSearch(params.toString());
       }}
+      onReset={() => onSearch("")}
     >
       {points ? (
         <label>
@@ -74,6 +78,7 @@ export default function LogFilters({
           方法
           <select name="method" aria-label="请求方法">
             <option value="">全部</option>
+            <option value="writes">只看写操作</option>
             {["GET", "POST", "PUT", "DELETE"].map((m) => (
               <option key={m}>{m}</option>
             ))}
@@ -90,15 +95,15 @@ export default function LogFilters({
           </div>
         </div>
       )}
-      {tab === "api" && (
-        <label className="checkbox log-writes">
-          <input type="checkbox" name="writes" value="1" /> 只看写操作
-        </label>
-      )}
-      <button className="primary" type="submit">
-        <Search size={15} aria-hidden="true" />
-        查询
-      </button>
+      <div className="log-filter-actions">
+        <button className="secondary" type="reset">
+          重置
+        </button>
+        <button className="primary" type="submit">
+          <Search size={15} aria-hidden="true" />
+          查询
+        </button>
+      </div>
     </form>
   );
 }

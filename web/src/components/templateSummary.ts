@@ -12,7 +12,6 @@ export function templateSummary(
     labels: {
       category: "分类",
       description: "描述",
-      family: "模板类型",
       kind: "类型",
       model: "模型",
       mode: "生成方式",
@@ -31,7 +30,6 @@ export function templateSummary(
       quality: (v) => qualityLabels[String(v)] || String(v),
       kind: (v) =>
         v === "video" ? "视频" : v === "image" ? "图片" : String(v),
-      family: (v) => (v === "inspiration" ? "灵感做同款" : "风格主题"),
       cover: file,
       coverAssetId: () => "已上传新图片",
       preview: file,

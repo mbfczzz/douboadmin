@@ -200,3 +200,25 @@
   margin: 0;
   font-size: 12px;
 }
+.gen-warn {
+  padding: 12px 14px;
+  border: 1px solid var(--warning-border);
+  border-radius: var(--radius);
+  background: var(--warning-soft);
+}
+.gen-warn h4 {
+  color: var(--warning);
+}
+.gen-warn p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.gen-warn p + p {
+  margin-top: 6px;
+  font-size: 12px;
+}
+.gen-hint {
+  display: block;
+  margin-top: 2px;
+  font-size: 11px;
+}

@@ -66,30 +66,57 @@ const metrics: {
   },
 ];
 
-// One daily series at a time; a single axis per chart, switched by the tabs.
-export default function Trend({ series }: { series: Daily[] }) {
-  const [key, setKey] = useState("jobs"),
-    m = metrics.find((x) => x.key === key) || metrics[0],
-    values = series.map(m.value),
+// Beijing-time hour now, to tell past hours from those still to come.
+const hourNow = () =>
+  Number(
+    new Date().toLocaleString("en-US", {
+      timeZone: "Asia/Shanghai",
+      hour: "numeric",
+      hourCycle: "h23",
+    }),
+  );
+
+// One series at a time; a single axis per chart, switched by the tabs. The
+// "today" view charts hours instead of a single daily bar.
+export default function Trend({
+  series,
+  hours,
+  only,
+}: {
+  series: Daily[];
+  hours?: Daily[];
+  // Metric keys this chart offers (a tab shows only its own).
+  only?: string[];
+}) {
+  // In the order given, so a tab's main metric comes first.
+  const list = only
+      ? only.flatMap((k) => metrics.filter((x) => x.key === k))
+      : metrics,
+    [key, setKey] = useState(list[0].key),
+    m = list.find((x) => x.key === key) || list[0],
+    hourly = !!hours?.length,
+    bars = hourly ? hours! : series,
+    values = bars.map(m.value),
     peak = Math.max(0, ...values),
-    single = series.length === 1,
-    label = single ? `今日${m.name}` : `每日${m.name}趋势`;
+    total = values.reduce((a, v) => a + v, 0),
+    now = hourly ? hourNow() : 24,
+    unit = m.unit && " " + m.unit,
+    label = hourly ? `今日${m.name}（按小时）` : `每日${m.name}趋势`;
   return (
     <section className="panel">
       <div className="section-head">
         <h2>
-          {single ? "今日" : "每日"}
+          {hourly ? "今日" : "每日"}
           {m.name}
         </h2>
         <span className="quiet">
-          {single ? "合计 " : "峰值 "}
-          {m.text(peak)}
-          {m.unit && " " + m.unit}
-          {!single && " / 日"}
+          {hourly
+            ? `合计 ${m.text(total)}${unit} · 峰值 ${m.text(peak)}${unit} / 小时`
+            : `峰值 ${m.text(peak)}${unit} / 日`}
         </span>
       </div>
       <div className="trend-switch" role="tablist" aria-label="趋势指标">
-        {metrics.map((x) => (
+        {list.map((x) => (
           <button
             key={x.key}
             role="tab"
@@ -103,7 +130,8 @@ export default function Trend({ series }: { series: Daily[] }) {
       <div className="business-trend" role="img" aria-label={label}>
         {!peak && (
           <span className="quiet">
-            所选时段暂无{m.name === "生成量" ? "生成任务" : "数据"}
+            {hourly ? "今天" : "所选时段"}暂无
+            {m.name === "生成量" ? "生成任务" : "数据"}
           </span>
         )}
         {!!peak && (
@@ -113,12 +141,18 @@ export default function Trend({ series }: { series: Daily[] }) {
           </span>
         )}
         {!!peak &&
-          series.map((d, i) => {
-            const tip = `${d.date}：${m.text(values[i])}${m.unit && " " + m.unit}`;
+          bars.map((d, i) => {
+            const when = hourly
+                ? `${d.date}–${String(i + 1).padStart(2, "0")}:00`
+                : d.date,
+              tip =
+                hourly && i > now
+                  ? `${when}：尚未到达`
+                  : `${when}：${m.text(values[i])}${unit}`;
             return (
               <div
                 key={d.date}
-                className="tip"
+                className={"tip" + (hourly && i > now ? " future" : "")}
                 data-tip={tip}
                 title={tip}
                 style={{ height: (values[i] / peak) * 180 }}
@@ -127,9 +161,9 @@ export default function Trend({ series }: { series: Daily[] }) {
           })}
       </div>
       <p className="chart-axis quiet">
-        <span>{series[0]?.date}</span>
-        <span>北京时间</span>
-        <span>{single ? "" : series.at(-1)?.date}</span>
+        <span>{hourly ? "00:00" : series[0]?.date}</span>
+        <span>{hourly ? "北京时间 · 按小时" : "北京时间"}</span>
+        <span>{hourly ? "23:00" : series.at(-1)?.date}</span>
       </p>
     </section>
   );

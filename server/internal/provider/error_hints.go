@@ -6,6 +6,7 @@ import (
 	"doubo/server/internal/relay"
 	"encoding/json"
 	"errors"
+	"log/slog"
 	"strings"
 )
 
@@ -54,9 +55,13 @@ func (p *Relay) redact(err error) string {
 }
 
 // waiting records why a task is still pending; only changes are written.
+// The note is written even when the task's own deadline has passed (a slow
+// download is a common reason to be here), and logged once per change so it
+// also shows in 运行监控.
 func (p *Relay) waiting(ctx context.Context, row *core.Record, e Execution, note string) {
 	if e.Note != note {
 		e.Note = note
-		_ = p.checkpoint(ctx, row, e)
+		slog.Warn("generation waiting", "task", row.ID, "phase", e.Phase, "reason", note)
+		_ = p.checkpoint(context.WithoutCancel(ctx), row, e)
 	}
 }

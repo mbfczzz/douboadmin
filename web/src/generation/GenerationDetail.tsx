@@ -68,7 +68,9 @@ export default function GenerationDetail({
         ["耗时", done ? elapsed(j.createdAt, j.updatedAt) : "进行中"],
       ]
     : [];
-  const cause = g?.execution?.errorCause;
+  const cause = g?.execution?.errorCause,
+    // A pending task whose last step failed (saving the result, polling).
+    retrying = !done && !!g?.execution?.note?.includes("失败");
   useEffect(() => {
     if (done) setLive(false);
   }, [done]);
@@ -92,6 +94,15 @@ export default function GenerationDetail({
               <Tag tone="info">{kindNames[j.input.kind] || j.input.kind}</Tag>
               <Tag tone="accent">{j.modelName || j.input.model}</Tag>
             </div>
+            {retrying && !j.error && (
+              <section className="gen-warn" aria-label="正在重试">
+                <h4>仍在自动重试</h4>
+                <p>{g.execution?.note}</p>
+                <p className="quiet">
+                  约每分钟重试一次；从开始执行算起超过一小时仍未成功，任务会标记为失败，需要管理员核实后处理。
+                </p>
+              </section>
+            )}
             {(j.error || cause) && (
               <section className="gen-error" aria-label="失败原因">
                 <h4>失败原因</h4>
@@ -149,13 +160,24 @@ export default function GenerationDetail({
               {g.execution && (
                 <Field label="执行阶段">
                   {phaseNames[g.execution.phase] || g.execution.phase}
-                  {g.execution.note ? ` · ${g.execution.note}` : ""}
+                </Field>
+              )}
+              {g.execution?.note && (
+                <Field label="最近状态">
+                  <span className={retrying ? "danger-text" : undefined}>
+                    {g.execution.note}
+                  </span>
                 </Field>
               )}
               <Field label="用户">
                 <IdChip>{j.userId}</IdChip>
               </Field>
-              <Field label="处理次数">{j.attempts}</Field>
+              <Field label="调度轮次">
+                {j.attempts} 次
+                <small className="quiet gen-hint">
+                  每次查询上游进度或重试都会计一次，不是重复生成
+                </small>
+              </Field>
               <Field label="提交时间">{date(j.createdAt, true)}</Field>
               {j.updatedAt && (
                 <Field label="更新时间">{date(j.updatedAt, true)}</Field>

@@ -1,0 +1,188 @@
+/* Account popover contents: identity card, facts, sign-ins, actions. */
+.account-card {
+  position: relative;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 16px 14px;
+  overflow: hidden;
+  border-radius: calc(var(--radius) - 2px);
+  background: var(--surface-subtle);
+}
+/* A thin brand stripe across the top of the card. */
+.account-card::before {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 2px;
+  background: var(--brand-gradient);
+  content: "";
+}
+.account-card > div {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+.account-card b {
+  overflow: hidden;
+  color: var(--ink-strong);
+  font-size: 16px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.account-card small {
+  font-size: 12px;
+}
+.account-avatar {
+  width: 46px;
+  height: 46px;
+  border: 2px solid var(--accent-border);
+  font-size: 18px;
+}
+.account-sub {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  min-width: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+.account-role {
+  flex-shrink: 0;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent-text);
+  font-size: 11px;
+  line-height: 18px;
+}
+.account-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  margin: 8px 0;
+}
+.account-facts > div {
+  padding: 9px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+.account-facts dt {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  color: var(--muted);
+  font-size: 11px;
+}
+.account-facts dd {
+  margin: 4px 0 0;
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.account-warn {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin: 0 0 8px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--warning-soft);
+  color: var(--warning);
+  font-size: 12px;
+}
+.account-logins {
+  padding: 10px 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+.account-logins h4 {
+  display: flex;
+  justify-content: space-between;
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.account-logins h4 .quiet {
+  font-weight: 400;
+}
+.account-logins ul {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 12px;
+}
+.account-logins li {
+  display: grid;
+  grid-template-columns: 7px auto minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+}
+.account-logins li i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--success);
+}
+.account-logins li.failed i {
+  background: var(--danger);
+}
+.account-logins li.failed .quiet:nth-of-type(2) {
+  color: var(--danger);
+}
+.account-logins li .quiet {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.account-empty {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin: 0;
+  color: var(--success);
+  font-size: 12px;
+}
+.account-empty span {
+  display: grid;
+  gap: 2px;
+  color: var(--text);
+}
+.account-empty small {
+  font-size: 11px;
+}
+.account-actions {
+  display: grid;
+  margin-top: 6px;
+}
+.account-actions button {
+  justify-content: flex-start;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 10px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text);
+  font-size: 13px;
+}
+.account-actions button:hover {
+  background: #ffffff0f;
+  color: var(--ink-strong);
+}
+.account-exit {
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px solid var(--line);
+}
+.account-popover .danger-text,
+.account-popover .danger-text:hover {
+  color: var(--danger);
+}

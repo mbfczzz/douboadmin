@@ -24,25 +24,6 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
-.traffic-sub {
-  margin: 20px 2px 12px;
-  color: var(--text);
-  font-size: 13px;
-  font-weight: 600;
-}
-.kpi-strip.service-kpis {
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  margin: 0;
-}
-@media (max-width: 1100px) {
-  .kpi-strip.service-kpis {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  /* Five tiles in two columns: the last one spans, leaving no empty cell. */
-  .kpi-strip.service-kpis > div:last-child:nth-child(odd) {
-    grid-column: 1 / -1;
-  }
-}
 /* 全部 / 小程序 / 网页 / APP switch, at the right end of the heading. */
 .traffic-clients {
   display: flex;
@@ -62,4 +43,20 @@
   border-color: var(--accent-border);
   background: var(--accent-soft);
   color: var(--accent-text);
+}
+
+/* The third traffic panel spans the row between 1100 and 1500px: split its
+   two groups into columns rather than stretching the bars across it. */
+.traffic-split > div + div {
+  margin-top: 6px;
+}
+@media (min-width: 1101px) and (max-width: 1500px) {
+  .traffic-split:has(> div + div) {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 40px;
+  }
+  .traffic-split > div + div {
+    margin-top: 0;
+  }
 }

@@ -56,8 +56,8 @@ func routeMenus(method, path string) ([]string, bool) {
 		// The template editor needs the model catalogue.
 		return []string{"models", "templates"}, true
 	case method == http.MethodGet && path == "/api/admin/audit/stats":
-		// Request volume and errors also appear on the overview.
-		return []string{"overview", "logs"}, true
+		// Request volume and errors are shown on 运行监控 and 日志管理.
+		return []string{"monitor", "logs", "overview"}, true
 	// A user's operation log and full generation records (raw model calls,
 	// materials) keep the menus that guard them elsewhere.
 	case strings.HasPrefix(path, "/api/admin/users/") && strings.Contains(path, "/activity"):

@@ -11,6 +11,7 @@ import Events from "../monitor/Events";
 import type { Health, Event } from "../monitor/types";
 import Metrics from "../monitor/Metrics";
 import HealthSummary from "../monitor/HealthSummary";
+import ApiHealth from "../monitor/ApiHealth";
 
 export default function Monitor({ notify, navigate }: PageProps) {
   const resource = useResource<Health>("/admin/monitor", 15000),
@@ -60,6 +61,7 @@ export default function Monitor({ notify, navigate }: PageProps) {
         }}
       />
       <Metrics health={h} />
+      <ApiHealth />
       <div className="monitor-grid">
         {h && <Nodes nodes={h.instances} />}
         <Events

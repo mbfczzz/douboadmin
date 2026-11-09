@@ -59,6 +59,7 @@ test("overview shows anonymous visit statistics without crowding", async ({
 }) => {
   await dashboard(page, true);
   await login(page);
+  await page.getByRole("tab", { name: "流量" }).click();
   const section = page.locator(".traffic-section");
   await expect(
     section.getByRole("heading", { name: "访问统计" }),
@@ -109,6 +110,7 @@ test("overview tolerates a dashboard without visit statistics", async ({
 }) => {
   await dashboard(page, false);
   await login(page);
+  await page.getByRole("tab", { name: "流量" }).click();
   await expect(page.getByText("暂无访问数据")).toBeVisible();
   await page.getByRole("tab", { name: "访客数" }).click();
   await expect(page.getByText("峰值 9 人 / 日")).toBeVisible();

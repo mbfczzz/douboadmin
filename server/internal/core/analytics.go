@@ -24,13 +24,30 @@ type ModelCost struct {
 	EstimatedMicros int64  `json:"estimatedMicros"`
 }
 type Dashboard struct {
-	Days      []DailyMetric    `json:"days"`
+	Days []DailyMetric `json:"days"`
+	// Hours is the same series per hour (Date "HH:00"), for the 1-day view.
+	Hours     []DailyMetric    `json:"hours,omitempty"`
 	Models    []ModelCost      `json:"models"`
 	Events    map[string]int64 `json:"events"`
 	Period    int              `json:"period"`
 	Breakdown Breakdown        `json:"breakdown"`
+	// Previous is the period just before, of the same length, for 较上期.
+	Previous *PeriodTotals `json:"previous,omitempty"`
 	// API is request volume/errors/latency from the operation log, when kept.
 	API *APIStats `json:"api,omitempty"`
+}
+
+// PeriodTotals are the headline figures of one period.
+type PeriodTotals struct {
+	NewUsers    int64 `json:"newUsers"`
+	ActiveUsers int64 `json:"activeUsers"`
+	Jobs        int64 `json:"jobs"`
+	Succeeded   int64 `json:"succeeded"`
+	PaidFen     int64 `json:"paidFen"`
+	RefundFen   int64 `json:"refundFen"`
+	RevenueFen  int64 `json:"revenueFen"`
+	PV          int64 `json:"pv"`
+	UV          int64 `json:"uv"`
 }
 
 // KindStat summarises one generation type within the report period.

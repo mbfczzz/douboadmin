@@ -54,4 +54,4 @@
 | GET | `/api/admin/audit/points?user=&q=&page=` | 积分流水（含用户昵称和操作人） |
 | GET | `/api/admin/audit/stats?days=7\|30\|90` | 接口请求量、错误、慢请求、平均耗时（缓存 1 分钟） |
 
-工作概览的「服务接口」指标随 `GET /api/admin/dashboard` 的 `api` 字段一起返回，不额外请求；同样缓存 1 分钟。
+「运行监控」页的「接口健康」显示今日请求量、错误率、被拒比例和平均响应，读取 `GET /api/admin/audit/stats?days=1`（运行监控或日志管理菜单可用，缓存 1 分钟）。工作概览不再显示这些运维指标。

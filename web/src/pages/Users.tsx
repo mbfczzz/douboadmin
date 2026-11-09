@@ -1,5 +1,5 @@
 import Badge from "../components/Badge";
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import type { Row } from "../api";
 import { useMe } from "../session";
 import type { PageProps } from "../navigation";
@@ -13,9 +13,11 @@ import UserEdit from "../business/UserEdit";
 import UserStatus from "../business/UserStatus";
 import SignupSwitch from "../users/SignupSwitch";
 import "../users/users.css";
-import UserModels from "../users/UserModels";
-import UserActivity from "../users/UserActivity";
 import { accessCell, createdCell, nameCell } from "../users/cells";
+
+// Record dialogs load when opened, keeping the users list itself light.
+const UserModels = lazy(() => import("../users/UserModels"));
+const UserActivity = lazy(() => import("../users/UserActivity"));
 
 type Dialog = "detail" | "models" | "activity" | "points" | "edit" | "status";
 import type { Profile } from "../business/types";
@@ -156,10 +158,14 @@ export default function Users({ notify }: PageProps) {
         <UserDetails user={open.row} onClose={close} />
       )}
       {open?.kind === "models" && (
-        <UserModels user={open.row} onClose={close} />
+        <Suspense fallback={null}>
+          <UserModels user={open.row} onClose={close} />
+        </Suspense>
       )}
       {open?.kind === "activity" && (
-        <UserActivity user={open.row} onClose={close} />
+        <Suspense fallback={null}>
+          <UserActivity user={open.row} onClose={close} />
+        </Suspense>
       )}
       {open?.kind === "points" && (
         <UserPoints user={open.row} onClose={close} notify={notify} />

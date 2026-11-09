@@ -15,6 +15,8 @@ type reportBuilder struct {
 	events  map[string]int64
 	extra   *breakdownBuilder
 	traffic *trafficSet
+	hours   *hourSeries // only for the "today" view
+	prev    *compareBuilder
 	period  int
 	since   time.Time
 }
@@ -31,11 +33,17 @@ func newReport(days int) *reportBuilder {
 		r.days[key] = &core.DailyMetric{Date: key}
 	}
 	r.traffic = newTrafficSet(r.days, now.Format("2006-01-02"))
+	if days == 1 {
+		r.hours = newHours(now.Format("2006-01-02"))
+	}
+	r.prev = newCompare(start, days)
 	return r
 }
 func (r *reportBuilder) record(ns string, row core.Record) {
 	r.extra.record(ns, row)
 	r.traffic.record(ns, row)
+	r.hours.record(ns, row)
+	r.prev.record(ns, row)
 	day := r.days[row.CreatedAt.In(reportZone).Format("2006-01-02")]
 	switch ns {
 	case "users":
@@ -93,6 +101,8 @@ func (r *reportBuilder) record(ns string, row core.Record) {
 func (r *reportBuilder) job(j core.Job) {
 	d := r.days[j.CreatedAt.In(reportZone).Format("2006-01-02")]
 	r.extra.job(j, d)
+	r.hours.job(j, r.extra.charged[j.ID])
+	r.prev.job(j)
 	if d != nil && j.Input.Kind != "import" {
 		d.Jobs++
 		if j.Status == "succeeded" {
@@ -106,6 +116,8 @@ func (r *reportBuilder) job(j core.Job) {
 func (r *reportBuilder) result() core.Dashboard {
 	out := core.Dashboard{Days: []core.DailyMetric{}, Models: []core.ModelCost{}, Events: r.events, Period: r.period, Breakdown: r.extra.result()}
 	out.Breakdown.Traffic, out.Breakdown.TrafficByClient = r.traffic.result()
+	out.Hours = r.hours.result()
+	out.Previous = r.prev.result()
 	for _, d := range r.days {
 		d.RevenueFen = d.PaidFen - d.RefundFen
 		out.Days = append(out.Days, *d)

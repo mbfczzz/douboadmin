@@ -8,11 +8,18 @@ export default function Details({
   data: Dashboard;
   events?: boolean;
 }) {
+  // At most 10 rows each: the newest days, the most frequent events.
+  const counts = Object.entries(data.events || {})
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 10);
+  if (events && !counts.length)
+    return <p className="chart-empty quiet">所选时段没有行为事件</p>;
   return events ? (
     <Table
-      rows={Object.entries(data.events || {})}
+      rows={counts}
       id={(r) => r[0]}
       framed={false}
+      paged={false}
       columns={[
         { title: "事件", render: (r) => r[0] },
         { title: "次数", render: (r) => r[1] },
@@ -20,9 +27,10 @@ export default function Details({
     />
   ) : (
     <Table
-      rows={[...data.days].reverse()}
+      rows={[...data.days].reverse().slice(0, 10)}
       id={(d) => d.date}
       framed={false}
+      paged={false}
       columns={[
         { title: "日期", render: (d) => d.date },
         {

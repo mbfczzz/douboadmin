@@ -1,0 +1,102 @@
+/* 工作概览: five headline figures with change and a small trend line. */
+.headline {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.headline-card {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  min-height: 138px;
+  padding: 16px 18px;
+  overflow: hidden;
+}
+.headline-label {
+  color: var(--muted);
+  font-size: 13px;
+}
+.headline-card strong {
+  color: var(--ink-strong);
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+}
+.headline-card small {
+  position: relative;
+  z-index: 1;
+  font-size: 12px;
+}
+.delta {
+  display: inline-flex;
+  gap: 2px;
+  align-items: center;
+  justify-self: start;
+  padding: 1px 7px 1px 5px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.delta.up {
+  background: var(--success-soft);
+  color: var(--success);
+}
+.delta.down {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+.delta.flat {
+  padding-left: 7px;
+  background: var(--surface-raised);
+  color: var(--muted);
+}
+.spark {
+  position: absolute;
+  right: 14px;
+  top: 18px;
+  width: 96px;
+  height: 28px;
+  overflow: visible;
+}
+.spark-line {
+  fill: none;
+  stroke: var(--accent-hover);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.spark-area {
+  fill: var(--accent-soft);
+  stroke: none;
+  opacity: 0.6;
+}
+@media (max-width: 1300px) and (min-width: 761px) {
+  .headline {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+  /* Three on the first row, two wider ones on the second. */
+  .headline-card {
+    grid-column: span 2;
+  }
+  .headline-card:nth-child(n + 4) {
+    grid-column: span 3;
+  }
+}
+@media (max-width: 760px) {
+  .headline {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  /* Five cards in two columns: the last spans the row. */
+  .headline-card:last-child {
+    grid-column: 1 / -1;
+  }
+  .headline-card strong {
+    font-size: 22px;
+  }
+  .spark {
+    width: 64px;
+  }
+}

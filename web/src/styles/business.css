@@ -70,35 +70,6 @@
 .attention-panel {
   margin-bottom: 20px;
 }
-.attention-list button {
-  width: 100%;
-  padding: 14px 22px;
-  justify-content: space-between;
-  border: 0;
-  border-top: 1px solid var(--line);
-  background: transparent;
-  color: var(--accent-text);
-  text-align: left;
-}
-.attention-list span,
-.attention-list b,
-.attention-list small {
-  display: block;
-}
-.attention-list b {
-  color: var(--ink);
-}
-.attention-list small {
-  margin-top: 3px;
-  color: var(--muted);
-  font-size: 12px;
-}
-.attention-clear {
-  margin: 0;
-  padding: 0 22px 20px;
-  color: var(--muted);
-  font-size: 13px;
-}
 .business-metrics .panel {
   position: relative;
   padding: 20px 22px;

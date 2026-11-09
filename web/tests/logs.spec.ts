@@ -55,3 +55,24 @@ test("日志管理 shows who did what, with details and points history", async (
   await expect(page.locator("tbody tr").first()).toBeVisible();
   await expect(page.locator("tbody")).toContainText("登录");
 });
+
+test("接口日志 filters: writes-only lives in the method list; reset clears", async ({
+  page,
+}) => {
+  await login(page);
+  await page.getByRole("button", { name: "日志管理", exact: true }).click();
+  await page.getByRole("tab", { name: "接口日志" }).click();
+  const asked = page.waitForRequest(
+    (r) =>
+      r.url().includes("/api/admin/audit?") && r.url().includes("writes=1"),
+  );
+  await page.getByLabel("请求方法").selectOption("writes");
+  await page.getByRole("button", { name: "查询" }).click();
+  expect(new URL((await asked).url()).searchParams.get("method")).toBeNull();
+  const cleared = page.waitForRequest(
+    (r) => r.url().includes("/api/admin/audit?") && !r.url().includes("writes"),
+  );
+  await page.getByRole("button", { name: "重置" }).click();
+  await cleared;
+  await expect(page.getByLabel("请求方法")).toHaveValue("");
+});

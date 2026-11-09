@@ -122,9 +122,10 @@ export default function Traffic({
                 }))}
               />
             </section>
-            <section className="panel">
+            {/* Two groups side by side when this panel spans the full row. */}
+            <section className="panel traffic-split">
               {client === "all" && (
-                <>
+                <div>
                   <div className="section-head">
                     <h2>各端占比</h2>
                     <span className="quiet">浏览量 · 访客</span>
@@ -139,25 +140,23 @@ export default function Traffic({
                       tip: `${clientNames[c.client] || c.client}：浏览 ${c.pv} 次，占 ${pct(c.pv, t.pv)}`,
                     }))}
                   />
-                </>
+                </div>
               )}
-              <div
-                className={
-                  client === "all" ? "section-head sub" : "section-head"
-                }
-              >
-                {client === "all" ? <h3>设备平台</h3> : <h2>设备平台</h2>}
-                <span className="quiet">访问次数</span>
+              <div>
+                <div className="section-head">
+                  <h2>设备平台</h2>
+                  <span className="quiet">访问次数</span>
+                </div>
+                <HBars
+                  label="设备平台"
+                  rows={shown.platforms.map((p) => ({
+                    key: p.platform,
+                    label: platformName(p.platform),
+                    value: p.visits,
+                    display: `${count(p.visits)} · ${pct(p.visits, shown.visits)}`,
+                  }))}
+                />
               </div>
-              <HBars
-                label="设备平台"
-                rows={shown.platforms.map((p) => ({
-                  key: p.platform,
-                  label: platformName(p.platform),
-                  value: p.visits,
-                  display: `${count(p.visits)} · ${pct(p.visits, shown.visits)}`,
-                }))}
-              />
             </section>
           </div>
         </>

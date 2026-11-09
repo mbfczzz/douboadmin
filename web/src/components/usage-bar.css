@@ -1,0 +1,39 @@
+/* Outcome bar (succeeded / failed / running) with its legend; shared by the
+   overview and the user model records. */
+.usage-bar {
+  display: flex;
+  gap: 2px;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 3px;
+  background: var(--surface-raised);
+}
+.usage-bar i,
+.usage-legend i {
+  display: block;
+}
+.usage-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  align-items: center;
+  font-size: 12px;
+}
+.usage-legend i {
+  width: 8px;
+  height: 8px;
+  margin-right: -8px;
+  border-radius: 2px;
+}
+.usage-legend > span {
+  margin-left: auto;
+}
+:is(.usage-bar, .usage-legend) .ok {
+  background: var(--success);
+}
+:is(.usage-bar, .usage-legend) .bad {
+  background: var(--danger);
+}
+:is(.usage-bar, .usage-legend) .run {
+  background: var(--info);
+}

@@ -1,7 +1,44 @@
 import { test, expect } from "@playwright/test";
 import { login } from "./helpers";
 
-test("overview exposes daily detail and fits a 90-day chart on mobile", async ({
+const breakdown = {
+  totalUsers: 12,
+  activeUsers: 5,
+  creatorUsers: 3,
+  payers: 1,
+  ordersCreated: 2,
+  ordersPaid: 1,
+  pointsSold: 0,
+  refunds: 1,
+  directActivations: 1,
+  providerActivations: 0,
+  codesIssued: 0,
+  codesRedeemed: 0,
+  channels: {},
+  providers: [],
+  kinds: {},
+  hours: [],
+  weekdays: [],
+  traffic: {
+    uv: 3,
+    pv: 9,
+    visits: 4,
+    pagesPerVisit: 2.3,
+    avgVisitSeconds: 40,
+    bounceRate: 0.25,
+    newVisitors: 2,
+    nextDayRetention: 0,
+    retentionBase: 0,
+    topPages: [],
+    entryPages: [],
+    scenes: [],
+    sources: [],
+    platforms: [],
+    clients: [],
+  },
+};
+
+test("tabs hold the daily detail and fit a 90-day chart on mobile", async ({
   page,
 }) => {
   await login(page);
@@ -14,10 +51,11 @@ test("overview exposes daily detail and fits a 90-day chart on mobile", async ({
         period: count,
         models: [],
         events: {},
+        breakdown,
         days: Array.from({ length: count }, (_, i) => ({
           date: new Date(Date.UTC(2026, 7, i + 1)).toISOString().slice(0, 10),
-          newUsers: 0,
-          activeUsers: 0,
+          newUsers: 1,
+          activeUsers: 1,
           jobs: count === 90 && i === 89 ? 9 : 0,
           succeeded: 0,
           failed: 0,
@@ -31,17 +69,22 @@ test("overview exposes daily detail and fits a 90-day chart on mobile", async ({
   await page.getByRole("button", { name: "刷新", exact: true }).click();
   await expect(page.getByText("今日经营数据", { exact: true })).toBeVisible();
   await page.getByLabel("统计周期").selectOption("30");
-  await expect(page.getByText("所选时段暂无生成任务")).toBeVisible();
-  await page.getByText("每日经营数据 · 30 天", { exact: true }).click();
+  // The daily list starts open and shows the newest 10 days only.
   await expect(
-    page.getByRole("columnheader", { name: "生成 / 成功 / 失败" }),
+    page.getByText("每日经营数据 · 最近 10 天", { exact: true }),
   ).toBeVisible();
+  const daily = page.locator(".overview-details").first();
+  await expect(
+    daily.getByRole("columnheader", { name: "生成 / 成功 / 失败" }),
+  ).toBeVisible();
+  await expect(daily.locator("tbody tr")).toHaveCount(10);
+  // No generation in 30 days: one hint instead of empty charts.
+  await page.getByRole("tab", { name: "创作" }).click();
+  await expect(page.getByText("所选时段还没有生成任务")).toBeVisible();
   await page.setViewportSize({ width: 390, height: 844 });
   await page.getByLabel("统计周期").selectOption("90");
   await expect(page.getByText("峰值 9 次 / 日")).toBeVisible();
-  const chart = page.getByRole("img", {
-    name: "每日生成量趋势",
-  });
+  const chart = page.getByRole("img", { name: "每日生成量趋势" });
   expect(
     await chart.evaluate((el) => el.scrollWidth <= el.clientWidth),
   ).toBeTruthy();
@@ -59,7 +102,7 @@ test("overview exposes daily detail and fits a 90-day chart on mobile", async ({
   ).toBeTruthy();
 });
 
-test("overview groups real metrics and marks incomplete costs without a false zero", async ({
+test("headline figures compare with the previous period; costs stay honest", async ({
   page,
 }) => {
   await page.route("**/api/admin/dashboard?*", (route) =>
@@ -77,6 +120,18 @@ test("overview groups real metrics and marks incomplete costs without a false ze
           refundFen: i === 29 ? 5000 : 0,
           revenueFen: i === 29 ? 15000 : 0,
         })),
+        previous: {
+          newUsers: 6,
+          activeUsers: 10,
+          jobs: 8,
+          succeeded: 8,
+          paidFen: 0,
+          refundFen: 0,
+          revenueFen: 0,
+          pv: 9,
+          uv: 3,
+        },
+        breakdown,
         models: [
           { model: "partial-cost", calls: 2, known: 1, estimatedMicros: 1000 },
           { model: "known-cost", calls: 3, known: 3, estimatedMicros: 2000 },
@@ -86,21 +141,25 @@ test("overview groups real metrics and marks incomplete costs without a false ze
     }),
   );
   await login(page);
-  const cards = page.locator(".overview-page .business-metrics .panel");
-  await expect(cards).toHaveCount(4);
+  const cards = page.locator(".headline-card");
   await expect(cards.locator("strong")).toHaveText([
+    "¥200.00",
     "12",
     "8",
-    "¥150.00",
-    "¥50.00",
+    "5",
+    "3",
   ]);
-  await expect(cards.first()).toContainText("今日活跃 5 人");
-  const chart = await page
-    .getByRole("img", { name: "每日生成量趋势" })
-    .boundingBox();
-  const attention = await page.locator(".attention-panel").boundingBox();
-  expect(chart!.width).toBeGreaterThan(attention!.width * 1.5);
-  const table = page.locator(".overview-section").first();
+  await expect(cards.nth(0)).toContainText("上期为 0");
+  await expect(cards.nth(0)).toContainText("退款 ¥50.00");
+  await expect(cards.nth(1).locator(".delta.up")).toContainText("100.0%");
+  await expect(cards.nth(2)).toContainText("持平");
+  await expect(cards.nth(3).locator(".delta.down")).toContainText("50.0%");
+  // Service metrics moved to 运行监控.
+  await expect(page.getByText("服务接口")).toHaveCount(0);
+  await page.getByRole("tab", { name: "创作" }).click();
+  const table = page
+    .locator(".overview-section")
+    .filter({ hasText: "AI 调用成本" });
   await expect(
     table.locator("tr").filter({ hasText: "partial-cost" }),
   ).toContainText("待配置");
@@ -110,7 +169,10 @@ test("overview groups real metrics and marks incomplete costs without a false ze
   await expect(
     table.locator("tr").filter({ hasText: "known-cost" }),
   ).toContainText("$0.0020");
-  await page.getByText("行为事件", { exact: true }).click();
+  await page.getByRole("tab", { name: "流量" }).click();
+  await expect(
+    page.getByText("行为事件 · 前 10 项", { exact: true }),
+  ).toBeVisible();
   await expect(
     page.getByRole("columnheader", { name: "事件", exact: true }),
   ).toBeVisible();
@@ -139,4 +201,32 @@ test("overview opens on today and can switch to a longer period", async ({
   await period.selectOption("7");
   await expect.poll(() => asked.at(-1)).toBe("7");
   expect(asked[0]).toBe("1");
+});
+
+test("today charts the day by hour instead of one daily bar", async ({
+  page,
+}) => {
+  await page.route("**/api/admin/dashboard?days=1", async (route) => {
+    const real = await (await route.fetch()).json();
+    const hours = Array.from({ length: 24 }, (_, i) => ({
+      date: String(i).padStart(2, "0") + ":00",
+      newUsers: 0,
+      activeUsers: 0,
+      jobs: i === 9 ? 4 : i === 10 ? 2 : 0,
+      succeeded: 0,
+      failed: 0,
+      paidFen: 0,
+      refundFen: 0,
+      revenueFen: 0,
+    }));
+    real.days[0].jobs = 6;
+    await route.fulfill({ json: { ...real, hours } });
+  });
+  await login(page);
+  await page.getByRole("tab", { name: "创作" }).click();
+  const chart = page.getByRole("img", { name: "今日生成量（按小时）" });
+  await expect(chart.locator("div")).toHaveCount(24);
+  const panel = page.locator("section.panel").filter({ has: chart });
+  await expect(panel).toContainText("合计 6 次 · 峰值 4 次 / 小时");
+  await expect(panel).toContainText("23:00");
 });

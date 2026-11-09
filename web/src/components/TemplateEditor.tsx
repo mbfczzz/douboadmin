@@ -100,27 +100,15 @@ export default function TemplateEditor({
               onChange={(cover, coverAssetId) => patch({ cover, coverAssetId })}
               onBusy={setUploading}
             />
-            <div className="form-grid">
-              <label>
-                分类
-                <input
-                  value={data.category}
-                  onChange={(e) => patch({ category: e.target.value })}
-                  maxLength={40}
-                  placeholder="例如：产品摄影"
-                />
-              </label>
-              <label>
-                模板栏目
-                <select
-                  value={data.family || "style"}
-                  onChange={(e) => patch({ family: e.target.value })}
-                >
-                  <option value="style">风格主题</option>
-                  <option value="inspiration">灵感做同款</option>
-                </select>
-              </label>
-            </div>
+            <label>
+              分类
+              <input
+                value={data.category}
+                onChange={(e) => patch({ category: e.target.value })}
+                maxLength={40}
+                placeholder="例如：产品摄影"
+              />
+            </label>
             <label>
               简介
               <textarea

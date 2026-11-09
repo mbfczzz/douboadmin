@@ -100,21 +100,19 @@ for (const width of [1440, 390, 320]) {
     await modal("编辑", "编辑创作模板");
     await page.getByRole("button", { name: "新增模板", exact: true }).click();
     const template = page.getByRole("dialog");
-    await template
-      .getByRole("combobox", { name: "模板栏目", exact: true })
-      .focus();
+    const kindSelect = template.getByRole("combobox", {
+      name: "生成类型",
+      exact: true,
+    });
+    await kindSelect.focus();
     // The themed select follows the combobox pattern: ↓ opens the list,
     // arrows move and Enter picks.
     for (const key of ["ArrowDown", "ArrowDown", "Enter"])
       await page.keyboard.press(key);
-    await expect(
-      template.getByRole("combobox", { name: "模板栏目", exact: true }),
-    ).toHaveValue("inspiration");
+    await expect(kindSelect).toHaveValue("video");
     for (const key of ["ArrowDown", "ArrowUp", "Enter"])
       await page.keyboard.press(key);
-    await expect(
-      template.getByRole("combobox", { name: "模板栏目", exact: true }),
-    ).toHaveValue("style");
+    await expect(kindSelect).toHaveValue("image");
     for (const kind of ["image", "video"]) {
       const model = models.find(
         (r) => r.data.kind === kind && r.data.available,
