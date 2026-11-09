@@ -8,22 +8,6 @@ import (
 	"strings"
 )
 
-func (a *Server) execution(w http.ResponseWriter, r *http.Request) {
-	row, err := a.Store.Get(r.Context(), "executions", r.PathValue("id"))
-	if err != nil {
-		dbError(w, err)
-		return
-	}
-	var e provider.Execution
-	if json.Unmarshal(row.Data, &e) != nil {
-		fail(w, 500, "执行记录无效")
-		return
-	}
-	// Result URLs may be transient signed URLs. Return only operational metadata.
-	// errorCause is the redacted upstream error; only admins reach this route.
-	reply(w, 200, map[string]any{"phase": e.Phase, "taskId": e.TaskID, "modelKey": e.ModelKey, "startedAt": e.StartedAt, "note": e.Note, "errorCause": e.ErrorCause})
-}
-
 func (a *Server) releaseJob(w http.ResponseWriter, r *http.Request) {
 	var v struct {
 		Verified bool   `json:"verified"`

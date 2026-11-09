@@ -7,7 +7,7 @@ import { stateText, type Job } from "../api";
 import FilterBar from "../components/FilterBar";
 import Empty from "../components/Empty";
 import JobTable, { type JobAction } from "../components/JobTable";
-import { JobResume, releaseJob } from "../components/JobRecovery";
+import { releaseJob } from "../components/JobRecovery";
 import type { PageProps } from "../navigation";
 
 // The detail view loads when a task is opened.
@@ -17,11 +17,9 @@ export default function Jobs({ notify }: PageProps) {
   const jobs = resource.data || [];
   const [filter, setFilter] = useRememberedState("jobs.status", "all"),
     [search, setSearch] = useRememberedState("jobs.query", ""),
-    [detail, setDetail] = useState<Job | null>(null),
-    [resuming, setResuming] = useState<Job>();
+    [detail, setDetail] = useState<Job | null>(null);
   const act = async (kind: JobAction, job: Job) => {
     if (kind === "detail") return setDetail(job);
-    if (kind === "resume") return setResuming(job);
     try {
       if (await releaseJob(job)) {
         notify("预留积分已退回，此任务不会再次扣费或恢复生成");
@@ -80,16 +78,6 @@ export default function Jobs({ notify }: PageProps) {
             onClose={() => setDetail(null)}
           />
         </Suspense>
-      )}
-      {resuming && (
-        <JobResume
-          job={resuming}
-          onClose={() => setResuming(undefined)}
-          onDone={(message) => {
-            notify(message);
-            void resource.reload();
-          }}
-        />
       )}
     </>
   );

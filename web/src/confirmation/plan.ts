@@ -62,7 +62,7 @@ export function needsConfirmation(path: string, method: string, body: unknown) {
   }
   return (
     method === "POST" &&
-    (/\/(wallet|refund|release|resume|retry|review|sync)$/.test(path) ||
+    (/\/(wallet|refund|release|retry|review|sync)$/.test(path) ||
       /^\/admin\/(quota-moves|commission-payouts)$/.test(path))
   );
 }

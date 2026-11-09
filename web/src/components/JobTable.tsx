@@ -2,9 +2,9 @@ import { Image, Bot, Film, Music, ArrowUpRight } from "lucide-react";
 import { date, kindText, type Job } from "../api";
 import Badge from "./Badge";
 import Table from "../business/Table";
-import { releasable, resumable } from "./JobRecovery";
+import { releasable } from "./JobRecovery";
 
-export type JobAction = "detail" | "resume" | "release";
+export type JobAction = "detail" | "release";
 const icons = { image: Image, chat: Bot, audio: Music } as const;
 
 // Shared record table: wraps text, and turns into cards when it cannot fit.
@@ -52,14 +52,6 @@ export default function JobTable({
               >
                 详情 <ArrowUpRight size={14} />
               </button>
-              {resumable(j) && (
-                <button
-                  className="text-button"
-                  onClick={() => onAction("resume", j)}
-                >
-                  恢复查询
-                </button>
-              )}
               {releasable(j) && (
                 <button
                   className="text-button danger-text"

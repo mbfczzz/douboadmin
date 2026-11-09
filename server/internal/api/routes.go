@@ -72,7 +72,6 @@ func (a *Server) routes() {
 	m.HandleFunc("PUT /api/admin/templates/{id}", a.auth("admin", a.saveTemplate))
 	m.HandleFunc("GET /api/admin/jobs", a.auth("admin", a.jobs))
 	m.HandleFunc("POST /api/admin/jobs", a.auth("admin", a.createJob))
-	m.HandleFunc("GET /api/admin/jobs/{id}/execution", a.auth("admin", a.execution))
 	m.HandleFunc("POST /api/admin/jobs/{id}/resume", a.auth("admin", a.resumeJob))
 	m.HandleFunc("GET /api/admin/users", a.auth("admin", a.users))
 	m.HandleFunc("GET /api/admin/feedback", a.auth("admin", func(w http.ResponseWriter, r *http.Request) {

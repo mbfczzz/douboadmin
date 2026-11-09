@@ -156,13 +156,6 @@ export async function surfaceFixtures(page: Page) {
       polls: 0,
       morePolls: false,
     },
-    "/jobs/qa-job/execution": {
-      phase: "polling",
-      taskId: "test-task",
-      modelKey: "test-model",
-      note: "上游状态：processing",
-      startedAt: now,
-    },
     "/works": [
       { ...job, status: "succeeded", reviewStatus: "approved", error: "" },
     ],
