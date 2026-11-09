@@ -73,17 +73,14 @@ func (a *Server) myLogins(w http.ResponseWriter, r *http.Request) {
 		OK        bool      `json:"ok"`
 	}
 	out := []login{}
-	account := identity(r).Account
-	if logs, ok := a.Store.(store.AuditLogs); ok && account != "" {
-		page, e := logs.Logs(r.Context(), core.AuditQuery{Categories: []string{core.LogAuth}, Actor: account, Limit: 50})
+	if logs, ok := a.Store.(store.AuditLogs); ok {
+		page, e := logs.Logs(r.Context(), core.AuditQuery{ActorID: identity(r).ID, Route: "POST /api/admin/login", Limit: 5})
 		if e != nil {
 			dbError(w, e)
 			return
 		}
 		for _, e := range page.Items {
-			if e.Route == "POST /api/admin/login" && e.ActorName == account && len(out) < 5 {
-				out = append(out, login{e.At, e.IP, e.UserAgent, e.Status < 400})
-			}
+			out = append(out, login{e.At, e.IP, e.UserAgent, e.Status < 400})
 		}
 	}
 	reply(w, 200, out)

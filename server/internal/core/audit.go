@@ -44,13 +44,16 @@ type AuditQuery struct {
 	Categories []string
 	Actor      string // actor id or name fragment
 	Target     string // target id or name fragment
-	Search     string // path, action or summary fragment
-	Method     string
-	Failed     *bool
-	WritesOnly bool
-	From, To   time.Time
-	Before     string
-	Limit      int
+	// Exact matches for per-user, per-job and per-account views; these use
+	// the actor/target indexes instead of scanning by category.
+	ActorID, TargetID, Route string
+	Search                   string // path, action or summary fragment
+	Method                   string
+	Failed                   *bool
+	WritesOnly               bool
+	From, To                 time.Time
+	Before                   string
+	Limit                    int
 }
 
 type AuditPage struct {

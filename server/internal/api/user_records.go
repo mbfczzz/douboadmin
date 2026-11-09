@@ -31,19 +31,31 @@ type modelJob struct {
 	Kind        string    `json:"kind"`
 	Status      string    `json:"status"`
 	PointsUnits int64     `json:"pointsUnits"`
+	Billing     string    `json:"billing,omitempty"` // reserved, charged, released
 	Prompt      string    `json:"prompt"`
 	Error       string    `json:"error,omitempty"`
 	CreatedAt   time.Time `json:"createdAt"`
 	UpdatedAt   time.Time `json:"updatedAt"`
 }
 
-// userModels summarises the user's generation tasks per model, plus the
-// latest 100 tasks. Material imports are not model calls and are skipped.
+// userModels summarises the user's latest (up to 200) generation tasks per
+// model, plus the latest 100 tasks. Points count only what was actually
+// charged; reserved and refunded points are shown per task, not summed.
+// Material imports are not model calls and are skipped.
 func (a *Server) userModels(w http.ResponseWriter, r *http.Request) {
 	jobs, e := a.Store.Jobs(r.Context(), r.PathValue("id"))
 	if e != nil {
 		dbError(w, e)
 		return
+	}
+	bills := map[string]core.JobBilling{}
+	if rows, e := a.Store.List(r.Context(), "job_billing", r.PathValue("id")); e == nil {
+		for _, row := range rows {
+			var b core.JobBilling
+			if json.Unmarshal(row.Data, &b) == nil {
+				bills[row.ID] = b
+			}
+		}
 	}
 	names := map[string]string{}
 	if rows, e := a.Store.List(r.Context(), "models", ""); e == nil {
@@ -70,7 +82,10 @@ func (a *Server) userModels(w http.ResponseWriter, r *http.Request) {
 			uses[j.Input.Model] = u
 		}
 		u.Calls++
-		u.PointsUnits += j.CostUnits
+		bill := bills[j.ID]
+		if bill.State == "charged" {
+			u.PointsUnits += bill.Units
+		}
 		switch j.Status {
 		case "succeeded":
 			u.Succeeded++
@@ -80,15 +95,20 @@ func (a *Server) userModels(w http.ResponseWriter, r *http.Request) {
 			u.Active++
 		}
 		if len(recent) < 100 {
-			recent = append(recent, modelJob{j.ID, j.Input.Model, name, j.Input.Kind, j.Status, j.CostUnits, short(j.Input.Prompt, 80), j.Error, j.CreatedAt, j.UpdatedAt})
+			recent = append(recent, modelJob{j.ID, j.Input.Model, name, j.Input.Kind, j.Status, bill.Units, bill.State, short(j.Input.Prompt, 80), j.Error, j.CreatedAt, j.UpdatedAt})
 		}
 	}
 	models := make([]*modelUse, 0, len(uses))
 	for _, u := range uses {
 		models = append(models, u)
 	}
-	sort.Slice(models, func(i, j int) bool { return models[i].Calls > models[j].Calls })
-	reply(w, 200, map[string]any{"models": models, "jobs": recent})
+	sort.Slice(models, func(i, j int) bool {
+		if models[i].Calls != models[j].Calls {
+			return models[i].Calls > models[j].Calls
+		}
+		return models[i].Model < models[j].Model
+	})
+	reply(w, 200, map[string]any{"models": models, "jobs": recent, "limited": len(jobs) >= 200})
 }
 
 // userActivity pages through the operation log entries made by this user:
@@ -100,7 +120,7 @@ func (a *Server) userActivity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	v := r.URL.Query()
-	q := core.AuditQuery{Categories: []string{core.LogBusiness, core.LogAuth}, Actor: r.PathValue("id"), Before: v.Get("before")}
+	q := core.AuditQuery{Categories: []string{core.LogBusiness, core.LogAuth}, ActorID: r.PathValue("id"), Before: v.Get("before")}
 	if v.Get("scope") == "all" {
 		q.Categories = append(q.Categories, core.LogAPI, core.LogModel)
 	}

@@ -41,6 +41,9 @@ func (a *Server) adminLogin(w http.ResponseWriter, r *http.Request) {
 	if errors.Is(e, core.ErrNotFound) && subtle.ConstantTimeCompare([]byte(v.Username), []byte(a.Config.AdminUser)) == 1 && subtle.ConstantTimeCompare([]byte(v.Password), []byte(a.Config.AdminPassword)) == 1 {
 		row, account, e = a.bootstrapAdmin(r, v.Username, v.Password)
 	}
+	if e == nil { // attribute the attempt, failed or not, to the account
+		auditActor(r, Identity{ID: row.ID, Role: "admin", Account: account.Username, AdminRole: account.Role})
+	}
 	if e != nil || account.Disabled || account.Archived || bcrypt.CompareHashAndPassword([]byte(account.PasswordHash), []byte(v.Password)) != nil {
 		fail(w, 401, "账号或密码不正确")
 		return

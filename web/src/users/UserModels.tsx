@@ -9,6 +9,7 @@ import Empty from "../components/Empty";
 import Table from "../business/Table";
 import { kindNames, points, type Profile } from "../business/types";
 import GenerationDetail from "../generation/GenerationDetail";
+import { billingNames } from "../generation/types";
 import "./records.css";
 
 type ModelUse = {
@@ -29,6 +30,7 @@ type ModelJob = {
   kind: string;
   status: string;
   pointsUnits: number;
+  billing?: string;
   prompt: string;
   error?: string;
   createdAt: string;
@@ -49,9 +51,11 @@ export default function UserModels({
   user: Row<Profile>;
   onClose: () => void;
 }) {
-  const data = useResource<{ models: ModelUse[]; jobs: ModelJob[] }>(
-      `/admin/users/${user.id}/models`,
-    ),
+  const data = useResource<{
+      models: ModelUse[];
+      jobs: ModelJob[];
+      limited: boolean;
+    }>(`/admin/users/${encodeURIComponent(user.id)}/models`),
     models = data.data?.models || [],
     [open, setOpen] = useState(""),
     total = models.reduce(
@@ -80,7 +84,8 @@ export default function UserModels({
         {data.data && models.length > 0 && (
           <>
             <p className="quiet records-summary">
-              共使用 {models.length} 个模型 · 生成 {total.calls} 次 · 消耗{" "}
+              {data.data.limited ? "最近 200 个任务：" : ""}共使用{" "}
+              {models.length} 个模型 · 生成 {total.calls} 次 · 实际扣除{" "}
               {points(total.units)} 积分
             </p>
             <Table
@@ -98,7 +103,7 @@ export default function UserModels({
                   title: "成功 / 失败 / 进行中",
                   render: (m) => `${m.succeeded} / ${m.failed} / ${m.active}`,
                 },
-                { title: "消耗积分", render: (m) => points(m.pointsUnits) },
+                { title: "实际扣除", render: (m) => points(m.pointsUnits) },
                 { title: "最近使用", render: (m) => date(m.lastAt) },
               ]}
             />
@@ -124,7 +129,19 @@ export default function UserModels({
                   ),
                 },
                 { title: "状态", render: (j) => <Badge state={j.status} /> },
-                { title: "积分", render: (j) => points(j.pointsUnits) },
+                {
+                  title: "积分",
+                  render: (j) => (
+                    <>
+                      {points(j.pointsUnits)}
+                      {j.billing && j.billing !== "charged" && (
+                        <small className="cell-note">
+                          {billingNames[j.billing] || j.billing}
+                        </small>
+                      )}
+                    </>
+                  ),
+                },
                 {
                   title: "操作",
                   action: true,

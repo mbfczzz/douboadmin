@@ -2,7 +2,9 @@ package api
 
 import (
 	"doubo/server/internal/core"
+	"doubo/server/internal/store"
 	"encoding/json"
+	"fmt"
 	"testing"
 	"time"
 )
@@ -56,5 +58,21 @@ func TestAdminSeesUserModelUseAndActivity(t *testing.T) {
 	_ = json.Unmarshal(call(a, "GET", "/api/admin/users/user-a/activity?scope=all", admin, "", nil).Body.Bytes(), &all)
 	if len(all.Items) <= len(page.Items) {
 		t.Fatal("scope=all should include API calls", len(all.Items), len(page.Items))
+	}
+}
+
+// user-a must not see the entries of user-ab (ids are matched exactly).
+func TestUserActivityMatchesTheIDExactly(t *testing.T) {
+	a, _, admin := activationFixture(t)
+	logs := a.Store.(store.AuditLogs)
+	at := time.Now()
+	_ = logs.AppendLogs(t.Context(), []core.AuditEntry{
+		{ID: fmt.Sprintf("%013x%013d", at.UnixMilli(), 1), At: at, Category: core.LogBusiness, Action: "别人的操作", ActorType: "user", ActorID: "user-ab", ActorName: "user-a 的朋友"},
+		{ID: fmt.Sprintf("%013x%013d", at.UnixMilli(), 2), At: at, Category: core.LogBusiness, Action: "自己的操作", ActorType: "user", ActorID: "user-a"},
+	})
+	var page core.AuditPage
+	_ = json.Unmarshal(call(a, "GET", "/api/admin/users/user-a/activity", admin, "", nil).Body.Bytes(), &page)
+	if len(page.Items) != 1 || page.Items[0].Action != "自己的操作" {
+		t.Fatal("activity of another user leaked", page.Items)
 	}
 }

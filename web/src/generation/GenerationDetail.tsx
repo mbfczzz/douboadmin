@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { date } from "../api";
 import { useResource } from "../hooks/useResource";
 import Modal from "../components/Modal";
@@ -31,7 +32,9 @@ export default function GenerationDetail({
   path: string;
   onClose: () => void;
 }) {
-  const res = useResource<Generation>(path),
+  // Refresh while the task runs, like the task list does.
+  const [live, setLive] = useState(true),
+    res = useResource<Generation>(path, live ? 15000 : 0),
     g = res.data,
     j = g?.job,
     done = j && (j.status === "succeeded" || j.status === "failed");
@@ -66,6 +69,9 @@ export default function GenerationDetail({
       ]
     : [];
   const cause = g?.execution?.errorCause;
+  useEffect(() => {
+    if (done) setLive(false);
+  }, [done]);
   return (
     <Modal
       title="生成记录详情"

@@ -33,7 +33,7 @@ export default function TrafficKpis({
       !whole
         ? `占全部 ${pct(t.uv, all.uv)}`
         : n === 1
-          ? `回访 ${count(t.uv - t.newVisitors)} 人`
+          ? `回访 ${count(Math.max(0, t.uv - t.newVisitors))} 人`
           : `日均 ${dailyUV.toFixed(1)} 人`,
     ],
     [

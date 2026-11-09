@@ -64,7 +64,8 @@ func (a *Server) generationInputs(ctx context.Context, ids []string) []genInput 
 	return out
 }
 
-// generationCalls returns every submission and failed status query in full,
+// generationCalls returns the submissions (up to 100) and failed status
+// queries (up to 5) in full,
 // plus the latest successful status query; the routine polls in between are
 // only counted (polls; more reports that there were over 100).
 func (a *Server) generationCalls(ctx context.Context, job string) (calls []core.AuditEntry, polls int, more bool, err error) {
@@ -73,7 +74,7 @@ func (a *Server) generationCalls(ctx context.Context, job string) (calls []core.
 	if !ok {
 		return
 	}
-	q := core.AuditQuery{Categories: []string{core.LogModel}, Target: job, Method: http.MethodPost, Limit: 20}
+	q := core.AuditQuery{Categories: []string{core.LogModel}, TargetID: job, Method: http.MethodPost, Limit: 100}
 	posts, err := logs.Logs(ctx, q)
 	if err != nil {
 		return
@@ -85,9 +86,6 @@ func (a *Server) generationCalls(ctx context.Context, job string) (calls []core.
 	}
 	keep, latest, failed := []core.AuditEntry{}, false, 0
 	for _, it := range gets.Items { // newest first
-		if it.TargetID != job {
-			continue
-		}
 		polls++
 		bad := it.Status >= 400 || it.Error != ""
 		if (!bad && !latest) || (bad && failed < 5) {
@@ -98,11 +96,7 @@ func (a *Server) generationCalls(ctx context.Context, job string) (calls []core.
 			}
 		}
 	}
-	for _, it := range posts.Items {
-		if it.TargetID == job {
-			keep = append(keep, it)
-		}
-	}
+	keep = append(keep, posts.Items...)
 	sort.Slice(keep, func(i, j int) bool { return keep[i].ID < keep[j].ID }) // ids are time-ordered
 	for _, it := range keep {
 		if full, e := logs.Log(ctx, it.ID); e == nil {

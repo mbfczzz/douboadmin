@@ -101,22 +101,17 @@ export default function AccountPanel({
         )}
       </section>
       <div className="account-actions">
-        <button type="button" role="menuitem" onClick={onPassword}>
+        <button type="button" onClick={onPassword}>
           <KeyRound size={15} />
           修改密码
         </button>
         {onLogs && (
-          <button type="button" role="menuitem" onClick={onLogs}>
+          <button type="button" onClick={onLogs}>
             <ScrollText size={15} />
             我的操作日志
           </button>
         )}
-        <button
-          type="button"
-          role="menuitem"
-          className="danger-text"
-          onClick={onLogout}
-        >
+        <button type="button" className="danger-text" onClick={onLogout}>
           <LogOut size={15} />
           退出登录
         </button>

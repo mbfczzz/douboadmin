@@ -81,6 +81,15 @@ func logWhere(q core.AuditQuery) (string, []any) {
 	if q.Target != "" {
 		add(`(target_id=? OR target_name LIKE ?)`, q.Target, like(q.Target))
 	}
+	if q.ActorID != "" {
+		add(`actor_id=?`, q.ActorID)
+	}
+	if q.TargetID != "" {
+		add(`target_id=?`, q.TargetID)
+	}
+	if q.Route != "" {
+		add(`route=?`, q.Route)
+	}
 	if q.Search != "" {
 		add(`(path LIKE ? OR action LIKE ? OR summary LIKE ?)`, like(q.Search), like(q.Search), like(q.Search))
 	}

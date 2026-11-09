@@ -213,7 +213,7 @@ export default function Workspace({
                 onLogs={
                   me.menus.includes("logs")
                     ? () => {
-                        presetActor(me.account || me.id);
+                        presetActor(me.id);
                         navigate("logs");
                       }
                     : undefined

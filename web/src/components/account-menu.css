@@ -145,7 +145,7 @@
 .account-logins li.failed small {
   color: var(--danger);
 }
-.account-popover [role="menuitem"] {
+.account-actions button {
   justify-content: flex-start;
   gap: 10px;
   width: 100%;
@@ -156,7 +156,7 @@
   color: var(--text);
   font-size: 13px;
 }
-.account-popover [role="menuitem"]:hover {
+.account-actions button:hover {
   background: #ffffff0f;
   color: var(--ink-strong);
 }

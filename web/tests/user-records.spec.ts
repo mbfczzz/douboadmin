@@ -43,7 +43,7 @@ test("user rows open model use and activity records", async ({ page }) => {
   await row.getByRole("button", { name: "模型记录", exact: true }).click();
   let dialog = page.getByRole("dialog", { name: "模型使用记录" });
   await expect(dialog).toContainText(
-    "共使用 1 个模型 · 生成 3 次 · 消耗 24 积分",
+    "共使用 1 个模型 · 生成 3 次 · 实际扣除 24 积分",
   );
   await expect(dialog).toContainText("2 / 1 / 0");
   await expect(dialog).toContainText("上游超时");

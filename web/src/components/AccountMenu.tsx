@@ -43,7 +43,7 @@ export default function AccountMenu({
       <button
         type="button"
         className="account-trigger"
-        aria-haspopup="menu"
+        aria-haspopup="dialog"
         aria-expanded={open}
         aria-label={`账号菜单：${name}`}
         onClick={() => setOpen(!open)}
@@ -53,7 +53,7 @@ export default function AccountMenu({
         <ChevronDown size={14} aria-hidden="true" />
       </button>
       {open && (
-        <div className="account-popover" role="menu" aria-label="账号">
+        <div className="account-popover" role="dialog" aria-label="账号">
           <AccountPanel
             me={me}
             name={name}

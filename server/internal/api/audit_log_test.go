@@ -53,7 +53,8 @@ func TestOperationsAreLoggedWithWhoWhatAndRedactedBodies(t *testing.T) {
 		t.Fatalf("read entry %+v", read)
 	}
 	login := waitLog(t, a, core.AuditQuery{Categories: []string{core.LogAuth}}, func(e core.AuditEntry) bool { return e.Action == "管理员登录" })
-	if login.ActorName != "admin" || strings.Contains(login.Request, "test-pass") {
+	// Sign-ins name the account (and its id) whether they succeed or not.
+	if login.ActorID == "" || !strings.Contains(login.ActorName, "admin") || strings.Contains(login.Request, "test-pass") {
 		t.Fatalf("login entry %+v", login)
 	}
 

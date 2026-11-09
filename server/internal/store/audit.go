@@ -48,6 +48,9 @@ func matchLog(e core.AuditEntry, q core.AuditQuery) bool {
 		q.WritesOnly && (e.Method == "GET" || e.Method == ""),
 		q.Failed != nil && (e.Status >= 400 || e.Error != "") != *q.Failed,
 		q.Actor != "" && !containsFold([]string{e.ActorID, e.ActorName}, q.Actor),
+		q.ActorID != "" && e.ActorID != q.ActorID,
+		q.TargetID != "" && e.TargetID != q.TargetID,
+		q.Route != "" && e.Route != q.Route,
 		q.Target != "" && !containsFold([]string{e.TargetID, e.TargetName}, q.Target),
 		q.Search != "" && !containsFold([]string{e.Path, e.Action, e.Summary, e.Route}, q.Search):
 		return false
