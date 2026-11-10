@@ -1,25 +1,14 @@
 import type { ReactNode } from "react";
 import { Copy, Download, RotateCcw } from "lucide-react";
 import { api } from "../api";
-import { useResource } from "../hooks/useResource";
+import { useShareCode } from "./useShareCode";
 import RequestState from "../components/RequestState";
 import { ask } from "../confirm/ask";
 import { copyText } from "../clipboard";
 import type { Notify } from "../navigation";
+import type { BoundUser } from "./types";
 
-export type BoundUser = {
-  id: string;
-  nickname: string;
-  name: string;
-  phone: string;
-};
-// A bind code that has been used returns the bound account instead.
-export type Share = {
-  pending?: boolean; // the bound account still awaits the platform
-  code: string;
-  qr: string;
-  user?: BoundUser;
-};
+export type { BoundUser, Share } from "./types";
 const pretty = (code: string) => code.slice(0, 4) + "-" + code.slice(4);
 
 // One long-lived QR code: the QR, its code and what to do with it.
@@ -43,7 +32,7 @@ export default function CodeView({
     reload: () => Promise<void>,
   ) => ReactNode;
 }) {
-  const share = useResource<Share>(path),
+  const share = useShareCode(path),
     s = share.data;
   async function reset() {
     const ok = await ask({
@@ -67,38 +56,60 @@ export default function CodeView({
     }
   }
   if (s?.user) return bound?.(s.user, !!s.pending, share.reload);
-  if (!s)
-    return (
-      <RequestState
-        loading={share.loading}
-        error={share.error}
-        retry={share.reload}
-      />
-    );
   return (
-    <div className="code-view">
-      <img
-        className="share-qr"
-        src={s.qr}
-        alt={title + "二维码"}
-        width="168"
-        height="168"
-      />
+    <div className="code-view" aria-busy={share.loading}>
+      <div className="share-qr-slot">
+        {s ? (
+          <img
+            className="share-qr"
+            src={s.qr}
+            alt={title + "二维码"}
+            width="168"
+            height="168"
+          />
+        ) : (
+          <div className="share-qr-placeholder">
+            <RequestState
+              loading={share.loading}
+              error={share.error}
+              retry={share.reload}
+            />
+          </div>
+        )}
+      </div>
       <div className="code-info">
-        <p className="share-code mono">{pretty(s.code)}</p>
+        <p className="share-code mono">
+          {s ? (
+            pretty(s.code)
+          ) : (
+            <span className="share-code-placeholder" aria-hidden="true" />
+          )}
+        </p>
         <p className="quiet">{note}</p>
         <div className="share-actions">
-          <a className="primary" href={s.qr} download={file}>
+          <a
+            className="primary"
+            href={s?.qr}
+            download={s ? file : undefined}
+            aria-disabled={!s || undefined}
+            tabIndex={s ? undefined : -1}
+          >
             <Download size={15} aria-hidden="true" />
             下载二维码
           </a>
-          <button type="button" className="secondary" onClick={copy}>
+          <button
+            type="button"
+            className="secondary"
+            onClick={copy}
+            disabled={!s}
+          >
             <Copy size={15} aria-hidden="true" />
             复制
           </button>
           <button
             type="button"
             className="text-button danger-text"
+            disabled={!s}
             onClick={() => void reset()}
           >
             <RotateCcw size={14} aria-hidden="true" />

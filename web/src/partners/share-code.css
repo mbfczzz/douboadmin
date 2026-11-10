@@ -38,6 +38,28 @@
   gap: 24px;
   align-items: center;
   min-width: 0;
+  min-height: 168px;
+}
+.share-qr-slot {
+  flex: 0 0 168px;
+  width: 168px;
+  height: 168px;
+}
+.share-qr-placeholder {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  border-radius: var(--radius-sm);
+  background: var(--surface-subtle);
+}
+.share-qr-placeholder .loading-state {
+  margin: 0;
+}
+.share-qr-placeholder .error {
+  margin: 0;
+  font-size: 12px;
 }
 .share-qr {
   flex-shrink: 0;
@@ -48,9 +70,11 @@
   background: #fff; /* the quiet zone a scanner needs */
 }
 .code-info {
+  flex: 1;
   display: grid;
   gap: 10px;
   min-width: 0;
+  width: 100%;
 }
 .share-code {
   margin: 0;
@@ -63,6 +87,16 @@
 .code-info > .quiet {
   margin: 0;
   font-size: 13px;
+  line-height: 1.6;
+  min-height: 4.8em;
+}
+.share-code-placeholder {
+  display: inline-block;
+  vertical-align: middle;
+  width: 9ch;
+  height: 1em;
+  border-radius: 4px;
+  background: var(--surface-subtle);
 }
 .share-actions {
   display: flex;
@@ -73,6 +107,10 @@
 }
 .share-actions > * {
   gap: 6px;
+}
+.share-actions [aria-disabled="true"] {
+  opacity: 0.5;
+  cursor: default;
 }
 @media (max-width: 720px) {
   /* Keep the three business code choices readable on narrow screens. */

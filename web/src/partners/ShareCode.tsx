@@ -66,7 +66,7 @@ export default function ShareCode({ id, view, changed, notify }: Scope) {
           <h3 className="share-title">{title}</h3>
           <p className="share-owner quiet">归属服务商：{name}</p>
           <CodeView
-            key={kind}
+            key={id}
             path={path}
             title={title}
             note={note}

@@ -110,6 +110,7 @@ export default function PagedProviderTree(props: Props) {
     items: ProviderItem[];
     page: number;
     total: number;
+    size?: number;
   }>(`/admin/partners/tree?${params}`);
   return (
     <>
@@ -126,11 +127,16 @@ export default function PagedProviderTree(props: Props) {
           {resource.data.items.map((row) => (
             <ProviderNode key={row.id} {...props} row={row} />
           ))}
-          <Pagination
-            page={resource.data.page}
-            total={resource.data.total}
-            onChange={setPage}
-          />
+          {(!props.parent ||
+            resource.data.total > (resource.data.size ?? 20) ||
+            resource.data.page > 1) && (
+            <Pagination
+              page={resource.data.page}
+              total={resource.data.total}
+              size={resource.data.size}
+              onChange={setPage}
+            />
+          )}
         </>
       )}
     </>

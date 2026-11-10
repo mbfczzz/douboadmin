@@ -14,6 +14,18 @@ export type Partner = {
   // The mini-program account that runs it (by invite or bind code).
   ownerUser?: string;
 };
+export type BoundUser = {
+  id: string;
+  nickname: string;
+  name: string;
+  phone: string;
+};
+export type Share = {
+  pending?: boolean;
+  code: string;
+  qr: string;
+  user?: BoundUser;
+};
 export type Price = {
   enabled: boolean;
   version: string;
