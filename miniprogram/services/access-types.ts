@@ -4,8 +4,10 @@ export interface AccessStatus {
   partnerId?: string;
   partnerName?: string;
   message?: string;
-  // Registration step: name and SMS-verified phone are still missing.
+  // Name is required; phone verification depends on the server's SMS setup.
   profileRequired?: boolean;
+  // Missing on older APIs: keep SMS validation unless explicitly disabled.
+  smsRequired?: boolean;
   name?: string;
   phone?: string;
 }

@@ -13,7 +13,8 @@ import (
 	"time"
 )
 
-// register checks the SMS code, then saves the name and verified phone.
+// Registration always collects a name. Phone verification is required only
+// when SMS is configured; name-only registration never changes phone fields.
 func (a *Server) register(w http.ResponseWriter, r *http.Request) {
 	var v struct {
 		Name  string `json:"name"`
@@ -24,21 +25,31 @@ func (a *Server) register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	user, name, phone := identity(r).ID, strings.TrimSpace(v.Name), strings.TrimSpace(v.Phone)
+	phoneRequired := a.registrationRequired()
 	switch {
 	case name == "" || len([]rune(name)) > 30:
 		fail(w, 400, "请填写姓名（30 字以内）")
 		return
-	case !mainlandPhone.MatchString(phone):
+	case !phoneRequired && (phone != "" || v.Code != ""):
+		fail(w, 400, "短信验证尚未启用，请仅填写姓名")
+		return
+	case phoneRequired && !mainlandPhone.MatchString(phone):
 		fail(w, 400, "请输入 11 位手机号")
 		return
-	case !smsDigits.MatchString(v.Code):
+	case phoneRequired && !smsDigits.MatchString(v.Code):
 		fail(w, 400, "请输入 6 位验证码")
 		return
 	}
 	if !a.allowAll(w, r, "验证过于频繁，请稍后再试", limit{"sms-verify:" + user, 10}) {
 		return
 	}
-	problem, e := a.verifyAndRegister(r.Context(), user, name, phone, v.Code)
+	var problem string
+	var e error
+	if phoneRequired {
+		problem, e = a.verifyAndRegister(r.Context(), user, name, phone, v.Code)
+	} else {
+		e = a.registerName(r.Context(), user, name)
+	}
 	if e != nil {
 		dbError(w, e)
 		return
@@ -53,6 +64,23 @@ func (a *Server) register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	reply(w, 200, out)
+}
+
+func (a *Server) registerName(ctx context.Context, user, name string) error {
+	return a.Store.Atomic(ctx, func(tx store.Transaction) error {
+		row, e := tx.Lock("users", core.Record{ID: user})
+		if e != nil {
+			return e
+		}
+		var profile map[string]any
+		if json.Unmarshal(row.Data, &profile) != nil || profile == nil {
+			return fmt.Errorf("账号状态异常")
+		}
+		profile["name"] = name
+		row.Data = core.Data(profile)
+		_, e = tx.Put("users", row, row.Version)
+		return e
+	})
 }
 
 // verifyAndRegister runs under a row lock on the code, so concurrent guesses

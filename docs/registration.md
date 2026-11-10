@@ -2,7 +2,7 @@
 
 微信登录后，小程序用户按三步开通：
 
-1. **填写资料**：填写姓名和手机号，输入短信验证码完成验证。未完成这一步时，除登录、查询授权状态、发送验证码、提交资料、退出登录外，其他业务接口都返回 `403`，`code=ACTIVATION_REQUIRED`，`access.profileRequired=true`，小程序自动回到授权页。
+1. **填写资料**：填写姓名；短信服务已配置时还需填写手机号、输入验证码完成验证。未配置短信的测试环境只填写姓名，不显示手机号和验证码输入框。资料缺失时 `/api/access` 返回 `profileRequired=true`，并通过 `smsRequired` 告知小程序是否需要短信验证。
 2. **扫码登记**：在授权页「扫码登记」扫描服务商或会员给的二维码（或输入 8 位码），按码的类型登记为会员、S1 服务商、S2 推荐官，或绑定为后台创建的服务商本人。登记后状态为「待开通」（`access.status=review`）。
 3. **总部开通**：总部在后台「小程序用户 → 扫码登记」开通后才能使用；被拒绝（`status=rejected`）可扫其他码重新登记。
 
@@ -20,7 +20,7 @@
 | 短信签名 | 阿里云短信控制台审核通过的签名 |
 | 验证码模板 CODE | 验证码类模板，内容须包含 `${code}` 变量 |
 
-四项需同时填写。**短信未配置时不强制第一步**（避免先部署、后配置时所有用户无法使用）；保存配置并重启后才开始要求验证手机号。只有开启演示登录的本地开发环境（`ALLOW_DEMO_LOGIN=true`，正式环境禁止）在未配置短信时会强制第一步，并在接口中直接返回 `debugCode` 供调试；该字段不会写入日志。
+四项需同时填写。**短信未配置时只填写姓名，暂不要求手机号和验证码**；保存完整短信配置并重启后才开始要求验证手机号。测试时保持短信配置为空、`ALLOW_DEMO_LOGIN=false`，即可通过真实微信登录、姓名登记、扫码和总部开通测试完整流程，不会标记虚假的手机号验证状态。只有开启演示登录的本地开发环境（`ALLOW_DEMO_LOGIN=true`，正式环境禁止）在未配置短信时仍走模拟短信验证，并在接口中返回 `debugCode` 供调试；该字段不会写入日志。
 
 规则：
 
@@ -33,9 +33,9 @@
 
 | 方法 | 路径 | 说明 |
 | --- | --- | --- |
-| GET | `/api/access` | 返回授权状态 `status`（pending 未登记 / review 待开通 / rejected / active / provider / disabled / unbound）和 `profileRequired`；资料未完成时附带已填的 `name`、`phone` 供预填 |
+| GET | `/api/access` | 返回授权状态 `status`（pending 未登记 / review 待开通 / rejected / active / provider / disabled / unbound）、`profileRequired`、`smsRequired`；资料未完成时附带已填的 `name`、`phone` 供预填 |
 | POST | `/api/access/sms` | `{phone}`，发送验证码，返回 `expiresIn`、`resendIn` |
-| POST | `/api/access/profile` | `{name, phone, code}`，校验验证码并保存姓名和手机号，返回新的授权状态 |
+| POST | `/api/access/profile` | `smsRequired=true` 时提交 `{name, phone, code}`；否则只提交 `{name}`，保留已有手机号及验证记录，返回新的授权状态 |
 | POST | `/api/access/join` | `{code, method}` 扫码登记（method 为 scan / code）；需已完成第一步，返回待开通状态 |
 
 上线前请在微信公众平台更新《小程序隐私保护指引》，声明收集姓名和手机号的用途。

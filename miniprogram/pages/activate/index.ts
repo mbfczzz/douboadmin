@@ -7,6 +7,7 @@ import {
   errorMessage,
   AuthCancelledError,
   cancelled,
+  RequestError,
 } from "../../utils/api";
 import {
   accessStatus,
@@ -136,7 +137,7 @@ Page({
   },
   async join(code: string, method: "scan" | "code") {
     if (this.data.busy || !this.data.logged) return;
-    this.setData({ busy: true });
+    this.setData({ busy: true, code });
     try {
       const status = await request<AccessStatus>("/access/join", "POST", {
         code,
@@ -148,7 +149,10 @@ Page({
       if (status.active) this.enter();
       else wx.showToast({ title: "已登记，等待总部开通", icon: "none" });
     } catch (e) {
-      if (!this.destroyed) error(e);
+      if (!this.destroyed) {
+        if (e instanceof RequestError && e.status === 403) await this.load();
+        if (!this.destroyed) error(e);
+      }
     } finally {
       if (!this.destroyed) this.setData({ busy: false });
     }

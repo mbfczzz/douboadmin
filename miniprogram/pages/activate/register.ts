@@ -64,16 +64,16 @@ export async function sendCode(page: Register) {
 export async function register(page: Register) {
   const { name, phone, smsCode } = page.data;
   if (!name.trim()) return void error(new Error("请填写姓名"));
-  if (!validPhone(phone.trim()))
+  const sms = page.data.status?.smsRequired !== false;
+  if (sms && !validPhone(phone.trim()))
     return void error(new Error("请输入 11 位手机号"));
-  if (!/^[0-9]{6}$/.test(smsCode))
+  if (sms && !/^[0-9]{6}$/.test(smsCode))
     return void error(new Error("请输入 6 位验证码"));
   page.setData({ busy: true });
   try {
     const status = await request<AccessStatus>("/access/profile", "POST", {
       name: name.trim(),
-      phone: phone.trim(),
-      code: smsCode,
+      ...(sms ? { phone: phone.trim(), code: smsCode } : {}),
     });
     if (page.destroyed) return;
     stopCountdown(page);

@@ -2,9 +2,10 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { collectDependencies } from "./dependencies.mjs";
+import { sourceBytes } from "./source-bytes.mjs";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const graph = collectDependencies(root);
-const sum = (files) => files.reduce((n, p) => n + fs.statSync(p).size, 0);
+const sum = (files) => files.reduce((n, p) => n + sourceBytes(p), 0);
 const vendor = graph.files.filter((p) =>
   p.includes(path.sep + "node_modules" + path.sep),
 );
@@ -12,12 +13,13 @@ const report = {
   applicationSourceBytes: sum(graph.files.filter((p) => !vendor.includes(p))),
   referencedVendorSourceBytes: sum(vendor),
   referencedSourceBytes: sum(graph.files),
+  onDiskSourceBytes: graph.files.reduce((n, p) => n + fs.statSync(p).size, 0),
   files: graph.files.length,
   packages: graph.packages,
   externalResources: graph.external.length,
 };
 console.log(
-  "Mini-program referenced source estimate (NOT final WeChat package):",
+  "Mini-program LF-normalized referenced source estimate (NOT final WeChat package):",
   JSON.stringify(report),
 );
 // 512 KiB at launch. Raised to 544 KiB in Nov 2026 for intentional growth:

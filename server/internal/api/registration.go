@@ -45,12 +45,14 @@ func (a *Server) userDisabled(ctx context.Context, id string) (bool, error) {
 // accessView is what the mini-program needs to pick the next step.
 type accessView struct {
 	core.Access
-	ProfileRequired bool   `json:"profileRequired"`
-	Name            string `json:"name,omitempty"`
-	Phone           string `json:"phone,omitempty"`
+	ProfileRequired           bool   `json:"profileRequired"`
+	PhoneVerificationRequired bool   `json:"smsRequired"`
+	Name                      string `json:"name,omitempty"`
+	Phone                     string `json:"phone,omitempty"`
 }
 
 const errProfileRequired = "请先填写姓名并验证手机号"
+const errNameRequired = "请先填写姓名"
 
 func (a *Server) accessFor(ctx context.Context, id string) (accessView, error) {
 	flags, e := a.userState(ctx, id)
@@ -61,9 +63,15 @@ func (a *Server) accessFor(ctx context.Context, id string) (accessView, error) {
 	if e != nil {
 		return accessView{}, e
 	}
-	v := accessView{Access: access, ProfileRequired: !flags.Registered}
+	phoneRequired := a.registrationRequired()
+	// Skipping unavailable SMS must not skip a new user's name. Existing
+	// active accounts retain access while SMS is unavailable.
+	v := accessView{Access: access, ProfileRequired: !flags.Registered || !access.Active && strings.TrimSpace(flags.Name) == "", PhoneVerificationRequired: phoneRequired}
 	if v.ProfileRequired {
 		v.Active, v.Message, v.Name, v.Phone = false, errProfileRequired, flags.Name, flags.Phone
+		if !phoneRequired {
+			v.Message = errNameRequired
+		}
 	}
 	return v, nil
 }

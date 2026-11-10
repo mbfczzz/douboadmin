@@ -25,7 +25,7 @@ func (a *Server) allowActivation(w http.ResponseWriter, r *http.Request, user st
 		return true
 	}
 	if !registered {
-		reply(w, 403, map[string]any{"code": "ACTIVATION_REQUIRED", "error": errProfileRequired, "access": accessView{Access: core.Access{Status: "pending"}, ProfileRequired: true}})
+		reply(w, 403, map[string]any{"code": "ACTIVATION_REQUIRED", "error": errProfileRequired, "access": accessView{Access: core.Access{Status: "pending"}, ProfileRequired: true, PhoneVerificationRequired: a.registrationRequired()}})
 		return false
 	}
 	access, e := a.Partners.Access(r.Context(), user)
@@ -99,8 +99,12 @@ func (a *Server) registeredOnly(w http.ResponseWriter, r *http.Request) bool {
 		dbError(w, e)
 		return false
 	}
-	if !flags.Registered {
-		reply(w, 403, map[string]string{"code": "PROFILE_REQUIRED", "error": errProfileRequired})
+	if !flags.Registered || strings.TrimSpace(flags.Name) == "" {
+		message := errProfileRequired
+		if !a.registrationRequired() {
+			message = errNameRequired
+		}
+		reply(w, 403, map[string]string{"code": "PROFILE_REQUIRED", "error": message})
 		return false
 	}
 	return true

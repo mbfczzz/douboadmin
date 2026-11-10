@@ -129,9 +129,9 @@ func TestProductionSendsRealSMSOnly(t *testing.T) {
 	if w := call(a, "POST", "/api/access/sms", user, "", map[string]string{"phone": "13900139003"}); w.Code != 503 {
 		t.Fatal("production without SMS", w.Code, w.Body.String())
 	}
-	// Until SMS is configured nobody is held at the registration step.
-	if v := accessOf(t, a, user); v.ProfileRequired {
-		t.Fatal("registration enforced without SMS", v)
+	// Without SMS a missing name still needs input, but no phone verification.
+	if v := accessOf(t, a, user); !v.ProfileRequired || v.PhoneVerificationRequired {
+		t.Fatal("incorrect registration step without SMS", v)
 	}
 	sender := &fakeSMS{}
 	a.SMS = sender
