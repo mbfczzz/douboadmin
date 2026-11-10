@@ -62,10 +62,9 @@ test("分享码 tabs follow the role", async ({ page }) => {
       .click();
     const dialog = page.getByRole("dialog", { name: "分享码" });
     await expect(dialog.getByRole("tab")).toHaveText([
-      "会员开通码",
-      "S1 邀请码",
-      "S2 邀请码",
-      "服务商绑定码",
+      "S1 服务商邀请码",
+      "S2 推荐官邀请码",
+      "子账号开通码",
     ]);
     await expect(dialog.locator(".share-qr")).toBeVisible();
     expect(
@@ -84,22 +83,25 @@ test("分享码 tabs follow the role", async ({ page }) => {
     .click();
   let dialog = page.getByRole("dialog", { name: "分享码" });
   await expect(dialog.getByRole("tab")).toHaveText([
-    "会员开通码",
-    "S2 邀请码",
-    "服务商绑定码",
+    "S2 推荐官邀请码",
+    "子账号开通码",
   ]);
   await dialog.getByRole("button", { name: "关闭" }).first().click();
   await row(page, "质检推荐官")
     .getByRole("button", { name: "分享码", exact: true })
     .click();
   dialog = page.getByRole("dialog", { name: "分享码" });
-  await expect(dialog.getByRole("tab")).toHaveText([
-    "会员开通码",
-    "服务商绑定码",
-  ]);
-  await dialog.getByRole("tab", { name: "服务商绑定码" }).click();
-  await expect(dialog.locator(".share-code")).toHaveText("BIND-2345");
-  await expect(dialog.locator(".code-info")).toContainText("一次有效");
+  await expect(dialog.getByRole("tab")).toHaveCount(0);
+  await expect(
+    dialog.getByRole("heading", { name: "子账号开通码" }),
+  ).toBeVisible();
+  await dialog.locator(".owner-bind > summary").click();
+  await expect(dialog.locator(".owner-bind .share-code")).toHaveText(
+    "BIND-2345",
+  );
+  await expect(dialog.locator(".owner-bind .code-info")).toContainText(
+    "一次有效",
+  );
 });
 
 test("the platform picks S1 or S2 under a 分公司; an S1 adds S2", async ({

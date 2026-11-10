@@ -36,7 +36,7 @@ for (const width of [1440, 390, 320]) {
 
     const codes = await open("分享码", "分享码");
     await codes.getByRole("button", { name: "重置", exact: true }).click();
-    await audit("重置会员开通码");
+    await audit("重置S1服务商邀请码");
     await closeTop(page);
     for (const action of ["停用", "解绑"]) {
       await codes.getByRole("button", { name: action, exact: true }).click();

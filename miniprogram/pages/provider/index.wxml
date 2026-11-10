@@ -11,6 +11,7 @@
       <text wx:for="{{tabs}}" wx:key="key" class="{{tab===item.key?'on':''}}" data-tab="{{item.key}}" bindtap="switchTab">{{item.label}}</text>
     </view>
     <image class="provider-qr" src="{{shown.qr}}" mode="aspectFit" show-menu-by-longpress />
+    <text wx:if="{{center}}" class="biz-note">归属服务商：{{center.name}}</text>
     <view class="provider-code"><text>{{shown.code}}</text><text class="biz-link" bindtap="copy" data-text="{{shown.raw}}">复制</text></view>
     <text class="biz-note">{{note}}</text>
     <button class="biz-action" bindtap="save">保存二维码</button>

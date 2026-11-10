@@ -57,7 +57,4 @@
   .provider-tree-actions button {
     min-height: 44px;
   }
-  .provider-tree-children::before {
-    display: none;
-  }
 }

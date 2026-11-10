@@ -49,8 +49,9 @@
 }
 .provider-tabs {
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
-  gap: 24px;
+  gap: 8px 16px;
   margin-bottom: 14px;
   color: #a0a8ac;
   font-size: 14px;

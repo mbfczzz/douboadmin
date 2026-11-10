@@ -57,26 +57,26 @@ test("each provider function opens its own readable, contained dialog", async ({
           await panel.evaluate((el) => el.scrollWidth <= el.clientWidth + 1),
         ).toBe(true);
         if (index === 1) {
-          // A 分公司 has every code: 会员, S1 and S2 invites and its bind code.
+          // Business invitations and opening codes are separate from owner binding.
           await expect(panel.getByRole("tab")).toHaveText([
-            "会员开通码",
-            "S1 邀请码",
-            "S2 邀请码",
-            "服务商绑定码",
+            "S1 服务商邀请码",
+            "S2 推荐官邀请码",
+            "子账号开通码",
           ]);
+          await panel.getByRole("tab", { name: "子账号开通码" }).click();
           await expect(panel.locator(".share-code")).toHaveText("ABCD-2345");
           await expect(panel.locator(".code-info")).toContainText(
-            "用户扫码登记为会员，总部开通后生效",
+            "用户扫码登记为子账号（会员），直接归属本服务商，总部开通后生效",
           );
-          await panel.getByRole("tab", { name: "S1 邀请码" }).click();
+          await panel.getByRole("tab", { name: "S1 服务商邀请码" }).click();
           await expect(panel.locator(".share-code")).toHaveText("KMNP-2345");
           await expect(panel.locator(".code-info")).toContainText(
-            "新用户扫码登记为 S1 服务商，总部开通后生效",
+            "新用户扫码登记为本服务商下的 S1 服务商，总部开通后生效",
           );
-          await panel.getByRole("tab", { name: "S2 邀请码" }).click();
+          await panel.getByRole("tab", { name: "S2 推荐官邀请码" }).click();
           await expect(panel.locator(".share-code")).toHaveText("WXYZ-6789");
           // An admin-made provider shows the account its bind code linked.
-          await panel.getByRole("tab", { name: "服务商绑定码" }).click();
+          await panel.locator(".owner-bind > summary").click();
           await expect(panel.locator(".bound-owner")).toContainText(
             "华东负责人",
           );
@@ -84,7 +84,8 @@ test("each provider function opens its own readable, contained dialog", async ({
             panel.getByRole("button", { name: "解除绑定" }),
           ).toBeVisible();
           await expect(panel).not.toContainText("名额");
-          await panel.getByRole("tab", { name: "S1 邀请码" }).click();
+          await panel.locator(".owner-bind > summary").click();
+          await panel.getByRole("tab", { name: "S1 服务商邀请码" }).click();
         }
         if (width === 390) {
           const nativeButtons = await panel
@@ -115,9 +116,9 @@ test("provider function dialogs keep their record workflows", async ({
 }) => {
   await row(page).getByRole("button", { name: "分享码", exact: true }).click();
   const share = page.getByRole("dialog", { name: "分享码", exact: true });
-  await share.getByRole("tab", { name: "S2 邀请码" }).click();
+  await share.getByRole("tab", { name: "S2 推荐官邀请码" }).click();
   await share.getByRole("button", { name: "重置", exact: true }).click();
-  const reset = page.getByRole("dialog", { name: "重置S2 邀请码？" });
+  const reset = page.getByRole("dialog", { name: "重置S2 推荐官邀请码？" });
   await expect(reset).toContainText("已登记的会员和服务商不受影响");
   await reset.getByRole("button", { name: "取消", exact: true }).click();
   await share

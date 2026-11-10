@@ -60,7 +60,7 @@ test("scans only register; 总部 opens or rejects; members can be suspended", a
   expect(invited.status()).toBe(200);
 
   let row = await registration(page, member.userId);
-  await expect(row).toContainText("会员开通码");
+  await expect(row).toContainText("子账号开通码");
   await row.getByRole("button", { name: "开通", exact: true }).click();
   await answerAsk(page, true);
   expect((await page.request.get("/api/templates", { headers })).status()).toBe(

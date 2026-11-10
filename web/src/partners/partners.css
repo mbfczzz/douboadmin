@@ -29,23 +29,6 @@
 .provider-tree-row:hover {
   background: var(--surface-subtle);
 }
-.provider-tree-children {
-  position: relative;
-}
-/* Guide line under the parent's toggle so nesting reads at a glance. */
-.provider-tree-children::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 28px;
-  left: calc(
-    var(--tree-inset) + min(var(--tree-depth), 5) * var(--tree-indent) +
-      var(--tree-control) / 2
-  );
-  width: 1px;
-  background: var(--line-strong);
-  pointer-events: none;
-}
 .provider-tree-identity b {
   display: block;
   color: var(--ink-strong);

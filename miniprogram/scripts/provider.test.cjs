@@ -39,17 +39,20 @@ test("a 分公司 switches between its three codes and sees what is below it", a
   assert.equal(page.data.roleName, "分公司");
   assert.deepEqual(
     JSON.parse(JSON.stringify(page.data.tabs.map((t) => t.label))),
-    ["会员开通码", "S1 邀请码", "S2 邀请码"],
+    ["S1 服务商邀请码", "S2 推荐官邀请码", "子账号开通码"],
   );
-  assert.equal(page.data.shown.code, "ABCD-2345");
+  assert.equal(page.data.shown.code, "KMNP-2345");
   page.switchTab({ currentTarget: { dataset: { tab: "s2" } } });
   assert.equal(page.data.shown.code, "WXYZ-6789");
   assert.match(page.data.note, /S2 推荐官/);
+  page.switchTab({ currentTarget: { dataset: { tab: "member" } } });
+  assert.equal(page.data.shown.code, "ABCD-2345");
+  assert.match(page.data.note, /直接归属当前服务商/);
   assert.equal(page.data.children[0].roleName, "S1 服务商");
   assert.equal(page.data.children[0].date, "2026-11-10");
 });
 
-test("an S2 has only its 会员开通码", async () => {
+test("an S2 has only its 子账号开通码", async () => {
   const h = harness(),
     page = h.page("provider");
   h.api.request = async () => ({

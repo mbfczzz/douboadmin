@@ -77,7 +77,7 @@ test("a bind still waiting for approval says so", async ({ page }) => {
     .getByRole("button", { name: "分享码", exact: true })
     .click();
   const dialog = page.getByRole("dialog", { name: "分享码", exact: true });
-  await dialog.getByRole("tab", { name: "服务商绑定码" }).click();
+  await dialog.locator(".owner-bind > summary").click();
   await expect(dialog.locator(".bound-owner")).toContainText(
     "已扫码登记，等待总部开通",
   );

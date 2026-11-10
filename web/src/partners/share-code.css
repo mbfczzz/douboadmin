@@ -12,6 +12,27 @@
 .share-body {
   padding: 22px;
 }
+.share-title {
+  margin: 0 0 6px;
+  font-size: 16px;
+}
+.share-owner {
+  margin: 0 0 20px;
+  overflow-wrap: anywhere;
+}
+.owner-bind {
+  margin: 0 0 24px;
+  padding: 16px 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+.owner-bind > summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+.owner-bind[open] > summary {
+  margin-bottom: 18px;
+}
 .code-view {
   display: flex;
   gap: 24px;
@@ -54,12 +75,12 @@
   gap: 6px;
 }
 @media (max-width: 720px) {
-  /* Four codes on a phone: keep the gaps and scroll sideways if needed. */
+  /* Keep the three business code choices readable on narrow screens. */
   .share-tabs {
-    gap: 16px;
-    padding: 0 16px;
-    overflow-x: auto;
-    scrollbar-width: none;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    padding: 8px 16px;
+    overflow: visible;
   }
   .share-tabs button {
     flex-shrink: 0;

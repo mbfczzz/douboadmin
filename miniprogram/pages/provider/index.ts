@@ -9,9 +9,13 @@ const roles: Record<string, string> = {
   s2: "S2 推荐官",
 };
 const tabs = [
-  ["member", "会员开通码", "用户扫码登记为你的会员"],
-  ["s1", "S1 邀请码", "新用户扫码登记为你的 S1 服务商"],
-  ["s2", "S2 邀请码", "新用户扫码登记为你的 S2 推荐官"],
+  ["s1", "S1 服务商邀请码", "新用户扫码登记为你的 S1 服务商"],
+  ["s2", "S2 推荐官邀请码", "新用户扫码登记为你的 S2 推荐官"],
+  [
+    "member",
+    "子账号开通码",
+    "用户扫码登记为子账号（会员），直接归属当前服务商",
+  ],
 ] as const;
 const pretty = (code: string) => code.slice(0, 4) + "-" + code.slice(4);
 
@@ -24,7 +28,7 @@ Page({
     center: null as Center | null,
     roleName: "",
     tabs: [] as { key: string; label: string }[],
-    tab: "member",
+    tab: "",
     note: "",
     shown: { code: "", raw: "", qr: "" },
     children: [] as (Child & { roleName: string; date: string })[],
@@ -119,7 +123,9 @@ Page({
   show(tab: string) {
     const c = this.data.center;
     if (!c) return;
-    const found = tabs.find(([key]) => key === tab && c.codes[key]) || tabs[0];
+    const available = tabs.filter(([key]) => c.codes[key]);
+    const found = available.find(([key]) => key === tab) || available[0];
+    if (!found) return;
     const code = c.codes[found[0]];
     if (!code) return;
     this.setData({

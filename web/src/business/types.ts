@@ -258,12 +258,12 @@ const roles: Record<string, string> = {
   member: "会员",
 };
 export const roleName = (role?: string) => roles[role || ""] || "服务商";
-// The code a registration used ("" is a provider's 会员开通码).
+// The code a registration used ("" is a provider's 子账号开通码).
 const codeKinds: Record<string, string> = {
   promo: "推广码",
-  s1: "S1 邀请码",
-  s2: "S2 邀请码",
-  bind: "服务商绑定码",
+  s1: "S1 服务商邀请码",
+  s2: "S2 推荐官邀请码",
+  bind: "负责人绑定码",
 };
 export const codeKindName = (kind?: string) =>
-  codeKinds[kind || ""] || "会员开通码";
+  codeKinds[kind || ""] || "子账号开通码";
