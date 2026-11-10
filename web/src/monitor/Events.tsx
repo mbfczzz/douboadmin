@@ -15,6 +15,8 @@ export default function Events({
   ack,
   tab,
   setTab,
+  pagination,
+  pending: pendingTotal,
 }: {
   logs: Resource<Row<Event>[]>;
   alerts: Resource<Row<Event>[]>;
@@ -22,15 +24,19 @@ export default function Events({
   // Controlled by the page so the health summary can open a tab.
   tab: string;
   setTab: (tab: string) => void;
+  pagination: { page: number; total: number; onChange: (page: number) => void };
+  pending?: number;
 }) {
   const [busy, setBusy] = useState("");
   const resource = tab === "logs" ? logs : alerts,
     rows = [...(resource.data || [])].sort((a, b) =>
       latest(b).localeCompare(latest(a)),
     ),
-    pending = (alerts.data || []).filter((r) => !r.data.acknowledged).length,
+    pending =
+      pendingTotal ??
+      (alerts.data || []).filter((r) => !r.data.acknowledged).length,
     counts: Record<string, number | undefined> = {
-      logs: logs.data?.length,
+      logs: tab === "logs" ? pagination.total : undefined,
       alerts: alerts.data ? pending : undefined,
     };
   return (
@@ -64,6 +70,7 @@ export default function Events({
       {resource.data && (
         <Table
           rows={rows}
+          pagination={pagination}
           empty={tab === "logs" ? "暂无错误日志" : "暂无异常告警"}
           id={(r) => r.id}
           columns={[

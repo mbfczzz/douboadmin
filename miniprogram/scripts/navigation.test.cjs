@@ -87,7 +87,7 @@ test("return remains usable on clients without route animation events", async ()
   await h.api.returnAfterTransition("/pages/mine/index");
 });
 
-test("returning to templates preserves rendered items and expanded results while refreshing", async () => {
+test("returning to templates preserves rendered items during paged refresh", async () => {
   const h = harness(),
     page = h.page("templates");
   const rows = Array.from({ length: 7 }, (_, i) => ({
@@ -108,7 +108,7 @@ test("returning to templates preserves rendered items and expanded results while
   complete(rows);
   await refresh;
   assert.equal(page.data.columns.flatMap((c) => c.items).length, 7);
-  assert.equal(page.data.visibleCount, 8);
+  assert.equal(page.data.visibleCount, 7);
   h.api.request = async () => {
     throw new Error("offline");
   };

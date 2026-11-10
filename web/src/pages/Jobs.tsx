@@ -13,11 +13,15 @@ import type { PageProps } from "../navigation";
 // The detail view loads when a task is opened.
 const GenerationDetail = lazy(() => import("../generation/GenerationDetail"));
 export default function Jobs({ notify }: PageProps) {
-  const resource = useResource<Job[]>("/admin/jobs", 15000);
-  const jobs = resource.data || [];
   const [filter, setFilter] = useRememberedState("jobs.status", "all"),
     [search, setSearch] = useRememberedState("jobs.query", ""),
     [detail, setDetail] = useState<Job | null>(null);
+  const [page, setPage] = useState(1);
+  const resource = useResource<{ items: Job[]; total: number; page: number }>(
+    `/admin/jobs?page=${page}&status=${filter === "all" ? "" : filter}&q=${encodeURIComponent(search)}`,
+    15000,
+  );
+  const jobs = resource.data?.items || [];
   const act = async (kind: JobAction, job: Job) => {
     if (kind === "detail") return setDetail(job);
     try {
@@ -29,11 +33,7 @@ export default function Jobs({ notify }: PageProps) {
       notify((e as Error).message, "error");
     }
   };
-  const filteredJobs = jobs.filter(
-    (j) =>
-      (filter === "all" || j.status === filter) &&
-      (j.input.prompt.includes(search) || j.id.includes(search)),
-  );
+  const filteredJobs = jobs;
   return (
     <>
       <PageHeader
@@ -53,13 +53,27 @@ export default function Jobs({ notify }: PageProps) {
             (v) => [v, v === "all" ? "全部任务" : stateText[v]] as const,
           )}
           value={filter}
-          onChange={setFilter}
+          onChange={(value) => {
+            setFilter(value);
+            setPage(1);
+          }}
           search={search}
-          onSearch={setSearch}
+          onSearch={(value) => {
+            setSearch(value);
+            setPage(1);
+          }}
           placeholder="搜索提示词或任务编号"
         />
         {filteredJobs.length ? (
-          <JobTable jobs={filteredJobs} onAction={(k, j) => void act(k, j)} />
+          <JobTable
+            jobs={filteredJobs}
+            pagination={{
+              page,
+              total: resource.data?.total || 0,
+              onChange: setPage,
+            }}
+            onAction={(k, j) => void act(k, j)}
+          />
         ) : !resource.data || resource.error ? null : (
           <Empty
             text={jobs.length ? "暂无匹配的任务" : "暂无生成任务"}

@@ -91,3 +91,5 @@
   font-weight: 400;
   color: #a4acb1;
 }
+
+@import "../../styles/job-pagination.wxss";

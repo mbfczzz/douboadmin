@@ -15,9 +15,10 @@
     <text class="biz-note">{{note}}</text>
     <button class="biz-action" bindtap="save">保存二维码</button>
   </view>
-  <block wx:if="{{center&&center.children}}">
-    <text class="provider-section">下级服务商 · {{children.length}}</text>
-    <view wx:if="{{!children.length}}" class="biz-card biz-note">还没有下级服务商</view>
+  <block wx:if="{{center&&center.role!=='s2'}}">
+    <text class="provider-section">下级服务商 · {{childrenTotal}}</text>
+    <view wx:if="{{childrenError}}" class="biz-error" bindtap="moreChildren">{{childrenError}} · 点击重试</view>
+    <view wx:if="{{!children.length&&!childrenLoading&&!childrenError}}" class="biz-card biz-note">还没有下级服务商</view>
     <view wx:for="{{children}}" wx:key="id" class="biz-card provider-child">
       <view class="provider-title"><text class="biz-list-title">{{item.name}}</text><text class="provider-level {{item.role}}">{{item.roleName}}</text><text wx:if="{{item.status!=='active'}}" class="provider-off">{{item.status==='pending'?'待开通':'已停用'}}</text></view>
       <view class="provider-facts">
@@ -26,6 +27,7 @@
       </view>
       <text class="biz-note">后台账号 {{item.account||'未开通'}}{{item.scanned?' · 扫码登记':''}}</text>
     </view>
+    <button wx:if="{{children.length<childrenTotal||childrenLoading}}" class="biz-action biz-secondary" loading="{{childrenLoading}}" disabled="{{childrenLoading}}" bindtap="moreChildren">加载更多下级</button>
   </block>
   <view wx:if="{{center}}" class="biz-card provider-login">
     <text class="biz-heading">管理后台登录</text>

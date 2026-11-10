@@ -25,6 +25,6 @@
           >{{item.data.title}}</text
         ><text class="biz-small">{{item.time}}</text></view
       ><text class="biz-note">{{item.data.content}}</text></view
-    ></block
+    ><button wx:if="{{total>page*20}}" class="biz-action biz-secondary" bindtap="more" disabled="{{loading}}" loading="{{loading}}">加载更多</button></block
   ></view
 >

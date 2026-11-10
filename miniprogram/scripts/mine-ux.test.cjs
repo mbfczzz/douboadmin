@@ -19,7 +19,7 @@ test("My works refresh while generation is pending and stop after leaving the pa
   const page = h.page("mine");
   let running = 1;
   h.api.request = async (p) =>
-    p === "/jobs"
+    p.startsWith("/jobs")
       ? []
       : {
           profile: { version: 1, data: { nickname: "小豆", bio: "" } },
@@ -27,6 +27,7 @@ test("My works refresh while generation is pending and stop after leaving the pa
           running,
           favorites: 0,
         };
+  h.wx.request = async o => o.success({ statusCode: 200, data: await h.api.request(o.url.split("/api")[1]) });
   await page.load();
   assert.equal(timers.size, 1);
   page.edit();

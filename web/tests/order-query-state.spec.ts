@@ -25,8 +25,8 @@ for (const issued of [false, true]) {
         },
       },
     };
-    await page.route("**/api/admin/orders", (route) =>
-      route.fulfill({ json: [row] }),
+    await page.route("**/api/admin/orders?*", (route) =>
+      route.fulfill({ json: { items: [row], page: 1, size: 20, total: 1 } }),
     );
     let probes = 0;
     await page.route(
@@ -73,8 +73,8 @@ test("an issued order query error remains visible without reporting payment succ
       },
     },
   };
-  await page.route("**/api/admin/orders", (route) =>
-    route.fulfill({ json: [row] }),
+  await page.route("**/api/admin/orders?*", (route) =>
+    route.fulfill({ json: { items: [row], page: 1, size: 20, total: 1 } }),
   );
   await page.route("**/api/admin/orders/query-error-order/refresh", (route) =>
     route.fulfill({

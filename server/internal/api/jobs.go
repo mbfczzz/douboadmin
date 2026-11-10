@@ -7,6 +7,10 @@ import (
 )
 
 func (a *Server) jobs(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Query().Has("page") {
+		a.pagedJobs(w, r, false)
+		return
+	}
 	id := identity(r)
 	user := id.ID
 	if id.Role == "admin" {

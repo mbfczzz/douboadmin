@@ -18,6 +18,8 @@ import {
 } from "../../services/payment-status";
 import { ledgerView } from "../../services/wallet-ledger";
 import type { Ledger } from "../../services/wallet-ledger";
+import { financePage } from "../../services/finance-page";
+import type { FinancePage } from "../../services/finance-page";
 import { walletData, loggedOut } from "./state";
 import { checkout } from "./checkout";
 import {
@@ -27,6 +29,7 @@ import {
 Page({
   data: walletData,
   revision: 0,
+  loadedLedgerPage: 1,
   destroyed: false,
   visible: false,
   watching: "",
@@ -67,6 +70,7 @@ Page({
     if (owner && owner !== sessionUserId()) {
       this.stopWatching?.();
       this.watching = "";
+      this.loadedLedgerPage = 1;
       this.setData({ ...loggedOut, loading: true, needsLogin: false });
     }
     if (!hasSession()) {
@@ -74,11 +78,18 @@ Page({
       return;
     }
     try {
-      const [info, rows] = await Promise.all([
+      this.setData({ loading: true });
+      const [info, result] = await Promise.all([
         request<WalletInfo>("/wallet"),
-        request<Row<Ledger>[]>("/wallet/ledger").catch(() => undefined),
+        request<FinancePage<Ledger> | Row<Ledger>[]>(
+          `/wallet/ledger?page=${this.data.ledgerPage}&size=20`,
+        ).catch(() => undefined),
       ]);
       if (revision !== this.revision) return;
+      const ledger = result
+        ? financePage(result, this.data.ledgerPage)
+        : undefined;
+      if (ledger) this.loadedLedgerPage = ledger.page;
       this.setData({
         info,
         products: (info.virtualProducts || []).map((p) => ({
@@ -96,13 +107,21 @@ Page({
         held: points(info.wallet.heldUnits),
         allowed: canRecharge(info),
         needsLogin: false,
-        error: rows ? "" : "余额已更新，积分流水暂时无法加载，点击重试",
-        ledger: rows ? rows.map(ledgerView) : this.data.ledger,
+        error: ledger ? "" : "余额已更新，积分流水暂时无法加载，点击重试",
+        ledger: ledger ? ledger.items.map(ledgerView) : this.data.ledger,
+        ...(ledger
+          ? {
+              ledgerPage: ledger.page,
+              ledgerPages: Math.max(1, Math.ceil(ledger.total / ledger.size)),
+              ledgerTotal: ledger.total,
+            }
+          : { ledgerPage: this.loadedLedgerPage }),
       });
       this.estimate();
       this.trackPayment(pendingPayment(info.wallet.userId));
     } catch (e) {
       if (revision === this.revision) {
+        this.setData({ ledgerPage: this.loadedLedgerPage });
         if (!hasSession()) this.setData(loggedOut);
         else this.setData({ error: (e as Error).message });
       }
@@ -150,6 +169,12 @@ Page({
         });
       },
     );
+  },
+  async changeLedgerPage(e: WechatMiniprogram.TouchEvent) {
+    const page = this.data.ledgerPage + Number(e.currentTarget.dataset.step);
+    if (this.data.loading || page < 1 || page > this.data.ledgerPages) return;
+    this.setData({ ledgerPage: page });
+    await this.load();
   },
   input(e: WechatMiniprogram.Input) {
     if (this.data.busy || this.data.pendingOrderId) return;

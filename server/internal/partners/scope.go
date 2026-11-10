@@ -3,6 +3,7 @@ package partners
 import (
 	"context"
 	"doubo/server/internal/core"
+	"doubo/server/internal/store"
 	"encoding/json"
 	"errors"
 	"slices"
@@ -10,7 +11,7 @@ import (
 
 // Subtree returns the provider itself and every descendant at any depth.
 func (s *Service) Subtree(ctx context.Context, root string) ([]string, error) {
-	rows, err := s.Store.List(ctx, "partners", "")
+	rows, err := store.AllRecords(ctx, s.Store, "partners", "")
 	if err != nil {
 		return nil, err
 	}

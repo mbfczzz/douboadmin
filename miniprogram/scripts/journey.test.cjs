@@ -49,6 +49,7 @@ test("temporary task refresh failure keeps the previously displayed work", async
   await h.api.signIn();
   const page = h.page("tasks");
   h.api.request = async () => [job()];
+  h.wx.request = async o => {try{o.success({statusCode:200,data:await h.api.request(o.url.split("/api")[1])});}catch{o.fail({errMsg:"offline"});}};
   await page.load();
   h.api.request = async () => {
     throw new Error("offline");
@@ -80,10 +81,7 @@ test("returning from a template refreshes changes to favorites", async () => {
   await h.api.signIn();
   const page = h.page("library");
   let active = true;
-  h.api.request = async (path) =>
-    path === "/favorites"
-      ? [{ data: { templateId: "template-1", active } }]
-      : [{ id: "template-1", data: { cover: "/cover.jpg" } }];
+  h.api.request = async () => ({items:active ? [{id:"template-1",data:{cover:"/cover.jpg"}}] : [],unavailable:[],total:active?1:0});
   await page.load();
   assert.equal(page.data.templates.length, 1);
   active = false;

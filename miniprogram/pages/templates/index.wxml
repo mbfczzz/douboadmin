@@ -73,5 +73,5 @@
       </view>
     </view>
   </view>
-  <view class="end" wx:if="{{items.length>visibleCount}}" bindtap="more">查看更多 →</view>
+  <view class="end" wx:if="{{total>page*4}}" bindtap="more">{{loading?'加载中…':'查看更多 →'}}</view>
 </view>

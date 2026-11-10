@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"doubo/server/internal/core"
+	"doubo/server/internal/store"
 	"encoding/json"
 	"errors"
 )
@@ -11,7 +12,7 @@ func (a *Server) keepSuperAdmin(ctx context.Context, id string, current core.Adm
 	if current.Role != "super_admin" || (nextRole == "super_admin" && !disabled && !archived) {
 		return nil
 	}
-	rows, err := a.Store.List(ctx, "admin_accounts", "")
+	rows, err := store.AllRecords(ctx, a.Store, "admin_accounts", "")
 	if err != nil {
 		return err
 	}

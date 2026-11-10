@@ -67,6 +67,10 @@ func (a *Server) partnerList(ns string) http.HandlerFunc {
 	}
 }
 func (a *Server) partnerTree(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Query().Has("page") {
+		a.providerTreePage(w, r)
+		return
+	}
 	rows, e := a.Partners.Tree(r.Context())
 	scope, se := a.partnerScope(r)
 	if e == nil && se != nil {

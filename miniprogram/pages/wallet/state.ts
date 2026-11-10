@@ -27,6 +27,9 @@ export const walletData = {
   pendingOrderId: "",
   paymentWaiting: false,
   paymentNotice: "",
+  ledgerPage: 1,
+  ledgerPages: 1,
+  ledgerTotal: 0,
   ledger: [] as Array<{
     id: string;
     title: string;

@@ -6,14 +6,8 @@ import {
   chooseReferenceFile,
 } from "../../utils/api";
 import type { Row, Asset } from "../../services/types";
-import type { mixState } from "./state";
 
-interface Editor {
-  data: typeof mixState;
-  assetRevision: number;
-  revision: number;
-  setData(data: Record<string, unknown>): void;
-}
+import type { MixEditor as Editor } from "../../services/page-contracts";
 
 export async function addAssets(page: Editor) {
   if (page.data.uploading || page.data.restoring || page.data.busy) return;

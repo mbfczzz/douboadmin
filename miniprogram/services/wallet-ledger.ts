@@ -2,13 +2,8 @@ import { date } from "../utils/ui";
 import { points } from "./business";
 import type { Row } from "./types";
 
-export interface Ledger {
-  kind: string;
-  availableDelta: number;
-  heldDelta: number;
-  note: string;
-  availableAfter: number;
-}
+import type { Ledger } from "./ledger-types";
+export type { Ledger } from "./ledger-types";
 
 const labels: Record<string, string> = {
   topup: "充值到账",

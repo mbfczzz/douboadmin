@@ -1,3 +1,4 @@
+import { movePage } from "../../services/list-page";
 import {
   request,
   error,
@@ -9,7 +10,8 @@ import {
   hasSession,
   login,
 } from "../../utils/api";
-import type { Template, Row, Job } from "../../services/types";
+import type { Template, Row } from "../../services/types";
+import { jobPage } from "../../services/job-pages";
 Page({
   data: {
     mode: "favorites",
@@ -25,6 +27,8 @@ Page({
     content: "",
     canSend: false,
     busy: false,
+    page: 1,
+    total: 0,
   },
   loadVersion: 0,
   destroyed: false,
@@ -64,31 +68,30 @@ Page({
     this.setData({ loadError: "", needsLogin: false });
     try {
       if (this.data.mode === "favorites") {
-        const [fav, all] = await Promise.all([
-          request<Row<{ templateId: string; active: boolean }>[]>("/favorites"),
-          request<Row<Template>[]>("/templates"),
-        ]);
+        const result = await request<{
+          items: Row<Template>[];
+          total: number;
+          unavailable?: Row<{ templateId: string; active: boolean }>[];
+        }>(`/favorites/templates?page=${this.data.page}&size=20`);
         if (version !== this.loadVersion) return;
-        const ids = fav
-          .filter((f) => f.data.active)
-          .map((f) => f.data.templateId);
         this.setData({
-          templates: all
-            .filter((t) => ids.includes(t.id))
-            .map((t) => ({
-              ...t,
-              data: { ...t.data, cover: media(t.data.cover) },
-            })),
-          unavailableFavorites: fav.filter(
-            (f) =>
-              f.data.active && !all.some((t) => t.id === f.data.templateId),
-          ),
+          total: result.total,
+          templates: result.items.map((t) => ({
+            ...t,
+            data: { ...t.data, cover: media(t.data.cover) },
+          })),
+          unavailableFavorites: result.unavailable || [],
         });
       }
       if (this.data.mode === "notifications") {
-        const jobs = await request<Job[]>("/jobs");
+        const result = await jobPage(
+          this.data.page,
+          "&excludeChat=true&ended=true",
+        );
+        const jobs = result.items;
         if (version !== this.loadVersion) return;
         this.setData({
+          total: result.total,
           notifications: jobs
             .filter(
               (j) =>
@@ -123,6 +126,12 @@ Page({
     } finally {
       if (!this.destroyed) this.setData({ signingIn: false });
     }
+  },
+  previous() {
+    movePage(this, -1);
+  },
+  next() {
+    movePage(this, 1);
   },
   detail(e: WechatMiniprogram.TouchEvent) {
     openPage(this, {

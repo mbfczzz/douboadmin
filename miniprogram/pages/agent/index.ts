@@ -9,12 +9,16 @@ import {
 import type { Job, Config } from "../../services/types";
 import { chatMessages } from "../../utils/chat";
 import type { ChatMessage } from "../../utils/chat";
+import { jobPage } from "../../services/job-pages";
+import { sessionToken } from "../../services/session";
 Page({
   data: {
     prompt: "",
     messages: [] as ChatMessage[],
     busy: false,
     bottom: "",
+    hasOlder: false,
+    loadingOlder: false,
     quick: [
       "帮我写一段产品短视频脚本",
       "为我的照片写创意提示词",
@@ -26,6 +30,9 @@ Page({
   failed: false,
   loadVersion: 0,
   destroyed: false,
+  historyPage: 1,
+  history: [] as Job[],
+  historyToken: "",
   onShow() {
     tab(this, 3);
     void this.load();
@@ -45,9 +52,18 @@ Page({
     clearInterval(this.timer);
   },
   async load(force = false) {
+    const token = sessionToken();
+    if (token !== this.historyToken) {
+      this.historyToken = token;
+      this.history = [];
+      this.historyPage = 1;
+      this.setData({ messages: [], hasOlder: false });
+    }
     if (!hasSession()) {
       this.loadVersion++;
       this.fetching = false;
+      this.history = [];
+      this.historyPage = 1;
       this.setData({ messages: [] });
       return;
     }
@@ -55,9 +71,16 @@ Page({
     const version = ++this.loadVersion;
     this.fetching = true;
     try {
-      const jobs = await request<Job[]>("/jobs");
+      const result = await jobPage(1, "&kind=chat");
+      const fresh = result.items;
+      const jobs = [
+        ...fresh,
+        ...this.history.filter((j: Job) => !fresh.some((n) => n.id === j.id)),
+      ];
       if (version !== this.loadVersion) return;
       this.failed = false;
+      this.history = jobs;
+      this.setData({ hasOlder: jobs.length < result.total });
       if (
         !jobs.some(
           (j) => j.input.kind === "chat" && /queued|running/.test(j.status),
@@ -82,6 +105,30 @@ Page({
   },
   input(e: WechatMiniprogram.Input) {
     this.setData({ prompt: e.detail.value });
+  },
+  async older() {
+    if (this.data.loadingOlder || !this.data.hasOlder) return;
+    const version = this.loadVersion;
+    this.setData({ loadingOlder: true });
+    try {
+      const result = await jobPage(this.historyPage + 1, "&kind=chat");
+      if (version !== this.loadVersion) return;
+      this.historyPage++;
+      this.history = [
+        ...this.history,
+        ...result.items.filter(
+          (j) => !this.history.some((old: Job) => old.id === j.id),
+        ),
+      ];
+      this.setData({
+        messages: chatMessages(this.history),
+        hasOlder: this.history.length < result.total,
+      });
+    } catch (e) {
+      error(e);
+    } finally {
+      if (!this.destroyed) this.setData({ loadingOlder: false });
+    }
   },
   quick(e: WechatMiniprogram.TouchEvent) {
     this.setData({ prompt: e.currentTarget.dataset.value });

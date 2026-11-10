@@ -2,6 +2,7 @@ package api
 
 import (
 	"doubo/server/internal/core"
+	"doubo/server/internal/store"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -10,7 +11,21 @@ import (
 )
 
 func (a *Server) favorites(w http.ResponseWriter, r *http.Request) {
-	rows, e := a.Store.List(r.Context(), "favorites", identity(r).ID)
+	if r.URL.Query().Has("page") {
+		q, ok := listQuery(w, r, "favorites")
+		if !ok {
+			return
+		}
+		q.Owner = identity(r).ID
+		page, e := a.Store.RecordPage(r.Context(), q)
+		if e != nil {
+			dbError(w, e)
+			return
+		}
+		reply(w, 200, page)
+		return
+	}
+	rows, e := store.AllRecords(r.Context(), a.Store, "favorites", identity(r).ID)
 	if e != nil {
 		dbError(w, e)
 		return

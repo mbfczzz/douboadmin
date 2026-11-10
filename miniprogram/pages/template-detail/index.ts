@@ -92,11 +92,7 @@ Page({
   async refreshFavorite() {
     const revision = this.favoriteRevision;
     try {
-      const rows =
-        await request<Row<{ templateId: string; active: boolean }>[]>(
-          "/favorites",
-        );
-      const f = rows.find((r) => r.data.templateId === this.id);
+      const f = await request<Row<{ active: boolean }>>("/favorites/" + this.id);
       if (revision === this.favoriteRevision)
         this.setData({
           favorite: !!f?.data.active,
@@ -148,11 +144,7 @@ Page({
     this.setData({ favoriteBusy: true });
     try {
       await login("favorite");
-      const rows =
-        await request<Row<{ templateId: string; active: boolean }>[]>(
-          "/favorites",
-        );
-      const current = rows.find((r) => r.data.templateId === this.id);
+      const current = await request<Row<{ active: boolean }>>("/favorites/" + this.id);
       if (!!current?.data.active === desired) {
         this.setData({
           favorite: desired,

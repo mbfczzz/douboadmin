@@ -9,6 +9,10 @@ import (
 )
 
 func (a *Server) works(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Query().Has("page") {
+		a.pagedJobs(w, r, true)
+		return
+	}
 	owner := identity(r).ID
 	if identity(r).Role == "admin" {
 		owner = ""

@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Plus, RefreshCw, Search } from "lucide-react";
 import { api, type Row, type Model } from "../api";
 import type { PageProps } from "../navigation";
-import { useResource } from "../hooks/useResource";
+import { useRecordPage } from "../hooks/useRecordPage";
 import { useRememberedState } from "../hooks/useRememberedState";
 import PageHeader from "../components/PageHeader";
 import RequestState from "../components/RequestState";
@@ -22,22 +22,22 @@ import {
 import { ask } from "../confirm/ask";
 
 export default function Models({ notify }: PageProps) {
-  const resource = useResource<Row<Model>[]>("/admin/models");
   const [kind, setKind] = useRememberedState("models.kind", ""),
     [q, setQ] = useRememberedState("models.query", ""),
     [page, setPage] = useState(1);
+  const resource = useRecordPage<Model>(
+    `/admin/models?kind=${encodeURIComponent(kind)}&q=${encodeURIComponent(q)}`,
+    page,
+  );
   const [busy, setBusy] = useState(""),
     [edit, setEdit] = useState<{ row: Row<Model>; section: ModelSection }>(),
     [adding, setAdding] = useState(false);
-  const rows = resource.data || [];
-  const filtered = rows.filter(
-    (r) =>
-      (!kind || r.data.kind === kind) &&
-      [r.data.name, r.data.key].some((s) =>
-        s.toLowerCase().includes(q.toLowerCase()),
-      ),
-  );
-  const current = Math.min(page, Math.max(1, Math.ceil(filtered.length / 20)));
+  useEffect(()=>{
+    if (resource.data) setPage(current=>Math.min(current,Math.max(1,Math.ceil(resource.data!.total/20))));
+  },[resource.data]);
+  const rows = resource.data?.items || [],
+    filtered = rows,
+    current = page;
   async function sync() {
     if (busy) return;
     setBusy("sync");
@@ -109,7 +109,7 @@ export default function Models({ notify }: PageProps) {
           <div>
             <h2>模型目录</h2>
             <p>
-              共 {rows.length} 个 · 已上架{" "}
+              共 {resource.data?.total || 0} 个 · 本页已上架{" "}
               {rows.filter((r) => r.data.published && r.data.available).length}
             </p>
           </div>
@@ -177,7 +177,7 @@ export default function Models({ notify }: PageProps) {
               </tr>
             </thead>
             <tbody>
-              {filtered.slice((current - 1) * 20, current * 20).map((r) => (
+              {filtered.map((r) => (
                 <tr key={r.id}>
                   <td>
                     <div className="model-cell">
@@ -249,7 +249,11 @@ export default function Models({ notify }: PageProps) {
             }
           />
         )}
-        <Pagination total={filtered.length} page={current} onChange={setPage} />
+        <Pagination
+          total={resource.data?.total || 0}
+          page={current}
+          onChange={setPage}
+        />
       </section>
       {edit && (
         <ModelEditor

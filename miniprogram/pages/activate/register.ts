@@ -10,13 +10,7 @@ export const registerState = {
   sending: false,
 };
 
-type Fields = typeof registerState;
-interface Register {
-  data: Fields & { busy: boolean; status: AccessStatus | null };
-  setData(data: Partial<Fields> & Record<string, unknown>): void;
-  destroyed: boolean;
-  timer?: number;
-}
+import type { Register } from "../../services/page-contracts";
 
 export const validPhone = (phone: string) => /^1[3-9][0-9]{9}$/.test(phone);
 

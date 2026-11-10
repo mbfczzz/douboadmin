@@ -25,15 +25,19 @@ func (a *Server) orders(w http.ResponseWriter, r *http.Request) {
 	if identity(r).Role == "admin" {
 		owner = ""
 	}
-	rows, e := a.Store.List(r.Context(), "orders", owner)
+	query, ok := financeQuery(w, r, "orders", owner)
+	if !ok {
+		return
+	}
+	page, e := a.Store.RecordPage(r.Context(), query)
 	if e != nil {
 		dbError(w, e)
 		return
 	}
-	for i := range rows {
-		rows[i] = publicOrder(rows[i])
+	for i := range page.Items {
+		page.Items[i] = publicOrder(page.Items[i])
 	}
-	reply(w, 200, rows)
+	financeReply(w, r, page)
 }
 func (a *Server) order(w http.ResponseWriter, r *http.Request) {
 	row, e := a.Store.Get(r.Context(), "orders", r.PathValue("id"))

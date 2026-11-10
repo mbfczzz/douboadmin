@@ -1,4 +1,5 @@
 import type { Page } from "@playwright/test";
+import { pagedFixture } from "./paged-fixture";
 
 const now = "2026-11-02T00:00:00Z";
 const row = (id: string, data: unknown) => ({
@@ -287,7 +288,8 @@ export async function surfaceFixtures(page: Page) {
           commission: { balanceFen: 20000, heldFen: 1000, paidOutFen: 0 },
         },
       });
-    if (path in maps) return route.fulfill({ json: maps[path] });
+    if (path === "/templates/categories") return route.fulfill({ json: ["测试分类"] });
+    if (path in maps) return route.fulfill({ json: pagedFixture(maps[path], url) });
     return route.fallback();
   });
   return models;

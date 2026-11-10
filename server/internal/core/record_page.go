@@ -1,6 +1,11 @@
 package core
 
 type RecordQuery struct {
+	Fields, NotFields                           map[string]string
+	FieldsIn                                    map[string][]string
+	IDs                                         []string
+	NotIDs                                      []string
+	SortField                                   string
 	AfterID                                     string
 	ByID                                        bool
 	Namespace, Owner, Search, Status, PartnerID string

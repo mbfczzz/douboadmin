@@ -1,15 +1,8 @@
 import { error, isNavigating, openTask, submitInput } from "../../utils/api";
 import { referenceError, selectedModel } from "./references";
 import { creationInput } from "./input";
-import type { creationData } from "./state";
 
-interface Editor {
-  data: typeof creationData;
-  assetRevision: number;
-  visible: boolean;
-  destroyed: boolean;
-  setData(value: Record<string, unknown>): void;
-}
+import type { SubmitEditor as Editor } from "./editor-types";
 export async function generate(page: Editor) {
   const data = page.data;
   if (data.busy || data.uploading || data.restoring || isNavigating(page))

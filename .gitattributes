@@ -1,2 +1,12 @@
 *.sh text eol=lf
 *.service text eol=lf
+# Keep mini-program source size reproducible on Windows and in release builds.
+miniprogram/**/*.ts text eol=lf
+miniprogram/**/*.js text eol=lf
+miniprogram/**/*.json text eol=lf
+miniprogram/**/*.wxml text eol=lf
+miniprogram/**/*.wxss text eol=lf
+miniprogram/**/*.wxs text eol=lf
+miniprogram/**/*.cjs text eol=lf
+miniprogram/**/*.mjs text eol=lf
+miniprogram/**/*.md text eol=lf

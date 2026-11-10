@@ -21,6 +21,7 @@ func (a *Server) partnerRoutes() {
 	m.HandleFunc("GET /api/admin/partner-policy", a.auth("admin", a.partnerPolicy))
 	m.HandleFunc("PUT /api/admin/partner-policy", a.auth("admin", a.savePartnerPolicy))
 	m.HandleFunc("GET /api/provider", a.auth("user", a.providerCenter))
+	m.HandleFunc("GET /api/provider/children", a.auth("user", a.providerChildren))
 	m.HandleFunc("POST /api/provider/password", a.auth("user", a.providerPassword))
 	m.HandleFunc("GET /api/promo", a.auth("user", a.myPromo))
 	m.HandleFunc("GET /api/admin/memberships", a.auth("admin", a.partnerList("memberships")))

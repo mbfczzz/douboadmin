@@ -18,6 +18,9 @@ type Store interface {
 	Put(context.Context, string, core.Record, int64) (core.Record, error)
 	CreateJob(context.Context, core.Job) (core.Job, error)
 	Jobs(context.Context, string) ([]core.Job, error)
+	JobPage(context.Context, core.JobQuery) (core.JobPage, error)
+	JobStats(context.Context, string) (core.JobStats, error)
+	JobModels(context.Context, string) ([]core.JobModelUse, error)
 	Job(context.Context, string) (core.Job, error)
 	Claim(context.Context) (core.Job, error)
 	Hold(context.Context, core.Job, int, bool) error

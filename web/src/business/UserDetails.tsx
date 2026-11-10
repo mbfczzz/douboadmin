@@ -1,4 +1,6 @@
 import { date, type Row } from "../api";
+import { useState } from "react";
+import type { RecordPage } from "./recordPage";
 import { useResource } from "../hooks/useResource";
 import Modal from "../components/Modal";
 import Table from "./Table";
@@ -32,7 +34,10 @@ export default function UserDetails({
   user: Row<Profile>;
   onClose: () => void;
 }) {
-  const ledger = useResource<Row<Ledger>[]>(`/admin/users/${user.id}/ledger`),
+  const [page, setPage] = useState(1);
+  const ledger = useResource<RecordPage<Ledger>>(
+      `/admin/users/${user.id}/ledger?page=${page}`,
+    ),
     wallet = useResource<{ wallet: Wallet }>(`/admin/users/${user.id}/wallet`),
     [tone, label] = userState(user.data),
     verified = phoneVerified(user.data);
@@ -93,7 +98,13 @@ export default function UserDetails({
         <UserActivation userId={user.id} />
         <h3 className="business-section-title">积分流水</h3>
         <Table
-          rows={ledger.data || []}
+          rows={ledger.data?.items || []}
+          pagination={{
+            page,
+            size: ledger.data?.size,
+            total: ledger.data?.total || 0,
+            onChange: setPage,
+          }}
           id={(r) => r.id}
           columns={[
             {

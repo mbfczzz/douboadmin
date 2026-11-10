@@ -2,20 +2,11 @@ import { estimateCost } from "../../services/estimate";
 import { points } from "../../services/business";
 import { sessionToken } from "../../services/session";
 import { pricingInput } from "./input";
-import type { creationData } from "./state";
 
-interface Editor {
-  data: typeof creationData;
-  visible: boolean;
-  destroyed: boolean;
-  setData(value: Record<string, unknown>): void;
-}
-interface Ticket {
-  key: string;
-  at: number;
-  timer?: ReturnType<typeof setTimeout>;
-  abort?: () => void;
-}
+import type {
+  VisibleEditor as Editor,
+  EstimateTicket as Ticket,
+} from "./editor-types";
 const pending = new WeakMap<Editor, Ticket>();
 export function cancelEstimate(page: Editor, reset = false) {
   const ticket = pending.get(page);

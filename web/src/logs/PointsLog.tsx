@@ -28,6 +28,7 @@ export default function PointsLog({ query }: { query: string }) {
     items: LedgerRow[];
     page: number;
     total: number;
+    size: number;
   }>(`/admin/audit/points?page=${page}${query ? "&" + query : ""}`);
   const data = resource.data;
   return (
@@ -42,7 +43,12 @@ export default function PointsLog({ query }: { query: string }) {
           rows={data.items}
           id={(r) => r.id}
           empty={query ? "没有符合条件的积分变动" : "暂无积分变动"}
-          pagination={{ page: data.page, total: data.total, onChange: setPage }}
+          pagination={{
+            page: data.page,
+            size: data.size,
+            total: data.total,
+            onChange: setPage,
+          }}
           columns={[
             { title: "时间", render: (r) => date(r.createdAt, true) },
             {

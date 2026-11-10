@@ -11,18 +11,18 @@ import StatusBadge from "../components/StatusBadge";
 import Tag, { IdChip } from "../components/Tag";
 import OrderSummary from "../business/OrderSummary";
 import { canRefund, refundOrder } from "../business/orderRefund";
+import type { RecordPage } from "../business/recordPage";
 
 export default function Orders({ notify }: PageProps) {
-  const resource = useResource<Row<Order>[]>("/admin/orders"),
-    [query, setQuery] = useRememberedState("orders.query", ""),
+  const [query, setQuery] = useRememberedState("orders.query", ""),
     [state, setState] = useRememberedState("orders.status", "");
+  const [page, setPage] = useState(1);
+  const resource = useResource<RecordPage<Order>>(
+    `/admin/orders?${new URLSearchParams({ page: String(page), q: query, status: state })}`,
+  );
   const [detail, setDetail] = useState<Row<Order> | null>(null),
     [busy, setBusy] = useState(false);
-  const rows = (resource.data || []).filter(
-    (r) =>
-      (!state || r.data.status === state) &&
-      (r.id.includes(query) || r.data.userId.includes(query)),
-  );
+  const rows = resource.data?.items || [];
   async function refresh(row: Row<Order>) {
     try {
       const updated = await api<Row<Order>>(`/admin/orders/${row.id}/refresh`, {
@@ -62,12 +62,18 @@ export default function Orders({ notify }: PageProps) {
           placeholder="搜索订单号或用户编号"
           aria-label="搜索订单"
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            setPage(1);
+          }}
         />
         <select
           aria-label="订单状态"
           value={state}
-          onChange={(e) => setState(e.target.value)}
+          onChange={(e) => {
+            setState(e.target.value);
+            setPage(1);
+          }}
         >
           <option value="">全部状态</option>
           {["created", "paid", "closed", "refunding", "refunded"].map((s) => (
@@ -80,6 +86,12 @@ export default function Orders({ notify }: PageProps) {
       <Table
         key={state + query}
         rows={rows}
+        pagination={{
+          page,
+          size: resource.data?.size,
+          total: resource.data?.total || 0,
+          onChange: setPage,
+        }}
         empty={
           query || state ? "没有匹配的订单，请调整筛选条件" : "暂无充值订单"
         }

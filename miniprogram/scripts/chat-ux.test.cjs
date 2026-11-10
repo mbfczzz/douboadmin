@@ -21,6 +21,7 @@ test("a sent message is shown even when an older poll is still in flight", async
       });
     return [sent];
   };
+  h.wx.request = async o => o.success({ statusCode: 200, data: await h.api.request(o.url.split("/api")[1]) });
   const pending = page.load();
   h.api.submitInput = async () => sent;
   page.input({ detail: { value: "新的想法" } });

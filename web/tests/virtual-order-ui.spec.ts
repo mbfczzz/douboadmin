@@ -10,24 +10,29 @@ for (const platform of ["wechat", "ios"]) {
   }) => {
     await login(page);
     await surfaceFixtures(page);
-    await page.route("**/api/admin/orders", (route) =>
+    await page.route("**/api/admin/orders?*", (route) =>
       route.fulfill({
-        json: [
-          {
-            id: "virtual-ui-order",
-            version: 1,
-            createdAt: "2026-11-06T00:00:00Z",
-            data: {
-              userId: "qa-user",
-              channel: "wechat_virtual",
-              status: "paid",
-              amountFen: 1000,
-              pointsUnits: 100000,
-              transactionId: "virtual-transaction",
-              virtual: { productName: "1000积分", platform },
+        json: {
+          items: [
+            {
+              id: "virtual-ui-order",
+              version: 1,
+              createdAt: "2026-11-06T00:00:00Z",
+              data: {
+                userId: "qa-user",
+                channel: "wechat_virtual",
+                status: "paid",
+                amountFen: 1000,
+                pointsUnits: 100000,
+                transactionId: "virtual-transaction",
+                virtual: { productName: "1000积分", platform },
+              },
             },
-          },
-        ],
+          ],
+          page: 1,
+          size: 20,
+          total: 1,
+        },
       }),
     );
     await page.getByRole("button", { name: "充值订单", exact: true }).click();

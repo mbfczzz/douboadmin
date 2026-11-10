@@ -25,9 +25,8 @@ test("guest favorite resumes against the saved account version instead of versio
       writes++;
       throw new Error("must not overwrite existing favorite");
     }
-    return [
-      { id: "favorite", version: 7, data: { templateId: "t", active: true } },
-    ];
+    assert.equal(p, "/favorites/t");
+    return { id: "favorite", version: 7, data: { templateId: "t", active: true } };
   };
   const page = h.page("template-detail");
   page.id = "t";

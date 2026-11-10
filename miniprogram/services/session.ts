@@ -7,20 +7,7 @@ import {
   errorMessage,
 } from "./errors";
 import type { LoginPurpose } from "./login-context";
-interface Session {
-  token: string;
-  userId: string;
-  expiresAt: number;
-  provider: string;
-}
-interface LoginResponse {
-  activationRequired?: boolean;
-  token: string;
-  userId: string;
-  expiresIn: number;
-  provider: string;
-  isNewUser: boolean;
-}
+import type { Session, LoginResponse } from "./session-types";
 let pendingLogin:
   | { promise: Promise<void>; resolve: () => void; reject: (e: Error) => void }
   | undefined;

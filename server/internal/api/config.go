@@ -2,6 +2,7 @@ package api
 
 import (
 	"doubo/server/internal/core"
+	"doubo/server/internal/store"
 	"encoding/json"
 	"net/http"
 	"sort"
@@ -20,7 +21,7 @@ func (a *Server) config(w http.ResponseWriter, r *http.Request) {
 		reply(w, 200, map[string]any{"activationRequired": true, "demo": false, "demoLogin": a.demoLoginEnabled(), "wechatLogin": a.Config.WeChatAppID != "" && a.Config.WeChatSecret != "", "models": []core.Model{}, "categories": []string{}, "relayConfigured": a.Relay.Ready(), "mixAvailable": false, "mixMessage": "混剪功能暂未开放", "storage": a.Config.Storage})
 		return
 	}
-	rows, err := a.Store.List(r.Context(), "models", "")
+	rows, err := store.AllRecords(r.Context(), a.Store, "models", "")
 	if err != nil {
 		dbError(w, err)
 		return
@@ -49,7 +50,7 @@ func (a *Server) config(w http.ResponseWriter, r *http.Request) {
 		}
 		return models[i].Sort < models[j].Sort
 	})
-	templates, err := a.Store.List(r.Context(), "templates", "")
+	templates, err := store.AllRecords(r.Context(), a.Store, "templates", "")
 	if err != nil {
 		dbError(w, err)
 		return

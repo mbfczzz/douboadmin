@@ -64,7 +64,11 @@ func (a *Server) ledger(w http.ResponseWriter, r *http.Request) {
 	if identity(r).Role == "admin" {
 		user = r.PathValue("id")
 	}
-	rows, e := a.Store.List(r.Context(), "wallet_ledger", user)
+	query, ok := financeQuery(w, r, "wallet_ledger", user)
+	if !ok {
+		return
+	}
+	page, e := a.Store.RecordPage(r.Context(), query)
 	if e != nil {
 		dbError(w, e)
 		return
@@ -72,15 +76,15 @@ func (a *Server) ledger(w http.ResponseWriter, r *http.Request) {
 	if identity(r).Role != "admin" {
 		// Users see amounts and the note, not which admin acted or the
 		// internal reference (idempotency keys, job/order ids).
-		for i := range rows {
+		for i := range page.Items {
 			var entry core.LedgerEntry
-			if json.Unmarshal(rows[i].Data, &entry) == nil {
+			if json.Unmarshal(page.Items[i].Data, &entry) == nil {
 				entry.Actor, entry.Reference = "", ""
-				rows[i].Data = core.Data(entry)
+				page.Items[i].Data = core.Data(entry)
 			}
 		}
 	}
-	reply(w, 200, rows)
+	financeReply(w, r, page)
 }
 func (a *Server) adjustWallet(w http.ResponseWriter, r *http.Request) {
 	var v struct {

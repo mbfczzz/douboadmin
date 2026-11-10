@@ -1,5 +1,5 @@
+import { movePage } from "../../services/list-page";
 import {
-  request,
   jobView,
   openTask,
   enterPage,
@@ -9,6 +9,7 @@ import {
   error,
 } from "../../utils/api";
 import type { Job } from "../../services/types";
+import { jobPage } from "../../services/job-pages";
 
 Page({
   data: {
@@ -24,6 +25,8 @@ Page({
     loadError: "",
     needsLogin: false,
     signingIn: false,
+    page: 1,
+    total: 0,
   },
   loadVersion: 0,
   destroyed: false,
@@ -36,6 +39,7 @@ Page({
     this.loadVersion++;
   },
   onPullDownRefresh() {
+    this.setData({ page: 1 });
     void this.load();
   },
   async load() {
@@ -52,7 +56,12 @@ Page({
       return;
     }
     try {
-      const jobs = await request<Job[]>("/jobs");
+      const result = await jobPage(
+        this.data.page,
+        "&works=true&kind=" +
+          (this.data.filter === "all" ? "" : this.data.filter),
+      );
+      const jobs = result.items;
       if (version !== this.loadVersion) return;
       this.setData({
         works: jobs
@@ -63,6 +72,7 @@ Page({
               !job.deleted,
           )
           .map(jobView),
+        total: result.total,
         needsLogin: false,
         loadError: "",
       });
@@ -97,8 +107,14 @@ Page({
     });
   },
   choose(e: WechatMiniprogram.TouchEvent) {
-    this.setData({ filter: e.currentTarget.dataset.value });
-    this.filterWorks();
+    this.setData({ filter: e.currentTarget.dataset.value, page: 1 });
+    void this.load();
+  },
+  previous() {
+    movePage(this, -1);
+  },
+  next() {
+    movePage(this, 1);
   },
   async signIn() {
     if (this.data.signingIn) return;

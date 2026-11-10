@@ -1,11 +1,7 @@
 import type { Asset, Row } from "../services/types";
 import { media } from "../services/media";
 
-interface AssetEditor {
-  assetRevision: number;
-  restoreIds: string[];
-  setData(data: Record<string, unknown>): void;
-}
+import type { AssetEditor } from "../services/page-contracts";
 
 export async function restoreEditorAssets(
   page: AssetEditor,

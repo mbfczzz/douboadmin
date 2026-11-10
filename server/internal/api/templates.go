@@ -2,6 +2,7 @@ package api
 
 import (
 	"doubo/server/internal/core"
+	"doubo/server/internal/store"
 	"encoding/json"
 	"net/http"
 	"slices"
@@ -10,7 +11,11 @@ import (
 )
 
 func (a *Server) templates(w http.ResponseWriter, r *http.Request) {
-	rows, e := a.Store.List(r.Context(), "templates", "")
+	if r.URL.Query().Has("page") {
+		a.templatePage(w, r, nil)
+		return
+	}
+	rows, e := store.AllRecords(r.Context(), a.Store, "templates", "")
 	if e != nil {
 		dbError(w, e)
 		return
@@ -105,7 +110,7 @@ func (a *Server) templateVisible(r *http.Request, ready func(string) bool, id st
 
 // visibleTemplates lists the ids users can open, in one read of templates.
 func (a *Server) visibleTemplates(r *http.Request) (map[string]bool, error) {
-	rows, err := a.Store.List(r.Context(), "templates", "")
+	rows, err := store.AllRecords(r.Context(), a.Store, "templates", "")
 	if err != nil {
 		return nil, err
 	}

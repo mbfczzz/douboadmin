@@ -23,6 +23,9 @@ export interface ModelJob {
   createdAt: string;
 }
 export interface ModelRecords {
+  page: number;
+  size: number;
+  total: number;
   models: ModelUse[];
   jobs: ModelJob[];
   limited: boolean;

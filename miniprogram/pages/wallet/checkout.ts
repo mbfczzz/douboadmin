@@ -4,16 +4,9 @@ import { VirtualPaymentRejectedError } from "../../services/virtual-failure";
 import { recharge, amountFen } from "../../services/payment";
 import { pendingPayment, paymentMessage } from "../../services/payment-status";
 import { sessionToken, sessionUserId } from "../../services/session";
-import type { walletData } from "./state";
 
-interface Editor {
-  data: typeof walletData;
-  destroyed: boolean;
-  checkoutToken: string;
-  setData(value: Record<string, unknown>): void;
-  trackPayment(id: string): void;
-  load(): Promise<void>;
-}
+import type { WalletEditor as Editor } from "../../services/page-contracts";
+
 export async function checkout(page: Editor) {
   const d = page.data,
     info = d.info;

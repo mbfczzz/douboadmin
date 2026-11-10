@@ -20,7 +20,7 @@ async function fixture() {
     expiresAt: new Date(Date.now() + 60000).toISOString(), virtual: { issued: true },
   } };
   h.wx.request = o => {
-    const url = o.url.split("/api")[1];
+    const url = o.url.split("/api")[1].split("?")[0];
     const data = url === "/wallet" ? info : url === "/wallet/ledger" ? [] : url === "/orders" ? [row] : url.endsWith("/refresh") ? {} : row;
     o.success({ statusCode: 200, data: JSON.parse(JSON.stringify(data)) });
   };

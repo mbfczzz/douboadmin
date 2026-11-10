@@ -1,11 +1,10 @@
-import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { Plus } from "lucide-react";
 import PageHeader from "../components/PageHeader";
-import RequestState, { LoadingState } from "../components/RequestState";
-import { useResource } from "../hooks/useResource";
+import { LoadingState } from "../components/RequestState";
 import type { Notify } from "../navigation";
 import ProviderForm from "./ProviderForm";
-import ProviderTree from "./ProviderTree";
+import PagedProviderTree from "./PagedProviderTree";
 import type { Row } from "../api";
 import type { Partner } from "./types";
 import { useMe } from "../session";
@@ -19,46 +18,24 @@ import type { ProviderAction } from "./ProviderActions";
 const ProviderModule = lazy(() => import("./ProviderModule"));
 
 export default function Providers({ notify }: { notify: Notify }) {
-  const resource = useResource<Row<Partner>[]>("/admin/partners/tree", 15000),
+  const [refresh, setRefresh] = useState(0),
     [query, setQuery] = useState(""),
-    [expanded, setExpanded] = useState<Set<string>>(new Set()),
     // New provider under a parent (create form) or one row action.
     [creating, setCreating] = useState<Row<Partner> | "root">(),
     [action, setAction] = useState<{
       kind: ProviderAction;
       row: Row<Partner>;
-    }>(),
-    initialized = useRef(false);
-  const rows = resource.data || [];
+    }>();
+  const reload = async () => setRefresh((n) => n + 1);
+  const rows = action ? [action.row] : [];
   // Only the platform adds providers by hand; provider logins grow by codes.
   const platform = !useMe()?.partnerId;
-  const parentIds = useMemo(() => {
-    const parents = new Set(rows.map((item) => item.data.parentId));
-    return rows.filter((item) => parents.has(item.id)).map((item) => item.id);
-  }, [rows]);
-  const allOpen = parentIds.every((id) => expanded.has(id));
-  useEffect(() => {
-    if (initialized.current || !rows.length) return;
-    setExpanded(new Set(parentIds));
-    initialized.current = true;
-  }, [rows, parentIds]);
   const close = () => setAction(undefined),
     kind = action?.kind,
     moduleKind = kind === "share" || kind === "commissions" ? kind : undefined;
-  const toggle = (id: string) =>
-    setExpanded((current) => {
-      const next = new Set(current);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
   return (
     <>
-      <PageHeader
-        page="partners"
-        loading={resource.loading}
-        onRefresh={() => void resource.reload()}
-      >
+      <PageHeader page="partners" onRefresh={() => void reload()}>
         {platform && (
           <button
             type="button"
@@ -80,50 +57,43 @@ export default function Providers({ notify }: { notify: Notify }) {
           value={query}
           onChange={(event) => setQuery(event.target.value)}
         />
-        {parentIds.length > 0 && !query && (
-          <button
-            type="button"
-            className="secondary"
-            onClick={() => setExpanded(new Set(allOpen ? [] : parentIds))}
-          >
-            {allOpen ? "全部收起" : "全部展开"}
-          </button>
-        )}
         {platform && (
           <span className="provider-platform">
-            <PlatformActions notify={notify} changed={resource.reload} />
+            <PlatformActions notify={notify} changed={reload} />
           </span>
         )}
       </div>
-      <RequestState
-        loading={resource.loading && !resource.data}
-        error={resource.error}
-        retry={resource.reload}
-      />
-      {resource.data && (
-        <ProviderTree
-          rows={rows}
+      <section
+        className="panel provider-tree"
+        role="tree"
+        aria-label="服务商层级"
+      >
+        <div className="provider-tree-head quiet">
+          <span>服务商</span>
+          <span>状态</span>
+          <span>操作</span>
+        </div>
+        <PagedProviderTree
+          key={query}
+          refresh={refresh}
           query={query}
-          expanded={expanded}
-          toggle={toggle}
           open={(kind, row) => setAction({ kind, row })}
           add={
             platform
               ? (row) => {
-                  setExpanded((current) => new Set(current).add(row.id));
                   setCreating(row);
                 }
               : undefined
           }
         />
-      )}
+      </section>
       {creating && (
         <ProviderForm
           parent={creating}
           onClose={() => setCreating(undefined)}
           notify={notify}
           onSaved={async () => {
-            await resource.reload();
+            await reload();
             setCreating(undefined);
           }}
         />
@@ -133,7 +103,7 @@ export default function Providers({ notify }: { notify: Notify }) {
           row={action.row}
           onClose={close}
           notify={notify}
-          onSaved={resource.reload}
+          onSaved={reload}
         />
       )}
       {action?.kind === "account" && (
@@ -157,7 +127,7 @@ export default function Providers({ notify }: { notify: Notify }) {
             rows={rows}
             notify={notify}
             onClose={close}
-            onSaved={resource.reload}
+            onSaved={reload}
           />
         </Suspense>
       )}

@@ -77,7 +77,7 @@ func frozen(status string) bool { return status == "pending" || status == "rejec
 // Tree lists every provider record except rejected registrations; callers
 // filter it to their scope.
 func (s *Service) Tree(ctx context.Context) ([]core.Record, error) {
-	rows, e := s.Store.List(ctx, "partners", "")
+	rows, e := store.AllRecords(ctx, s.Store, "partners", "")
 	out := rows[:0]
 	for _, row := range rows {
 		var p core.Partner

@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"doubo/server/internal/core"
+	"doubo/server/internal/store"
 	"encoding/json"
 	"errors"
 	"math"
@@ -21,7 +22,11 @@ func (a *Server) model(ctx context.Context, id string) (core.Model, error) {
 }
 
 func (a *Server) models(w http.ResponseWriter, r *http.Request) {
-	rows, err := a.Store.List(r.Context(), "models", "")
+	if r.URL.Query().Has("page") {
+		a.modelPage(w, r)
+		return
+	}
+	rows, err := store.AllRecords(r.Context(), a.Store, "models", "")
 	if err != nil {
 		dbError(w, err)
 		return
@@ -148,7 +153,7 @@ func (a *Server) syncModels(w http.ResponseWriter, r *http.Request) {
 			updated++
 		}
 	}
-	rows, err := a.Store.List(ctx, "models", "")
+	rows, err := store.AllRecords(ctx, a.Store, "models", "")
 	if err != nil {
 		dbError(w, err)
 		return

@@ -59,10 +59,13 @@ func (a *Server) routes() {
 	m.HandleFunc("POST /api/assets", a.auth("user", a.upload))
 	m.HandleFunc("GET /api/assets/{id}", a.auth("user", a.asset))
 	m.HandleFunc("GET /api/favorites", a.auth("user", a.favorites))
+	m.HandleFunc("GET /api/favorites/templates", a.auth("user", a.favoriteTemplates))
+	m.HandleFunc("GET /api/favorites/{id}", a.auth("user", a.favoriteState))
 	m.HandleFunc("PUT /api/favorites/{id}", a.auth("user", a.favorite))
 	m.HandleFunc("POST /api/feedback", a.auth("user", a.feedback))
 	m.HandleFunc("GET /api/admin/overview", a.auth("admin", a.overview))
 	m.HandleFunc("GET /api/admin/templates", a.auth("admin", a.templates))
+	m.HandleFunc("GET /api/admin/templates/categories", a.auth("admin", a.templateCategories))
 	m.HandleFunc("POST /api/admin/assets", a.auth("admin", a.upload))
 	m.HandleFunc("GET /api/admin/models", a.auth("admin", a.models))
 	m.HandleFunc("POST /api/admin/models", a.auth("admin", a.importModel))
@@ -75,13 +78,6 @@ func (a *Server) routes() {
 	m.HandleFunc("POST /api/admin/jobs", a.auth("admin", a.createJob))
 	m.HandleFunc("POST /api/admin/jobs/{id}/resume", a.auth("admin", a.resumeJob))
 	m.HandleFunc("GET /api/admin/users", a.auth("admin", a.users))
-	m.HandleFunc("GET /api/admin/feedback", a.auth("admin", func(w http.ResponseWriter, r *http.Request) {
-		rows, e := a.Store.List(r.Context(), "feedback", "")
-		if e != nil {
-			dbError(w, e)
-			return
-		}
-		reply(w, 200, rows)
-	}))
+	m.HandleFunc("GET /api/admin/feedback", a.auth("admin", a.simpleList("feedback")))
 	m.HandleFunc("GET /media/", a.mediaFile)
 }

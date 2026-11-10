@@ -3,11 +3,7 @@ import { points } from "../../services/business";
 import { sessionToken } from "../../services/session";
 import type { Row, Template } from "../../services/types";
 
-interface QuotePage {
-  destroyed: boolean;
-  quoteAbort?: () => void;
-  setData(value: Record<string, unknown>): void;
-}
+import type { QuotePage } from "../../services/page-contracts";
 
 // Template parameters are fixed, so one estimate per load is enough.
 export function loadQuote(page: QuotePage, t: Row<Template>) {
@@ -34,7 +30,9 @@ export function loadQuote(page: QuotePage, t: Row<Template>) {
       if (page.destroyed) return;
       page.setData({
         quoteText:
-          quote.units === 0 ? "本次不扣积分" : `预计 ${points(quote.units)} 积分`,
+          quote.units === 0
+            ? "本次不扣积分"
+            : `预计 ${points(quote.units)} 积分`,
       });
     },
     () => {

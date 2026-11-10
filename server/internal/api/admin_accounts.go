@@ -54,22 +54,25 @@ func (a *Server) readAdmin(r *http.Request, username string) (core.Record, core.
 }
 
 func (a *Server) adminAccounts(w http.ResponseWriter, r *http.Request) {
-	rows, err := a.Store.List(r.Context(), "admin_accounts", "")
+	page, ok := providerPageNumber(w, r)
+	if !ok {
+		return
+	}
+	result, err := a.Store.RecordPage(r.Context(), core.RecordQuery{Namespace: "admin_accounts", Fields: map[string]string{"partnerId": "", "archived": "false"}, Search: r.URL.Query().Get("q"), Page: page, Size: 20})
 	if err != nil {
 		dbError(w, err)
 		return
 	}
 	items := []core.Record{}
-	for _, row := range rows {
+	for _, row := range result.Items {
 		// Provider login accounts are managed under 服务商管理, not here.
 		var account core.AdminAccount
 		if json.Unmarshal(row.Data, &account) == nil && account.PartnerID == "" {
 			items = append(items, a.adminView(r.Context(), row))
 		}
 	}
-	rows = items
 	role := identity(r).AdminRole
-	reply(w, 200, map[string]any{"items": rows, "canManage": role == "" || role == "super_admin"})
+	reply(w, 200, map[string]any{"items": items, "page": page, "size": 20, "total": result.Total, "canManage": role == "" || role == "super_admin"})
 }
 
 func (a *Server) createAdminAccount(w http.ResponseWriter, r *http.Request) {

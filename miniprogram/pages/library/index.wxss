@@ -80,3 +80,5 @@
   margin-top: 6px;
   font-size: 12px;
 }
+
+@import "../../styles/job-pagination.wxss";

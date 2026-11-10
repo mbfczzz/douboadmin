@@ -11,7 +11,8 @@ import {
   login,
   AuthCancelledError,
 } from "../../utils/api";
-import type { Me, Job } from "../../services/types";
+import type { Me } from "../../services/types";
+import { jobPage } from "../../services/job-pages";
 
 const baseMenus = [
   { icon: "wallet", label: "我的积分", mode: "wallet" },
@@ -79,9 +80,9 @@ Page({
       return;
     }
     try {
-      const [me, jobs] = await Promise.all([
+      const [me, result] = await Promise.all([
         request<Me>("/me"),
-        request<Job[]>("/jobs"),
+        jobPage(1, "&works=true", 3),
       ]);
       if (version !== this.loadVersion) return;
       if (me.profile.data.avatarUrl)
@@ -89,7 +90,7 @@ Page({
       this.setData({
         me,
         avatarLetter: Array.from(me.profile.data.nickname)[0] || "豆",
-        jobs: jobs
+        jobs: result.items
           .filter(
             (j) =>
               ["image", "video", "mix"].includes(j.input.kind) &&

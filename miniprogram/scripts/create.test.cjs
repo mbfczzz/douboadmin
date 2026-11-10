@@ -103,13 +103,17 @@ test("reference audio selection uses supported file formats and checks size", as
 test("template more action appends remaining templates to the two columns", async () => {
   const h = harness(),
     page = h.page("templates");
-  h.api.request = async () =>
-    Array.from({ length: 6 }, (_, i) => ({
+  const rows = Array.from({ length: 6 }, (_, i) => ({
       id: String(i),
       data: { cover: "/media/test.jpg" },
     }));
+  h.api.request = async (path) => {
+    const page = Number(new URL(path,"https://fixture").searchParams.get("page"));
+    return {items:rows.slice((page-1)*4,page*4),total:6};
+  };
   await page.load();
   assert.equal(page.data.columns.flatMap((c) => c.items).length, 4);
   page.more();
+  await new Promise(resolve=>setImmediate(resolve));
   assert.equal(page.data.columns.flatMap((c) => c.items).length, 6);
 });

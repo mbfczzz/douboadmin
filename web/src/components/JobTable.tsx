@@ -11,13 +11,20 @@ const icons = { image: Image, chat: Bot, audio: Music } as const;
 export default function JobTable({
   jobs,
   onAction,
+  pagination,
 }: {
   jobs: Job[];
   onAction: (kind: JobAction, j: Job) => void;
+  pagination?: {
+    page: number;
+    total: number;
+    onChange: (page: number) => void;
+  };
 }) {
   return (
     <Table
       rows={jobs}
+      pagination={pagination}
       framed={false}
       id={(j) => j.id}
       columns={[

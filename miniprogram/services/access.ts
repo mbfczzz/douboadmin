@@ -2,17 +2,9 @@ import { API_BASE } from "../config";
 import { sessionToken, storedToken, clearSession } from "./session";
 import { AuthCancelledError, RequestError } from "./errors";
 
-export interface AccessStatus {
-  active: boolean;
-  status: string;
-  partnerId?: string;
-  partnerName?: string;
-  message?: string;
-  // Registration step: name and SMS-verified phone are still missing.
-  profileRequired?: boolean;
-  name?: string;
-  phone?: string;
-}
+import type { AccessStatus } from "./access-types";
+export type { AccessStatus } from "./access-types";
+
 let redirecting = false;
 let pending: { token: string; promise: Promise<AccessStatus> } | undefined;
 export function resetAccessNavigation() {

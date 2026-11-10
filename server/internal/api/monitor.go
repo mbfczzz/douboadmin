@@ -2,12 +2,14 @@ package api
 
 import (
 	"doubo/server/internal/core"
+	"doubo/server/internal/store"
 	"encoding/json"
 	"net/http"
+	"time"
 )
 
 func (a *Server) monitor(w http.ResponseWriter, r *http.Request) {
-	instances, e := a.Store.List(r.Context(), "instances", "")
+	instances, e := store.AllRecords(r.Context(), a.Store, "instances", "")
 	if e != nil {
 		dbError(w, e)
 		return
@@ -17,10 +19,24 @@ func (a *Server) monitor(w http.ResponseWriter, r *http.Request) {
 		dbError(w, e)
 		return
 	}
-	reply(w, 200, map[string]any{"instances": instances, "queue": queue, "database": a.Store.Ping(r.Context()) == nil, "redisConfigured": a.Sessions.Redis != nil, "ossConfigured": a.Objects != nil, "relayConfigured": a.Relay.Ready(), "paymentConfigured": a.rechargeReady(), "hotConfigured": a.Hot.Ready()})
+	alerts, e := a.Store.RecordPage(r.Context(), core.RecordQuery{Namespace: "alerts", Fields: map[string]string{"acknowledged": "false"}, Page: 1, Size: 1})
+	if e != nil {
+		dbError(w, e)
+		return
+	}
+	errorsHour, e := store.CountErrorsSince(r.Context(), a.Store, time.Now().Add(-time.Hour))
+	if e != nil {
+		dbError(w, e)
+		return
+	}
+	reply(w, 200, map[string]any{"pendingAlerts": alerts.Total, "errorsHour": errorsHour, "instances": instances, "queue": queue, "database": a.Store.Ping(r.Context()) == nil, "redisConfigured": a.Sessions.Redis != nil, "ossConfigured": a.Objects != nil, "relayConfigured": a.Relay.Ready(), "paymentConfigured": a.rechargeReady(), "hotConfigured": a.Hot.Ready()})
 }
 func (a *Server) operationalRecords(namespace string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Query().Has("page") {
+			a.simpleList(namespace)(w, r)
+			return
+		}
 		rows, e := a.Store.List(r.Context(), namespace, "")
 		if e != nil {
 			dbError(w, e)

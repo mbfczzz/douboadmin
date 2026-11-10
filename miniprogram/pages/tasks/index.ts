@@ -1,5 +1,5 @@
+import { movePage } from "../../services/list-page";
 import {
-  request,
   jobView,
   openTask,
   enterPage,
@@ -9,7 +9,7 @@ import {
   login,
   error,
 } from "../../utils/api";
-import type { Job } from "../../services/types";
+import { jobPage } from "../../services/job-pages";
 Page({
   data: {
     jobs: [] as ReturnType<typeof jobView>[],
@@ -21,6 +21,8 @@ Page({
     loadError: "",
     needsLogin: false,
     signingIn: false,
+    page: 1,
+    total: 0,
   },
   timer: 0,
   fetching: false,
@@ -72,7 +74,8 @@ Page({
     if (this.fetching) return;
     this.fetching = true;
     try {
-      const jobs = (await request<Job[]>("/jobs"))
+      const result = await jobPage(this.data.page, "&excludeChat=true");
+      const jobs = result.items
         .filter((j) => j.input.kind !== "chat")
         .map(jobView);
       if (this.destroyed) return;
@@ -81,6 +84,7 @@ Page({
         clearInterval(this.timer);
       this.setData({
         jobs,
+        total: result.total,
         loading: false,
         needsLogin: false,
         loadError: "",
@@ -113,7 +117,14 @@ Page({
     openTask(e.currentTarget.dataset.id, this);
   },
   onPullDownRefresh() {
+    this.setData({ page: 1 });
     void this.load();
+  },
+  previous() {
+    movePage(this, -1);
+  },
+  next() {
+    movePage(this, 1);
   },
   works() {
     openPage(this, { url: "/pages/works/index" });

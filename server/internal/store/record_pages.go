@@ -98,6 +98,12 @@ func (m *MySQL) RecordPage(ctx context.Context, q core.RecordQuery) (out core.Re
 		where += ` AND ` + field("status") + `=?`
 		args = append(args, q.Status)
 	}
+	extra, values, e := recordFilters(t, q)
+	if e != nil {
+		return out, e
+	}
+	where += extra
+	args = append(args, values...)
 	tx, e := m.db.BeginTx(ctx, &sql.TxOptions{ReadOnly: true, Isolation: sql.LevelRepeatableRead})
 	if e != nil {
 		return out, e
@@ -109,6 +115,8 @@ func (m *MySQL) RecordPage(ctx context.Context, q core.RecordQuery) (out core.Re
 	order := ` ORDER BY created_at DESC,id DESC`
 	if q.ByID {
 		order = ` ORDER BY id ASC`
+	} else if q.SortField != "" {
+		order = " ORDER BY COALESCE(`" + column(q.SortField) + "`,0) ASC,id DESC"
 	}
 	items, e := listRows(ctx, tx, "SELECT "+t.selectList()+where+order+` LIMIT ? OFFSET ?`, t, append(args, q.Size, (q.Page-1)*q.Size)...)
 	if e != nil {
@@ -122,10 +130,20 @@ func (m *Memory) RecordPage(_ context.Context, q core.RecordQuery) (out core.Rec
 	if !validRecordPage(q) {
 		return out, fmt.Errorf("invalid record page")
 	}
+	t, e := tableOf(q.Namespace)
+	if e != nil {
+		return out, e
+	}
+	if _, _, e = recordFilters(t, q); e != nil {
+		return out, e
+	}
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	items := []core.Record{}
 	for key, row := range m.records {
+		if !recordMatches(t, row, q) {
+			continue
+		}
 		if q.ByID && row.ID <= q.AfterID {
 			continue
 		}
@@ -135,7 +153,7 @@ func (m *Memory) RecordPage(_ context.Context, q core.RecordQuery) (out core.Rec
 		if q.OwnerIn != nil && !slices.Contains(q.OwnerIn, row.Owner) {
 			continue
 		}
-		if q.Search != "" && !strings.Contains(strings.ToLower(row.ID+string(row.Data)), strings.ToLower(q.Search)) {
+		if !recordSearch(t, row, q.Search) {
 			continue
 		}
 		if q.Status != "" {
@@ -160,6 +178,15 @@ func (m *Memory) RecordPage(_ context.Context, q core.RecordQuery) (out core.Rec
 		sort.Slice(items, func(i, j int) bool { return items[i].ID < items[j].ID })
 	} else {
 		sortNewest(items)
+		if q.SortField != "" {
+			sort.Slice(items, func(i, j int) bool {
+				a, b := recordNumber(items[i], q.SortField), recordNumber(items[j], q.SortField)
+				if a == b {
+					return items[i].ID > items[j].ID
+				}
+				return a < b
+			})
+		}
 	}
 	out.Total = len(items)
 	start := (q.Page - 1) * q.Size

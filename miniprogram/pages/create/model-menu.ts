@@ -1,8 +1,4 @@
-type MenuPage = {
-  visible: boolean;
-  data: { showModels: boolean; expanded: boolean; availableModels: unknown[] };
-  setData: (value: Record<string, unknown>) => void;
-};
+import type { MenuPage } from "../../services/page-contracts";
 
 // Preserve the designed downward menu when space permits; flip only to fit.
 export function openModelMenu(page: MenuPage) {

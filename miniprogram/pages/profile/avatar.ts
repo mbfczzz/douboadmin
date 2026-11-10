@@ -1,13 +1,6 @@
 import { upload, errorMessage } from "../../utils/api";
 
-interface Editor {
-  data: { busy: boolean; uploadingAvatar: boolean };
-  revision: number;
-  ownerToken: string;
-  setData(data: Record<string, unknown>): void;
-  current(revision: number): boolean;
-  updateDirty(): void;
-}
+import type { AvatarEditor as Editor } from "../../services/page-contracts";
 
 export async function chooseProfileAvatar(page: Editor, path: string) {
   if (!path || page.data.busy || page.data.uploadingAvatar) return;

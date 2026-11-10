@@ -1,0 +1,19 @@
+.job-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12rpx;
+  padding: 24rpx 0;
+  color: #a6b1ab;
+  font-size: 24rpx;
+}
+.job-pagination button {
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 16rpx 20rpx;
+  line-height: 1.5;
+  font-size: 24rpx;
+  color: #c2e0ca;
+  background: #252b28;
+}
+.job-pagination button[disabled] { color: #76867c; }

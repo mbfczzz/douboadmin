@@ -19,10 +19,13 @@ import {
 } from "../adminAccounts/types";
 
 export default function AdminAccounts({ notify }: PageProps) {
+  const [page, setPage] = useState(1);
   const resource = useResource<{
       items: Row<AdminAccount>[];
       canManage: boolean;
-    }>("/admin/accounts"),
+      page: number;
+      total: number;
+    }>(`/admin/accounts?page=${page}`),
     [editing, setEditing] = useState<Row<AdminAccount> | null | undefined>(),
     [resetting, setResetting] = useState<Row<AdminAccount>>(),
     roles = useRoles(),
@@ -59,6 +62,15 @@ export default function AdminAccounts({ notify }: PageProps) {
         rows={(resource.data?.items || []).filter((row) => !row.data.archived)}
         empty="暂无管理账号"
         id={(row) => row.id}
+        pagination={
+          resource.data
+            ? {
+                page: resource.data.page,
+                total: resource.data.total,
+                onChange: setPage,
+              }
+            : undefined
+        }
         columns={[
           {
             title: "账号",

@@ -54,11 +54,11 @@ func (a *Server) createProviderAccount(ctx context.Context, partnerID, name, has
 }
 
 func (a *Server) providerAccount(ctx context.Context, partnerID string) (core.Record, core.AdminAccount, bool, error) {
-	rows, err := a.Store.List(ctx, "admin_accounts", "")
+	page, err := a.Store.RecordPage(ctx, core.RecordQuery{Namespace: "admin_accounts", PartnerID: partnerID, Fields: map[string]string{"archived": "false"}, Page: 1, Size: 1})
 	if err != nil {
 		return core.Record{}, core.AdminAccount{}, false, err
 	}
-	for _, row := range rows {
+	for _, row := range page.Items {
 		var account core.AdminAccount
 		if json.Unmarshal(row.Data, &account) == nil && account.PartnerID == partnerID && !account.Archived {
 			return row, account, true, nil

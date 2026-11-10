@@ -4,7 +4,6 @@ import (
 	"doubo/server/internal/core"
 	"encoding/json"
 	"net/http"
-	"sort"
 	"strconv"
 	"time"
 )
@@ -12,17 +11,7 @@ import (
 // Per-user records for the 小程序用户 page (users menu, platform accounts
 // only): which models the user generated with, and what the user did.
 
-type modelUse struct {
-	Model       string    `json:"model"`
-	Name        string    `json:"name"`
-	Kind        string    `json:"kind"`
-	Calls       int       `json:"calls"`
-	Succeeded   int       `json:"succeeded"`
-	Failed      int       `json:"failed"`
-	Active      int       `json:"active"`
-	PointsUnits int64     `json:"pointsUnits"`
-	LastAt      time.Time `json:"lastAt"`
-}
+type modelUse = core.JobModelUse
 
 type modelJob struct {
 	ID          string    `json:"id"`
@@ -38,77 +27,43 @@ type modelJob struct {
 	UpdatedAt   time.Time `json:"updatedAt"`
 }
 
-// userModels summarises the user's latest (up to 200) generation tasks per
-// model, plus the latest 100 tasks. Points count only what was actually
-// charged; reserved and refunded points are shown per task, not summed.
-// Material imports are not model calls and are skipped.
+// userModels returns complete model aggregates and one bounded page of jobs.
 func (a *Server) userModels(w http.ResponseWriter, r *http.Request) {
-	jobs, e := a.Store.Jobs(r.Context(), r.PathValue("id"))
+	q, ok := jobQuery(w, r)
+	if !ok {
+		return
+	}
+	q.User = r.PathValue("id")
+	q.ExcludeImport = true
+	page, e := a.Store.JobPage(r.Context(), q)
 	if e != nil {
 		dbError(w, e)
 		return
 	}
-	bills := map[string]core.JobBilling{}
-	if rows, e := a.Store.List(r.Context(), "job_billing", r.PathValue("id")); e == nil {
-		for _, row := range rows {
-			var b core.JobBilling
-			if json.Unmarshal(row.Data, &b) == nil {
-				bills[row.ID] = b
-			}
-		}
+	models, e := a.Store.JobModels(r.Context(), q.User)
+	if e != nil {
+		dbError(w, e)
+		return
 	}
 	names := map[string]string{}
-	if rows, e := a.Store.List(r.Context(), "models", ""); e == nil {
-		for _, row := range rows {
+	for i := range models {
+		row, err := a.Store.Get(r.Context(), "models", models[i].Model)
+		if err == nil {
 			var m core.Model
-			if json.Unmarshal(row.Data, &m) == nil {
-				names[row.ID] = m.Name
-			}
+			_ = json.Unmarshal(row.Data, &m)
+			models[i].Name = m.Name
+			names[models[i].Model] = m.Name
 		}
 	}
-	sort.Slice(jobs, func(i, j int) bool { return jobs[i].CreatedAt.After(jobs[j].CreatedAt) })
-	uses, recent := map[string]*modelUse{}, []modelJob{}
-	for _, j := range jobs {
-		if j.Input.Kind == "import" {
-			continue
+	recent := []modelJob{}
+	for _, j := range page.Items {
+		var bill core.JobBilling
+		if row, err := a.Store.Get(r.Context(), "job_billing", j.ID); err == nil {
+			_ = json.Unmarshal(row.Data, &bill)
 		}
-		name := names[j.Input.Model]
-		if name == "" {
-			name = j.ModelName
-		}
-		u := uses[j.Input.Model]
-		if u == nil {
-			u = &modelUse{Model: j.Input.Model, Name: name, Kind: j.Input.Kind, LastAt: j.CreatedAt}
-			uses[j.Input.Model] = u
-		}
-		u.Calls++
-		bill := bills[j.ID]
-		if bill.State == "charged" {
-			u.PointsUnits += bill.Units
-		}
-		switch j.Status {
-		case "succeeded":
-			u.Succeeded++
-		case "failed", "canceled":
-			u.Failed++
-		default:
-			u.Active++
-		}
-		if len(recent) < 100 {
-			recent = append(recent, modelJob{j.ID, j.Input.Model, name, j.Input.Kind, j.Status, bill.Units, bill.State, short(j.Input.Prompt, 80), j.Error, j.CreatedAt, j.UpdatedAt})
-		}
+		recent = append(recent, modelJob{j.ID, j.Input.Model, names[j.Input.Model], j.Input.Kind, j.Status, bill.Units, bill.State, short(j.Input.Prompt, 80), j.Error, j.CreatedAt, j.UpdatedAt})
 	}
-	models := make([]*modelUse, 0, len(uses))
-	for _, u := range uses {
-		models = append(models, u)
-	}
-	sort.Slice(models, func(i, j int) bool {
-		if models[i].Calls != models[j].Calls {
-			return models[i].Calls > models[j].Calls
-		}
-		return models[i].Model < models[j].Model
-	})
-	reply(w, 200, map[string]any{"models": models, "jobs": recent, "limited": len(jobs) >= 200})
+	reply(w, 200, map[string]any{"models": models, "jobs": recent, "limited": false, "page": page.Page, "size": page.Size, "total": page.Total})
 }
 
 // userActivity pages through the operation log entries made by this user:

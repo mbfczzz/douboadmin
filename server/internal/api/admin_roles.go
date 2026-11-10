@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"doubo/server/internal/core"
+	"doubo/server/internal/store"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -59,12 +60,16 @@ type roleView struct {
 }
 
 func (a *Server) listAdminRoles(w http.ResponseWriter, r *http.Request) {
-	stored, err := a.Store.List(r.Context(), rolesNamespace, "")
+	if r.URL.Query().Has("page") {
+		a.adminRolePage(w, r)
+		return
+	}
+	stored, err := store.AllRecords(r.Context(), a.Store, rolesNamespace, "")
 	if err != nil {
 		dbError(w, err)
 		return
 	}
-	accounts, err := a.Store.List(r.Context(), "admin_accounts", "")
+	accounts, err := store.AllRecords(r.Context(), a.Store, "admin_accounts", "")
 	if err != nil {
 		dbError(w, err)
 		return
@@ -164,7 +169,7 @@ func (a *Server) deleteAdminRole(w http.ResponseWriter, r *http.Request) {
 		fail(w, 400, "内置角色不可删除")
 		return
 	}
-	accounts, err := a.Store.List(r.Context(), "admin_accounts", "")
+	accounts, err := store.AllRecords(r.Context(), a.Store, "admin_accounts", "")
 	if err != nil {
 		dbError(w, err)
 		return
@@ -201,7 +206,7 @@ func (a *Server) roleNameTaken(ctx context.Context, id, name string) (bool, erro
 			return true, nil
 		}
 	}
-	rows, err := a.Store.List(ctx, rolesNamespace, "")
+	rows, err := store.AllRecords(ctx, a.Store, rolesNamespace, "")
 	if err != nil {
 		return false, err
 	}

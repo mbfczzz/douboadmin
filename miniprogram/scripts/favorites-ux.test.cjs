@@ -14,10 +14,10 @@ test("an unavailable favorite stays visible and can be removed", async () => {
       active = false;
       return {};
     }
-    if (path === "/favorites")
-      return [
+    if (path.startsWith("/favorites/templates?"))
+      return {items:[],total:active ? 1 : 0,unavailable:active ? [
         { id: "fav-1", version: 2, data: { templateId: "hidden", active } },
-      ];
+      ] : []};
     return [];
   };
   await page.load();

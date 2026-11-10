@@ -3,6 +3,7 @@ import { Plus, Search, Image, Film } from "lucide-react";
 import { api, type Row, type Template, type Model } from "../api";
 import type { PageProps } from "../navigation";
 import { useResource } from "../hooks/useResource";
+import { useRecordPage } from "../hooks/useRecordPage";
 import { useRememberedState } from "../hooks/useRememberedState";
 import PageHeader from "../components/PageHeader";
 import RequestState from "../components/RequestState";
@@ -32,41 +33,35 @@ const blank: Template = {
   family: "style",
 };
 export default function Templates({ notify }: PageProps) {
-  const resource = useResource<Row<Template>[]>("/admin/templates"),
-    models = useResource<Row<Model>[]>("/admin/models");
+  const models = useResource<Row<Model>[]>("/admin/models");
   const [kind, setKind] = useRememberedState("templates.kind", "image"),
     [status, setStatus] = useRememberedState("templates.status", ""),
     [category, setCategory] = useRememberedState("templates.category", ""),
     [q, setQ] = useRememberedState("templates.query", ""),
     [sort, setSort] = useRememberedState("templates.sort", "sort"),
     [page, setPage] = useState(1);
+  const resource = useRecordPage<Template>(
+    `/admin/templates?${new URLSearchParams({ kind, status, category, q, sort })}`,
+    page,
+    12,
+  );
+  const categories = useResource<string[]>("/admin/templates/categories");
   const [edit, setEdit] = useState<Row<Template> | null>(null),
     [busy, setBusy] = useState("");
-  const rows = resource.data || [],
+  const rows = resource.data?.items || [],
     modelRows = models.data || [];
   // A remembered category whose templates are all gone no longer filters.
   useEffect(() => {
-    if (
-      category &&
-      resource.data &&
-      !resource.data.some((r) => r.data.category === category)
-    )
+    if (category && categories.data && !categories.data.includes(category)) {
       setCategory("");
-  }, [category, resource.data, setCategory]);
-  const filtered = rows
-    .filter(
-      (r) =>
-        r.data.kind === kind &&
-        (!status || (status === "published") === r.data.published) &&
-        (!category || r.data.category === category) &&
-        [r.data.title, r.data.prompt].some((s) => s.includes(q)),
-    )
-    .sort((a, b) =>
-      sort === "newest"
-        ? b.createdAt.localeCompare(a.createdAt)
-        : a.data.sort - b.data.sort,
-    );
-  const current = Math.min(page, Math.max(1, Math.ceil(filtered.length / 12)));
+      setPage(1);
+    }
+  }, [category, categories.data, setCategory]);
+  useEffect(()=>{
+    if (resource.data) setPage(current=>Math.min(current,Math.max(1,Math.ceil(resource.data!.total/12))));
+  },[resource.data]);
+  const filtered = rows,
+    current = page;
   function create(data = blank) {
     setEdit({
       id: newId(),
@@ -180,11 +175,9 @@ export default function Templates({ notify }: PageProps) {
           }}
         >
           <option value="">全部分类</option>
-          {[...new Set(rows.map((r) => r.data.category))]
-            .filter(Boolean)
-            .map((c) => (
-              <option key={c}>{c}</option>
-            ))}
+          {(categories.data || []).filter(Boolean).map((c) => (
+            <option key={c}>{c}</option>
+          ))}
         </select>
         <label className="catalog-search">
           <Search size={15} />
@@ -202,19 +195,19 @@ export default function Templates({ notify }: PageProps) {
       </div>
       <div className="catalog-caption">
         <span>
-          {category || "全部分类"} · {filtered.length} 个模板
+          {category || "全部分类"} · {resource.data?.total || 0} 个模板
         </span>
         <select
           aria-label="模板排序"
           value={sort}
-          onChange={(e) => setSort(e.target.value)}
+          onChange={(e) => {setSort(e.target.value);setPage(1);}}
         >
           <option value="sort">默认排序</option>
           <option value="newest">最近添加</option>
         </select>
       </div>
       <div className="studio-grid">
-        {filtered.slice((current - 1) * 12, current * 12).map((r) => (
+        {filtered.map((r) => (
           <TemplateCard
             key={r.id}
             r={r}
@@ -239,7 +232,7 @@ export default function Templates({ notify }: PageProps) {
       )}
       <div>
         <Pagination
-          total={filtered.length}
+          total={resource.data?.total || 0}
           size={12}
           page={current}
           onChange={setPage}

@@ -1,11 +1,7 @@
 import { resetNavigation } from "./navigation";
 import { trackVisit } from "../services/analytics";
 
-interface MotionPage {
-  route?: string;
-  data: Record<string, unknown>;
-  setData(data: Record<string, unknown>): void;
-}
+import type { MotionPage } from "../services/page-contracts";
 
 // Alternating names restart the animation when an existing tab is shown again.
 // Only opacity animates on page roots, preserving fixed-position descendants.

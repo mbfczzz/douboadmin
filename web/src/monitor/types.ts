@@ -11,6 +11,8 @@ export interface Node {
   goVersion: string;
 }
 export interface Health {
+  pendingAlerts?: number;
+  errorsHour?: number;
   instances: Row<Node>[];
   queue: { queued: number; running: number; failedHour: number };
   database: boolean;

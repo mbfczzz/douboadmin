@@ -16,6 +16,8 @@ Page({
     loading: true,
     needsLogin: false,
     loadError: "",
+    page: 1,
+    total: 0,
   },
   revision: 0,
   visible: true,
@@ -28,6 +30,8 @@ Page({
   },
   onHide() {
     this.visible = false;
+    this.revision++;
+    this.setData({loading:false});
   },
   onUnload() {
     this.destroyed = true;
@@ -42,20 +46,26 @@ Page({
       error(e);
     }
   },
-  async load() {
-    if (this.destroyed) return;
+  async load(append = false) {
+    if (this.destroyed || !this.visible) return;
+    append = append === true;
+    if (append && this.data.loading) return;
+    const page = append ? this.data.page + 1 : 1;
+    this.setData({loading: true});
     const revision = ++this.revision;
     if (!hasSession()) {
-      this.setData({ needsLogin: true, loading: false, items: [] });
+      this.setData({ needsLogin: true, loading: false, items: [], unread:0, total:0, page:1 });
       return;
     }
     try {
-      const result = await request<{ items: Row<Notice>[]; unread: number }>(
-        "/notifications",
+      const result = await request<{ items: Row<Notice>[]; unread: number; total: number }>(
+        "/notifications?page=" + page + "&size=20",
       );
       if (revision !== this.revision) return;
+      const rows=[...(append ? this.data.items : []), ...result.items.map((r) => ({ ...r, time: date(r.createdAt) }))];
       this.setData({
-        items: result.items.map((r) => ({ ...r, time: date(r.createdAt) })),
+        items: [...new Map(rows.map(row=>[row.id,row])).values()],
+        page, total: result.total ?? result.items.length,
         unread: result.unread,
         needsLogin: false,
         loadError: "",
@@ -75,12 +85,16 @@ Page({
       if (revision === this.revision) this.setData({ loading: false });
     }
   },
+  more() { if (this.data.page*20<this.data.total) void this.load(true); },
   async readAll() {
+    if (!this.visible || this.destroyed) return;
+    const revision=this.revision;
     try {
       await request("/notifications/read-all", "POST", {});
+      if (!this.visible || revision!==this.revision) return;
       await this.load();
     } catch (e) {
-      if (!this.destroyed) error(e);
+      if (!this.destroyed && this.visible) error(e);
     }
   },
   async open(e: WechatMiniprogram.TouchEvent) {

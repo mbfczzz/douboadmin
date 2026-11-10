@@ -34,6 +34,7 @@ export default function Table<T>({
   pagination?: {
     page: number;
     total: number;
+    size?: number;
     onChange: (page: number) => void;
   };
 }) {
@@ -143,6 +144,7 @@ export default function Table<T>({
       {!rows.length && <Empty text={empty} help={help} />}
       {paged && (
         <Pagination
+          size={pagination?.size}
           total={pagination?.total ?? rows.length}
           page={current}
           onChange={pagination?.onChange ?? setPage}

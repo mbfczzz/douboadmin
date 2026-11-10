@@ -34,12 +34,16 @@ export default function HealthSummary({
     live = h.instances.filter(online),
     workers = live.filter((n) => n.data.role === "worker").length,
     hourAgo = Date.now() - 3600_000,
-    errors = (logs || []).filter(
-      (r) =>
-        r.data.level === "ERROR" &&
-        Date.parse(r.data.lastAt || r.createdAt) > hourAgo,
-    ).length,
-    pending = (alerts || []).filter((r) => !r.data.acknowledged).length,
+    errors =
+      h.errorsHour ??
+      (logs || []).filter(
+        (r) =>
+          r.data.level === "ERROR" &&
+          Date.parse(r.data.lastAt || r.createdAt) > hourAgo,
+      ).length,
+    pending =
+      h.pendingAlerts ??
+      (alerts || []).filter((r) => !r.data.acknowledged).length,
     issues: Issue[] = [];
   if (!h.database)
     issues.push({

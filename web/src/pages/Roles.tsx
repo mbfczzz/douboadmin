@@ -7,13 +7,17 @@ import { pageInfo, type PageId, type PageProps } from "../navigation";
 import ResourcePage from "../business/ResourcePage";
 import Table from "../business/Table";
 import RoleForm from "../roles/RoleForm";
-import { roleScopeLabel, useRoles, type RoleRow } from "../roles/types";
+import { roleScopeLabel, type RoleRow } from "../roles/types";
+import { useResource } from "../hooks/useResource";
 import { useMe } from "../session";
 import "../roles/roles.css";
 import { ask } from "../confirm/ask";
 
 export default function Roles({ notify }: PageProps) {
-  const roles = useRoles(),
+  const [page, setPage] = useState(1);
+  const roles = useResource<{ items: RoleRow[]; page: number; total: number }>(
+      `/admin/roles?page=${page}`,
+    ),
     // Only the super administrator may change roles; others just read them.
     manage = useMe()?.role === "super_admin",
     [editing, setEditing] = useState<RoleRow | null | undefined>();
@@ -47,7 +51,16 @@ export default function Roles({ notify }: PageProps) {
       }
     >
       <Table
-        rows={roles.rows}
+        rows={roles.data?.items || []}
+        pagination={
+          roles.data
+            ? {
+                page: roles.data.page,
+                total: roles.data.total,
+                onChange: setPage,
+              }
+            : undefined
+        }
         empty="暂无角色"
         id={(row) => row.id}
         columns={[

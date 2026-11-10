@@ -12,15 +12,14 @@ import { IdChip } from "../components/Tag";
 import { ask } from "../confirm/ask";
 
 export default function Works({ notify }: PageProps) {
-  const resource = useResource<Job[]>("/admin/works"),
-    [detail, setDetail] = useState<Job | null>(null),
+  const [detail, setDetail] = useState<Job | null>(null),
     [query, setQuery] = useRememberedState("works.query", ""),
     [state, setState] = useRememberedState("works.state", "");
-  const rows = (resource.data || []).filter(
-    (j) =>
-      (j.input.prompt.includes(query) || j.userId.includes(query)) &&
-      (!state || (state === "deleted") === !!j.deleted),
+  const [page, setPage] = useState(1);
+  const resource = useResource<{ items: Job[]; total: number }>(
+    `/admin/works?page=${page}&q=${encodeURIComponent(query)}&deleted=${state}`,
   );
+  const rows = resource.data?.items || [];
   async function remove(j: Job) {
     const ok = await ask({
       title: "删除作品？",
@@ -45,12 +44,18 @@ export default function Works({ notify }: PageProps) {
           aria-label="搜索作品"
           placeholder="搜索创作描述或用户编号"
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            setPage(1);
+          }}
         />
         <select
           aria-label="作品状态"
           value={state}
-          onChange={(e) => setState(e.target.value)}
+          onChange={(e) => {
+            setState(e.target.value);
+            setPage(1);
+          }}
         >
           <option value="">全部作品</option>
           <option value="active">正常</option>
@@ -60,6 +65,11 @@ export default function Works({ notify }: PageProps) {
       <Table
         key={query + state}
         rows={rows}
+        pagination={{
+          page,
+          total: resource.data?.total || 0,
+          onChange: setPage,
+        }}
         empty={query ? "没有匹配的作品，请调整搜索条件" : "暂无作品"}
         id={(j) => j.id}
         columns={[

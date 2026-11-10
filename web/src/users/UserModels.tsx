@@ -10,6 +10,7 @@ import { pct } from "../overview/format";
 import RecordsHead from "./RecordsHead";
 import ModelUsage from "./ModelUsage";
 import RecentJobs from "./RecentJobs";
+import Pagination from "../components/Pagination";
 import type { ModelRecords } from "./records";
 import "./records.css";
 import "./model-records.css";
@@ -26,8 +27,9 @@ export default function UserModels({
   user: Row<Profile>;
   onClose: () => void;
 }) {
+  const [page, setPage] = useState(1);
   const data = useResource<ModelRecords>(
-      `/admin/users/${encodeURIComponent(user.id)}/models`,
+      `/admin/users/${encodeURIComponent(user.id)}/models?page=${page}`,
     ),
     [open, setOpen] = useState(""),
     // Full generation records keep the 生成任务 menu.
@@ -98,11 +100,17 @@ export default function UserModels({
             <section aria-label="最近生成">
               <h3 className="records-title">
                 最近生成
-                <span className="quiet">最多 100 条</span>
+                <span className="quiet">共 {d.total} 条</span>
               </h3>
               <RecentJobs
                 jobs={d.jobs}
                 onOpen={canJobs ? setOpen : undefined}
+              />
+              <Pagination
+                page={d.page}
+                size={d.size}
+                total={d.total}
+                onChange={setPage}
               />
             </section>
           </>

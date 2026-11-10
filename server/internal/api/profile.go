@@ -2,6 +2,7 @@ package api
 
 import (
 	"doubo/server/internal/core"
+	"doubo/server/internal/store"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -15,34 +16,17 @@ func (a *Server) me(w http.ResponseWriter, r *http.Request) {
 		dbError(w, e)
 		return
 	}
-	jobs, e := a.Store.Jobs(r.Context(), id)
+	stats, e := a.Store.JobStats(r.Context(), id)
 	if e != nil {
 		dbError(w, e)
 		return
 	}
-	fav, e := a.Store.List(r.Context(), "favorites", id)
+	fav, e := store.AllRecords(r.Context(), a.Store, "favorites", id)
 	if e != nil {
 		dbError(w, e)
 		return
 	}
-	works, running, count := 0, 0, 0
-	for _, j := range jobs {
-		if !core.IsWork(j.Input.Kind) {
-			continue
-		}
-		if j.Status == "succeeded" {
-			var meta core.WorkMeta
-			if row, e := a.Store.Get(r.Context(), "work_meta", j.ID); e == nil {
-				_ = json.Unmarshal(row.Data, &meta)
-			}
-			if !meta.Deleted {
-				works++
-			}
-		}
-		if j.Status == "queued" || j.Status == "running" {
-			running++
-		}
-	}
+	works, running, count := stats.Works, stats.Running, 0
 	visible, e := a.visibleTemplates(r)
 	if e != nil {
 		dbError(w, e)

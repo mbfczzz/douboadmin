@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { api } from "../api";
-import type { Row } from "../api";
 import type { PageProps } from "../navigation";
 import { useResource } from "../hooks/useResource";
+import { useRecordPage } from "../hooks/useRecordPage";
 import PageHeader from "../components/PageHeader";
 import Badge from "../components/Badge";
 import RequestState from "../components/RequestState";
@@ -14,9 +14,13 @@ import HealthSummary from "../monitor/HealthSummary";
 import ApiHealth from "../monitor/ApiHealth";
 
 export default function Monitor({ notify, navigate }: PageProps) {
+  const [logPage, setLogPage] = useState(1),
+    [alertPage, setAlertPage] = useState(1);
   const resource = useResource<Health>("/admin/monitor", 15000),
-    alerts = useResource<Row<Event>[]>("/admin/alerts", 15000),
-    logs = useResource<Row<Event>[]>("/admin/logs", 15000);
+    alertsPage = useRecordPage<Event>("/admin/alerts", alertPage, 20, 15000),
+    logsPage = useRecordPage<Event>("/admin/logs", logPage, 20, 15000);
+  const alerts = { ...alertsPage, data: alertsPage.data?.items },
+    logs = { ...logsPage, data: logsPage.data?.items };
   const [tab, setTab] = useState("logs");
   const h = resource.data,
     busy = resource.loading || alerts.loading || logs.loading;
@@ -27,7 +31,7 @@ export default function Monitor({ notify, navigate }: PageProps) {
     try {
       await api(`/admin/alerts/${id}/ack`, { method: "PUT" });
       notify("告警已确认");
-      await alerts.reload();
+      await Promise.all([alerts.reload(), resource.reload()]);
     } catch (e) {
       notify((e as Error).message, "error");
     }
@@ -70,6 +74,12 @@ export default function Monitor({ notify, navigate }: PageProps) {
           ack={ack}
           tab={tab}
           setTab={setTab}
+          pagination={{
+            page: tab === "logs" ? logPage : alertPage,
+            total: (tab === "logs" ? logsPage : alertsPage).data?.total || 0,
+            onChange: tab === "logs" ? setLogPage : setAlertPage,
+          }}
+          pending={h?.pendingAlerts}
         />
         <section
           className="panel monitor-panel monitor-connections"

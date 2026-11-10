@@ -8,12 +8,16 @@ import (
 )
 
 func (a *Server) refunds(w http.ResponseWriter, r *http.Request) {
-	rows, e := a.Store.List(r.Context(), "refunds", "")
+	query, ok := financeQuery(w, r, "refunds", "")
+	if !ok {
+		return
+	}
+	page, e := a.Store.RecordPage(r.Context(), query)
 	if e != nil {
 		dbError(w, e)
 		return
 	}
-	reply(w, 200, rows)
+	financeReply(w, r, page)
 }
 func (a *Server) createRefund(w http.ResponseWriter, r *http.Request) {
 	var v struct {

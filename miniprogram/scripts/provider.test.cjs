@@ -32,7 +32,8 @@ const branch = {
 test("a 分公司 switches between its three codes and sees what is below it", async () => {
   const h = harness(),
     page = h.page("provider");
-  h.api.request = async () => branch;
+  h.api.request = async (path) => path.startsWith("/provider/children?")
+    ? {items:branch.children,page:1,total:1,size:20} : branch;
   page.onLoad({});
   await page.load();
   assert.equal(page.data.roleName, "分公司");
@@ -88,6 +89,7 @@ test("a scanned provider keeps its password visible; a reset asks first", async 
       resets++;
       return { account: "13800138000", password: "Nw".repeat(10) };
     }
+    if (path.startsWith("/provider/children?")) return {items:branch.children,page:1,total:1,size:20};
     return { ...branch, owner: true, password: "Kp".repeat(10) };
   };
   page.onLoad({});
@@ -100,6 +102,47 @@ test("a scanned provider keeps its password visible; a reset asks first", async 
   await page.password();
   assert.equal(resets, 1);
   assert.equal(page.data.password, "Nw".repeat(10));
+});
+
+test("provider children load the next server page and a failed page can be retried", async () => {
+  const h=harness(), page=h.page("provider"), paths=[];
+  let fail=true;
+  h.api.request=async path=>{
+    paths.push(path);
+    if(path==="/provider?children=paged") return {...branch,children:undefined};
+    if(path==="/provider/children?page=1") return {items:branch.children,page:1,size:20,total:21};
+    if(path==="/provider/children?page=2") {
+      if(fail) throw new Error("加载失败");
+      return {items:[{...branch.children[0],id:"old-child",name:"历史下级"}],page:2,size:20,total:21};
+    }
+    throw new Error("unexpected path "+path);
+  };
+  page.onLoad({});
+  await page.load();
+  assert.equal(page.data.childrenTotal,21);
+  assert.equal(page.data.childrenPage,1);
+  assert.equal(page.data.children.length,1);
+  await page.loadChildren();
+  assert.equal(page.data.childrenPage,1);
+  assert.match(page.data.childrenError,/加载失败/);
+  fail=false;
+  await page.loadChildren();
+  assert.equal(page.data.childrenPage,2);
+  assert.equal(page.data.children[1].name,"历史下级");
+  assert.equal(page.data.childrenError,"");
+  assert.equal(paths.filter(path=>path==="/provider/children?page=2").length,2);
+});
+
+test("late provider child response cannot update a hidden page", async ()=>{
+  const h=harness(),page=h.page("provider");
+  let release;
+  h.api.request=()=>new Promise(resolve=>{release=resolve});
+  const loading=page.loadChildren(true);
+  page.onHide();
+  release({items:branch.children,page:1,size:20,total:1});
+  await loading;
+  assert.equal(page.data.children.length,0);
+  assert.equal(page.data.childrenLoading,false);
 });
 
 test("我的 shows 服务商中心 to providers and 我的推广码 to members", async () => {

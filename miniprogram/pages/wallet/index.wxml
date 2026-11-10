@@ -62,15 +62,20 @@
       ></view
     >
     <view class="biz-card"
-      ><text class="biz-heading">最近积分流水</text
+      ><text class="biz-heading">积分流水</text
       ><view wx:if="{{!ledger.length}}" class="biz-empty">暂无积分变动</view
       ><view wx:for="{{ledger}}" wx:key="id" class="biz-row ledger-row"
         ><view class="ledger-copy"
           ><text class="biz-list-title">{{item.title}}</text
           ><text wx:if="{{item.note}}" class="biz-small ledger-note">{{item.note}}</text
           ><text class="biz-small ledger-time">{{item.time}}</text></view
-        ><text class="ledger-change {{item.tone}}">{{item.change}}</text></view
-      ></view
+        ><text class="ledger-change {{item.tone}}">{{item.change}}</text></view>
+      <view wx:if="{{ledgerTotal>0}}" class="biz-pair">
+        <view><button class="biz-action biz-secondary" disabled="{{loading||ledgerPage<=1}}" data-step="-1" bindtap="changeLedgerPage">上一页</button></view>
+        <view><button class="biz-action biz-secondary" disabled="{{loading||ledgerPage>=ledgerPages}}" data-step="1" bindtap="changeLedgerPage">下一页</button></view>
+      </view>
+      <text wx:if="{{ledgerTotal>0}}" class="biz-note">第 {{ledgerPage}} / {{ledgerPages}} 页 · 共 {{ledgerTotal}} 条</text>
+      </view
     >
   </block>
 </view>

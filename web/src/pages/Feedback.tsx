@@ -1,13 +1,16 @@
 import PageHeader from "../components/PageHeader";
 import RequestState from "../components/RequestState";
-import { useResource } from "../hooks/useResource";
+import { useRecordPage } from "../hooks/useRecordPage";
+import { useState } from "react";
+import Pagination from "../components/Pagination";
 import { MessageSquare } from "lucide-react";
 import { date, type Row } from "../api";
 import Empty from "../components/Empty";
 import "../styles/feedback-list.css";
 export default function Feedback() {
-  const resource = useResource<Row[]>("/admin/feedback");
-  const feedback = resource.data || [];
+  const [page, setPage] = useState(1);
+  const resource = useRecordPage<Row["data"]>("/admin/feedback", page);
+  const feedback = resource.data?.items || [];
   return (
     <>
       <PageHeader
@@ -47,6 +50,11 @@ export default function Feedback() {
           />
         )}
       </section>
+      <Pagination
+        total={resource.data?.total || 0}
+        page={page}
+        onChange={setPage}
+      />
     </>
   );
 }

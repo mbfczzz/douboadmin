@@ -70,12 +70,15 @@ test("work filters contain only completed media and treat mixes as videos", asyn
     makeJob("failed", "image", "failed"),
     makeJob("chat", "chat"),
   ];
+  h.wx.request = async o => { try { o.success({statusCode:200,data:await h.api.request(o.url.split("/api")[1])}); } catch {o.fail({errMsg:"offline"});} };
   await page.load();
   assert.equal(page.data.filtered.length, 3);
   page.choose({ currentTarget: { dataset: { value: "image" } } });
+  await new Promise(setImmediate);
   assert.equal(page.data.filtered[0].id, "image");
   assert.equal(page.data.filtered.length, 1);
   page.choose({ currentTarget: { dataset: { value: "video" } } });
+  await new Promise(setImmediate);
   assert.deepEqual(
     Array.from(page.data.filtered, (j) => j.id),
     ["video", "mix"],
@@ -124,7 +127,7 @@ test("pending works point to task progress while finished works remain in the li
   await h.api.signIn();
   const page = h.page("mine");
   h.api.request = async (p) =>
-    p === "/jobs"
+    p.startsWith("/jobs")
       ? [makeJob("pending", "image", "running")]
       : {
           profile: { version: 1, data: { nickname: "小豆", bio: "" } },
@@ -132,6 +135,7 @@ test("pending works point to task progress while finished works remain in the li
           running: 1,
           favorites: 0,
         };
+  h.wx.request = async o => o.success({statusCode:200,data:await h.api.request(o.url.split("/api")[1])});
   await page.load();
   assert.equal(page.data.jobs.length, 0);
   page.emptyWorks();

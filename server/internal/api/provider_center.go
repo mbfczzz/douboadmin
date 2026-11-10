@@ -9,6 +9,7 @@ import (
 
 	"doubo/server/internal/core"
 	"doubo/server/internal/partners"
+	"doubo/server/internal/store"
 )
 
 // managedPartner is the provider a mini-program user runs (by scan or bind
@@ -54,11 +55,11 @@ type childView struct {
 // children lists the providers directly below id. A provider only ever sees
 // downward: nothing about its parent is returned.
 func (a *Server) children(ctx context.Context, id string) ([]childView, error) {
-	rows, e := a.Store.List(ctx, "partners", id)
+	rows, e := store.AllRecords(ctx, a.Store, "partners", id)
 	if e != nil {
 		return nil, e
 	}
-	accounts, e := a.Store.List(ctx, "admin_accounts", "")
+	accounts, e := store.AllRecords(ctx, a.Store, "admin_accounts", "")
 	if e != nil {
 		return nil, e
 	}
@@ -121,7 +122,7 @@ func (a *Server) providerCenter(w http.ResponseWriter, r *http.Request) {
 		codes[name] = v
 	}
 	out["codes"] = codes
-	if p.Role != core.RoleS2 {
+	if p.Role != core.RoleS2 && r.URL.Query().Get("children") != "paged" {
 		if out["children"], e = a.children(ctx, id); e != nil {
 			dbError(w, e)
 			return

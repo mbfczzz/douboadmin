@@ -7,6 +7,7 @@
     scroll-with-animation
   >
     <view class="conversation">
+      <button wx:if="{{hasOlder}}" class="secondary" bindtap="older" loading="{{loadingOlder}}" disabled="{{loadingOlder}}">加载更早对话</button>
       <view class="agent-intro">
         <view class="agent-mark"><t-icon name="chat" size="27" /></view>
         <text class="headline">让想法，再往前一步。</text>

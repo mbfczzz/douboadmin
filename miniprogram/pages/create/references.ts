@@ -1,6 +1,5 @@
 import { cancelled, chooseReferenceFile, error, upload } from "../../utils/api";
 import type { Model, Row, Asset } from "../../services/types";
-import type { creationData } from "./state";
 
 // API upload and request ceilings; model-specific limits can only narrow them.
 const maxAssets = 20,
@@ -117,12 +116,7 @@ export function referenceError(
   return "";
 }
 
-interface Editor {
-  refreshParameters?(): void;
-  data: typeof creationData;
-  assetRevision: number;
-  setData(data: Record<string, unknown>): void;
-}
+import type { ReferenceEditor as Editor } from "./editor-types";
 export function selectedModel(page: Editor) {
   return page.data.availableModels.find((m) => m.id === page.data.model);
 }

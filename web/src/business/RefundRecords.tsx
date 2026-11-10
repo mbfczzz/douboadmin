@@ -1,13 +1,18 @@
-import { api, date, type Row } from "../api";
+import { api, date } from "../api";
 import { useResource } from "../hooks/useResource";
 import Table from "./Table";
 import RequestState from "../components/RequestState";
 import { money, type Refund } from "./types";
 import StatusBadge from "../components/StatusBadge";
 import type { Notify } from "../navigation";
+import { useState } from "react";
+import type { RecordPage } from "./recordPage";
 
 export default function RefundRecords({ notify }: { notify: Notify }) {
-  const resource = useResource<Row<Refund>[]>("/admin/refunds");
+  const [page, setPage] = useState(1);
+  const resource = useResource<RecordPage<Refund>>(
+    `/admin/refunds?page=${page}`,
+  );
   async function refresh(id: string) {
     try {
       await api(`/admin/refunds/${id}/refresh`, { method: "POST" });
@@ -31,7 +36,13 @@ export default function RefundRecords({ notify }: { notify: Notify }) {
       />
       {resource.data && (
         <Table
-          rows={resource.data}
+          rows={resource.data.items}
+          pagination={{
+            page: resource.data.page,
+            size: resource.data.size,
+            total: resource.data.total,
+            onChange: setPage,
+          }}
           id={(r) => r.id}
           empty="暂无退款记录"
           columns={[

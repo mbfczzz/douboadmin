@@ -1,28 +1,7 @@
 import { request, error, saveFailed } from "../../utils/api";
 
-type Code = { code: string; qr: string };
-interface Child {
-  id: string;
-  name: string;
-  role: string;
-  status: string;
-  members: number;
-  account: string;
-  scanned: boolean;
-  createdAt: string;
-}
-interface Center {
-  name: string;
-  status: string;
-  role: string; // branch, s1 or s2
-  members: number;
-  codes: { member?: Code; s1?: Code; s2?: Code };
-  children?: Child[];
-  account: string;
-  owner: boolean; // registered by scanning; manages its own login
-  password?: string;
-  passwordChanged?: boolean;
-}
+import type { Code, Child, Center } from "../../services/provider-types";
+export type { Code, Child, Center } from "../../services/provider-types";
 
 const roles: Record<string, string> = {
   branch: "分公司",
@@ -49,6 +28,10 @@ Page({
     note: "",
     shown: { code: "", raw: "", qr: "" },
     children: [] as (Child & { roleName: string; date: string })[],
+    childrenPage: 0,
+    childrenTotal: 0,
+    childrenLoading: false,
+    childrenError: "",
     password: "",
     busy: false,
     loadError: "",
@@ -70,25 +53,65 @@ Page({
         });
         return;
       }
-      const center = await request<Center>("/provider");
+      const center = await request<Center>("/provider?children=paged");
       this.setData({
         center,
         roleName: roles[center.role] || "服务商",
         tabs: tabs
           .filter(([key]) => center.codes[key])
           .map(([key, label]) => ({ key, label })),
-        children: (center.children || []).map((c) => ({
-          ...c,
-          roleName: roles[c.role] || "",
-          date: c.createdAt.slice(0, 10),
-        })),
         password: center.password || "",
         loadError: "",
       });
       this.show(this.data.tab);
+      if (center.role !== "s2") await this.loadChildren(true);
     } catch (e) {
       this.setData({ loadError: (e as Error).message });
     }
+  },
+  childRevision: 0,
+  onHide() {
+    this.childRevision++;
+    this.setData({ childrenLoading: false });
+  },
+  onUnload() {
+    this.onHide();
+  },
+  async loadChildren(reset = false) {
+    if (this.data.childrenLoading && !reset) return;
+    const revision = ++this.childRevision;
+    const page = reset ? 1 : this.data.childrenPage + 1;
+    if (reset)
+      this.setData({ children: [], childrenPage: 0, childrenTotal: 0 });
+    this.setData({ childrenLoading: true, childrenError: "" });
+    try {
+      const result = await request<{
+        items: Child[];
+        page: number;
+        total: number;
+      }>(`/provider/children?page=${page}`);
+      if (revision !== this.childRevision) return;
+      const incoming = result.items.map((c) => ({
+        ...c,
+        roleName: roles[c.role] || "",
+        date: c.createdAt.slice(0, 10),
+      }));
+      const rows = reset ? incoming : [...this.data.children, ...incoming];
+      this.setData({
+        children: [...new Map(rows.map((row) => [row.id, row])).values()],
+        childrenPage: result.page,
+        childrenTotal: result.total,
+      });
+    } catch (e) {
+      if (revision === this.childRevision)
+        this.setData({ childrenError: (e as Error).message });
+    } finally {
+      if (revision === this.childRevision)
+        this.setData({ childrenLoading: false });
+    }
+  },
+  moreChildren() {
+    void this.loadChildren();
   },
   switchTab(e: WechatMiniprogram.TouchEvent) {
     this.show(e.currentTarget.dataset.tab);
