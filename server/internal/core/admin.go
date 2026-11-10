@@ -15,7 +15,3 @@ type AdminAccount struct {
 	PasswordChangedAt time.Time `json:"passwordChangedAt"`
 	CreatedBy         string    `json:"createdBy"`
 }
-
-type DirectAccess struct {
-	ActivatedAt time.Time `json:"activatedAt"`
-}

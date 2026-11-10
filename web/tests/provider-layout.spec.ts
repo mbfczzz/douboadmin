@@ -15,21 +15,22 @@ const names = [
   "杭州服务商",
   "超长名称服务商".repeat(5),
 ];
+// 华东 分公司 → 上海 S1 → 浦东 S2 → deeper S2 records; 杭州 is disabled and
+// 视频创作团队 waits for approval.
+const roles = ["branch", "s1", "s2", "s2", "s2", "s2", "branch", "branch"];
 const rows = ids.map((id, i) => ({
-  record: {
-    id,
-    version: 1,
-    createdAt: "2026-11-06T00:00:00Z",
-    data: {
-      name: names[i],
-      parentId: i > 0 && i < 6 ? ids[i - 1] : "root",
-      path: [],
-      status: i === 6 ? "disabled" : "active",
-      retailPer100Fen: 10000,
-      childMarginBps: 5000,
-    },
+  id,
+  version: 1,
+  createdAt: "2026-11-06T00:00:00Z",
+  data: {
+    name: names[i],
+    role: roles[i],
+    parentId: i > 0 && i < 6 ? ids[i - 1] : "root",
+    path: [],
+    status: i === 6 ? "disabled" : i === 5 ? "pending" : "active",
+    retailPer100Fen: 10000,
+    childMarginBps: 5000,
   },
-  quota: { users: { granted: 100, used: 10, allocated: 20, reserved: 0 } },
 }));
 
 test.beforeEach(async ({ page }) => {
@@ -75,16 +76,8 @@ test("provider layout stays aligned and contained across desktop, tablet and mob
     expect(toggle!.width).toBe(spacer!.width);
     if (width === 1440) {
       const heads = tree.locator(".provider-tree-head > span");
+      await expect(heads).toHaveText(["服务商", "状态", "操作"]);
       const rootRow = tree.locator(".provider-tree-row").first();
-      const total = await rootRow
-        .locator(".provider-quota")
-        .first()
-        .boundingBox();
-      const totalHead = await heads.nth(2).boundingBox();
-      expect(total!.x + total!.width).toBeCloseTo(
-        totalHead!.x + totalHead!.width,
-        0,
-      );
       const actions = await rootRow
         .locator(".provider-tree-actions")
         .boundingBox();
@@ -140,4 +133,30 @@ test("search, expansion, expand-all and the edit action keep working", async ({
   await expect(
     page.getByRole("dialog", { name: "编辑服务商", exact: true }),
   ).toBeVisible();
+});
+
+test("分公司 and S1 add sub-providers; an S2 serves 会员 only", async ({
+  page,
+}) => {
+  const add = (name: string) =>
+    page
+      .locator(".provider-tree-row")
+      .filter({ hasText: name })
+      .first()
+      .getByRole("button", { name: "新增子级" });
+  await expect(add("华东服务商")).toHaveCount(1); // 分公司
+  await expect(add("上海服务商")).toHaveCount(1); // S1
+  // S2 and the older, deeper records keep no "新增子级" button.
+  await expect(add("浦东服务商")).toHaveCount(0);
+  await expect(add("创作工作室")).toHaveCount(0);
+  const tree = page.locator(".provider-tree");
+  await expect(tree).toContainText("分公司 · ");
+  await expect(tree).toContainText("S1 服务商 · ");
+  await expect(tree).toContainText("S2 推荐官 · ");
+  // A scanned provider waits for 总部: 待开通, and nothing to edit yet.
+  const pending = page
+    .locator(".provider-tree-row")
+    .filter({ hasText: "视频创作团队" });
+  await expect(pending.locator(".badge")).toHaveText("待开通");
+  await expect(pending.getByRole("button", { name: "编辑" })).toHaveCount(0);
 });

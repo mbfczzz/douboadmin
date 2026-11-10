@@ -2,8 +2,6 @@ import type { ReactNode } from "react";
 
 export type Stat = {
   label: string;
-  // Colour key matching a segment of the quota bar.
-  dot?: "used" | "reserved" | "allocated";
   value: ReactNode;
   note?: ReactNode;
   tone?: "accent" | "success" | "warning" | "danger";
@@ -25,10 +23,7 @@ export default function TabSummary({
         <dl>
           {stats.map((s) => (
             <div key={s.label} className={s.tone}>
-              <dt>
-                {s.dot && <i className={s.dot} aria-hidden="true" />}
-                {s.label}
-              </dt>
+              <dt>{s.label}</dt>
               <dd>
                 {s.value}
                 {s.note && <small>{s.note}</small>}

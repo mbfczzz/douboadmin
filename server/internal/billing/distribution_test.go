@@ -23,21 +23,32 @@ func channelFixture(t *testing.T) (*Service, *partners.Service, context.Context,
 	if _, e := p.SavePolicy(ctx, policy, 0, "admin"); e != nil {
 		t.Fatal(e)
 	}
-	a, e := p.Create(ctx, core.RootPartner, "S1", 9, "create-s1", "admin")
+	// 分公司 → S1 → member, with the classic 10/5/5 commission split.
+	a, e := p.Create(ctx, core.RootPartner, "分公司", core.RoleBranch, "create-s1", "admin")
 	if e != nil {
 		t.Fatal(e)
 	}
-	b, e := p.Create(ctx, a.ID, "S2", 1, "create-s2", "admin")
+	b, e := p.Create(ctx, a.ID, "S1", core.RoleS1, "create-s2", "admin")
 	if e != nil {
 		t.Fatal(e)
 	}
 	_, _ = db.Put(ctx, "users", core.Record{ID: "user", Data: core.Data(map[string]string{"nickname": "test"})}, 0)
-	code, e := p.Issue(ctx, b.ID, "user", 7, "code-user", "admin")
+	code, e := p.ShareCode(ctx, b.ID, "admin")
 	if e != nil {
 		t.Fatal(e)
 	}
-	token, _ := p.Reveal(ctx, code.ID)
-	if _, e = p.Redeem(ctx, "user", token); e != nil {
+	if _, e = p.Join(ctx, "user", code, "scan"); e != nil {
+		t.Fatal(e)
+	}
+	// Scanning only registers; the platform's approval opens the account.
+	if _, _, e = p.UserQuote(ctx, "user", 100, 100); !errors.Is(e, core.ErrActivationRequired) {
+		t.Fatal("a pending registration was quoted", e)
+	}
+	reg, e := db.Get(ctx, "registrations", "user")
+	if e != nil {
+		t.Fatal(e)
+	}
+	if _, e = p.Decide(ctx, "user", true, "", reg.Version, "admin"); e != nil {
 		t.Fatal(e)
 	}
 	return s, p, ctx, a.ID, b.ID

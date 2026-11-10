@@ -229,3 +229,34 @@ button.profile-submit {
   font-size: 12px;
   line-height: 18px;
 }
+.profile-identity {
+  padding: 1px 8px;
+  border-radius: 4px;
+  background: #2a2f32;
+  color: #c7cdd0;
+  font-size: 12px;
+  line-height: 18px;
+}
+.profile-identity.branch {
+  background: #2f2a3a;
+  color: #c9b6ef;
+}
+.profile-identity.member {
+  background: #22303a;
+  color: #9cc3e0;
+}
+.profile-identity.s1 {
+  background: #3a3222;
+  color: #e8c98a;
+}
+.profile-identity.s2 {
+  background: #22332a;
+  color: #9bcbaa;
+}
+/* Long provider names give way to the identity label. */
+.profile-partner {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}

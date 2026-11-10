@@ -10,7 +10,6 @@ export interface AccessStatus {
   message?: string;
   // Registration step: name and SMS-verified phone are still missing.
   profileRequired?: boolean;
-  openSignup?: boolean;
   name?: string;
   phone?: string;
 }
@@ -93,18 +92,15 @@ export async function enforceAccess(path: string) {
     if (e instanceof RequestError && e.status === 403) activationRedirect();
   }
 }
-export function scannedActivation(value: string) {
-  let input = value.trim();
-  try {
-    input = decodeURIComponent(input);
-  } catch {
-    throw new Error("二维码内容无效");
-  }
-  input = input
+// A provider's share code: 8 unambiguous characters. Accepts the scanned QR
+// content (DOUBO-SHARE:CODE) or a typed code with spaces or dashes.
+export function shareFrom(value: string) {
+  const code = value
+    .trim()
     .toUpperCase()
-    .replace(/^DOUBO-ACTIVATE:/, "")
+    .replace(/^DOUBO-SHARE:/, "")
     .replace(/[\s-]/g, "");
-  if (!/^[A-Z2-7]{20}$/.test(input))
-    throw new Error("请扫描豆播授权二维码或输入完整激活码");
-  return input;
+  if (!/^[A-HJ-NP-Z2-9]{8}$/.test(code))
+    throw new Error("请扫描服务商的分享二维码或输入 8 位分享码");
+  return code;
 }

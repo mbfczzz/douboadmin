@@ -1,0 +1,104 @@
+/* 分享码: one panel per code type, the QR code first. */
+.share-panel {
+  margin-bottom: 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.share-tabs {
+  padding: 0 22px;
+  border-bottom: 1px solid var(--line);
+}
+.share-body {
+  padding: 22px;
+}
+.code-view {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  min-width: 0;
+}
+.share-qr {
+  flex-shrink: 0;
+  width: 168px;
+  height: 168px;
+  padding: 8px;
+  border-radius: var(--radius-sm);
+  background: #fff; /* the quiet zone a scanner needs */
+}
+.code-info {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+.share-code {
+  margin: 0;
+  color: var(--ink-strong);
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  line-height: 1.1;
+}
+.code-info > .quiet {
+  margin: 0;
+  font-size: 13px;
+}
+.share-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-top: 6px;
+}
+.share-actions > * {
+  gap: 6px;
+}
+@media (max-width: 720px) {
+  /* Four codes on a phone: keep the gaps and scroll sideways if needed. */
+  .share-tabs {
+    gap: 16px;
+    padding: 0 16px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .share-tabs button {
+    flex-shrink: 0;
+  }
+  .share-body {
+    padding: 16px;
+  }
+  .code-view {
+    flex-direction: column;
+    text-align: center;
+  }
+  .share-actions {
+    justify-content: center;
+  }
+}
+.bound-owner {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  min-height: 168px;
+}
+.bound-avatar {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+.bound-owner > div {
+  flex: 1;
+  min-width: 0;
+}
+.bound-owner p {
+  margin: 0;
+}
+.bound-name {
+  color: var(--ink-strong);
+  font-size: 18px;
+  font-weight: 600;
+}

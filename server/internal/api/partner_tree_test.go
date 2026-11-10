@@ -3,38 +3,45 @@ package api
 import (
 	"doubo/server/internal/core"
 	"encoding/json"
+	"strings"
 	"testing"
 )
 
-func TestPartnerTreeReturnsAllHierarchyLevels(t *testing.T) {
+func TestPartnerTreeListsEveryRole(t *testing.T) {
 	a, _, _ := setup(t)
-	login := call(a, "POST", "/api/admin/login", "", "", map[string]string{"username": "admin", "password": "test-pass"})
-	admin := login.Result().Cookies()[0].Value
-	parent := call(a, "POST", "/api/admin/partners", admin, "tree-parent", map[string]any{"parentId": "root", "name": "一级服务商", "users": 10})
-	if parent.Code != 200 {
-		t.Fatal(parent.Code, parent.Body.String())
-	}
-	var created struct {
-		ID string `json:"id"`
-	}
-	if json.Unmarshal(parent.Body.Bytes(), &created) != nil {
-		t.Fatal(parent.Body.String())
-	}
-	child := call(a, "POST", "/api/admin/partners", admin, "tree-child", map[string]any{"parentId": created.ID, "name": "二级服务商", "users": 4})
-	if child.Code != 200 {
-		t.Fatal(child.Code, child.Body.String())
-	}
+	admin := adminLoginToken(t, a, "admin", "test-pass")
+	branch := createBranch(t, a, admin, "tree")
+	s1 := createProvider(t, a, admin, "tree-s1", branch, "S1", "s1", nil)
+	s2 := createProvider(t, a, admin, "tree-s2", s1, "S2", "s2", nil)
+	direct := createProvider(t, a, admin, "tree-direct-s2", branch, "直属 S2", "s2", nil)
 	tree := call(a, "GET", "/api/admin/partners/tree", admin, "", nil)
-	var items []struct {
-		Record core.Record       `json:"record"`
-		Quota  core.PartnerQuota `json:"quota"`
-	}
-	if tree.Code != 200 || json.Unmarshal(tree.Body.Bytes(), &items) != nil || len(items) != 2 {
+	var rows []core.Record
+	if tree.Code != 200 || json.Unmarshal(tree.Body.Bytes(), &rows) != nil || len(rows) != 4 {
 		t.Fatal(tree.Code, tree.Body.String())
 	}
-	for _, item := range items {
-		if item.Record.ID == created.ID && (item.Quota.Users.Granted != 10 || item.Quota.Users.Allocated != 4 || item.Quota.Users.Available() != 6) {
-			t.Fatal(item.Quota)
+	want := map[string][2]string{branch: {"branch", "root"}, s1: {"s1", branch}, s2: {"s2", s1}, direct: {"s2", branch}}
+	for _, row := range rows {
+		var p core.Partner
+		if json.Unmarshal(row.Data, &p) != nil || want[row.ID] != [2]string{p.Role, p.ParentID} || p.Status != "active" {
+			t.Fatal("tree row", row.ID, string(row.Data))
+		}
+	}
+}
+
+func TestPlatformGrowsProvidersByRole(t *testing.T) {
+	a, _, _ := setup(t)
+	admin := adminLoginToken(t, a, "admin", "test-pass")
+	branch := createBranch(t, a, admin, "grow")
+	s1 := createProvider(t, a, admin, "grow-s1", branch, "S1", "s1", nil)
+	s2 := createProvider(t, a, admin, "grow-s2", s1, "S2", "s2", nil)
+	// The platform adds 分公司; a 分公司 adds S1 and S2; an S1 adds S2.
+	for _, c := range []struct{ parent, role string }{
+		{core.RootPartner, "s1"}, {core.RootPartner, "s2"}, {core.RootPartner, ""},
+		{branch, "branch"}, {s1, "s1"}, {s1, "branch"}, {s2, "s2"}, {s2, "s1"},
+	} {
+		w := call(a, "POST", "/api/admin/partners", admin, "grow-"+c.parent+"-"+c.role, map[string]any{"parentId": c.parent, "name": "越级", "role": c.role})
+		if w.Code != 400 || !strings.Contains(w.Body.String(), "不能添加这一级") {
+			t.Fatal("growth rule", c, w.Code, w.Body.String())
 		}
 	}
 }

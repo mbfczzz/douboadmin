@@ -24,7 +24,11 @@ test("admin accounts and mini users have separate management controls", async ({
 
   await page.getByRole("button", { name: "小程序用户", exact: true }).click();
   // Each user action has its own button in the row and its own small dialog.
-  const row = page.locator("tbody tr").first();
+  // The 扫码登记 table sits above the user list; take a user row.
+  const row = page
+    .locator("tbody tr")
+    .filter({ has: page.getByRole("button", { name: "编辑", exact: true }) })
+    .first();
   await row.getByRole("button", { name: "编辑", exact: true }).click();
   const profile = page.getByRole("dialog", { name: "编辑用户资料" });
   await expect(

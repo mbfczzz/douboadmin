@@ -4,33 +4,28 @@ import type { Row } from "../api";
 import Modal from "../components/Modal";
 import ProviderLoginFields from "./ProviderLoginFields";
 import type { Notify } from "../navigation";
-import type { Partner } from "./types";
+import { growth, type Partner } from "./types";
+import { roleName } from "../business/types";
 import { useCommand } from "./useCommand";
 
+// Edits a provider, or adds one below `parent` (platform only): a 分公司
+// under the platform, an S1 or S2 under a 分公司, an S2 under an S1.
 export default function ProviderForm({
   parent,
   row,
   onSaved,
   onClose,
   notify,
-  parentAvailable,
 }: {
-  parent: string;
+  parent?: Row<Partner> | "root";
   row?: Row<Partner>;
   onSaved: () => Promise<void>;
   onClose: () => void;
   notify: Notify;
-  parentAvailable?: number;
 }) {
   const [dirty, setDirty] = useState(false);
   const command = useCommand(),
-    [users, setUsers] = useState(""),
-    limited = !row && parent !== "root",
-    noAvailable = limited && (parentAvailable ?? 0) < 1,
-    overAvailable = limited && Number(users) > (parentAvailable ?? 0),
-    remaining = limited
-      ? Math.max(0, (parentAvailable ?? 0) - (Number(users) || 0))
-      : undefined;
+    roles = growth[parent === "root" ? "root" : parent?.data.role || ""] || [];
   const form = (
     <form
       className="edit-form"
@@ -57,9 +52,9 @@ export default function ProviderForm({
             );
           else
             await command.send("/admin/partners", {
-              parentId: parent,
+              parentId: parent === "root" ? "root" : parent?.id,
               name: String(data.get("name")),
-              users: Number(data.get("users")),
+              role: String(data.get("role") || roles[0]),
               account: {
                 username: String(data.get("accountUsername") || "").trim(),
                 password: String(data.get("accountPassword") || ""),
@@ -95,35 +90,22 @@ export default function ProviderForm({
                 />{" "}
                 启用服务商
               </label>
-              <p className="quiet">
-                停用会暂停整个下级链路的使用权限，但不释放名额。
-              </p>
+              <p className="quiet">停用会暂停整个下级链路的使用权限。</p>
             </>
           ) : (
             <>
-              <label>
-                可授权账号额度
-                <input
-                  name="users"
-                  type="number"
-                  min="1"
-                  max={limited ? parentAvailable : 1000000}
-                  step="1"
-                  value={users}
-                  onChange={(event) => setUsers(event.target.value)}
-                  disabled={noAvailable}
-                  required
-                />
-              </label>
-              <p className="quiet" aria-live="polite">
-                {limited
-                  ? noAvailable
-                    ? "上级当前没有可划拨额度，请先补充或收回额度。"
-                    : overAvailable
-                      ? `本次额度超出上级可用额度 ${Number(users) - (parentAvailable ?? 0)} 个，请调小后再保存。`
-                      : `上级当前可用 ${parentAvailable} 个，本次分配后预计剩余 ${remaining} 个。`
-                  : "一级服务商额度不占用总账号额度，可直接设置初始可授权账号数。"}
-              </p>
+              {roles.length > 1 && (
+                <label>
+                  服务商级别
+                  <select name="role" defaultValue={roles[0]}>
+                    {roles.map((role) => (
+                      <option key={role} value={role}>
+                        {roleName(role)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
               <ProviderLoginFields disabled={command.busy} />
             </>
           )}
@@ -138,10 +120,7 @@ export default function ProviderForm({
         >
           取消
         </button>
-        <button
-          className="primary"
-          disabled={command.busy || noAvailable || overAvailable}
-        >
+        <button className="primary" disabled={command.busy}>
           {command.busy ? "保存中…" : "保存服务商"}
         </button>
       </div>
@@ -151,9 +130,12 @@ export default function ProviderForm({
     <Modal
       className="form-modal"
       title={
-        row ? "编辑服务商" : parent === "root" ? "新增服务商" : "新增下级服务商"
+        row ? "编辑服务商" : parent === "root" ? "新增分公司" : "新增下级服务商"
       }
-      subtitle={row?.data.name}
+      subtitle={
+        row?.data.name ||
+        (parent && parent !== "root" ? `上级：${parent.data.name}` : undefined)
+      }
       onClose={guardedClose(command.busy, onClose)}
     >
       {form}

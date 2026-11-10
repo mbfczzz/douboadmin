@@ -7,6 +7,7 @@ export default function ResourcePage({
   page,
   resource,
   actions,
+  tabs,
   children,
 }: {
   page: PageId;
@@ -17,6 +18,8 @@ export default function ResourcePage({
     reload: () => unknown;
   };
   actions?: ReactNode;
+  // Page-level view switch, shown even while the list loads or fails.
+  tabs?: ReactNode;
   children: ReactNode;
 }) {
   const refresh = () => {
@@ -27,6 +30,7 @@ export default function ResourcePage({
       <PageHeader page={page} loading={resource.loading} onRefresh={refresh}>
         {actions}
       </PageHeader>
+      {tabs}
       <RequestState
         loading={resource.loading && resource.data === undefined}
         error={resource.error}

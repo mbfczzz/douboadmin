@@ -65,6 +65,13 @@ Page({
     guardProfile(false);
     return false;
   },
+  loadIdentity(revision = this.revision) {
+    request<typeof profileState.identity>("/me/identity").then(
+      (identity) => this.current(revision) && this.setData({ identity }),
+      () => {},
+    );
+  },
+
   async load() {
     const revision = ++this.revision;
     this.ownerToken = sessionToken();
@@ -91,6 +98,8 @@ Page({
           ? media(me.profile.data.avatarUrl)
           : "",
       });
+      // The identity label is extra; the editor never waits for it.
+      this.loadIdentity(revision);
     } catch (e) {
       if (this.current(revision) && !(e instanceof AuthCancelledError))
         this.setData({ loadError: errorMessage(e) });

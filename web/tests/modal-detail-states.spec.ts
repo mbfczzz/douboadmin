@@ -5,18 +5,6 @@ import { inspectModal, closeTop } from "./modal-audit";
 
 const samples = [
   {
-    module: ["授权码", "授权激活"],
-    button: "查看二维码",
-    path: "/activation-codes/qa-code",
-    loaded: "复制激活码",
-  },
-  {
-    module: ["授权码", "授权激活"],
-    button: "来源记录",
-    path: "/activation-codes/qa-code/trace",
-    loaded: "生成账号",
-  },
-  {
     module: ["分佣", "算力分佣"],
     button: "qa-order",
     path: "/orders/qa-order/distribution",

@@ -50,6 +50,7 @@ func (a *Server) routes() {
 	m.HandleFunc("GET /api/templates", a.business(a.templates))
 	m.HandleFunc("GET /api/templates/{id}", a.business(a.template))
 	m.HandleFunc("GET /api/me", a.auth("user", a.me))
+	m.HandleFunc("GET /api/me/identity", a.auth("user", a.myIdentity))
 	m.HandleFunc("PUT /api/me", a.auth("user", a.updateMe))
 	m.HandleFunc("GET /api/jobs", a.auth("user", a.jobs))
 	m.HandleFunc("POST /api/jobs", a.auth("user", a.createJob))

@@ -88,42 +88,33 @@ var ops = map[string]op{
 	"PUT /api/admin/integrations/{group}":                 {label: "修改服务接入配置", target: "group"},
 	"PUT /api/admin/alerts/{id}/ack":                      {label: "确认告警", target: "alert"},
 	"POST /api/admin/partners": {creates: "partner", label: "创建服务商", summary: func(q, _ map[string]any) string {
-		return str(q, "name") + fmt.Sprintf(" · 初始名额 %.0f", num(q, "users"))
+		return str(q, "name") + " · " + map[string]string{"branch": "分公司", "s1": "S1 服务商", "s2": "S2 推荐官"}[str(q, "role")]
 	}},
-	"PUT /api/admin/partners/{id}":         {label: "编辑服务商", target: "partner"},
-	"PUT /api/admin/partners/{id}/account": {label: "修改服务商登录账号", target: "partner", summary: accountSummary},
-	"PUT /api/admin/partner-policy":        {label: "修改分销规则"},
-	"POST /api/admin/quota-moves": {label: "名额划拨", summary: func(q, _ map[string]any) string {
-		return map[bool]string{true: "收回", false: "划拨"}[str(q, "kind") == "reclaim"] + fmt.Sprintf(" %.0f 个名额", num(q, "users")) + reason(q, "reason")
+	"PUT /api/admin/partners/{id}":               {label: "编辑服务商", target: "partner"},
+	"PUT /api/admin/partners/{id}/account":       {label: "修改服务商登录账号", target: "partner", summary: accountSummary},
+	"PUT /api/admin/partner-policy":              {label: "修改分销规则"},
+	"POST /api/provider/password":                {label: "生成服务商后台密码"},
+	"POST /api/admin/partners/{id}/codes/{kind}": {label: "重置分享码", target: "partner"},
+	"DELETE /api/admin/partners/{id}/codes/bind": {label: "解除服务商绑定", target: "partner"},
+	"PUT /api/admin/registrations/{id}": {label: "处理扫码登记", target: "user", summary: func(q, _ map[string]any) string {
+		return map[bool]string{true: "开通", false: "拒绝"}[q["approve"] == true] + reason(q, "reason")
 	}},
-	"POST /api/admin/quota-requests": {creates: "request", label: "申请名额", summary: func(q, _ map[string]any) string {
-		return fmt.Sprintf("%.0f 个名额", num(q, "users")) + reason(q, "reason")
-	}},
-	"PUT /api/admin/quota-requests/{id}": {label: "审批名额申请", target: "request", summary: func(q, _ map[string]any) string {
-		return map[bool]string{true: "批准", false: "拒绝"}[q["approve"] == true] + reason(q, "reason")
-	}},
-	"POST /api/admin/activation-codes":        {creates: "code", label: "生成授权码", summary: func(q, _ map[string]any) string { return str(q, "label") }},
-	"DELETE /api/admin/activation-codes/{id}": {label: "撤销授权码", target: "code"},
-	"PUT /api/admin/memberships/{id}":         {label: "修改用户授权", target: "user", summary: func(q, _ map[string]any) string { return statusWords[str(q, "status")] + reason(q, "reason") }},
+	"PUT /api/admin/memberships/{id}": {label: "修改用户授权", target: "user", summary: func(q, _ map[string]any) string { return statusWords[str(q, "status")] + reason(q, "reason") }},
 	"POST /api/admin/commission-payouts": {creates: "payout", label: "申请提现", summary: func(q, _ map[string]any) string {
 		return fmt.Sprintf("¥%.2f", num(q, "amountFen")/100) + reason(q, "note")
 	}},
 	"PUT /api/admin/commission-payouts/{id}": {label: "处理提现", target: "payout", summary: func(q, _ map[string]any) string { return statusWords[str(q, "status")] + reason(q, "reference") }},
 	"POST /api/access/sms":                   {label: "发送短信验证码", summary: func(q, _ map[string]any) string { return "手机号 " + str(q, "phone") }},
 	"POST /api/access/profile":               {label: "完善注册信息", summary: func(q, _ map[string]any) string { return str(q, "name") + " · " + str(q, "phone") }},
-	"PUT /api/admin/signup": {label: "设置普通用户注册", summary: func(q, _ map[string]any) string {
-		return map[bool]string{true: "开放", false: "关闭"}[q["openSignup"] == true]
-	}},
-	"POST /api/access/direct":          {label: "跳过激活，以普通用户开通"},
-	"POST /api/access/redeem":          {label: "使用授权码激活"},
-	"PUT /api/me":                      {label: "修改个人资料"},
-	"PUT /api/preferences":             {label: "修改偏好设置"},
-	"POST /api/assets":                 {label: "上传素材"},
-	"POST /api/jobs":                   {creates: "job", label: "提交生成任务", summary: jobSummary},
-	"POST /api/jobs/{id}/retry":        {label: "重试生成任务", target: "job"},
-	"POST /api/hot/videos/{id}/import": {label: "导入热门视频", target: "video"},
-	"DELETE /api/works/{id}":           {label: "删除作品", target: "job"},
-	"POST /api/shares":                 {label: "创建分享"},
+	"POST /api/access/join":                  {label: "扫码登记"},
+	"PUT /api/me":                            {label: "修改个人资料"},
+	"PUT /api/preferences":                   {label: "修改偏好设置"},
+	"POST /api/assets":                       {label: "上传素材"},
+	"POST /api/jobs":                         {creates: "job", label: "提交生成任务", summary: jobSummary},
+	"POST /api/jobs/{id}/retry":              {label: "重试生成任务", target: "job"},
+	"POST /api/hot/videos/{id}/import":       {label: "导入热门视频", target: "video"},
+	"DELETE /api/works/{id}":                 {label: "删除作品", target: "job"},
+	"POST /api/shares":                       {label: "创建分享"},
 	"PUT /api/favorites/{id}": {label: "收藏模板", target: "template", summary: func(q, _ map[string]any) string {
 		return map[bool]string{true: "收藏", false: "取消收藏"}[q["active"] == true]
 	}},

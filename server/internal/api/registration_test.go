@@ -56,17 +56,15 @@ func sendCode(t *testing.T, a *Server, token, phone string) string {
 func TestRegistrationComesBeforeActivation(t *testing.T) {
 	a, _, admin := activationFixture(t)
 	user := newMiniUser(t, a, "user-new")
-	if v := accessOf(t, a, user); !v.ProfileRequired || v.Active || !v.OpenSignup {
+	if v := accessOf(t, a, user); !v.ProfileRequired || v.Active {
 		t.Fatal("unregistered access", v)
 	}
 	w := call(a, "GET", "/api/templates", user, "", nil)
 	if w.Code != 403 || !strings.Contains(w.Body.String(), `"profileRequired":true`) {
 		t.Fatal("business endpoint before registration", w.Code, w.Body.String())
 	}
-	for _, path := range []string{"/api/access/direct", "/api/access/redeem"} {
-		if w = call(a, "POST", path, user, "", map[string]string{"code": "AAAAAAAAAAAAAAAAAAAA"}); w.Code != 403 || !strings.Contains(w.Body.String(), "PROFILE_REQUIRED") {
-			t.Fatal("activation before registration", path, w.Code, w.Body.String())
-		}
+	if w = call(a, "POST", "/api/access/join", user, "", map[string]string{"code": "AAAAAAAA", "method": "scan"}); w.Code != 403 || !strings.Contains(w.Body.String(), "PROFILE_REQUIRED") {
+		t.Fatal("activation before registration", w.Code, w.Body.String())
 	}
 	if w = call(a, "POST", "/api/access/sms", user, "", map[string]string{"phone": "12345"}); w.Code != 400 {
 		t.Fatal("invalid phone accepted", w.Code)
@@ -98,12 +96,13 @@ func TestRegistrationComesBeforeActivation(t *testing.T) {
 	if !strings.Contains(string(row.Data), `"name":"张三"`) || !strings.Contains(string(row.Data), `"verifiedPhone":"13900139000"`) {
 		t.Fatal(string(row.Data))
 	}
-	// Signup open: the user may skip the provider code.
-	if w = call(a, "POST", "/api/access/direct", user, "", map[string]any{}); w.Code != 200 {
-		t.Fatal(w.Code, w.Body.String())
+	// Registered users still need a provider's code and the platform's approval.
+	if w = call(a, "GET", "/api/templates", user, "", nil); w.Code != 403 {
+		t.Fatal("registered user without a provider", w.Code, w.Body.String())
 	}
+	joinPartner(t, a, newBranch(t, a, "reg"), "user-new")
 	if w = call(a, "GET", "/api/templates", user, "", nil); w.Code != 200 {
-		t.Fatal("registered direct user blocked", w.Code, w.Body.String())
+		t.Fatal("approved member blocked", w.Code, w.Body.String())
 	}
 	// The phone is changed only through SMS; the name stays required.
 	w = call(a, "PUT", "/api/me", user, "", map[string]any{"version": row.Version, "nickname": "n", "phone": "13700000000"})
@@ -120,31 +119,6 @@ func TestRegistrationComesBeforeActivation(t *testing.T) {
 	}
 	if v := accessOf(t, a, user); !v.ProfileRequired || v.Active || v.Phone != "13700000000" {
 		t.Fatal("changed phone kept the old verification", v)
-	}
-}
-
-func TestClosedSignupRequiresProviderCode(t *testing.T) {
-	a, _, admin := activationFixture(t)
-	w := call(a, "PUT", "/api/admin/signup", admin, "", map[string]any{"version": 0, "openSignup": false})
-	if w.Code != 200 {
-		t.Fatal(w.Code, w.Body.String())
-	}
-	if w = call(a, "GET", "/api/admin/signup", admin, "", nil); !strings.Contains(w.Body.String(), `"openSignup":false`) {
-		t.Fatal(w.Body.String())
-	}
-	user := newMiniUser(t, a, "user-closed")
-	code := sendCode(t, a, user, "13900139002")
-	if w = call(a, "POST", "/api/access/profile", user, "", map[string]string{"name": "李四", "phone": "13900139002", "code": code}); w.Code != 200 {
-		t.Fatal(w.Code, w.Body.String())
-	}
-	if v := accessOf(t, a, user); v.OpenSignup || v.ProfileRequired || v.Active {
-		t.Fatal(v)
-	}
-	if w = call(a, "POST", "/api/access/direct", user, "", map[string]any{}); w.Code != 403 || !strings.Contains(w.Body.String(), "未开放") {
-		t.Fatal("direct access while signup closed", w.Code, w.Body.String())
-	}
-	if w = call(a, "PUT", "/api/admin/signup", newMiniUser(t, a, "user-x"), "", map[string]any{"version": 1, "openSignup": true}); w.Code != 403 {
-		t.Fatal("user changed signup", w.Code)
 	}
 }
 

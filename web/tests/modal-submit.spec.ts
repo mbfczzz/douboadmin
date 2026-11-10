@@ -10,6 +10,8 @@ for (const sample of submitCases) {
     await login(page);
     await modalPartnerFixtures(page);
     await page.getByRole("button", { name: sample.nav, exact: true }).click();
+    if (sample.tab)
+      await page.getByRole("tab", { name: sample.tab, exact: true }).click();
     if (sample.module)
       await page
         .locator(".provider-tree-row")
@@ -20,17 +22,6 @@ for (const sample of submitCases) {
       .getByRole("button", { name: sample.open, exact: true })
       .first()
       .click();
-    if (sample.pick) {
-      await page.getByRole("button", { name: "选择直接下级服务商" }).click();
-      await page
-        .getByRole("dialog")
-        .last()
-        .getByRole("button", { name: "选择", exact: true })
-        .click();
-      await expect(
-        page.getByText("目标可用名额", { exact: true }),
-      ).toBeVisible();
-    }
     const dialog = page.getByRole("dialog").last();
     const field = (label: string) =>
       dialog
@@ -57,13 +48,8 @@ for (const sample of submitCases) {
       .getByRole("button", { name: sample.submit, exact: true })
       .click();
     if (
-      ![
-        "管理账号",
-        "模型导入",
-        "新增服务商",
-        "名额申请",
-        "生成授权码",
-      ].includes(sample.name)
+      !sample.direct &&
+      !["管理账号", "模型导入", "新增分公司"].includes(sample.name)
     )
       await confirmSubmission(page);
     await expect.poll(() => submitted).toBe(1);

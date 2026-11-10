@@ -136,10 +136,9 @@ export interface Breakdown {
   pointsSold: number;
   channels: Record<string, { orders: number; amountFen: number }>;
   refunds: number;
-  directActivations: number;
-  providerActivations: number;
-  codesIssued: number;
-  codesRedeemed: number;
+  // Accounts the platform opened in the period.
+  memberActivations: number;
+  ownerActivations: number;
   providers: { id: string; name: string; activations: number }[];
   traffic?: Traffic;
   trafficByClient?: Record<string, Traffic>;
@@ -248,3 +247,23 @@ export const kindNames: Record<string, string> = {
   audio: "配音",
   mix: "混剪",
 };
+// How a user registered: scanning a QR code or typing its code.
+export const joinMethod = (method?: string) =>
+  method === "scan" ? "扫码登记" : method === "code" ? "输入码登记" : "未记录";
+// Role names: 分公司 → S1 服务商 → S2 推荐官, and their 会员.
+const roles: Record<string, string> = {
+  branch: "分公司",
+  s1: "S1 服务商",
+  s2: "S2 推荐官",
+  member: "会员",
+};
+export const roleName = (role?: string) => roles[role || ""] || "服务商";
+// The code a registration used ("" is a provider's 会员开通码).
+const codeKinds: Record<string, string> = {
+  promo: "推广码",
+  s1: "S1 邀请码",
+  s2: "S2 邀请码",
+  bind: "服务商绑定码",
+};
+export const codeKindName = (kind?: string) =>
+  codeKinds[kind || ""] || "会员开通码";

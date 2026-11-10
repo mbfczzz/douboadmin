@@ -5,7 +5,7 @@
   .provider-tree-head {
     display: none;
   }
-  /* Name, then status/quota, then the actions: every row the same shape. */
+  /* Name, then status, then the actions: every row the same shape. */
   .provider-tree-row {
     grid-template-columns: minmax(0, 1fr);
     gap: 12px;
@@ -30,12 +30,6 @@
   .provider-tree-meta small {
     display: block;
     margin-bottom: 8px;
-  }
-  .provider-quota {
-    text-align: left;
-  }
-  .quota-bar {
-    margin-left: 0;
   }
 }
 @container (max-width: 520px) {

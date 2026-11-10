@@ -11,9 +11,7 @@ import (
 
 func TestAdminSeesUserModelUseAndActivity(t *testing.T) {
 	a, user, admin := activationFixture(t)
-	if w := call(a, "POST", "/api/access/direct", user, "", map[string]any{}); w.Code != 200 {
-		t.Fatal(w.Code, w.Body.String())
-	}
+	activate(t, a, "user-a")
 	for i, kind := range []string{"image", "image", "import"} {
 		j := core.NewJob("user-a", "key-"+string(rune('a'+i)), core.JobInput{Kind: kind, Model: "demo-image", Prompt: "一只猫"})
 		if kind == "import" {

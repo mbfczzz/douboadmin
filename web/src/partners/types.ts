@@ -1,24 +1,18 @@
 import type { Tone } from "../components/Tag";
 import type { Row } from "../api";
 import type { Notify } from "../navigation";
-import { date } from "../api";
 export type Partner = {
   name: string;
+  // branch (分公司), s1 (S1 服务商) or s2 (S2 推荐官).
+  role: string;
   parentId: string;
   path: string[];
+  // active, disabled, or pending until the platform approves a scan.
   status: string;
   retailPer100Fen: number;
   childMarginBps: number;
-};
-export type Pool = {
-  granted: number;
-  allocated: number;
-  reserved: number;
-  used: number;
-};
-export type PartnerTreeItem = {
-  record: Row<Partner>;
-  quota: { users: Pool; partners?: Pool };
+  // The mini-program account that runs it (by invite or bind code).
+  ownerUser?: string;
 };
 export type Price = {
   enabled: boolean;
@@ -30,7 +24,6 @@ export type Price = {
 };
 export type Overview = {
   record: Row<Partner>;
-  quota: { users: Pool; partners?: Pool };
   price: Price;
   priceError?: string;
   commission: { balanceFen: number; heldFen: number; paidOutFen: number };
@@ -45,48 +38,16 @@ export type Membership = {
   partnerId: string;
   status: string;
   codeId: string;
+  method?: string;
+  // The member whose promo code was used.
+  referrer?: string;
   activatedAt: string;
   reason?: string;
-};
-export type Code = {
-  actor: string;
-  creatorAccount?: string;
-  partnerName?: string;
-  activatedNickname?: string;
-  activationMethod?: string;
-  usedAt?: string;
-  partnerId: string;
-  label: string;
-  suffix: string;
-  status: string;
-  expiresAt: string;
-  userId?: string;
-};
-export const activationMethod = (method?: string) =>
-  method === "qr" ? "扫码" : method === "code" ? "激活码" : "未记录";
-export const traceTime = (value?: string) => date(value, true);
-export type Move = {
-  parentId: string;
-  childId: string;
-  users: number;
-  partners?: number;
-  kind: string;
-  reason: string;
-};
-export type QuotaRequest = {
-  partnerId: string;
-  parentId: string;
-  users: number;
-  partners?: number;
-  status: string;
-  reason: string;
-  decision?: string;
 };
 export type Policy = {
   enabled: boolean;
   costPer100Fen: number;
   rootMarginBps: number;
-  totalUserQuota: number;
 };
 export type CommissionEntry = {
   partnerId: string;
@@ -111,8 +72,6 @@ export type Scope = {
   changed: () => Promise<void>;
   notify: Notify;
 };
-export const available = (pool: Pool) =>
-  pool.granted - pool.allocated - pool.reserved - pool.used;
 export const labels: Record<string, string> = {
   active: "已启用",
   disabled: "已停用",
@@ -124,8 +83,6 @@ export const labels: Record<string, string> = {
   provider_disabled: "上级停用",
   approved: "已批准",
   rejected: "已拒绝",
-  grant: "划拨",
-  reclaim: "收回",
   paid: "已打款",
   cancelled: "已取消",
   recharge: "充值分佣",
@@ -142,10 +99,8 @@ export function hundredths(value: FormDataEntryValue | null) {
     throw Error("请输入最多两位小数的非负数字");
   return Math.round(Number(text) * 100);
 }
-// Tag tones for quota moves and commission ledger kinds.
+// Tag tones for commission ledger kinds.
 export const kindTones: Record<string, Tone> = {
-  grant: "success",
-  reclaim: "warning",
   recharge: "success",
   refund_hold: "warning",
   refund_cancel: "muted",
@@ -155,5 +110,10 @@ export const kindTones: Record<string, Tone> = {
   payout_cancel: "muted",
 };
 
-// Matches the server rule: providers go at most three levels below the platform.
-export const MAX_LEVELS = 3;
+// Matches the server: the platform adds 分公司, a 分公司 adds S1 or S2 and an
+// S1 adds S2. Only the platform adds providers by hand; others grow by codes.
+export const growth: Record<string, string[]> = {
+  root: ["branch"],
+  branch: ["s1", "s2"],
+  s1: ["s2"],
+};

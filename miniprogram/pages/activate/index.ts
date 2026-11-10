@@ -11,7 +11,7 @@ import {
 import {
   accessStatus,
   resetAccessNavigation,
-  scannedActivation,
+  shareFrom,
 } from "../../services/access";
 import type { AccessStatus } from "../../services/access";
 import { trackVisit } from "../../services/analytics";
@@ -39,17 +39,6 @@ Page({
   destroyed: false,
   entering: false,
   timer: undefined as number | undefined,
-  onLoad(options: Record<string, string>) {
-    if (options.code || options.scene) {
-      try {
-        this.setData({
-          code: scannedActivation(options.code || options.scene),
-        });
-      } catch (e) {
-        error(e);
-      }
-    }
-  },
   onShow() {
     trackVisit(this);
     resetAccessNavigation();
@@ -62,7 +51,11 @@ Page({
   },
   async load() {
     const revision = ++this.revision;
-    this.setData({ logged: hasSession(), loading: true, loadError: "" });
+    this.setData({
+      logged: hasSession(),
+      loading: true,
+      loadError: "",
+    });
     try {
       if (!hasSession()) {
         const c = await request<Config>(
@@ -129,38 +122,31 @@ Page({
     try {
       const result = await wx.scanCode({ scanType: ["qrCode"] });
       if (this.destroyed) return;
-      this.setData({ code: scannedActivation(result.result) });
-      await this.activate("qr");
+      await this.join(shareFrom(result.result), "scan");
     } catch (e) {
       if (!this.destroyed && !cancelled(e)) error(e);
     }
   },
-  async direct() {
-    if (this.data.busy || !this.data.logged) return;
-    this.setData({ busy: true });
+  confirm() {
     try {
-      const status = await request<AccessStatus>("/access/direct", "POST", {});
-      if (this.destroyed) return;
-      this.setData({ status });
-      this.enter();
+      void this.join(shareFrom(this.data.code), "code");
     } catch (e) {
-      if (!this.destroyed) error(e);
-    } finally {
-      if (!this.destroyed) this.setData({ busy: false });
+      error(e);
     }
   },
-  async activate(method?: unknown) {
+  async join(code: string, method: "scan" | "code") {
     if (this.data.busy || !this.data.logged) return;
     this.setData({ busy: true });
     try {
-      const status = await request<AccessStatus>("/access/redeem", "POST", {
-        code: scannedActivation(this.data.code),
-        method: method === "qr" ? "qr" : "code",
+      const status = await request<AccessStatus>("/access/join", "POST", {
+        code,
+        method,
       });
       if (this.destroyed) return;
-      if (!status.active) throw new Error(status.message || "授权尚未开通");
-      this.setData({ status });
-      this.enter();
+      // Scanning only registers; the platform opens the account later.
+      this.setData({ status, code: "" });
+      if (status.active) this.enter();
+      else wx.showToast({ title: "已登记，等待总部开通", icon: "none" });
     } catch (e) {
       if (!this.destroyed) error(e);
     } finally {

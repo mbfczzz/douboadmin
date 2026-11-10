@@ -14,8 +14,10 @@ const list = (items: unknown[]) => ({
   total: items.length,
 });
 export const longName = "QualityControlProvider".repeat(2) + "International";
+export const qr =
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAUAAAAFAAQMAAAD3XjfpAAAABlBMVEX///8AAABVwtN+AAABm0lEQVR42uyaO5KzQAyERTmYkCNwFI4GR+MocwTCCVz0X5JmwI+fddUuDA66k334y1RStzQWiqIoivqlGmRFaSDS2u/zrfx3IngdONrPIQZA+jksMkxyg39K8FKwAyBD1L96pMZLKANwJ3gyiEl7ZuwJfhUYFpF+9iYi+BVgnmar5XgJ98cewb+BxdjDoj2TGgd/SAAEq4DP6udgJfwYjQmeDuo0M1uJKwjM3m2lxQheAYqIgu42GdGOApBuL81F8AAwTzP3GTd2qKXLgPS/jZ1gTdCGV5fM8MOaALr3EhKsCCqiqRe6Ooq0SZurvYt22/3FaggeCI4dlryxj33OWwSvBHVNaW14YcmF9DA8SnjbCwlWBA2BZquAfPDNG7tGLoKHg5ZxNWFFz1mbYgDBC8FNfmH3HaSc3AleBz68Sr0cfOPueyHBOuDT/XFe0zHB08Dtwu6VKUqye4onWBM0n/FpZnvLbgkJVga1hNZctqbk7WUieDy4TTO19/JdheHtrEiwMvjwKlVuKfLpvZDg+SBFURRFmf4FAAD//13EXvMqiHVCAAAAAElFTkSuQmCC";
 
-// Browser-only read fixtures. Writes are blocked; no payments or quotas are changed.
+// Browser-only read fixtures. Writes are blocked; no payments or providers change.
 export async function surfaceFixtures(page: Page) {
   const models = await (await page.request.get("/api/admin/models")).json();
   const imageModel = models.find(
@@ -23,6 +25,7 @@ export async function surfaceFixtures(page: Page) {
   );
   const partner = row("qa-provider", {
       name: longName,
+      role: "branch",
       parentId: "root",
       path: ["root"],
       status: "active",
@@ -31,41 +34,32 @@ export async function surfaceFixtures(page: Page) {
     }),
     childPartner = row("qa-child", {
       name: "质检子级服务商",
+      role: "s1",
       parentId: "qa-provider",
       path: ["root", "qa-provider"],
       status: "active",
       retailPer100Fen: 12000,
       childMarginBps: 3000,
     }),
-    partnerTree = [
-      {
-        record: partner,
-        quota: {
-          users: { granted: 20, used: 1, reserved: 1, allocated: 9 },
-        },
-      },
-      {
-        record: childPartner,
-        quota: {
-          users: { granted: 4, used: 1, reserved: 0, allocated: 0 },
-        },
-      },
-    ];
+    partnerTree = [partner, childPartner];
   const membership = {
-    partnerId: "root",
+    partnerId: "qa-provider",
     status: "active",
-    codeId: "qa-code",
+    codeId: "ABCD2345",
+    method: "scan",
+    referrer: "qa-referrer",
     activatedAt: now,
   };
-  const code = row("qa-code", {
-    partnerId: "root",
-    partnerName: "总账号",
-    label: "界面质检授权码",
-    suffix: "TEST",
+  const registration = row("qa-user", {
+    role: "member",
+    partnerId: "qa-provider",
+    referrer: "qa-referrer",
+    codeKind: "promo",
+    code: "PRMO2345",
+    method: "scan",
+    name: "质检登记用户",
+    phone: "13900000002",
     status: "pending",
-    expiresAt: "2026-12-01T00:00:00Z",
-    actor: "admin",
-    creatorAccount: "admin",
   });
   const job = {
     id: "qa-job",
@@ -184,27 +178,20 @@ export async function surfaceFixtures(page: Page) {
         reason: "界面质检",
       }),
     ],
-    "/quota-moves": list([]),
-    "/quota-requests": list([
-      row("qa-request", {
-        partnerId: "qa-provider",
-        parentId: "root",
-        users: 2,
-        partners: 1,
-        status: "pending",
-        reason: "界面质检申请",
-      }),
-    ]),
-    "/activation-codes": list([code]),
-    "/activation-codes/qa-code": {
-      code: "AAAABBBBCCCCDDDDEEEE",
-      qr: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAUAAAAFAAQMAAAD3XjfpAAAABlBMVEX///8AAABVwtN+AAABm0lEQVR42uyaO5KzQAyERTmYkCNwFI4GR+MocwTCCVz0X5JmwI+fddUuDA66k334y1RStzQWiqIoivqlGmRFaSDS2u/zrfx3IngdONrPIQZA+jksMkxyg39K8FKwAyBD1L96pMZLKANwJ3gyiEl7ZuwJfhUYFpF+9iYi+BVgnmar5XgJ98cewb+BxdjDoj2TGgd/SAAEq4DP6udgJfwYjQmeDuo0M1uJKwjM3m2lxQheAYqIgu42GdGOApBuL81F8AAwTzP3GTd2qKXLgPS/jZ1gTdCGV5fM8MOaALr3EhKsCCqiqRe6Ooq0SZurvYt22/3FaggeCI4dlryxj33OWwSvBHVNaW14YcmF9DA8SnjbCwlWBA2BZquAfPDNG7tGLoKHg5ZxNWFFz1mbYgDBC8FNfmH3HaSc3AleBz68Sr0cfOPueyHBOuDT/XFe0zHB08Dtwu6VKUqye4onWBM0n/FpZnvLbgkJVga1hNZctqbk7WUieDy4TTO19/JdheHtrEiwMvjwKlVuKfLpvZDg+SBFURRFmf4FAAD//13EXvMqiHVCAAAAAElFTkSuQmCC",
-    },
-    "/activation-codes/qa-code/trace": {
-      record: code,
-      partnerName: "总账号",
-      user: { id: "qa-user", nickname: "质检用户", name: "" },
-      currentMembership: membership,
+    "/registrations": list([registration]),
+    "/users/qa-user/activation": {
+      kind: "member",
+      membership,
+      registration: { ...registration.data, status: "approved" },
+      referrer: { id: "qa-referrer", name: "推荐会员", nickname: "小李" },
+      chain: [
+        {
+          id: "qa-provider",
+          name: "质检分公司",
+          role: "branch",
+          status: "active",
+        },
+      ],
     },
     "/memberships": list([row("qa-user", membership)]),
     "/partner-policy": row("distribution", {
@@ -244,6 +231,18 @@ export async function surfaceFixtures(page: Page) {
       },
     },
   };
+  const codes: Record<string, string> = {
+      member: "ABCD2345",
+      s1: "KMNP2345",
+      s2: "WXYZ6789",
+      bind: "BIND2345",
+    },
+    owner = {
+      id: "qa-owner",
+      nickname: "小华",
+      name: "华东负责人",
+      phone: "13900000001",
+    };
   await page.route("**/api/admin/**", async (route) => {
     if (route.request().method() !== "GET")
       return route.fulfill({
@@ -259,16 +258,19 @@ export async function surfaceFixtures(page: Page) {
           url.searchParams.get("owner") === "qa-provider" ? [] : [partner],
         ),
       });
-    if (path === "/partners/root" || path === "/partners/qa-provider")
+    const code = path.match(/^\/partners\/([^/]+)\/codes\/(\w+)$/);
+    if (code)
+      return route.fulfill({
+        json:
+          code[1] === "qa-provider" && code[2] === "bind"
+            ? { user: owner }
+            : { code: codes[code[2]], qr },
+      });
+    const record = partnerTree.find((r) => path === "/partners/" + r.id);
+    if (record)
       return route.fulfill({
         json: {
-          record: path.endsWith("/root")
-            ? row("root", { ...(partner.data as object), name: "总账号" })
-            : partner,
-          quota: {
-            users: { granted: 20, used: 1, reserved: 1, allocated: 9 },
-            partners: { granted: 1, used: 1, reserved: 0, allocated: 0 },
-          },
+          record,
           price: {
             enabled: true,
             version: "qa",

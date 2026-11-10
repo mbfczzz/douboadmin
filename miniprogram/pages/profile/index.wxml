@@ -128,6 +128,15 @@
           </view>
         </view>
       </view>
+      <view wx:if="{{identity.label}}" class="profile-field">
+        <text class="profile-label">身份</text
+        ><view class="profile-field-content">
+          <view class="profile-readonly">
+            <text wx:if="{{identity.partner}}" class="profile-partner">{{identity.partner}}</text
+            ><text class="profile-identity {{identity.kind}}">{{identity.label}}</text>
+          </view>
+        </view>
+      </view>
     </view>
     <text class="profile-section"
       >个人简介<text class="profile-optional">选填</text></text

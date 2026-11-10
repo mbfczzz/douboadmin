@@ -70,36 +70,48 @@ func TestSignedPaymentStillCreditsAfterAccountSuspension(t *testing.T) {
 	}
 }
 
-func TestActiveDirectAndProviderUsersCanStillReceiveSignatures(t *testing.T) {
-	for _, kind := range []string{"direct", "provider"} {
+// put stores one record in the fixture's store.
+func (f *fixture) put(t *testing.T, ns, id string, v any, version int64) {
+	t.Helper()
+	if _, err := f.svc.Store.Put(t.Context(), ns, core.Record{ID: id, Owner: "u", Data: core.Data(v)}, version); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestActiveMembersReceiveSignaturesAndPendingOwnersDoNot(t *testing.T) {
+	for _, kind := range []string{"pending-owner", "member"} {
 		f := newFixture(t)
 		f.svc.Billing.RequireActivation = true
-		_, err := f.svc.Store.Put(t.Context(), "users", core.Record{ID: "u", Owner: "u",
-			Data: core.Data(map[string]string{"nickname": "test"})}, 0)
-		if err != nil {
-			t.Fatal(err)
-		}
-		if kind == "direct" {
-			_, err = f.svc.Store.Put(t.Context(), "direct_access", core.Record{ID: "u", Owner: "u",
-				Data: core.Data(core.DirectAccess{})}, 0)
-		} else {
-			_, err = f.svc.Store.Put(t.Context(), "partners", core.Record{ID: "provider",
-				Data: core.Data(core.Partner{Name: "test", Status: "active", ParentID: core.RootPartner})}, 0)
-			if err == nil {
-				_, err = f.svc.Store.Put(t.Context(), "memberships", core.Record{ID: "u", Owner: "u",
-					Data: core.Data(core.Membership{PartnerID: "provider", Status: "active"})}, 0)
-			}
+		f.put(t, "users", "u", map[string]string{"nickname": "test"}, 0)
+		f.put(t, "partners", "provider", core.Partner{Name: "test", Status: "active", ParentID: core.RootPartner}, 0)
+		switch kind {
+		case "member":
+			f.put(t, "memberships", "u", core.Membership{PartnerID: "provider", Status: "active"}, 0)
 			f.order.Distribution = &core.DistributionSnapshot{PartnerID: "provider"}
-			if err == nil {
-				_, err = f.svc.Store.Put(t.Context(), "orders", core.Record{ID: f.row.ID, Owner: "u",
-					Data: core.Data(f.order)}, f.row.Version)
+			f.put(t, "orders", f.row.ID, f.order, f.row.Version)
+		default:
+			f.put(t, "partner_owners", "u", core.PartnerOwner{PartnerID: "provider", Status: "pending"}, 0)
+		}
+		err := f.svc.ClaimSignature(t.Context(), f.row.ID)
+		if kind == "pending-owner" {
+			if !errors.Is(err, core.ErrActivationRequired) {
+				t.Fatal("a pending owner received a signature", err)
 			}
-		}
-		if err != nil {
-			t.Fatal(err)
-		}
-		if err = f.svc.ClaimSignature(t.Context(), f.row.ID); err != nil {
+		} else if err != nil {
 			t.Fatal("active user was blocked by the new authorization check", kind, err)
 		}
+	}
+}
+
+// An approved provider owner's order has no commission snapshot and still
+// gets its payment signature.
+func TestSignatureAllowsAnApprovedProviderOwner(t *testing.T) {
+	f := newFixture(t)
+	f.svc.Billing.RequireActivation = true
+	f.put(t, "users", "u", map[string]string{"nickname": "test"}, 0)
+	f.put(t, "partners", "p1", core.Partner{Name: "华东", Role: core.RoleBranch, ParentID: core.RootPartner, Status: "active"}, 0)
+	f.put(t, "partner_owners", "u", core.PartnerOwner{PartnerID: "p1", Status: "active"}, 0)
+	if err := f.svc.ClaimSignature(t.Context(), f.row.ID); err != nil {
+		t.Fatal("owner refused a signature", err)
 	}
 }

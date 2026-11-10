@@ -12,6 +12,22 @@ import {
   AuthCancelledError,
 } from "../../utils/api";
 import type { Me, Job } from "../../services/types";
+
+const baseMenus = [
+  { icon: "wallet", label: "我的积分", mode: "wallet" },
+  { icon: "order", label: "充值订单", mode: "orders" },
+  { icon: "heart", label: "我的收藏", mode: "favorites" },
+  { icon: "history", label: "生成记录", mode: "tasks" },
+  { icon: "notification", label: "消息通知", mode: "notifications" },
+  { icon: "chat", label: "帮助与反馈", mode: "help" },
+  { icon: "setting", label: "设置", mode: "settings" },
+];
+// Providers manage their codes in 服务商中心; members share their 推广码.
+const roleMenus: Record<string, { icon: string; label: string; mode: string }> =
+  {
+    provider: { icon: "shop", label: "服务商中心", mode: "provider" },
+    member: { icon: "qrcode", label: "我的推广码", mode: "promo" },
+  };
 Page({
   data: {
     me: null as Me | null,
@@ -20,15 +36,7 @@ Page({
     loadError: "",
     avatarLetter: "豆",
     cover: "",
-    menus: [
-      { icon: "wallet", label: "我的积分", mode: "wallet" },
-      { icon: "order", label: "充值订单", mode: "orders" },
-      { icon: "heart", label: "我的收藏", mode: "favorites" },
-      { icon: "history", label: "生成记录", mode: "tasks" },
-      { icon: "notification", label: "消息通知", mode: "notifications" },
-      { icon: "chat", label: "帮助与反馈", mode: "help" },
-      { icon: "setting", label: "设置", mode: "settings" },
-    ],
+    menus: baseMenus,
   },
   loadVersion: 0,
   visible: true,
@@ -37,6 +45,22 @@ Page({
     this.visible = true;
     tab(this, 4);
     void this.load();
+    void this.loadIdentity();
+  },
+  // Providers get 服务商中心, members 我的推广码. A failed request keeps the
+  // current menu; a newer load or a signed-out session wins.
+  async loadIdentity() {
+    const version = this.loadVersion;
+    if (!hasSession()) return this.setData({ menus: baseMenus });
+    try {
+      const { kind } = await request<{ kind: string }>("/me/identity");
+      if (version !== this.loadVersion || !hasSession()) return;
+      const extra =
+        roleMenus[["branch", "s1", "s2"].includes(kind) ? "provider" : kind];
+      this.setData({ menus: extra ? [extra, ...baseMenus] : baseMenus });
+    } catch {
+      // keep the menu as it is
+    }
   },
   onHide() {
     this.visible = false;
@@ -93,6 +117,7 @@ Page({
     try {
       await login();
       await this.load();
+      void this.loadIdentity();
     } catch (e) {
       error(e);
     }
@@ -100,7 +125,9 @@ Page({
   menu(e: WechatMiniprogram.TouchEvent) {
     const m = e.currentTarget.dataset.mode;
     if (m === "tasks") openPage(this, { url: "/pages/tasks/index" });
-    else if (["wallet", "orders", "notifications"].includes(m))
+    else if (m === "promo")
+      openPage(this, { url: "/pages/provider/index?mode=promo" });
+    else if (["wallet", "orders", "notifications", "provider"].includes(m))
       openPage(this, { url: "/pages/" + m + "/index" });
     else if (m === "settings")
       openPage(this, { url: "/pages/preferences/index" });

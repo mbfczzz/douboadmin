@@ -8,7 +8,7 @@ import (
 func TestAdminChangesOwnPassword(t *testing.T) {
 	a, _, _ := setup(t)
 	admin := adminLoginToken(t, a, "admin", "test-pass")
-	createProvider(t, a, admin, "self-pw", "root", "S1", 3, map[string]string{"username": "self-pw", "password": "self-pw-password-2026"})
+	createProvider(t, a, admin, "self-pw", "root", "分公司", "branch", map[string]string{"username": "self-pw", "password": "self-pw-password-2026"})
 	old := adminLoginToken(t, a, "self-pw", "self-pw-password-2026")
 	second := adminLoginToken(t, a, "self-pw", "self-pw-password-2026")
 	if w := call(a, "PUT", "/api/admin/me/password", old, "", map[string]string{"current": "wrong-password-0000", "next": "new-password-2026-ok"}); w.Code != 400 || !strings.Contains(w.Body.String(), "当前密码不正确") {
@@ -36,7 +36,7 @@ func TestAdminChangesOwnPassword(t *testing.T) {
 func TestLoginKeepsAccountVersion(t *testing.T) {
 	a, _, _ := setup(t)
 	admin := adminLoginToken(t, a, "admin", "test-pass")
-	id := createProvider(t, a, admin, "ver-key", "root", "V1", 3, map[string]string{"username": "ver-login", "password": "ver-login-password-2026"})
+	id := createProvider(t, a, admin, "ver-key", "root", "V1", "branch", map[string]string{"username": "ver-login", "password": "ver-login-password-2026"})
 	before := call(a, "GET", "/api/admin/partners/"+id+"/account", admin, "", nil).Body.String()
 	adminLoginToken(t, a, "ver-login", "ver-login-password-2026")
 	after := call(a, "GET", "/api/admin/partners/"+id+"/account", admin, "", nil).Body.String()

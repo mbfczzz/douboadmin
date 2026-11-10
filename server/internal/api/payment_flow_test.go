@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-func TestDirectUserPaymentToGenerationLedger(t *testing.T) {
+func TestMemberPaymentToGenerationLedger(t *testing.T) {
 	a, user, _ := activationFixture(t)
 	key := paymentGateway(t, a)
 	ctx := t.Context()
@@ -34,8 +34,15 @@ func TestDirectUserPaymentToGenerationLedger(t *testing.T) {
 	if _, err = a.Store.Put(ctx, "models", modelRow, modelRow.Version); err != nil {
 		t.Fatal(err)
 	}
-	if w := call(a, "POST", "/api/access/direct", user, "", map[string]any{}); w.Code != 200 {
-		t.Fatal(w.Code, w.Body.String())
+	activate(t, a, "user-a")
+	policy := core.DefaultDistributionPolicy()
+	policy.Enabled = true
+	if _, err = a.Partners.SavePolicy(ctx, policy, 0, "admin"); err != nil {
+		t.Fatal(err)
+	}
+	quote, _, err := a.Partners.UserQuote(ctx, "user-a", 1000, 100)
+	if err != nil || quote == nil {
+		t.Fatal(quote, err)
 	}
 	balance := func(available, held int64) {
 		t.Helper()
@@ -47,7 +54,7 @@ func TestDirectUserPaymentToGenerationLedger(t *testing.T) {
 			t.Fatal(w.Code, w.Body.String(), available, held)
 		}
 	}
-	orderInput := map[string]any{"amountFen": 1000, "settingsVersion": 1, "platform": "android"}
+	orderInput := map[string]any{"amountFen": 1000, "settingsVersion": 1, "platform": "android", "pricingVersion": quote.PricingVersion}
 	w := call(a, "POST", "/api/orders", user, "payment-flow-order", orderInput)
 	var order core.Record
 	if w.Code != 201 || json.Unmarshal(w.Body.Bytes(), &order) != nil {
@@ -139,24 +146,16 @@ func TestDirectUserPaymentToGenerationLedger(t *testing.T) {
 	}
 }
 
-func TestSuspendedAuthorizationCannotSwitchToDirectForRecharge(t *testing.T) {
+// A suspended member cannot re-register elsewhere to recharge.
+func TestSuspendedMemberCannotRegisterAgainForRecharge(t *testing.T) {
 	for _, providerDisabled := range []bool{false, true} {
 		a, user, _ := activationFixture(t)
-		p, err := a.Partners.Create(t.Context(), core.RootPartner, "Provider", 2, "recharge-provider", "admin")
+		branch := newBranch(t, a, "recharge")
+		p, err := a.Partners.Create(t.Context(), branch, "Provider", core.RoleS1, "recharge-provider", "admin")
 		if err != nil {
 			t.Fatal(err)
 		}
-		code, err := a.Partners.Issue(t.Context(), p.ID, "test", 7, "recharge-code", "admin")
-		if err != nil {
-			t.Fatal(err)
-		}
-		token, err := a.Partners.Reveal(t.Context(), code.ID)
-		if err != nil {
-			t.Fatal(err)
-		}
-		if _, err = a.Partners.Redeem(t.Context(), "user-a", token); err != nil {
-			t.Fatal(err)
-		}
+		joinPartner(t, a, p.ID, "user-a")
 		if providerDisabled {
 			var value core.Partner
 			if err = json.Unmarshal(p.Data, &value); err != nil {
@@ -175,8 +174,12 @@ func TestSuspendedAuthorizationCannotSwitchToDirectForRecharge(t *testing.T) {
 				t.Fatal(err)
 			}
 		}
-		if w := call(a, "POST", "/api/access/direct", user, "", map[string]any{}); w.Code != 400 {
-			t.Fatal(w.Code, w.Body.String())
+		other, err := a.Partners.ShareCode(t.Context(), branch, "admin")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if code, body := joinHTTP(a, user, other); code != 400 {
+			t.Fatal(code, body)
 		}
 		if w := call(a, "GET", "/api/wallet", user, "", nil); w.Code != 403 {
 			t.Fatal(w.Code)

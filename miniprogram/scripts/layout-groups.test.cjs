@@ -43,7 +43,7 @@ test("profile fields share explicit grouping while preserving form field names",
   const profile = source("profile");
   assert.equal(
     (profile.match(/class="profile-field(?:\s|")/g) || []).length,
-    3,
+    4, // nickname, name, the verified phone and the identity label
   );
   for (const field of ["nickname", "name", "bio"])
     assert.ok(profile.includes(`name="${field}"`));

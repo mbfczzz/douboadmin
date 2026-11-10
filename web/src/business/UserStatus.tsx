@@ -66,7 +66,7 @@ export default function UserStatus({
         <div className="form-body">
           <p className="quiet">
             {disabling
-              ? "停用后该用户无法登录和使用业务功能；授权名额不会释放，可随时重新启用。"
+              ? "停用后该用户无法登录和使用业务功能，可随时重新启用。"
               : "启用后该用户恢复登录和使用。"}
           </p>
           <label>

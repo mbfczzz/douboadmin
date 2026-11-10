@@ -17,7 +17,7 @@ func tokenFrom(r *http.Request) string {
 
 // The registration and activation steps themselves stay reachable.
 var activationSteps = map[string]bool{"/api/access": true, "/api/access/sms": true, "/api/access/profile": true,
-	"/api/access/direct": true, "/api/access/redeem": true, "/api/auth/logout": true}
+	"/api/access/join": true, "/api/auth/logout": true}
 
 func activationExempt(path string) bool { return activationSteps[path] }
 func (a *Server) allowActivation(w http.ResponseWriter, r *http.Request, user string, registered bool) bool {
@@ -105,25 +105,7 @@ func (a *Server) registeredOnly(w http.ResponseWriter, r *http.Request) bool {
 	}
 	return true
 }
-func (a *Server) directAccess(w http.ResponseWriter, r *http.Request) {
-	if !a.registeredOnly(w, r) {
-		return
-	}
-	if _, s, e := a.signup(r.Context()); e != nil {
-		dbError(w, e)
-		return
-	} else if !s.OpenSignup {
-		fail(w, 403, "当前未开放普通用户注册，请使用服务商激活码开通")
-		return
-	}
-	access, e := a.Partners.ActivateDirect(r.Context(), identity(r).ID)
-	if e != nil {
-		partnerError(w, e)
-		return
-	}
-	reply(w, 200, access)
-}
-func (a *Server) redeemAccess(w http.ResponseWriter, r *http.Request) {
+func (a *Server) joinAccess(w http.ResponseWriter, r *http.Request) {
 	var input struct {
 		Code   string `json:"code"`
 		Method string `json:"method"`
@@ -131,16 +113,16 @@ func (a *Server) redeemAccess(w http.ResponseWriter, r *http.Request) {
 	if !decode(w, r, &input) || !a.registeredOnly(w, r) {
 		return
 	}
-	ok, e := a.Sessions.Allow(r.Context(), "activation:"+identity(r).ID, 10)
+	ok, e := a.Sessions.Allow(r.Context(), "join:"+identity(r).ID, 10)
 	if e != nil {
 		dbError(w, e)
 		return
 	}
 	if !ok {
-		fail(w, 429, "激活尝试过于频繁，请稍后重试")
+		fail(w, 429, "加入尝试过于频繁，请稍后重试")
 		return
 	}
-	access, e := a.Partners.Redeem(r.Context(), identity(r).ID, input.Code, input.Method)
+	access, e := a.Partners.Join(r.Context(), identity(r).ID, input.Code, input.Method)
 	if e != nil {
 		partnerError(w, e)
 		return

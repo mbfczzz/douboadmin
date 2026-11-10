@@ -72,27 +72,23 @@ func (b *breakdownBuilder) record(ns string, row core.Record) {
 		if json.Unmarshal(row.Data, &f) == nil && f.Status == "succeeded" && b.inPeriod(f.CompletedAt) {
 			b.out.Refunds++
 		}
-	case "direct_access":
-		var d core.DirectAccess
-		if json.Unmarshal(row.Data, &d) == nil && b.inPeriod(&d.ActivatedAt) {
-			b.out.DirectActivations++
+	case "partner_audit":
+		// Accounts the platform opened in the period: 会员 by provider, and
+		// providers' own owners. Approvals are kept as append-only audit rows,
+		// so a later re-registration does not erase them.
+		var a struct {
+			Kind string            `json:"kind"`
+			Data core.Registration `json:"data"`
 		}
-	case "memberships":
-		var m core.Membership
-		if json.Unmarshal(row.Data, &m) == nil && b.inPeriod(&m.ActivatedAt) {
-			b.out.ProviderActivations++
-			b.providers[m.PartnerID]++
-		}
-	case "activation_codes":
-		var c core.ActivationCode
-		if json.Unmarshal(row.Data, &c) != nil {
+		if json.Unmarshal(row.Data, &a) != nil || a.Kind != "registration_approved" || !b.inPeriod(&created) {
 			return
 		}
-		if b.inPeriod(&created) {
-			b.out.CodesIssued++
-		}
-		if c.Status == "used" && b.inPeriod(c.UsedAt) {
-			b.out.CodesRedeemed++
+		r := a.Data
+		if r.Role == "member" {
+			b.out.MemberActivations++
+			b.providers[r.PartnerID]++
+		} else {
+			b.out.OwnerActivations++
 		}
 	}
 }

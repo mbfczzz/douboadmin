@@ -37,7 +37,7 @@ func TestOperationsAreLoggedWithWhoWhatAndRedactedBodies(t *testing.T) {
 	if w := call(a, "POST", "/api/admin/accounts", admin, "", map[string]any{"username": "logged-ops", "name": "运营", "role": "operator", "password": "a-very-secret-password"}); w.Code != 201 {
 		t.Fatal(w.Code, w.Body.String())
 	}
-	call(a, "POST", "/api/access/direct", user, "", map[string]any{})
+	activate(t, a, "user-a")
 	call(a, "GET", "/api/me", user, "", nil)
 
 	points := waitLog(t, a, core.AuditQuery{Categories: []string{core.LogBusiness}}, func(e core.AuditEntry) bool { return e.Action == "调整用户积分" })

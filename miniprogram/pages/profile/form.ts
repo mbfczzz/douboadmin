@@ -23,6 +23,8 @@ export const profileState = {
   saveError: "",
   focusedField: "",
   fieldErrors: {} as Record<string, string>,
+  // 分公司, S1 服务商, S2 推荐官 or 会员; display only.
+  identity: null as { kind: string; label: string; partner?: string } | null,
 };
 
 // Registered users (SMS-verified) must keep a name.

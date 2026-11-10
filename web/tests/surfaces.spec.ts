@@ -56,11 +56,7 @@ for (const width of [1440, 390, 320]) {
       }
       surfaces.push({ name, selects: count, ...shape });
       if (await dialog.count()) await inspectModal(page, `${width}-${name}`);
-      if (
-        name === "名额划拨" ||
-        name === "长名称服务商" ||
-        name === "分佣子页面"
-      )
+      if (name === "长名称服务商" || name === "分享码")
         await page.screenshot({
           path: `../.runtime/surfaces-${width}-${name.replaceAll(" / ", "-")}.png`,
         });
@@ -188,14 +184,13 @@ for (const width of [1440, 390, 320]) {
           getComputedStyle(el).whiteSpace === "normal",
       ),
     ).toBeTruthy();
-    await modal("新增服务商", "新增服务商");
+    await modal("新增分公司", "新增分公司");
     const provider = page
       .locator(".provider-tree-row")
       .filter({ hasText: longName });
     await modal("编辑", "编辑服务商", provider);
     await modal("登录账号", "登录账号", provider);
-    await modal("名额划拨", "名额划拨", provider);
-    await modal("授权码", "授权激活", provider);
+    await modal("分享码", "分享码", provider);
     await modal("分佣", "算力分佣", provider);
     await inspect("长名称服务商");
     await info.attach("surface-inventory", {

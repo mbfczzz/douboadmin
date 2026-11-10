@@ -49,8 +49,6 @@ func dbError(w http.ResponseWriter, err error) {
 		fail(w, 403, err.Error())
 	case errors.Is(err, core.ErrActivationRequired), errors.Is(err, core.ErrPartnerDisabled):
 		reply(w, 403, map[string]string{"code": "ACTIVATION_REQUIRED", "error": err.Error()})
-	case errors.Is(err, core.ErrQuota):
-		fail(w, 409, err.Error())
 	case errors.As(err, &rule):
 		fail(w, 400, err.Error())
 	case errors.Is(err, core.ErrPaymentMismatch):

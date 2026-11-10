@@ -55,18 +55,3 @@ func TestVerifiedPhoneBelongsToOneAccount(t *testing.T) {
 		t.Fatal("archived account kept the phone", b)
 	}
 }
-
-func TestNormalUserCannotRedeemACode(t *testing.T) {
-	a, _, _ := activationFixture(t)
-	user := newMiniUser(t, a, "user-normal")
-	if b := registerWith(t, a, user, "13900139030"); !strings.Contains(b, `"profileRequired":false`) {
-		t.Fatal(b)
-	}
-	if w := call(a, "POST", "/api/access/direct", user, "", map[string]any{}); w.Code != 200 {
-		t.Fatal(w.Code, w.Body.String())
-	}
-	w := call(a, "POST", "/api/access/redeem", user, "", map[string]string{"code": "AAAAAAAAAAAAAAAAAAAA"})
-	if w.Code != 400 || !strings.Contains(w.Body.String(), "普通用户") {
-		t.Fatal("normal user redeemed a code", w.Code, w.Body.String())
-	}
-}

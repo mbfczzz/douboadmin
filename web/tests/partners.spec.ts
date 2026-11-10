@@ -1,126 +1,96 @@
-import { test, expect } from "@playwright/test";
-import { confirmSubmission, login } from "./helpers";
-import {
-  createProvider,
-  selectProvider,
-  issueCode,
-  miniUser,
-} from "./partner-helpers";
+import { test, expect, type Page } from "@playwright/test";
+import { answerAsk, confirmSubmission, login } from "./helpers";
+import { createProvider, providerCode, miniUser } from "./partner-helpers";
 
 test.skip(
   process.env.PARTNER_ACCEPTANCE !== "true",
   "Requires isolated partner acceptance database and API",
 );
-test("fixed user quotas, QR activation, suspension, unbinding and configurable margins", async ({
+
+// The registration row of one mini-program user on the 小程序用户 page.
+async function registration(page: Page, userId: string) {
+  await page.getByRole("button", { name: "小程序用户", exact: true }).click();
+  const section = page.getByRole("region", { name: "扫码登记" });
+  await section.getByPlaceholder("搜索姓名、手机号或用户编号").fill(userId);
+  const row = section.locator("tbody tr").filter({ hasText: userId });
+  await expect(row).toHaveCount(1);
+  return row;
+}
+
+test("scans only register; 总部 opens or rejects; members can be suspended", async ({
   page,
 }) => {
   test.setTimeout(120000);
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await login(page);
-  await page.getByRole("button", { name: "小程序用户", exact: true }).click();
   await page.getByRole("button", { name: "服务商管理", exact: true }).click();
-  await expect(
-    page.getByRole("tab", { name: "服务商列表", exact: true }),
-  ).toBeVisible();
-  const s1 = await createProvider(page, "验收 S1");
-  await selectProvider(page, "验收 S1");
-  const s2 = await createProvider(page, "验收 S2");
-  let view = await (
-    await page.request.get("/api/admin/partners/" + s2.id)
-  ).json();
-  expect(view.quota.users.granted).toBe(10);
-  const additional = await page.request.post("/api/admin/partners", {
-    headers: { "Idempotency-Key": crypto.randomUUID() },
-    data: { parentId: s1.id, name: "额度不足的服务商", users: 1 },
+  const stamp = Date.now();
+  const branch = await createProvider(page, `验收分公司${stamp}`);
+  expect(branch.data.role).toBe("branch");
+  const s1 = await createProvider(
+    page,
+    `验收 S1 ${stamp}`,
+    `验收分公司${stamp}`,
+    "S1 服务商",
+  );
+  expect(s1.data.role).toBe("s1");
+
+  // A member scan registers and waits for 总部.
+  const member = await miniUser(page.request),
+    headers = member.headers;
+  const joined = await page.request.post("/api/access/join", {
+    headers,
+    data: { code: await providerCode(page.request, s1.id), method: "scan" },
   });
-  expect(additional.status()).toBe(409);
-  view = await (await page.request.get("/api/admin/partners/" + s1.id)).json();
-  expect(view.quota.users.allocated).toBe(10);
-  await selectProvider(page, "验收 S2");
-  const code = await issueCode(page);
-  const user = await miniUser(page.request),
-    headers = user.headers;
+  expect(joined.status()).toBe(200);
+  expect((await joined.json()).active).toBe(false);
   expect((await page.request.get("/api/templates", { headers })).status()).toBe(
     403,
   );
-  const activation = await page.request.post("/api/access/redeem", {
-    headers,
-    data: { code: "DOUBO-ACTIVATE:" + code },
+  // An S2 invite scan registers a pending provider below the 分公司.
+  const scout = await miniUser(page.request);
+  const invited = await page.request.post("/api/access/join", {
+    headers: scout.headers,
+    data: {
+      code: await providerCode(page.request, branch.id, "s2"),
+      method: "scan",
+    },
   });
-  expect(activation.status()).toBe(200);
-  expect((await activation.json()).active).toBe(true);
+  expect(invited.status()).toBe(200);
+
+  let row = await registration(page, member.userId);
+  await expect(row).toContainText("会员开通码");
+  await row.getByRole("button", { name: "开通", exact: true }).click();
+  await answerAsk(page, true);
   expect((await page.request.get("/api/templates", { headers })).status()).toBe(
     200,
   );
-  const other = await miniUser(page.request);
-  expect(
-    (
-      await page.request.post("/api/access/redeem", {
-        headers: { Authorization: "Bearer " + other.token },
-        data: { code },
-      })
-    ).status(),
-  ).toBe(400);
-  await page.getByRole("button", { name: "刷新", exact: true }).last().click();
-  const row = page
-    .locator("tbody tr")
-    .filter({
-      has: page.getByRole("button", { name: "管理授权", exact: true }),
-    })
-    .filter({ hasText: user.userId });
-  await row.getByRole("button", { name: "管理授权", exact: true }).click();
-  let dialog = page.getByRole("dialog", { name: "管理用户授权", exact: true });
-  await dialog.getByLabel("原因", { exact: true }).fill("测试停用授权");
-  await dialog
-    .getByRole("button", { name: "保存授权状态", exact: true })
-    .click();
-  await confirmSubmission(page);
-  await expect(dialog).toHaveCount(0);
-  view = await (await page.request.get("/api/admin/partners/" + s2.id)).json();
-  expect(view.quota.users.used).toBe(1);
-  expect((await page.request.get("/api/jobs", { headers })).status()).toBe(403);
-  const replay = await page.request.post("/api/access/redeem", {
-    headers,
-    data: { code },
-  });
-  expect((await replay.json()).active).toBe(false);
-  await row.getByRole("button", { name: "管理授权", exact: true }).click();
-  dialog = page.getByRole("dialog", { name: "管理用户授权", exact: true });
-  await dialog
-    .getByRole("combobox", { name: "操作", exact: true })
-    .selectOption("unbound");
-  await dialog.getByLabel("原因", { exact: true }).fill("测试解绑释放名额");
-  await dialog
-    .getByRole("button", { name: "保存授权状态", exact: true })
-    .click();
-  await confirmSubmission(page);
-  await expect(dialog).toHaveCount(0);
-  view = await (await page.request.get("/api/admin/partners/" + s2.id)).json();
-  expect(view.quota.users.used).toBe(0);
-  expect(view.quota.users.granted - view.quota.users.reserved).toBe(10);
-  await selectProvider(page, "总账号");
-  await page.getByRole("tab", { name: "算力分佣", exact: true }).click();
+  row = await registration(page, scout.userId);
+  await expect(row).toContainText("S2 推荐官");
+  await row.getByRole("button", { name: "拒绝", exact: true }).click();
+  const reject = page.getByRole("dialog", { name: "拒绝登记" });
+  await reject.getByLabel("拒绝原因").fill("验收拒绝");
+  await reject.getByRole("button", { name: "拒绝", exact: true }).click();
+  await expect(reject).toHaveCount(0);
+
+  // The opened member shows in the S1's 分享码 dialog and can be suspended.
+  await page.getByRole("button", { name: "服务商管理", exact: true }).click();
   await page
-    .getByLabel("每 100 元基准算力成本（元）", { exact: true })
-    .fill("80");
-  await page.getByLabel("总账号保留毛利（%）", { exact: true }).fill("50");
-  await page.getByLabel("已确认成本与价格，启用按充值分佣").check();
-  await page.getByRole("button", { name: "保存分佣规则", exact: true }).click();
-  await confirmSubmission(page);
-  await expect(
-    page.getByText("价格规则已保存，历史订单快照不变", { exact: true }),
-  ).toBeVisible();
-  await selectProvider(page, "验收 S2");
-  view = await (await page.request.get("/api/admin/partners/" + s2.id)).json();
-  expect(view.price.incomingPer100Fen).toBe(9500);
-  expect(
-    view.price.shares.map((s: { amountFen: number }) => s.amountFen),
-  ).toEqual([1000, 500, 500]);
-  expect(view.commission.balanceFen).toBe(0);
-  await page.screenshot({
-    path: "../.runtime/partners-pricing-isolated-test.png",
-    fullPage: true,
+    .locator(".provider-tree-row")
+    .filter({ hasText: `验收 S1 ${stamp}` })
+    .getByRole("button", { name: "分享码", exact: true })
+    .click();
+  const members = page.getByRole("region", { name: "已加入的会员" });
+  const memberRow = members.locator("tbody tr").filter({
+    hasText: member.userId,
   });
+  await memberRow.getByRole("button", { name: "停用", exact: true }).click();
+  const stop = page.getByRole("dialog", { name: "停用用户授权" });
+  await stop.getByLabel("原因").fill("验收停用授权");
+  await stop.getByRole("button", { name: "停用授权" }).click();
+  await confirmSubmission(page);
+  await expect(stop).toHaveCount(0);
+  expect((await page.request.get("/api/jobs", { headers })).status()).toBe(403);
   expect(errors).toEqual([]);
 });

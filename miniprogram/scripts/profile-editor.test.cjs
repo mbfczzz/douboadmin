@@ -181,10 +181,10 @@ test("failed saves retain all fields and permit retry without navigating", async
     throw new Error("网络暂不可用");
   };
   input(page, "name", "小豆本人");
-  input(page, "phone", "13800000000");
+  input(page, "bio", "新的简介");
   await page.save();
   assert.equal(page.data.name, "小豆本人");
-  assert.equal(page.data.phone, "13800000000");
+  assert.equal(page.data.bio, "新的简介");
   assert.equal(page.data.saveError, "网络暂不可用");
   assert.equal(page.data.dirty, true);
   assert.equal(page.data.busy, false);

@@ -32,14 +32,14 @@ test("local field errors block writes and correcting one field preserves other e
     writes++;
   };
   page.input(event("nickname", ""));
-  page.input(event("phone", "123"));
+  page.input(event("bio", "长".repeat(121)));
   await page.save();
   assert.equal(writes, 0);
   assert.equal(page.data.focusedField, "nickname");
   assert.match(page.data.fieldErrors.nickname, /昵称/);
-  assert.match(page.data.fieldErrors.phone, /手机号/);
-  page.input(event("phone", "13800000000"));
-  assert.equal(page.data.fieldErrors.phone, "");
+  assert.match(page.data.fieldErrors.bio, /简介/);
+  page.input(event("bio", "短简介"));
+  assert.equal(page.data.fieldErrors.bio, "");
   assert.match(page.data.fieldErrors.nickname, /昵称/);
 });
 
@@ -70,10 +70,12 @@ test("keyboard next preserves the entered value and a late blur cannot remove th
 
 test("blur validates only its own field and retains its draft", async () => {
   const { page } = await editor();
-  page.focus(event("phone"));
-  page.blur(event("phone", "not-a-number"));
-  assert.match(page.data.fieldErrors.phone, /手机号/);
-  assert.equal(page.data.phone, "not-a-number");
+  page.focus(event("bio"));
+  page.blur(event("bio", "长".repeat(121)));
+  assert.match(page.data.fieldErrors.bio, /简介/);
+  assert.equal(page.data.nickname, "小豆");
+  assert.equal(page.data.fieldErrors.nickname, undefined);
+  assert.equal(page.data.bio, "长".repeat(121));
   assert.equal(page.data.focusedField, "");
   assert.equal(page.data.dirty, true);
 });
@@ -99,18 +101,18 @@ test("save reads the latest native form nickname and confirms success after retu
   assert.equal(page.data.dirty, false);
 });
 
-test("optional phones follow the backend contract without restricting international numbers", async () => {
-  for (const phone of ["", "+8613800000000", "123-4567", "123456"]) {
-    const { h, page } = await editor();
-    let writes = 0;
-    h.api.request = async () => {
-      writes++;
-      return {};
-    };
-    h.wx.navigateBack = (options) => options.success({});
-    page.input(event("nickname", "新昵称"));
-    page.input(event("phone", phone));
-    await page.save();
-    assert.equal(writes, ["", "+8613800000000"].includes(phone) ? 1 : 0, phone);
-  }
+test("the SMS-verified phone is read-only and saved unchanged", async () => {
+  const { h, page } = await editor();
+  let written;
+  h.api.request = async (_path, method, data) => {
+    if (method === "PUT") written = data;
+    return {};
+  };
+  h.wx.navigateBack = (options) => options.success({});
+  page.input(event("phone", "13900000000"));
+  assert.equal(page.data.phone, "");
+  page.input(event("nickname", "新昵称"));
+  await page.save({ detail: { value: { phone: "13900000000" } } });
+  assert.equal(written.nickname, "新昵称");
+  assert.equal(written.phone, "");
 });

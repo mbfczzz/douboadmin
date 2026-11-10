@@ -9,6 +9,7 @@ export async function modalPartnerFixtures(page: Page) {
     createdAt: "2026-11-06T00:00:00Z",
     data: {
       name: "质检下级服务商",
+      role: "s1",
       parentId: "qa-provider",
       path: ["root", "qa-provider"],
       status: "active",
@@ -23,7 +24,6 @@ export async function modalPartnerFixtures(page: Page) {
     route.fulfill({
       json: {
         record,
-        quota: { users: { granted: 4, allocated: 0, used: 0, reserved: 0 } },
         price: { shares: [] },
         commission: { balanceFen: 0, heldFen: 0, paidOutFen: 0 },
       },

@@ -19,9 +19,6 @@ var adminRouteMenus = map[string][]string{
 	"/api/admin/accounts":           {"accounts"},
 	"/api/admin/partners":           {"partners"},
 	"/api/admin/partner-policy":     {"partners"},
-	"/api/admin/quota-moves":        {"partners"},
-	"/api/admin/quota-requests":     {"partners"},
-	"/api/admin/activation-codes":   {"partners"},
 	"/api/admin/memberships":        {"partners"},
 	"/api/admin/commission-ledger":  {"partners"},
 	"/api/admin/commission-payouts": {"partners"},
@@ -43,7 +40,7 @@ var adminRouteMenus = map[string][]string{
 	"/api/admin/virtual-payments":   {"payments"},
 	"/api/admin/templates":          {"templates"},
 	"/api/admin/users":              {"users"},
-	"/api/admin/signup":             {"users"},
+	"/api/admin/registrations":      {"users"},
 	"/api/admin/works":              {"works"},
 }
 

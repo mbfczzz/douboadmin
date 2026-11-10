@@ -4,29 +4,30 @@ import { pct } from "./format";
 import "./panels.css";
 
 const parts = [
-  ["provider", "服务商激活", "var(--accent-hover)"],
-  ["direct", "直接开通", "var(--info)"],
+  ["member", "会员", "var(--accent-hover)"],
+  ["owner", "服务商负责人", "var(--info)"],
 ] as const;
 
-// New users by how they got access, code redemption and top providers.
+// Accounts the platform (总部) opened in the period, and the providers whose
+// 会员 were opened most.
 export default function Activations({ b }: { b: Breakdown }) {
-  const n = { provider: b.providerActivations, direct: b.directActivations },
-    total = n.provider + n.direct,
+  const n = { member: b.memberActivations, owner: b.ownerActivations },
+    total = n.member + n.owner,
     providers = b.providers || [];
   return (
     <section className="panel stat-panel">
       <div className="section-head">
         <h2>开通情况</h2>
-        <span className="quiet">服务商与直接开通</span>
+        <span className="quiet">总部开通的账号</span>
       </div>
       <div className="stat-hero">
         <b>{total}</b>
-        <span className="quiet">新开通用户（人）</span>
+        <span className="quiet">新开通账号（人）</span>
       </div>
       <div
         className={"mix-bar" + (total ? "" : " no-data")}
         role="img"
-        aria-label="开通方式占比"
+        aria-label="会员与服务商负责人占比"
       >
         {!!total &&
           parts.map(([k, , color]) => (
@@ -43,22 +44,11 @@ export default function Activations({ b }: { b: Breakdown }) {
           </li>
         ))}
       </ul>
-      <dl className="stat-facts">
-        <div>
-          <dt>授权码核销率</dt>
-          <dd>
-            {pct(b.codesRedeemed, b.codesIssued)}
-            <small>
-              核销 {b.codesRedeemed} / 发放 {b.codesIssued} 张
-            </small>
-          </dd>
-        </div>
-      </dl>
       {providers.length > 0 && (
         <>
-          <h3 className="stat-sub">服务商排行</h3>
+          <h3 className="stat-sub">新开通会员最多的服务商</h3>
           <HBars
-            label="服务商激活排行"
+            label="服务商新开通会员排行"
             rows={providers.map((p) => ({
               key: p.id,
               label: p.name,

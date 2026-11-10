@@ -33,7 +33,7 @@ for (const width of [320, 375, 430]) {
       <div class="hot-search"><input class="biz-input" placeholder="搜索抖音视频关键词"><button class="biz-action">搜索</button></div>
       <div class="biz-card"><div class="row biz-title-row"><span class="biz-heading">最近搜索</span><span class="biz-link">清空</span></div><div class="row biz-note"><span>点赞 123.4万</span><span>播放 999.9万</span></div></div>
       <div class="favorite-card"><img style="object-fit:cover" alt=""><div><span>这是一个比较长的收藏模板标题，需要保持图片和箭头位置稳定</span><span class="small">作品分类</span></div><t-icon>›</t-icon></div>
-      <div class="biz-card activation-options"><div class="activation-path"><span class="biz-heading">申请使用</span><button class="biz-action">直接申请使用</button><span class="biz-note">直接申请自动开通，不关联服务商。</span></div><div class="activation-path"><span class="biz-heading">服务商激活</span><input class="biz-input" placeholder="输入 20 位激活码"><button class="biz-action">确认激活</button></div></div>
+      <div class="biz-card activation-options"><div class="activation-path"><span class="biz-heading">申请使用</span><button class="biz-action">直接申请使用</button><span class="biz-note">直接申请自动开通，不关联服务商。</span></div><div class="activation-path"><span class="biz-heading">加入服务商</span><button class="biz-action">扫码加入</button><input class="biz-input" placeholder="或输入 8 位分享码"><button class="biz-action biz-secondary">确认加入</button></div></div>
     </div>`);
     const input = await page.locator(".hot-search input").boundingBox();
     const button = await page.locator(".hot-search button").boundingBox();

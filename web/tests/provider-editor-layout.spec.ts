@@ -5,51 +5,15 @@ import { surfaceFixtures, longName } from "./surface-fixtures";
 test.beforeEach(async ({ page }) => {
   await login(page);
   await surfaceFixtures(page);
-  await page.route("**/api/admin/quota-moves?*", (route) =>
-    route.fulfill({
-      json: {
-        items: [
-          {
-            id: "move-1",
-            version: 1,
-            createdAt: "2026-11-06T00:50:00Z",
-            data: {
-              parentId: "root",
-              childId: "qa-provider",
-              users: 20,
-              kind: "grant",
-              reason: "初始可授权账号额度",
-            },
-          },
-          {
-            id: "move-2",
-            version: 1,
-            createdAt: "2026-11-06T00:51:00Z",
-            data: {
-              parentId: "qa-provider",
-              childId: "qa-child",
-              users: 4,
-              kind: "grant",
-              reason: "创建下级服务商并分配初始额度",
-            },
-          },
-        ],
-        page: 1,
-        total: 2,
-        size: 20,
-      },
-    }),
-  );
   await page.getByRole("button", { name: "服务商管理", exact: true }).click();
 });
 
 const row = (page: Page) => page.locator(".provider-tree-row").first();
 // Each row button opens one dialog with one job.
 const functions = [
-  ["编辑", "编辑服务商", ""],
-  ["名额划拨", "名额划拨", "名额划拨记录"],
-  ["授权码", "授权激活", "授权码"],
-  ["分佣", "算力分佣", "佣金流水"],
+  ["编辑", "编辑服务商", "", 0],
+  ["分享码", "分享码", "已加入的会员", 1],
+  ["分佣", "算力分佣", "佣金流水", 2],
 ] as const;
 
 test("each provider function opens its own readable, contained dialog", async ({
@@ -57,7 +21,10 @@ test("each provider function opens its own readable, contained dialog", async ({
 }) => {
   for (const width of [1440, 390]) {
     await page.setViewportSize({ width, height: 1000 });
-    for (const [index, [button, title, heading]] of functions.entries()) {
+    for (const [
+      index,
+      [button, title, heading, lists],
+    ] of functions.entries()) {
       await row(page)
         .getByRole("button", { name: button, exact: true })
         .click();
@@ -68,16 +35,16 @@ test("each provider function opens its own readable, contained dialog", async ({
         await expect(
           dialog.getByRole("button", { name: "保存服务商" }),
         ).toBeEnabled();
-        // Profile only: login, quotas and codes have their own buttons.
+        // Profile only: login and codes have their own buttons.
         await expect(dialog.getByText("登录账号")).toHaveCount(0);
       } else {
         const panel = dialog.locator(".provider-panel");
         await expect(
           panel.getByRole("heading", { name: heading, exact: true }),
         ).toBeVisible();
-        await expect(panel.locator(".partner-records")).toHaveCount(2);
+        await expect(panel.locator(".partner-records")).toHaveCount(lists);
         const sections = await panel
-          .locator(".partner-records")
+          .locator(".partner-records, .share-panel")
           .evaluateAll((nodes) =>
             nodes.map((node) => {
               const box = node.getBoundingClientRect();
@@ -90,17 +57,35 @@ test("each provider function opens its own readable, contained dialog", async ({
           await panel.evaluate((el) => el.scrollWidth <= el.clientWidth + 1),
         ).toBe(true);
         if (index === 1) {
+          // A 分公司 has every code: 会员, S1 and S2 invites and its bind code.
+          await expect(panel.getByRole("tab")).toHaveText([
+            "会员开通码",
+            "S1 邀请码",
+            "S2 邀请码",
+            "服务商绑定码",
+          ]);
+          await expect(panel.locator(".share-code")).toHaveText("ABCD-2345");
+          await expect(panel.locator(".code-info")).toContainText(
+            "用户扫码登记为会员，总部开通后生效",
+          );
+          await panel.getByRole("tab", { name: "S1 邀请码" }).click();
+          await expect(panel.locator(".share-code")).toHaveText("KMNP-2345");
+          await expect(panel.locator(".code-info")).toContainText(
+            "新用户扫码登记为 S1 服务商，总部开通后生效",
+          );
+          await panel.getByRole("tab", { name: "S2 邀请码" }).click();
+          await expect(panel.locator(".share-code")).toHaveText("WXYZ-6789");
+          // An admin-made provider shows the account its bind code linked.
+          await panel.getByRole("tab", { name: "服务商绑定码" }).click();
+          await expect(panel.locator(".bound-owner")).toContainText(
+            "华东负责人",
+          );
           await expect(
-            panel.getByText("质检子级服务商", { exact: true }),
+            panel.getByRole("button", { name: "解除绑定" }),
           ).toBeVisible();
-          await expect(
-            panel.getByRole("region", { name: "名额申请", exact: true }),
-          ).toContainText("审批说明");
+          await expect(panel).not.toContainText("名额");
+          await panel.getByRole("tab", { name: "S1 邀请码" }).click();
         }
-        if (index === 2)
-          await expect(
-            panel.getByLabel("查看全部服务商的授权码"),
-          ).not.toBeChecked();
         if (width === 390) {
           const nativeButtons = await panel
             .locator(".mobile-record button")
@@ -128,44 +113,14 @@ test("each provider function opens its own readable, contained dialog", async ({
 test("provider function dialogs keep their record workflows", async ({
   page,
 }) => {
-  await row(page)
-    .getByRole("button", { name: "名额划拨", exact: true })
-    .click();
-  const quotas = page.getByRole("dialog", { name: "名额划拨", exact: true });
-  const moves = quotas.getByRole("region", {
-    name: "名额划拨记录",
-    exact: true,
-  });
-  await moves.getByLabel("查询记录").fill("初始");
-  const query = page.waitForRequest(
-    (r) =>
-      r.url().includes("/quota-moves?") &&
-      new URL(r.url()).searchParams.get("q") === "初始",
-  );
-  await moves.getByRole("button", { name: "查询", exact: true }).click();
-  await query;
-  // Grant and reclaim are separate buttons with their own dialog.
-  for (const name of ["划拨名额", "收回名额"]) {
-    await quotas.getByRole("button", { name, exact: true }).click();
-    const form = page.getByRole("dialog", { name, exact: true });
-    await expect(
-      form.getByRole("button", { name: "选择直接下级服务商" }),
-    ).toBeVisible();
-    await expect(form.getByLabel("操作")).toHaveCount(0);
-    await form.getByRole("button", { name: "关闭", exact: true }).click();
-  }
-  await quotas
-    .getByRole("button", { name: "关闭", exact: true })
-    .first()
-    .click();
-
-  await row(page).getByRole("button", { name: "授权码", exact: true }).click();
-  const codes = page.getByRole("dialog", { name: "授权激活", exact: true });
-  await codes.getByRole("button", { name: "生成授权码", exact: true }).click();
-  const code = page.getByRole("dialog", { name: "生成授权码", exact: true });
-  await expect(code.getByLabel("激活码有效天数")).toHaveValue("7");
-  await code.getByRole("button", { name: "关闭", exact: true }).click();
-  await codes
+  await row(page).getByRole("button", { name: "分享码", exact: true }).click();
+  const share = page.getByRole("dialog", { name: "分享码", exact: true });
+  await share.getByRole("tab", { name: "S2 邀请码" }).click();
+  await share.getByRole("button", { name: "重置", exact: true }).click();
+  const reset = page.getByRole("dialog", { name: "重置S2 邀请码？" });
+  await expect(reset).toContainText("已登记的会员和服务商不受影响");
+  await reset.getByRole("button", { name: "取消", exact: true }).click();
+  await share
     .getByRole("button", { name: "关闭", exact: true })
     .first()
     .click();
@@ -186,8 +141,8 @@ test("provider function dialogs keep their record workflows", async ({
 test("a new provider's login comes prefilled with a generated account", async ({
   page,
 }) => {
-  await page.getByRole("button", { name: "新增服务商", exact: true }).click();
-  const dialog = page.getByRole("dialog", { name: "新增服务商" }),
+  await page.getByRole("button", { name: "新增分公司", exact: true }).click();
+  const dialog = page.getByRole("dialog", { name: "新增分公司" }),
     account = dialog.getByLabel("账号", { exact: true }),
     password = dialog.getByLabel("初始密码");
   await expect(account).toHaveValue(/^sp\d{6}$/);

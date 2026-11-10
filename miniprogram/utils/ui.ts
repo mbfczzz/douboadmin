@@ -4,6 +4,21 @@ import type { Job } from "../services/types";
 import { enterPage } from "./motion";
 import { openPage } from "./navigation";
 import { track } from "../services/analytics";
+// Saving to the album failed. Once permission is denied WeChat never asks
+// again, so offer the settings page; a cancelled picker says nothing.
+export function saveFailed(e: unknown) {
+  const msg = String((e as { errMsg?: string })?.errMsg || "");
+  if (msg.includes("cancel")) return;
+  if (msg.includes("auth"))
+    wx.showModal({
+      title: "需要相册权限",
+      content: "请在设置中允许保存到相册，返回后再次点击保存。",
+      success: (r) => {
+        if (r.confirm) wx.openSetting({});
+      },
+    });
+  else error(e instanceof Error ? e : new Error("保存失败，请重试"));
+}
 export function error(e: unknown) {
   if (e instanceof AuthCancelledError) return;
   wx.showToast({

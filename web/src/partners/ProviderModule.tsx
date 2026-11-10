@@ -5,18 +5,16 @@ import RequestState, { LoadingState } from "../components/RequestState";
 import { canLeave } from "../hooks/unsaved";
 import { useResource } from "../hooks/useResource";
 import type { Notify } from "../navigation";
-import type { Overview, Partner, PartnerTreeItem, Scope } from "./types";
+import type { Overview, Partner, Scope } from "./types";
 import { PartnerNames } from "./PartnerIdentity";
 import ProviderId from "./ProviderId";
 import "./editor.css";
 
-const Quotas = lazy(() => import("./Quotas")),
-  Codes = lazy(() => import("./Codes")),
+const ShareCode = lazy(() => import("./ShareCode")),
   Commissions = lazy(() => import("./Commissions"));
 
 export const modules = {
-  quotas: "名额划拨",
-  codes: "授权激活",
+  share: "分享码",
   commissions: "算力分佣",
 } as const;
 export type ModuleKey = keyof typeof modules;
@@ -32,7 +30,7 @@ export default function ProviderModule({
 }: {
   kind: ModuleKey;
   row: Row<Partner>;
-  rows: PartnerTreeItem[];
+  rows: Row<Partner>[];
   notify: Notify;
   onClose: () => void;
   onSaved: () => Promise<void>;
@@ -40,7 +38,7 @@ export default function ProviderModule({
   const resource = useResource<Overview>("/admin/partners/" + row.id, 15000),
     view = resource.data?.record.id === row.id ? resource.data : undefined;
   const names = useMemo(
-    () => new Map(rows.map(({ record }) => [record.id, record.data.name])),
+    () => new Map(rows.map((r) => [r.id, r.data.name])),
     [rows],
   );
   const scope: Scope | undefined = view && {
@@ -72,8 +70,7 @@ export default function ProviderModule({
           />
           {scope && (
             <Suspense fallback={<LoadingState label="正在加载服务商功能" />}>
-              {kind === "quotas" && <Quotas {...scope} />}
-              {kind === "codes" && <Codes {...scope} />}
+              {kind === "share" && <ShareCode {...scope} />}
               {kind === "commissions" && <Commissions {...scope} />}
             </Suspense>
           )}

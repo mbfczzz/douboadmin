@@ -69,7 +69,8 @@ func PurchaseSnapshot(tx store.Transaction, user string, fen int64) (*core.Distr
 	if fen < 1 || fen > core.MaxOrderAmountFen {
 		return nil, rulef("充值参数无效")
 	}
-	if a.PartnerID == "" {
+	// No commission on a provider owner's own purchases.
+	if a.PartnerID == "" || a.Status == "provider" {
 		return nil, nil
 	}
 	p, e := prices(tx, a.PartnerID)

@@ -6,7 +6,7 @@
 .provider-tree-head,
 .provider-tree-row {
   display: grid;
-  grid-template-columns: minmax(220px, 1fr) 96px 180px 384px;
+  grid-template-columns: minmax(220px, 1fr) 96px 340px;
   align-items: center;
   gap: 24px;
 }
@@ -63,39 +63,6 @@
   color: var(--muted);
   font-size: 12px;
 }
-.quota-figure {
-  display: block;
-  color: var(--text);
-  font-size: 12px;
-}
-.quota-figure b {
-  margin-right: 2px;
-  color: var(--ink-strong);
-  font-size: 16px;
-}
-.quota-bar {
-  display: flex;
-  width: 100%;
-  max-width: 200px;
-  height: 4px;
-  margin: 7px 0 6px auto;
-  overflow: hidden;
-  border-radius: 2px;
-  background: var(--line);
-}
-.quota-bar .used {
-  background: var(--accent);
-}
-.quota-bar .reserved {
-  background: var(--warning);
-}
-.quota-bar .allocated {
-  background: var(--info);
-}
-.quota-legend {
-  display: block;
-  font-size: 11.5px;
-}
 .provider-tree-head > :first-child {
   padding-left: calc(var(--tree-control) + 8px);
 }
@@ -124,15 +91,15 @@
 .provider-tree-meta small {
   display: none;
 }
-.provider-quota {
+.provider-tree-head > :last-child {
   text-align: right;
-  font-variant-numeric: tabular-nums;
 }
 /* One row of compact actions: business functions, a thin divider, then the
    provider's own record. */
+/* Left-aligned so 分享码 and 分佣 line up whatever follows them. */
 .provider-tree-actions {
   align-items: center;
-  justify-content: flex-end;
+  justify-content: flex-start;
   gap: 0;
   white-space: nowrap;
 }
@@ -196,4 +163,8 @@
   display: flex;
   gap: 8px;
   margin-left: auto;
+}
+.provider-waiting {
+  padding: 0 8px;
+  font-size: 12px;
 }

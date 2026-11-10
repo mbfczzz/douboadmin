@@ -11,7 +11,6 @@ type Store interface {
 	Get(context.Context, string, string) (core.Record, error)
 	List(context.Context, string, string) ([]core.Record, error)
 	RecordPage(context.Context, core.RecordQuery) (core.RecordPage, error)
-	ExpiredActivationCodes(context.Context, int) ([]core.Record, error)
 	PendingPayments(context.Context, string, string, int) ([]core.Record, error)
 	PaymentRecords(context.Context, core.PaymentQuery) (core.PaymentPage, error)
 	PendingSubscriptions(context.Context, string, int) ([]core.Record, error)

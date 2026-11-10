@@ -24,9 +24,10 @@ func TestProviderCreateRetryAndChildPricing(t *testing.T) {
 	a, _, _ := setup(t)
 	admin := adminLoginToken(t, a, "admin", "test-pass")
 	login := map[string]string{"username": "rules-s1", "password": "rules-s1-password-2026"}
-	s1 := createProvider(t, a, admin, "rules-s1", "root", "S1", 10, login)
+	branch := createBranch(t, a, admin, "rules")
+	s1 := createProvider(t, a, admin, "rules-s1", branch, "S1", "s1", login)
 	// A lost response retried with the same key succeeds instead of "账号已被使用".
-	if again := createProvider(t, a, admin, "rules-s1", "root", "S1", 10, login); again != s1 {
+	if again := createProvider(t, a, admin, "rules-s1", branch, "S1", "s1", login); again != s1 {
 		t.Fatal("retry created another provider", again, s1)
 	}
 	version, data := providerData(t, a, admin, s1)
@@ -35,7 +36,8 @@ func TestProviderCreateRetryAndChildPricing(t *testing.T) {
 		t.Fatal(w.Code, w.Body.String())
 	}
 	provider := adminLoginToken(t, a, "rules-s1", "rules-s1-password-2026")
-	child := createProvider(t, a, provider, "rules-child", s1, "S1-child", 2, nil)
+	// Only the platform adds providers; the S1 then manages its child.
+	child := createProvider(t, a, admin, "rules-child", s1, "S1-child", "s2", nil)
 	version, data = providerData(t, a, provider, child)
 	if data["childMarginBps"].(float64) != 3000 {
 		t.Fatal("new child starts above its parent's margin", data)
@@ -53,8 +55,8 @@ func TestProviderCreateRetryAndChildPricing(t *testing.T) {
 func TestDisabledProviderCannotUseAdmin(t *testing.T) {
 	a, _, _ := setup(t)
 	admin := adminLoginToken(t, a, "admin", "test-pass")
-	s1 := createProvider(t, a, admin, "off-s1", "root", "S1", 5, nil)
-	child := createProvider(t, a, admin, "off-child", s1, "S1-child", 1, map[string]string{"username": "off-child", "password": "off-child-password-2026"})
+	s1 := createBranch(t, a, admin, "off")
+	child := createProvider(t, a, admin, "off-child", s1, "S1-child", "s1", map[string]string{"username": "off-child", "password": "off-child-password-2026"})
 	session := adminLoginToken(t, a, "off-child", "off-child-password-2026")
 	version, data := providerData(t, a, admin, s1)
 	data["status"] = "disabled"

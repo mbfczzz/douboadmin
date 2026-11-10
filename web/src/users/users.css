@@ -17,3 +17,7 @@
   color: var(--warning);
   font-family: inherit;
 }
+.users-views {
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--line);
+}

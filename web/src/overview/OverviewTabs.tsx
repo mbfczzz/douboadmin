@@ -42,8 +42,8 @@ export default function OverviewTabs({
           b &&
           (b.activeUsers ||
             b.ordersCreated ||
-            b.directActivations ||
-            b.providerActivations)
+            b.memberActivations ||
+            b.ownerActivations)
         );
       if (!b || !has)
         return (

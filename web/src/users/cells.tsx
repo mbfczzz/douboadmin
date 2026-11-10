@@ -23,19 +23,21 @@ export const accessCell = (r: Row<Profile>) => {
   const a = r.data.access,
     note = !registered(r.data)
       ? "待完成注册"
-      : a?.active
-        ? a.partnerName
+      : a?.active || a?.status === "review"
+        ? a?.partnerName
         : a?.status !== "pending"
           ? a?.message
           : "";
   return (
     <>
       {a?.active ? (
-        a.status === "direct" ? (
-          <Tag tone="info">直接开通</Tag>
+        a.status === "provider" ? (
+          <Tag tone="info">服务商负责人</Tag>
         ) : (
-          <Tag tone="accent">服务商激活</Tag>
+          <Tag tone="accent">会员</Tag>
         )
+      ) : a?.status === "review" ? (
+        <Tag tone="warning">待开通</Tag>
       ) : (
         <Tag>未开通</Tag>
       )}
@@ -45,7 +47,7 @@ export const accessCell = (r: Row<Profile>) => {
 };
 
 // Date over time, so the column stays narrow.
-export const createdCell = (r: Row<Profile>) => {
+export const createdCell = (r: { createdAt: string }) => {
   const [day, time] = date(r.createdAt).split(" ");
   return (
     <>

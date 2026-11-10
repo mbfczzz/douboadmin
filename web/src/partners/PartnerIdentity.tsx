@@ -20,7 +20,13 @@ export function PartnerIdentity({ id, name }: { id: string; name?: string }) {
   );
 }
 
-export function PartnerStatus({ state }: { state: string }) {
+export function PartnerStatus({
+  state,
+  label,
+}: {
+  state: string;
+  label?: string;
+}) {
   const tone = ["active", "approved", "paid", "used"].includes(state)
     ? "succeeded"
     : ["rejected", "disabled", "provider_disabled"].includes(state)
@@ -29,7 +35,7 @@ export function PartnerStatus({ state }: { state: string }) {
   return (
     <span className={`badge ${tone}`}>
       <i aria-hidden="true" />
-      {labels[state] || state}
+      {label || labels[state] || state}
     </span>
   );
 }

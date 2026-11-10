@@ -9,6 +9,7 @@ import {
   hasSession,
   login,
   cancelled,
+  saveFailed,
   openPage,
 } from "../../utils/api";
 import type { Job, Row, Asset } from "../../services/types";
@@ -221,17 +222,7 @@ Page({
       wx.showToast({ title: "已保存到相册", icon: "success" });
       track("work_saved", "task-detail", j.id);
     } catch (e) {
-      const msg = String((e as { errMsg?: string })?.errMsg || "");
-      if (cancelled(e)) return;
-      if (msg.includes("auth")) {
-        wx.showModal({
-          title: "需要相册权限",
-          content: "请在设置中允许保存到相册，返回后再次点击保存。",
-          success: (r) => {
-            if (r.confirm) wx.openSetting({});
-          },
-        });
-      } else error(e instanceof Error ? e : new Error("保存失败，请重试"));
+      if (!cancelled(e)) saveFailed(e);
     } finally {
       this.setData({ busy: false });
     }

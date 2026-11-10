@@ -2,38 +2,45 @@ const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const { harness } = require("./harness.cjs");
 
-test("scan and manual activation report their method without trusting it for identity", async () => {
+test("typed and scanned share codes join with their method", async () => {
   const h = harness(),
     page = h.page("activate");
-  page.setData({ logged: true, code: "AAAABBBBCCCCDDDDEEEE" });
+  page.setData({ logged: true, code: "abcd-2345" });
   h.wx.reLaunch = () => {};
-  const methods = [];
+  const bodies = [];
   h.api.request = async (path, method, body) => {
-    methods.push(body.method);
+    bodies.push([path, body.code, body.method]);
     return { active: true, status: "active" };
   };
-  await page.activate({ currentTarget: { dataset: {} } });
-  h.wx.scanCode = async () => ({
-    result: "DOUBO-ACTIVATE:AAAABBBBCCCCDDDDEEEE",
-  });
+  page.confirm();
+  await new Promise((r) => setTimeout(r));
+  page.entering = false;
+  h.wx.scanCode = async () => ({ result: "DOUBO-SHARE:WXYZ6789" });
   await page.scan();
-  assert.deepEqual(methods, ["code", "qr"]);
+  assert.deepEqual(bodies, [
+    ["/access/join", "ABCD2345", "code"],
+    ["/access/join", "WXYZ6789", "scan"],
+  ]);
 });
 
-test("direct application auto-approves without an activation code", async () => {
+test("a scan only registers: the page waits for the platform to open it", async () => {
   const h = harness(),
     page = h.page("activate"),
-    requests = [],
-    moves = [];
+    toasts = [];
+  let enters = 0;
   page.setData({ logged: true });
-  h.wx.reLaunch = (o) => moves.push(o.url);
-  h.api.request = async (path, method) => {
-    requests.push([path, method]);
-    return { active: true, status: "direct" };
-  };
-  await page.direct();
-  assert.deepEqual(requests, [["/access/direct", "POST"]]);
-  assert.equal(moves[0], "/pages/templates/index");
+  h.wx.reLaunch = () => enters++;
+  h.wx.showToast = (o) => toasts.push(o.title);
+  h.api.request = async () => ({
+    active: false,
+    status: "review",
+    message: "已登记，等待总部开通",
+    partnerName: "华东分公司",
+  });
+  await page.join("ABCD2345", "scan");
+  assert.equal(enters, 0);
+  assert.equal(page.data.status.status, "review");
+  assert.deepEqual(toasts, ["已登记，等待总部开通"]);
 });
 
 test("activation-required business response redirects instead of exposing data", async () => {
@@ -77,11 +84,11 @@ test("wechat login does not leave the activation page until a grant is active", 
   assert.equal(page.data.status.active, false);
   assert.equal(moves.length, 0);
   h.api.request = async () => ({ active: true, status: "active" });
-  page.setData({ code: "AAAA-BBBB-CCCC-DDDD-EEEE" });
-  await page.activate();
+  page.setData({ code: "ABCD-2345" });
+  await page.join("ABCD2345", "code");
   assert.equal(moves[0], "/pages/templates/index");
 });
-test("invalid scanned content never reaches the redemption endpoint", async () => {
+test("invalid scanned content never reaches the join endpoint", async () => {
   const h = harness(),
     page = h.page("activate");
   let submits = 0;
@@ -89,7 +96,12 @@ test("invalid scanned content never reaches the redemption endpoint", async () =
   h.api.request = async () => {
     submits++;
   };
-  await page.activate();
+  h.wx.showToast = () => {};
+  page.confirm();
+  h.wx.scanCode = async () => ({
+    result: "DOUBO-ACTIVATE:AAAABBBBCCCCDDDDEEEE",
+  });
+  await page.scan();
   assert.equal(submits, 0);
 });
 test("a replayed code for a disabled account does not enter the app", async () => {
@@ -97,13 +109,14 @@ test("a replayed code for a disabled account does not enter the app", async () =
     page = h.page("activate");
   let enters = 0;
   h.wx.reLaunch = () => enters++;
-  page.setData({ logged: true, code: "AAAABBBBCCCCDDDDEEEE" });
+  page.setData({ logged: true });
+  h.wx.showToast = () => {};
   h.api.request = async () => ({
     active: false,
     status: "disabled",
     message: "已停用",
   });
-  await page.activate();
+  await page.join("ABCD2345", "scan");
   assert.equal(enters, 0);
   assert.equal(page.data.busy, false);
 });
@@ -120,7 +133,7 @@ test("registration sends an SMS code, then verifies name and phone before activa
   h.api.request = async (path, method, body) => {
     requests.push([path, body]);
     if (path === "/access/sms") return { resendIn: 60, debugCode: "123456" };
-    return { active: false, status: "pending", openSignup: true };
+    return { active: false, status: "pending" };
   };
   page.setData({ name: " 张三 ", phone: "13800138000" });
   await page.sendCode();
@@ -133,7 +146,6 @@ test("registration sends an SMS code, then verifies name and phone before activa
     ["/access/profile", { name: "张三", phone: "13800138000", code: "123456" }],
   ]);
   assert.equal(page.data.status.profileRequired, undefined);
-  assert.equal(page.data.status.openSignup, true);
   assert.equal(page.data.countdown, 0);
   page.onUnload();
 });

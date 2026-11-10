@@ -2,6 +2,7 @@ package api
 
 import (
 	"doubo/server/internal/core"
+	"doubo/server/internal/partners"
 	"doubo/server/internal/virtualpay"
 	"encoding/json"
 	"net/http"
@@ -150,13 +151,13 @@ func (a *Server) payOrder(w http.ResponseWriter, r *http.Request) {
 		fail(w, 409, "此订单已完成或过期，请刷新订单状态")
 		return
 	}
-	if a.Config.RequireActivation && o.Distribution != nil {
+	if a.Config.RequireActivation {
 		access, e := a.Partners.Access(r.Context(), row.Owner)
 		if e != nil {
 			dbError(w, e)
 			return
 		}
-		if !access.Active || access.PartnerID != o.Distribution.PartnerID {
+		if !access.Active || !partners.SameOrderPartner(access, o) {
 			fail(w, 409, "授权归属已变化，请创建新的充值订单")
 			return
 		}

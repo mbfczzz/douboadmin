@@ -27,8 +27,9 @@ test("creation consumes backend models and capabilities without local demo fallb
   const h = connected(),
     page = h.page("create");
   const config = await (await fetch(origin + "/api/config")).json();
+  // demoLogin is a server setting (the local dev API enables it for browser
+  // tests); what matters here is that no demo catalog leaks into creation.
   assert.equal(config.demo, false);
-  assert.equal(config.demoLogin, false);
   if (config.activationRequired)
     assert.equal(
       config.models.length,

@@ -1,37 +1,51 @@
 import { date } from "../api";
 import { useResource } from "../hooks/useResource";
 import Badge from "../components/Badge";
-import Tag from "../components/Tag";
+import Tag, { IdChip } from "../components/Tag";
 import RequestState from "../components/RequestState";
+import { codeKindName, joinMethod, roleName } from "./types";
 import "./user-activation.css";
 
 interface Source {
-  kind: "provider" | "direct" | "none";
-  directAt?: string;
-  membership?: { status: string; activatedAt: string; reason?: string };
-  chain: { id: string; name: string; status: string; level: number }[];
-  code?: {
-    code?: string;
-    label: string;
-    suffix: string;
-    creatorAccount?: string;
-    createdAt: string;
-    usedAt?: string;
-    method?: string;
+  kind: "owner" | "member" | "none";
+  ownerOf?: string;
+  membership?: { status: string; activatedAt: string };
+  registration?: {
+    role: string;
+    codeKind: string;
+    code: string;
+    method: string;
+    status: string;
+    reason?: string;
+    decidedAt?: string;
+    registeredAt?: string;
   };
+  referrer?: { id: string; name?: string; nickname?: string };
+  chain: { id: string; name: string; role: string; status: string }[];
 }
-const levels = ["", "一级", "二级", "三级"];
+const registrations: Record<string, [string, string]> = {
+  pending: ["待开通", "queued"],
+  approved: ["已开通", "succeeded"],
+  rejected: ["已拒绝", "failed"],
+};
+// A 会员's own authorization once opened.
 const bindings: Record<string, [string, string]> = {
   active: ["授权有效", "succeeded"],
   disabled: ["授权已停用", "failed"],
   unbound: ["已解绑", "muted"],
   provider_disabled: ["上级已停用", "failed"],
 };
+const pretty = (code: string) => code.match(/.{1,4}/g)?.join("-");
 
-// How a mini-program user was activated: provider chain and redeemed code.
+// How a mini-program user registered and where they sit: the owner of a
+// provider or a 会员 of one, the registration's review and the chain.
 export default function UserActivation({ userId }: { userId: string }) {
   const resource = useResource<Source>(`/admin/users/${userId}/activation`),
-    source = resource.data;
+    source = resource.data,
+    reg = source?.registration,
+    [state, tone] = (reg && registrations[reg.status]) || [],
+    binding = source?.membership && bindings[source.membership.status],
+    who = source?.referrer;
   return (
     <section className="user-source">
       <h3 className="business-section-title">开通来源</h3>
@@ -40,84 +54,69 @@ export default function UserActivation({ userId }: { userId: string }) {
         error={resource.error}
         retry={resource.reload}
       />
-      {source?.kind === "none" && (
+      {source && !reg && source.kind === "none" && (
         <p className="quiet">
-          尚未开通：用户验证手机号后，需使用服务商激活码开通；开放普通用户注册时也可跳过。
+          尚未登记：用户需扫描服务商的二维码登记，总部开通后才能使用。
         </p>
       )}
-      {source?.kind === "direct" && (
-        <div className="source-head">
-          <Tag tone="info">直接开通</Tag>
-          <span className="quiet">
-            {source.directAt && date(source.directAt)} · 不归属任何服务商
-          </span>
-        </div>
-      )}
-      {source?.kind === "provider" && source.membership && (
+      {source && (reg || source.kind !== "none") && (
         <>
           <div className="source-head">
-            <Tag tone="accent">服务商激活</Tag>
-            <Badge
-              state={bindings[source.membership.status]?.[1] || "muted"}
-              label={
-                bindings[source.membership.status]?.[0] ||
-                source.membership.status
-              }
-            />
-            <span className="quiet">
-              激活于 {date(source.membership.activatedAt)}
-            </span>
+            {source.kind !== "none" && (
+              <Tag tone="accent">
+                {source.kind === "member" ? "会员" : "服务商负责人"}
+              </Tag>
+            )}
+            {state && <Badge state={tone!} label={state} />}
+            {binding && reg?.status === "approved" && (
+              <Badge state={binding[1]} label={binding[0]} />
+            )}
+            {reg?.registeredAt && (
+              <span className="quiet">登记于 {date(reg.registeredAt)}</span>
+            )}
+            {reg?.status === "approved" && reg.decidedAt && (
+              <span className="quiet">开通于 {date(reg.decidedAt)}</span>
+            )}
           </div>
           <dl className="source-grid">
-            <dt>服务商链路</dt>
-            <dd>
-              <ol className="source-chain" aria-label="服务商链路">
-                <li>总账号</li>
-                {source.chain.map((n, i) => (
-                  <li
-                    key={n.id}
-                    className={i === source.chain.length - 1 ? "current" : ""}
-                  >
-                    <b>{n.name}</b>
-                    <small>
-                      {levels[n.level] || `${n.level}级`}
-                      {n.status !== "active" && " · 已停用"}
-                    </small>
-                  </li>
-                ))}
-              </ol>
-            </dd>
-            {source.code && (
+            {reg && (
               <>
-                <dt>激活码</dt>
+                <dt>登记身份</dt>
+                <dd>{roleName(reg.role)}</dd>
+                <dt>登记码</dt>
                 <dd>
-                  <span className="source-code">
-                    {source.code.code
-                      ? source.code.code.match(/.{1,4}/g)?.join("-")
-                      : `•••• ${source.code.suffix}`}
-                  </span>
-                  {source.code.label && (
-                    <small className="cell-note">
-                      备注：{source.code.label}
-                    </small>
-                  )}
+                  {codeKindName(reg.codeKind)}{" "}
+                  <span className="source-code">{pretty(reg.code)}</span>
+                  <span className="quiet"> · {joinMethod(reg.method)}</span>
                 </dd>
-                <dt>生成者</dt>
+                {reg.decidedAt && (
+                  <>
+                    <dt>{reg.status === "rejected" ? "拒绝" : "开通"}时间</dt>
+                    <dd>{date(reg.decidedAt)}</dd>
+                  </>
+                )}
+                {reg.reason && (
+                  <>
+                    <dt>拒绝原因</dt>
+                    <dd>{reg.reason}</dd>
+                  </>
+                )}
+              </>
+            )}
+            {who && (
+              <>
+                <dt>推荐人</dt>
                 <dd>
-                  {source.code.creatorAccount || "未记录"}
-                  <small className="cell-note">
-                    {date(source.code.createdAt)}
-                  </small>
+                  {who.name || who.nickname || "未填写"}{" "}
+                  <IdChip>{who.id}</IdChip>
                 </dd>
-                <dt>激活方式</dt>
+              </>
+            )}
+            {source.chain.length > 0 && (
+              <>
+                <dt>服务商链路</dt>
                 <dd>
-                  <Tag tone={source.code.method === "qr" ? "info" : "muted"}>
-                    {source.code.method === "qr"
-                      ? "扫码"
-                      : source.code.method === "code"
-                        ? "输入激活码"
-                        : "未记录"}
-                  </Tag>
+                  <Chain chain={source.chain} />
                 </dd>
               </>
             )}
@@ -125,5 +124,24 @@ export default function UserActivation({ userId }: { userId: string }) {
         </>
       )}
     </section>
+  );
+}
+
+// Platform → provider chain, the last entry being the user's own provider.
+function Chain({ chain }: { chain: Source["chain"] }) {
+  return (
+    <ol className="source-chain" aria-label="服务商链路">
+      <li>总账号</li>
+      {chain.map((n, i) => (
+        <li key={n.id} className={i === chain.length - 1 ? "current" : ""}>
+          <b>{n.name}</b>
+          <small>
+            {roleName(n.role)}
+            {n.status === "pending" && " · 待开通"}
+            {n.status === "disabled" && " · 已停用"}
+          </small>
+        </li>
+      ))}
+    </ol>
   );
 }

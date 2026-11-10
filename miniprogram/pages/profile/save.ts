@@ -34,7 +34,6 @@ export async function saveProfile(
     page.setData({
       nickname: values.nickname ?? page.data.nickname,
       name: values.name ?? page.data.name,
-      phone: values.phone ?? page.data.phone,
       bio: values.bio ?? page.data.bio,
     });
   page.updateDirty();

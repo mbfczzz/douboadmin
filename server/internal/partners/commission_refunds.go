@@ -3,6 +3,7 @@ package partners
 import (
 	"doubo/server/internal/core"
 	"doubo/server/internal/store"
+	"errors"
 )
 
 func HoldCommissionRefund(tx store.Transaction, orderID, refundID string, o core.Order) error {
@@ -13,6 +14,9 @@ func HoldCommissionRefund(tx store.Transaction, orderID, refundID string, o core
 		return e
 	}
 	row, v, e := get[core.CommissionSettlement](tx, "commission_settlements", orderID)
+	if errors.Is(e, core.ErrNotFound) {
+		return nil // provider data was reset: no commission left to reverse
+	}
 	if e != nil {
 		return e
 	}
@@ -48,6 +52,9 @@ func FinishCommissionRefund(tx store.Transaction, orderID, refundID string, o co
 		return e
 	}
 	row, v, e := get[core.CommissionSettlement](tx, "commission_settlements", orderID)
+	if errors.Is(e, core.ErrNotFound) {
+		return nil // provider data was reset: no commission left to reverse
+	}
 	if e != nil {
 		return e
 	}

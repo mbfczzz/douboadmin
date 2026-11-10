@@ -70,9 +70,7 @@ func TestOmniTemplateRespectsZeroImageLimit(t *testing.T) {
 
 func TestUnfavoriteNeverCreatesRecordsForUnknownTemplates(t *testing.T) {
 	a, user, _ := activationFixture(t)
-	if w := call(a, "POST", "/api/access/direct", user, "", map[string]any{}); w.Code != 200 {
-		t.Fatal(w.Code, w.Body.String())
-	}
+	activate(t, a, "user-a")
 	for range 3 {
 		if w := call(a, "PUT", "/api/favorites/no-such-template", user, "", map[string]any{"version": 0, "active": false}); w.Code != 404 {
 			t.Fatal("unknown template accepted", w.Code, w.Body.String())

@@ -7,9 +7,7 @@ import (
 
 func TestAdminStatusReasonStaysOutOfOwnProfile(t *testing.T) {
 	a, user, admin := activationFixture(t)
-	if w := call(a, "POST", "/api/access/direct", user, "", map[string]any{}); w.Code != 200 {
-		t.Fatal(w.Code, w.Body.String())
-	}
+	activate(t, a, "user-a")
 	row, _ := a.Store.Get(t.Context(), "users", "user-a")
 	for i, disabled := range []bool{true, false} {
 		w := call(a, "PUT", "/api/admin/users/user-a/status", admin, "", map[string]any{"version": row.Version + int64(i), "disabled": disabled, "reason": "内部风控备注"})

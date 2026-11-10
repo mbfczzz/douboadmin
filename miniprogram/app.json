@@ -22,7 +22,8 @@
     "pages/share/index",
     "pages/shared-work/index",
     "pages/hot-videos/index",
-    "pages/hot-detail/index"
+    "pages/hot-detail/index",
+    "pages/provider/index"
   ],
   "window": {
     "navigationStyle": "custom",

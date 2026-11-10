@@ -28,7 +28,7 @@ func (tx *admissionSignalTx) Lock(ns string, row core.Record) (core.Record, erro
 	return tx.Transaction.Lock(ns, row)
 }
 
-func TestMySQLSuspensionWinsAgainstWaitingRedemption(t *testing.T) {
+func TestMySQLSuspensionWinsAgainstWaitingJoin(t *testing.T) {
 	a, b, ctx := sqlFixture(t)
 	p := &partners.Service{Store: a}
 	id := makePartner(t, p, ctx)
@@ -36,11 +36,7 @@ func TestMySQLSuspensionWinsAgainstWaitingRedemption(t *testing.T) {
 	if e != nil {
 		t.Fatal(e)
 	}
-	code, e := p.Issue(ctx, id, "race", 7, "profile-race-code", "admin")
-	if e != nil {
-		t.Fatal(e)
-	}
-	token, e := p.Reveal(ctx, code.ID)
+	code, e := p.ShareCode(ctx, id, "admin")
 	if e != nil {
 		t.Fatal(e)
 	}
@@ -51,7 +47,7 @@ func TestMySQLSuspensionWinsAgainstWaitingRedemption(t *testing.T) {
 		if _, _, err := store.LockWallet(tx, "profile-race"); err != nil {
 			return err
 		}
-		go func() { _, err := second.Redeem(ctx, "profile-race", token); finished <- err }()
+		go func() { _, err := second.Join(ctx, "profile-race", code, "scan"); finished <- err }()
 		select {
 		case <-waiting:
 		case <-ctx.Done():
@@ -74,13 +70,11 @@ func TestMySQLSuspensionWinsAgainstWaitingRedemption(t *testing.T) {
 		t.Fatal(ctx.Err())
 	}
 	if !errors.Is(e, core.ErrUserDisabled) {
-		t.Fatal("waiting redemption bypassed suspension", e)
+		t.Fatal("waiting join bypassed suspension", e)
 	}
-	v, e := p.Overview(ctx, id)
-	if e != nil {
-		t.Fatal(e)
-	}
-	if v.Quota.Users.Reserved != 1 || v.Quota.Users.Used != 0 {
-		t.Fatal("quota changed", v.Quota)
+	for _, ns := range []string{"registrations", "memberships"} {
+		if _, e = p.Store.Get(ctx, ns, "profile-race"); !errors.Is(e, core.ErrNotFound) {
+			t.Fatal("suspended user was registered", ns, e)
+		}
 	}
 }

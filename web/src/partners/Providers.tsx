@@ -6,9 +6,8 @@ import { useResource } from "../hooks/useResource";
 import type { Notify } from "../navigation";
 import ProviderForm from "./ProviderForm";
 import ProviderTree from "./ProviderTree";
-import type { PartnerTreeItem } from "./types";
-import { available } from "./types";
-import { MAX_LEVELS } from "./ProviderTree";
+import type { Row } from "../api";
+import type { Partner } from "./types";
 import { useMe } from "../session";
 
 import ProviderAccount from "./ProviderAccount";
@@ -20,33 +19,22 @@ import type { ProviderAction } from "./ProviderActions";
 const ProviderModule = lazy(() => import("./ProviderModule"));
 
 export default function Providers({ notify }: { notify: Notify }) {
-  const resource = useResource<PartnerTreeItem[]>(
-      "/admin/partners/tree",
-      15000,
-    ),
+  const resource = useResource<Row<Partner>[]>("/admin/partners/tree", 15000),
     [query, setQuery] = useState(""),
     [expanded, setExpanded] = useState<Set<string>>(new Set()),
-    // New provider (create form) or one row action on an existing provider.
-    [creating, setCreating] = useState<{
-      parent: string;
-      parentAvailable?: number;
-    }>(),
+    // New provider under a parent (create form) or one row action.
+    [creating, setCreating] = useState<Row<Partner> | "root">(),
     [action, setAction] = useState<{
       kind: ProviderAction;
-      row: PartnerTreeItem["record"];
+      row: Row<Partner>;
     }>(),
     initialized = useRef(false);
   const rows = resource.data || [];
-  // A provider login adds children under its own node, within the level limit.
-  const ownId = useMe()?.partnerId,
-    own = ownId ? rows.find((item) => item.record.id === ownId) : undefined,
-    canAddTop =
-      !ownId || (!!own && (own.record.data.path?.length || 0) < MAX_LEVELS);
+  // Only the platform adds providers by hand; provider logins grow by codes.
+  const platform = !useMe()?.partnerId;
   const parentIds = useMemo(() => {
-    const parents = new Set(rows.map((item) => item.record.data.parentId));
-    return rows
-      .filter((item) => parents.has(item.record.id))
-      .map((item) => item.record.id);
+    const parents = new Set(rows.map((item) => item.data.parentId));
+    return rows.filter((item) => parents.has(item.id)).map((item) => item.id);
   }, [rows]);
   const allOpen = parentIds.every((id) => expanded.has(id));
   useEffect(() => {
@@ -56,10 +44,7 @@ export default function Providers({ notify }: { notify: Notify }) {
   }, [rows, parentIds]);
   const close = () => setAction(undefined),
     kind = action?.kind,
-    moduleKind =
-      kind === "quotas" || kind === "codes" || kind === "commissions"
-        ? kind
-        : undefined;
+    moduleKind = kind === "share" || kind === "commissions" ? kind : undefined;
   const toggle = (id: string) =>
     setExpanded((current) => {
       const next = new Set(current);
@@ -74,25 +59,14 @@ export default function Providers({ notify }: { notify: Notify }) {
         loading={resource.loading}
         onRefresh={() => void resource.reload()}
       >
-        {canAddTop && (
+        {platform && (
           <button
             type="button"
             className="primary"
-            onClick={() => {
-              if (own)
-                setExpanded((current) => new Set(current).add(own.record.id));
-              setCreating(
-                own
-                  ? {
-                      parent: own.record.id,
-                      parentAvailable: available(own.quota.users),
-                    }
-                  : { parent: "root" },
-              );
-            }}
+            onClick={() => setCreating("root")}
           >
             <Plus size={16} aria-hidden="true" />
-            {own ? "新增下级服务商" : "新增服务商"}
+            新增分公司
           </button>
         )}
       </PageHeader>
@@ -115,7 +89,7 @@ export default function Providers({ notify }: { notify: Notify }) {
             {allOpen ? "全部收起" : "全部展开"}
           </button>
         )}
-        {!ownId && (
+        {platform && (
           <span className="provider-platform">
             <PlatformActions notify={notify} changed={resource.reload} />
           </span>
@@ -132,20 +106,20 @@ export default function Providers({ notify }: { notify: Notify }) {
           query={query}
           expanded={expanded}
           toggle={toggle}
-          open={(kind, item) => setAction({ kind, row: item.record })}
-          add={(item) => {
-            setExpanded((current) => new Set(current).add(item.record.id));
-            setCreating({
-              parent: item.record.id,
-              parentAvailable: available(item.quota.users),
-            });
-          }}
+          open={(kind, row) => setAction({ kind, row })}
+          add={
+            platform
+              ? (row) => {
+                  setExpanded((current) => new Set(current).add(row.id));
+                  setCreating(row);
+                }
+              : undefined
+          }
         />
       )}
       {creating && (
         <ProviderForm
-          parent={creating.parent}
-          parentAvailable={creating.parentAvailable}
+          parent={creating}
           onClose={() => setCreating(undefined)}
           notify={notify}
           onSaved={async () => {
@@ -156,7 +130,6 @@ export default function Providers({ notify }: { notify: Notify }) {
       )}
       {action?.kind === "edit" && (
         <ProviderForm
-          parent={action.row.data.parentId}
           row={action.row}
           onClose={close}
           notify={notify}

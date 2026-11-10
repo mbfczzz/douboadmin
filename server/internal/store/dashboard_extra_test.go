@@ -22,11 +22,16 @@ func TestDashboardBreakdown(t *testing.T) {
 	rec("orders", "o1", "u1", now, core.Order{UserID: "u1", AmountFen: 990, PointsUnits: 100000, Channel: "wechat_virtual", PaidAt: &now})
 	rec("orders", "o2", "u1", now, core.Order{UserID: "u1", AmountFen: 990, Channel: "wechat_virtual"})
 	rec("refunds", "f1", "u1", now, core.Refund{Status: "succeeded", CompletedAt: &now, AmountFen: 990})
-	rec("direct_access", "u2", "u2", now, core.DirectAccess{ActivatedAt: now})
-	rec("memberships", "u1", "u1", now, core.Membership{PartnerID: "p1", ActivatedAt: now})
-	rec("memberships", "u0", "u0", old, core.Membership{PartnerID: "p1", ActivatedAt: old})
-	rec("activation_codes", "c1", "p1", now, core.ActivationCode{Status: "used", UsedAt: &now})
-	rec("activation_codes", "c2", "p1", now, core.ActivationCode{Status: "pending"})
+	// Only approvals in the period count, read from the append-only audit
+	// rows: a 会员 and a provider owner; an old approval and other audit
+	// kinds do not.
+	approved := func(id, user, role string, at time.Time) {
+		rec("partner_audit", id, user, at, map[string]any{"kind": "registration_approved", "data": core.Registration{Role: role, PartnerID: "p1", Status: "approved"}})
+	}
+	approved("a-u1", "u1", "member", now)
+	approved("a-u2", "u2", "s1", now)
+	approved("a-u0", "u0", "member", old)
+	rec("partner_audit", "a-u3", "u3", now, map[string]any{"kind": "registration_rejected", "data": core.Registration{Role: "member", PartnerID: "p1"}})
 	// Spent points come from job_billing (the MySQL job row has no cost), so
 	// the job's own CostUnits is deliberately left empty here.
 	job := func(kind, status string, cost int64, took time.Duration) {
@@ -57,7 +62,7 @@ func TestDashboardBreakdown(t *testing.T) {
 	if hours != 3 {
 		t.Fatal("hours", b.Hours)
 	}
-	if b.DirectActivations != 1 || b.ProviderActivations != 1 || b.CodesIssued != 2 || b.CodesRedeemed != 1 {
+	if b.MemberActivations != 1 || b.OwnerActivations != 1 {
 		t.Fatal("activations", b)
 	}
 	if len(b.Providers) != 1 || b.Providers[0].Name != "华东" || b.Providers[0].Activations != 1 {
@@ -76,8 +81,7 @@ func TestMySQLDashboardBreakdownQuery(t *testing.T) {
 	}
 	put("users", "dash-u-"+id, "dash-u-"+id, map[string]string{})
 	put("partners", "dash-p-"+id, "root", core.Partner{Name: "看板服务商"})
-	put("memberships", "dash-u-"+id, "dash-u-"+id, core.Membership{PartnerID: "dash-p-" + id, ActivatedAt: now})
-	put("activation_codes", "dash-c-"+id, "dash-p-"+id, core.ActivationCode{Status: "used", UsedAt: &now})
+	put("partner_audit", "dash-a-"+id, "dash-u-"+id, map[string]any{"kind": "registration_approved", "data": core.Registration{Role: "member", PartnerID: "dash-p-" + id, Status: "approved"}})
 	put("orders", "dash-o-"+id, "dash-u-"+id, core.Order{UserID: "dash-u-" + id, AmountFen: 500, Channel: "wechat_virtual", PaidAt: &now})
 	out, err := m.Dashboard(ctx, 7)
 	if err != nil {
@@ -88,7 +92,7 @@ func TestMySQLDashboardBreakdownQuery(t *testing.T) {
 	for _, p := range b.Providers {
 		found = found || (p.ID == "dash-p-"+id && p.Name == "看板服务商")
 	}
-	if !found || b.TotalUsers < 1 || b.CodesRedeemed < 1 || b.Channels["wechat_virtual"] == nil || b.OrdersPaid < 1 {
+	if !found || b.TotalUsers < 1 || b.MemberActivations < 1 || b.Channels["wechat_virtual"] == nil || b.OrdersPaid < 1 {
 		t.Fatal("mysql breakdown", b)
 	}
 }

@@ -26,36 +26,34 @@ test("long model headings leave fields and save usable on a short screen", async
   );
 });
 
-test("repeating a provider search retries the same failed query", async ({
+test("repeating a member search retries the same failed query", async ({
   page,
 }) => {
   await login(page);
   await surfaceFixtures(page);
   let attempts = 0;
-  await page.route("**/api/admin/partners?*", (route) => {
+  await page.route("**/api/admin/memberships?*", (route) => {
     const q = new URL(route.request().url()).searchParams.get("q");
     if (q === "same" && ++attempts === 1)
       return route.fulfill({ status: 503, json: { error: "测试查询失败" } });
     return route.fulfill({ json: { items: [], page: 1, size: 20, total: 0 } });
   });
   // The provider list is a locally filtered tree; the server-side search
-  // lives in the child picker used for quota transfers.
+  // lives in the member list of the 分享码 dialog.
   await page.getByRole("button", { name: "服务商管理", exact: true }).click();
   await page
     .locator(".provider-tree-row")
     .first()
-    .getByRole("button", { name: "名额划拨", exact: true })
+    .getByRole("button", { name: "分享码", exact: true })
     .click();
-  await page.getByRole("button", { name: "划拨名额", exact: true }).click();
-  await page.getByRole("button", { name: "选择直接下级服务商" }).click();
-  const picker = page.getByRole("dialog", { name: "选择直接下级服务商" });
-  await picker.getByLabel("查询记录").fill("same");
-  await picker.getByRole("button", { name: "查询", exact: true }).click();
-  await expect(picker.getByRole("alert")).toBeVisible();
-  await picker.getByRole("button", { name: "查询", exact: true }).click();
+  const members = page.getByRole("region", { name: "已加入的会员" });
+  await members.getByLabel("查询记录").fill("same");
+  await members.getByRole("button", { name: "查询", exact: true }).click();
+  await expect(members.getByRole("alert")).toBeVisible();
+  await members.getByRole("button", { name: "查询", exact: true }).click();
   await expect.poll(() => attempts).toBe(2);
-  await expect(picker.getByRole("alert")).toHaveCount(0);
-  await expect(picker.getByLabel("查询记录")).toHaveValue("same");
+  await expect(members.getByRole("alert")).toHaveCount(0);
+  await expect(members.getByLabel("查询记录")).toHaveValue("same");
 });
 
 test("repeating a payment search retries without changing the filters", async ({

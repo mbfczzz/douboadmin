@@ -41,6 +41,7 @@ export default function Records<T>({
   controls,
   footnote,
   empty = "暂无记录",
+  placeholder = "搜索名称、编号或备注",
 }: {
   resource: ReturnType<typeof useRecords<T>>;
   columns: Column<Row<T>>[];
@@ -50,6 +51,7 @@ export default function Records<T>({
   controls?: ReactNode;
   footnote?: ReactNode;
   empty?: string;
+  placeholder?: string;
 }) {
   return (
     <section
@@ -82,7 +84,7 @@ export default function Records<T>({
               <input
                 name="q"
                 aria-label="查询记录"
-                placeholder="搜索名称、编号或备注"
+                placeholder={placeholder}
                 maxLength={100}
               />
             </span>

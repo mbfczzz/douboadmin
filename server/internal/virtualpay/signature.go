@@ -47,11 +47,7 @@ func (s *Service) ClaimSignature(ctx context.Context, id string) error {
 		if err = validateSnapshot(o); err != nil {
 			return err
 		}
-		partner := ""
-		if o.Distribution != nil {
-			partner = o.Distribution.PartnerID
-		}
-		if requireActivation && access.PartnerID != partner {
+		if requireActivation && !partners.SameOrderPartner(access, o) {
 			return fmt.Errorf("%w: 授权归属已变化，请重新下单", core.ErrConflict)
 		}
 		if o.Virtual.Issued {

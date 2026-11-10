@@ -2,103 +2,165 @@ package partners
 
 import (
 	"doubo/server/internal/core"
-	"encoding/json"
+	"errors"
 	"strings"
 	"sync"
 	"sync/atomic"
 	"testing"
-	"time"
 )
 
-func TestActivationSingleUseDisableAndUnbind(t *testing.T) {
+func TestScanRegistersAndOnlyApprovalOpensTheAccount(t *testing.T) {
 	s, ctx, s1, _ := fixture(t)
-	for _, id := range []string{"a", "b"} {
-		_, _ = s.Store.Put(ctx, "users", core.Record{ID: id, Data: core.Data(map[string]string{"nickname": id})}, 0)
+	addUsers(t, s, ctx, "a")
+	code, e := s.ShareCode(ctx, s1, "admin")
+	if e != nil || len(code) != 8 {
+		t.Fatal(code, e)
 	}
-	row, e := s.Issue(ctx, s1, "single", 7, "single-code", "admin")
-	if e != nil {
-		t.Fatal(e)
+	if again, e := s.ShareCode(ctx, s1, "admin"); e != nil || again != code {
+		t.Fatal("share code changed", again, e)
 	}
-	repeated, e := s.Issue(ctx, s1, "single", 7, "single-code", "admin")
-	if e != nil || repeated.ID != row.ID {
-		t.Fatal(repeated, e)
+	if _, e = s.Join(ctx, "a", code, "link"); e == nil {
+		t.Fatal("unknown method accepted")
 	}
-	code, e := s.Reveal(ctx, row.ID)
-	if e != nil {
-		t.Fatal(e)
+	if _, e = s.Join(ctx, "a", "short", "code"); e == nil {
+		t.Fatal("malformed code accepted")
 	}
-	var wins atomic.Int32
-	var wg sync.WaitGroup
-	for _, id := range []string{"a", "b"} {
-		wg.Go(func() {
-			if access, e := s.Redeem(ctx, id, code); e == nil && access.Active {
-				wins.Add(1)
-			}
-		})
+	typed := strings.ToLower(code[:4]) + "-" + code[4:]
+	access, e := s.Join(ctx, "a", typed, "code")
+	if e != nil || access.Active || access.Status != "review" || access.PartnerID != s1 || access.Message != reviewMessage {
+		t.Fatal(access, e)
 	}
-	wg.Wait()
-	if wins.Load() != 1 {
-		t.Fatal("single code activated twice", wins.Load())
+	_, reg, e := get[core.Registration](reader{ctx, s.Store}, "registrations", "a")
+	if e != nil || reg.Role != "member" || reg.PartnerID != s1 || reg.CodeKind != MemberCode || reg.Code != code || reg.Method != "code" || reg.Name != "a" || reg.Status != "pending" {
+		t.Fatal("registration", reg, e)
 	}
-	saved, _ := s.Store.Get(ctx, "activation_codes", row.ID)
-	var grant core.ActivationCode
-	_ = json.Unmarshal(saved.Data, &grant)
-	user := grant.UserID
-	if access, e := s.Redeem(ctx, user, code); e != nil || !access.Active {
-		t.Fatal("own retry failed", access, e)
+	if _, m, _ := get[core.Membership](reader{ctx, s.Store}, "memberships", "a"); m.Status != "pending" || m.CodeID != code {
+		t.Fatal("membership", m)
 	}
-	binding, _ := s.Store.Get(ctx, "memberships", user)
-	disabled, e := s.ChangeMembership(ctx, user, "disabled", "暂停授权", "admin", binding.Version)
-	if e != nil {
-		t.Fatal(e)
+	if _, e = s.Join(ctx, "a", code, "scan"); e == nil || !strings.Contains(e.Error(), "等待总部开通") {
+		t.Fatal("registered twice while in review", e)
 	}
-	p, _ := s.Overview(ctx, s1)
-	if p.Quota.Users.Used != 1 || p.Quota.Users.Reserved != 0 {
-		t.Fatal(p.Quota)
+	decide(t, s, ctx, "a", true)
+	if access, e = s.Access(ctx, "a"); e != nil || !access.Active || access.Status != "active" {
+		t.Fatal(access, e)
 	}
-	if access, e := s.Redeem(ctx, user, code); e != nil || access.Active {
-		t.Fatal("old code re-enabled account", access, e)
+	if _, reg, _ = get[core.Registration](reader{ctx, s.Store}, "registrations", "a"); reg.Status != "approved" || reg.DecidedBy != "admin" || reg.DecidedAt == nil {
+		t.Fatal("decision", reg)
 	}
-	if _, e = s.ChangeMembership(ctx, user, "unbound", "解除绑定", "admin", disabled.Version); e != nil {
-		t.Fatal(e)
-	}
-	p, _ = s.Overview(ctx, s1)
-	if p.Quota.Users.Used != 0 || p.Quota.Users.Available() != 8 {
-		t.Fatal(p.Quota)
-	}
-	// After an unbind the old code is spent: a clear error, never a rebind.
-	if access, e := s.Redeem(ctx, user, code); e == nil || access.Active || !strings.Contains(e.Error(), "新的激活码") {
-		t.Fatal("old code rebound account", access, e)
+	if _, e = s.Join(ctx, "a", code, "scan"); e == nil || !strings.Contains(e.Error(), "已开通") {
+		t.Fatal("an active member registered again", e)
 	}
 }
-func TestExpiredCodesReleaseExactlyOneReservation(t *testing.T) {
-	s, ctx, s1, _ := fixture(t)
-	row, e := s.Issue(ctx, s1, "expire", 1, "expiry-code", "admin")
+
+func TestDecideChecksReasonVersionAndRejectionAllowsAnotherScan(t *testing.T) {
+	s, ctx, s1, s2 := fixture(t)
+	addUsers(t, s, ctx, "a")
+	code, _ := s.ShareCode(ctx, s1, "admin")
+	register(t, s, ctx, code, "a")
+	row, _ := s.Store.Get(ctx, "registrations", "a")
+	if _, e := s.Decide(ctx, "a", false, " 不", row.Version, "admin"); e == nil {
+		t.Fatal("rejected without a reason")
+	}
+	if _, e := s.Decide(ctx, "a", true, "", row.Version+1, "admin"); !errors.Is(e, core.ErrConflict) {
+		t.Fatal("stale version accepted", e)
+	}
+	decided, e := s.Decide(ctx, "a", false, "资料不符", row.Version, "admin")
 	if e != nil {
 		t.Fatal(e)
 	}
-	var v core.ActivationCode
-	_ = json.Unmarshal(row.Data, &v)
-	v.ExpiresAt = time.Now().Add(-time.Minute)
-	v.ExpiresUnix = v.ExpiresAt.Unix()
-	row.Data = core.Data(v)
-	if _, e = s.Store.Put(ctx, "activation_codes", row, row.Version); e != nil {
+	if _, e = s.Decide(ctx, "a", true, "", decided.Version, "admin"); e == nil || !strings.Contains(e.Error(), "已处理") {
+		t.Fatal("decided twice", e)
+	}
+	if access, _ := s.Access(ctx, "a"); access.Active || access.Status != "rejected" {
+		t.Fatal("after rejection", access)
+	}
+	other, _ := s.ShareCode(ctx, s2, "admin")
+	if access := register(t, s, ctx, other, "a"); access.PartnerID != s2 {
+		t.Fatal("re-registration", access)
+	}
+	decide(t, s, ctx, "a", true)
+	if access, _ := s.Access(ctx, "a"); !access.Active || access.PartnerID != s2 {
+		t.Fatal(access)
+	}
+}
+
+func TestDisableUnbindAndRegisterAgain(t *testing.T) {
+	s, ctx, s1, _ := fixture(t)
+	addUsers(t, s, ctx, "a", "p")
+	code, _ := s.ShareCode(ctx, s1, "admin")
+	register(t, s, ctx, code, "p")
+	pending, _ := s.Store.Get(ctx, "memberships", "p")
+	if _, e := s.ChangeMembership(ctx, "p", "active", "提前开通", "admin", pending.Version); e == nil {
+		t.Fatal("membership change bypassed the platform's approval")
+	}
+	join(t, s, ctx, s1, "a")
+	row, _ := s.Store.Get(ctx, "memberships", "a")
+	disabled, e := s.ChangeMembership(ctx, "a", "disabled", "暂停授权", "admin", row.Version)
+	if e != nil {
 		t.Fatal(e)
 	}
+	if access, _ := s.Access(ctx, "a"); access.Active || access.Status != "disabled" {
+		t.Fatal(access)
+	}
+	if _, e = s.Join(ctx, "a", code, "scan"); e == nil {
+		t.Fatal("a disabled member registered again")
+	}
+	if _, e = s.ChangeMembership(ctx, "a", "unbound", "解除绑定", "admin", disabled.Version); e != nil {
+		t.Fatal(e)
+	}
+	register(t, s, ctx, code, "a")
+	decide(t, s, ctx, "a", true)
+	if access, _ := s.Access(ctx, "a"); !access.Active {
+		t.Fatal("re-join after unbind", access)
+	}
+}
+
+func TestConcurrentScansRegisterEveryoneButEachUserOnce(t *testing.T) {
+	s, ctx, s1, s2 := fixture(t)
+	users := []string{"u0", "u1", "u2", "u3", "u4", "u5", "u6", "u7"}
+	addUsers(t, s, ctx, users...)
+	one, _ := s.ShareCode(ctx, s1, "admin")
+	two, _ := s.ShareCode(ctx, s2, "admin")
+	var wins atomic.Int32
 	var wg sync.WaitGroup
-	for range 8 {
-		wg.Go(func() {
-			if e := s.Expire(ctx); e != nil {
-				t.Error(e)
-			}
-		})
+	for _, id := range users {
+		for _, code := range []string{one, two} {
+			wg.Go(func() {
+				access, e := s.Join(ctx, id, code, "scan")
+				var rule *RuleError
+				switch {
+				case e == nil && access.Status == "review":
+					wins.Add(1)
+				case !errors.As(e, &rule):
+					t.Error(e)
+				}
+			})
+		}
 	}
 	wg.Wait()
-	p, _ := s.Overview(ctx, s1)
-	if p.Quota.Users.Reserved != 0 || p.Quota.Users.Available() != 8 {
-		t.Fatal(p.Quota)
+	rows, _ := s.Store.List(ctx, "registrations", "")
+	if wins.Load() != int32(len(users)) || len(rows) != len(users) {
+		t.Fatal("registrations", wins.Load(), len(rows))
 	}
-	if _, e = s.Reveal(ctx, row.ID); e == nil {
-		t.Fatal("expired code revealed")
+}
+
+func TestResetShareCodeKeepsMembers(t *testing.T) {
+	s, ctx, s1, _ := fixture(t)
+	addUsers(t, s, ctx, "a", "b")
+	join(t, s, ctx, s1, "a")
+	old, _ := s.ShareCode(ctx, s1, "admin")
+	fresh, e := s.ResetShare(ctx, s1, MemberCode, "admin")
+	if e != nil || fresh.Code == old {
+		t.Fatal(fresh, e)
 	}
+	if current, _ := s.ShareCode(ctx, s1, "admin"); current != fresh.Code {
+		t.Fatal("reset code not current", current)
+	}
+	if _, e = s.Join(ctx, "b", old, "scan"); e == nil || !strings.Contains(e.Error(), "已重置") {
+		t.Fatal("old code still registers", e)
+	}
+	if access, e := s.Access(ctx, "a"); e != nil || !access.Active {
+		t.Fatal("reset dropped a member", access, e)
+	}
+	register(t, s, ctx, fresh.Code, "b")
 }

@@ -8,7 +8,7 @@
 | GET | /config | 已上架且可用的真实模型、参数、参考素材类型、模板分类和登录能力 |
 | POST | /auth/wechat | `{code}`，服务端向微信换取身份，返回业务会话 |
 | POST | /auth/logout | 撤销当前会话 |
-| GET / POST | /access、/access/redeem | 查询使用授权 / 扫码或激活码兑换；微信登录本身不授予业务权限 |
+| GET / POST | /access、/access/join | 查询使用授权 / 用服务商分享码加入；微信登录本身不授予业务权限 |
 | GET / PUT | /me | 当前用户资料、作品统计 / 版本化更新 |
 | GET | /templates | 已发布模板，支持 `category`、`kind`、`q` |
 | GET | /templates/{id} | 已发布模板详情及新签名封面 URL |
@@ -72,4 +72,4 @@
 
 充值、积分、混剪、热门视频、作品审核、通知与监控接口见 [business-api.md](business-api.md)。
 
-服务商、固定用户额度、直接申请、激活绑定与充值分佣接口见 [partner-api.md](partner-api.md)。用户可直接申请自动开通，或使用服务商激活码建立归属；尚未开通时 `/config` 不返回模型/分类目录。
+服务商层级、扫码登记与总部开通、会员推广码与充值分佣接口见 [partner-api.md](partner-api.md)。用户扫码登记后须由总部开通；尚未开通时 `/config` 不返回模型/分类目录。

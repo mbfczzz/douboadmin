@@ -34,59 +34,9 @@ for (const width of [1440, 390, 320]) {
     await audit("登录账号");
     await closeTop(page);
 
-    const quotas = await open("名额划拨", "名额划拨");
-    await audit("名额划拨");
-    await quotas.getByRole("button", { name: "划拨名额", exact: true }).click();
-    await audit("划拨名额-未选择");
-    await top().getByRole("button", { name: "选择直接下级服务商" }).click();
-    await expect(
-      top().getByRole("button", { name: "选择", exact: true }),
-    ).toBeVisible();
-    await audit("三级弹窗-服务商选择");
-    await top().getByRole("button", { name: "选择", exact: true }).click();
-    await expect(
-      top().getByText("目标可用名额", { exact: true }),
-    ).toBeVisible();
-    await audit("划拨名额-已选择");
-    await closeTop(page);
-    await quotas.getByRole("button", { name: "收回名额", exact: true }).click();
-    await top().getByRole("button", { name: "选择直接下级服务商" }).click();
-    await top().getByRole("button", { name: "选择", exact: true }).click();
-    await expect(
-      top().getByRole("button", { name: "确认收回 1 个名额" }),
-    ).toHaveClass(/primary danger/);
-    await audit("收回名额");
-    await closeTop(page);
-    await quotas
-      .getByRole("button", { name: "向上级申请", exact: true })
-      .click();
-    await audit("向上级申请名额");
-    await closeTop(page);
-    await quotas.getByRole("button", { name: "批准", exact: true }).click();
-    await audit("批准名额申请");
-    await closeTop(page);
-    await quotas.getByRole("button", { name: "拒绝", exact: true }).click();
-    await audit("拒绝名额申请");
-    await closeTop(page);
-    await closeTop(page);
-
-    const codes = await open("授权码", "授权激活");
-    await codes
-      .getByRole("button", { name: "生成授权码", exact: true })
-      .click();
-    await audit("生成授权码");
-    await closeTop(page);
-    await codes
-      .getByRole("button", { name: "查看二维码", exact: true })
-      .click();
-    await expect(top().getByAltText("豆播授权二维码")).toBeVisible();
-    await audit("授权二维码-激活码");
-    await closeTop(page);
-    await codes.getByRole("button", { name: "来源记录", exact: true }).click();
-    await expect(top().getByText("生成账号", { exact: true })).toBeVisible();
-    await expect(top().locator("dl > dt")).toHaveCount(13);
-    await expect(top().locator("dl > dd")).toHaveCount(13);
-    await audit("二维码生成与激活记录");
+    const codes = await open("分享码", "分享码");
+    await codes.getByRole("button", { name: "重置", exact: true }).click();
+    await audit("重置会员开通码");
     await closeTop(page);
     for (const action of ["停用", "解绑"]) {
       await codes.getByRole("button", { name: action, exact: true }).click();

@@ -7,7 +7,10 @@ export type SubmitCase = {
   fields: Record<string, string>;
   // Provider row button that opens the function dialog holding `open`.
   module?: string;
-  pick?: boolean;
+  // A page tab to open before the row action.
+  tab?: string;
+  // Sent without the change summary (an ask() dialog already confirmed it).
+  direct?: boolean;
 };
 
 export const submitCases: SubmitCase[] = [
@@ -48,14 +51,13 @@ export const submitCases: SubmitCase[] = [
     fields: { 模板名称: "保留的模板草稿" },
   },
   {
-    name: "新增服务商",
+    name: "新增分公司",
     nav: "服务商管理",
-    open: "新增服务商",
+    open: "新增分公司",
     submit: "保存服务商",
     endpoint: "/partners",
     fields: {
       服务商名称: "保留的服务商草稿",
-      可授权账号额度: "10",
       账号: "draft-provider",
       初始密码: "draft-provider-password",
     },
@@ -69,46 +71,19 @@ export const submitCases: SubmitCase[] = [
     fields: { 服务商名称: "保留的修改草稿" },
   },
   {
-    name: "名额划拨",
-    nav: "服务商管理",
-    module: "名额划拨",
-    open: "划拨名额",
-    submit: "确认划拨 1 个名额",
-    pick: true,
-    endpoint: "/quota-moves",
-    fields: { 原因: "仅验证输入保留" },
-  },
-  {
-    name: "名额申请",
-    nav: "服务商管理",
-    module: "名额划拨",
-    open: "向上级申请",
-    submit: "提交申请",
-    endpoint: "/quota-requests",
-    fields: { 原因: "仅验证输入保留" },
-  },
-  {
-    name: "名额审批",
-    nav: "服务商管理",
-    module: "名额划拨",
-    open: "批准",
-    submit: "批准并划拨",
-    endpoint: "/quota-requests/qa-request",
-    fields: { 审批说明: "仅验证输入保留" },
-  },
-  {
-    name: "生成授权码",
-    nav: "服务商管理",
-    module: "授权码",
-    open: "生成授权码",
-    submit: "生成并预留名额",
-    endpoint: "/activation-codes",
-    fields: { 备注: "仅验证输入保留" },
+    name: "拒绝登记",
+    nav: "小程序用户",
+    tab: "扫码登记",
+    open: "拒绝",
+    submit: "拒绝",
+    direct: true,
+    endpoint: "/registrations/qa-user",
+    fields: { 拒绝原因: "仅验证输入保留" },
   },
   {
     name: "用户授权",
     nav: "服务商管理",
-    module: "授权码",
+    module: "分享码",
     open: "停用",
     submit: "停用授权",
     endpoint: "/memberships/qa-user",

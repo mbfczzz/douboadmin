@@ -6,6 +6,7 @@ import (
 	"doubo/server/internal/store"
 	"encoding/json"
 	"errors"
+	"time"
 )
 
 type Service struct{ Store store.Store }
@@ -49,32 +50,6 @@ func node(r Reader, id string) (core.Record, core.Partner, error) {
 	}
 	return get[core.Partner](r, "partners", id)
 }
-func quota(tx store.Transaction, id string) (core.Record, core.PartnerQuota, error) {
-	row, v, e := get[core.PartnerQuota](tx, "partner_quotas", id)
-	if errors.Is(e, core.ErrNotFound) {
-		return core.Record{ID: id, Owner: id}, v, nil
-	}
-	return row, v, e
-}
-func ensure(pool *core.QuotaPool, auto bool, n int64) error {
-	if n < 0 || n > 1000000 {
-		return rulef("名额数量无效")
-	}
-	if pool.Available() < n {
-		if !auto {
-			return core.ErrQuota
-		}
-		pool.Granted += n - pool.Available()
-	}
-	return nil
-}
-func legacyRootQuota(r Reader, id string) bool {
-	if id != core.RootPartner {
-		return false
-	}
-	_, value, err := policy(r)
-	return err == nil && value.TotalUserQuota == 0
-}
 func audit(tx store.Transaction, owner, kind, actor, reason string, data any) error {
 	_, e := tx.Put("partner_audit", core.Record{ID: core.NewID(), Owner: owner, Data: core.Data(map[string]any{"kind": kind, "actor": actor, "reason": reason, "data": data})}, 0)
 	return e
@@ -97,3 +72,5 @@ func activeChain(r Reader, id string) error {
 	}
 	return nil
 }
+
+func nowUTC() time.Time { return time.Now().UTC() }

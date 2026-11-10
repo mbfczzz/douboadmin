@@ -10,17 +10,10 @@ import (
 func TestOrderDistributionIsAdminOnlyAndHiddenFromUserOrder(t *testing.T) {
 	a, user, admin := activationFixture(t)
 	ctx := context.Background()
-	code, e := a.Partners.Issue(ctx, core.RootPartner, "test", 7, "privacy-grant", "admin")
-	if e != nil {
-		t.Fatal(e)
-	}
-	token, _ := a.Partners.Reveal(ctx, code.ID)
-	if _, e = a.Partners.Redeem(ctx, "user-a", token); e != nil {
-		t.Fatal(e)
-	}
+	activate(t, a, "user-a")
 	policy := core.DefaultDistributionPolicy()
 	policy.Enabled = true
-	if _, e = a.Partners.SavePolicy(ctx, policy, 0, "admin"); e != nil {
+	if _, e := a.Partners.SavePolicy(ctx, policy, 0, "admin"); e != nil {
 		t.Fatal(e)
 	}
 	quote, _, e := a.Partners.UserQuote(ctx, "user-a", 10000, 100)

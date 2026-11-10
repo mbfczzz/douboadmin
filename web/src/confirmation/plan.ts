@@ -7,13 +7,11 @@ const names: Record<string, string> = {
   templates: "模板",
   accounts: "管理账号",
   users: "用户资料",
-  signup: "普通用户注册",
   partners: "服务商",
   memberships: "用户归属",
   "partner-policy": "分销规则",
   "commission-payouts": "结算记录",
-  "quota-requests": "名额申请",
-  "quota-moves": "名额分配",
+  registrations: "扫码登记",
   roles: "角色",
   jobs: "生成任务",
 };
@@ -42,13 +40,10 @@ const labels: Record<string, string> = {
   productId: "商品 ID",
   enabled: "启用",
   prompt: "提示词",
-  approve: "批准申请",
+  approve: "开通",
   reference: "打款流水号 / 原因",
-  users: "用户额度",
   parentId: "上级服务商",
-  childId: "下级服务商",
   kind: "类型",
-  openSignup: "开放普通用户注册",
 };
 export function needsConfirmation(path: string, method: string, body: unknown) {
   if (!path.startsWith("/admin/")) return false;
@@ -63,7 +58,7 @@ export function needsConfirmation(path: string, method: string, body: unknown) {
   return (
     method === "POST" &&
     (/\/(wallet|refund|release|retry|review|sync)$/.test(path) ||
-      /^\/admin\/(quota-moves|commission-payouts)$/.test(path))
+      /^\/admin\/commission-payouts$/.test(path))
   );
 }
 const secret = (key: string, options: ConfirmationOptions) =>
@@ -163,7 +158,7 @@ export function confirmationPlan(
     });
   const warning =
     path.includes("/memberships/") && data.status === "unbound"
-      ? "解绑将停止使用权限并释放名额；历史作品、订单和分佣归属保留。"
+      ? "解绑将停止使用权限，用户可重新扫码登记；历史作品、订单和分佣归属保留。"
       : path.includes("/commission-payouts/") && data.status === "paid"
         ? "请确认已完成线下打款，本操作仅记录打款结果。"
         : undefined;

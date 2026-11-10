@@ -1,4 +1,4 @@
-/* Provider function dialogs (名额划拨 / 授权激活 / 算力分佣): the header stays
+/* Provider function dialogs (分享码 / 算力分佣): the header stays
    put and the content scrolls on its own. */
 .modal.partner-editor {
   display: flex;

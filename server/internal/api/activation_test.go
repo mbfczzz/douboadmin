@@ -1,12 +1,9 @@
 package api
 
 import (
-	"bytes"
 	"context"
 	"doubo/server/internal/core"
-	"encoding/base64"
 	"encoding/json"
-	"image/png"
 	"strings"
 	"testing"
 )
@@ -54,39 +51,32 @@ func TestWechatIdentityAloneCannotUseBusinessEndpoints(t *testing.T) {
 	if w := call(a, "GET", "/api/admin/partners", user, "", nil); w.Code != 403 {
 		t.Fatal("user accessed partner management")
 	}
-	code, e := a.Partners.Issue(context.Background(), core.RootPartner, "api activation", 7, "api-activation", "admin")
-	if e != nil {
-		t.Fatal(e)
+	if w := call(a, "GET", "/api/admin/partners/root/codes/member", admin, "", nil); w.Code != 400 {
+		t.Fatal("the platform got a member code", w.Code, w.Body.String())
 	}
-	w := call(a, "GET", "/api/admin/activation-codes/"+code.ID, admin, "", nil)
-	var grant struct {
-		Code string `json:"code"`
-		QR   string `json:"qr"`
+	share := providerCode(t, a, "GET", newBranch(t, a, "gate"), "member", admin)
+	if !strings.HasPrefix(share.QR, "data:image/png;base64,") {
+		t.Fatal("share QR missing", share)
 	}
-	if w.Code != 200 || json.Unmarshal(w.Body.Bytes(), &grant) != nil {
+	// The QR carries the prefixed code, as the mini-program scanner reads it.
+	// Scanning only registers: the account waits for the platform.
+	if code, body := joinHTTP(a, user, share.Code); code != 200 || !strings.Contains(body, `"status":"review"`) || !strings.Contains(body, `"active":false`) {
+		t.Fatal(code, body)
+	}
+	if w := call(a, "GET", "/api/templates", user, "", nil); w.Code != 403 || !strings.Contains(w.Body.String(), "等待总部开通") {
+		t.Fatal("pending registration opened business endpoints", w.Code, w.Body.String())
+	}
+	approve(t, a, "user-a")
+	if w := call(a, "GET", "/api/templates", user, "", nil); w.Code != 200 {
 		t.Fatal(w.Code, w.Body.String())
 	}
-	image, e := base64.StdEncoding.DecodeString(strings.TrimPrefix(grant.QR, "data:image/png;base64,"))
-	if e != nil {
-		t.Fatal(e)
-	}
-	if _, e = png.Decode(bytes.NewReader(image)); e != nil {
-		t.Fatal("invalid QR PNG", e)
-	}
-	w = call(a, "POST", "/api/access/redeem", user, "", map[string]string{"code": "DOUBO-ACTIVATE:" + grant.Code})
-	if w.Code != 200 {
-		t.Fatal(w.Body.String())
-	}
-	if w = call(a, "GET", "/api/templates", user, "", nil); w.Code != 200 {
-		t.Fatal(w.Code, w.Body.String())
-	}
-	w = call(a, "GET", "/api/config", user, "", nil)
+	w := call(a, "GET", "/api/config", user, "", nil)
 	if !strings.Contains(w.Body.String(), "demo-image") {
 		t.Fatal("activated catalog missing")
 	}
 	row, _ := a.Store.Get(context.Background(), "memberships", "user-a")
-	if _, e = a.Partners.ChangeMembership(context.Background(), "user-a", "disabled", "测试停用", "admin", row.Version); e != nil {
-		t.Fatal(e)
+	if w = call(a, "PUT", "/api/admin/memberships/user-a", admin, "", map[string]any{"status": "disabled", "reason": "测试停用", "version": row.Version}); w.Code != 200 {
+		t.Fatal(w.Code, w.Body.String())
 	}
 	if w = call(a, "GET", "/api/templates", user, "", nil); w.Code != 403 {
 		t.Fatal("cached session bypassed revocation")

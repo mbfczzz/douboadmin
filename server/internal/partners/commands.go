@@ -2,53 +2,17 @@ package partners
 
 import (
 	"context"
-	"crypto/hmac"
-	"crypto/rand"
-	"crypto/sha256"
 	"doubo/server/internal/core"
 	"doubo/server/internal/store"
-	"encoding/base32"
-	"encoding/base64"
 	"encoding/json"
 	"errors"
 )
 
-type control struct {
-	CodeKey string `json:"codeKey"`
-}
-
+// The partner tree lock is one shared row; holding it serializes every
+// partner operation.
 func lockControl(tx store.Transaction) error {
-	row, e := tx.Lock("partner_control", core.Record{ID: "tree", Data: core.Data(control{})})
-	if e != nil {
-		return e
-	}
-	var c control
-	if e = json.Unmarshal(row.Data, &c); e != nil {
-		return e
-	}
-	if c.CodeKey != "" {
-		return nil
-	}
-	key := make([]byte, 32)
-	if _, e = rand.Read(key); e != nil {
-		return e
-	}
-	c.CodeKey = base64.StdEncoding.EncodeToString(key)
-	_, e = put(tx, "partner_control", row, c)
+	_, e := tx.Lock("partner_control", core.Record{ID: "tree", Data: core.Data(map[string]string{})})
 	return e
-}
-func codeFor(r Reader, seed string) (string, error) {
-	_, c, e := get[control](r, "partner_control", "tree")
-	if e != nil {
-		return "", e
-	}
-	key, e := base64.StdEncoding.DecodeString(c.CodeKey)
-	if e != nil || len(key) != 32 {
-		return "", rulef("激活码密钥不可用")
-	}
-	mac := hmac.New(sha256.New, key)
-	_, _ = mac.Write([]byte("activation:" + seed))
-	return base32.StdEncoding.WithPadding(base32.NoPadding).EncodeToString(mac.Sum(nil)[:12]), nil
 }
 func (s *Service) command(ctx context.Context, actor, key string, input any, fn func(store.Transaction, string) (core.Record, error)) (result core.Record, err error) {
 	if len(key) < 8 || len(key) > 128 {

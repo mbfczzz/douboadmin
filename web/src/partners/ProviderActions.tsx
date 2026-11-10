@@ -1,25 +1,27 @@
 import { Plus } from "lucide-react";
+import type { Row } from "../api";
 import { useMe } from "../session";
-import type { PartnerTreeItem } from "./types";
+import { growth, type Partner } from "./types";
 
 export type ProviderAction =
-  "edit" | "account" | "profile" | "quotas" | "codes" | "commissions";
+  "edit" | "account" | "profile" | "share" | "commissions";
 
 // Row buttons of one provider: every function opens its own dialog.
-// A provider login on its own node may run quotas, codes and commissions but
+// A provider login on its own node may run share codes and commissions but
 // its profile and login belong to its parent, so it only gets a read-only view.
+// `add` is set for the platform only, shown where the role may grow.
 export default function ProviderActions({
   item,
-  canAdd,
   open,
   add,
 }: {
-  item: PartnerTreeItem;
-  canAdd: boolean;
-  open: (kind: ProviderAction, item: PartnerTreeItem) => void;
-  add: (item: PartnerTreeItem) => void;
+  item: Row<Partner>;
+  open: (kind: ProviderAction, item: Row<Partner>) => void;
+  add?: (item: Row<Partner>) => void;
 }) {
-  const self = useMe()?.partnerId === item.record.id,
+  const self = useMe()?.partnerId === item.id,
+    // A scanned provider has nothing to run until the platform opens it.
+    pending = item.data.status === "pending",
     button = (kind: ProviderAction, label: string, subtle = false) => (
       <button
         type="button"
@@ -29,11 +31,16 @@ export default function ProviderActions({
         {label}
       </button>
     );
+  if (pending)
+    return (
+      <div className="provider-tree-actions">
+        <span className="quiet provider-waiting">等待总部开通</span>
+      </div>
+    );
   return (
     <div className="provider-tree-actions">
       <span className="provider-action-group">
-        {button("quotas", "名额划拨")}
-        {button("codes", "授权码")}
+        {button("share", "分享码")}
         {button("commissions", "分佣")}
       </span>
       <span className="provider-action-group">
@@ -45,7 +52,7 @@ export default function ProviderActions({
             {button("account", "登录账号", true)}
           </>
         )}
-        {canAdd && (
+        {add && !!growth[item.data.role]?.length && (
           <button
             type="button"
             className="text-button subtle"

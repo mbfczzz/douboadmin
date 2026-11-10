@@ -14,8 +14,6 @@ func partnerError(w http.ResponseWriter, e error) {
 	switch {
 	case errors.As(e, &rule):
 		fail(w, 400, e.Error())
-	case errors.Is(e, core.ErrQuota):
-		fail(w, 409, e.Error())
 	case errors.Is(e, core.ErrActivationRequired), errors.Is(e, core.ErrPartnerDisabled):
 		fail(w, 403, e.Error())
 	default:
@@ -41,7 +39,7 @@ func (a *Server) partnerList(ns string) http.HandlerFunc {
 			}
 			page = n
 		}
-		if len([]rune(q.Get("q"))) > 100 || len(q.Get("owner")) > 64 || len(q.Get("provider")) > 64 || len(q.Get("around")) > 64 || len(q.Get("status")) > 30 {
+		if len([]rune(q.Get("q"))) > 100 || len(q.Get("owner")) > 64 || len(q.Get("provider")) > 64 || len(q.Get("status")) > 30 {
 			fail(w, 400, "查询条件无效")
 			return
 		}
@@ -50,22 +48,6 @@ func (a *Server) partnerList(ns string) http.HandlerFunc {
 		if e != nil {
 			dbError(w, e)
 			return
-		}
-		if around := q.Get("around"); around != "" {
-			// Records owned by the provider or its direct children: quota moves
-			// into it and out of it, and requests from it and its children.
-			if scope != nil && !a.inPartnerScope(w, r, around) {
-				return
-			}
-			children, e := a.Store.List(r.Context(), "partners", around)
-			if e != nil {
-				dbError(w, e)
-				return
-			}
-			query.OwnerIn = []string{around}
-			for _, child := range children {
-				query.OwnerIn = append(query.OwnerIn, child.ID)
-			}
 		}
 		if scope != nil {
 			for _, id := range []string{query.Owner, query.PartnerID} {
@@ -76,8 +58,6 @@ func (a *Server) partnerList(ns string) http.HandlerFunc {
 			// Memberships are keyed by user and carry the provider in data.
 			if ns == "memberships" {
 				query.PartnerIn = scope
-			} else if query.OwnerIn != nil {
-				query.OwnerIn = slices.DeleteFunc(query.OwnerIn, func(id string) bool { return !slices.Contains(scope, id) })
 			} else {
 				query.OwnerIn = scope
 			}
@@ -95,7 +75,7 @@ func (a *Server) partnerTree(w http.ResponseWriter, r *http.Request) {
 	if e == nil && scope != nil {
 		visible := rows[:0]
 		for _, row := range rows {
-			if slices.Contains(scope, row.Record.ID) {
+			if slices.Contains(scope, row.ID) {
 				visible = append(visible, row)
 			}
 		}
@@ -114,10 +94,11 @@ func (a *Server) createPartner(w http.ResponseWriter, r *http.Request) {
 	var v struct {
 		Name     string                `json:"name"`
 		ParentID string                `json:"parentId"`
-		Users    int64                 `json:"users"`
+		Role     string                `json:"role"`
 		Account  *providerAccountInput `json:"account"`
 	}
-	if !decode(w, r, &v) || !a.inPartnerScope(w, r, v.ParentID) {
+	// Providers grow by QR codes; only the platform adds one by hand.
+	if !decode(w, r, &v) || !platformOnly(w, r) {
 		return
 	}
 	hash, key, actor := "", r.Header.Get("Idempotency-Key"), identity(r).ID
@@ -138,7 +119,7 @@ func (a *Server) createPartner(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	out, e := a.Partners.Create(r.Context(), v.ParentID, v.Name, v.Users, key, actor)
+	out, e := a.Partners.Create(r.Context(), v.ParentID, v.Name, v.Role, key, actor)
 	if e != nil {
 		partnerError(w, e)
 		return

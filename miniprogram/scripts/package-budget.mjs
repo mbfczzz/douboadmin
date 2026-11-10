@@ -20,8 +20,14 @@ console.log(
   "Mini-program referenced source estimate (NOT final WeChat package):",
   JSON.stringify(report),
 );
-if (report.referencedSourceBytes > 512 * 1024)
-  throw new Error("Referenced source budget exceeded (512 KiB).");
+// 512 KiB at launch. Raised to 544 KiB in Nov 2026 for intentional growth:
+// SMS two-step registration (536.8 KB at that commit), then scan
+// registration with the provider centre, 推广码 and profile identity
+// (548.3 KB). Not a ceiling to drift up to: the WeChat upload package is
+// still checked separately in the developer tools.
+const budget = 544 * 1024;
+if (report.referencedSourceBytes > budget)
+  throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");
 fs.mkdirSync(out, { recursive: true });
 fs.writeFileSync(

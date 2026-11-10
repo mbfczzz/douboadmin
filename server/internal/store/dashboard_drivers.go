@@ -25,7 +25,7 @@ func (m *MySQL) Dashboard(ctx context.Context, days int) (core.Dashboard, error)
 	// table for provider names. Builders ignore rows outside their window.
 	from := r.prev.from
 	day := from.Format("2006-01-02")
-	rows, e := m.db.QueryContext(ctx, `SELECT namespace,id,owner_id,version,data,created_at FROM records WHERE (namespace IN ('users','daily_activity','analytics','executions','orders','direct_access','activation_codes','job_billing','visits','visitors') AND created_at>=?) OR namespace='partners' OR (namespace='orders' AND JSON_UNQUOTE(JSON_EXTRACT(data,'$.paidAt'))>=?) OR (namespace='refunds' AND JSON_UNQUOTE(JSON_EXTRACT(data,'$.completedAt'))>=?) OR (namespace='memberships' AND JSON_UNQUOTE(JSON_EXTRACT(data,'$.activatedAt'))>=?) OR (namespace='activation_codes' AND JSON_UNQUOTE(JSON_EXTRACT(data,'$.usedAt'))>=?)`, from, day, day, day, day)
+	rows, e := m.db.QueryContext(ctx, `SELECT namespace,id,owner_id,version,data,created_at FROM records WHERE (namespace IN ('users','daily_activity','analytics','executions','orders','job_billing','visits','visitors') AND created_at>=?) OR namespace='partners' OR (namespace='orders' AND JSON_UNQUOTE(JSON_EXTRACT(data,'$.paidAt'))>=?) OR (namespace='refunds' AND JSON_UNQUOTE(JSON_EXTRACT(data,'$.completedAt'))>=?) OR (namespace='partner_audit' AND created_at>=? AND JSON_UNQUOTE(JSON_EXTRACT(data,'$.kind'))='registration_approved')`, from, day, day, from)
 	if e != nil {
 		return core.Dashboard{}, e
 	}

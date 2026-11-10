@@ -9,7 +9,7 @@ test("provider login: open, role, password and status are separate actions", asy
   const name = "登录账号验收" + Date.now();
   const created = await page.request.post("/api/admin/partners", {
     headers: { "Idempotency-Key": crypto.randomUUID() },
-    data: { parentId: "root", name, users: 1 },
+    data: { parentId: "root", name, role: "branch" },
   });
   expect(created.status()).toBe(200);
   await page.getByRole("button", { name: "服务商管理", exact: true }).click();

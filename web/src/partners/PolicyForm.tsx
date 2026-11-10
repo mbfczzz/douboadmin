@@ -56,7 +56,6 @@ export default function PolicyForm({
                     enabled: !!f.get("enabled"),
                     costPer100Fen: hundredths(f.get("cost")),
                     rootMarginBps: hundredths(f.get("margin")),
-                    totalUserQuota: Number(f.get("totalUserQuota")),
                   },
                 },
                 "PUT",
@@ -72,19 +71,6 @@ export default function PolicyForm({
           }}
         >
           <div className="partner-form-grid">
-            <label>
-              平台用户总额度
-              <input
-                disabled={busy}
-                type="number"
-                name="totalUserQuota"
-                min="0"
-                max="1000000"
-                step="1"
-                defaultValue={resource.data.data.totalUserQuota || 0}
-                required
-              />
-            </label>
             <label>
               每 100 元基准算力成本（元）
               <input

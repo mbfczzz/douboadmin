@@ -72,24 +72,22 @@ type ProviderStat struct {
 
 // Breakdown holds period totals across users, generation, revenue and providers.
 type Breakdown struct {
-	TotalUsers          int64                   `json:"totalUsers"`
-	ActiveUsers         int64                   `json:"activeUsers"`
-	CreatorUsers        int64                   `json:"creatorUsers"`
-	Payers              int64                   `json:"payers"`
-	Kinds               map[string]*KindStat    `json:"kinds"`
-	Hours               [24]int64               `json:"hours"`
-	Weekdays            [7]int64                `json:"weekdays"`
-	OrdersCreated       int64                   `json:"ordersCreated"`
-	OrdersPaid          int64                   `json:"ordersPaid"`
-	PointsSold          int64                   `json:"pointsSold"`
-	Channels            map[string]*ChannelStat `json:"channels"`
-	Refunds             int64                   `json:"refunds"`
-	DirectActivations   int64                   `json:"directActivations"`
-	ProviderActivations int64                   `json:"providerActivations"`
-	CodesIssued         int64                   `json:"codesIssued"`
-	CodesRedeemed       int64                   `json:"codesRedeemed"`
-	Providers           []ProviderStat          `json:"providers"`
-	Traffic             Traffic                 `json:"traffic"`
+	TotalUsers        int64                   `json:"totalUsers"`
+	ActiveUsers       int64                   `json:"activeUsers"`
+	CreatorUsers      int64                   `json:"creatorUsers"`
+	Payers            int64                   `json:"payers"`
+	Kinds             map[string]*KindStat    `json:"kinds"`
+	Hours             [24]int64               `json:"hours"`
+	Weekdays          [7]int64                `json:"weekdays"`
+	OrdersCreated     int64                   `json:"ordersCreated"`
+	OrdersPaid        int64                   `json:"ordersPaid"`
+	PointsSold        int64                   `json:"pointsSold"`
+	Channels          map[string]*ChannelStat `json:"channels"`
+	Refunds           int64                   `json:"refunds"`
+	MemberActivations int64                   `json:"memberActivations"` // 会员 opened by the platform
+	OwnerActivations  int64                   `json:"ownerActivations"`  // provider owners opened
+	Providers         []ProviderStat          `json:"providers"`
+	Traffic           Traffic                 `json:"traffic"`
 	// The same visit statistics per client (miniprogram/web/app).
 	TrafficByClient map[string]Traffic `json:"trafficByClient,omitempty"`
 }

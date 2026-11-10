@@ -1,34 +1,70 @@
 import Badge from "../components/Badge";
-import { lazy, Suspense, useState } from "react";
+import { lazy, Suspense, useState, type ReactNode } from "react";
 import type { Row } from "../api";
 import { useMe } from "../session";
 import type { PageProps } from "../navigation";
 import { useResource } from "../hooks/useResource";
 import { useRememberedState } from "../hooks/useRememberedState";
 import ResourcePage from "../business/ResourcePage";
+import PageHeader from "../components/PageHeader";
+import ViewTabs from "../users/ViewTabs";
 import Table from "../business/Table";
 import UserDetails from "../business/UserDetails";
 import UserPoints from "../business/UserPoints";
 import UserEdit from "../business/UserEdit";
 import UserStatus from "../business/UserStatus";
-import SignupSwitch from "../users/SignupSwitch";
 import "../users/users.css";
 import { accessCell, createdCell, nameCell } from "../users/cells";
 
 // Record dialogs load when opened, keeping the users list itself light.
 const UserModels = lazy(() => import("../users/UserModels"));
 const UserActivity = lazy(() => import("../users/UserActivity"));
+// Scan registrations awaiting the platform; provider logins never see them.
+const Registrations = lazy(() => import("../users/Registrations"));
 
 type Dialog = "detail" | "models" | "activity" | "points" | "edit" | "status";
 import type { Profile } from "../business/types";
 
+// The platform switches between the user list and scan registrations; each
+// view loads only its own data.
 export default function Users({ notify }: PageProps) {
+  const me = useMe(),
+    platform = !!me && !me.partnerId,
+    [view, setView] = useRememberedState("users.view", "users"),
+    tabs = platform ? <ViewTabs view={view} onChange={setView} /> : null;
+  return platform && view === "registrations" ? (
+    <RegistrationView notify={notify} tabs={tabs} />
+  ) : (
+    <UserList notify={notify} tabs={tabs} />
+  );
+}
+
+function RegistrationView({
+  notify,
+  tabs,
+}: Pick<PageProps, "notify"> & { tabs: ReactNode }) {
+  const [refresh, setRefresh] = useState(0);
+  return (
+    <div className="catalog-page">
+      <PageHeader page="users" onRefresh={() => setRefresh((n) => n + 1)} />
+      {tabs}
+      <Suspense fallback={null}>
+        <Registrations notify={notify} refresh={refresh} />
+      </Suspense>
+    </div>
+  );
+}
+
+function UserList({
+  notify,
+  tabs,
+}: Pick<PageProps, "notify"> & { tabs: ReactNode }) {
   // A user's operation log keeps the 日志管理 menu.
   const canLogs = !!useMe()?.menus.includes("logs");
   const resource = useResource<Row<Profile>[]>("/admin/users"),
     [query, setQuery] = useRememberedState("users.query", ""),
     [state, setState] = useRememberedState("users.state", ""),
-    [access, setAccess] = useRememberedState("users.access", ""),
+    [access, setAccess] = useRememberedState("users.joined", ""),
     [open, setOpen] = useState<{ kind: Dialog; row: Row<Profile> } | null>(
       null,
     ),
@@ -37,11 +73,13 @@ export default function Users({ notify }: PageProps) {
   const userState = (p: Profile) =>
       p.archived ? "archived" : p.disabled ? "disabled" : "active",
     userAccess = (p: Profile) =>
-      !p.access?.active
-        ? "none"
-        : p.access.status === "direct"
-          ? "direct"
-          : "provider";
+      p.access?.active
+        ? p.access.status === "provider"
+          ? "owner"
+          : "member"
+        : p.access?.status === "review"
+          ? "review"
+          : "none";
   const rows = (resource.data || []).filter(
     (r) =>
       [r.id, r.data.nickname, r.data.name, r.data.phone].some((v) =>
@@ -51,7 +89,7 @@ export default function Users({ notify }: PageProps) {
       (!access || userAccess(r.data) === access),
   );
   return (
-    <ResourcePage page="users" resource={resource}>
+    <ResourcePage page="users" resource={resource} tabs={tabs}>
       <div className="business-filters">
         <input
           type="search"
@@ -71,16 +109,16 @@ export default function Users({ notify }: PageProps) {
           <option value="archived">已归档</option>
         </select>
         <select
-          aria-label="开通方式"
+          aria-label="开通状态"
           value={access}
           onChange={(e) => setAccess(e.target.value)}
         >
-          <option value="">全部开通方式</option>
-          <option value="provider">服务商激活</option>
-          <option value="direct">直接开通</option>
+          <option value="">全部开通状态</option>
+          <option value="member">会员</option>
+          <option value="owner">服务商负责人</option>
+          <option value="review">待开通</option>
           <option value="none">未开通</option>
         </select>
-        <SignupSwitch notify={notify} />
       </div>
       <Table
         key={query + state + access}

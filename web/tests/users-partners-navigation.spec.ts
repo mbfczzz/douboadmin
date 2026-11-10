@@ -14,7 +14,12 @@ test("users and providers are isolated sidebar routes", async ({ page }) => {
   await expect(page).toHaveURL(/#users$/);
   await expect(page.getByLabel("搜索用户")).toBeVisible();
   expect(requests).toContain("/api/admin/users");
-  expect(requests).not.toContain("/api/admin/partners/tree");
+  // 扫码登记 is its own tab and loads only when opened.
+  expect(requests).not.toContain("/api/admin/registrations");
+  await page.getByRole("tab", { name: "扫码登记", exact: true }).click();
+  await expect.poll(() => requests).toContain("/api/admin/registrations");
+  await page.getByRole("tab", { name: "小程序用户", exact: true }).click();
+  expect(requests).not.toContain("/api/admin/memberships");
 
   await page.getByRole("button", { name: "服务商管理", exact: true }).click();
   await expect(page).toHaveURL(/#partners$/);
@@ -40,17 +45,8 @@ test("users and providers are isolated sidebar routes", async ({ page }) => {
     .getByRole("button", { name: "新增子级", exact: true })
     .click();
   const createChild = page.getByRole("dialog", { name: "新增下级服务商" });
-  await expect(createChild.getByLabel("可授权账号额度")).toHaveAttribute(
-    "max",
-    "9",
-  );
-  await expect(createChild).toContainText("上级当前可用 9 个");
-  await createChild.getByLabel("可授权账号额度").fill("10");
-  await expect(createChild).toContainText("超出上级可用额度 1 个");
-  await expect(
-    createChild.getByRole("button", { name: "保存服务商", exact: true }),
-  ).toBeDisabled();
-  await page.screenshot({ path: "../.runtime/provider-create-quota.png" });
+  await createChild.getByLabel("服务商名称").fill("未保存的下级");
+  await page.screenshot({ path: "../.runtime/provider-create-child.png" });
   await createChild.getByRole("button", { name: "关闭", exact: true }).click();
   // Typed edits ask before they are discarded.
   await answerAsk(page, true);
@@ -59,8 +55,7 @@ test("users and providers are isolated sidebar routes", async ({ page }) => {
   const row = page.locator(".provider-tree-row").first();
   for (const [button, title, heading] of [
     ["编辑", "编辑服务商", ""],
-    ["名额划拨", "名额划拨", "名额划拨记录"],
-    ["授权码", "授权激活", "授权码"],
+    ["分享码", "分享码", "已加入的会员"],
     ["分佣", "算力分佣", "佣金流水"],
   ]) {
     await row.getByRole("button", { name: button, exact: true }).click();
@@ -74,7 +69,10 @@ test("users and providers are isolated sidebar routes", async ({ page }) => {
       await page.screenshot({
         path: "../.runtime/provider-editor-desktop.png",
       });
-    await expect(dialog.getByRole("tab")).toHaveCount(0);
+    // No tabs into other functions; 分享码 only switches between its codes.
+    await expect(
+      dialog.getByRole("tab", { name: /名额|分佣|编辑|登录账号/ }),
+    ).toHaveCount(0);
     await dialog
       .getByRole("button", { name: "关闭", exact: true })
       .first()

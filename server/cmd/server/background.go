@@ -40,5 +40,4 @@ func background(ctx context.Context, app *api.Server, role string, values settin
 	go metrics.Run(ctx)
 	go payments.Reconcile(ctx, app.Store, app.Pay, app.Billing)
 	go app.Virtual.Run(ctx)
-	go app.Partners.Run(ctx)
 }

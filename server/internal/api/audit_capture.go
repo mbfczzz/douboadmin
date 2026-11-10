@@ -153,7 +153,8 @@ func (a *Server) queueRequestLog(r *http.Request, info *auditInfo, in *capture, 
 		}
 	}
 	// Reads that succeed are frequent and repetitive: keep only their size.
-	if r.Method != "GET" || e.Status >= 400 {
+	// QR code responses carry live join/bind codes, so they stay out too.
+	if (r.Method != "GET" && !strings.Contains(r.Pattern, "/codes/")) || e.Status >= 400 {
 		e.Response = audit.Body(rec.body.buf.Bytes(), rec.body.over)
 	} else {
 		e.Response = "（" + strconv.Itoa(rec.size) + " 字节）"

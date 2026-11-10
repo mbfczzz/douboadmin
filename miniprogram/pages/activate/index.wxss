@@ -75,6 +75,3 @@
   font-size: 14px;
   white-space: nowrap;
 }
-.activation-skip button.biz-action {
-  margin-top: 0;
-}

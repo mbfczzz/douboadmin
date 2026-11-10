@@ -5,30 +5,24 @@ import (
 	"testing"
 )
 
-func TestRedeemRechecksProfileAfterAdmission(t *testing.T) {
-	for _, raw := range []string{`{"nickname":"test","disabled":true}`, `null`, `{"disabled":"broken"}`} {
+func TestJoinRechecksProfileAfterAdmission(t *testing.T) {
+	for _, raw := range []string{`{"nickname":"test","disabled":true}`, `{"nickname":"test","archived":true}`, `null`, `{"disabled":"broken"}`} {
 		t.Run(raw, func(t *testing.T) {
 			s, ctx, s1, _ := fixture(t)
 			if _, e := s.Store.Put(ctx, "users", core.Record{ID: "guard-user", Data: []byte(raw)}, 0); e != nil {
 				t.Fatal(e)
 			}
-			code, e := s.Issue(ctx, s1, "guard", 7, "profile-code", "admin")
+			code, e := s.ShareCode(ctx, s1, "admin")
 			if e != nil {
 				t.Fatal(e)
 			}
-			token, e := s.Reveal(ctx, code.ID)
-			if e != nil {
-				t.Fatal(e)
+			if _, e = s.Join(ctx, "guard-user", code, "scan"); e == nil {
+				t.Fatal("invalid or disabled profile registered")
 			}
-			if _, e = s.Redeem(ctx, "guard-user", token); e == nil {
-				t.Fatal("invalid or disabled profile consumed activation quota")
-			}
-			after, e := s.Overview(ctx, s1)
-			if e != nil {
-				t.Fatal(e)
-			}
-			if after.Quota.Users.Used != 0 || after.Quota.Users.Reserved != 1 {
-				t.Fatal("rejected redemption changed quota", after.Quota)
+			for _, ns := range []string{"registrations", "memberships", "partner_owners"} {
+				if _, e = s.Store.Get(ctx, ns, "guard-user"); e == nil {
+					t.Fatal("refused registration left a record in", ns)
+				}
 			}
 		})
 	}

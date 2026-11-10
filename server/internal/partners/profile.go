@@ -8,6 +8,8 @@ import (
 
 type userProfile struct {
 	Nickname string `json:"nickname"`
+	Name     string `json:"name"`
+	Phone    string `json:"phone"`
 	Disabled bool   `json:"disabled"`
 	Archived bool   `json:"archived"`
 }

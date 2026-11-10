@@ -1,0 +1,123 @@
+@import "../../styles/business.wxss";
+.provider-head {
+  padding: 8px 2px 16px;
+}
+.provider-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.provider-name {
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 30px;
+}
+.provider-level {
+  padding: 1px 8px;
+  border-radius: 4px;
+  background: #22332a;
+  color: #9bcbaa;
+  font-size: 12px;
+  line-height: 18px;
+}
+/* Same colours as the identity label on the profile page. */
+.provider-level.branch {
+  background: #2f2a3a;
+  color: #c9b6ef;
+}
+.provider-level.s1 {
+  background: #3a3222;
+  color: #e8c98a;
+}
+.provider-head .biz-error {
+  margin: 10px 0 0;
+}
+.provider-share {
+  text-align: center;
+}
+.provider-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-bottom: 14px;
+  color: #a0a8ac;
+  font-size: 14px;
+}
+.provider-tabs text {
+  padding: 4px 0;
+  border-bottom: 2px solid transparent;
+}
+.provider-tabs .on {
+  color: #e9eceb;
+  font-weight: 600;
+  border-bottom-color: #9bcbaa;
+}
+.provider-qr {
+  display: block;
+  width: 200px;
+  height: 200px;
+  margin: 0 auto 12px;
+  padding: 8px;
+  box-sizing: border-box;
+  border-radius: 8px;
+  background: #fff;
+}
+.provider-code {
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 4px;
+  font-family: monospace;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 2px;
+}
+.provider-code .biz-link,
+.provider-secret .biz-link {
+  font-family: inherit;
+  font-size: 13px;
+  letter-spacing: 0;
+}
+.provider-share .biz-action,
+.provider-login .biz-action {
+  margin-top: 12px;
+}
+.provider-section {
+  display: block;
+  margin: 20px 2px 10px;
+  color: #a0a8ac;
+  font-size: 13px;
+}
+.provider-off {
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: #382d27;
+  color: #e5bfa6;
+  font-size: 12px;
+}
+.provider-facts {
+  display: flex;
+  margin: 8px 0;
+}
+.provider-facts view {
+  flex: 1;
+}
+.provider-facts .biz-label {
+  margin-bottom: 2px;
+}
+.provider-facts text:last-child {
+  font-size: 16px;
+  font-weight: 600;
+}
+.provider-secret {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  font-family: monospace;
+  font-size: 14px;
+}
+.biz-row .biz-label {
+  margin: 0;
+}

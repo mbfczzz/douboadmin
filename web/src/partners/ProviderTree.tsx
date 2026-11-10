@@ -1,47 +1,43 @@
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { useMemo, type CSSProperties } from "react";
 import Empty from "../components/Empty";
+import type { Row } from "../api";
+import Badge from "../components/Badge";
 import ProviderId from "./ProviderId";
-import ProviderQuota from "./ProviderQuota";
 import ProviderActions, { type ProviderAction } from "./ProviderActions";
-import type { PartnerTreeItem } from "./types";
-import { labels } from "./types";
+import type { Partner } from "./types";
+import { roleName } from "../business/types";
 
-type Node = { item: PartnerTreeItem; children: Node[] };
-import { MAX_LEVELS } from "./types";
-export { MAX_LEVELS };
-const levelNames = [
-  "一级",
-  "二级",
-  "三级",
-  "四级",
-  "五级",
-  "六级",
-  "七级",
-  "八级",
-];
+type Item = Row<Partner>;
+type Node = { item: Item; children: Node[] };
 type Props = {
-  rows: PartnerTreeItem[];
+  rows: Item[];
   query: string;
   expanded: Set<string>;
   toggle: (id: string) => void;
-  open: (kind: ProviderAction, item: PartnerTreeItem) => void;
-  add: (item: PartnerTreeItem) => void;
+  open: (kind: ProviderAction, item: Item) => void;
+  // Unset for provider logins: only the platform adds providers by hand.
+  add?: (item: Item) => void;
+};
+const states: Record<string, [string, string]> = {
+  active: ["已启用", "succeeded"],
+  disabled: ["已停用", "failed"],
+  pending: ["待开通", "queued"],
 };
 
-function buildTree(rows: PartnerTreeItem[]) {
+function buildTree(rows: Item[]) {
   const nodes = new Map<string, Node>(
-      rows.map((item) => [item.record.id, { item, children: [] }]),
+      rows.map((item) => [item.id, { item, children: [] }]),
     ),
     roots: Node[] = [];
   for (const node of nodes.values()) {
-    const parent = nodes.get(node.item.record.data.parentId);
+    const parent = nodes.get(node.item.data.parentId);
     if (parent) parent.children.push(node);
     else roots.push(node);
   }
   const sort = (items: Node[]) => {
     items.sort((a, b) =>
-      a.item.record.data.name.localeCompare(b.item.record.data.name, "zh-CN"),
+      a.item.data.name.localeCompare(b.item.data.name, "zh-CN"),
     );
     items.forEach((item) => sort(item.children));
   };
@@ -54,7 +50,7 @@ function filterTree(nodes: Node[], query: string): Node[] {
   const value = query.toLowerCase();
   return nodes.flatMap((node) => {
     const children = filterTree(node.children, query),
-      matched = [node.item.record.id, node.item.record.data.name].some((text) =>
+      matched = [node.item.id, node.item.data.name].some((text) =>
         text.toLowerCase().includes(value),
       );
     return matched || children.length ? [{ ...node, children }] : [];
@@ -71,10 +67,15 @@ function TreeNodes({
   add,
   rows,
 }: Props & { nodes: Node[]; depth: number }) {
-  return nodes.map(({ item, children }) => {
-    const { record: row, quota } = item,
-      open = Boolean(query) || expanded.has(row.id),
-      level = Math.max(depth + 1, row.data.path?.length || 0),
+  return nodes.map(({ item: row, children }) => {
+    const open = Boolean(query) || expanded.has(row.id),
+      // Growth fails below a stopped provider; ancestors outside a login's
+      // scope are active, or the login would not work.
+      active = [...(row.data.path || []), row.id].every(
+        (id) =>
+          (rows.find((r) => r.id === id)?.data.status ?? "active") === "active",
+      ),
+      [state, tone] = states[row.data.status] || [row.data.status, "muted"],
       style = { "--tree-depth": depth } as CSSProperties;
     return (
       <div
@@ -105,31 +106,25 @@ function TreeNodes({
             <div className="provider-tree-identity">
               <b>{row.data.name}</b>
               <div className="provider-tree-detail quiet">
-                <span>{levelNames[level - 1] || `${level}级`} · </span>
+                <span>{roleName(row.data.role)} · </span>
                 <ProviderId id={row.id} />
                 {children.length > 0 && (
                   <span> · {children.length} 个下级</span>
                 )}
+                {row.data.ownerUser && <span> · 扫码加入</span>}
               </div>
             </div>
           </div>
           <div className="provider-tree-meta">
             <span>
               <small className="quiet">状态</small>
-              <span
-                className={`badge ${row.data.status === "active" ? "succeeded" : "failed"}`}
-              >
-                <i aria-hidden="true" />
-                {labels[row.data.status] || row.data.status}
-              </span>
+              <Badge state={tone} label={state} />
             </span>
-            <ProviderQuota pool={quota.users} />
           </div>
           <ProviderActions
-            item={item}
-            canAdd={level < MAX_LEVELS}
+            item={row}
             open={openDialog}
-            add={add}
+            add={active ? add : undefined}
           />
         </div>
         {children.length > 0 && open && (
@@ -166,8 +161,7 @@ export default function ProviderTree(props: Props) {
       <div className="provider-tree-head quiet">
         <span>服务商</span>
         <span>状态</span>
-        <span className="provider-quota">授权名额</span>
-        <span className="provider-quota">操作</span>
+        <span>操作</span>
       </div>
       {visible.length ? (
         <TreeNodes
@@ -182,7 +176,7 @@ export default function ProviderTree(props: Props) {
           help={
             props.query
               ? "请调整搜索条件。"
-              : "点击新增服务商创建第一个服务商。"
+              : "点击新增分公司创建第一个分公司。"
           }
         />
       )}

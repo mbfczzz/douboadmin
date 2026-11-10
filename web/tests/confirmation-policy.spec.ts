@@ -23,7 +23,7 @@ test("all existing configuration and profile updates require approval, creations
     "/admin/users/u/wallet",
     "/admin/orders/o/refund",
     "/admin/virtual-payments/events/e/review",
-    "/admin/quota-moves",
+    "/admin/commission-payouts",
   ])
     expect(needsConfirmation(path, "POST", {})).toBe(true);
 });
