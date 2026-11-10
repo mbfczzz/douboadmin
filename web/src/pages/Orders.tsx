@@ -107,6 +107,7 @@ export default function Orders({ notify }: PageProps) {
           },
           {
             title: "金额 / 积分",
+            align: "right",
             render: (r) => (
               <>
                 <span className="amount">{money(r.data.amountFen)}</span>

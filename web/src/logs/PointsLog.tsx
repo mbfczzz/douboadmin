@@ -70,6 +70,7 @@ export default function PointsLog({ query }: { query: string }) {
             },
             {
               title: "可用 / 预留变动",
+              align: "right",
               render: (r) => (
                 <>
                   <Delta value={r.data.availableDelta}>
@@ -83,6 +84,7 @@ export default function PointsLog({ query }: { query: string }) {
             },
             {
               title: "变动后",
+              align: "right",
               render: (r) => (
                 <>
                   {points(r.data.availableAfter)}

@@ -45,7 +45,7 @@
       ></view
     ></view
   >
-  <view wx:if="{{!needsLogin&&total>0}}" class="biz-pair">
+  <view wx:if="{{!needsLogin&&pages>1}}" class="biz-pair">
     <view><button class="biz-action biz-secondary" disabled="{{loading||busy||page<=1}}" data-step="-1" bindtap="changePage">上一页</button></view>
     <view><button class="biz-action biz-secondary" disabled="{{loading||busy||page>=pages}}" data-step="1" bindtap="changePage">下一页</button></view>
   </view>

@@ -33,11 +33,13 @@
 }
 .virtual-products {
   display: grid;
-  /* Two packages per row so long package names fit on one line. */
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
 button.virtual-product {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
   width: 100%;
   padding: 12px 8px;
   background: #1c1f21;
@@ -57,6 +59,11 @@ button.virtual-product::after {
 }
 .virtual-product text {
   display: block;
+  width: 100%;
+}
+.virtual-product text:first-child {
+  min-height: 3.2em;
+  flex: 1;
 }
 .product-price {
   margin: 4px 0;

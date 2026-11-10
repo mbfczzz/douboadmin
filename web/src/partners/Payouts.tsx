@@ -65,6 +65,7 @@ export default function Payouts({ id, view, changed, notify }: Scope) {
         columns={[
           {
             title: "金额",
+            align: "right",
             render: (r) => (
               <span className="amount">{money(r.data.amountFen)}</span>
             ),

@@ -4,9 +4,20 @@
 }
 .provider-title {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 8px;
   margin-bottom: 4px;
+}
+.provider-title > text:first-child {
+  flex: 1 1 180px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.provider-level,
+.provider-off {
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 .provider-name {
   font-size: 22px;
@@ -113,6 +124,9 @@
 }
 .provider-secret {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  min-width: 0;
   align-items: baseline;
   gap: 12px;
   font-family: monospace;
@@ -120,4 +134,10 @@
 }
 .biz-row .biz-label {
   margin: 0;
+  flex-shrink: 0;
+}
+.provider-login .biz-row > text:last-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  text-align: right;
 }

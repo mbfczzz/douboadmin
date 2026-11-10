@@ -1,27 +1,5 @@
-export interface HotVideo {
-  id: string;
-  title: string;
-  text: string;
-  author: string;
-  cover: string;
-  url: string;
-  sourceUrl: string;
-  likes: number | null;
-  views: number | null;
-  comments: number | null;
-  publishedAt: string;
-  duration: number;
-}
-export interface HotResult {
-  items: HotVideo[];
-  cursor: number;
-  hasMore: boolean;
-  searchId: string;
-  backtrace: string;
-  sortScope: string;
-  cached: boolean;
-  fetchedAt: string;
-}
+import type { HotVideo } from "./hot-video-types";
+export type { HotVideo, HotResult } from "./hot-video-types";
 export function count(value: number | null) {
   if (value === null || value === undefined) return "未提供";
   return value >= 10000 ? (value / 10000).toFixed(1) + "万" : String(value);

@@ -10,8 +10,16 @@ import Empty from "../components/Empty";
 export interface Column<T> {
   title: string;
   action?: boolean;
+  align?: "left" | "right";
   render: (row: T) => ReactNode;
 }
+const columnClass = <T,>(column: Column<T>) =>
+  [
+    column.action && "table-actions",
+    column.align === "right" && "table-numeric",
+  ]
+    .filter(Boolean)
+    .join(" ") || undefined;
 export default function Table<T>({
   rows,
   columns,
@@ -87,10 +95,7 @@ export default function Table<T>({
             <thead>
               <tr>
                 {columns.map((c) => (
-                  <th
-                    key={c.title}
-                    className={c.action ? "table-actions" : undefined}
-                  >
+                  <th key={c.title} className={columnClass(c)}>
                     {c.title}
                   </th>
                 ))}
@@ -100,10 +105,7 @@ export default function Table<T>({
               {visible.map((row) => (
                 <tr key={id(row)}>
                   {columns.map((c) => (
-                    <td
-                      key={c.title}
-                      className={c.action ? "table-actions" : undefined}
-                    >
+                    <td key={c.title} className={columnClass(c)}>
                       {c.render(row)}
                     </td>
                   ))}

@@ -73,20 +73,30 @@
   margin-left: auto;
   display: flex;
   align-items: center;
-  gap: 7px;
-  min-height: 38px;
+  gap: 8px;
+  height: 40px;
   background: var(--surface-subtle);
   border: 1px solid var(--line-strong);
   border-radius: 8px;
   padding: 0 10px;
 }
 .catalog-search input {
+  min-height: 0;
+  height: 100%;
   padding: 8px 0;
   background: transparent;
   border: 0;
   outline: none;
   min-width: 160px;
   font-size: 12px;
+}
+@media (max-width: 640px) {
+  .catalog-search {
+    height: 44px;
+  }
+  .catalog-search input:not([type="checkbox"]):not([type="radio"]) {
+    min-height: 0;
+  }
 }
 .catalog-toolbar select,
 .catalog-caption select {

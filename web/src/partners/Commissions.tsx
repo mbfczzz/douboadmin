@@ -41,6 +41,7 @@ export default function Commissions(scope: Scope) {
           },
           {
             title: "可用 / 预留变动",
+            align: "right",
             render: (r) => (
               <>
                 <Delta value={r.data.amountFen}>
@@ -68,7 +69,11 @@ export default function Commissions(scope: Scope) {
               </>
             ),
           },
-          { title: "变动后可用", render: (r) => money(r.data.balanceAfter) },
+          {
+            title: "变动后可用",
+            align: "right",
+            render: (r) => money(r.data.balanceAfter),
+          },
           { title: "说明", render: (r) => r.data.note },
           { title: "时间", render: (r) => date(r.createdAt) },
         ]}

@@ -10,7 +10,7 @@
   --line: #2a2c30;
   --line-strong: #383b40;
   --accent: #d81670;
-  --accent-hover: #ec2b84;
+  --accent-hover: #be1261;
   --accent-text: #ff4d9d;
   --accent-ink: #ffffff;
   --accent-soft: #3a1228;
@@ -34,7 +34,7 @@
   --warning-border: #6a5422;
   --info: #5ccbe6;
   --info-soft: #12303a;
-  --radius-sm: 7px;
+  --radius-sm: 8px;
   --radius: 10px;
   --radius-lg: 14px;
   --shadow-float: 0 24px 64px #000000a8;
@@ -119,7 +119,7 @@ textarea {
 }
 input::placeholder,
 textarea::placeholder {
-  color: #7d858a;
+  color: var(--muted);
 }
 input:hover,
 select:hover,

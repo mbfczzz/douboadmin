@@ -22,3 +22,12 @@ dd {
   font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
   font-size: 12px;
 }
+/* Numeric columns line up by their last digit. Mobile cards retain reading order. */
+.catalog-table th.table-numeric,
+.catalog-table td.table-numeric {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.catalog-table td.table-numeric .cell-tags {
+  justify-content: flex-end;
+}

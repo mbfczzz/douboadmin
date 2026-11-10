@@ -24,7 +24,7 @@
   border-bottom: 1px solid var(--line);
   color: var(--ink-strong);
   font-size: 19px;
-  font-weight: 720;
+  font-weight: 600;
   letter-spacing: -0.02em;
 }
 .brand > span {
@@ -228,9 +228,9 @@ nav button.active::before {
   margin-bottom: 24px;
 }
 .page-heading h1 {
-  margin: 0 0 7px;
+  margin: 0 0 8px;
   font-size: 26px;
-  font-weight: 720;
+  font-weight: 600;
   line-height: 1.25;
 }
 .page-heading p {

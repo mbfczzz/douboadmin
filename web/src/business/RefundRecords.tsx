@@ -57,6 +57,7 @@ export default function RefundRecords({ notify }: { notify: Notify }) {
             },
             {
               title: "金额",
+              align: "right",
               render: (r) => (
                 <span className="amount">{money(r.data.amountFen)}</span>
               ),

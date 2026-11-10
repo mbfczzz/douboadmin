@@ -70,7 +70,7 @@
           ><text wx:if="{{item.note}}" class="biz-small ledger-note">{{item.note}}</text
           ><text class="biz-small ledger-time">{{item.time}}</text></view
         ><text class="ledger-change {{item.tone}}">{{item.change}}</text></view>
-      <view wx:if="{{ledgerTotal>0}}" class="biz-pair">
+      <view wx:if="{{ledgerPages>1}}" class="biz-pair">
         <view><button class="biz-action biz-secondary" disabled="{{loading||ledgerPage<=1}}" data-step="-1" bindtap="changeLedgerPage">上一页</button></view>
         <view><button class="biz-action biz-secondary" disabled="{{loading||ledgerPage>=ledgerPages}}" data-step="1" bindtap="changeLedgerPage">下一页</button></view>
       </view>

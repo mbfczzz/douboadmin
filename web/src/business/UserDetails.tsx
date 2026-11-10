@@ -117,6 +117,7 @@ export default function UserDetails({
             },
             {
               title: "可用变动",
+              align: "right",
               render: (r) => (
                 <Delta value={r.data.availableDelta}>
                   {points(r.data.availableDelta)}

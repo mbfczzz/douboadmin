@@ -103,6 +103,7 @@ export default function PaymentRecords() {
             { title: "用户", render: (r) => <IdChip>{r.userId}</IdChip> },
             {
               title: "实付 / 到账积分",
+              align: "right",
               render: (r) => (
                 <>
                   <span className="amount">{money(r.amountFen)}</span>

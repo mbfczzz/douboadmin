@@ -126,6 +126,9 @@ input[type="search"]:not(.catalog-search input) {
 .catalog-toolbar .catalog-tabs button {
   min-height: 40px;
 }
+@media (max-width: 640px) {
+  .catalog-toolbar .catalog-tabs button { min-height: 44px; }
+}
 /* Space between a page toolbar or caption and the content below. */
 .catalog-caption {
   margin-bottom: 14px;
