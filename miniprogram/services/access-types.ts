@@ -1,5 +1,6 @@
 export interface AccessStatus {
   active: boolean;
+  canBrowse?: boolean;
   status: string;
   partnerId?: string;
   partnerName?: string;

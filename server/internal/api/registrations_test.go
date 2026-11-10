@@ -28,8 +28,11 @@ func TestRegistrationWaitsForPlatformApproval(t *testing.T) {
 	if v := accessOf(t, a, user); v.Active || v.Status != "review" || v.PartnerID != branch || v.Message != "已登记，等待总部开通" {
 		t.Fatal("pending access", v)
 	}
-	if w := call(a, "GET", "/api/templates", user, "", nil); w.Code != 403 || !strings.Contains(w.Body.String(), "ACTIVATION_REQUIRED") {
-		t.Fatal("pending user reached business endpoints", w.Code)
+	if w := call(a, "GET", "/api/templates", user, "", nil); w.Code != 200 {
+		t.Fatal("pending user cannot browse templates", w.Code)
+	}
+	if w := call(a, "POST", "/api/jobs", user, "", map[string]any{}); w.Code != 403 || !strings.Contains(w.Body.String(), "ACTIVATION_REQUIRED") {
+		t.Fatal("pending user could generate", w.Code)
 	}
 	if status, body := joinHTTP(a, user, code); status != 400 || !strings.Contains(body, "等待总部开通") {
 		t.Fatal("registered twice while pending", status, body)

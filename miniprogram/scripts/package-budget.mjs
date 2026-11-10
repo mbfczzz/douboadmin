@@ -27,7 +27,9 @@ console.log(
 // registration with the provider centre, 推广码 and profile identity
 // (548.3 KB). Not a ceiling to drift up to: the WeChat upload package is
 // still checked separately in the developer tools.
-const budget = 544 * 1024;
+// Reviewed feature increment: awaiting-approval browsing, +139 source bytes
+// after consolidating response parsing. See docs/miniprogram-browse-budget.md.
+const budget = 545 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

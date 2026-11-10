@@ -6,7 +6,7 @@ import {
   RequestError,
 } from "./errors";
 import { media } from "./media";
-import type { Row, Asset } from "./types";
+import type { Row, Asset, ResponseMeta } from "./types";
 import { requestPurpose } from "./login-context";
 import { activationRedirect } from "./access";
 export function request<T>(
@@ -47,6 +47,7 @@ export function request<T>(
           },
           timeout: 20000,
           success(res) {
+            const meta = res.data as ResponseMeta;
             if (storedToken() !== storedAtSend) {
               reject(new AuthCancelledError());
               return;
@@ -60,7 +61,8 @@ export function request<T>(
             }
             if (
               res.statusCode === 403 &&
-              (res.data as { code?: string })?.code === "ACTIVATION_REQUIRED"
+              meta?.code === "ACTIVATION_REQUIRED" &&
+              !meta.access?.canBrowse
             ) {
               activationRedirect();
               reject(new AuthCancelledError());
@@ -77,23 +79,15 @@ export function request<T>(
             }
             if (res.statusCode >= 400) {
               reject(
-                new RequestError(
-                  res.statusCode,
-                  (res.data as { error?: string })?.error || "请求失败",
-                ),
+                new RequestError(res.statusCode, meta?.error || "请求失败"),
               );
               return;
             }
             if (
               path === "/config" &&
-              typeof (res.data as { activationRequired?: boolean })
-                .activationRequired === "boolean"
+              typeof meta?.activationRequired === "boolean"
             )
-              wx.setStorageSync(
-                "activation-required",
-                (res.data as { activationRequired: boolean })
-                  .activationRequired,
-              );
+              wx.setStorageSync("activation-required", meta.activationRequired);
             resolve(res.data as T);
           },
           fail() {
@@ -138,7 +132,11 @@ export function upload(
                 throw new SessionExpiredError();
               }
               const d = JSON.parse(r.data);
-              if (r.statusCode === 403 && d.code === "ACTIVATION_REQUIRED") {
+              if (
+                r.statusCode === 403 &&
+                d.code === "ACTIVATION_REQUIRED" &&
+                !d.access?.canBrowse
+              ) {
                 activationRedirect();
                 throw new AuthCancelledError();
               }

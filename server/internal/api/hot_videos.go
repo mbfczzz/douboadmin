@@ -70,7 +70,7 @@ func (a *Server) hotDiscovery(w http.ResponseWriter, r *http.Request) {
 	}
 	words := settings.HotKeywords
 	source := "推荐关键词"
-	if a.Hot.Ready() {
+	if a.Hot.Ready() && !browseOnly(r) {
 		if live, err := a.Hot.Hotwords(r.Context()); err == nil && len(live) > 0 {
 			words = live
 			source = "抖音热词"

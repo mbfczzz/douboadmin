@@ -39,6 +39,7 @@
         </view>
       </view>
     </block>
+    <button wx:if="{{status.canBrowse&&!status.active}}" class="biz-action" disabled="{{busy||loading}}" bindtap="enter">先浏览小程序</button>
     <view class="activation-links"><text bindtap="load">刷新授权状态</text><text bindtap="signOut">退出登录</text></view>
   </block>
   <text class="activation-privacy" bindtap="privacy">隐私保护指引</text>

@@ -11,7 +11,7 @@ import {
 } from "../../utils/api";
 import type { Config } from "../../services/types";
 import { loginContext } from "../../services/login-context";
-import { accessStatus, activationRedirect } from "../../services/access";
+import { canEnter, activationRedirect } from "../../services/access";
 Page({
   data: {
     ...loginContext(),
@@ -110,10 +110,7 @@ Page({
     this.completed = true;
     this.setData({ returning: true });
     try {
-      if (
-        wx.getStorageSync("activation-required") &&
-        !(await accessStatus()).active
-      ) {
+      if (wx.getStorageSync("activation-required") && !(await canEnter())) {
         flow.cancel();
         activationRedirect();
         return;

@@ -4,7 +4,7 @@
 
 1. **填写资料**：姓名和有效手机号始终必填；短信服务已配置时还需输入验证码。未配置短信时保留手机号输入框，只隐藏验证码区域。资料缺失时 `/api/access` 返回 `profileRequired=true`，并通过 `smsRequired` 告知小程序是否需要短信验证。
 2. **扫码登记**：在授权页「扫码登记」扫描服务商或会员给的二维码（或输入 8 位码），按码的类型登记为会员、S1 服务商、S2 推荐官，或绑定为后台创建的服务商本人。登记后状态为「待开通」（`access.status=review`）。
-3. **总部开通**：总部在后台「小程序用户 → 扫码登记」开通后才能使用；被拒绝（`status=rejected`）可扫其他码重新登记。
+3. **总部开通**：待审批时可点击「先浏览小程序」查看模板、模型参数和自己的页面，但不能生成、上传、充值或发码。总部在后台「小程序用户 → 扫码登记」开通后才能使用这些功能；被拒绝（`status=rejected`）可扫其他码重新登记。
 
 不再有「开放普通用户注册」和「跳过直接使用」。已登记或已开通的账号不能再扫码重复登记；解绑或被拒绝后可以重新登记。
 
@@ -35,9 +35,11 @@
 
 | 方法 | 路径 | 说明 |
 | --- | --- | --- |
-| GET | `/api/access` | 返回授权状态 `status`（pending 未登记 / review 待开通 / rejected / active / provider / disabled / unbound）、`profileRequired`、`smsRequired`；资料未完成时附带已填的 `name`、`phone` 供预填 |
+| GET | `/api/access` | 返回 `status`、`active`、`canBrowse`、`profileRequired`、`smsRequired`；已完成资料且待审批的扫码用户为 `active=false, canBrowse=true`，资料未完成时附带 `name`、`phone` 供预填 |
 | POST | `/api/access/sms` | `{phone}`，发送验证码，返回 `expiresIn`、`resendIn` |
 | POST | `/api/access/profile` | 始终提交 `{name, phone}`；`smsRequired=true` 时额外提交 `code`。未验证时不写入号码归属证明，更换号码会清除旧验证状态，返回新的授权状态 |
-| POST | `/api/access/join` | `{code, method}` 扫码登记（method 为 scan / code）；需已完成第一步，返回待开通状态 |
+| POST | `/api/access/join` | `{code, method}` 扫码登记（method 为 scan / code）；需已完成第一步，返回待开通状态和浏览权限 |
+
+浏览权限只开放给资料完整、已扫码并等待审批的用户，覆盖会员开通码、S1 / S2 邀请码、负责人绑定码及推广码。匿名、未登记、被拒绝、停用及资料未完成的账号不会因此获得浏览权限。服务器按路由明确列出允许的本地读取接口；付费上游搜索、发码等具有副作用的 GET 接口仍需开通。只读操作被拒绝时在当前页提示等待开通，不强制退回授权页；生成和付款的事务校验继续要求真正的有效授权。
 
 上线前请在微信公众平台更新《小程序隐私保护指引》，声明收集姓名和手机号的用途。

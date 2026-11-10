@@ -55,9 +55,10 @@ func TestIdentityLabelsEachKindOfUser(t *testing.T) {
 			t.Fatal(want.Label, w.Code, w.Body.String())
 		}
 	}
-	// A pending registration opens nothing, identity included.
-	if w := call(a, "GET", "/api/me/identity", waiting, "", nil); w.Code != 403 {
-		t.Fatal("a pending user read an identity", w.Code, w.Body.String())
+	// Pending users can browse their profile, but have no approved identity.
+	var pending identityView
+	if w := call(a, "GET", "/api/me/identity", waiting, "", nil); w.Code != 200 || json.Unmarshal(w.Body.Bytes(), &pending) != nil || pending != (identityView{}) {
+		t.Fatal("pending user gained an approved identity", w.Code, w.Body.String())
 	}
 	// Without the activation gate an unopened account has no identity.
 	a.Config.RequireActivation = false

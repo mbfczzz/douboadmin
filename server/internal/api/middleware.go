@@ -106,6 +106,7 @@ func (a *Server) auth(role string, h http.HandlerFunc) http.HandlerFunc {
 			h(w, r.WithContext(context.WithValue(r.Context(), identityKey, v)))
 			return
 		}
+		preview := false
 		if v.Role == "user" {
 			flags, e := a.userState(r.Context(), v.ID)
 			if e != nil && !errors.Is(e, core.ErrNotFound) { // Legacy private sessions can predate profiles; public shares cannot.
@@ -116,9 +117,11 @@ func (a *Server) auth(role string, h http.HandlerFunc) http.HandlerFunc {
 				fail(w, 403, "账号已停用，请联系管理员")
 				return
 			}
-			if !a.allowActivation(w, r, v.ID, flags.Registered) {
+			allowed, browsing := a.allowActivation(w, r, v.ID, flags.Registered)
+			if !allowed {
 				return
 			}
+			preview = browsing
 		}
 		ok, err := a.Sessions.Allow(r.Context(), v.ID, 180)
 		if err != nil {
@@ -133,6 +136,6 @@ func (a *Server) auth(role string, h http.HandlerFunc) http.HandlerFunc {
 			a.Activity.Active(r.Context(), v.ID)
 		}
 		auditActor(r, v) // now with provider scope resolved
-		h(w, r.WithContext(context.WithValue(r.Context(), identityKey, v)))
+		h(w, r.WithContext(context.WithValue(browsingContext(r.Context(), preview), identityKey, v)))
 	}
 }

@@ -20,28 +20,32 @@ var activationSteps = map[string]bool{"/api/access": true, "/api/access/sms": tr
 	"/api/access/join": true, "/api/auth/logout": true}
 
 func activationExempt(path string) bool { return activationSteps[path] }
-func (a *Server) allowActivation(w http.ResponseWriter, r *http.Request, user string, registered bool) bool {
+func (a *Server) allowActivation(w http.ResponseWriter, r *http.Request, user string, registered bool) (bool, bool) {
 	if !a.Config.RequireActivation || activationExempt(r.URL.Path) {
-		return true
+		return true, false
 	}
 	if !registered {
 		reply(w, 403, map[string]any{"code": "ACTIVATION_REQUIRED", "error": a.profileRequiredMessage(), "access": accessView{Access: core.Access{Status: "pending"}, ProfileRequired: true, PhoneVerificationRequired: a.registrationRequired()}})
-		return false
+		return false, false
 	}
 	access, e := a.Partners.Access(r.Context(), user)
 	if e != nil {
 		dbError(w, e)
-		return false
+		return false, false
 	}
 	if access.Active {
-		return true
+		return true, false
+	}
+	preview := canBrowse(access, registered)
+	if preview && browseReads[r.Pattern] {
+		return true, true
 	}
 	message := access.Message
 	if message == "" {
 		message = core.ErrActivationRequired.Error()
 	}
-	reply(w, 403, map[string]any{"code": "ACTIVATION_REQUIRED", "error": message, "access": access})
-	return false
+	reply(w, 403, map[string]any{"code": "ACTIVATION_REQUIRED", "error": message, "access": accessView{Access: access, CanBrowse: preview, PhoneVerificationRequired: a.registrationRequired()}})
+	return false, false
 }
 func (a *Server) business(h http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -77,7 +81,7 @@ func (a *Server) fullConfig(r *http.Request) (bool, error) {
 		return false, nil
 	}
 	access, e := a.Partners.Access(r.Context(), id.ID)
-	return access.Active, e
+	return canBrowse(access, flags.Registered), e
 }
 func (a *Server) myAccess(w http.ResponseWriter, r *http.Request) {
 	if !a.Config.RequireActivation {
@@ -127,5 +131,5 @@ func (a *Server) joinAccess(w http.ResponseWriter, r *http.Request) {
 		partnerError(w, e)
 		return
 	}
-	reply(w, 200, access)
+	reply(w, 200, accessView{Access: access, CanBrowse: canBrowse(access, true), PhoneVerificationRequired: a.registrationRequired()})
 }

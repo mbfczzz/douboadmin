@@ -115,6 +115,7 @@ function harness(timers = {}) {
     wx,
     page,
     component,
+    service: (name) => load(path.join(process.cwd(), "services", name + ".ts")),
     api: load(path.join(process.cwd(), "utils/api.ts")),
   };
 }

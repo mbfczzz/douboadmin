@@ -43,6 +43,7 @@ func (a *Server) userDisabled(ctx context.Context, id string) (bool, error) {
 type accessView struct {
 	core.Access
 	ProfileRequired           bool   `json:"profileRequired"`
+	CanBrowse                 bool   `json:"canBrowse"`
 	PhoneVerificationRequired bool   `json:"smsRequired"`
 	Name                      string `json:"name,omitempty"`
 	Phone                     string `json:"phone,omitempty"`
@@ -68,7 +69,7 @@ func (a *Server) accessFor(ctx context.Context, id string) (accessView, error) {
 		return accessView{}, e
 	}
 	phoneRequired := a.registrationRequired()
-	v := accessView{Access: access, ProfileRequired: !flags.Registered, PhoneVerificationRequired: phoneRequired}
+	v := accessView{Access: access, ProfileRequired: !flags.Registered, CanBrowse: canBrowse(access, flags.Registered), PhoneVerificationRequired: phoneRequired}
 	if v.ProfileRequired {
 		v.Active, v.Message, v.Name, v.Phone = false, a.profileRequiredMessage(), flags.Name, flags.Phone
 	}

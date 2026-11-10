@@ -77,12 +77,17 @@ export function accessStatus(): Promise<AccessStatus> {
 export async function enforceAccess(path: string) {
   if (["pages/activate/index", "pages/login/index"].includes(path)) return;
   try {
-    if (!(await accessStatus()).active) activationRedirect();
+    if (!(await canEnter())) activationRedirect();
   } catch (e) {
     // Only a definite refusal leaves the page. Network, 5xx and 429 keep the
     // user where they are so drafts and uploads survive a brief outage.
     if (e instanceof RequestError && e.status === 403) activationRedirect();
   }
+}
+
+export async function canEnter() {
+  const status = await accessStatus();
+  return status.active || !!status.canBrowse;
 }
 // A provider's share code: 8 unambiguous characters. Accepts the scanned QR
 // content (DOUBO-SHARE:CODE) or a typed code with spaces or dashes.

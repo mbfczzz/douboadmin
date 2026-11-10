@@ -53,7 +53,7 @@ func (a *Server) wallet(w http.ResponseWriter, r *http.Request) {
 	if channel == "" {
 		channel = "wechat_jsapi"
 	}
-	ready := a.rechargeReady()
+	ready := a.rechargeReady() && !browseOnly(r)
 	if channel == "wechat_virtual" && len(products) == 0 && custom == nil {
 		ready = false
 	}

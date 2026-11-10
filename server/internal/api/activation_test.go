@@ -63,8 +63,11 @@ func TestWechatIdentityAloneCannotUseBusinessEndpoints(t *testing.T) {
 	if code, body := joinHTTP(a, user, share.Code); code != 200 || !strings.Contains(body, `"status":"review"`) || !strings.Contains(body, `"active":false`) {
 		t.Fatal(code, body)
 	}
-	if w := call(a, "GET", "/api/templates", user, "", nil); w.Code != 403 || !strings.Contains(w.Body.String(), "等待总部开通") {
-		t.Fatal("pending registration opened business endpoints", w.Code, w.Body.String())
+	if w := call(a, "GET", "/api/templates", user, "", nil); w.Code != 200 {
+		t.Fatal("pending registration could not browse", w.Code, w.Body.String())
+	}
+	if w := call(a, "POST", "/api/jobs", user, "", map[string]any{}); w.Code != 403 || !strings.Contains(w.Body.String(), "等待总部开通") {
+		t.Fatal("pending registration gained generation access", w.Code, w.Body.String())
 	}
 	approve(t, a, "user-a")
 	if w := call(a, "GET", "/api/templates", user, "", nil); w.Code != 200 {

@@ -1,3 +1,10 @@
+export interface ResponseMeta {
+  code?: string;
+  error?: string;
+  access?: { canBrowse?: boolean };
+  activationRequired?: boolean;
+}
+
 export interface Row<T = Record<string, unknown>> {
   id: string;
   owner?: string;
