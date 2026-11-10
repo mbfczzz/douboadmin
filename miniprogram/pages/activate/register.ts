@@ -1,7 +1,7 @@
 import { request, error } from "../../utils/api";
 import type { AccessStatus } from "../../services/access";
 
-// Step 1 of activation: name and an SMS-verified phone number.
+// Name and phone; verify only when SMS is configured.
 export const registerState = {
   name: "",
   phone: "",
@@ -65,7 +65,7 @@ export async function register(page: Register) {
   const { name, phone, smsCode } = page.data;
   if (!name.trim()) return void error(new Error("请填写姓名"));
   const sms = page.data.status?.smsRequired !== false;
-  if (sms && !validPhone(phone.trim()))
+  if (!validPhone(phone.trim()))
     return void error(new Error("请输入 11 位手机号"));
   if (sms && !/^[0-9]{6}$/.test(smsCode))
     return void error(new Error("请输入 6 位验证码"));
@@ -73,7 +73,8 @@ export async function register(page: Register) {
   try {
     const status = await request<AccessStatus>("/access/profile", "POST", {
       name: name.trim(),
-      ...(sms ? { phone: phone.trim(), code: smsCode } : {}),
+      phone: phone.trim(),
+      ...(sms ? { code: smsCode } : {}),
     });
     if (page.destroyed) return;
     stopCountdown(page);

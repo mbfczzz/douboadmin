@@ -8,9 +8,8 @@ import (
 	"strings"
 )
 
-// A mini-program user is registered once they have a name and a phone number
-// confirmed by SMS. Until then every business endpoint answers
-// ACTIVATION_REQUIRED and the mini-program shows the registration step.
+// Registration always requires a name and valid phone. A configured SMS
+// provider additionally requires proof that the user owns that phone.
 type userFlags struct {
 	Disabled, Registered bool
 	Name, Phone          string
@@ -31,9 +30,7 @@ func (a *Server) userState(ctx context.Context, id string) (userFlags, error) {
 	if json.Unmarshal(row.Data, &p) != nil || p == nil {
 		return userFlags{}, fmt.Errorf("账号状态异常")
 	}
-	// Changing the phone (for example by an administrator) asks for a new SMS
-	// check. While SMS is not configured nobody is held at this step.
-	registered := !a.registrationRequired() || strings.TrimSpace(p.Name) != "" && p.Phone != "" && p.VerifiedPhone == p.Phone
+	registered := strings.TrimSpace(p.Name) != "" && mainlandPhone.MatchString(p.Phone) && (!a.registrationRequired() || p.VerifiedPhone == p.Phone)
 	return userFlags{Disabled: p.Disabled || p.Archived, Registered: registered, Name: p.Name, Phone: p.Phone}, nil
 }
 
@@ -52,7 +49,14 @@ type accessView struct {
 }
 
 const errProfileRequired = "请先填写姓名并验证手机号"
-const errNameRequired = "请先填写姓名"
+const errBasicProfileRequired = "请先填写姓名和手机号"
+
+func (a *Server) profileRequiredMessage() string {
+	if a.registrationRequired() {
+		return errProfileRequired
+	}
+	return errBasicProfileRequired
+}
 
 func (a *Server) accessFor(ctx context.Context, id string) (accessView, error) {
 	flags, e := a.userState(ctx, id)
@@ -64,14 +68,9 @@ func (a *Server) accessFor(ctx context.Context, id string) (accessView, error) {
 		return accessView{}, e
 	}
 	phoneRequired := a.registrationRequired()
-	// Skipping unavailable SMS must not skip a new user's name. Existing
-	// active accounts retain access while SMS is unavailable.
-	v := accessView{Access: access, ProfileRequired: !flags.Registered || !access.Active && strings.TrimSpace(flags.Name) == "", PhoneVerificationRequired: phoneRequired}
+	v := accessView{Access: access, ProfileRequired: !flags.Registered, PhoneVerificationRequired: phoneRequired}
 	if v.ProfileRequired {
-		v.Active, v.Message, v.Name, v.Phone = false, errProfileRequired, flags.Name, flags.Phone
-		if !phoneRequired {
-			v.Message = errNameRequired
-		}
+		v.Active, v.Message, v.Name, v.Phone = false, a.profileRequiredMessage(), flags.Name, flags.Phone
 	}
 	return v, nil
 }

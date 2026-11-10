@@ -14,14 +14,14 @@
       <view class="activation-path">
         <text class="biz-heading">填写资料</text>
         <input class="biz-input" placeholder="姓名" value="{{name}}" maxlength="30" data-field="name" bindinput="field" disabled="{{busy}}" />
+        <input class="biz-input" type="number" placeholder="手机号" value="{{phone}}" maxlength="11" data-field="phone" bindinput="field" disabled="{{busy}}" />
         <block wx:if="{{status.smsRequired!==false}}">
-          <input class="biz-input" type="number" placeholder="手机号" value="{{phone}}" maxlength="11" data-field="phone" bindinput="field" disabled="{{busy}}" />
           <view class="activation-sms">
             <input class="biz-input" type="number" placeholder="短信验证码" value="{{smsCode}}" maxlength="6" data-field="smsCode" bindinput="field" disabled="{{busy}}" />
             <button class="biz-action biz-secondary" loading="{{sending}}" disabled="{{busy||sending||countdown>0||phone.length!==11}}" bindtap="sendCode">{{countdown>0?countdown+' 秒后重发':'获取验证码'}}</button>
           </view>
         </block>
-        <button class="biz-action" loading="{{busy}}" disabled="{{busy||loading||!name||(status.smsRequired!==false&&(phone.length!==11||smsCode.length!==6))}}" bindtap="register">下一步</button>
+        <button class="biz-action" loading="{{busy}}" disabled="{{busy||loading||!name||phone.length!==11||(status.smsRequired!==false&&smsCode.length!==6)}}" bindtap="register">下一步</button>
       </view>
     </view>
     <block wx:else>

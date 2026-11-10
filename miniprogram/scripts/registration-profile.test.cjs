@@ -2,7 +2,7 @@ const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const { harness } = require("./harness.cjs");
 
-test("name-only registration preserves the invitation and sends no phone verification fields", async () => {
+test("registration without SMS still submits a phone and preserves the invitation", async () => {
   const h = harness(),
     page = h.page("activate"),
     sent = [];
@@ -34,7 +34,7 @@ test("name-only registration preserves the invitation and sends no phone verific
   assert.equal(page.data.code, "KMNP2345");
   assert.equal(page.data.status.profileRequired, false);
   assert.deepEqual(JSON.parse(JSON.stringify(sent)), [
-    ["/access/profile", { name: "张三" }],
+    ["/access/profile", { name: "张三", phone: "13800138000" }],
   ]);
   await page.join(page.data.code, "code");
   assert.deepEqual(JSON.parse(JSON.stringify(sent[1])), [
@@ -43,6 +43,36 @@ test("name-only registration preserves the invitation and sends no phone verific
   ]);
   assert.equal(page.data.status.status, "review");
   assert.equal(page.data.code, "");
+});
+
+test("name and valid phone remain required without SMS", async () => {
+  const h = harness(),
+    page = h.page("activate"),
+    sent = [];
+  page.setData({
+    logged: true,
+    status: {
+      active: false,
+      status: "pending",
+      profileRequired: true,
+      smsRequired: false,
+    },
+  });
+  h.api.request = async (...args) => {
+    sent.push(args);
+    return { active: false, status: "pending" };
+  };
+  await page.register();
+  page.setData({ name: "张三" });
+  await page.register();
+  page.setData({ phone: "123" });
+  await page.register();
+  assert.equal(sent.length, 0);
+  page.setData({ phone: " 13800138000 " });
+  await page.register();
+  assert.deepEqual(JSON.parse(JSON.stringify(sent)), [
+    ["/access/profile", "POST", { name: "张三", phone: "13800138000" }],
+  ]);
 });
 
 for (const required of [true, undefined]) {

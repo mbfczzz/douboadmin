@@ -13,8 +13,8 @@ import (
 	"time"
 )
 
-// Registration always collects a name. Phone verification is required only
-// when SMS is configured; name-only registration never changes phone fields.
+// Name and phone are always required. Only the verification code depends on
+// SMS availability; the unverified path never creates proof of phone ownership.
 func (a *Server) register(w http.ResponseWriter, r *http.Request) {
 	var v struct {
 		Name  string `json:"name"`
@@ -30,10 +30,7 @@ func (a *Server) register(w http.ResponseWriter, r *http.Request) {
 	case name == "" || len([]rune(name)) > 30:
 		fail(w, 400, "请填写姓名（30 字以内）")
 		return
-	case !phoneRequired && (phone != "" || v.Code != ""):
-		fail(w, 400, "短信验证尚未启用，请仅填写姓名")
-		return
-	case phoneRequired && !mainlandPhone.MatchString(phone):
+	case !mainlandPhone.MatchString(phone):
 		fail(w, 400, "请输入 11 位手机号")
 		return
 	case phoneRequired && !smsDigits.MatchString(v.Code):
@@ -48,7 +45,7 @@ func (a *Server) register(w http.ResponseWriter, r *http.Request) {
 	if phoneRequired {
 		problem, e = a.verifyAndRegister(r.Context(), user, name, phone, v.Code)
 	} else {
-		e = a.registerName(r.Context(), user, name)
+		problem, e = a.registerWithoutSMS(r.Context(), user, name, phone)
 	}
 	if e != nil {
 		dbError(w, e)
@@ -66,9 +63,15 @@ func (a *Server) register(w http.ResponseWriter, r *http.Request) {
 	reply(w, 200, out)
 }
 
-func (a *Server) registerName(ctx context.Context, user, name string) error {
-	return a.Store.Atomic(ctx, func(tx store.Transaction) error {
-		row, e := tx.Lock("users", core.Record{ID: user})
+func (a *Server) registerWithoutSMS(ctx context.Context, user, name, phone string) (string, error) {
+	if taken, e := a.phoneTaken(ctx, phone, user); e != nil || taken {
+		if taken {
+			return errPhoneTaken, e
+		}
+		return "", e
+	}
+	err := a.Store.Atomic(ctx, func(tx store.Transaction) error {
+		row, e := tx.Get("users", user)
 		if e != nil {
 			return e
 		}
@@ -76,11 +79,19 @@ func (a *Server) registerName(ctx context.Context, user, name string) error {
 		if json.Unmarshal(row.Data, &profile) != nil || profile == nil {
 			return fmt.Errorf("账号状态异常")
 		}
-		profile["name"] = name
+		if verified, _ := profile["verifiedPhone"].(string); verified != phone {
+			if e = releasePhone(tx, verified, user); e != nil {
+				return e
+			}
+			delete(profile, "verifiedPhone")
+			delete(profile, "phoneVerifiedAt")
+		}
+		profile["name"], profile["phone"] = name, phone
 		row.Data = core.Data(profile)
 		_, e = tx.Put("users", row, row.Version)
 		return e
 	})
+	return "", err
 }
 
 // verifyAndRegister runs under a row lock on the code, so concurrent guesses

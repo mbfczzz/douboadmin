@@ -4,7 +4,7 @@ export interface AccessStatus {
   partnerId?: string;
   partnerName?: string;
   message?: string;
-  // Name is required; phone verification depends on the server's SMS setup.
+  // Name and phone are required; SMS setup determines verification.
   profileRequired?: boolean;
   // Missing on older APIs: keep SMS validation unless explicitly disabled.
   smsRequired?: boolean;
