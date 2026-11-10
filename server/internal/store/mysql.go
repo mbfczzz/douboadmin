@@ -8,10 +8,14 @@ import (
 	"errors"
 	"fmt"
 	"github.com/go-sql-driver/mysql"
+	"sync"
 	"time"
 )
 
-type MySQL struct{ db *sql.DB }
+type MySQL struct {
+	db               *sql.DB
+	jobIDComparisons sync.Map
+}
 
 func NewMySQL(dsn string) (*MySQL, error) {
 	cfg, err := mysql.ParseDSN(dsn)
@@ -32,7 +36,7 @@ func NewMySQL(dsn string) (*MySQL, error) {
 	db.SetMaxOpenConns(20)
 	db.SetMaxIdleConns(10)
 	db.SetConnMaxLifetime(5 * time.Minute)
-	return &MySQL{db}, nil
+	return &MySQL{db: db}, nil
 }
 
 // Migrate is an explicit deployment command. Never run schema changes on API startup.

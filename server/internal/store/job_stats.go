@@ -8,13 +8,21 @@ import (
 )
 
 func (m *MySQL) JobStats(ctx context.Context, user string) (out core.JobStats, err error) {
-	q := `SELECT COALESCE(SUM(j.status='succeeded' AND COALESCE(w.deleted,0)=0),0), COALESCE(SUM(j.status IN ('queued','running')),0), COALESCE(SUM(j.status='failed'),0) FROM jobs j LEFT JOIN work_meta w ON w.id=j.id WHERE j.user_id=? AND j.input->>'$.kind' IN ('image','video','mix')`
+	referenceID, err := m.jobReferenceID(ctx, "work_meta")
+	if err != nil {
+		return out, err
+	}
+	q := `SELECT COALESCE(SUM(j.status='succeeded' AND COALESCE(w.deleted,0)=0),0), COALESCE(SUM(j.status IN ('queued','running')),0), COALESCE(SUM(j.status='failed'),0) FROM jobs j LEFT JOIN work_meta w ON w.id=` + referenceID + ` WHERE j.user_id=? AND j.input->>'$.kind' IN ('image','video','mix')`
 	err = m.db.QueryRowContext(ctx, q, user).Scan(&out.Works, &out.Running, &out.Failed)
 	return
 }
 
 func (m *MySQL) JobModels(ctx context.Context, user string) ([]core.JobModelUse, error) {
-	q := `SELECT COALESCE(j.input->>'$.model',''), COALESCE(j.input->>'$.kind',''), COUNT(*), SUM(j.status='succeeded'), SUM(j.status IN ('failed','canceled')), SUM(j.status IN ('queued','running')), COALESCE(SUM(IF(b.state='charged',b.units,0)),0), MAX(j.created_at) FROM jobs j LEFT JOIN job_billing b ON b.id=j.id WHERE j.user_id=? AND j.input->>'$.kind'<>'import' GROUP BY j.input->>'$.model',j.input->>'$.kind' ORDER BY COUNT(*) DESC,j.input->>'$.model'`
+	referenceID, err := m.jobReferenceID(ctx, "job_billing")
+	if err != nil {
+		return nil, err
+	}
+	q := `SELECT COALESCE(j.input->>'$.model','') AS model_key, COALESCE(j.input->>'$.kind','') AS kind_key, COUNT(*), SUM(j.status='succeeded'), SUM(j.status IN ('failed','canceled')), SUM(j.status IN ('queued','running')), COALESCE(SUM(IF(b.state='charged',b.units,0)),0), MAX(j.created_at) FROM jobs j LEFT JOIN job_billing b ON b.id=` + referenceID + ` WHERE j.user_id=? AND j.input->>'$.kind'<>'import' GROUP BY model_key,kind_key ORDER BY COUNT(*) DESC,model_key,kind_key`
 	rows, e := m.db.QueryContext(ctx, q, user)
 	if e != nil {
 		return nil, e

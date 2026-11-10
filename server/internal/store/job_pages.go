@@ -10,8 +10,8 @@ import (
 	"strings"
 )
 
-func jobWhere(q core.JobQuery) (string, []any) {
-	w, args := " FROM jobs j LEFT JOIN work_meta w ON w.id=j.id WHERE 1=1", []any{}
+func jobWhere(q core.JobQuery, referenceID string) (string, []any) {
+	w, args := " FROM jobs j LEFT JOIN work_meta w ON w.id="+referenceID+" WHERE 1=1", []any{}
 	add := func(clause string, value any) { w += clause; args = append(args, value) }
 	if q.User != "" {
 		add(" AND j.user_id=?", q.User)
@@ -53,12 +53,16 @@ func (m *MySQL) JobPage(ctx context.Context, q core.JobQuery) (out core.JobPage,
 	if !q.Valid() {
 		return out, fmt.Errorf("invalid job page")
 	}
+	referenceID, err := m.jobReferenceID(ctx, "work_meta")
+	if err != nil {
+		return out, err
+	}
 	tx, err := m.db.BeginTx(ctx, &sql.TxOptions{ReadOnly: true, Isolation: sql.LevelRepeatableRead})
 	if err != nil {
 		return out, err
 	}
 	defer tx.Rollback()
-	w, args := jobWhere(q)
+	w, args := jobWhere(q, referenceID)
 	if err = tx.QueryRowContext(ctx, "SELECT COUNT(*)"+w, args...).Scan(&out.Total); err != nil {
 		return out, err
 	}
