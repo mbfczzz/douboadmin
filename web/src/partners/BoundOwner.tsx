@@ -42,7 +42,7 @@ export default function BoundOwner({
       <div>
         <p className="bound-name">{name}</p>
         <p className="quiet">
-          {pending ? "已扫码登记，等待总部开通" : "已绑定小程序账号"}
+          {pending ? "已扫码登记，等待上级开通" : "已绑定小程序账号"}
           {user.phone ? ` · ${user.phone}` : ""}
         </p>
       </div>

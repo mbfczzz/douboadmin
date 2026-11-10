@@ -16,6 +16,7 @@ func TestProfileRegistrationWithoutSMSAllowsProviderScan(t *testing.T) {
 			a.Config.DemoLogin = false // test deployment: no SMS sender or debug codes
 			user := newMiniUser(t, a, "name-user")
 			branch := createBranch(t, a, admin, "profile-phone")
+			parent := reviewLogin(t, a, admin, branch)
 			invite := providerCode(t, a, "GET", branch, role, admin)
 			v := accessOf(t, a, user)
 			if !v.ProfileRequired || v.PhoneVerificationRequired || v.Message != errBasicProfileRequired {
@@ -46,7 +47,7 @@ func TestProfileRegistrationWithoutSMSAllowsProviderScan(t *testing.T) {
 			if page.Total != 1 || json.Unmarshal(page.Items[0].Data, &reg) != nil || reg.Name != "张三" || reg.Role != role || reg.ParentID != branch || reg.Phone != phone {
 				t.Fatal("wrong provider registration", page)
 			}
-			if status, body := decideHTTP(t, a, admin, "name-user", true, ""); status != 200 {
+			if status, body := decideHTTP(t, a, parent, "name-user", true, ""); status != 200 {
 				t.Fatal("approval failed", status, body)
 			}
 			if v = accessOf(t, a, user); !v.Active || v.ProfileRequired || v.PhoneVerificationRequired {

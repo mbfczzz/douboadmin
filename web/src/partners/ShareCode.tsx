@@ -3,24 +3,25 @@ import Memberships from "./Memberships";
 import CodeUses from "./CodeUses";
 import CodeView from "./CodeCard";
 import OwnerBindCode from "./OwnerBindCode";
+import { useShareCode } from "./useShareCode";
 import { useMe } from "../session";
 import { codeKindName } from "../business/types";
 import type { Scope } from "./types";
 import "./share-code.css";
 
-// Every scan only registers; the platform (总部) opens the account.
+// Every scan registers first; the direct parent opens the account.
 const kinds = {
   s1: [
     codeKindName("s1"),
-    "新用户扫码登记为本服务商下的 S1 服务商，总部开通后生效",
+    "新用户扫码登记为本服务商下的 S1 服务商，上级开通后生效",
   ],
   s2: [
     codeKindName("s2"),
-    "新用户扫码登记为本服务商下的 S2 推荐官，总部开通后生效",
+    "新用户扫码登记为本服务商下的 S2 推荐官，上级开通后生效",
   ],
   member: [
     codeKindName(""),
-    "用户扫码登记为子账号（会员），直接归属本服务商，总部开通后生效",
+    "用户扫码登记为子账号（会员），直接归属本服务商，服务商开通后生效",
   ],
 } as const;
 type Kind = keyof typeof kinds;
@@ -41,6 +42,7 @@ export default function ShareCode({ id, view, changed, notify }: Scope) {
     kind = shown.includes(picked) ? picked : shown[0],
     path = `/admin/partners/${encodeURIComponent(id)}/codes/${kind}`,
     [title, note] = kinds[kind];
+  const share = useShareCode(path);
   return (
     <>
       <section className="share-panel" aria-label="分享码">
@@ -73,14 +75,36 @@ export default function ShareCode({ id, view, changed, notify }: Scope) {
             note={note}
             file={`${name}-${title}.png`}
             notify={notify}
+            share={share}
           />
         </div>
       </section>
       {!ownerUser && !self && (
-        <OwnerBindCode id={id} name={name} notify={notify} />
+        <OwnerBindCode
+          id={id}
+          name={name}
+          reviewerId={view.record.data.parentId}
+          notify={notify}
+          changed={changed}
+        />
       )}
-      <CodeUses id={id} kind={kind} />
-      <Memberships id={id} notify={notify} changed={changed} />
+      <CodeUses
+        id={id}
+        kind={kind}
+        code={share.data?.code}
+        reviewerId={id}
+        notify={notify}
+        changed={changed}
+      />
+      {kind === "member" && share.data?.code && (
+        <Memberships
+          key={share.data.code}
+          id={id}
+          code={share.data.code}
+          notify={notify}
+          changed={changed}
+        />
+      )}
     </>
   );
 }

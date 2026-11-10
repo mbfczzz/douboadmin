@@ -1,10 +1,10 @@
 import { expect, test, type Page } from "@playwright/test";
-import { login } from "./helpers";
+import { mockLogin } from "./mock-login";
 import { surfaceFixtures, longName } from "./surface-fixtures";
 
 test.beforeEach(async ({ page }) => {
-  await login(page);
-  await surfaceFixtures(page);
+  await mockLogin(page);
+  await surfaceFixtures(page, []);
   await page.getByRole("button", { name: "服务商管理", exact: true }).click();
 });
 
@@ -12,7 +12,7 @@ const row = (page: Page) => page.locator(".provider-tree-row").first();
 // Each row button opens one dialog with one job.
 const functions = [
   ["编辑", "编辑服务商", "", 0],
-  ["分享码", "分享码", "已加入的会员", 1],
+  ["分享码", "分享码", "扫码登记记录", 1],
   ["分佣", "算力分佣", "佣金流水", 2],
 ] as const;
 
@@ -66,12 +66,12 @@ test("each provider function opens its own readable, contained dialog", async ({
           await panel.getByRole("tab", { name: "子账号开通码" }).click();
           await expect(panel.locator(".share-code")).toHaveText("ABCD-2345");
           await expect(panel.locator(".code-info")).toContainText(
-            "用户扫码登记为子账号（会员），直接归属本服务商，总部开通后生效",
+            "用户扫码登记为子账号（会员），直接归属本服务商，服务商开通后生效",
           );
           await panel.getByRole("tab", { name: "S1 服务商邀请码" }).click();
           await expect(panel.locator(".share-code")).toHaveText("KMNP-2345");
           await expect(panel.locator(".code-info")).toContainText(
-            "新用户扫码登记为本服务商下的 S1 服务商，总部开通后生效",
+            "新用户扫码登记为本服务商下的 S1 服务商，上级开通后生效",
           );
           await panel.getByRole("tab", { name: "S2 推荐官邀请码" }).click();
           await expect(panel.locator(".share-code")).toHaveText("WXYZ-6789");

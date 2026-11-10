@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
-    "build:assets": "node ../scripts/check-structure.mjs && node --test scripts/check-budget.test.mjs scripts/budget/*.test.mjs && tsc -b && vite build",
+    "build:assets": "node ../scripts/check-structure.mjs && node --test scripts/ask.test.mjs scripts/check-budget.test.mjs scripts/budget/*.test.mjs && tsc -b && vite build",
     "build": "npm run build:assets && npm run budget:check",
     "budget:check": "node scripts/check-budget.mjs",
     "budget:baseline": "node scripts/update-budget-baseline.mjs",

@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { Copy, Download, RotateCcw } from "lucide-react";
 import { api } from "../api";
-import { useShareCode } from "./useShareCode";
+import type { useShareCode } from "./useShareCode";
 import RequestState from "../components/RequestState";
 import { ask } from "../confirm/ask";
 import { copyText } from "../clipboard";
@@ -20,20 +20,21 @@ export default function CodeView({
   file,
   notify,
   bound,
+  share,
 }: {
   path: string;
   title: string;
   note: string;
   file: string;
   notify: Notify;
+  share: ReturnType<typeof useShareCode>;
   bound?: (
     user: BoundUser,
     pending: boolean,
     reload: () => Promise<void>,
   ) => ReactNode;
 }) {
-  const share = useShareCode(path),
-    s = share.data;
+  const s = share.data;
   async function reset() {
     const ok = await ask({
       title: `重置${title}？`,

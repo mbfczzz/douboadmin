@@ -12,6 +12,8 @@ import (
 func partnerError(w http.ResponseWriter, e error) {
 	var rule *partners.RuleError
 	switch {
+	case errors.Is(e, partners.ErrReviewDenied):
+		fail(w, 403, e.Error())
 	case errors.As(e, &rule):
 		fail(w, 400, e.Error())
 	case errors.Is(e, core.ErrActivationRequired), errors.Is(e, core.ErrPartnerDisabled):
@@ -44,6 +46,14 @@ func (a *Server) partnerList(ns string) http.HandlerFunc {
 			return
 		}
 		query := core.RecordQuery{Namespace: ns, Owner: q.Get("owner"), PartnerID: q.Get("provider"), Search: q.Get("q"), Status: q.Get("status"), Page: page, Size: 20}
+		if ns == "memberships" && q.Has("code") {
+			code, valid := partners.NormalizeShareCode(q.Get("code"))
+			if !valid {
+				fail(w, 400, "二维码无效")
+				return
+			}
+			query.Fields = map[string]string{"codeId": code}
+		}
 		scope, e := a.partnerScope(r)
 		if e != nil {
 			dbError(w, e)

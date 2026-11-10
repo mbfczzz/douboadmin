@@ -104,7 +104,7 @@ func (s *Service) Update(ctx context.Context, id string, v core.Partner, version
 			return e
 		}
 		v.Role, v.ParentID, v.Path, v.OwnerUser = old.Role, old.ParentID, old.Path, old.OwnerUser
-		// Only the platform's approval opens a scanned provider; a rejected
+		// Only registration approval opens a scanned provider; a rejected
 		// one stays closed.
 		if frozen(old.Status) || frozen(v.Status) {
 			v.Status = old.Status

@@ -3,7 +3,14 @@ import { useMe } from "../session";
 import type { Partner } from "./types";
 
 export type ProviderAction =
-  "edit" | "account" | "profile" | "share" | "commissions";
+  | "edit"
+  | "account"
+  | "profile"
+  | "share"
+  | "commissions"
+  | "registrations"
+  | "approve"
+  | "reject";
 
 // Row buttons of one provider: every function opens its own dialog.
 // A provider login on its own node may run share codes and commissions but
@@ -11,17 +18,21 @@ export type ProviderAction =
 export default function ProviderActions({
   item,
   open,
+  busy,
 }: {
   item: Row<Partner>;
   open: (kind: ProviderAction, item: Row<Partner>) => void;
+  busy?: boolean;
 }) {
-  const self = useMe()?.partnerId === item.id,
-    // A scanned provider has nothing to run until the platform opens it.
+  const me = useMe(),
+    self = me?.partnerId === item.id,
+    canReview = !!me && (me.partnerId || "root") === item.data.parentId,
     pending = item.data.status === "pending",
     button = (kind: ProviderAction, label: string, subtle = false) => (
       <button
         type="button"
         className={subtle ? "text-button subtle" : "text-button"}
+        disabled={busy}
         onClick={() => open(kind, item)}
       >
         {label}
@@ -30,13 +41,21 @@ export default function ProviderActions({
   if (pending)
     return (
       <div className="provider-tree-actions">
-        <span className="quiet provider-waiting">等待总部开通</span>
+        {canReview && item.data.ownerUser ? (
+          <>
+            {button("approve", "开通")}
+            {button("reject", "拒绝")}
+          </>
+        ) : (
+          <span className="quiet provider-waiting">等待上级开通</span>
+        )}
       </div>
     );
   return (
     <div className="provider-tree-actions">
       <span className="provider-action-group">
         {button("share", "分享码")}
+        {self && button("registrations", "会员开通")}
         {button("commissions", "分佣")}
       </span>
       <span className="provider-action-group">

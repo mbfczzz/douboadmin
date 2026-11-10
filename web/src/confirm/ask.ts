@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 // rest of the admin. Resolves to false when cancelled, otherwise to the
 // entered reason ("" when no reason was requested).
 export interface AskOptions {
+  signal?: AbortSignal;
   title: string;
   message?: ReactNode;
   confirmText?: string;
@@ -21,6 +22,7 @@ export interface AskOptions {
 type Listener = (options: AskOptions | undefined) => void;
 let listener: Listener | undefined;
 let pending: ((value: false | string) => void) | undefined;
+let current: AskOptions | undefined;
 
 export function bindAsk(next: Listener) {
   listener = next;
@@ -29,18 +31,26 @@ export function bindAsk(next: Listener) {
     if (listener === next) listener = undefined;
   };
 }
-export function finishAsk(value: false | string) {
+export function finishAsk(value: false | string, expected?: AskOptions) {
+  if (expected && current !== expected) return;
   const resolve = pending;
   pending = undefined;
+  current = undefined;
   listener?.(undefined);
   resolve?.(value);
 }
 export function ask(options: AskOptions): Promise<false | string> {
-  if (!listener) return Promise.resolve(false);
+  if (!listener || options.signal?.aborted) return Promise.resolve(false);
   finishAsk(false);
   // Focus returns to the opener through the dialog's overlay handling.
   return new Promise((resolve) => {
-    pending = resolve;
+    const cancel = () => finishAsk(false, options);
+    pending = (value) => {
+      options.signal?.removeEventListener("abort", cancel);
+      resolve(value);
+    };
+    current = options;
+    options.signal?.addEventListener("abort", cancel, { once: true });
     listener?.(options);
   });
 }

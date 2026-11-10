@@ -9,7 +9,7 @@ import (
 
 // Join registers a user through a scanned code: as a 会员 (member or promo
 // code), as an S1/S2 provider (invites) or as the owner of an admin-made
-// provider (bind code). Every registration waits for the platform.
+// provider (bind code). Every registration waits for its direct parent.
 func (s *Service) Join(ctx context.Context, user, input, method string) (out core.Access, err error) {
 	if method != "scan" && method != "code" {
 		return out, rulef("加入方式无效")
@@ -107,7 +107,7 @@ func registerMember(tx store.Transaction, user string, sc core.ShareCode, reg *c
 }
 
 // registerProvider creates the scanner's provider below the code's owner,
-// pending until the platform approves.
+// pending until its direct parent approves.
 func registerProvider(tx store.Transaction, user string, sc core.ShareCode, reg *core.Registration) error {
 	if reg.Name == "" {
 		return rulef("请先完成注册并填写姓名")

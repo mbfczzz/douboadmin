@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { TriangleAlert } from "lucide-react";
 import Modal from "../components/Modal";
 import { bindAsk, finishAsk, type AskOptions } from "./ask";
@@ -6,6 +6,7 @@ import "./ask.css";
 
 // Renders the current ask() request as a small themed dialog.
 export default function AskHost() {
+  const current = useRef<AskOptions | undefined>(undefined);
   const [options, setOptions] = useState<AskOptions>(),
     [reason, setReason] = useState(""),
     [busy, setBusy] = useState(false),
@@ -13,6 +14,7 @@ export default function AskHost() {
   useEffect(
     () =>
       bindAsk((next) => {
+        current.current = next;
         setReason("");
         setError("");
         setBusy(false);
@@ -21,19 +23,19 @@ export default function AskHost() {
     [],
   );
   if (!options) return null;
-  const close = () => !busy && finishAsk(false);
+  const close = () => !busy && finishAsk(false, options);
   async function confirm(value: string) {
-    if (!options?.run) return finishAsk(value);
+    if (!options?.run) return finishAsk(value, options);
     setBusy(true);
     setError("");
     try {
       await options.run(value);
-      finishAsk(value);
+      finishAsk(value, options);
     } catch (e) {
       // An empty message means the change summary was cancelled.
-      setError((e as Error).message);
+      if (current.current === options) setError((e as Error).message);
     } finally {
-      setBusy(false);
+      if (current.current === options) setBusy(false);
     }
   }
   const min = options.reason?.minLength || 0,

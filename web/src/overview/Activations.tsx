@@ -8,7 +8,7 @@ const parts = [
   ["owner", "服务商负责人", "var(--info)"],
 ] as const;
 
-// Accounts the platform (总部) opened in the period, and the providers whose
+// Accounts opened in the period, and the providers whose
 // 会员 were opened most.
 export default function Activations({ b }: { b: Breakdown }) {
   const n = { member: b.memberActivations, owner: b.ownerActivations },
@@ -18,7 +18,7 @@ export default function Activations({ b }: { b: Breakdown }) {
     <section className="panel stat-panel">
       <div className="section-head">
         <h2>开通情况</h2>
-        <span className="quiet">总部开通的账号</span>
+        <span className="quiet">已审核开通的账号</span>
       </div>
       <div className="stat-hero">
         <b>{total}</b>

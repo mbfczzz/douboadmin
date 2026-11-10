@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { openCodes, titles } from "./provider-code-fixture";
+import { codes, openCodes, titles } from "./provider-code-fixture";
 
 function item(status = "pending", kind = "s1", user = "scan-user") {
   return {
@@ -11,7 +11,7 @@ function item(status = "pending", kind = "s1", user = "scan-user") {
       nickname: "微信昵称",
       name: "扫码用户" + user,
       phone: "13900139004",
-      code: "KMNP2345",
+      code: codes[kind as keyof typeof codes],
       codeKind: kind,
       role: kind === "member" ? "member" : kind,
       status,
@@ -94,6 +94,10 @@ test("usage filters follow the selected code and preserve code-card geometry", a
   page,
 }) => {
   const { dialog, records, calls } = await openUses(page);
+  expect(calls.at(-1)?.get("code")).toBe(codes.s1);
+  await expect(
+    dialog.getByRole("heading", { name: "已加入的会员" }),
+  ).toHaveCount(0);
   await records
     .getByRole("combobox", { name: "扫码登记状态" })
     .selectOption("pending");
@@ -107,6 +111,10 @@ test("usage filters follow the selected code and preserve code-card geometry", a
   const before = await dialog.locator(".share-panel").boundingBox();
   await dialog.getByRole("tab", { name: titles.s2, exact: true }).click();
   await expect.poll(() => calls.at(-1)?.get("kind")).toBe("s2");
+  expect(calls.at(-1)?.get("code")).toBe(codes.s2);
+  await expect(
+    dialog.getByRole("heading", { name: "已加入的会员" }),
+  ).toHaveCount(0);
   await expect(records).toContainText("S2 推荐官");
   const after = await dialog.locator(".share-panel").boundingBox();
   expect(Math.abs(after!.height - before!.height)).toBeLessThanOrEqual(1);

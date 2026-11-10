@@ -14,6 +14,7 @@ import PlatformActions from "./PlatformActions";
 import ProviderSelf from "./ProviderSelf";
 import Modal from "../components/Modal";
 import type { ProviderAction } from "./ProviderActions";
+import { useRegistrationDecision } from "../users/useRegistrationDecision";
 
 const ProviderModule = lazy(() => import("./ProviderModule"));
 
@@ -26,12 +27,20 @@ export default function Providers({ notify }: { notify: Notify }) {
       row: Row<Partner>;
     }>();
   const reload = async () => setRefresh((n) => n + 1);
+  const review = useRegistrationDecision(
+    notify,
+    reload,
+    `${query}/${creating}/${action?.kind}/${action?.row.id}`,
+  );
   const rows = action ? [action.row] : [];
   // Only the platform adds branches by hand. S1/S2 join through invite codes.
   const platform = !useMe()?.partnerId;
   const close = () => setAction(undefined),
     kind = action?.kind,
-    moduleKind = kind === "share" || kind === "commissions" ? kind : undefined;
+    moduleKind =
+      kind === "share" || kind === "commissions" || kind === "registrations"
+        ? kind
+        : undefined;
   return (
     <>
       <PageHeader page="partners" onRefresh={() => void reload()}>
@@ -76,7 +85,16 @@ export default function Providers({ notify }: { notify: Notify }) {
           key={query}
           refresh={refresh}
           query={query}
-          open={(kind, row) => setAction({ kind, row })}
+          busy={review.busy}
+          open={(kind, row) => {
+            if (kind === "approve" || kind === "reject") {
+              if (row.data.ownerUser)
+                void review.decide(row.data.ownerUser, kind === "approve", {
+                  partnerId: row.id,
+                  role: row.data.role,
+                });
+            } else setAction({ kind, row });
+          }}
         />
       </section>
       {creating && (

@@ -6,10 +6,10 @@ import (
 	"errors"
 )
 
-const reviewMessage = "已登记，等待总部开通"
+const reviewMessage = "已登记，等待上级开通"
 
 // access is what a mini-program user may do. Scanning only registers; the
-// platform's approval turns a registration into a usable account.
+// direct parent's approval opens generation access.
 func access(r Reader, user string) (core.Access, error) {
 	if out, ok, e := ownerAccess(r, user); ok || e != nil {
 		return out, e
@@ -106,7 +106,7 @@ func unregistered(r Reader, user string) (core.Access, error) {
 	if e != nil {
 		return core.Access{}, e
 	}
-	message := "未通过总部审核"
+	message := "未通过开通审核"
 	if reg.Reason != "" {
 		message += "：" + reg.Reason
 	}

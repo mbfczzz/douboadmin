@@ -2,11 +2,15 @@ import { useState } from "react";
 import { RefreshCw, Search } from "lucide-react";
 import { date } from "../api";
 import { useCachedResource } from "../hooks/useCachedResource";
+import { usePageLimit } from "../hooks/usePageLimit";
 import CatalogResults from "../components/CatalogResults";
 import Table from "../business/Table";
 import Tag, { IdChip } from "../components/Tag";
 import { codeKindName, joinMethod, roleName } from "../business/types";
 import type { PageData } from "./types";
+import type { Notify } from "../navigation";
+import { useMe } from "../session";
+import { useRegistrationDecision } from "../users/useRegistrationDecision";
 import "./records.css";
 
 type Use = {
@@ -25,23 +29,51 @@ type Use = {
 };
 const statuses = { pending: "待开通", approved: "已通过", rejected: "已拒绝" };
 
-export default function CodeUses({ id, kind }: { id: string; kind: string }) {
+export default function CodeUses({
+  id,
+  kind,
+  code,
+  reviewerId,
+  notify,
+  changed,
+}: {
+  id: string;
+  kind: string;
+  code?: string;
+  reviewerId: string;
+  notify: Notify;
+  changed: () => Promise<void>;
+}) {
+  const me = useMe(),
+    canReview = !!me && (me.partnerId || "root") === reviewerId;
   const [query, setQuery] = useState(""),
     [status, setStatus] = useState("");
-  const key = `${id}/${kind}`;
+  const key = `${id}/${kind}/${code || ""}`;
   const [paging, setPaging] = useState({ key, page: 1 });
   const page = paging.key === key ? paging.page : 1;
   const params = new URLSearchParams({
     kind,
+    code: code || "",
     status,
     q: query,
     page: String(page),
   });
   const resource = useCachedResource<PageData<Use>>(
-    `/admin/partners/${encodeURIComponent(id)}/code-uses?${params}`,
+    code
+      ? `/admin/partners/${encodeURIComponent(id)}/code-uses?${params}`
+      : null,
     15000,
   );
   const firstPage = () => setPaging({ key, page: 1 });
+  usePageLimit(page, (value) => setPaging({ key, page: value }), resource.data);
+  const review = useRegistrationDecision(
+    notify,
+    async () => {
+      await resource.reload();
+      await changed();
+    },
+    `${key}/${status}/${query}/${page}`,
+  );
   return (
     <section
       className="panel attention-panel partner-records"
@@ -52,7 +84,7 @@ export default function CodeUses({ id, kind }: { id: string; kind: string }) {
           <h2>扫码登记记录</h2>
           <p>
             {codeKindName(kind === "member" ? "" : kind)} ·
-            包含历史码，待开通用户也会显示
+            仅显示当前码的登记记录，包含待开通用户
           </p>
         </div>
         <form
@@ -100,6 +132,7 @@ export default function CodeUses({ id, kind }: { id: string; kind: string }) {
               type="button"
               className="icon"
               aria-label="刷新扫码记录"
+              disabled={!code}
               onClick={() => void resource.reload()}
             >
               <RefreshCw
@@ -112,7 +145,7 @@ export default function CodeUses({ id, kind }: { id: string; kind: string }) {
       </div>
       <CatalogResults
         label="扫码登记列表"
-        loading={resource.loading && !resource.data}
+        loading={!code || (resource.loading && !resource.data)}
         error={resource.error}
         retry={resource.reload}
       >
@@ -180,6 +213,42 @@ export default function CodeUses({ id, kind }: { id: string; kind: string }) {
               },
               { title: "登记时间", render: (r) => date(r.data.registeredAt) },
               { title: "登记方式", render: (r) => joinMethod(r.data.method) },
+              ...(canReview
+                ? [
+                    {
+                      title: "操作",
+                      action: true,
+                      render: (r: PageData<Use>["items"][number]) =>
+                        r.data.status === "pending" ? (
+                          <div className="business-actions">
+                            <button
+                              disabled={review.busy}
+                              onClick={() =>
+                                void review.decide(r.data.userId, true, {
+                                  code: r.data.code,
+                                })
+                              }
+                            >
+                              开通
+                            </button>
+                            <button
+                              className="danger-text"
+                              disabled={review.busy}
+                              onClick={() =>
+                                void review.decide(r.data.userId, false, {
+                                  code: r.data.code,
+                                })
+                              }
+                            >
+                              拒绝
+                            </button>
+                          </div>
+                        ) : (
+                          "—"
+                        ),
+                    },
+                  ]
+                : []),
             ]}
           />
         )}

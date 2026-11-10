@@ -16,7 +16,7 @@ const shareAlphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
 const SharePrefix = "DOUBO-SHARE:"
 
 // Code kinds. Scanning one registers the user in that role, pending the
-// platform's approval: a 会员 (member code or a member's promo code), an S1
+// direct parent's approval: a 会员 (member code or a member's promo code), an S1
 // or S2 provider (invites), or the owner of an admin-made provider (bind).
 const (
 	MemberCode = ""

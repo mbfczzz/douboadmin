@@ -40,15 +40,17 @@ const states: Record<string, string> = {
 
 export default function Memberships({
   id,
+  code,
   notify,
   changed,
 }: {
   id: string;
+  code: string;
   notify: Notify;
   changed: () => Promise<void>;
 }) {
   const resource = useRecords<Membership>(
-      "/admin/memberships?provider=" + id,
+      "/admin/memberships?" + new URLSearchParams({ provider: id, code }),
       15000,
     ),
     command = useCommand();

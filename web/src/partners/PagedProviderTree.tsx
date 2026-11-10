@@ -15,6 +15,7 @@ export type ProviderItem = Row<Partner> & { children: number };
 type Props = {
   query: string;
   refresh: number;
+  busy?: boolean;
   open: (kind: ProviderAction, row: Row<Partner>) => void;
   parent?: string;
   depth?: number;
@@ -74,7 +75,7 @@ function ProviderNode({ row, ...props }: Props & { row: ProviderItem }) {
             <Badge state={tone} label={label} />
           </span>
         </div>
-        <ProviderActions item={row} open={props.open} />
+        <ProviderActions item={row} open={props.open} busy={props.busy} />
       </div>
       {expanded && row.children > 0 && (
         <div className="provider-tree-children" role="group" style={style}>

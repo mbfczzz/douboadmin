@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { login } from "./helpers";
+import { mockLogin } from "./mock-login";
 import { surfaceFixtures } from "./surface-fixtures";
 
 const record = (
@@ -28,22 +28,27 @@ const record = (
 test("pending and stopped providers offer only what can work", async ({
   page,
 }) => {
-  await login(page);
-  await surfaceFixtures(page);
-  await page.route("**/api/admin/partners/tree", (route) =>
+  await mockLogin(page);
+  await surfaceFixtures(page, []);
+  await page.route("**/api/admin/partners/tree?*", (route) =>
     route.fulfill({
-      json: [
-        record("b1", "停用分公司", "branch", "root", "disabled", ["root"]),
-        record("s1a", "停用下的S1", "s1", "b1", "active", ["root", "b1"]),
-        record("b2", "正常分公司", "branch", "root", "active", ["root"]),
-        record("s1p", "待开通S1", "s1", "b2", "pending", ["root", "b2"]),
-      ],
+      json: {
+        items: [
+          record("b1", "停用分公司", "branch", "root", "disabled", ["root"]),
+          record("s1a", "停用下的S1", "s1", "b1", "active", ["root", "b1"]),
+          record("b2", "正常分公司", "branch", "root", "active", ["root"]),
+          record("s1p", "待开通S1", "s1", "b2", "pending", ["root", "b2"]),
+        ],
+        page: 1,
+        size: 20,
+        total: 4,
+      },
     }),
   );
   await page.getByRole("button", { name: "服务商管理", exact: true }).click();
   const row = (name: string) =>
     page.locator(".provider-tree-row").filter({ hasText: name }).first();
-  await expect(row("待开通S1")).toContainText("等待总部开通");
+  await expect(row("待开通S1")).toContainText("等待上级开通");
   await expect(row("待开通S1").getByRole("button")).toHaveCount(0);
   await expect(
     row("正常分公司").getByRole("button", { name: "新增子级" }),
@@ -55,11 +60,12 @@ test("pending and stopped providers offer only what can work", async ({
 });
 
 test("a bind still waiting for approval says so", async ({ page }) => {
-  await login(page);
-  await surfaceFixtures(page);
+  await mockLogin(page);
+  await surfaceFixtures(page, []);
   await page.route("**/api/admin/partners/qa-provider/codes/bind", (route) =>
     route.fulfill({
       json: {
+        code: "ABCD6789",
         user: {
           id: "u9",
           name: "新负责人",
@@ -79,7 +85,7 @@ test("a bind still waiting for approval says so", async ({ page }) => {
   const dialog = page.getByRole("dialog", { name: "分享码", exact: true });
   await dialog.locator(".owner-bind > summary").click();
   await expect(dialog.locator(".bound-owner")).toContainText(
-    "已扫码登记，等待总部开通",
+    "已扫码登记，等待上级开通",
   );
   await dialog.getByRole("button", { name: "解除绑定" }).click();
   await expect(page.getByRole("dialog", { name: "解除绑定？" })).toContainText(

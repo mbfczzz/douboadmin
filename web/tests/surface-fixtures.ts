@@ -1,5 +1,7 @@
 import type { Page } from "@playwright/test";
 import { pagedFixture } from "./paged-fixture";
+import { surfaceCode } from "./surface-code-fixture";
+import type { Row, Model } from "../src/api";
 
 const now = "2026-11-02T00:00:00Z";
 const row = (id: string, data: unknown) => ({
@@ -19,8 +21,8 @@ export const qr =
   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAUAAAAFAAQMAAAD3XjfpAAAABlBMVEX///8AAABVwtN+AAABm0lEQVR42uyaO5KzQAyERTmYkCNwFI4GR+MocwTCCVz0X5JmwI+fddUuDA66k334y1RStzQWiqIoivqlGmRFaSDS2u/zrfx3IngdONrPIQZA+jksMkxyg39K8FKwAyBD1L96pMZLKANwJ3gyiEl7ZuwJfhUYFpF+9iYi+BVgnmar5XgJ98cewb+BxdjDoj2TGgd/SAAEq4DP6udgJfwYjQmeDuo0M1uJKwjM3m2lxQheAYqIgu42GdGOApBuL81F8AAwTzP3GTd2qKXLgPS/jZ1gTdCGV5fM8MOaALr3EhKsCCqiqRe6Ooq0SZurvYt22/3FaggeCI4dlryxj33OWwSvBHVNaW14YcmF9DA8SnjbCwlWBA2BZquAfPDNG7tGLoKHg5ZxNWFFz1mbYgDBC8FNfmH3HaSc3AleBz68Sr0cfOPueyHBOuDT/XFe0zHB08Dtwu6VKUqye4onWBM0n/FpZnvLbgkJVga1hNZctqbk7WUieDy4TTO19/JdheHtrEiwMvjwKlVuKfLpvZDg+SBFURRFmf4FAAD//13EXvMqiHVCAAAAAElFTkSuQmCC";
 
 // Browser-only read fixtures. Writes are blocked; no payments or providers change.
-export async function surfaceFixtures(page: Page) {
-  const models = await (await page.request.get("/api/admin/models")).json();
+export async function surfaceFixtures(page: Page, catalog?: Row<Model>[]) {
+  const models = catalog || await (await page.request.get("/api/admin/models")).json();
   const imageModel = models.find(
     (r: { data: { kind: string } }) => r.data.kind === "image",
   );
@@ -237,18 +239,6 @@ export async function surfaceFixtures(page: Page) {
       },
     },
   };
-  const codes: Record<string, string> = {
-      member: "ABCD2345",
-      s1: "KMNP2345",
-      s2: "WXYZ6789",
-      bind: "BIND2345",
-    },
-    owner = {
-      id: "qa-owner",
-      nickname: "小华",
-      name: "华东负责人",
-      phone: "13900000001",
-    };
   await page.route("**/api/admin/**", async (route) => {
     if (route.request().method() !== "GET")
       return route.fulfill({
@@ -257,21 +247,20 @@ export async function surfaceFixtures(page: Page) {
       });
     const url = new URL(route.request().url()),
       path = url.pathname.replace("/api/admin", "");
-    if (path === "/partners/tree") return route.fulfill({ json: partnerTree });
+    if (path === "/partners/tree") {
+      const rows = url.searchParams.has("page") ? partnerTree
+        .filter((r) => r.data.parentId === (url.searchParams.get("parent") || "root"))
+        .map((r) => ({ ...r, children: partnerTree.filter((c) => c.data.parentId === r.id).length })) : partnerTree;
+      return route.fulfill({ json: pagedFixture(rows, url) });
+    }
     if (path === "/partners")
       return route.fulfill({
         json: list(
           url.searchParams.get("owner") === "qa-provider" ? [] : [partner],
         ),
       });
-    const code = path.match(/^\/partners\/([^/]+)\/codes\/(\w+)$/);
-    if (code)
-      return route.fulfill({
-        json:
-          code[1] === "qa-provider" && code[2] === "bind"
-            ? { user: owner }
-            : { code: codes[code[2]], qr },
-      });
+    const code = surfaceCode(path, qr);
+    if (code) return route.fulfill({ json: code });
     const record = partnerTree.find((r) => path === "/partners/" + r.id);
     if (record)
       return route.fulfill({

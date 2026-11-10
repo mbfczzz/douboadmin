@@ -11,11 +11,13 @@ import ProviderId from "./ProviderId";
 import "./editor.css";
 
 const ShareCode = lazy(() => import("./ShareCode")),
-  Commissions = lazy(() => import("./Commissions"));
+  Commissions = lazy(() => import("./Commissions")),
+  Registrations = lazy(() => import("../users/Registrations"));
 
 export const modules = {
   share: "分享码",
   commissions: "算力分佣",
+  registrations: "会员开通",
 } as const;
 export type ModuleKey = keyof typeof modules;
 
@@ -58,7 +60,10 @@ export default function ProviderModule({
         </>
       }
       className="partner-editor"
-      style={{ width: "min(1040px, 100%)" }}
+      style={{
+        width: "min(1040px, 100%)",
+        height: kind === "commissions" ? undefined : "92vh",
+      }}
       onClose={() => void canLeave().then((ok) => ok && onClose())}
     >
       <PartnerNames.Provider value={names}>
@@ -72,6 +77,14 @@ export default function ProviderModule({
             <Suspense fallback={<LoadingState label="正在加载服务商功能" />}>
               {kind === "share" && <ShareCode {...scope} />}
               {kind === "commissions" && <Commissions {...scope} />}
+              {kind === "registrations" && (
+                <Registrations
+                  notify={notify}
+                  refresh={0}
+                  path={`/admin/partners/${encodeURIComponent(row.id)}/member-registrations`}
+                  changed={scope.changed}
+                />
+              )}
             </Suspense>
           )}
         </div>

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { api, type Row } from "../api";
+import type { Row } from "../api";
 import Badge from "../components/Badge";
 import Empty from "../components/Empty";
 import FilterBar from "../components/FilterBar";
@@ -7,28 +7,16 @@ import CatalogResults from "../components/CatalogResults";
 import Tag, { IdChip } from "../components/Tag";
 import Table from "../business/Table";
 import { codeKindName, roleName } from "../business/types";
-import { ask } from "../confirm/ask";
+import {
+  useRegistrationDecision,
+  type Registration,
+} from "./useRegistrationDecision";
 import { useResource } from "../hooks/useResource";
 import { useCachedResource } from "../hooks/useCachedResource";
+import { usePageLimit } from "../hooks/usePageLimit";
 import type { Notify } from "../navigation";
 import { createdCell } from "./cells";
 
-// A scan registration (record id = mini-program user id).
-type Registration = {
-  role: string;
-  partnerId: string;
-  parentId?: string;
-  referrer?: string;
-  codeKind: string;
-  code: string;
-  method: string;
-  name: string;
-  phone: string;
-  status: string;
-  reason?: string;
-  // The latest scan; a rejected user may register again.
-  registeredAt?: string;
-};
 type Page = { items: Row<Registration>[]; page: number; total: number };
 const states = [
   ["pending", "待开通", "queued"],
@@ -36,14 +24,18 @@ const states = [
   ["rejected", "已拒绝", "failed"],
 ] as const;
 
-// 扫码登记: every scan waits here until the platform opens or rejects it.
+// The platform searches all registrations; direct parents review from providers.
 export default function Registrations({
   notify,
   refresh,
+  path = "/admin/registrations",
+  changed,
 }: {
   notify: Notify;
   // Bumped by the page header's 刷新.
   refresh: number;
+  path?: string;
+  changed?: () => Promise<void>;
 }) {
   const [status, setStatus] = useState("pending"),
     [typed, setTyped] = useState(""),
@@ -59,10 +51,12 @@ export default function Registrations({
     return () => clearTimeout(timer);
   }, [typed, query]);
   const resource = useCachedResource<Page>(
-      "/admin/registrations?" +
+      path +
+        "?" +
         new URLSearchParams({ status, q: query, page: String(page) }),
     ),
     items = resource.data?.items || [];
+  usePageLimit(page, setPage, resource.data);
   // A header refresh invalidates every status once per click; ordinary tab
   // and search changes keep the other queries' snapshots.
   const reload = resource.reload,
@@ -72,30 +66,14 @@ export default function Registrations({
     previousRefresh.current = refresh;
     void reload();
   }, [refresh, reload]);
-  async function decide(row: Row<Registration>, approve: boolean) {
-    const who = row.data.name || row.id,
-      role = roleName(row.data.role);
-    const ok = await ask({
-      title: approve ? "开通登记" : "拒绝登记",
-      message: approve
-        ? `「${who}」将以${role}身份开通，开通后即可使用。`
-        : `拒绝「${who}」的${role}登记，用户可重新扫码登记。`,
-      confirmText: approve ? "开通" : "拒绝",
-      danger: !approve,
-      reason: approve
-        ? undefined
-        : { label: "拒绝原因", minLength: 2, maxLength: 200 },
-      run: (reason) =>
-        api(`/admin/registrations/${encodeURIComponent(row.id)}`, {
-          method: "PUT",
-          confirmation: false,
-          body: JSON.stringify({ approve, reason, version: row.version }),
-        }),
-    });
-    if (ok === false) return;
-    notify(approve ? `${who} 已开通` : `已拒绝 ${who} 的登记`);
-    await resource.reload();
-  }
+  const review = useRegistrationDecision(
+    notify,
+    async () => {
+      await resource.reload();
+      await changed?.();
+    },
+    `${path}/${status}/${query}/${page}`,
+  );
   return (
     <section
       className="panel attention-panel registrations"
@@ -121,7 +99,11 @@ export default function Registrations({
       >
         {resource.data &&
           (items.length ? (
-            <List page={resource.data} setPage={setPage} decide={decide} />
+            <List
+              page={resource.data}
+              setPage={setPage}
+              decide={review.decide}
+            />
           ) : (
             <Empty
               text={query ? "没有匹配的登记" : "暂无登记"}
@@ -218,7 +200,7 @@ function List({
           title: "操作",
           action: true,
           render: (r) =>
-            r.data.status === "pending" ? (
+            r.data.status === "pending" && r.data.canReview ? (
               <div className="business-actions">
                 <button onClick={() => void decide(r, true)}>开通</button>
                 <button
@@ -228,6 +210,8 @@ function List({
                   拒绝
                 </button>
               </div>
+            ) : r.data.status === "pending" ? (
+              "等待直属上级开通"
             ) : (
               "—"
             ),

@@ -17,6 +17,7 @@ func TestSubprovidersStillJoinByScanAndWaitForApproval(t *testing.T) {
 				parent = createProvider(t, a, admin, "scan-parent", parent, "已有S1", "s1", nil)
 			}
 			invite := providerCode(t, a, "GET", parent, c.role, admin)
+			reviewer := reviewLogin(t, a, admin, parent)
 			if status, body := joinHTTP(a, user, invite.Code); status != 200 || !strings.Contains(body, `"status":"review"`) {
 				t.Fatal("scan registration failed", status, body)
 			}
@@ -29,7 +30,7 @@ func TestSubprovidersStillJoinByScanAndWaitForApproval(t *testing.T) {
 			if data["status"] != "pending" {
 				t.Fatal("scan bypassed approval")
 			}
-			if status, body := decideHTTP(t, a, admin, "user-a", true, ""); status != 200 {
+			if status, body := decideHTTP(t, a, reviewer, "user-a", true, ""); status != 200 {
 				t.Fatal("approval failed", status, body)
 			}
 			_, data = providerData(t, a, admin, reg.PartnerID)

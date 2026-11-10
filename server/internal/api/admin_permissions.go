@@ -46,6 +46,8 @@ var adminRouteMenus = map[string][]string{
 
 func routeMenus(method, path string) ([]string, bool) {
 	switch {
+	case strings.HasPrefix(path, "/api/admin/registrations/") && (method == http.MethodGet || method == http.MethodPut):
+		return []string{"users", "partners"}, true
 	case method == http.MethodGet && (path == "/api/admin/roles"):
 		// Account and provider forms list roles to pick from.
 		return []string{"roles", "accounts", "partners"}, true

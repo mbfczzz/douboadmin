@@ -1,13 +1,15 @@
 package api
 
 import (
+	"encoding/json"
 	"net/http"
 	"strconv"
 
 	"doubo/server/internal/core"
 )
 
-// Scan registrations wait here until the platform (总部) opens them.
+// Platform-wide scan registration search; providers review their own rows
+// from the provider tree and code usage records.
 func (a *Server) registrationList(w http.ResponseWriter, r *http.Request) {
 	if !platformOnly(w, r) {
 		return
@@ -22,7 +24,49 @@ func (a *Server) registrationList(w http.ResponseWriter, r *http.Request) {
 		fail(w, 400, "查询条件无效")
 		return
 	}
-	rows, e := a.Store.RecordPage(r.Context(), core.RecordQuery{Namespace: "registrations", Status: status, Search: q.Get("q"), Page: page, Size: 20})
+	a.replyRegistrations(w, r, core.RecordQuery{Namespace: "registrations", Status: status, Search: q.Get("q"), Page: page, Size: 20})
+}
+
+// This separate member inbox keeps pending old-code registrations reachable
+// without mixing historical codes into the currently displayed QR's records.
+func (a *Server) memberRegistrations(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+	if !a.inPartnerScope(w, r, id) {
+		return
+	}
+	page, ok := providerPageNumber(w, r)
+	if !ok {
+		return
+	}
+	status := r.URL.Query().Get("status")
+	if status != "" && status != "pending" && status != "approved" && status != "rejected" {
+		fail(w, 400, "登记状态无效")
+		return
+	}
+	a.replyRegistrations(w, r, core.RecordQuery{Namespace: "registrations", PartnerID: id,
+		Fields: map[string]string{"role": "member"}, Status: status,
+		Search: r.URL.Query().Get("q"), Page: page, Size: 20})
+}
+
+func (a *Server) replyRegistrations(w http.ResponseWriter, r *http.Request, query core.RecordQuery) {
+	rows, e := a.Store.RecordPage(r.Context(), query)
+	if e == nil {
+		for i := range rows.Items {
+			var reg core.Registration
+			if e = json.Unmarshal(rows.Items[i].Data, &reg); e != nil {
+				break
+			}
+			var allowed bool
+			allowed, e = a.Partners.CanReviewRegistration(r.Context(), reg, registrationReviewer(r))
+			if e != nil {
+				break
+			}
+			rows.Items[i].Data = core.Data(struct {
+				core.Registration
+				CanReview bool `json:"canReview"`
+			}{reg, allowed})
+		}
+	}
 	partnerResult(w, rows, e)
 }
 
@@ -32,11 +76,23 @@ func (a *Server) decideRegistration(w http.ResponseWriter, r *http.Request) {
 		Reason  string `json:"reason"`
 		Version int64  `json:"version"`
 	}
-	if !decode(w, r, &v) || !platformOnly(w, r) {
+	if !decode(w, r, &v) {
 		return
 	}
-	out, e := a.Partners.Decide(r.Context(), r.PathValue("id"), v.Approve, v.Reason, v.Version, identity(r).ID)
+	out, e := a.Partners.DecideForProvider(r.Context(), r.PathValue("id"), v.Approve, v.Reason, v.Version, identity(r).ID, registrationReviewer(r))
 	partnerResult(w, out, e)
+}
+
+func (a *Server) registrationForReview(w http.ResponseWriter, r *http.Request) {
+	row, e := a.Partners.RegistrationForReview(r.Context(), r.PathValue("id"), registrationReviewer(r))
+	partnerResult(w, row, e)
+}
+
+func registrationReviewer(r *http.Request) string {
+	if id := identity(r).PartnerID; id != "" {
+		return id
+	}
+	return core.RootPartner
 }
 
 // myPromo is an active member's own promo code and its QR image.

@@ -4,7 +4,7 @@
   <text class="activation-title">开通你的创作空间</text>
   <text wx:if="{{!logged}}" class="biz-note activation-intro">登录后填写资料。</text>
   <text wx:elif="{{status.profileRequired}}" class="biz-note activation-intro">第 1 步：填写资料。</text>
-  <text wx:elif="{{status.status==='review'}}" class="biz-note activation-intro">已登记，总部开通后即可使用。</text>
+  <text wx:elif="{{status.status==='review'}}" class="biz-note activation-intro">已登记，上级开通后即可使用。</text>
   <text wx:elif="{{!status||status.status==='pending'||status.status==='unbound'||status.status==='rejected'}}" class="biz-note activation-intro">第 2 步：扫描服务商或会员给你的二维码登记。</text>
   <view wx:if="{{loading}}" class="biz-note">正在确认授权状态…</view>
   <view wx:if="{{loadError}}" class="biz-error" bindtap="load">{{loadError}} · 点击重试</view>
@@ -26,7 +26,7 @@
     </view>
     <block wx:else>
       <view wx:if="{{status.message&&status.status!=='pending'}}" class="biz-card activation-status">
-        <text class="biz-list-title">{{status.status==='review'?'等待总部开通':'授权状态'}}</text>
+        <text class="biz-list-title">{{status.status==='review'?'等待上级开通':'授权状态'}}</text>
         <text class="biz-note">{{status.status==='review'&&status.partnerName?'已登记到「'+status.partnerName+'」，开通后会通知你，也可稍后刷新查看。':status.message}}</text>
       </view>
       <view wx:if="{{!loadError&&(!status||status.status==='pending'||status.status==='unbound'||status.status==='rejected')}}" class="biz-card activation-options">
@@ -35,7 +35,7 @@
           <button class="biz-action" loading="{{busy}}" disabled="{{busy||loading}}" bindtap="scan">扫码登记</button>
           <input class="biz-input" placeholder="或输入 8 位码" value="{{code}}" maxlength="24" bindinput="input" disabled="{{busy}}" />
           <button class="biz-action biz-secondary" disabled="{{busy||loading||!code}}" bindtap="confirm">确认登记</button>
-          <text class="biz-note">扫哪种码就登记为对应身份，总部开通后生效</text>
+          <text class="biz-note">扫哪种码就登记为对应身份，上级开通后生效</text>
         </view>
       </view>
     </block>

@@ -28,13 +28,13 @@ func (a *Server) replyBind(w http.ResponseWriter, r *http.Request, v core.Partne
 	if row, err := a.Store.Get(r.Context(), "users", v.User); err == nil {
 		_ = json.Unmarshal(row.Data, &u)
 	}
-	// Until the platform approves, the binding is only a registration.
+	// Until the direct parent approves, the binding is only a registration.
 	access, e := a.Partners.Access(r.Context(), v.User)
 	if e != nil {
 		dbError(w, e)
 		return
 	}
-	reply(w, 200, map[string]any{"user": u, "pending": access.Status == "review"})
+	reply(w, 200, map[string]any{"code": v.Code, "user": u, "pending": access.Status == "review"})
 }
 
 func (a *Server) unbind(w http.ResponseWriter, r *http.Request) {

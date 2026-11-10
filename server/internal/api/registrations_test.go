@@ -18,14 +18,15 @@ func registrationPage(t *testing.T, a *Server, token, query string) core.RecordP
 	return page
 }
 
-func TestRegistrationWaitsForPlatformApproval(t *testing.T) {
+func TestRegistrationWaitsForDirectParentApproval(t *testing.T) {
 	a, user, admin := activationFixture(t)
 	branch := newBranch(t, a, "review")
+	parent := reviewLogin(t, a, admin, branch)
 	code, _ := a.Partners.ShareCode(t.Context(), branch, "admin")
 	if status, body := joinHTTP(a, user, code); status != 200 || !strings.Contains(body, `"status":"review"`) {
 		t.Fatal(status, body)
 	}
-	if v := accessOf(t, a, user); v.Active || v.Status != "review" || v.PartnerID != branch || v.Message != "已登记，等待总部开通" {
+	if v := accessOf(t, a, user); v.Active || v.Status != "review" || v.PartnerID != branch || v.Message != "已登记，等待上级开通" {
 		t.Fatal("pending access", v)
 	}
 	if w := call(a, "GET", "/api/templates", user, "", nil); w.Code != 200 {
@@ -34,7 +35,7 @@ func TestRegistrationWaitsForPlatformApproval(t *testing.T) {
 	if w := call(a, "POST", "/api/jobs", user, "", map[string]any{}); w.Code != 403 || !strings.Contains(w.Body.String(), "ACTIVATION_REQUIRED") {
 		t.Fatal("pending user could generate", w.Code)
 	}
-	if status, body := joinHTTP(a, user, code); status != 400 || !strings.Contains(body, "等待总部开通") {
+	if status, body := joinHTTP(a, user, code); status != 400 || !strings.Contains(body, "等待上级开通") {
 		t.Fatal("registered twice while pending", status, body)
 	}
 	page := registrationPage(t, a, admin, "?status=pending&q=测试用户")
@@ -49,16 +50,16 @@ func TestRegistrationWaitsForPlatformApproval(t *testing.T) {
 		t.Fatal("invalid status filter", w.Code)
 	}
 	stale := map[string]any{"approve": true, "version": page.Items[0].Version + 1}
-	if w := call(a, "PUT", "/api/admin/registrations/user-a", admin, "", stale); w.Code != 409 {
+	if w := call(a, "PUT", "/api/admin/registrations/user-a", parent, "", stale); w.Code != 409 {
 		t.Fatal("stale decision accepted", w.Code, w.Body.String())
 	}
-	if status, body := decideHTTP(t, a, admin, "user-a", true, ""); status != 200 || !strings.Contains(body, `"status":"approved"`) {
+	if status, body := decideHTTP(t, a, parent, "user-a", true, ""); status != 200 || !strings.Contains(body, `"status":"approved"`) {
 		t.Fatal(status, body)
 	}
 	if w := call(a, "GET", "/api/templates", user, "", nil); w.Code != 200 {
 		t.Fatal("approved member blocked", w.Code, w.Body.String())
 	}
-	if status, body := decideHTTP(t, a, admin, "user-a", false, "重复处理"); status != 400 || !strings.Contains(body, "已处理") {
+	if status, body := decideHTTP(t, a, parent, "user-a", false, "重复处理"); status != 400 || !strings.Contains(body, "已处理") {
 		t.Fatal("decided twice", status, body)
 	}
 	if p := registrationPage(t, a, admin, "?status=pending"); p.Total != 0 {
@@ -72,14 +73,15 @@ func TestRegistrationWaitsForPlatformApproval(t *testing.T) {
 func TestRejectedUserCanScanAgain(t *testing.T) {
 	a, user, admin := activationFixture(t)
 	branch := newBranch(t, a, "reject")
+	parent := reviewLogin(t, a, admin, branch)
 	member, _ := a.Partners.ShareCode(t.Context(), branch, "admin")
 	if status, body := joinHTTP(a, user, member); status != 200 {
 		t.Fatal(status, body)
 	}
-	if status, body := decideHTTP(t, a, admin, "user-a", false, ""); status != 400 {
+	if status, body := decideHTTP(t, a, parent, "user-a", false, ""); status != 400 {
 		t.Fatal("rejected without a reason", status, body)
 	}
-	if status, body := decideHTTP(t, a, admin, "user-a", false, "资料不完整"); status != 200 || !strings.Contains(body, "资料不完整") {
+	if status, body := decideHTTP(t, a, parent, "user-a", false, "资料不完整"); status != 200 || !strings.Contains(body, "资料不完整") {
 		t.Fatal(status, body)
 	}
 	if v := accessOf(t, a, user); v.Active || v.Status != "rejected" {
@@ -109,7 +111,7 @@ func TestRejectedUserCanScanAgain(t *testing.T) {
 	}
 }
 
-func TestRegistrationsAndProviderCreationArePlatformOnly(t *testing.T) {
+func TestGlobalRegistrationsAndManualProviderCreationRemainPlatformOnly(t *testing.T) {
 	a, user, _ := activationFixture(t)
 	admin := adminLoginToken(t, a, "admin", "test-pass")
 	branch := createProvider(t, a, admin, "only-branch", "root", "分公司", "branch", map[string]string{"username": "only-branch", "password": "only-branch-password-2026"})
@@ -122,7 +124,6 @@ func TestRegistrationsAndProviderCreationArePlatformOnly(t *testing.T) {
 	}{
 		{"GET", "/api/admin/registrations", nil},
 		{"GET", "/api/admin/registrations?status=pending", nil},
-		{"PUT", "/api/admin/registrations/user-a", map[string]any{"approve": true, "version": 1}},
 		{"POST", "/api/admin/partners", map[string]any{"parentId": branch, "name": "自建 S1", "role": "s1"}},
 	} {
 		for _, token := range []string{provider, user} {
@@ -132,6 +133,6 @@ func TestRegistrationsAndProviderCreationArePlatformOnly(t *testing.T) {
 		}
 	}
 	if v := accessOf(t, a, user); v.Active {
-		t.Fatal("a provider login approved a registration", v)
+		t.Fatal("a denied operation opened a registration", v)
 	}
 }

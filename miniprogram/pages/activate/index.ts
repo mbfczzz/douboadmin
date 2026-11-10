@@ -144,10 +144,10 @@ Page({
         method,
       });
       if (this.destroyed) return;
-      // Scanning only registers; the platform opens the account later.
+      // Scanning registers; approval opens the account later.
       this.setData({ status, code: "" });
       if (status.active) this.enter();
-      else wx.showToast({ title: "已登记，等待总部开通", icon: "none" });
+      else wx.showToast({ title: "已登记，等待上级开通", icon: "none" });
     } catch (e) {
       if (!this.destroyed) {
         if (e instanceof RequestError && e.status === 403) await this.load();

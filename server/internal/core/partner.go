@@ -7,7 +7,7 @@ import (
 
 const RootPartner = "root"
 
-var ErrActivationRequired = errors.New("请扫描服务商的二维码登记，并等待总部开通")
+var ErrActivationRequired = errors.New("请扫描服务商的二维码登记，并等待上级开通")
 var ErrPartnerDisabled = errors.New("所属服务商已停用，请联系管理员")
 var ErrUserDisabled = errors.New("账号已停用，请联系管理员")
 
@@ -24,7 +24,7 @@ type Partner struct {
 	Role            string   `json:"role"`
 	ParentID        string   `json:"parentId"`
 	Path            []string `json:"path"`
-	Status          string   `json:"status"` // pending until the platform approves, active, disabled
+	Status          string   `json:"status"` // pending until approved, active, disabled
 	RetailPer100Fen int64    `json:"retailPer100Fen"`
 	ChildMarginBps  int64    `json:"childMarginBps"`
 	// OwnerUser is the mini-program user who became this provider by scanning
@@ -33,7 +33,7 @@ type Partner struct {
 }
 
 // Registration is a mini-program user's request to join, made by scanning a
-// code. Nothing is usable until the platform approves it.
+// code. Generation stays blocked until its direct parent approves it.
 type Registration struct {
 	Role      string `json:"role"`      // member, branch, s1 or s2
 	PartnerID string `json:"partnerId"` // the provider joined, created or bound

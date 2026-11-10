@@ -2,6 +2,7 @@ import { useState } from "react";
 import CodeView from "./CodeCard";
 import BoundOwner from "./BoundOwner";
 import CodeUses from "./CodeUses";
+import { useShareCode } from "./useShareCode";
 import type { Notify } from "../navigation";
 
 // Binding the provider's own responsible person is a management action,
@@ -9,14 +10,19 @@ import type { Notify } from "../navigation";
 export default function OwnerBindCode({
   id,
   name,
+  reviewerId,
   notify,
+  changed,
 }: {
   id: string;
   name: string;
+  reviewerId: string;
   notify: Notify;
+  changed: () => Promise<void>;
 }) {
   const [open, setOpen] = useState(false);
   const path = `/admin/partners/${encodeURIComponent(id)}/codes/bind`;
+  const share = useShareCode(open ? path : null);
   return (
     <details
       className="owner-bind"
@@ -28,9 +34,10 @@ export default function OwnerBindCode({
           <CodeView
             path={path}
             title="负责人绑定码"
-            note="仅用于负责人绑定自己的小程序账号，总部开通后生效；一次有效。"
+            note="仅用于负责人绑定自己的小程序账号，上级开通后生效；一次有效。"
             file={`${name}-负责人绑定码.png`}
             notify={notify}
+            share={share}
             bound={(user, pending, reload) => (
               <BoundOwner
                 path={path}
@@ -41,7 +48,17 @@ export default function OwnerBindCode({
               />
             )}
           />
-          <CodeUses id={id} kind="bind" />
+          <CodeUses
+            id={id}
+            kind="bind"
+            code={share.data?.code}
+            reviewerId={reviewerId}
+            notify={notify}
+            changed={async () => {
+              await share.reload();
+              await changed();
+            }}
+          />
         </>
       )}
     </details>

@@ -1,6 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
-import { login } from "./helpers";
+import { mockLogin } from "./mock-login";
 import { longName, surfaceFixtures } from "./surface-fixtures";
+import { registration, registrations } from "./registration-fixture";
 
 // Captures the PUT bodies a decision sends and answers like the server.
 async function decisions(page: Page) {
@@ -21,8 +22,8 @@ async function decisions(page: Page) {
 }
 
 test.beforeEach(async ({ page }) => {
-  await login(page);
-  await surfaceFixtures(page);
+  await mockLogin(page);
+  await surfaceFixtures(page, []);
   await page.getByRole("button", { name: "小程序用户", exact: true }).click();
   await page.getByRole("tab", { name: "扫码登记", exact: true }).click();
 });
@@ -30,7 +31,7 @@ test.beforeEach(async ({ page }) => {
 test("扫码登记 lists pending registrations with their source", async ({
   page,
 }) => {
-  const section = page.getByRole("region", { name: "扫码登记" }),
+  const section = page.getByRole("region", { name: "扫码登记", exact: true }),
     row = section.locator("tbody tr, article.mobile-record").first();
   await expect(row).toContainText("质检登记用户");
   await expect(row).toContainText("13900000002");
@@ -39,6 +40,10 @@ test("扫码登记 lists pending registrations with their source", async ({
   await expect(row).toContainText(longName);
   await expect(row).toContainText("推广码 · 推荐人 qa-referrer");
   await expect(row.locator(".badge")).toHaveText("待开通");
+  await expect(
+    row.getByRole("button", { name: "开通", exact: true }),
+  ).toHaveCount(0);
+  await expect(row).toContainText("等待直属上级开通");
   const filter = page.waitForRequest(
     (r) =>
       r.url().includes("/api/admin/registrations?") &&
@@ -73,11 +78,17 @@ test("扫码登记 lists pending registrations with their source", async ({
 });
 
 test("开通 confirms first; 拒绝 needs a reason", async ({ page }) => {
+  await page.route("**/api/admin/registrations?*", (route) =>
+    route.fulfill({
+      json: registrations([registration("pending", "质检登记用户", "qa-user")]),
+    }),
+  );
+  await page.reload();
   const bodies = await decisions(page),
-    section = page.getByRole("region", { name: "扫码登记" });
+    section = page.getByRole("region", { name: "扫码登记", exact: true });
   await section.getByRole("button", { name: "开通", exact: true }).click();
   const approve = page.getByRole("dialog", { name: "开通登记" });
-  await expect(approve).toContainText("「质检登记用户」将以会员身份开通");
+  await expect(approve).toContainText("「质检登记用户」将以分公司身份开通");
   await approve.getByRole("button", { name: "开通", exact: true }).click();
   await expect(approve).toHaveCount(0);
   // ask() already confirmed: no second change summary.

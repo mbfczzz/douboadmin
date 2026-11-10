@@ -7,9 +7,13 @@ import (
 	"strings"
 )
 
-// Decide approves or rejects a pending registration (platform only).
+// Decide is the trusted platform entry point for pending registrations.
 // Approval opens the account; rejection lets the user scan again.
-func (s *Service) Decide(ctx context.Context, user string, approve bool, reason string, version int64, actor string) (out core.Record, err error) {
+func (s *Service) Decide(ctx context.Context, user string, approve bool, reason string, version int64, actor string) (core.Record, error) {
+	return s.decide(ctx, user, approve, reason, version, actor, "")
+}
+
+func (s *Service) decide(ctx context.Context, user string, approve bool, reason string, version int64, actor, reviewer string) (out core.Record, err error) {
 	reason = strings.TrimSpace(reason)
 	if !approve && (len([]rune(reason)) < 2 || len([]rune(reason)) > 200) {
 		return out, rulef("请填写 2–200 字的拒绝原因")
@@ -21,7 +25,7 @@ func (s *Service) Decide(ctx context.Context, user string, approve bool, reason 
 		if e := Lock(tx); e != nil {
 			return e
 		}
-		row, reg, e := get[core.Registration](tx, "registrations", user)
+		row, reg, e := reviewRegistration(tx, user, reviewer)
 		if e != nil {
 			return e
 		}
