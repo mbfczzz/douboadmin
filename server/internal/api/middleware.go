@@ -89,7 +89,7 @@ func (a *Server) auth(role string, h http.HandlerFunc) http.HandlerFunc {
 				fail(w, 403, denied)
 				return
 			}
-			changed := v.PasswordVersion != "" && v.PasswordVersion != account.PasswordChangedAt.UTC().Format(time.RFC3339Nano)
+			changed := v.PasswordVersion != "" && v.PasswordVersion != passwordVersion(account.PasswordChangedAt)
 			legacyExpired := v.PasswordVersion == "" && v.Expires.Add(-24*time.Hour).Before(account.PasswordChangedAt)
 			if changed || legacyExpired {
 				fail(w, 401, "密码已修改，请重新登录")

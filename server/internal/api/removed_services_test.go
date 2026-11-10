@@ -46,10 +46,6 @@ func TestMixPageGetsUnavailableCapabilityAndNoRetiredSettings(t *testing.T) {
 	if w.Code != 200 || json.Unmarshal(w.Body.Bytes(), &config) != nil || config.MixAvailable || config.MixMessage == "" {
 		t.Fatal(w.Code, w.Body.String())
 	}
-	settings := core.Data(map[string]any{"pointsPerYuan": 100, "mixPoints": 10, "ttsModel": "retired", "rewriteModel": "retired"})
-	if _, err := a.Store.Put(context.Background(), "settings", core.Record{ID: "platform", Data: settings}, 0); err != nil {
-		t.Fatal(err)
-	}
 	admin, _ := a.Sessions.Create(context.Background(), "admin", "admin")
 	w = call(a, "GET", "/api/admin/platform", admin, "", nil)
 	if w.Code != 200 {

@@ -81,7 +81,7 @@ func (s *Service) SavePolicy(ctx context.Context, v core.DistributionPolicy, ver
 			return e
 		}
 		var e error
-		if out, e = tx.Put("settings", core.Record{ID: "distribution", Data: core.Data(v)}, version); e != nil {
+		if out, e = tx.Put("distribution_policy", core.Record{ID: "distribution", Data: core.Data(v)}, version); e != nil {
 			return e
 		}
 		return audit(tx, core.RootPartner, "pricing", actor, "更新总账号分佣规则", v)

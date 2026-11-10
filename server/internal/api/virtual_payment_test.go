@@ -36,12 +36,6 @@ func virtualFixture(t *testing.T) (*Server, string, string) {
 	a.WeChat.HTTP = virtualHTTP(func(*http.Request) (*http.Response, error) {
 		return virtualResponse(map[string]string{"openid": "openid-a", "session_key": "private-session-key"}), nil
 	})
-	settings := core.DefaultPlatform()
-	settings.RechargeEnabled = true
-	_, e = a.Store.Put(t.Context(), "settings", core.Record{ID: "platform", Data: core.Data(settings)}, 0)
-	if e != nil {
-		t.Fatal(e)
-	}
 	_, e = a.Store.Put(t.Context(), "wechat_identities", core.Record{ID: "user-a", Data: core.Data(map[string]string{"openid": "openid-a"})}, 0)
 	if e != nil {
 		t.Fatal(e)
@@ -50,7 +44,7 @@ func virtualFixture(t *testing.T) (*Server, string, string) {
 }
 func virtualOrder(t *testing.T, a *Server, token string) core.Record {
 	t.Helper()
-	w := call(a, "POST", "/api/orders", token, "virtual-fixture-order", map[string]any{"productId": "pack", "settingsVersion": 1, "platform": "android"})
+	w := call(a, "POST", "/api/orders", token, "virtual-fixture-order", map[string]any{"productId": "pack", "settingsVersion": 0, "platform": "android"})
 	if w.Code != 201 {
 		t.Fatal(w.Code, w.Body.String())
 	}
@@ -147,12 +141,12 @@ func TestVirtualDisabledAndIndependentlyPricedCatalog(t *testing.T) {
 	if !info.PaymentReady || len(info.Products) != 1 || info.Products[0].PointsUnits != 999 {
 		t.Fatal(w.Body.String())
 	}
-	w = call(a, "POST", "/api/orders", user, "invalid-product-order", map[string]any{"productId": "pack", "settingsVersion": 1, "platform": "android"})
+	w = call(a, "POST", "/api/orders", user, "invalid-product-order", map[string]any{"productId": "pack", "settingsVersion": 0, "platform": "android"})
 	if w.Code != 201 {
 		t.Fatal(w.Code, w.Body.String())
 	}
 	a.Virtual.Client.Config.Enabled = false
-	w = call(a, "POST", "/api/orders", user, "disabled-product-order", map[string]any{"productId": "pack", "settingsVersion": 1, "platform": "android"})
+	w = call(a, "POST", "/api/orders", user, "disabled-product-order", map[string]any{"productId": "pack", "settingsVersion": 0, "platform": "android"})
 	if w.Code != 503 {
 		t.Fatal(w.Code)
 	}

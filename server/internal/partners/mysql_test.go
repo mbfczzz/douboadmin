@@ -47,8 +47,10 @@ func sqlFixture(t *testing.T) (*store.MySQL, *store.MySQL, context.Context) {
 		if _, e := db.Exec(`DELETE FROM jobs`); e != nil {
 			t.Error(e)
 		}
-		if _, e := db.Exec(`DELETE FROM records`); e != nil {
-			t.Error(e)
+		for _, table := range store.Tables() {
+			if _, e := db.Exec("DELETE FROM `" + table.Name + "`"); e != nil {
+				t.Error(e)
+			}
 		}
 	}
 	clean()

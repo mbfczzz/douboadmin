@@ -52,12 +52,6 @@ func TestSignedPaymentStillCreditsAfterAccountSuspension(t *testing.T) {
 	if err = f.svc.ClaimSignature(t.Context(), f.row.ID); !errors.Is(err, core.ErrUserDisabled) {
 		t.Fatal("suspended account could request another signature", err)
 	}
-	settingsRow, _ := f.svc.Store.Get(t.Context(), "settings", "platform")
-	settings := core.DefaultPlatform()
-	settings.RechargeEnabled = false
-	if _, err = f.svc.Store.Put(t.Context(), "settings", core.Record{ID: "platform", Data: core.Data(settings)}, settingsRow.Version); err != nil {
-		t.Fatal(err)
-	}
 	for range 2 {
 		if err = f.svc.Refresh(t.Context(), f.row.ID); err != nil {
 			t.Fatal("previously authorized money was lost", err)

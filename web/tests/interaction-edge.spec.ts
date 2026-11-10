@@ -1,6 +1,12 @@
 import { test, expect } from "@playwright/test";
 import { readFileSync } from "node:fs";
-import { confirmSubmission, login, answerAsk } from "./helpers";
+import {
+  confirmSubmission,
+  login,
+  answerAsk,
+  usersList,
+  usersPage,
+} from "./helpers";
 
 test("cover upload locks its URL and restores editing on failure", async ({
   page,
@@ -41,16 +47,16 @@ test("collapsed account actions do not trap keyboard focus", async ({
   page,
 }) => {
   await login(page);
-  await page.route("**/api/admin/users", (route) =>
+  await page.route(usersList, (route) =>
     route.fulfill({
-      json: [
+      json: usersPage(route.request().url(), [
         {
           id: "focus-user",
           version: 1,
           createdAt: "2026-11-01T00:00:00Z",
           data: { nickname: "键盘验收" },
         },
-      ],
+      ]),
     }),
   );
   await page.route("**/api/admin/users/focus-user/wallet", (route) =>

@@ -36,76 +36,76 @@ func NewMySQL(dsn string) (*MySQL, error) {
 
 // Migrate is an explicit deployment command. Never run schema changes on API startup.
 func (m *MySQL) Migrate(ctx context.Context) error {
-	for _, q := range []string{
-		`CREATE TABLE IF NOT EXISTS records (namespace VARCHAR(32) NOT NULL,id VARCHAR(64) NOT NULL,owner_id VARCHAR(64) NOT NULL DEFAULT '',version BIGINT NOT NULL,data JSON NOT NULL,created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),PRIMARY KEY(namespace,id),KEY owner_list(namespace,owner_id,created_at)) ENGINE=InnoDB`,
-		`CREATE TABLE IF NOT EXISTS jobs (id CHAR(32) PRIMARY KEY,user_id VARCHAR(64) NOT NULL,input JSON NOT NULL,request_hash CHAR(64) NOT NULL,status VARCHAR(16) NOT NULL,progress INT NOT NULL DEFAULT 0,result MEDIUMTEXT NOT NULL,error TEXT NOT NULL,attempts INT NOT NULL DEFAULT 0,lease_token VARCHAR(32) NOT NULL DEFAULT '',lease_until DATETIME(6) NULL,created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),updated_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),KEY queue_claim(status,lease_until,created_at),KEY user_jobs(user_id,created_at)) ENGINE=InnoDB`,
+	statements := []string{
+		`CREATE TABLE IF NOT EXISTS jobs (id CHAR(32) PRIMARY KEY,user_id VARCHAR(64) NOT NULL,input JSON NOT NULL,request_hash CHAR(64) NOT NULL,status VARCHAR(16) NOT NULL,progress INT NOT NULL DEFAULT 0,result MEDIUMTEXT NOT NULL,error TEXT NOT NULL,attempts INT NOT NULL DEFAULT 0,lease_token VARCHAR(32) NOT NULL DEFAULT '',lease_until DATETIME(6) NULL,created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),updated_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),KEY queue_claim(status,lease_until,created_at),KEY user_jobs(user_id,created_at)) ENGINE=InnoDB COMMENT='生成任务'`,
 		auditTable,
-	} {
+	}
+	for _, t := range Tables() {
+		statements = append(statements, t.DDL())
+	}
+	for _, q := range statements {
 		if _, err := m.db.ExecContext(ctx, q); err != nil {
 			return err
 		}
 	}
-	return nil
-}
-func (m *MySQL) Get(ctx context.Context, ns, id string) (r core.Record, err error) {
-	err = m.db.QueryRowContext(ctx, `SELECT id,owner_id,version,data,created_at FROM records WHERE namespace=? AND id=?`, ns, id).Scan(&r.ID, &r.Owner, &r.Version, &r.Data, &r.CreatedAt)
-	if errors.Is(err, sql.ErrNoRows) {
-		err = core.ErrNotFound
+	if err := m.addMissingColumns(ctx); err != nil {
+		return err
 	}
-	return
+	return m.importLegacyRecords(ctx)
 }
+func (m *MySQL) Get(ctx context.Context, ns, id string) (core.Record, error) {
+	return getRow(ctx, m.db, ns, id, "")
+}
+
+// List returns a namespace's newest 500 records, optionally one owner's.
 func (m *MySQL) List(ctx context.Context, ns, owner string) ([]core.Record, error) {
-	q := `SELECT id,owner_id,version,data,created_at FROM records WHERE namespace=?`
-	args := []any{ns}
-	if owner != "" {
-		q += ` AND owner_id=?`
-		args = append(args, owner)
-	}
-	q += ` ORDER BY created_at DESC LIMIT 500`
-	rows, err := m.db.QueryContext(ctx, q, args...)
+	t, err := tableOf(ns)
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-	out := []core.Record{}
-	for rows.Next() {
-		var r core.Record
-		if err = rows.Scan(&r.ID, &r.Owner, &r.Version, &r.Data, &r.CreatedAt); err != nil {
-			return nil, err
-		}
-		out = append(out, r)
+	q := "SELECT " + t.selectList() + " FROM `" + t.Name + "`"
+	args := []any{}
+	if owner != "" {
+		q += " WHERE owner_id=?"
+		args = append(args, owner)
 	}
-	return out, rows.Err()
+	return listRows(ctx, m.db, q+" ORDER BY created_at DESC LIMIT 500", t, args...)
 }
 func (m *MySQL) Put(ctx context.Context, ns string, r core.Record, version int64) (core.Record, error) {
-	tx, beginErr := m.db.BeginTx(ctx, nil)
-	if beginErr != nil {
-		return r, beginErr
-	}
-	defer tx.Rollback()
-	var result sql.Result
-	var err error
-	if version == 0 {
-		result, err = tx.ExecContext(ctx, `INSERT INTO records(namespace,id,owner_id,version,data) VALUES(?,?,?,1,?)`, ns, r.ID, r.Owner, string(r.Data))
-		var me *mysql.MySQLError
-		if errors.As(err, &me) && me.Number == 1062 {
-			return r, core.ErrConflict
-		}
-	} else {
-		result, err = tx.ExecContext(ctx, `UPDATE records SET data=?,version=version+1 WHERE namespace=? AND id=? AND version=?`, string(r.Data), ns, r.ID, version)
-	}
+	tx, err := m.db.BeginTx(ctx, nil)
 	if err != nil {
 		return r, err
 	}
-	n, _ := result.RowsAffected()
-	if n != 1 {
-		return r, core.ErrConflict
+	defer tx.Rollback()
+	if err = putRow(ctx, tx, ns, r, version); err != nil {
+		return r, err
 	}
-	err = tx.QueryRowContext(ctx, `SELECT id,owner_id,version,data,created_at FROM records WHERE namespace=? AND id=?`, ns, r.ID).Scan(&r.ID, &r.Owner, &r.Version, &r.Data, &r.CreatedAt)
-	if err != nil {
+	if r, err = getRow(ctx, tx, ns, r.ID, ""); err != nil {
 		return r, err
 	}
 	return r, tx.Commit()
+}
+
+// putRow inserts at version 0, else updates if the stored version matches.
+func putRow(ctx context.Context, q querier, ns string, r core.Record, version int64) error {
+	var result sql.Result
+	var err error
+	if version == 0 {
+		result, err = insertRow(ctx, q, ns, r, false)
+	} else {
+		result, err = updateRow(ctx, q, ns, r, version)
+	}
+	var me *mysql.MySQLError
+	if errors.As(err, &me) && me.Number == 1062 {
+		return core.ErrConflict
+	}
+	if err != nil {
+		return err
+	}
+	if n, _ := result.RowsAffected(); n != 1 {
+		return core.ErrConflict
+	}
+	return nil
 }
 
 const jobCols = `id,user_id,input,request_hash,status,progress,result,error,attempts,lease_token,lease_until,created_at,updated_at`

@@ -25,31 +25,12 @@ func (m *MySQL) PendingPayments(ctx context.Context, ns, after string, limit int
 	if err != nil || limit < 1 || limit > 100 {
 		return nil, fmt.Errorf("invalid pending payment query")
 	}
-	q := `SELECT id,owner_id,version,data,created_at FROM records WHERE namespace=? AND id>? AND JSON_UNQUOTE(JSON_EXTRACT(data,'$.status')) IN (`
-	args := []any{ns, after}
-	for i, state := range states {
-		if i > 0 {
-			q += ","
-		}
-		q += "?"
-		args = append(args, state)
-	}
-	q += `) ORDER BY id LIMIT ?`
-	args = append(args, limit)
-	rows, err := m.db.QueryContext(ctx, q, args...)
+	t, err := tableOf(ns)
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-	out := []core.Record{}
-	for rows.Next() {
-		var r core.Record
-		if err = rows.Scan(&r.ID, &r.Owner, &r.Version, &r.Data, &r.CreatedAt); err != nil {
-			return nil, err
-		}
-		out = append(out, r)
-	}
-	return out, rows.Err()
+	q := "SELECT " + t.selectList() + " FROM `" + t.Name + "` WHERE id>? AND status IN (" + placeholders(len(states)) + ") ORDER BY id LIMIT ?"
+	return listRows(ctx, m.db, q, t, append(append([]any{after}, anyStrings(states)...), limit)...)
 }
 
 func (m *Memory) PendingPayments(_ context.Context, ns, after string, limit int) ([]core.Record, error) {

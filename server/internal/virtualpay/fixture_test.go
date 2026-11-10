@@ -43,9 +43,6 @@ func newFixture(t *testing.T) *fixture {
 	b := &billing.Service{Store: s}
 	settings := core.DefaultPlatform()
 	settings.RechargeEnabled = true
-	if _, err := s.Put(context.Background(), "settings", core.Record{ID: "platform", Data: core.Data(settings)}, 0); err != nil {
-		t.Fatal(err)
-	}
 	row, e := b.CreateVirtualOrder(context.Background(), "u", "fixture-key", 100, settings, c.Config.AppID, c.Config.OfferID, "openid", "", core.VirtualOrder{ProductID: "points-100", PointsUnits: 10000, Env: 1, Platform: "android"})
 	if e != nil {
 		t.Fatal(e)

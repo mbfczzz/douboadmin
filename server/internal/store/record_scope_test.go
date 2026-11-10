@@ -40,7 +40,7 @@ func TestRecordPageScopes(t *testing.T) {
 	t.Run("memory", func(t *testing.T) { run(t, NewMemory()) })
 	t.Run("mysql", func(t *testing.T) {
 		m := mysqlFixture(t)
-		_, _ = m.db.Exec(`DELETE FROM records WHERE namespace='scope_records'`)
+		_, _ = m.db.Exec(`DELETE FROM scope_records`)
 		run(t, m)
 	})
 }

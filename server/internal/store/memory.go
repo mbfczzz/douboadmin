@@ -20,6 +20,16 @@ type Memory struct {
 func NewMemory() *Memory {
 	return &Memory{records: map[string]core.Record{}, jobs: map[string]core.Job{}}
 }
+
+// normalized checks data against the namespace's table and returns it as
+// MySQL would read it back, so memory-backed tests honour the schema.
+func normalized(ns string, data []byte) ([]byte, error) {
+	t, err := tableOf(ns)
+	if err != nil {
+		return nil, err
+	}
+	return t.normalize(data)
+}
 func copyRecord(r core.Record) core.Record { r.Data = append(json.RawMessage{}, r.Data...); return r }
 func copyJob(j core.Job) core.Job {
 	j.Input.Assets = append([]string{}, j.Input.Assets...)
@@ -70,6 +80,11 @@ func (m *Memory) Put(_ context.Context, ns string, r core.Record, version int64)
 	} else {
 		r.CreatedAt = time.Now().UTC()
 	}
+	data, err := normalized(ns, r.Data)
+	if err != nil {
+		return r, err
+	}
+	r.Data = data
 	m.records[ns+":"+r.ID] = copyRecord(r)
 	return r, nil
 }

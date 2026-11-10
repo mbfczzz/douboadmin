@@ -12,11 +12,6 @@ import (
 func estimateFixture(t *testing.T) (*Server, string, core.Model) {
 	t.Helper()
 	a, user, _ := setup(t)
-	settings := core.DefaultPlatform()
-	settings.BillingEnabled = true
-	if _, err := a.Store.Put(context.Background(), "settings", core.Record{ID: "platform", Data: core.Data(settings)}, 0); err != nil {
-		t.Fatal(err)
-	}
 	m := core.Model{ID: "priced", Key: "image-test", Kind: "image", Published: true, Available: true,
 		Points: 1.25, Resolutions: []string{"1k", "2k"}, Ratios: []string{"1:1"}, Qualities: []string{"low", "high"}, Modes: []string{"i2i"},
 		Settings: core.ModelSettings{PriceMatrix: map[string]map[string]float64{"low": {"1k": 2.5, "2k": 4}, "high": {"1k": 6.25, "2k": 0}}}}
@@ -98,15 +93,6 @@ func TestJobEstimateIgnoresRetiredBillingSwitchAndUsesFallbackPrice(t *testing.T
 		t.Fatal(err)
 	}
 	in := core.JobInput{Kind: "image", Model: m.ID, Resolution: "1k", Ratio: "1:1", Quality: "low"}
-	assertEstimate(t, a, user, in, 125, true)
-	platform, settings, err := a.platform(context.Background())
-	if err != nil {
-		t.Fatal(err)
-	}
-	settings.BillingEnabled = false
-	if _, err = a.Store.Put(context.Background(), "settings", core.Record{ID: "platform", Data: core.Data(settings)}, platform.Version); err != nil {
-		t.Fatal(err)
-	}
 	assertEstimate(t, a, user, in, 125, true)
 }
 

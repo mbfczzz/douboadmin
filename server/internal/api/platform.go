@@ -7,15 +7,10 @@ import (
 	"net/http"
 )
 
-func (a *Server) platform(ctx context.Context) (core.Record, core.PlatformSettings, error) {
+// Business settings were retired; the defaults are fixed (version 0).
+func (a *Server) platform(context.Context) (core.Record, core.PlatformSettings, error) {
 	s := core.DefaultPlatform()
-	r, e := a.Store.Get(ctx, "settings", "platform")
-	if errors.Is(e, core.ErrNotFound) {
-		return core.Record{ID: "platform", Data: core.Data(s)}, s, nil
-	}
-	// Retain the version for older clients, but never apply retired business rules.
-	r.Data = core.Data(s)
-	return r, s, e
+	return core.Record{ID: "platform", Data: core.Data(s)}, s, nil
 }
 func (a *Server) platformSettings(w http.ResponseWriter, r *http.Request) {
 	row, _, e := a.platform(r.Context())

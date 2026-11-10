@@ -13,7 +13,7 @@ func TestConcurrentCustomCheckoutCreatesOnlyOneUnpaidOrder(t *testing.T) {
 	for range 12 {
 		group.Go(func() {
 			w := call(a, "POST", "/api/orders", user, "parallel-custom-checkout", map[string]any{
-				"purchaseMode": "custom", "amountFen": 500, "settingsVersion": 1, "platform": "android"})
+				"purchaseMode": "custom", "amountFen": 500, "settingsVersion": 0, "platform": "android"})
 			var row core.Record
 			if w.Code != 201 || json.Unmarshal(w.Body.Bytes(), &row) != nil {
 				t.Error(w.Code, w.Body.String())

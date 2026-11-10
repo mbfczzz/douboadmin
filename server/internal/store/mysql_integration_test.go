@@ -108,8 +108,8 @@ func TestMySQLConcurrentRecordVersionsReturnCommittedContent(t *testing.T) {
 	a, b := mysqlFixture(t), mysqlFixture(t)
 	ctx := context.Background()
 	id := core.NewID()
-	t.Cleanup(func() { _, _ = a.db.Exec(`DELETE FROM records WHERE namespace='models' AND id=?`, id) })
-	r, err := a.Put(ctx, "models", core.Record{ID: id, Data: json.RawMessage(`{"value":0}`)}, 0)
+	t.Cleanup(func() { _, _ = a.db.Exec(`DELETE FROM lock_contract WHERE id=?`, id) })
+	r, err := a.Put(ctx, "lock_contract", core.Record{ID: id, Data: json.RawMessage(`{"amountFen":0}`)}, 0)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -121,12 +121,12 @@ func TestMySQLConcurrentRecordVersionsReturnCommittedContent(t *testing.T) {
 			db = b
 		}
 		wg.Go(func() {
-			out, e := db.Put(ctx, "models", core.Record{ID: id, Data: core.Data(map[string]int{"value": i + 1})}, r.Version)
+			out, e := db.Put(ctx, "lock_contract", core.Record{ID: id, Data: core.Data(map[string]int{"amountFen": i + 1})}, r.Version)
 			if e == nil {
 				wins.Add(1)
 				var value map[string]int
 				_ = json.Unmarshal(out.Data, &value)
-				if out.Version != 2 || value["value"] != i+1 {
+				if out.Version != 2 || value["amountFen"] != i+1 {
 					t.Error("write returned another editor's data")
 				}
 			}

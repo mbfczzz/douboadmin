@@ -8,6 +8,7 @@ export default function ResourcePage({
   resource,
   actions,
   tabs,
+  filters,
   children,
 }: {
   page: PageId;
@@ -20,6 +21,8 @@ export default function ResourcePage({
   actions?: ReactNode;
   // Page-level view switch, shown even while the list loads or fails.
   tabs?: ReactNode;
+  // Filters stay mounted (and focused) while a new page or filter loads.
+  filters?: ReactNode;
   children: ReactNode;
 }) {
   const refresh = () => {
@@ -31,6 +34,7 @@ export default function ResourcePage({
         {actions}
       </PageHeader>
       {tabs}
+      {filters}
       <RequestState
         loading={resource.loading && resource.data === undefined}
         error={resource.error}

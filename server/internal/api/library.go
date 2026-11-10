@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -67,12 +68,25 @@ func (a *Server) feedback(w http.ResponseWriter, r *http.Request) {
 	reply(w, 201, row)
 }
 
+// users is one page of mini-program users; search and filters run in the
+// database so every user is reachable however many there are.
 func (a *Server) users(w http.ResponseWriter, r *http.Request) {
-	rows, e := a.Store.List(r.Context(), "users", "")
+	v := r.URL.Query()
+	page, e := strconv.Atoi(v.Get("page"))
+	if e != nil || page < 1 {
+		page = 1
+	}
+	q := core.UserQuery{Search: strings.TrimSpace(v.Get("q")), State: v.Get("state"), Access: v.Get("access"), Page: page, Size: 20}
+	if !q.Valid() {
+		fail(w, 400, "查询条件无效")
+		return
+	}
+	out, e := a.Store.UserPage(r.Context(), q)
 	if e != nil {
 		dbError(w, e)
 		return
 	}
+	rows := out.Items
 	for i := range rows {
 		var profile map[string]any
 		if e = json.Unmarshal(rows[i].Data, &profile); e != nil {
@@ -94,7 +108,7 @@ func (a *Server) users(w http.ResponseWriter, r *http.Request) {
 		}
 		rows[i].Data = core.Data(profile)
 	}
-	reply(w, 200, rows)
+	reply(w, 200, out)
 }
 
 // Local upload is deliberately disabled in production. OSS is injected through

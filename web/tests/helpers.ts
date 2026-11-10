@@ -99,3 +99,26 @@ export async function answerAsk(page: Page, accept: boolean) {
   ).click();
   await expect(dialog).toHaveCount(0);
 }
+
+// The admin user list URL (with its page and filter query, not sub-paths).
+export const usersList = /\/api\/admin\/users(\?|$)/;
+
+// Serves rows the way GET /api/admin/users pages them: 20 per page,
+// searching id and nickname.
+export function usersPage(
+  url: string,
+  rows: { id: string; data: { nickname?: string } }[],
+) {
+  const query = new URL(url).searchParams,
+    page = Number(query.get("page") || 1),
+    search = query.get("q") || "",
+    hits = rows.filter((r) =>
+      [r.id, r.data.nickname].some((v) => v?.includes(search)),
+    );
+  return {
+    items: hits.slice((page - 1) * 20, page * 20),
+    page,
+    size: 20,
+    total: hits.length,
+  };
+}

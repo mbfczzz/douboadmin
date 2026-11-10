@@ -12,14 +12,15 @@ func (m *MySQL) PaymentRecords(ctx context.Context, q core.PaymentQuery) (core.P
 	if !validPaymentQuery(q) {
 		return out, fmt.Errorf("invalid payment query")
 	}
-	where := ` FROM records t JOIN records o ON o.namespace='orders' AND o.id=JSON_UNQUOTE(t.data) WHERE t.namespace='payment_transactions' AND JSON_UNQUOTE(JSON_EXTRACT(o.data,'$.transactionId'))=t.id AND JSON_UNQUOTE(JSON_EXTRACT(o.data,'$.status')) IN ('paid','refunding','refunded')`
+	orders, _ := tableOf("orders")
+	where := ` FROM payment_transactions t JOIN orders o ON o.id=t.order_id AND o.transaction_id=t.id WHERE o.status IN ('paid','refunding','refunded')`
 	args := []any{}
 	if q.Search != "" {
 		where += ` AND (LOCATE(?,t.id)>0 OR LOCATE(?,o.id)>0 OR LOCATE(?,o.owner_id)>0)`
 		args = append(args, q.Search, q.Search, q.Search)
 	}
 	if q.Status != "" {
-		where += ` AND JSON_UNQUOTE(JSON_EXTRACT(o.data,'$.status'))=?`
+		where += ` AND o.status=?`
 		args = append(args, q.Status)
 	}
 	if !q.From.IsZero() {
@@ -39,13 +40,15 @@ func (m *MySQL) PaymentRecords(ctx context.Context, q core.PaymentQuery) (core.P
 	if e = tx.QueryRowContext(ctx, `SELECT COUNT(*)`+where, args...).Scan(&out.Total); e != nil {
 		return out, e
 	}
-	rows, e := tx.QueryContext(ctx, `SELECT t.id,t.created_at,o.id,o.owner_id,o.data`+where+` ORDER BY t.created_at DESC,t.id DESC LIMIT ? OFFSET ?`, append(args, q.Size, (q.Page-1)*q.Size)...)
+	cols := "t.id,t.created_at," + orders.selectAs("o")
+	rows, e := tx.QueryContext(ctx, `SELECT `+cols+where+` ORDER BY t.created_at DESC,t.id DESC LIMIT ? OFFSET ?`, append(args, q.Size, (q.Page-1)*q.Size)...)
 	if e != nil {
 		return out, e
 	}
 	for rows.Next() {
-		var receipt, order core.Record
-		if e = rows.Scan(&receipt.ID, &receipt.CreatedAt, &order.ID, &order.Owner, &order.Data); e != nil {
+		var receipt core.Record
+		order, e := orders.scanRecord(prefixed{rows, []any{&receipt.ID, &receipt.CreatedAt}})
+		if e != nil {
 			rows.Close()
 			return out, e
 		}
@@ -63,3 +66,12 @@ func (m *MySQL) PaymentRecords(ctx context.Context, q core.PaymentQuery) (core.P
 	}
 	return out, tx.Commit()
 }
+
+// prefixed scans a row whose first columns are extra values, then hands the
+// rest to a record scanner.
+type prefixed struct {
+	row  interface{ Scan(...any) error }
+	head []any
+}
+
+func (p prefixed) Scan(dest ...any) error { return p.row.Scan(append(p.head, dest...)...) }

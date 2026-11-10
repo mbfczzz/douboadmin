@@ -23,7 +23,7 @@ func TestVirtualCustomAmountSnapshotSignatureAndIdempotency(t *testing.T) {
 	if w.Code != 200 || json.Unmarshal(w.Body.Bytes(), &info) != nil || info.Custom == nil || info.Custom.UnitAmountFen != 100 {
 		t.Fatal(w.Code, w.Body.String())
 	}
-	input := map[string]any{"purchaseMode": "custom", "amountFen": 500, "settingsVersion": 1, "platform": "android"}
+	input := map[string]any{"purchaseMode": "custom", "amountFen": 500, "settingsVersion": 0, "platform": "android"}
 	w = call(a, "POST", "/api/orders", user, "custom-amount-order", input)
 	var row core.Record
 	if w.Code != 201 || json.Unmarshal(w.Body.Bytes(), &row) != nil {
@@ -61,10 +61,10 @@ func TestVirtualCustomAmountSnapshotSignatureAndIdempotency(t *testing.T) {
 func TestVirtualCustomRejectsInvalidAmountsAndForgedProducts(t *testing.T) {
 	for _, change := range []map[string]any{
 		{"amountFen": 0}, {"amountFen": -100}, {"amountFen": 150}, {"amountFen": core.MaxOrderAmountFen + 100},
-		{"amountFen": 100.5}, {"productId": "other"}, {"purchaseMode": "unknown"}, {"settingsVersion": 0},
+		{"amountFen": 100.5}, {"productId": "other"}, {"purchaseMode": "unknown"}, {"settingsVersion": 1},
 	} {
 		a, user := customFixture(t)
-		input := map[string]any{"purchaseMode": "custom", "amountFen": 500, "settingsVersion": 1, "platform": "android"}
+		input := map[string]any{"purchaseMode": "custom", "amountFen": 500, "settingsVersion": 0, "platform": "android"}
 		for key, value := range change {
 			input[key] = value
 		}
@@ -94,7 +94,7 @@ func TestVirtualCustomCanUseUnitBelowRechargeMinimum(t *testing.T) {
 	if !info.Ready || len(info.Products) != 1 || info.Custom == nil || info.Custom.MinAmountFen != 10 {
 		t.Fatal(w.Body.String())
 	}
-	input := map[string]any{"purchaseMode": "custom", "amountFen": 100, "settingsVersion": 1, "platform": "android"}
+	input := map[string]any{"purchaseMode": "custom", "amountFen": 100, "settingsVersion": 0, "platform": "android"}
 	if w = call(a, "POST", "/api/orders", user, "minimum-custom-order", input); w.Code != 201 {
 		t.Fatal(w.Code, w.Body.String())
 	}
@@ -109,7 +109,7 @@ func TestVirtualCustomCanUseUnitBelowRechargeMinimum(t *testing.T) {
 func TestVirtualCustomIsOptionalAndCatalogPriceChangesBlockSigning(t *testing.T) {
 	a, user := customFixture(t)
 	a.Virtual.Client.Config.CustomProductID = ""
-	input := map[string]any{"purchaseMode": "custom", "amountFen": 500, "settingsVersion": 1, "platform": "android"}
+	input := map[string]any{"purchaseMode": "custom", "amountFen": 500, "settingsVersion": 0, "platform": "android"}
 	if w := call(a, "POST", "/api/orders", user, "disabled-custom-order", input); w.Code != 409 {
 		t.Fatal(w.Code, w.Body.String())
 	}
@@ -133,7 +133,7 @@ func TestVirtualCheckoutRejectsIdentityFromAnotherWechatApp(t *testing.T) {
 		t.Fatal(err)
 	}
 	w := call(a, "POST", "/api/orders", user, "another-app-checkout", map[string]any{
-		"purchaseMode": "custom", "amountFen": 500, "settingsVersion": 1, "platform": "android"})
+		"purchaseMode": "custom", "amountFen": 500, "settingsVersion": 0, "platform": "android"})
 	if w.Code != 401 {
 		t.Fatal("an old app identity created a payment under the new app", w.Code, w.Body.String())
 	}

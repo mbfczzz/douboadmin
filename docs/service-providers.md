@@ -1,6 +1,6 @@
 # 服务商层级、扫码登记与算力分佣
 
-数据写入 MySQL；正常业务库不会自动创建示例服务商或付款记录。旧规则下的测试数据可用 `deploy/sql/reset-partners.sql` 清理（先备份）。
+数据写入 MySQL；正常业务库不会自动创建示例服务商或付款记录。拆表前的通用 `records` 表：执行 `migrate` 时会把仍符合新表结构的数据复制过去，确认无误后用 `deploy/sql/drop-legacy-records.sql` 删除（先备份）。
 
 ## 层级与开通链路
 

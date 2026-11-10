@@ -39,6 +39,6 @@ func TestMemoryPendingPaymentsIncludeOldRows(t *testing.T) {
 func TestMySQLPendingPaymentsIncludeOldRows(t *testing.T) {
 	m := mysqlFixture(t)
 	owner := "pending-" + core.NewID()
-	t.Cleanup(func() { _, _ = m.db.Exec(`DELETE FROM records WHERE namespace='orders' AND owner_id=?`, owner) })
+	t.Cleanup(func() { _, _ = m.db.Exec(`DELETE FROM orders WHERE owner_id=?`, owner) })
 	checkPendingPayments(t, m, owner)
 }

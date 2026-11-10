@@ -56,6 +56,6 @@ func TestPendingSubscriptionsSkipAttemptedAndPage(t *testing.T) {
 func TestMySQLPendingSubscriptionsSkipAttemptedAndPage(t *testing.T) {
 	s := mysqlFixture(t)
 	owner := "queue-" + core.NewID()
-	t.Cleanup(func() { _, _ = s.db.Exec(`DELETE FROM records WHERE owner_id=?`, owner) })
+	t.Cleanup(func() { deleteOwned(s, owner, "subscription_queue", "subscription_delivery", "preferences") })
 	checkSubscriptionQueue(t, s, owner)
 }

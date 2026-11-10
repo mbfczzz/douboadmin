@@ -13,11 +13,6 @@ func TestMemberPaymentToGenerationLedger(t *testing.T) {
 	a, user, _ := activationFixture(t)
 	key := paymentGateway(t, a)
 	ctx := t.Context()
-	platform := core.DefaultPlatform()
-	platform.BillingEnabled, platform.RechargeEnabled = true, true
-	if _, err := a.Store.Put(ctx, "settings", core.Record{ID: "platform", Data: core.Data(platform)}, 0); err != nil {
-		t.Fatal(err)
-	}
 	if _, err := a.Store.Put(ctx, "wechat_identities", core.Record{ID: "user-a", Data: core.Data(map[string]string{"openid": "test-openid"})}, 0); err != nil {
 		t.Fatal(err)
 	}
@@ -54,7 +49,7 @@ func TestMemberPaymentToGenerationLedger(t *testing.T) {
 			t.Fatal(w.Code, w.Body.String(), available, held)
 		}
 	}
-	orderInput := map[string]any{"amountFen": 1000, "settingsVersion": 1, "platform": "android", "pricingVersion": quote.PricingVersion}
+	orderInput := map[string]any{"amountFen": 1000, "settingsVersion": 0, "platform": "android", "pricingVersion": quote.PricingVersion}
 	w := call(a, "POST", "/api/orders", user, "payment-flow-order", orderInput)
 	var order core.Record
 	if w.Code != 201 || json.Unmarshal(w.Body.Bytes(), &order) != nil {

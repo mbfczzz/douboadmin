@@ -11,11 +11,6 @@ func TestSmallPackageOwnsPriceAndCreditDespiteRetiredRules(t *testing.T) {
 	a, user, _ := virtualFixture(t)
 	a.Virtual.Client.Config.Products[0].AmountFen = 10
 	a.Virtual.Client.Config.Products[0].PointsUnits = 1000000
-	legacy := core.PlatformSettings{PointsPerYuan: 0, MinRechargeFen: 10000, MaxRechargeFen: 1}
-	_, err := a.Store.Put(t.Context(), "settings", core.Record{ID: "platform", Data: core.Data(legacy)}, 1)
-	if err != nil {
-		t.Fatal(err)
-	}
 	w := call(a, "GET", "/api/wallet", user, "", nil)
 	var info struct {
 		Ready    bool                 `json:"paymentReady"`
@@ -24,7 +19,7 @@ func TestSmallPackageOwnsPriceAndCreditDespiteRetiredRules(t *testing.T) {
 	if w.Code != 200 || json.Unmarshal(w.Body.Bytes(), &info) != nil || !info.Ready || len(info.Products) != 1 || info.Products[0].PointsUnits != 1000000 {
 		t.Fatal(w.Code, w.Body.String())
 	}
-	input := map[string]any{"productId": "pack", "amountFen": 10, "settingsVersion": 2, "platform": "android", "expectedPointsUnits": 1000000}
+	input := map[string]any{"productId": "pack", "amountFen": 10, "settingsVersion": 0, "platform": "android", "expectedPointsUnits": 1000000}
 	w = call(a, "POST", "/api/orders", user, "independent-package", input)
 	var row core.Record
 	var order core.Order

@@ -29,13 +29,46 @@ func anyStrings(values []string) []any {
 func validRecordPage(q core.RecordQuery) bool {
 	return q.Namespace != "" && q.Page >= 1 && q.Page <= 1000000 && q.Size >= 1 && q.Size <= 100 && len([]rune(q.Search)) <= 100
 }
+
+// has reports whether a table stores a JSON field as a column.
+func (t Table) has(field string) bool {
+	for _, c := range t.Cols {
+		if c.Field == field {
+			return true
+		}
+	}
+	return false
+}
+
+// searchable is the text a page search looks in: the id and every string column.
+func (t Table) searchable() string {
+	parts := []string{"id"}
+	for _, c := range t.Cols {
+		if c.Kind == Text || c.Kind == Short || c.Kind == Key {
+			parts = append(parts, "`"+c.column()+"`")
+		}
+	}
+	return "CONCAT_WS(' '," + strings.Join(parts, ",") + ")"
+}
+
 func (m *MySQL) RecordPage(ctx context.Context, q core.RecordQuery) (out core.RecordPage, err error) {
 	out = core.RecordPage{Items: []core.Record{}, Page: q.Page, Size: q.Size}
 	if !validRecordPage(q) {
 		return out, fmt.Errorf("invalid record page")
 	}
-	where := ` FROM records WHERE namespace=?`
-	args := []any{q.Namespace}
+	t, err := tableOf(q.Namespace)
+	if err != nil {
+		return out, err
+	}
+	// A filter on a field the table lacks matches nothing, like the JSON
+	// path it replaces.
+	where, args := " FROM `"+t.Name+"` WHERE 1=1", []any{}
+	field := func(name string) string {
+		if !t.has(name) {
+			return "NULL"
+		}
+		return "`" + column(name) + "`"
+	} // has() matches object fields, whose column is column(field)
 	if q.ByID && q.AfterID != "" {
 		where += ` AND id>?`
 		args = append(args, q.AfterID)
@@ -45,7 +78,7 @@ func (m *MySQL) RecordPage(ctx context.Context, q core.RecordQuery) (out core.Re
 		args = append(args, q.Owner)
 	}
 	if q.PartnerID != "" {
-		where += ` AND JSON_UNQUOTE(JSON_EXTRACT(data,'$.partnerId'))=?`
+		where += ` AND ` + field("partnerId") + `=?`
 		args = append(args, q.PartnerID)
 	}
 	// A non-nil empty scope means the caller may see nothing.
@@ -54,15 +87,15 @@ func (m *MySQL) RecordPage(ctx context.Context, q core.RecordQuery) (out core.Re
 		args = append(args, anyStrings(q.OwnerIn)...)
 	}
 	if q.PartnerIn != nil {
-		where += ` AND JSON_UNQUOTE(JSON_EXTRACT(data,'$.partnerId')) IN (` + placeholders(len(q.PartnerIn)) + `)`
+		where += ` AND ` + field("partnerId") + ` IN (` + placeholders(len(q.PartnerIn)) + `)`
 		args = append(args, anyStrings(q.PartnerIn)...)
 	}
 	if q.Search != "" {
-		where += ` AND (LOCATE(?,id)>0 OR LOCATE(?,CAST(data AS CHAR))>0)`
-		args = append(args, q.Search, q.Search)
+		where += ` AND LOCATE(?,` + t.searchable() + `)>0`
+		args = append(args, q.Search)
 	}
 	if q.Status != "" {
-		where += ` AND JSON_UNQUOTE(JSON_EXTRACT(data,'$.status'))=?`
+		where += ` AND ` + field("status") + `=?`
 		args = append(args, q.Status)
 	}
 	tx, e := m.db.BeginTx(ctx, &sql.TxOptions{ReadOnly: true, Isolation: sql.LevelRepeatableRead})
@@ -77,23 +110,11 @@ func (m *MySQL) RecordPage(ctx context.Context, q core.RecordQuery) (out core.Re
 	if q.ByID {
 		order = ` ORDER BY id ASC`
 	}
-	rows, e := tx.QueryContext(ctx, `SELECT id,owner_id,version,data,created_at`+where+order+` LIMIT ? OFFSET ?`, append(args, q.Size, (q.Page-1)*q.Size)...)
+	items, e := listRows(ctx, tx, "SELECT "+t.selectList()+where+order+` LIMIT ? OFFSET ?`, t, append(args, q.Size, (q.Page-1)*q.Size)...)
 	if e != nil {
 		return out, e
 	}
-	for rows.Next() {
-		var row core.Record
-		if e = rows.Scan(&row.ID, &row.Owner, &row.Version, &row.Data, &row.CreatedAt); e != nil {
-			rows.Close()
-			return out, e
-		}
-		out.Items = append(out.Items, row)
-	}
-	e = rows.Err()
-	rows.Close()
-	if e != nil {
-		return out, e
-	}
+	out.Items = items
 	return out, tx.Commit()
 }
 func (m *Memory) RecordPage(_ context.Context, q core.RecordQuery) (out core.RecordPage, err error) {
@@ -135,19 +156,25 @@ func (m *Memory) RecordPage(_ context.Context, q core.RecordQuery) (out core.Rec
 		}
 		items = append(items, copyRecord(row))
 	}
-	sort.Slice(items, func(i, j int) bool {
-		if q.ByID {
-			return items[i].ID < items[j].ID
-		}
-		if items[i].CreatedAt.Equal(items[j].CreatedAt) {
-			return items[i].ID > items[j].ID
-		}
-		return items[i].CreatedAt.After(items[j].CreatedAt)
-	})
+	if q.ByID {
+		sort.Slice(items, func(i, j int) bool { return items[i].ID < items[j].ID })
+	} else {
+		sortNewest(items)
+	}
 	out.Total = len(items)
 	start := (q.Page - 1) * q.Size
 	if start < len(items) {
 		out.Items = items[start:min(start+q.Size, len(items))]
 	}
 	return
+}
+
+// sortNewest orders like MySQL's created_at DESC, id DESC.
+func sortNewest(items []core.Record) {
+	sort.Slice(items, func(i, j int) bool {
+		if items[i].CreatedAt.Equal(items[j].CreatedAt) {
+			return items[i].ID > items[j].ID
+		}
+		return items[i].CreatedAt.After(items[j].CreatedAt)
+	})
 }

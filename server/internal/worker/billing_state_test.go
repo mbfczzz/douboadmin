@@ -35,8 +35,4 @@ func TestFailedChargeRequiresKnownFailureBeforeRelease(t *testing.T) {
 	if !holdFailedCharge(ctx, s, "task", provider.ErrUncertain) {
 		t.Fatal("ambiguous submission lost its hold")
 	}
-	_, _ = s.Put(ctx, "executions", core.Record{ID: "task", Data: []byte(`{"phase":42}`)}, 0)
-	if !holdFailedCharge(ctx, s, "task", cause) {
-		t.Fatal("invalid record released funds")
-	}
 }

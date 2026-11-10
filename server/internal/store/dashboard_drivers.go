@@ -24,24 +24,29 @@ func (m *MySQL) Dashboard(ctx context.Context, days int) (core.Dashboard, error)
 	// This period and the one before it (for 较上期), plus the small partners
 	// table for provider names. Builders ignore rows outside their window.
 	from := r.prev.from
-	day := from.Format("2006-01-02")
-	rows, e := m.db.QueryContext(ctx, `SELECT namespace,id,owner_id,version,data,created_at FROM records WHERE (namespace IN ('users','daily_activity','analytics','executions','orders','job_billing','visits','visitors') AND created_at>=?) OR namespace='partners' OR (namespace='orders' AND JSON_UNQUOTE(JSON_EXTRACT(data,'$.paidAt'))>=?) OR (namespace='refunds' AND JSON_UNQUOTE(JSON_EXTRACT(data,'$.completedAt'))>=?) OR (namespace='partner_audit' AND created_at>=? AND JSON_UNQUOTE(JSON_EXTRACT(data,'$.kind'))='registration_approved')`, from, day, day, from)
-	if e != nil {
-		return core.Dashboard{}, e
+	scans := []struct{ ns, where string }{
+		{"users", "created_at>=?"}, {"daily_activity", "created_at>=?"}, {"analytics", "created_at>=?"},
+		{"executions", "created_at>=?"}, {"job_billing", "created_at>=?"}, {"visits", "created_at>=?"},
+		{"visitors", "created_at>=?"}, {"partners", "1=1"},
+		{"orders", "created_at>=? OR paid_at>=?"}, {"refunds", "completed_at>=?"},
+		{"partner_audit", "created_at>=? AND kind='registration_approved'"},
 	}
-	for rows.Next() {
-		var ns string
-		var record core.Record
-		if e = rows.Scan(&ns, &record.ID, &record.Owner, &record.Version, &record.Data, &record.CreatedAt); e != nil {
-			rows.Close()
+	for _, scan := range scans {
+		t, e := tableOf(scan.ns)
+		if e != nil {
 			return core.Dashboard{}, e
 		}
-		r.record(ns, record)
-	}
-	e = rows.Err()
-	rows.Close()
-	if e != nil {
-		return core.Dashboard{}, e
+		args := make([]any, strings.Count(scan.where, "?"))
+		for i := range args {
+			args[i] = from
+		}
+		rows, e := listRows(ctx, m.db, "SELECT "+t.selectList()+" FROM `"+t.Name+"` WHERE "+scan.where, t, args...)
+		if e != nil {
+			return core.Dashboard{}, e
+		}
+		for _, row := range rows {
+			r.record(scan.ns, row)
+		}
 	}
 	jobs, e := m.db.QueryContext(ctx, `SELECT `+jobCols+` FROM jobs WHERE created_at>=?`, from)
 	if e != nil {
@@ -60,7 +65,7 @@ func (m *MySQL) Dashboard(ctx context.Context, days int) (core.Dashboard, error)
 	}
 	out := r.result()
 	// The scan above only covers this period; total users are all-time.
-	if e = m.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM records WHERE namespace='users'`).Scan(&out.Breakdown.TotalUsers); e != nil {
+	if e = m.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM users`).Scan(&out.Breakdown.TotalUsers); e != nil {
 		return core.Dashboard{}, e
 	}
 	return out, nil

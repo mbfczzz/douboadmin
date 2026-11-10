@@ -120,9 +120,14 @@ export async function surfaceFixtures(page: Page) {
       ],
     },
     "/models": models,
-    "/users": [
-      row("qa-user", { nickname: "界面质检用户", name: "", phone: "" }),
-    ],
+    "/users": {
+      items: [
+        row("qa-user", { nickname: "界面质检用户", name: "", phone: "" }),
+      ],
+      page: 1,
+      size: 20,
+      total: 1,
+    },
     "/users/qa-user/wallet": {
       wallet: { availableUnits: 12345, heldUnits: 200 },
     },

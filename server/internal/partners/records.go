@@ -37,7 +37,7 @@ func put[T any](tx store.Transaction, ns string, row core.Record, v T) (core.Rec
 	return tx.Put(ns, row, row.Version)
 }
 func policy(r Reader) (core.Record, core.DistributionPolicy, error) {
-	row, v, e := get[core.DistributionPolicy](r, "settings", "distribution")
+	row, v, e := get[core.DistributionPolicy](r, "distribution_policy", "distribution")
 	if errors.Is(e, core.ErrNotFound) {
 		return core.Record{ID: "distribution"}, core.DefaultDistributionPolicy(), nil
 	}

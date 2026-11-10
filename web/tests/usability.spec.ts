@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { login } from "./helpers";
+import { login, usersList, usersPage } from "./helpers";
 
 test("page location survives reload, supports history and resets scroll", async ({
   page,
@@ -107,7 +107,7 @@ test("failed lists never claim to be empty and polling preserves table position"
   let fail = true;
   let release: (() => void) | undefined;
   let delayed = false;
-  await page.route("**/api/admin/users", async (route) => {
+  await page.route(usersList, async (route) => {
     if (delayed)
       await new Promise<void>((resolve) => {
         release = resolve;
@@ -116,14 +116,14 @@ test("failed lists never claim to be empty and polling preserves table position"
       fail
         ? { status: 503, json: { error: "读取用户失败" } }
         : {
-            json: [
+            json: usersPage(route.request().url(), [
               {
                 id: "ui-user",
                 version: 1,
                 createdAt: new Date().toISOString(),
                 data: { nickname: "界面验收" },
               },
-            ],
+            ]),
           },
     );
   });
@@ -151,15 +151,14 @@ test("local filters return to page one and single page lists hide useless contro
   page,
 }) => {
   await login(page);
-  await page.route("**/api/admin/users", (route) =>
-    route.fulfill({
-      json: Array.from({ length: 60 }, (_, i) => ({
-        id: `user-${i}`,
-        version: 1,
-        createdAt: new Date().toISOString(),
-        data: { nickname: `${i < 30 ? "A" : "B"} 用户 ${i}` },
-      })),
-    }),
+  const users = Array.from({ length: 60 }, (_, i) => ({
+    id: `user-${i}`,
+    version: 1,
+    createdAt: new Date().toISOString(),
+    data: { nickname: `${i < 30 ? "A" : "B"} 用户 ${i}` },
+  }));
+  await page.route(usersList, (route) =>
+    route.fulfill({ json: usersPage(route.request().url(), users) }),
   );
   await page.getByRole("button", { name: "小程序用户", exact: true }).click();
   const userTable = page.locator(".table-scroll");

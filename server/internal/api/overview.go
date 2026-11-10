@@ -12,7 +12,7 @@ func (a *Server) overview(w http.ResponseWriter, r *http.Request) {
 		dbError(w, e)
 		return
 	}
-	u, e := a.Store.List(r.Context(), "users", "")
+	u, e := a.Store.UserPage(r.Context(), core.UserQuery{Page: 1, Size: 1})
 	if e != nil {
 		dbError(w, e)
 		return
@@ -33,5 +33,5 @@ func (a *Server) overview(w http.ResponseWriter, r *http.Request) {
 	for _, v := range j {
 		states[v.Status]++
 	}
-	reply(w, 200, map[string]any{"users": len(u), "templates": active, "tasks": len(j), "states": states, "demo": false, "relayConfigured": a.Relay.Ready(), "storage": a.Config.Storage, "clusterReady": a.Config.Storage == "mysql" && a.Sessions.Redis != nil && a.Objects != nil, "scope": "最近 200 个任务 / 最多 500 条记录"})
+	reply(w, 200, map[string]any{"users": u.Total, "templates": active, "tasks": len(j), "states": states, "demo": false, "relayConfigured": a.Relay.Ready(), "storage": a.Config.Storage, "clusterReady": a.Config.Storage == "mysql" && a.Sessions.Redis != nil && a.Objects != nil, "scope": "最近 200 个任务 / 最多 500 个模板"})
 }

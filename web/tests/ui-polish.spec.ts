@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { login } from "./helpers";
+import { login, usersList, usersPage } from "./helpers";
 
 test("template editor keeps save and close visible while the fields scroll", async ({
   page,
@@ -32,16 +32,16 @@ test("mobile user actions stay accessible and failed balances remain unknown", a
   page,
 }) => {
   await login(page);
-  await page.route("**/api/admin/users", (route) =>
+  await page.route(usersList, (route) =>
     route.fulfill({
-      json: [
+      json: usersPage(route.request().url(), [
         {
           id: "ui-polish-user",
           version: 1,
           createdAt: "2026-11-01T00:00:00Z",
           data: { nickname: "测试用户", name: "", phone: "" },
         },
-      ],
+      ]),
     }),
   );
   let failed = true;

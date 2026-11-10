@@ -13,20 +13,11 @@ func (m *MySQL) PendingSubscriptions(ctx context.Context, after string, limit in
 	if limit < 1 || limit > 100 {
 		return nil, fmt.Errorf("invalid subscription batch size")
 	}
-	rows, e := m.db.QueryContext(ctx, `SELECT q.id,q.owner_id,q.version,q.data,q.created_at FROM records q LEFT JOIN records d ON d.namespace='subscription_delivery' AND d.id=q.id WHERE q.namespace='subscription_queue' AND q.id>? AND q.created_at>=UTC_TIMESTAMP(6)-INTERVAL 1 DAY AND d.id IS NULL ORDER BY q.id LIMIT ?`, after, limit)
+	t, e := tableOf("subscription_queue")
 	if e != nil {
 		return nil, e
 	}
-	defer rows.Close()
-	out := []core.Record{}
-	for rows.Next() {
-		var r core.Record
-		if e = rows.Scan(&r.ID, &r.Owner, &r.Version, &r.Data, &r.CreatedAt); e != nil {
-			return nil, e
-		}
-		out = append(out, r)
-	}
-	return out, rows.Err()
+	return listRows(ctx, m.db, `SELECT `+t.selectAs("q")+` FROM subscription_queue q LEFT JOIN subscription_delivery d ON d.id=q.id WHERE q.id>? AND q.created_at>=UTC_TIMESTAMP(6)-INTERVAL 1 DAY AND d.id IS NULL ORDER BY q.id LIMIT ?`, t, after, limit)
 }
 func (m *Memory) PendingSubscriptions(_ context.Context, after string, limit int) ([]core.Record, error) {
 	if limit < 1 || limit > 100 {

@@ -51,9 +51,15 @@ func (s *Sessions) Create(ctx context.Context, id, role string, account ...strin
 func (s *Sessions) CreateAdmin(ctx context.Context, id, account, role string, passwordChanged ...time.Time) (string, error) {
 	v := Identity{ID: id, Role: "admin", AdminRole: role, Account: account, Expires: time.Now().Add(24 * time.Hour)}
 	if len(passwordChanged) > 0 {
-		v.PasswordVersion = passwordChanged[0].UTC().Format(time.RFC3339Nano)
+		v.PasswordVersion = passwordVersion(passwordChanged[0])
 	}
 	return s.create(ctx, v)
+}
+
+// passwordVersion identifies a password change; the database keeps
+// microseconds, so a fresh in-memory time must compare equal once stored.
+func passwordVersion(t time.Time) string {
+	return t.UTC().Truncate(time.Microsecond).Format(time.RFC3339Nano)
 }
 func (s *Sessions) create(ctx context.Context, v Identity) (string, error) {
 	token := core.NewID() + core.NewID()

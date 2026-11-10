@@ -64,6 +64,11 @@ func (t *memoryTransaction) Put(ns string, r core.Record, version int64) (core.R
 	if !ok {
 		r.CreatedAt = time.Now().UTC()
 	}
+	data, err := normalized(ns, r.Data)
+	if err != nil {
+		return r, err
+	}
+	r.Data = data
 	t.records[ns+":"+r.ID] = copyRecord(r)
 	return r, nil
 }

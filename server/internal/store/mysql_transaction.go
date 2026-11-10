@@ -5,9 +5,6 @@ import (
 	"database/sql"
 	"doubo/server/internal/core"
 	"encoding/json"
-	"errors"
-
-	"github.com/go-sql-driver/mysql"
 )
 
 type mysqlTransaction struct {
@@ -16,8 +13,12 @@ type mysqlTransaction struct {
 }
 
 func (t *mysqlTransaction) HasRecords(ns string) (bool, error) {
+	table, err := tableOf(ns)
+	if err != nil {
+		return false, err
+	}
 	var found bool
-	err := t.tx.QueryRowContext(t.ctx, `SELECT EXISTS(SELECT 1 FROM records WHERE namespace=? LIMIT 1)`, ns).Scan(&found)
+	err = t.tx.QueryRowContext(t.ctx, "SELECT EXISTS(SELECT 1 FROM `"+table.Name+"` LIMIT 1)").Scan(&found)
 	return found, err
 }
 
@@ -32,45 +33,24 @@ func (m *MySQL) Atomic(ctx context.Context, fn func(Transaction) error) error {
 	}
 	return tx.Commit()
 }
-func (t *mysqlTransaction) record(ns, id, lock string) (r core.Record, err error) {
-	err = t.tx.QueryRowContext(t.ctx, `SELECT id,owner_id,version,data,created_at FROM records WHERE namespace=? AND id=?`+lock, ns, id).Scan(&r.ID, &r.Owner, &r.Version, &r.Data, &r.CreatedAt)
-	if errors.Is(err, sql.ErrNoRows) {
-		err = core.ErrNotFound
-	}
-	return
+func (t *mysqlTransaction) Get(ns, id string) (core.Record, error) {
+	return getRow(t.ctx, t.tx, ns, id, "")
 }
-func (t *mysqlTransaction) Get(ns, id string) (core.Record, error) { return t.record(ns, id, "") }
 func (t *mysqlTransaction) Lock(ns string, initial core.Record) (core.Record, error) {
-	if len(initial.Data) == 0 {
-		return t.record(ns, initial.ID, " FOR UPDATE")
+	if len(initial.Data) > 0 {
+		if _, err := insertRow(t.ctx, t.tx, ns, initial, true); err != nil {
+			return initial, err
+		}
 	}
-	_, err := t.tx.ExecContext(t.ctx, `INSERT INTO records(namespace,id,owner_id,version,data) VALUES(?,?,?,1,?) ON DUPLICATE KEY UPDATE id=id`, ns, initial.ID, initial.Owner, string(initial.Data))
-	if err != nil {
-		return initial, err
-	}
-	return t.record(ns, initial.ID, " FOR UPDATE")
+	return getRow(t.ctx, t.tx, ns, initial.ID, " FOR UPDATE")
 }
 func (t *mysqlTransaction) Put(ns string, r core.Record, version int64) (core.Record, error) {
-	var result sql.Result
-	var err error
-	if version == 0 {
-		result, err = t.tx.ExecContext(t.ctx, `INSERT INTO records(namespace,id,owner_id,version,data) VALUES(?,?,?,1,?)`, ns, r.ID, r.Owner, string(r.Data))
-	} else {
-		result, err = t.tx.ExecContext(t.ctx, `UPDATE records SET data=?,version=version+1 WHERE namespace=? AND id=? AND version=?`, string(r.Data), ns, r.ID, version)
-	}
-	var me *mysql.MySQLError
-	if errors.As(err, &me) && me.Number == 1062 {
-		return r, core.ErrConflict
-	}
-	if err != nil {
+	if err := putRow(t.ctx, t.tx, ns, r, version); err != nil {
 		return r, err
-	}
-	n, _ := result.RowsAffected()
-	if n != 1 {
-		return r, core.ErrConflict
 	}
 	return t.Get(ns, r.ID)
 }
+
 func (t *mysqlTransaction) Job(id string) (core.Job, error) {
 	return scanJob(t.tx.QueryRowContext(t.ctx, `SELECT `+jobCols+` FROM jobs WHERE id=?`, id))
 }

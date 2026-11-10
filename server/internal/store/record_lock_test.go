@@ -26,7 +26,7 @@ func recordLockContracts(t *testing.T, s Store) {
 	}
 	if db, ok := s.(*MySQL); ok {
 		t.Cleanup(func() {
-			_, _ = db.db.Exec(`DELETE FROM records WHERE namespace='lock_contract' AND id IN (?,?)`, id, missing)
+			_, _ = db.db.Exec(`DELETE FROM lock_contract WHERE id IN (?,?)`, id, missing)
 		})
 	}
 	t.Run("existing record locks without initializer and preserves contents", func(t *testing.T) {

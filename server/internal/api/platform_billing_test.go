@@ -9,19 +9,9 @@ import (
 
 func TestRetiredPlatformOverridesNeverControlRuntime(t *testing.T) {
 	a, _, _ := setup(t)
-	legacy := core.PlatformSettings{BillingEnabled: false, RechargeEnabled: false, PointsPerYuan: 999,
-		MinRechargeFen: 10000, MaxRechargeFen: 10000, ReviewRequired: false, SupportText: "old", HotKeywords: []string{"old"}, AlarmFailures: 999}
-	stored, err := a.Store.Put(t.Context(), "settings", core.Record{ID: "platform", Data: core.Data(legacy)}, 0)
-	if err != nil {
-		t.Fatal(err)
-	}
 	row, current, err := a.platform(t.Context())
-	if err != nil || row.Version != stored.Version || string(core.Data(current)) != string(core.Data(core.DefaultPlatform())) {
+	if err != nil || row.Version != 0 || string(core.Data(current)) != string(core.Data(core.DefaultPlatform())) {
 		t.Fatal(row, current, err)
-	}
-	old, _ := a.Store.Get(t.Context(), "settings", "platform")
-	if string(old.Data) != string(stored.Data) {
-		t.Fatal("reading settings changed historical data")
 	}
 }
 
@@ -71,8 +61,5 @@ func TestRetiredPlatformWriteIsRejected(t *testing.T) {
 	w := call(a, "PUT", "/api/admin/platform", admin, "", map[string]any{"version": 0, "data": core.DefaultPlatform()})
 	if w.Code != 410 {
 		t.Fatal(w.Code, w.Body.String())
-	}
-	if _, err = a.Store.Get(t.Context(), "settings", "platform"); err == nil {
-		t.Fatal("retired write persisted")
 	}
 }

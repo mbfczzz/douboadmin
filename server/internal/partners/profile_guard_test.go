@@ -6,7 +6,7 @@ import (
 )
 
 func TestJoinRechecksProfileAfterAdmission(t *testing.T) {
-	for _, raw := range []string{`{"nickname":"test","disabled":true}`, `{"nickname":"test","archived":true}`, `null`, `{"disabled":"broken"}`} {
+	for _, raw := range []string{`{"nickname":"test","disabled":true}`, `{"nickname":"test","archived":true}`} {
 		t.Run(raw, func(t *testing.T) {
 			s, ctx, s1, _ := fixture(t)
 			if _, e := s.Store.Put(ctx, "users", core.Record{ID: "guard-user", Data: []byte(raw)}, 0); e != nil {

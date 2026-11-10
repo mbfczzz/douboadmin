@@ -1,5 +1,5 @@
 import Badge from "../components/Badge";
-import { lazy, Suspense, useState, type ReactNode } from "react";
+import { lazy, Suspense, useEffect, useState, type ReactNode } from "react";
 import type { Row } from "../api";
 import { useMe } from "../session";
 import type { PageProps } from "../navigation";
@@ -8,6 +8,7 @@ import { useRememberedState } from "../hooks/useRememberedState";
 import ResourcePage from "../business/ResourcePage";
 import PageHeader from "../components/PageHeader";
 import ViewTabs from "../users/ViewTabs";
+import UserFilters from "../users/UserFilters";
 import Table from "../business/Table";
 import UserDetails from "../business/UserDetails";
 import UserPoints from "../business/UserPoints";
@@ -55,79 +56,70 @@ function RegistrationView({
   );
 }
 
+type UserPage = { items: Row<Profile>[]; page: number; total: number };
+
+// The server pages, searches and filters, so every user is reachable.
 function UserList({
   notify,
   tabs,
 }: Pick<PageProps, "notify"> & { tabs: ReactNode }) {
   // A user's operation log keeps the 日志管理 menu.
   const canLogs = !!useMe()?.menus.includes("logs");
-  const resource = useResource<Row<Profile>[]>("/admin/users"),
-    [query, setQuery] = useRememberedState("users.query", ""),
+  const [typed, setTyped] = useRememberedState("users.query", ""),
+    [search, setSearch] = useState(typed.trim()),
     [state, setState] = useRememberedState("users.state", ""),
     [access, setAccess] = useRememberedState("users.joined", ""),
+    [page, setPage] = useState(1),
     [open, setOpen] = useState<{ kind: Dialog; row: Row<Profile> } | null>(
       null,
     ),
     show = (kind: Dialog, row: Row<Profile>) => setOpen({ kind, row }),
     close = () => setOpen(null);
-  const userState = (p: Profile) =>
-      p.archived ? "archived" : p.disabled ? "disabled" : "active",
-    userAccess = (p: Profile) =>
-      p.access?.active
-        ? p.access.status === "provider"
-          ? "owner"
-          : "member"
-        : p.access?.status === "review"
-          ? "review"
-          : "none";
-  const rows = (resource.data || []).filter(
-    (r) =>
-      [r.id, r.data.nickname, r.data.name, r.data.phone].some((v) =>
-        v?.includes(query),
-      ) &&
-      (!state || userState(r.data) === state) &&
-      (!access || userAccess(r.data) === access),
-  );
+  // Typing settles before it queries; any new filter starts at page 1.
+  useEffect(() => {
+    const next = typed.trim();
+    if (next === search) return;
+    const timer = setTimeout(() => {
+      setSearch(next);
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [typed, search]);
+  const resource = useResource<UserPage>(
+      "/admin/users?" +
+        new URLSearchParams({ q: search, state, access, page: String(page) }),
+    ),
+    filtered = !!(search || state || access);
   return (
-    <ResourcePage page="users" resource={resource} tabs={tabs}>
-      <div className="business-filters">
-        <input
-          type="search"
-          aria-label="搜索用户"
-          placeholder="搜索昵称、姓名、手机号或编号"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
+    <ResourcePage
+      page="users"
+      resource={resource}
+      tabs={tabs}
+      filters={
+        <UserFilters
+          search={typed}
+          onSearch={setTyped}
+          state={state}
+          onState={(v) => {
+            setState(v);
+            setPage(1);
+          }}
+          access={access}
+          onAccess={(v) => {
+            setAccess(v);
+            setPage(1);
+          }}
         />
-        <select
-          aria-label="账号状态"
-          value={state}
-          onChange={(e) => setState(e.target.value)}
-        >
-          <option value="">全部状态</option>
-          <option value="active">正常</option>
-          <option value="disabled">已停用</option>
-          <option value="archived">已归档</option>
-        </select>
-        <select
-          aria-label="开通状态"
-          value={access}
-          onChange={(e) => setAccess(e.target.value)}
-        >
-          <option value="">全部开通状态</option>
-          <option value="member">会员</option>
-          <option value="owner">服务商负责人</option>
-          <option value="review">待开通</option>
-          <option value="none">未开通</option>
-        </select>
-      </div>
+      }
+    >
       <Table
-        key={query + state + access}
-        rows={rows}
-        empty={
-          query || state || access
-            ? "没有匹配的用户，请调整搜索条件"
-            : "暂无用户"
-        }
+        rows={resource.data?.items || []}
+        pagination={{
+          page: resource.data?.page || 1,
+          total: resource.data?.total || 0,
+          onChange: setPage,
+        }}
+        empty={filtered ? "没有匹配的用户，请调整搜索条件" : "暂无用户"}
         id={(r) => r.id}
         columns={[
           {

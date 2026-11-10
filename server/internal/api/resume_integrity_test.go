@@ -30,7 +30,7 @@ func TestGenerationResumePreservesStateAndRollsBackOnBillingConflict(t *testing.
 			if e = a.Store.Finish(ctx, claimed, "", "save interrupted"); e != nil {
 				t.Fatal(e)
 			}
-			state := map[string]any{"phase": "polling", "startedAt": time.Now().Add(-2 * time.Hour), "taskId": "upstream-task", "result": "asset:output", "futureField": map[string]any{"exact": 9007199254740993}}
+			state := map[string]any{"phase": "polling", "startedAt": time.Now().Add(-2 * time.Hour), "taskId": "upstream-task", "result": "asset:output"}
 			before, e := a.Store.Put(ctx, "executions", core.Record{ID: j.ID, Data: core.Data(state)}, 0)
 			if e != nil {
 				t.Fatal(e)

@@ -51,10 +51,3 @@ func TestPublicSharingFailsClosedWhenAccessChecksCannotBeRead(t *testing.T) {
 		})
 	}
 }
-func TestMalformedUserStatusDoesNotAuthorizeRequests(t *testing.T) {
-	a, user, _ := setup(t)
-	_, _ = a.Store.Put(context.Background(), "users", core.Record{ID: "user-a", Data: []byte(`{"disabled":"broken"}`)}, 0)
-	if w := call(a, "GET", "/api/jobs", user, "", nil); w.Code != 503 {
-		t.Fatalf("invalid account status allowed: %d", w.Code)
-	}
-}

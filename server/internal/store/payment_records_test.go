@@ -77,6 +77,6 @@ func TestMemoryPaymentRecordsPageBeyondRecentList(t *testing.T) {
 func TestMySQLPaymentRecordsPageBeyondRecentList(t *testing.T) {
 	s := mysqlFixture(t)
 	owner := "pr-" + core.NewID()
-	t.Cleanup(func() { _, _ = s.db.Exec(`DELETE FROM records WHERE owner_id=?`, owner) })
+	t.Cleanup(func() { deleteOwned(s, owner, "orders", "payment_transactions") })
 	checkPaymentRecords(t, s, owner)
 }
