@@ -10,7 +10,8 @@ Group=doubo
 WorkingDirectory=/opt/doubo/current
 EnvironmentFile=/etc/doubo/doubo.env
 ExecStart=/opt/doubo/current/bin/doubo-api migrate
-TimeoutStartSec=60
+# Longer than the application's 10-minute migration budget and connection check.
+TimeoutStartSec=15min
 UMask=0027
 NoNewPrivileges=true
 ProtectSystem=strict

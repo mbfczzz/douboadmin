@@ -55,7 +55,7 @@ func run() error {
 	check, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 	if err = s.Ping(check); err != nil {
-		return err
+		return fmt.Errorf("database connectivity check: %w", err)
 	}
 	command := "serve"
 	if len(os.Args) > 1 {
@@ -74,7 +74,7 @@ func run() error {
 		if !ok {
 			return fmt.Errorf("migrate requires mysql")
 		}
-		return m.Migrate(check)
+		return migrateDatabase(ctx, m)
 	}
 	var rc *redis.Client
 	redisOptions, err := redisOptionsFromEnv()

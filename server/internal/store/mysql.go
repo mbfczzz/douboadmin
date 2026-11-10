@@ -6,6 +6,7 @@ import (
 	"doubo/server/internal/core"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/go-sql-driver/mysql"
 	"time"
 )
@@ -43,15 +44,18 @@ func (m *MySQL) Migrate(ctx context.Context) error {
 	for _, t := range Tables() {
 		statements = append(statements, t.DDL())
 	}
-	for _, q := range statements {
+	for i, q := range statements {
 		if _, err := m.db.ExecContext(ctx, q); err != nil {
-			return err
+			return fmt.Errorf("create schema table %d/%d: %w", i+1, len(statements), err)
 		}
 	}
 	if err := m.addMissingColumns(ctx); err != nil {
-		return err
+		return fmt.Errorf("update schema columns: %w", err)
 	}
-	return m.importLegacyRecords(ctx)
+	if err := m.importLegacyRecords(ctx); err != nil {
+		return fmt.Errorf("import legacy records: %w", err)
+	}
+	return nil
 }
 func (m *MySQL) Get(ctx context.Context, ns, id string) (core.Record, error) {
 	return getRow(ctx, m.db, ns, id, "")

@@ -179,6 +179,8 @@ sudo systemctl restart doubo@serve doubo@worker
 readlink -f /opt/doubo/current
 ```
 
+数据库连接检查限时 10 秒；建表、补列及旧 `records` 导入使用独立的 10 分钟迁移预算，systemd 迁移单元限时 15 分钟。若日志包含 `database connectivity check`，检查数据库连接与白名单；若包含 `database migration`，根据后续的建表、补列或导入阶段定位锁等待、权限或数据问题。仅修改 systemd 超时不能解除旧版本程序内的 10 秒限制，需要重新构建部署。迁移失败时脚本会尝试恢复旧应用，但数据库和环境文件不自动回滚。
+
 发布版本保存在 `/srv/doubo/test-随机字符/`；部署成功后 `/opt/doubo/current` 链接到该版本，systemd 和 Nginx 通过这个固定入口运行。上传文件和历史前端资源在 `/opt/doubo/shared/`，制品下载路径为 `/opt/doubo/artifacts/package.tgz`，环境配置在 `/etc/doubo/doubo.env`。配置修改后重启两个服务。定期备份 MySQL、OSS 和接入配置加密密钥文件（默认 `/opt/doubo/shared/media/.secrets/integrations.key`），并按保留策略清理旧版本与无引用文件；发布脚本不会自动删除业务数据或历史版本。
 
 以后扩容时，API 节点接同一 MySQL、Redis、OSS，Nginx / 负载均衡转发到多个 API；Worker 可在其他主机独立启动。迁移阶段只能执行一次，不要让多台主机同时执行部署迁移。当前这套脚本用于单主机，不宣称多主机滚动发布或零中断。
