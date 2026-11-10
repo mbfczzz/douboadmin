@@ -26,9 +26,10 @@ export default function ProviderAccount({
   notify: Notify;
   onClose: () => void;
 }) {
-  const resource = useResource<{ account: Row<AdminAccount> | null }>(
-      `/admin/partners/${row.id}/account`,
-    ),
+  const resource = useResource<{
+      account: Row<AdminAccount> | null;
+      password?: string;
+    }>(`/admin/partners/${row.id}/account`),
     roles = useRoles("partner"),
     [sub, setSub] = useState<Sub>(),
     account = resource.data?.account;
@@ -75,6 +76,16 @@ export default function ProviderAccount({
             <dl className="detail-grid compact account-facts">
               <dt>账号</dt>
               <dd className="mono">{account.data.username}</dd>
+              <dt>密码</dt>
+              <dd className="account-password">
+                {resource.data?.password ? (
+                  <span className="mono">{resource.data.password}</span>
+                ) : (
+                  <span className="quiet">
+                    未保存可查看的密码，请重置后查看
+                  </span>
+                )}
+              </dd>
               <dt>角色</dt>
               <dd>
                 <Tag tone="accent">

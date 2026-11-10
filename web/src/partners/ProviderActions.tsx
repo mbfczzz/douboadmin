@@ -1,7 +1,6 @@
-import { Plus } from "lucide-react";
 import type { Row } from "../api";
 import { useMe } from "../session";
-import { growth, type Partner } from "./types";
+import type { Partner } from "./types";
 
 export type ProviderAction =
   "edit" | "account" | "profile" | "share" | "commissions";
@@ -9,15 +8,12 @@ export type ProviderAction =
 // Row buttons of one provider: every function opens its own dialog.
 // A provider login on its own node may run share codes and commissions but
 // its profile and login belong to its parent, so it only gets a read-only view.
-// `add` is set for the platform only, shown where the role may grow.
 export default function ProviderActions({
   item,
   open,
-  add,
 }: {
   item: Row<Partner>;
   open: (kind: ProviderAction, item: Row<Partner>) => void;
-  add?: (item: Row<Partner>) => void;
 }) {
   const self = useMe()?.partnerId === item.id,
     // A scanned provider has nothing to run until the platform opens it.
@@ -51,16 +47,6 @@ export default function ProviderActions({
             {button("edit", "编辑", true)}
             {button("account", "登录账号", true)}
           </>
-        )}
-        {add && !!growth[item.data.role]?.length && (
-          <button
-            type="button"
-            className="text-button subtle"
-            onClick={() => add(item)}
-          >
-            <Plus size={14} aria-hidden="true" />
-            新增子级
-          </button>
         )}
       </span>
     </div>

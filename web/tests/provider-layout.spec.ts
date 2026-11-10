@@ -135,7 +135,7 @@ test("search, expansion, expand-all and the edit action keep working", async ({
   ).toBeVisible();
 });
 
-test("分公司 and S1 add sub-providers; an S2 serves 会员 only", async ({
+test("every provider level grows through scanned invitations", async ({
   page,
 }) => {
   const add = (name: string) =>
@@ -144,9 +144,8 @@ test("分公司 and S1 add sub-providers; an S2 serves 会员 only", async ({
       .filter({ hasText: name })
       .first()
       .getByRole("button", { name: "新增子级" });
-  await expect(add("华东服务商")).toHaveCount(1); // 分公司
-  await expect(add("上海服务商")).toHaveCount(1); // S1
-  // S2 and the older, deeper records keep no "新增子级" button.
+  await expect(add("华东服务商")).toHaveCount(0);
+  await expect(add("上海服务商")).toHaveCount(0);
   await expect(add("浦东服务商")).toHaveCount(0);
   await expect(add("创作工作室")).toHaveCount(0);
   const tree = page.locator(".provider-tree");

@@ -20,15 +20,14 @@ const ProviderModule = lazy(() => import("./ProviderModule"));
 export default function Providers({ notify }: { notify: Notify }) {
   const [refresh, setRefresh] = useState(0),
     [query, setQuery] = useState(""),
-    // New provider under a parent (create form) or one row action.
-    [creating, setCreating] = useState<Row<Partner> | "root">(),
+    [creating, setCreating] = useState(false),
     [action, setAction] = useState<{
       kind: ProviderAction;
       row: Row<Partner>;
     }>();
   const reload = async () => setRefresh((n) => n + 1);
   const rows = action ? [action.row] : [];
-  // Only the platform adds providers by hand; provider logins grow by codes.
+  // Only the platform adds branches by hand. S1/S2 join through invite codes.
   const platform = !useMe()?.partnerId;
   const close = () => setAction(undefined),
     kind = action?.kind,
@@ -40,7 +39,7 @@ export default function Providers({ notify }: { notify: Notify }) {
           <button
             type="button"
             className="primary"
-            onClick={() => setCreating("root")}
+            onClick={() => setCreating(true)}
           >
             <Plus size={16} aria-hidden="true" />
             新增分公司
@@ -78,23 +77,15 @@ export default function Providers({ notify }: { notify: Notify }) {
           refresh={refresh}
           query={query}
           open={(kind, row) => setAction({ kind, row })}
-          add={
-            platform
-              ? (row) => {
-                  setCreating(row);
-                }
-              : undefined
-          }
         />
       </section>
       {creating && (
         <ProviderForm
-          parent={creating}
-          onClose={() => setCreating(undefined)}
+          onClose={() => setCreating(false)}
           notify={notify}
           onSaved={async () => {
             await reload();
-            setCreating(undefined);
+            setCreating(false);
           }}
         />
       )}

@@ -53,6 +53,7 @@
 }
 html {
   scrollbar-color: var(--line-strong) transparent;
+  scrollbar-gutter: stable;
 }
 body {
   margin: 0;

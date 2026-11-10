@@ -121,11 +121,3 @@ export const kindTones: Record<string, Tone> = {
   payout_paid: "info",
   payout_cancel: "muted",
 };
-
-// Matches the server: the platform adds 分公司, a 分公司 adds S1 or S2 and an
-// S1 adds S2. Only the platform adds providers by hand; others grow by codes.
-export const growth: Record<string, string[]> = {
-  root: ["branch"],
-  branch: ["s1", "s2"],
-  s1: ["s2"],
-};

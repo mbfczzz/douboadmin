@@ -3,10 +3,10 @@ import { Plus, Search, Image, Film } from "lucide-react";
 import { api, type Row, type Template, type Model } from "../api";
 import type { PageProps } from "../navigation";
 import { useResource } from "../hooks/useResource";
-import { useRecordPage } from "../hooks/useRecordPage";
+import { useCachedRecordPage } from "../hooks/useRecordPage";
 import { useRememberedState } from "../hooks/useRememberedState";
 import PageHeader from "../components/PageHeader";
-import RequestState from "../components/RequestState";
+import CatalogResults from "../components/CatalogResults";
 import Empty from "../components/Empty";
 import Pagination from "../components/Pagination";
 import TemplateCard from "../components/TemplateCard";
@@ -40,7 +40,7 @@ export default function Templates({ notify }: PageProps) {
     [q, setQ] = useRememberedState("templates.query", ""),
     [sort, setSort] = useRememberedState("templates.sort", "sort"),
     [page, setPage] = useState(1);
-  const resource = useRecordPage<Template>(
+  const resource = useCachedRecordPage<Template>(
     `/admin/templates?${new URLSearchParams({ kind, status, category, q, sort })}`,
     page,
     12,
@@ -57,9 +57,12 @@ export default function Templates({ notify }: PageProps) {
       setPage(1);
     }
   }, [category, categories.data, setCategory]);
-  useEffect(()=>{
-    if (resource.data) setPage(current=>Math.min(current,Math.max(1,Math.ceil(resource.data!.total/12))));
-  },[resource.data]);
+  useEffect(() => {
+    if (resource.data)
+      setPage((current) =>
+        Math.min(current, Math.max(1, Math.ceil(resource.data!.total / 12))),
+      );
+  }, [resource.data]);
   const filtered = rows,
     current = page;
   function create(data = blank) {
@@ -121,17 +124,6 @@ export default function Templates({ notify }: PageProps) {
           新增模板
         </button>
       </PageHeader>
-      <RequestState
-        loading={
-          (resource.loading && !resource.data) ||
-          (models.loading && !models.data)
-        }
-        error={resource.error || models.error}
-        retry={() => {
-          void resource.reload();
-          void models.reload();
-        }}
-      />
       <div className="catalog-toolbar panel">
         <div className="catalog-tabs">
           {[
@@ -195,49 +187,70 @@ export default function Templates({ notify }: PageProps) {
       </div>
       <div className="catalog-caption">
         <span>
-          {category || "全部分类"} · {resource.data?.total || 0} 个模板
+          {category || "全部分类"} ·{" "}
+          {resource.data
+            ? `${resource.data.total} 个模板`
+            : resource.loading
+              ? "正在加载模板…"
+              : "读取失败"}
         </span>
         <select
           aria-label="模板排序"
           value={sort}
-          onChange={(e) => {setSort(e.target.value);setPage(1);}}
+          onChange={(e) => {
+            setSort(e.target.value);
+            setPage(1);
+          }}
         >
           <option value="sort">默认排序</option>
           <option value="newest">最近添加</option>
         </select>
       </div>
-      <div className="studio-grid">
-        {filtered.map((r) => (
-          <TemplateCard
-            key={r.id}
-            r={r}
-            modelRows={modelRows}
-            busy={busy}
-            onEdit={setEdit}
-            onCopy={create}
-            onToggle={(r) => void action(r)}
-            onDelete={(r) => void action(r, true)}
+      <CatalogResults
+        label="模板列表"
+        loading={
+          (resource.loading && !resource.data) ||
+          (models.loading && !models.data)
+        }
+        error={resource.error || models.error}
+        retry={() => {
+          void resource.reload();
+          void models.reload();
+        }}
+      >
+        <div className="studio-grid">
+          {filtered.map((r) => (
+            <TemplateCard
+              key={r.id}
+              r={r}
+              modelRows={modelRows}
+              busy={busy}
+              onEdit={setEdit}
+              onCopy={create}
+              onToggle={(r) => void action(r)}
+              onDelete={(r) => void action(r, true)}
+            />
+          ))}
+        </div>
+        {!filtered.length && !resource.loading && !resource.error && (
+          <Empty
+            text={q || category || status ? "没有匹配的模板" : "暂无创作模板"}
+            help={
+              q || category || status
+                ? "请调整搜索词、分类或上下架筛选条件。"
+                : "创建模板、关联真实模型并上架后，小程序会自动展示。"
+            }
           />
-        ))}
-      </div>
-      {!filtered.length && !resource.loading && !resource.error && (
-        <Empty
-          text={q || category || status ? "没有匹配的模板" : "暂无创作模板"}
-          help={
-            q || category || status
-              ? "请调整搜索词、分类或上下架筛选条件。"
-              : "创建模板、关联真实模型并上架后，小程序会自动展示。"
-          }
-        />
-      )}
-      <div>
-        <Pagination
-          total={resource.data?.total || 0}
-          size={12}
-          page={current}
-          onChange={setPage}
-        />
-      </div>
+        )}
+        <div>
+          <Pagination
+            total={resource.data?.total || 0}
+            size={12}
+            page={current}
+            onChange={setPage}
+          />
+        </div>
+      </CatalogResults>
       {edit && (
         <TemplateEditor
           initial={edit}

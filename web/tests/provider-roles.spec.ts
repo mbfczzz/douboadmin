@@ -104,40 +104,15 @@ test("分享码 tabs follow the role", async ({ page }) => {
   );
 });
 
-test("the platform picks S1 or S2 under a 分公司; an S1 adds S2", async ({
+test("the platform can add branches but has no manual child creation", async ({
   page,
 }) => {
   await open(page);
-  const bodies: Record<string, unknown>[] = [];
-  await page.route("**/api/admin/partners", (route) => {
-    if (route.request().method() !== "POST") return route.fallback();
-    bodies.push(route.request().postDataJSON());
-    return route.fulfill({ json: tree[2] });
-  });
-  await expect(row(page, "质检推荐官").getByText("新增子级")).toHaveCount(0);
-  for (const [parent, role] of [
-    [longName, "S2 推荐官"],
-    ["质检子级服务商", ""],
-  ]) {
-    await row(page, parent).getByRole("button", { name: "新增子级" }).click();
-    const form = page.getByRole("dialog", { name: "新增下级服务商" });
-    const level = form.getByLabel("服务商级别");
-    if (role) {
-      await expect(level.locator("option")).toHaveText([
-        "S1 服务商",
-        "S2 推荐官",
-      ]);
-      await level.selectOption({ label: role });
-    } else await expect(level).toHaveCount(0);
-    await form.getByLabel("服务商名称").fill("新下级");
-    await form.getByRole("button", { name: "保存服务商" }).click();
-    await expect(form).toHaveCount(0);
-  }
-  expect(bodies.map((b) => [b.parentId, b.role])).toEqual([
-    ["qa-provider", "s2"],
-    ["qa-child", "s2"],
-  ]);
-  expect(bodies.every((b) => !("users" in b))).toBe(true);
+  await expect(page.getByRole("button", { name: "新增子级" })).toHaveCount(0);
+  await page.getByRole("button", { name: "新增分公司", exact: true }).click();
+  const form = page.getByRole("dialog", { name: "新增分公司", exact: true });
+  await expect(form.getByLabel("服务商名称")).toBeVisible();
+  await expect(form.getByLabel("服务商级别")).toHaveCount(0);
 });
 
 test("provider logins grow only by codes and see no registrations", async ({

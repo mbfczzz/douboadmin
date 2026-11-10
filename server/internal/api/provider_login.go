@@ -4,7 +4,6 @@ import (
 	"crypto/rand"
 	"encoding/json"
 	"errors"
-	"log/slog"
 	"net/http"
 	"time"
 
@@ -86,46 +85,4 @@ func (a *Server) providerPassword(w http.ResponseWriter, r *http.Request) {
 	_ = json.Unmarshal(created.Data, &saved)
 	a.savePassword(r, id, password, saved.PasswordChangedAt)
 	reply(w, 200, map[string]string{"account": profile.Phone, "password": password})
-}
-
-// providerLogin keeps a sub-provider's generated password, sealed with the
-// integration key, so the provider center can keep showing it.
-type providerLogin struct {
-	Sealed    string    `json:"sealed"`
-	ChangedAt time.Time `json:"changedAt"`
-}
-
-func (a *Server) savePassword(r *http.Request, partner, password string, changed time.Time) {
-	if a.Integrations == nil {
-		return
-	}
-	sealed, e := a.Integrations.SealSecret("provider-login/"+partner, password)
-	if e == nil {
-		row, err := a.Store.Get(r.Context(), "provider_logins", partner)
-		if errors.Is(err, core.ErrNotFound) {
-			row, err = core.Record{ID: partner, Owner: partner}, nil
-		}
-		if err == nil {
-			row.Data = core.Data(providerLogin{Sealed: sealed, ChangedAt: changed})
-			_, e = a.Store.Put(r.Context(), "provider_logins", row, row.Version)
-		} else {
-			e = err
-		}
-	}
-	if e != nil {
-		slog.Warn("saving provider password failed", "error", e)
-	}
-}
-
-func (a *Server) savedPassword(r *http.Request, partner string, account core.AdminAccount) (string, bool) {
-	if a.Integrations == nil {
-		return "", false
-	}
-	row, e := a.Store.Get(r.Context(), "provider_logins", partner)
-	var v providerLogin
-	if e != nil || json.Unmarshal(row.Data, &v) != nil || !v.ChangedAt.Equal(account.PasswordChangedAt) {
-		return "", false
-	}
-	password, e := a.Integrations.OpenSecret("provider-login/"+partner, v.Sealed)
-	return password, e == nil
 }

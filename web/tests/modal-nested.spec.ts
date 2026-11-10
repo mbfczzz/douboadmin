@@ -14,10 +14,10 @@ for (const width of [1440, 390, 320]) {
     const audit = (name: string) => inspectModal(page, `${width}-${name}`);
     const top = () => page.getByRole("dialog").last();
     await page
-      .getByRole("button", { name: "新增子级", exact: true })
+      .getByRole("button", { name: "新增分公司", exact: true })
       .first()
       .click();
-    await audit("新增下级服务商");
+    await audit("新增分公司");
     await closeTop(page);
     const row = page.locator(".provider-tree-row").first();
     const open = async (button: string, title: string) => {

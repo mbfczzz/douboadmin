@@ -28,20 +28,25 @@ func TestPartnerTreeListsEveryRole(t *testing.T) {
 	}
 }
 
-func TestPlatformGrowsProvidersByRole(t *testing.T) {
+func TestPlatformCannotManuallyCreateSubproviders(t *testing.T) {
 	a, _, _ := setup(t)
 	admin := adminLoginToken(t, a, "admin", "test-pass")
 	branch := createBranch(t, a, admin, "grow")
 	s1 := createProvider(t, a, admin, "grow-s1", branch, "S1", "s1", nil)
 	s2 := createProvider(t, a, admin, "grow-s2", s1, "S2", "s2", nil)
-	// The platform adds 分公司; a 分公司 adds S1 and S2; an S1 adds S2.
+	// Every lower tier is scan-only, including otherwise valid parent/role pairs.
 	for _, c := range []struct{ parent, role string }{
 		{core.RootPartner, "s1"}, {core.RootPartner, "s2"}, {core.RootPartner, ""},
+		{branch, "s1"}, {branch, "s2"}, {s1, "s2"},
 		{branch, "branch"}, {s1, "s1"}, {s1, "branch"}, {s2, "s2"}, {s2, "s1"},
 	} {
 		w := call(a, "POST", "/api/admin/partners", admin, "grow-"+c.parent+"-"+c.role, map[string]any{"parentId": c.parent, "name": "越级", "role": c.role})
-		if w.Code != 400 || !strings.Contains(w.Body.String(), "不能添加这一级") {
+		if w.Code != 400 || !strings.Contains(w.Body.String(), "只能通过扫码") {
 			t.Fatal("growth rule", c, w.Code, w.Body.String())
 		}
+	}
+	rows, err := a.Partners.Tree(t.Context())
+	if err != nil || len(rows) != 3 {
+		t.Fatal("a rejected creation changed the tree", len(rows), err)
 	}
 }

@@ -1,6 +1,11 @@
 import { test, expect, type Page } from "@playwright/test";
 import { answerAsk, confirmSubmission, login } from "./helpers";
-import { createProvider, providerCode, miniUser } from "./partner-helpers";
+import {
+  createProvider,
+  providerCode,
+  miniUser,
+  scanProvider,
+} from "./partner-helpers";
 
 test.skip(
   process.env.PARTNER_ACCEPTANCE !== "true",
@@ -10,6 +15,7 @@ test.skip(
 // The registration row of one mini-program user on the 小程序用户 page.
 async function registration(page: Page, userId: string) {
   await page.getByRole("button", { name: "小程序用户", exact: true }).click();
+  await page.getByRole("tab", { name: "扫码登记", exact: true }).click();
   const section = page.getByRole("region", { name: "扫码登记" });
   await section.getByPlaceholder("搜索姓名、手机号或用户编号").fill(userId);
   const row = section.locator("tbody tr").filter({ hasText: userId });
@@ -28,12 +34,7 @@ test("scans only register; 总部 opens or rejects; members can be suspended", a
   const stamp = Date.now();
   const branch = await createProvider(page, `验收分公司${stamp}`);
   expect(branch.data.role).toBe("branch");
-  const s1 = await createProvider(
-    page,
-    `验收 S1 ${stamp}`,
-    `验收分公司${stamp}`,
-    "S1 服务商",
-  );
+  const s1 = await scanProvider(page, branch.id, "s1", `验收 S1 ${stamp}`);
   expect(s1.data.role).toBe("s1");
 
   // A member scan registers and waits for 总部.

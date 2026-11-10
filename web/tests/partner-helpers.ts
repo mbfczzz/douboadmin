@@ -1,26 +1,13 @@
 import { expect, type APIRequestContext, type Page } from "@playwright/test";
 
-// Adds a provider in the admin (platform only): a 分公司 from the page
-// header, or a child from a row's 新增子级 with an optional role choice.
-export async function createProvider(
-  page: Page,
-  name: string,
-  parent?: string,
-  role?: string,
-) {
-  if (parent)
-    await page
-      .locator(".provider-tree-row")
-      .filter({ hasText: parent })
-      .first()
-      .getByRole("button", { name: "新增子级" })
-      .click();
-  else await page.getByRole("button", { name: "新增分公司" }).click();
+// Only branches are manually created from the platform header.
+export async function createProvider(page: Page, name: string) {
+  await page.getByRole("button", { name: "新增分公司" }).click();
   const dialog = page.getByRole("dialog", {
-    name: /新增(分公司|下级服务商)/,
+    name: "新增分公司",
+    exact: true,
   });
   await dialog.getByLabel("服务商名称").fill(name);
-  if (role) await dialog.getByLabel("服务商级别").selectOption({ label: role });
   // The login account and password come prefilled; keep the defaults.
   await expect(dialog.getByLabel("账号", { exact: true })).toHaveValue(
     /^sp\d{6}$/,
@@ -53,7 +40,7 @@ export async function providerCode(
 
 // A signed-in mini-program user who finished the SMS registration step; the
 // development server returns the code instead of sending it.
-export async function miniUser(request: APIRequestContext) {
+export async function miniUser(request: APIRequestContext, name = "验收用户") {
   const signIn = await request.post("/api/auth/login", {
     data: { demoId: crypto.randomUUID() },
   });
@@ -68,8 +55,46 @@ export async function miniUser(request: APIRequestContext) {
   expect(sent.status()).toBe(200);
   const registered = await request.post("/api/access/profile", {
     headers,
-    data: { name: "验收用户", phone, code: (await sent.json()).debugCode },
+    data: { name, phone, code: (await sent.json()).debugCode },
   });
   expect(registered.status()).toBe(200);
   return { ...user, headers };
+}
+
+// Isolated acceptance setup follows the real invitation and approval flow.
+export async function scanProvider(
+  page: Page,
+  parent: string,
+  kind: "s1" | "s2",
+  name: string,
+) {
+  const user = await miniUser(page.request, name);
+  const joined = await page.request.post("/api/access/join", {
+    headers: user.headers,
+    data: {
+      code: await providerCode(page.request, parent, kind),
+      method: "scan",
+    },
+  });
+  expect(joined.status()).toBe(200);
+  const response = await page.request.get(
+    `/api/admin/registrations?status=pending&q=${encodeURIComponent(user.userId)}`,
+  );
+  expect(response.status()).toBe(200);
+  const pending = (await response.json()).items.find(
+    (row: { id: string }) => row.id === user.userId,
+  );
+  expect(pending).toBeTruthy();
+  const approved = await page.request.put(
+    `/api/admin/registrations/${user.userId}`,
+    {
+      data: { approve: true, reason: "", version: pending.version },
+    },
+  );
+  expect(approved.status()).toBe(200);
+  const overview = await page.request.get(
+    `/api/admin/partners/${pending.data.partnerId}`,
+  );
+  expect(overview.status()).toBe(200);
+  return (await overview.json()).record;
 }

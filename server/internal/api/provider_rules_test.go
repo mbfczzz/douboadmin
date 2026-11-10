@@ -36,7 +36,7 @@ func TestProviderCreateRetryAndChildPricing(t *testing.T) {
 		t.Fatal(w.Code, w.Body.String())
 	}
 	provider := adminLoginToken(t, a, "rules-s1", "rules-s1-password-2026")
-	// Only the platform adds providers; the S1 then manages its child.
+	// A legacy child remains manageable under the same pricing rules.
 	child := createProvider(t, a, admin, "rules-child", s1, "S1-child", "s2", nil)
 	version, data = providerData(t, a, provider, child)
 	if data["childMarginBps"].(float64) != 3000 {

@@ -4,28 +4,24 @@ import type { Row } from "../api";
 import Modal from "../components/Modal";
 import ProviderLoginFields from "./ProviderLoginFields";
 import type { Notify } from "../navigation";
-import { growth, type Partner } from "./types";
-import { roleName } from "../business/types";
+import type { Partner } from "./types";
 import { useCommand } from "./useCommand";
 
-// Edits a provider, or adds one below `parent` (platform only): a 分公司
-// under the platform, an S1 or S2 under a 分公司, an S2 under an S1.
+// Edit an existing provider or add a platform branch. Sub-providers join
+// through scan registration and have no manual creation form.
 export default function ProviderForm({
-  parent,
   row,
   onSaved,
   onClose,
   notify,
 }: {
-  parent?: Row<Partner> | "root";
   row?: Row<Partner>;
   onSaved: () => Promise<void>;
   onClose: () => void;
   notify: Notify;
 }) {
   const [dirty, setDirty] = useState(false);
-  const command = useCommand(),
-    roles = growth[parent === "root" ? "root" : parent?.data.role || ""] || [];
+  const command = useCommand();
   const form = (
     <form
       className="edit-form"
@@ -52,9 +48,9 @@ export default function ProviderForm({
             );
           else
             await command.send("/admin/partners", {
-              parentId: parent === "root" ? "root" : parent?.id,
+              parentId: "root",
               name: String(data.get("name")),
-              role: String(data.get("role") || roles[0]),
+              role: "branch",
               account: {
                 username: String(data.get("accountUsername") || "").trim(),
                 password: String(data.get("accountPassword") || ""),
@@ -93,21 +89,7 @@ export default function ProviderForm({
               <p className="quiet">停用会暂停整个下级链路的使用权限。</p>
             </>
           ) : (
-            <>
-              {roles.length > 1 && (
-                <label>
-                  服务商级别
-                  <select name="role" defaultValue={roles[0]}>
-                    {roles.map((role) => (
-                      <option key={role} value={role}>
-                        {roleName(role)}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              )}
-              <ProviderLoginFields disabled={command.busy} />
-            </>
+            <ProviderLoginFields disabled={command.busy} />
           )}
         </fieldset>
       </div>
@@ -129,13 +111,8 @@ export default function ProviderForm({
   return (
     <Modal
       className="form-modal"
-      title={
-        row ? "编辑服务商" : parent === "root" ? "新增分公司" : "新增下级服务商"
-      }
-      subtitle={
-        row?.data.name ||
-        (parent && parent !== "root" ? `上级：${parent.data.name}` : undefined)
-      }
+      title={row ? "编辑服务商" : "新增分公司"}
+      subtitle={row?.data.name}
       onClose={guardedClose(command.busy, onClose)}
     >
       {form}

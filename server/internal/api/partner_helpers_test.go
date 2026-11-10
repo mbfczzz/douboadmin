@@ -7,9 +7,31 @@ import (
 	"doubo/server/internal/core"
 )
 
-// createProvider adds a provider in the admin (platform only).
+// Branches use the public creation endpoint. Lower tiers are legacy fixture
+// records for management tests; production creates them through scan joins.
 func createProvider(t *testing.T, a *Server, token, key, parent, name, role string, account map[string]string) string {
 	t.Helper()
+	if role != core.RoleBranch {
+		row, err := a.Partners.Create(t.Context(), parent, name, role, "fixture-"+key, "fixture")
+		if err != nil {
+			t.Fatal("seed provider", err)
+		}
+		_, _, found, err := a.providerAccount(t.Context(), row.ID)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if account != nil && !found {
+			input := map[string]any{"version": 0, "role": "partner"}
+			for k, v := range account {
+				input[k] = v
+			}
+			w := call(a, "PUT", "/api/admin/partners/"+row.ID+"/account", token, "", input)
+			if w.Code != 201 {
+				t.Fatal("seed provider login", w.Code, w.Body.String())
+			}
+		}
+		return row.ID
+	}
 	body := map[string]any{"parentId": parent, "name": name, "role": role}
 	if account != nil {
 		body["account"] = account

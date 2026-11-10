@@ -1,6 +1,6 @@
 import PageHeader from "../components/PageHeader";
-import RequestState from "../components/RequestState";
-import { useResource } from "../hooks/useResource";
+import CatalogResults from "../components/CatalogResults";
+import { useCachedResource } from "../hooks/useCachedResource";
 import { useRememberedState } from "../hooks/useRememberedState";
 import { lazy, Suspense, useState } from "react";
 import { stateText, type Job } from "../api";
@@ -9,6 +9,7 @@ import Empty from "../components/Empty";
 import JobTable, { type JobAction } from "../components/JobTable";
 import { releaseJob } from "../components/JobRecovery";
 import type { PageProps } from "../navigation";
+import "./jobs.css";
 
 // The detail view loads when a task is opened.
 const GenerationDetail = lazy(() => import("../generation/GenerationDetail"));
@@ -17,7 +18,11 @@ export default function Jobs({ notify }: PageProps) {
     [search, setSearch] = useRememberedState("jobs.query", ""),
     [detail, setDetail] = useState<Job | null>(null);
   const [page, setPage] = useState(1);
-  const resource = useResource<{ items: Job[]; total: number; page: number }>(
+  const resource = useCachedResource<{
+    items: Job[];
+    total: number;
+    page: number;
+  }>(
     `/admin/jobs?page=${page}&status=${filter === "all" ? "" : filter}&q=${encodeURIComponent(search)}`,
     15000,
   );
@@ -35,16 +40,11 @@ export default function Jobs({ notify }: PageProps) {
   };
   const filteredJobs = jobs;
   return (
-    <>
+    <div className="catalog-page jobs-page">
       <PageHeader
         page="jobs"
         loading={resource.loading}
         onRefresh={resource.reload}
-      />
-      <RequestState
-        loading={resource.loading && !resource.data}
-        error={resource.error}
-        retry={resource.reload}
       />
       <section className="panel">
         <FilterBar
@@ -64,26 +64,35 @@ export default function Jobs({ notify }: PageProps) {
           }}
           placeholder="搜索提示词或任务编号"
         />
-        {filteredJobs.length ? (
-          <JobTable
-            jobs={filteredJobs}
-            pagination={{
-              page,
-              total: resource.data?.total || 0,
-              onChange: setPage,
-            }}
-            onAction={(k, j) => void act(k, j)}
-          />
-        ) : !resource.data || resource.error ? null : (
-          <Empty
-            text={jobs.length ? "暂无匹配的任务" : "暂无生成任务"}
-            help={
-              jobs.length
-                ? "请调整状态或搜索条件。"
-                : "用户开始创作后，内容会显示在这里。"
-            }
-          />
-        )}
+        <CatalogResults
+          label="生成任务列表"
+          loading={resource.loading && !resource.data && !resource.error}
+          error={resource.error}
+          retry={resource.reload}
+        >
+          {filteredJobs.length ? (
+            <JobTable
+              jobs={filteredJobs}
+              pagination={{
+                page,
+                total: resource.data?.total || 0,
+                onChange: setPage,
+              }}
+              onAction={(k, j) => void act(k, j)}
+            />
+          ) : !resource.data || resource.error ? null : (
+            <Empty
+              text={
+                filter !== "all" || search ? "暂无匹配的任务" : "暂无生成任务"
+              }
+              help={
+                filter !== "all" || search
+                  ? "请调整状态或搜索条件。"
+                  : "用户开始创作后，内容会显示在这里。"
+              }
+            />
+          )}
+        </CatalogResults>
       </section>
       {detail && (
         <Suspense fallback={null}>
@@ -93,6 +102,6 @@ export default function Jobs({ notify }: PageProps) {
           />
         </Suspense>
       )}
-    </>
+    </div>
   );
 }

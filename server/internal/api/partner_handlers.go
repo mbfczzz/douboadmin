@@ -101,8 +101,13 @@ func (a *Server) createPartner(w http.ResponseWriter, r *http.Request) {
 		Role     string                `json:"role"`
 		Account  *providerAccountInput `json:"account"`
 	}
-	// Providers grow by QR codes; only the platform adds one by hand.
+	// The platform can add branches by hand. All S1/S2 providers must enter
+	// through scan registration, even when the caller is a platform admin.
 	if !decode(w, r, &v) || !platformOnly(w, r) {
+		return
+	}
+	if v.ParentID != core.RootPartner || v.Role != core.RoleBranch {
+		fail(w, 400, "下级服务商只能通过扫码登记新增")
 		return
 	}
 	hash, key, actor := "", r.Header.Get("Idempotency-Key"), identity(r).ID

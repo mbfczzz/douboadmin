@@ -39,14 +39,13 @@ test("users and providers are isolated sidebar routes", async ({ page }) => {
     .getByRole("button", { name: `展开${longName}`, exact: true })
     .click();
   await expect(page.getByText("质检子级服务商", { exact: true })).toBeVisible();
-  await page
-    .locator(".provider-tree-row")
-    .filter({ hasText: longName })
-    .getByRole("button", { name: "新增子级", exact: true })
-    .click();
-  const createChild = page.getByRole("dialog", { name: "新增下级服务商" });
-  await createChild.getByLabel("服务商名称").fill("未保存的下级");
-  await page.screenshot({ path: "../.runtime/provider-create-child.png" });
+  await expect(
+    page.getByRole("button", { name: "新增子级", exact: true }),
+  ).toHaveCount(0);
+  await page.getByRole("button", { name: "新增分公司", exact: true }).click();
+  const createChild = page.getByRole("dialog", { name: "新增分公司" });
+  await createChild.getByLabel("服务商名称").fill("未保存的分公司");
+  await page.screenshot({ path: "../.runtime/provider-create-branch.png" });
   await createChild.getByRole("button", { name: "关闭", exact: true }).click();
   // Typed edits ask before they are discarded.
   await answerAsk(page, true);

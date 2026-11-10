@@ -1,0 +1,4 @@
+.jobs-page .toolbar .tabs {
+  flex-wrap: wrap;
+  gap: 0 18px;
+}

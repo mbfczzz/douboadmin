@@ -47,7 +47,7 @@ test("pending and stopped providers offer only what can work", async ({
   await expect(row("待开通S1").getByRole("button")).toHaveCount(0);
   await expect(
     row("正常分公司").getByRole("button", { name: "新增子级" }),
-  ).toHaveCount(1);
+  ).toHaveCount(0);
   for (const name of ["停用分公司", "停用下的S1"])
     await expect(
       row(name).getByRole("button", { name: "新增子级" }),

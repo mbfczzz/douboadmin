@@ -1,14 +1,15 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { api, type Row } from "../api";
 import Badge from "../components/Badge";
 import Empty from "../components/Empty";
 import FilterBar from "../components/FilterBar";
-import RequestState from "../components/RequestState";
+import CatalogResults from "../components/CatalogResults";
 import Tag, { IdChip } from "../components/Tag";
 import Table from "../business/Table";
 import { codeKindName, roleName } from "../business/types";
 import { ask } from "../confirm/ask";
 import { useResource } from "../hooks/useResource";
+import { useCachedResource } from "../hooks/useCachedResource";
 import type { Notify } from "../navigation";
 import { createdCell } from "./cells";
 
@@ -50,21 +51,26 @@ export default function Registrations({
     [page, setPage] = useState(1);
   // Typing settles before it queries; a new filter starts at page 1.
   useEffect(() => {
+    if (typed.trim() === query) return;
     const timer = setTimeout(() => {
       setQuery(typed.trim());
       setPage(1);
     }, 300);
     return () => clearTimeout(timer);
-  }, [typed]);
-  const resource = useResource<Page>(
+  }, [typed, query]);
+  const resource = useCachedResource<Page>(
       "/admin/registrations?" +
         new URLSearchParams({ status, q: query, page: String(page) }),
     ),
     items = resource.data?.items || [];
-  // The header's 刷新 reloads this list (skipping the first render).
-  const reload = resource.reload;
+  // A header refresh invalidates every status once per click; ordinary tab
+  // and search changes keep the other queries' snapshots.
+  const reload = resource.reload,
+    previousRefresh = useRef(refresh);
   useEffect(() => {
-    if (refresh) void reload();
+    if (previousRefresh.current === refresh) return;
+    previousRefresh.current = refresh;
+    void reload();
   }, [refresh, reload]);
   async function decide(row: Row<Registration>, approve: boolean) {
     const who = row.data.name || row.id,
@@ -107,20 +113,22 @@ export default function Registrations({
         onSearch={setTyped}
         placeholder="搜索姓名、手机号或用户编号"
       />
-      <RequestState
+      <CatalogResults
+        label="扫码登记列表"
         loading={resource.loading && !resource.data}
         error={resource.error}
         retry={resource.reload}
-      />
-      {resource.data &&
-        (items.length ? (
-          <List page={resource.data} setPage={setPage} decide={decide} />
-        ) : (
-          <Empty
-            text={query ? "没有匹配的登记" : "暂无登记"}
-            help={query ? "请调整搜索条件。" : "用户扫码登记后会显示在这里。"}
-          />
-        ))}
+      >
+        {resource.data &&
+          (items.length ? (
+            <List page={resource.data} setPage={setPage} decide={decide} />
+          ) : (
+            <Empty
+              text={query ? "没有匹配的登记" : "暂无登记"}
+              help={query ? "请调整搜索条件。" : "用户扫码登记后会显示在这里。"}
+            />
+          ))}
+      </CatalogResults>
     </section>
   );
 }

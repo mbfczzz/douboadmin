@@ -16,10 +16,8 @@ type Props = {
   query: string;
   refresh: number;
   open: (kind: ProviderAction, row: Row<Partner>) => void;
-  add?: (row: Row<Partner>) => void;
   parent?: string;
   depth?: number;
-  active?: boolean;
 };
 const states: Record<string, [string, string]> = {
   active: ["已启用", "succeeded"],
@@ -29,8 +27,7 @@ const states: Record<string, [string, string]> = {
 
 function ProviderNode({ row, ...props }: Props & { row: ProviderItem }) {
   const [expanded, setExpanded] = useState(false);
-  const depth = props.depth || 0,
-    active = props.active !== false && row.data.status === "active";
+  const depth = props.depth || 0;
   const [label, tone] = states[row.data.status] || [row.data.status, "muted"];
   const style = { "--tree-depth": depth } as CSSProperties;
   return (
@@ -77,11 +74,7 @@ function ProviderNode({ row, ...props }: Props & { row: ProviderItem }) {
             <Badge state={tone} label={label} />
           </span>
         </div>
-        <ProviderActions
-          item={row}
-          open={props.open}
-          add={active ? props.add : undefined}
-        />
+        <ProviderActions item={row} open={props.open} />
       </div>
       {expanded && row.children > 0 && (
         <div className="provider-tree-children" role="group" style={style}>
@@ -90,7 +83,6 @@ function ProviderNode({ row, ...props }: Props & { row: ProviderItem }) {
             parent={row.id}
             query=""
             depth={depth + 1}
-            active={active}
           />
         </div>
       )}

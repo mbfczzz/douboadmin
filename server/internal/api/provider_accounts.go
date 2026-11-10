@@ -50,7 +50,11 @@ func (a *Server) createProviderAccount(ctx context.Context, partnerID, name, has
 		in.Role = "partner"
 	}
 	account := core.AdminAccount{Username: strings.TrimSpace(in.Username), Name: name, Role: in.Role, PartnerID: partnerID, PasswordHash: hash, PasswordChangedAt: time.Now().UTC(), CreatedBy: actor}
-	return a.Store.Put(ctx, "admin_accounts", core.Record{ID: adminID(account.Username), Data: core.Data(account)}, 0)
+	row, err := a.Store.Put(ctx, "admin_accounts", core.Record{ID: adminID(account.Username), Data: core.Data(account)}, 0)
+	if err == nil && in.Password != "" {
+		a.saveAdminPassword(ctx, partnerID, in.Password, account.PasswordChangedAt)
+	}
+	return row, err
 }
 
 func (a *Server) providerAccount(ctx context.Context, partnerID string) (core.Record, core.AdminAccount, bool, error) {
@@ -72,7 +76,7 @@ func (a *Server) getProviderAccount(w http.ResponseWriter, r *http.Request) {
 	if !a.inPartnerScope(w, r, id) {
 		return
 	}
-	row, _, ok, err := a.providerAccount(r.Context(), id)
+	row, account, ok, err := a.providerAccount(r.Context(), id)
 	if err != nil {
 		dbError(w, err)
 		return
@@ -81,7 +85,11 @@ func (a *Server) getProviderAccount(w http.ResponseWriter, r *http.Request) {
 		reply(w, 200, map[string]any{"account": nil})
 		return
 	}
-	reply(w, 200, map[string]any{"account": a.adminView(r.Context(), row)})
+	out := map[string]any{"account": a.adminView(r.Context(), row)}
+	if password, ok := a.adminPassword(r.Context(), id, account); ok {
+		out["password"] = password
+	}
+	reply(w, 200, out)
 }
 
 // saveProviderAccount creates the login for an existing provider or changes
@@ -143,6 +151,9 @@ func (a *Server) saveProviderAccount(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		dbError(w, err)
 		return
+	}
+	if in.Password != "" {
+		a.saveAdminPassword(r.Context(), id, in.Password, account.PasswordChangedAt)
 	}
 	reply(w, 200, map[string]any{"account": a.adminView(r.Context(), saved)})
 }

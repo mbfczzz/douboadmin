@@ -62,6 +62,9 @@ func TestS2InviteMakesASubProviderWithItsOwnLogin(t *testing.T) {
 	if saved := centerPassword(t, a, user); saved != login.Password {
 		t.Fatal("saved password", saved)
 	}
+	if _, saved := providerPasswordView(t, a, s2, s1Login); saved != login.Password {
+		t.Fatal("mini-program password unavailable in the admin")
+	}
 	// Once S1 changes it in the admin, the old one is no longer shown.
 	acct := call(a, "GET", "/api/admin/partners/"+s2+"/account", s1Login, "", nil)
 	var current struct{ Account struct{ Version int64 } }
@@ -72,6 +75,9 @@ func TestS2InviteMakesASubProviderWithItsOwnLogin(t *testing.T) {
 	if saved := centerPassword(t, a, user); saved != "" {
 		t.Fatal("stale password shown", saved)
 	}
+	if _, saved := providerPasswordView(t, a, s2, s1Login); saved != "changed-by-parent-2026" {
+		t.Fatal("admin reset not shown in the admin")
+	}
 	// A reset in the mini-program shows the new one again.
 	if w = call(a, "POST", "/api/provider/password", user, "", nil); w.Code != 200 || json.Unmarshal(w.Body.Bytes(), &login) != nil {
 		t.Fatal(w.Code, w.Body.String())
@@ -79,6 +85,9 @@ func TestS2InviteMakesASubProviderWithItsOwnLogin(t *testing.T) {
 	adminLoginToken(t, a, login.Account, login.Password)
 	if saved := centerPassword(t, a, user); saved != login.Password {
 		t.Fatal("reset password not shown", saved)
+	}
+	if _, saved := providerPasswordView(t, a, s2, s1Login); saved != login.Password {
+		t.Fatal("mini-program reset left an old admin password visible")
 	}
 }
 
