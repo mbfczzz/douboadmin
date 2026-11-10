@@ -50,6 +50,9 @@ func (s *Service) Decide(ctx context.Context, user string, approve bool, reason 
 		if out, e = put(tx, "registrations", row, reg); e != nil {
 			return e
 		}
+		if e = saveCodeUse(tx, user, reg); e != nil {
+			return e
+		}
 		return audit(tx, user, "registration_"+reg.Status, actor, reason, reg)
 	})
 	return

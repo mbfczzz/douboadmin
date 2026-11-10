@@ -46,6 +46,9 @@ func (s *Service) Join(ctx context.Context, user, input, method string) (out cor
 			}
 			return rulef("账号已开通，不能重复登记")
 		}
+		if e := unusedCode(tx, user, code); e != nil {
+			return e
+		}
 		reg := core.Registration{CodeKind: sc.Kind, Code: code, Method: method, Name: profile.Name, Phone: profile.Phone, Status: "pending", RegisteredAt: nowUTC()}
 		switch sc.Kind {
 		case MemberCode, PromoCode:
@@ -166,6 +169,9 @@ func saveRegistration(tx store.Transaction, user string, reg core.Registration) 
 		return e
 	}
 	if _, e = put(tx, "registrations", row, reg); e != nil {
+		return e
+	}
+	if e = saveCodeUse(tx, user, reg); e != nil {
 		return e
 	}
 	return audit(tx, user, "register", "user:"+user, "扫码登记", reg)

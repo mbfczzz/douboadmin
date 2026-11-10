@@ -98,6 +98,9 @@ func TestRejectedInviteClosesTheProviderAndAllowsAnotherScan(t *testing.T) {
 	if a, _ := s.Access(ctx, "boss"); a.Active || a.Status != "rejected" {
 		t.Fatal(a)
 	}
+	if _, e := s.ResetShare(ctx, branch, S1Code, "admin"); e != nil {
+		t.Fatal(e)
+	}
 	again := invite(t, s, ctx, branch, S1Code, "boss")
 	if again == first || partnerOf(t, s, ctx, first).Status != "rejected" {
 		t.Fatal("re-registration reused the rejected provider")

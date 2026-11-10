@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Memberships from "./Memberships";
+import CodeUses from "./CodeUses";
 import CodeView from "./CodeCard";
 import OwnerBindCode from "./OwnerBindCode";
 import { useMe } from "../session";
@@ -78,6 +79,7 @@ export default function ShareCode({ id, view, changed, notify }: Scope) {
       {!ownerUser && !self && (
         <OwnerBindCode id={id} name={name} notify={notify} />
       )}
+      <CodeUses id={id} kind={kind} />
       <Memberships id={id} notify={notify} changed={changed} />
     </>
   );

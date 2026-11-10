@@ -96,6 +96,10 @@ func TestRejectedUserCanScanAgain(t *testing.T) {
 	if e != nil || !strings.Contains(string(row.Data), `"status":"rejected"`) {
 		t.Fatal("rejected provider", string(row.Data), e)
 	}
+	if _, e := a.Partners.ResetShare(t.Context(), branch, "", "admin"); e != nil {
+		t.Fatal(e)
+	}
+	member, _ = a.Partners.ShareCode(t.Context(), branch, "admin")
 	if status, body := joinHTTP(a, user, member); status != 200 || !strings.Contains(body, `"status":"review"`) {
 		t.Fatal("rejected user could not register again", status, body)
 	}

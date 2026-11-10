@@ -15,6 +15,11 @@ func init() {
 			c("codeKind", Key), c("code", Key), c("method", Key), c("name", Short), c("phone", Key),
 			c("registeredAt", Time), c("reason", Text), c("decidedBy", Key), c("decidedAt", Time),
 		}, Indexes: []string{"status", "partner_id"}},
+		Table{Name: "code_uses", Comment: "二维码使用记录；同一用户同一码一条，审批状态同步", Owner: "发码服务商", Cols: []Col{
+			c("userId", Key), c("nickname", Short), c("name", Short), c("phone", Key),
+			c("code", Key), c("codeKind", Key), c("role", Key), c("partnerId", Key), c("referrer", Key),
+			c("method", Key), c("status", Key), c("reason", Text), c("registeredAt", Time), c("decidedAt", Time),
+		}, Indexes: []string{"code_kind", "user_id,code"}},
 		Table{Name: "memberships", Comment: "会员归属与开通状态；id = 用户 id", Owner: "用户", Cols: []Col{
 			c("partnerId", Key), c("status", Key), c("codeId", Key), c("method", Key), c("referrer", Key),
 			c("activatedAt", Time), c("changedAt", Time), c("reason", Text),

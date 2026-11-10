@@ -108,6 +108,14 @@ func TestDisableUnbindAndRegisterAgain(t *testing.T) {
 	if _, e = s.ChangeMembership(ctx, "a", "unbound", "解除绑定", "admin", disabled.Version); e != nil {
 		t.Fatal(e)
 	}
+	if _, e = s.Join(ctx, "a", code, "scan"); e == nil {
+		t.Fatal("same code reused after unbind")
+	}
+	fresh, e := s.ResetShare(ctx, s1, MemberCode, "admin")
+	if e != nil {
+		t.Fatal(e)
+	}
+	code = fresh.Code
 	register(t, s, ctx, code, "a")
 	decide(t, s, ctx, "a", true)
 	if access, _ := s.Access(ctx, "a"); !access.Active {

@@ -9,9 +9,9 @@ import (
 func TestPreviousPeriodTotals(t *testing.T) {
 	r := newReport(7)
 	now := time.Now()
-	before := now.AddDate(0, 0, -8)               // inside the previous 7 days
-	tooOld := now.AddDate(0, 0, -20)              // outside both periods
-	later := now.AddDate(0, 0, -7).Add(time.Hour) // previous period, but after "now - 7 days"
+	before := now.AddDate(0, 0, -8)    // inside the previous 7 days
+	tooOld := now.AddDate(0, 0, -20)   // outside both periods
+	later := r.since.Add(-time.Second) // last second of the previous calendar period, including near midnight
 	rec := func(ns, id, owner string, at time.Time, data any) {
 		r.record(ns, core.Record{ID: id, Owner: owner, CreatedAt: at, Data: core.Data(data)})
 	}

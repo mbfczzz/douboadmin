@@ -80,5 +80,8 @@ func closePendingBind(tx store.Transaction, user, partner, actor string) error {
 	now := nowUTC()
 	reg.Status, reg.Reason, reg.DecidedBy, reg.DecidedAt = "rejected", "后台已解除绑定", actor, &now
 	_, e = put(tx, "registrations", row, reg)
+	if e == nil {
+		e = saveCodeUse(tx, user, reg)
+	}
 	return e
 }

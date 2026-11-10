@@ -71,6 +71,9 @@ export async function openCodes(
     route.fulfill({ json: { items: [], page: 1, size: 20, total: 0 } }),
   );
   const requests: string[] = [];
+  await page.route("**/api/admin/partners/code-provider/code-uses?*", (route) =>
+    route.fulfill({ json: { items: [], page: 1, size: 20, total: 0 } }),
+  );
   await page.route("**/api/admin/partners/code-provider/codes/*", (route) => {
     const kind = new URL(route.request().url()).pathname
       .split("/")

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import CodeView from "./CodeCard";
 import BoundOwner from "./BoundOwner";
+import CodeUses from "./CodeUses";
 import type { Notify } from "../navigation";
 
 // Binding the provider's own responsible person is a management action,
@@ -23,22 +24,25 @@ export default function OwnerBindCode({
     >
       <summary>负责人绑定码</summary>
       {open && (
-        <CodeView
-          path={path}
-          title="负责人绑定码"
-          note="仅用于负责人绑定自己的小程序账号，总部开通后生效；一次有效。"
-          file={`${name}-负责人绑定码.png`}
-          notify={notify}
-          bound={(user, pending, reload) => (
-            <BoundOwner
-              path={path}
-              user={user}
-              pending={pending}
-              reload={reload}
-              notify={notify}
-            />
-          )}
-        />
+        <>
+          <CodeView
+            path={path}
+            title="负责人绑定码"
+            note="仅用于负责人绑定自己的小程序账号，总部开通后生效；一次有效。"
+            file={`${name}-负责人绑定码.png`}
+            notify={notify}
+            bound={(user, pending, reload) => (
+              <BoundOwner
+                path={path}
+                user={user}
+                pending={pending}
+                reload={reload}
+                notify={notify}
+              />
+            )}
+          />
+          <CodeUses id={id} kind="bind" />
+        </>
       )}
     </details>
   );

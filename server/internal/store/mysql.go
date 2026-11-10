@@ -59,6 +59,9 @@ func (m *MySQL) Migrate(ctx context.Context) error {
 	if err := m.importLegacyRecords(ctx); err != nil {
 		return fmt.Errorf("import legacy records: %w", err)
 	}
+	if err := BackfillCodeUses(ctx, m); err != nil {
+		return fmt.Errorf("backfill QR usage records: %w", err)
+	}
 	return nil
 }
 func (m *MySQL) Get(ctx context.Context, ns, id string) (core.Record, error) {
