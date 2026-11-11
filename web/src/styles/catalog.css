@@ -132,7 +132,7 @@
 .catalog-search:focus-within,
 .search:focus-within {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px #f0177f29;
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 .catalog-table th {
   position: sticky;

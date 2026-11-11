@@ -1,8 +1,8 @@
 .preview-page {
   padding: 24px 20px calc(130px + env(safe-area-inset-bottom));
-  --td-button-primary-bg-color: #e2e7e3;
-  --td-button-primary-color: #1a211d;
-  --td-button-primary-border-color: #e2e7e3;
+  --td-button-primary-bg-color: #fafafa;
+  --td-button-primary-color: #101113;
+  --td-button-primary-border-color: #fafafa;
   --td-button-border-radius: 7px;
 }
 .preview {
@@ -25,7 +25,7 @@
   align-items: center;
   justify-content: center;
   border-radius: 6px;
-  background: #131516bb;
+  background: #101113bb;
 }
 .preview-zoom::after {
   content: "";

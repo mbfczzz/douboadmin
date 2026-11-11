@@ -77,7 +77,7 @@
             <t-icon
               name="{{item.input.kind==='image'?'image':'play-circle'}}"
               size="32"
-              color="#9BCBAA"
+              color="#22c55e"
             />
           </view>
           <text class="work-state">{{item.stateText}}</text>

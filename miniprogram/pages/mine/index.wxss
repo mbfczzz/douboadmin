@@ -15,9 +15,9 @@
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: #25372c;
-  border: 1rpx solid #577b62;
-  color: #bcdcc5;
+  background: #2d2f34;
+  border: 1rpx solid #22c55e;
+  color: #c5c8ce;
   font-size: 43rpx;
   flex-shrink: 0;
 }
@@ -30,7 +30,7 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 17px;
-  font-weight: 700;
+  font-weight: 600;
   display: block;
   margin-bottom: 10px;
 }
@@ -55,7 +55,7 @@
 .numbers > view > text:first-child {
   display: block;
   font-size: 18px;
-  font-weight: 700;
+  font-weight: 600;
 }
 .numbers > view > text:last-child {
   font-size: 11px;
@@ -87,7 +87,7 @@
   top: 10rpx;
   left: 10rpx;
   font-size: 11px;
-  background: #13151699;
+  background: #101113bb;
   padding: 5rpx 9rpx;
   border-radius: 10px;
 }
@@ -132,7 +132,7 @@
   flex: 1;
 }
 .menu > t-icon:last-child {
-  color: #818b90;
+  color: #969ba4;
 }
 .menu::after {
   content: "";

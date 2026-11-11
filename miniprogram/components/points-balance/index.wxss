@@ -6,7 +6,7 @@
   margin: 0;
   padding: 24rpx;
   border-radius: 20rpx;
-  background: var(--td-bg-color-container, var(--ui-surface, #1c1f21));
+  background: var(--td-bg-color-container, var(--ui-surface, #1a1b1f));
 }
 .balance-copy {
   min-width: 0;
@@ -15,13 +15,13 @@
 .label,
 .note {
   display: block;
-  color: var(--td-text-color-secondary, var(--ui-muted, #a0a8ac));
+  color: var(--td-text-color-secondary, var(--ui-muted, #969ba4));
   font-size: var(--ui-font-note, 12px);
 }
 .amount {
   display: block;
   margin: 6rpx 0;
-  color: var(--td-text-color-primary, #e9eceb);
+  color: var(--td-text-color-primary, #f5f6f7);
   font-size: 38rpx;
   font-weight: 600;
   overflow-wrap: anywhere;
@@ -34,8 +34,8 @@ button.action {
   padding: 11px 12px;
   line-height: 22px;
   border-radius: 14rpx;
-  color: var(--td-button-primary-color, var(--ui-on-brand, #17281d));
-  background: var(--td-brand-color, var(--ui-brand, #9bcbaa));
+  color: #fff;
+  background: var(--ui-magenta, #e10b72);
   font-size: var(--ui-font-body, 14px);
 }
 .action::after {
@@ -43,7 +43,7 @@ button.action {
 }
 .error {
   display: block;
-  color: #e5bfa6;
+  color: #f05252;
   font-size: 24rpx;
   padding: 12rpx 0;
 }

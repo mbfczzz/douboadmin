@@ -81,8 +81,9 @@ nav button:hover {
 }
 nav button.active {
   position: relative;
-  color: var(--accent-text);
-  background: var(--accent-soft);
+  color: var(--accent-ink);
+  background: var(--nav-selected);
+  box-shadow: 0 2px 12px #beedf838;
   font-weight: 650;
 }
 /* A short accent bar marks the current page without glaring. */
@@ -94,7 +95,7 @@ nav button.active::before {
   left: 0;
   width: 3px;
   border-radius: 0 3px 3px 0;
-  background: var(--accent);
+  background: transparent;
 }
 .sidebar-bottom {
   flex-shrink: 0;

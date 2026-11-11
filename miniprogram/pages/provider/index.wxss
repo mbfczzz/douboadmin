@@ -27,7 +27,7 @@
 .provider-level {
   padding: 1px 8px;
   border-radius: 4px;
-  background: #22332a;
+  background: #183024;
   color: var(--ui-brand);
   font-size: 12px;
   line-height: 18px;
@@ -38,8 +38,8 @@
   color: #c9b6ef;
 }
 .provider-level.s1 {
-  background: #3a3222;
-  color: #e8c98a;
+  background: #33290f;
+  color: #f5c84b;
 }
 .provider-head .biz-error {
   margin: 10px 0 0;
@@ -64,7 +64,7 @@
   border-bottom: 2px solid transparent;
 }
 .provider-tabs .on {
-  color: #e9eceb;
+  color: #f5f6f7;
   font-weight: 600;
   border-bottom-color: var(--ui-brand);
 }
@@ -113,8 +113,8 @@
 .provider-off {
   padding: 1px 6px;
   border-radius: 4px;
-  background: #382d27;
-  color: #e5bfa6;
+  background: #33290f;
+  color: #f5c84b;
   font-size: 12px;
 }
 .provider-facts {

@@ -37,7 +37,7 @@
 .mix-add {
   /* Same size as the material tiles beside it. */
   height: calc((100vw - 86px) / 3);
-  border: 1px dashed #577b62;
+  border: 1px dashed #22c55e;
 }
 .mix-video text {
   max-width: 150rpx;
@@ -52,7 +52,7 @@
   right: 5rpx;
   padding: 3rpx 12rpx;
   border-radius: 50%;
-  background: #17201bd9;
+  background: #101113d9;
   color: #fff;
   font-size: 32rpx;
 }

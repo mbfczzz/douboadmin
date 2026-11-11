@@ -14,7 +14,7 @@
   color: var(--ui-muted);
 }
 .work-filter.active {
-  color: #e9eceb;
+  color: #f5f6f7;
   border-color: var(--ui-brand);
   font-weight: 600;
 }

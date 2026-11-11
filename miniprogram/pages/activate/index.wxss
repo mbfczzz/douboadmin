@@ -2,6 +2,10 @@
 .activation-page {
   padding-top: 40px;
 }
+.activation-page .biz-action:not(.biz-secondary):not([disabled]) {
+  background: var(--ui-magenta);
+  color: #fff;
+}
 .activation-intro {
   max-width: 300px;
   margin: 12px auto 0;

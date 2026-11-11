@@ -30,7 +30,7 @@
       /><view class="biz-row"
         ><text>包含创作描述</text
         ><switch
-          color="#9BCBAA"
+          color="#22c55e"
           checked="{{showPrompt}}"
           bindchange="prompt" /></view
       ><button

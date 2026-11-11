@@ -11,21 +11,21 @@
   white-space: nowrap;
 }
 .primary {
-  border: 1px solid var(--accent);
-  background: var(--accent);
+  border: 1px solid var(--primary);
+  background: var(--primary);
   color: var(--accent-ink);
-  box-shadow: 0 6px 18px #f0177f33;
+  box-shadow: 0 2px 8px #ffffff0d;
 }
-.primary:hover {
-  border-color: var(--accent-hover);
-  background: var(--accent-hover);
+.primary:hover:not(:disabled) {
+  border-color: var(--primary-hover);
+  background: var(--primary-hover);
 }
 .secondary {
   border: 1px solid var(--line-strong);
   color: var(--ink);
   background: var(--surface);
 }
-.secondary:hover {
+.secondary:hover:not(:disabled) {
   border-color: var(--accent-border);
   color: var(--accent-text);
   background: var(--accent-soft);
@@ -35,7 +35,7 @@
   background: var(--danger-strong);
   color: #fff;
 }
-.danger:hover {
+.danger:hover:not(:disabled) {
   background: #b23c34;
 }
 /* Destructive primary action: same size and shape as .primary, danger colour. */
@@ -44,7 +44,7 @@
   background: var(--danger-strong);
   box-shadow: 0 6px 18px #c9473e33;
 }
-.primary.danger:hover {
+.primary.danger:hover:not(:disabled) {
   border-color: #b23c34;
   background: #b23c34;
 }

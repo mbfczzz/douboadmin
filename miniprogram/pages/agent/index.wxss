@@ -38,14 +38,14 @@
   align-items: center;
   padding: 23rpx 0;
   font-size: 25rpx;
-  color: #c4ccca;
+  color: #c5c8ce;
 }
 .message {
   margin-top: 30rpx;
 }
 .message-label {
   font-size: var(--ui-font-note);
-  color: #818b90;
+  color: #969ba4;
   margin-bottom: 12rpx;
 }
 .bubble {
@@ -66,9 +66,9 @@
   text-align: right;
 }
 .user .bubble {
-  background: #25372c;
+  background: #2d2f34;
   margin-left: 50rpx;
-  color: #d1e2d6;
+  color: #f5f6f7;
 }
 .assistant .bubble {
   margin-right: 20rpx;

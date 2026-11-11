@@ -4,11 +4,11 @@
   left: 0;
   right: 0;
   z-index: 100;
-  background: #191c1e;
-  border-top: 1rpx solid #2b3032;
+  background: #1a1b1f;
+  border-top: 1rpx solid #ffffff1a;
   display: flex;
   padding: 12rpx 12rpx calc(8rpx + env(safe-area-inset-bottom));
-  color: #9aa3a6;
+  color: #969ba4;
 }
 .item {
   position: relative;
@@ -34,40 +34,15 @@
   align-items: center;
   justify-content: center;
 }
-.active .glyph {
-  color: var(--ui-on-brand, #17281d);
-}
-.active .glyph::before {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 27px;
-  height: 27px;
-  border-radius: 50%;
-  background: var(--ui-brand, #9bcbaa);
-}
-.glyph t-icon {
-  position: relative;
-}
-.active::after {
-  content: "";
-  position: absolute;
-  bottom: -3px;
-  left: calc(50% - 1.5px);
-  width: 3px;
-  height: 3px;
-  border-radius: 50%;
-  background: var(--ui-brand, #9bcbaa);
-}
 .label {
   font-size: var(--ui-font-note, 12px);
   line-height: 16px;
   font-weight: 500;
 }
 .active {
-  color: #b1d8bd;
+  color: var(--ui-on-brand, #101113);
+  background: var(--ui-nav, #e8faff);
+  border-radius: 8px;
 }
 .active .label {
   font-weight: 600;

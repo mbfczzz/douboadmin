@@ -87,25 +87,15 @@ for (const width of [320, 375, 430]) {
       `<style>body{margin:0;font-family:sans-serif}${styles}</style><div class="create-page"><div class="mode-tabs"><div class="mode-tab active">生成视频</div><div class="mode-tab">生成图片</div></div></div><div class="tabbar">${["模板", "混剪", "创作", "Agent", "我的"].map((name, i) => `<div class="item ${i === 2 ? "active" : ""}"><div class="glyph"><t-icon>◇</t-icon></div><span class="label">${name}</span></div>`).join("")}</div>`,
     );
     expect((await page.locator(".mode-tabs").boundingBox())!.height).toBe(42);
-    const underline = await page
-      .locator(".mode-tab.active")
-      .evaluate((el) => ({
-        width: getComputedStyle(el, "::after").width,
-        top: getComputedStyle(el, "::after").top,
-        actual: el.getBoundingClientRect().width,
+    for (const selector of [".mode-tab.active", ".item.active"]) {
+      const selected = await page.locator(selector).evaluate((el) => ({
+        background: getComputedStyle(el).backgroundImage,
+        color: getComputedStyle(el).color,
       }));
-    expect(parseFloat(underline.width)).toBe(underline.actual);
-    expect(underline.top).toBe("-1px");
-    expect(
-      await page
-        .locator(".item.active .glyph")
-        .evaluate((el) => getComputedStyle(el, "::before").width),
-    ).toBe("27px");
-    expect(
-      await page
-        .locator(".item.active")
-        .evaluate((el) => getComputedStyle(el, "::after").width),
-    ).toBe("3px");
+      expect(selected.background).toContain("linear-gradient");
+      expect(selected.color).toBe("rgb(16, 17, 19)");
+    }
+    expect((await page.locator(".item.active").boundingBox())!.height).toBeGreaterThanOrEqual(44);
     await page.screenshot({ path: `../.runtime/mini-selection-${width}.png` });
   });
 }

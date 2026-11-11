@@ -2,7 +2,7 @@
   position: relative;
   height: 300px;
   border: 1px solid var(--ui-border);
-  border-radius: 16px;
+  border-radius: 14px;
   background: var(--ui-surface);
 }
 .reference-strip {
@@ -31,7 +31,7 @@
   justify-content: center;
 }
 .add-reference {
-  color: #e4e9e5;
+  color: #f5f6f7;
 }
 .reference {
   position: relative;
@@ -51,7 +51,7 @@
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: #404a46;
+  background: #2d2f34;
 }
 .reference-remove::after {
   content: "";
@@ -67,7 +67,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #a4ada7;
+  color: #c5c8ce;
 }
 .prompt-input {
   position: absolute;
@@ -79,7 +79,7 @@
   padding: 0;
   font-size: 16px;
   line-height: 1.6;
-  color: #e9eceb;
+  color: #f5f6f7;
 }
 .prompt-placeholder {
   color: var(--ui-muted);
@@ -90,7 +90,7 @@
   right: 16px;
   bottom: 72px;
   font-size: 11px;
-  color: #85948b;
+  color: #969ba4;
 }
 .quote-note {
   position: absolute;
@@ -112,7 +112,7 @@
   color: var(--ui-brand);
 }
 .quote-note.quote-retry {
-  color: #b6c4bb;
+  color: #c5c8ce;
 }
 .workspace-foot {
   position: absolute;
@@ -171,11 +171,11 @@
   background-color: var(--ui-brand);
   color: var(--ui-on-brand);
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 600;
 }
 .workspace .generate-button.is-disabled {
-  background-color: #282d2f;
-  color: #818b90;
+  background-color: #292b30;
+  color: #969ba4;
 }
 .workspace.expanded {
   position: fixed;
@@ -185,7 +185,7 @@
   right: 20px;
   height: auto;
   z-index: 900;
-  box-shadow: 0 0 0 100vmax #131516dd;
+  box-shadow: 0 0 0 100vmax #101113ed;
 }
 .expanded .prompt-input {
   height: calc(100% - 188px);

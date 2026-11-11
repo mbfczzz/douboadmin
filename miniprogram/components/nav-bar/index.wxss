@@ -1,6 +1,6 @@
 .nav {
-  background: var(--ui-bg, #131516);
-  color: #e9eceb;
+  background: var(--ui-bg, #101113);
+  color: #f5f6f7;
   position: sticky;
   top: 0;
   z-index: 50;
@@ -10,7 +10,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 700;
+  font-weight: 600;
 }
 .back {
   position: absolute;

@@ -11,13 +11,13 @@
   line-height: 18px;
 }
 .order-state.paid {
-  background: #25372c;
-  color: var(--ui-brand);
+  background: #183024;
+  color: #32d47a;
 }
 .order-state.created,
 .order-state.refunding {
-  background: #3a3122;
-  color: #e3c48a;
+  background: #33290f;
+  color: #f5c84b;
 }
 .order-meta {
   flex-wrap: wrap;

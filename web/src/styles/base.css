@@ -1,41 +1,45 @@
 :root {
-  --canvas: #111214;
-  --surface: #191a1d;
-  --surface-subtle: #1f2124;
-  --surface-raised: #25272b;
-  --ink: #e8eaea;
-  --ink-strong: #f7f8f8;
-  --text: #c6ccc9;
-  --muted: #959ca1;
-  --line: #2a2c30;
-  --line-strong: #383b40;
-  --accent: #d81670;
-  --accent-hover: #be1261;
-  --accent-text: #ff4d9d;
-  --accent-ink: #ffffff;
-  --accent-soft: #3a1228;
-  --accent-border: #7d1f50;
-  --accent-glow: #22d3ee;
-  --success: #34d27b;
-  --success-soft: #14301f;
+  --canvas: #101113;
+  --surface: #1a1b1f;
+  --surface-subtle: #202125;
+  --surface-raised: #2d2f34;
+  --ink: #f5f6f7;
+  --ink-strong: #fafafa;
+  --text: #c5c8ce;
+  --muted: #969ba4;
+  --line: #ffffff1a;
+  --line-strong: #ffffff24;
+  --accent: #22c55e;
+  --accent-hover: #4ade80;
+  --accent-text: #4ade80;
+  --accent-ink: #101113;
+  --accent-soft: #22c55e29;
+  --accent-border: #22c55e85;
+  --accent-glow: #22c55e29;
+  --primary: #fafafa;
+  --primary-hover: #e8faff;
+  --magenta: #e10b72;
+  --nav-selected: linear-gradient(115deg, #fffaf7, #fff 38%, #e8faff 76%, #d5f7ff);
+  --success: #32d47a;
+  --success-soft: #32d47a21;
   --brand-gradient: linear-gradient(
     110deg,
     #22c55e,
     #22d3ee 38%,
     #a78bfa 68%,
-    #f0177f
+    #f20d7a
   );
-  --danger: #f2756b;
+  --danger: #f05252;
   --danger-strong: #c9473e;
   --danger-soft: #331b1a;
   --danger-border: #6a302b;
-  --warning: #e8b54d;
+  --warning: #f5c84b;
   --warning-soft: #33290f;
   --warning-border: #6a5422;
-  --info: #5ccbe6;
+  --info: #22d3ee;
   --info-soft: #12303a;
   --radius-sm: 8px;
-  --radius: 10px;
+  --radius: 8px;
   --radius-lg: 14px;
   --shadow-float: 0 24px 64px #000000a8;
   font-family:
@@ -61,6 +65,13 @@ body {
   background: var(--canvas);
   overflow-wrap: anywhere;
   text-rendering: optimizeLegibility;
+}
+a {
+  color: var(--accent-text);
+  text-underline-offset: 3px;
+}
+a:hover {
+  color: var(--accent-hover);
 }
 ::selection {
   color: var(--accent-ink);
@@ -98,7 +109,7 @@ select:focus-visible,
 textarea:focus-visible,
 summary:focus-visible,
 a:focus-visible {
-  outline: 3px solid #f0177f66;
+  outline: 3px solid var(--accent-border);
   outline-offset: 2px;
 }
 input,
@@ -131,7 +142,7 @@ input:focus,
 select:focus,
 textarea:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px #f0177f29;
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 textarea {
   resize: vertical;

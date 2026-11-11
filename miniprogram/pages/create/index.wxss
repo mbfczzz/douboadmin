@@ -23,22 +23,12 @@
   line-height: 18px;
   font-weight: 500;
   border-radius: 7px;
-  color: #929fa4;
+  color: #969ba4;
 }
 .mode-tab.active {
-  color: #d7fce2;
-  background: #25372c;
-  font-weight: 700;
-}
-.mode-tab.active::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: -1px;
-  width: 100%;
-  height: 2px;
-  border-radius: 1px;
-  background: var(--ui-brand);
+  color: #101113;
+  background: var(--ui-nav);
+  font-weight: 600;
 }
 .mode-tab-pressed {
   opacity: 0.7;
@@ -75,7 +65,7 @@
 .example-link {
   margin: -8px 0;
   padding: 12px 0;
-  color: #b1d8bd;
+  color: #4ade80;
   white-space: nowrap;
 }
 .creation-ideas {
@@ -85,8 +75,8 @@
   padding: 8px 0;
 }
 .creation-ideas view {
-  background: #202725;
-  color: #b7c3bd;
+  background: #202125;
+  color: #c5c8ce;
   border-radius: 6px;
   padding: 8px;
   font-size: 12px;

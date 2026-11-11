@@ -27,7 +27,7 @@
   height: 80px;
   flex-shrink: 0;
   border-radius: 6px;
-  background: #202326;
+  background: #202125;
   color: var(--ui-muted);
   display: flex;
   align-items: center;
@@ -56,10 +56,10 @@
   color: var(--ui-muted);
 }
 .queue-state.running {
-  color: var(--ui-brand);
+  color: #22d3ee;
 }
 .queue-state.failed {
-  color: #e6ab94;
+  color: #f05252;
 }
 .queue-spec {
   overflow-wrap: anywhere;

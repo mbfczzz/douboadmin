@@ -1,4 +1,8 @@
 .login-page {
+  --td-brand-color-active: #c40963;
+  --td-button-primary-bg-color: var(--ui-magenta);
+  --td-button-primary-border-color: var(--ui-magenta);
+  --td-button-primary-color: #fff;
   padding: 40px 20px calc(24px + env(safe-area-inset-bottom));
   text-align: center;
 }
@@ -35,7 +39,7 @@
   padding: 12px;
   border-radius: 8px;
   background: var(--ui-field);
-  color: #c4ccca;
+  color: #c5c8ce;
   font-size: 13px;
   line-height: 1.6;
 }

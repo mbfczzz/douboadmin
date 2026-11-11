@@ -23,7 +23,7 @@
   gap: 14px;
   min-height: 52px;
   padding: 12px 4px;
-  border-bottom: 1px solid #303538;
+  border-bottom: 1px solid #36383e;
   font-size: 15px;
 }
 .photo-source text {
@@ -33,11 +33,11 @@
 }
 .photo-source t-icon {
   flex-shrink: 0;
-  color: #b9c3bd;
+  color: #c5c8ce;
 }
 .photo-source-note {
   display: block;
   font-size: 11px;
-  color: #919a9f;
+  color: #969ba4;
   margin-top: 20px;
 }
