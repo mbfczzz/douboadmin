@@ -31,6 +31,8 @@ func (a *Server) routes() {
 		reply(w, 200, map[string]bool{"ok": true})
 	})
 	m.HandleFunc("GET /api/config", a.config)
+	m.HandleFunc("GET /api/branding", a.branding)
+	m.HandleFunc("GET /api/brand-icon", a.brandIconFile)
 	m.HandleFunc("POST /api/auth/login", a.login)
 	m.HandleFunc("POST /api/auth/wechat", a.login)
 	m.HandleFunc("POST /api/admin/login", a.adminLogin)

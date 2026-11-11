@@ -100,6 +100,7 @@ for (const name of [
       "REVISION",
       "media/design/icon.png",
       "media/model-icons/model.png",
+      "media/brand/doubo.png",
       "deploy/native/doubo@.service",
       "deploy/native/doubo-migrate.service",
       "deploy/native/doubo.env.example",
@@ -164,6 +165,10 @@ for (const name of [
       assert.ok(
         fs.existsSync(path.join(local, icons, "model-icons/model.png")),
         "model icons copied to " + icons,
+      );
+      assert.ok(
+        fs.existsSync(path.join(local, icons, "brand/doubo.png")),
+        "project logo copied to " + icons,
       );
       assert.equal(fs.readFileSync(targetFile, "utf8"), release);
       assert.ok(

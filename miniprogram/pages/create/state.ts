@@ -1,5 +1,5 @@
 import type { Model, Row, Asset } from "../../services/types";
-import type { ModelChoice } from "./models";
+import type { ModelChoice } from "./editor-types";
 
 export const creationData = {
   ideas: [] as string[],
@@ -7,6 +7,7 @@ export const creationData = {
   maxReferences: 0,
   kind: "video",
   prompt: "",
+  promptCursor: -1,
   hasPrompt: false,
   allowImage: false,
   allowVideo: false,

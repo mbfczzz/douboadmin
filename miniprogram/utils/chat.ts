@@ -1,11 +1,5 @@
-import type { Job } from "../services/types";
-
-export interface ChatMessage {
-  id: string;
-  role: string;
-  text: string;
-  pending?: boolean;
-}
+import type { Job, ChatMessage } from "../services/types";
+export type { ChatMessage } from "../services/types";
 
 export function chatMessages(jobs: Job[]): ChatMessage[] {
   return jobs

@@ -3,17 +3,11 @@
   text-align: center;
 }
 .login-brand {
-  width: 52px;
-  height: 52px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 160px;
+  height: 78px;
+  display: block;
   margin: 0 auto 24px;
-  border-radius: 14px;
-  background: #9bcbaa;
-  color: #17281d;
-  font-size: 28px;
-  font-weight: 600;
+  border-radius: 8px;
 }
 .login-heading {
   display: block;

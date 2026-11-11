@@ -2,13 +2,7 @@ import type { Model, Row, Asset } from "../../services/types";
 import { media } from "../../services/media";
 import { referenceSettings, creationMode } from "./references";
 
-export type ModelChoice = Model & {
-  label: string;
-  description: string;
-  estimate: string;
-  iconURL: string;
-  badges: { text: string; tone: string; id: string }[];
-};
+import type { ModelChoice } from "./editor-types";
 
 export function modelChoices(models: Model[], kind: string): ModelChoice[] {
   return models

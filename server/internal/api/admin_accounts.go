@@ -58,18 +58,20 @@ func (a *Server) adminAccounts(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	result, err := a.Store.RecordPage(r.Context(), core.RecordQuery{Namespace: "admin_accounts", Fields: map[string]string{"partnerId": "", "archived": "false"}, Search: r.URL.Query().Get("q"), Page: page, Size: 20})
+	result, err := a.Store.RecordPage(r.Context(), core.RecordQuery{Namespace: "admin_accounts", Fields: map[string]string{"archived": "false"}, Search: r.URL.Query().Get("q"), Page: page, Size: 20})
 	if err != nil {
 		dbError(w, err)
 		return
 	}
 	items := []core.Record{}
+	partners := map[string]core.Partner{}
 	for _, row := range result.Items {
-		// Provider login accounts are managed under 服务商管理, not here.
-		var account core.AdminAccount
-		if json.Unmarshal(row.Data, &account) == nil && account.PartnerID == "" {
-			items = append(items, a.adminView(r.Context(), row))
+		view, err := a.adminAccountListView(r.Context(), row, partners)
+		if err != nil {
+			dbError(w, err)
+			return
 		}
+		items = append(items, view)
 	}
 	role := identity(r).AdminRole
 	reply(w, 200, map[string]any{"items": items, "page": page, "size": 20, "total": result.Total, "canManage": role == "" || role == "super_admin"})

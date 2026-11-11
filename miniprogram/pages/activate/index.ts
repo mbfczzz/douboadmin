@@ -1,5 +1,6 @@
 import {
   request,
+  media,
   signIn,
   hasSession,
   logout,
@@ -27,6 +28,7 @@ import {
 
 Page({
   data: {
+    brandIcon: media("/api/brand-icon"),
     logged: false,
     loading: true,
     busy: false,
@@ -67,7 +69,7 @@ Page({
           false,
         );
         if (revision === this.revision)
-          this.setData({ wechatReady: c.wechatLogin, status: null });
+          this.setData({ brandIcon: media(c.brandIcon || "/api/brand-icon"), wechatReady: c.wechatLogin, status: null });
         return;
       }
       const status = await accessStatus();

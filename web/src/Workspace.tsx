@@ -15,6 +15,7 @@ import { canLeave } from "./hooks/unsaved";
 import ConfirmationHost from "./confirmation/Host";
 import AskHost from "./confirm/AskHost";
 import AccountMenu from "./components/AccountMenu";
+import BrandLogo from "./components/BrandLogo";
 import { presetActor } from "./logs/preset";
 import { MeContext, type Me } from "./session";
 import { confirmationPending } from "./confirmation/request";
@@ -145,10 +146,8 @@ export default function Workspace({
             <X />
           </button>
           <div className="brand">
-            <span>豆</span>
-            <div>
-              豆播 AI<small>创作管理工作台</small>
-            </div>
+            <BrandLogo />
+            <small>创作管理工作台</small>
           </div>
           <nav aria-label="管理栏目">
             {groups.map((group) => (

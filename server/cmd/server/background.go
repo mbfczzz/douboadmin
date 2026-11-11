@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"doubo/server/internal/api"
+	"doubo/server/internal/media"
 	"doubo/server/internal/monitor"
 	"doubo/server/internal/notifications"
 	"doubo/server/internal/payments"
@@ -11,6 +12,7 @@ import (
 	"log/slog"
 	"os"
 	"strconv"
+	"time"
 )
 
 func envDays(key string, fallback int) int {
@@ -36,8 +38,37 @@ func background(ctx context.Context, app *api.Server, role string, values settin
 	slog.SetDefault(slog.New(monitor.NewLogHandler(ctx, slog.NewTextHandler(os.Stderr, nil), app.Store, metrics.ID, secrets)))
 	// Operation logs mask the same secret values, whatever field they sit in.
 	app.Audit.SetSecrets(secrets)
+	if role != "worker" {
+		if app.Media.ModelIcons != nil {
+			go syncBuiltinIcons(ctx, app.Media.ModelIcons, "models")
+		}
+		if app.Media.BrandIcons != nil {
+			go syncBuiltinIcons(ctx, app.Media.BrandIcons, "project")
+		}
+	}
 	go app.RunLogRetention(ctx, envDays("LOG_RETENTION_DAYS", 180), envDays("LOG_READ_RETENTION_DAYS", 14))
 	go metrics.Run(ctx)
 	go payments.Reconcile(ctx, app.Store, app.Pay, app.Billing)
 	go app.Virtual.Run(ctx)
+}
+
+func syncBuiltinIcons(ctx context.Context, icons *media.BuiltinIcons, kind string) {
+	for ctx.Err() == nil {
+		attempt, cancel := context.WithTimeout(ctx, 2*time.Minute)
+		count, err := icons.Sync(attempt)
+		cancel()
+		if err == nil {
+			slog.Info("built-in icons synchronized to OSS", "kind", kind, "count", count)
+			return
+		}
+		// SDK errors can contain request URLs; keep credentials out of logs.
+		slog.Warn("built-in icons OSS sync incomplete; retaining local fallback", "kind", kind, "count", count)
+		timer := time.NewTimer(time.Minute)
+		select {
+		case <-ctx.Done():
+			timer.Stop()
+			return
+		case <-timer.C:
+		}
+	}
 }

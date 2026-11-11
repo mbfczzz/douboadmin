@@ -19,16 +19,11 @@
   border-top: 1px solid #353b3e;
 }
 .activation-logo {
-  width: 52px;
-  height: 52px;
+  display: block;
+  width: 160px;
+  height: 78px;
   margin: 0 auto 24px;
-  border-radius: 14px;
-  background: #9bcbaa;
-  color: #17281d;
-  font-size: 28px;
-  line-height: 52px;
-  text-align: center;
-  font-weight: 600;
+  border-radius: 8px;
 }
 .activation-title {
   display: block;

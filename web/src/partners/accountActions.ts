@@ -12,6 +12,7 @@ export function saveAccount(
   roleName?: (id: unknown) => string,
 ) {
   const body = {
+    accountId: account.id,
     version: account.version,
     role: change.role ?? account.data.role,
     disabled: change.disabled ?? !!account.data.disabled,
@@ -24,7 +25,7 @@ export function saveAccount(
     confirmation: change.password
       ? false
       : {
-          before: account.data,
+          before: { ...account.data, accountId: account.id },
           title:
             change.disabled === undefined
               ? "修改登录角色"

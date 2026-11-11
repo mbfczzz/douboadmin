@@ -87,7 +87,7 @@ func (a *Server) getProviderAccount(w http.ResponseWriter, r *http.Request) {
 	if !a.inPartnerScope(w, r, id) {
 		return
 	}
-	row, account, ok, err := a.providerAccount(r.Context(), id)
+	row, account, ok, err := a.selectedProviderAccount(r.Context(), id, r.URL.Query().Get("accountId"))
 	if err != nil {
 		dbError(w, err)
 		return
@@ -108,8 +108,9 @@ func (a *Server) getProviderAccount(w http.ResponseWriter, r *http.Request) {
 func (a *Server) saveProviderAccount(w http.ResponseWriter, r *http.Request) {
 	var in struct {
 		providerAccountInput
-		Version  int64 `json:"version"`
-		Disabled bool  `json:"disabled"`
+		AccountID string `json:"accountId"`
+		Version   int64  `json:"version"`
+		Disabled  bool   `json:"disabled"`
 	}
 	id := r.PathValue("id")
 	if !decode(w, r, &in) || !a.belowPartner(w, r, id) {
@@ -126,7 +127,7 @@ func (a *Server) saveProviderAccount(w http.ResponseWriter, r *http.Request) {
 		fail(w, 400, "角色与当前服务商层级不匹配，请保留对应角色或选择自定义权限角色")
 		return
 	}
-	row, account, ok, err := a.providerAccount(r.Context(), id)
+	row, account, ok, err := a.selectedProviderAccount(r.Context(), id, in.AccountID)
 	if err != nil {
 		dbError(w, err)
 		return
@@ -173,7 +174,8 @@ func (a *Server) saveProviderAccount(w http.ResponseWriter, r *http.Request) {
 	reply(w, 200, map[string]any{"account": a.adminView(r.Context(), saved)})
 }
 
-// platformAccountOnly keeps provider logins out of the 管理账号 endpoints.
+// Provider logins appear in the unified list, but their mutations continue
+// through the provider endpoint to preserve scope and business-role checks.
 func (a *Server) platformAccountOnly(h http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		row, err := a.Store.Get(r.Context(), "admin_accounts", r.PathValue("id"))

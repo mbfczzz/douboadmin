@@ -1,9 +1,7 @@
 import { request } from "./request";
 import { sessionToken } from "./session";
-import type { Row } from "./types";
+import type { Row, PendingPayment } from "./types";
 import type { Order } from "./business";
-
-type PendingPayment = { id: string; owner: string; deferred?: boolean };
 
 function paymentRecords(): PendingPayment[] {
   const saved = wx.getStorageSync("pending-payments");

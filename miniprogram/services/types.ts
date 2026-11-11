@@ -4,6 +4,13 @@ export interface NativeFailure {
   err_code?: number | string;
   err_msg?: string;
 }
+export type PendingPayment = { id: string; owner: string; deferred?: boolean };
+export interface ChatMessage {
+  id: string;
+  role: string;
+  text: string;
+  pending?: boolean;
+}
 export interface JobPage {
   items: Job[];
   total: number;
@@ -132,6 +139,7 @@ export interface Model {
   demo: boolean;
 }
 export interface Config {
+  brandIcon?: string;
   activationRequired?: boolean;
   completionTemplateId?: string;
   relayConfigured: boolean;

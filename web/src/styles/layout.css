@@ -17,8 +17,9 @@
 .brand {
   display: flex;
   flex-shrink: 0;
-  align-items: center;
-  gap: 12px;
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 6px;
   padding: 0 10px 14px;
   /* Separates the logo from the menu that scrolls beneath it. */
   border-bottom: 1px solid var(--line);
@@ -27,16 +28,14 @@
   font-weight: 600;
   letter-spacing: -0.02em;
 }
-.brand > span {
-  display: grid;
-  place-items: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  color: var(--accent-ink);
-  background: var(--brand-gradient);
-  font-size: 23px;
-  box-shadow: 0 6px 18px #a78bfa33;
+.project-logo {
+  display: block;
+  width: 160px;
+  max-width: 100%;
+  height: auto;
+  aspect-ratio: 1794 / 876;
+  object-fit: contain;
+  border-radius: 8px;
 }
 .brand small {
   display: block;

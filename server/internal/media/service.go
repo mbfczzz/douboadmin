@@ -23,10 +23,12 @@ type Asset struct {
 	Size int64  `json:"size"`
 }
 type Service struct {
-	Store   store.Store
-	Objects Objects
-	Dir     string
-	HTTP    *http.Client
+	Store      store.Store
+	Objects    Objects
+	Dir        string
+	HTTP       *http.Client
+	ModelIcons *BuiltinIcons
+	BrandIcons *BuiltinIcons
 }
 
 func (s *Service) Inputs(ctx context.Context, j core.Job) ([]core.Reference, error) {

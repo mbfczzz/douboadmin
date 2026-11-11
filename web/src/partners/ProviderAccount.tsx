@@ -12,6 +12,7 @@ import type { Notify } from "../navigation";
 import type { Partner } from "./types";
 import { AccountCreate, RoleChange } from "./ProviderAccountForms";
 import { saveAccount } from "./accountActions";
+import "./editor.css";
 
 type Sub = "role" | "password";
 
@@ -19,17 +20,21 @@ type Sub = "role" | "password";
 // open the account, change its role, reset its password, disable/enable it.
 export default function ProviderAccount({
   row,
+  accountId,
   notify,
   onClose,
 }: {
-  row: Row<Partner>;
+  row: { id: string; data: Pick<Partner, "name" | "role"> };
+  accountId?: string;
   notify: Notify;
   onClose: () => void;
 }) {
   const resource = useResource<{
       account: Row<AdminAccount> | null;
       password?: string;
-    }>(`/admin/partners/${row.id}/account`),
+    }>(
+      `/admin/partners/${row.id}/account${accountId ? "?accountId=" + encodeURIComponent(accountId) : ""}`,
+    ),
     roles = useRoles("partner"),
     [sub, setSub] = useState<Sub>(),
     account = resource.data?.account;

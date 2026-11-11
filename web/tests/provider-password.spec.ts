@@ -149,6 +149,7 @@ test("legacy account explains missing password and shows a successfully reset pa
   );
   expect(writes).toEqual([
     {
+      accountId: "provider-login",
       version: 1,
       role: "partner",
       disabled: false,

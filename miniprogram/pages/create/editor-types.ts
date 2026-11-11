@@ -1,4 +1,13 @@
 import type { creationData } from "./state";
+import type { Model } from "../../services/types";
+
+export type ModelChoice = Model & {
+  label: string;
+  description: string;
+  estimate: string;
+  iconURL: string;
+  badges: { text: string; tone: string; id: string }[];
+};
 
 export interface ReferenceEditor {
   refreshParameters?(): void;

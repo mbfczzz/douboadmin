@@ -4,6 +4,7 @@ import (
 	"context"
 	"doubo/server/internal/api"
 	"doubo/server/internal/hotvideo"
+	"doubo/server/internal/media"
 	"doubo/server/internal/objectstore"
 	"doubo/server/internal/payments"
 	"doubo/server/internal/provider"
@@ -12,6 +13,7 @@ import (
 	"doubo/server/internal/virtualpay"
 	"log/slog"
 	"os"
+	"path/filepath"
 )
 
 func integrations(ctx context.Context, app *api.Server, values settings.Values) (provider.Provider, error) {
@@ -26,8 +28,11 @@ func integrations(ctx context.Context, app *api.Server, values settings.Values) 
 		app.Virtual = &virtualpay.Service{Client: &virtualpay.Client{Config: virtualpay.Config{Env: 0}}, Store: app.Store, Billing: app.Billing}
 	}
 	if values["OSS_REGION"] != "" && values["OSS_BUCKET"] != "" && values["OSS_ACCESS_KEY_ID"] != "" && values["OSS_ACCESS_KEY_SECRET"] != "" {
-		app.Objects = objectstore.New(values["OSS_REGION"], values["OSS_BUCKET"], values["OSS_ACCESS_KEY_ID"], values["OSS_ACCESS_KEY_SECRET"])
-		app.Media.Objects = app.Objects
+		objects := objectstore.New(values["OSS_REGION"], values["OSS_BUCKET"], values["OSS_ACCESS_KEY_ID"], values["OSS_ACCESS_KEY_SECRET"])
+		app.Objects = objects
+		app.Media.Objects = objects
+		app.Media.ModelIcons = media.NewModelIcons(filepath.Join(app.Media.Dir, "model-icons"), objects)
+		app.Media.BrandIcons = media.NewBrandIcons(filepath.Join(app.Media.Dir, "brand"), objects)
 	}
 	app.SMS = &sms.Aliyun{KeyID: values["SMS_ACCESS_KEY_ID"], Secret: values["SMS_ACCESS_KEY_SECRET"], SignName: values["SMS_SIGN_NAME"], Template: values["SMS_TEMPLATE_CODE"]}
 	ai := &provider.Relay{Client: app.Relay, Store: app.Store, Assets: app.Media.Inputs, SaveResult: app.Media.Save}

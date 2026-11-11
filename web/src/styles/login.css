@@ -23,10 +23,6 @@
   padding: 0;
   color: var(--ink-strong);
 }
-.login-form .brand > span {
-  background: var(--brand-gradient);
-  color: #101113;
-}
 .login-form h1 {
   margin: 32px 0 8px;
   font-size: 26px;

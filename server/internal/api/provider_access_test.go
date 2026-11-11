@@ -59,10 +59,10 @@ func TestProviderAccountSeesOnlyItsSubtree(t *testing.T) {
 		t.Fatal("descendant priced above its provider", w.Code, w.Body.String())
 	}
 	accounts := call(a, "GET", "/api/admin/accounts", admin, "", nil)
-	if strings.Contains(accounts.Body.String(), "s1-login") {
-		t.Fatal("provider login listed under 管理账号")
+	if accounts.Code != 200 || !strings.Contains(accounts.Body.String(), "s1-login") || strings.Contains(accounts.Body.String(), "passwordHash") {
+		t.Fatal("platform list must include the provider login without its password hash", accounts.Code)
 	}
 	if w := call(a, "PUT", "/api/admin/accounts/"+adminID("s1-login"), admin, "", map[string]any{"version": 1, "name": "x", "role": "operator"}); w.Code != 400 {
-		t.Fatal("provider login edited from 管理账号", w.Code)
+		t.Fatal("provider login bypassed the scoped account endpoint", w.Code)
 	}
 }

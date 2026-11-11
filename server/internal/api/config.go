@@ -18,7 +18,7 @@ func (a *Server) config(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if !full {
-		reply(w, 200, map[string]any{"activationRequired": true, "demo": false, "demoLogin": a.demoLoginEnabled(), "wechatLogin": a.Config.WeChatAppID != "" && a.Config.WeChatSecret != "", "models": []core.Model{}, "categories": []string{}, "relayConfigured": a.Relay.Ready(), "mixAvailable": false, "mixMessage": "混剪功能暂未开放", "storage": a.Config.Storage})
+		reply(w, 200, map[string]any{"brandIcon": a.brandIcon(r.Context()), "activationRequired": true, "demo": false, "demoLogin": a.demoLoginEnabled(), "wechatLogin": a.Config.WeChatAppID != "" && a.Config.WeChatSecret != "", "models": []core.Model{}, "categories": []string{}, "relayConfigured": a.Relay.Ready(), "mixAvailable": false, "mixMessage": "混剪功能暂未开放", "storage": a.Config.Storage})
 		return
 	}
 	rows, err := store.AllRecords(r.Context(), a.Store, "models", "")
@@ -36,6 +36,9 @@ func (a *Server) config(w http.ResponseWriter, r *http.Request) {
 			}
 			m.Settings.CostUSD = ""
 			m.Icon = m.DisplayIcon()
+			if a.Media != nil && a.Media.ModelIcons != nil {
+				m.Icon = a.Media.ModelIcons.URL(r.Context(), m.Icon)
+			}
 			m.Settings.ErrorHints = nil
 			m.ReferenceRules = publicReferenceRules(m)
 			m.ResolutionByMode = publicModeResolutions(m)
@@ -69,6 +72,6 @@ func (a *Server) config(w http.ResponseWriter, r *http.Request) {
 	if a.Config.CompletionReady {
 		completion = a.Config.CompletionTemplateID
 	}
-	reply(w, 200, map[string]any{"demo": false, "demoLogin": a.demoLoginEnabled(), "wechatLogin": a.Config.WeChatAppID != "" && a.Config.WeChatSecret != "",
+	reply(w, 200, map[string]any{"brandIcon": a.brandIcon(r.Context()), "demo": false, "demoLogin": a.demoLoginEnabled(), "wechatLogin": a.Config.WeChatAppID != "" && a.Config.WeChatSecret != "",
 		"activationRequired": a.Config.RequireActivation, "storage": a.Config.Storage, "models": models, "categories": categories, "relayConfigured": a.Relay.Ready(), "mixAvailable": false, "mixMessage": "混剪功能暂未开放", "completionTemplateId": completion})
 }

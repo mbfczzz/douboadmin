@@ -58,7 +58,7 @@ func TestProviderPagesAndScopeReachPastLegacyLimit(t *testing.T) {
 	}
 }
 
-func TestAccountPagesAndRoleCountsIgnoreProviderVolume(t *testing.T) {
+func TestUnifiedAccountPagesAndRoleCountsIncludeProviders(t *testing.T) {
 	a, _, _ := setup(t)
 	token := adminLoginToken(t, a, "admin", "test-pass")
 	for i := 0; i < 523; i++ {
@@ -74,8 +74,12 @@ func TestAccountPagesAndRoleCountsIgnoreProviderVolume(t *testing.T) {
 		Items []core.Record `json:"items"`
 		Total int           `json:"total"`
 	}
-	if w.Code != 200 || json.Unmarshal(w.Body.Bytes(), &accounts) != nil || accounts.Total != 23 || len(accounts.Items) != 3 {
+	if w.Code != 200 || json.Unmarshal(w.Body.Bytes(), &accounts) != nil || accounts.Total != 524 || len(accounts.Items) != 20 {
 		t.Fatal(w.Code, w.Body.String())
+	}
+	w = call(a, "GET", "/api/admin/accounts?page=27", token, "", nil)
+	if w.Code != 200 || json.Unmarshal(w.Body.Bytes(), &accounts) != nil || accounts.Total != 524 || len(accounts.Items) != 4 {
+		t.Fatal("provider accounts lost beyond the old list limit", w.Code, w.Body.String())
 	}
 	_, _, found, e := a.providerAccount(t.Context(), "provider")
 	if e != nil || !found {

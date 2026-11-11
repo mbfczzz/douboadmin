@@ -29,7 +29,9 @@ console.log(
 // still checked separately in the developer tools.
 // Reviewed feature increment: awaiting-approval browsing, +139 source bytes
 // after consolidating response parsing. See docs/miniprogram-browse-budget.md.
-const budget = 545 * 1024;
+// Explicit feature allowance: native @ reference selection and preview,
+// measured +2.6 KiB with no new SDK components. See the feature budget note.
+const budget = 548 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

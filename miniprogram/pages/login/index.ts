@@ -1,5 +1,6 @@
 import {
   request,
+  media,
   signIn,
   captureLoginFlow,
   hasSession,
@@ -14,6 +15,7 @@ import { loginContext } from "../../services/login-context";
 import { canEnter, activationRedirect } from "../../services/access";
 Page({
   data: {
+    brandIcon: media("/api/brand-icon"),
     ...loginContext(),
     loading: true,
     busy: false,
@@ -72,6 +74,7 @@ Page({
       );
       if (this.destroyed) return;
       this.setData({
+        brandIcon: media(c.brandIcon || "/api/brand-icon"),
         wechatReady: c.wechatLogin,
         demoAllowed: c.demoLogin,
         activationRequired: !!c.activationRequired,

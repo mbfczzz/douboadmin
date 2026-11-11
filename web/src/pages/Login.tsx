@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react";
 import { ArrowUpRight } from "lucide-react";
 import { api } from "../api";
 import PasswordInput from "../components/PasswordInput";
+import BrandLogo from "../components/BrandLogo";
 import "../components/account-menu.css";
 export default function Login({ onSuccess }: { onSuccess: () => void }) {
   const [saving, setSaving] = useState(false),
@@ -31,7 +32,7 @@ export default function Login({ onSuccess }: { onSuccess: () => void }) {
     <div className="login">
       <form onSubmit={login} className="login-form">
         <div className="brand">
-          <span>豆</span>豆播 AI
+          <BrandLogo />
         </div>
         <h1>登录管理后台</h1>
         <p>平台管理员和服务商均使用后台账号登录。</p>

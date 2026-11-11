@@ -5,8 +5,9 @@ import { generate } from "./submit";
 import { cancelEstimate, updateEstimate } from "./estimate";
 import { openModelMenu } from "./model-menu";
 import { modelChoices, modelSettings, resolutionSettings } from "./models";
-import type { ModelChoice } from "./models";
+import type { ModelChoice } from "./editor-types";
 import { addReference, selectedModel } from "./references";
+import { chooseMention, removeMention } from "./mentions";
 import {
   restoreEditorAssets,
   clearEditorAssets,
@@ -68,6 +69,9 @@ Page({
   clearReferences() {
     clearEditorAssets(this);
     this.refreshParameters();
+  },
+  previewReference(e: WechatMiniprogram.TouchEvent) {
+    wx.previewImage({ urls: [e.currentTarget.dataset.url] });
   },
   refreshParameters() {
     const model = selectedModel(this);
@@ -142,6 +146,7 @@ Page({
       prompt: e.detail.value,
       hasPrompt: !!e.detail.value.trim(),
     });
+    chooseMention(this, e.detail.cursor ?? e.detail.value.length);
   },
   useExample(e?: WechatMiniprogram.TouchEvent) {
     if (this.data.prompt.trim() || this.data.busy) return;
@@ -194,7 +199,8 @@ Page({
   },
   // Failed brand images fall back to the native icon in the menu.
   hideModelIcon(e: WechatMiniprogram.CustomEvent) {
-    const index = this.data.availableModels.findIndex((m: ModelChoice) => m.id === e.currentTarget.dataset.id);
+    const { id, url } = e.currentTarget.dataset;
+    const index = this.data.availableModels.findIndex((m: ModelChoice) => m.id === id && m.iconURL === url);
     if (this.data.availableModels[index])
       this.setData({
         [`availableModels[${index}].iconURL`]: "",
@@ -235,7 +241,10 @@ Page({
     await addReference(this, e?.currentTarget.dataset.kind || "image");
   },
   remove(e: WechatMiniprogram.TouchEvent) {
+    const index = this.data.assets.filter((a: Row<Asset> & {isImage:boolean})=>a.isImage).findIndex((a: Row<Asset>)=>a.id===e.currentTarget.dataset.id);
+    const prompt = index < 0 ? this.data.prompt : removeMention(this.data.prompt,index+1);
     this.setData({
+      prompt, hasPrompt: !!prompt.trim(),
       assets: this.data.assets.filter(
         (a: Row<Asset>) => a.id !== e.currentTarget.dataset.id,
       ),

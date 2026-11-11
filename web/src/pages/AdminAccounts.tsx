@@ -1,6 +1,6 @@
 import Badge from "../components/Badge";
 import Tag from "../components/Tag";
-import { useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { Plus } from "lucide-react";
 import type { Row } from "../api";
 import type { PageProps } from "../navigation";
@@ -12,11 +12,14 @@ import PasswordReset from "../components/PasswordReset";
 import { archive, resetPassword, setDisabled } from "../adminAccounts/actions";
 import { useRoles } from "../roles/types";
 import { useMe } from "../session";
+import { LoadingState } from "../components/RequestState";
 import {
   adminRoleLabel,
   lastLogin,
   type AdminAccount,
 } from "../adminAccounts/types";
+
+const ProviderAccount = lazy(() => import("../partners/ProviderAccount"));
 
 export default function AdminAccounts({ notify }: PageProps) {
   const [page, setPage] = useState(1);
@@ -28,12 +31,19 @@ export default function AdminAccounts({ notify }: PageProps) {
     }>(`/admin/accounts?page=${page}`),
     [editing, setEditing] = useState<Row<AdminAccount> | null | undefined>(),
     [resetting, setResetting] = useState<Row<AdminAccount>>(),
+    [provider, setProvider] = useState<Row<AdminAccount>>(),
     roles = useRoles(),
     me = useMe(),
     roleName = (id: string) =>
       roles.rows.find((row) => row.id === id)?.data.name ||
       adminRoleLabel[id] ||
       id;
+  useEffect(() => {
+    if (resource.data)
+      setPage((current) =>
+        Math.min(current, Math.max(1, Math.ceil(resource.data!.total / 20))),
+      );
+  }, [resource.data]);
   // Each row action runs on its own; failures surface as a toast.
   const run = async (action: () => Promise<unknown>, done: string) => {
     try {
@@ -99,6 +109,18 @@ export default function AdminAccounts({ notify }: PageProps) {
           },
           { title: "手机号", render: (row) => row.data.phone || "未填写" },
           {
+            title: "账号归属",
+            render: (row) =>
+              row.data.partnerId ? (
+                <>
+                  {row.data.partnerName || "服务商"}
+                  <small className="cell-note mono">{row.data.partnerId}</small>
+                </>
+              ) : (
+                "平台"
+              ),
+          },
+          {
             title: "状态",
             render: (row) => (
               <Badge
@@ -116,34 +138,38 @@ export default function AdminAccounts({ notify }: PageProps) {
             action: true,
             render: (row) =>
               resource.data?.canManage ? (
-                <div className="business-actions">
-                  <button onClick={() => setEditing(row)}>编辑</button>
-                  <button onClick={() => setResetting(row)}>重置密码</button>
-                  {/* Your own account cannot be disabled or archived here. */}
-                  {row.id !== me?.id && (
-                    <>
-                      <button
-                        className={row.data.disabled ? "" : "danger-text"}
-                        onClick={() =>
-                          void run(
-                            () => setDisabled(row, !row.data.disabled),
-                            row.data.disabled ? "账号已启用" : "账号已停用",
-                          )
-                        }
-                      >
-                        {row.data.disabled ? "启用" : "停用"}
-                      </button>
-                      <button
-                        className="danger-text"
-                        onClick={() =>
-                          void run(() => archive(row), "管理账号已归档")
-                        }
-                      >
-                        归档
-                      </button>
-                    </>
-                  )}
-                </div>
+                row.data.partnerId ? (
+                  <button onClick={() => setProvider(row)}>管理登录</button>
+                ) : (
+                  <div className="business-actions">
+                    <button onClick={() => setEditing(row)}>编辑</button>
+                    <button onClick={() => setResetting(row)}>重置密码</button>
+                    {/* Your own account cannot be disabled or archived here. */}
+                    {row.id !== me?.id && (
+                      <>
+                        <button
+                          className={row.data.disabled ? "" : "danger-text"}
+                          onClick={() =>
+                            void run(
+                              () => setDisabled(row, !row.data.disabled),
+                              row.data.disabled ? "账号已启用" : "账号已停用",
+                            )
+                          }
+                        >
+                          {row.data.disabled ? "启用" : "停用"}
+                        </button>
+                        <button
+                          className="danger-text"
+                          onClick={() =>
+                            void run(() => archive(row), "管理账号已归档")
+                          }
+                        >
+                          归档
+                        </button>
+                      </>
+                    )}
+                  </div>
+                )
               ) : (
                 "—"
               ),
@@ -184,6 +210,25 @@ export default function AdminAccounts({ notify }: PageProps) {
             notify("密码已重置");
           }}
         />
+      )}
+      {provider?.data.partnerId && (
+        <Suspense fallback={<LoadingState label="正在加载登录账号" />}>
+          <ProviderAccount
+            accountId={provider.id}
+            row={{
+              id: provider.data.partnerId,
+              data: {
+                name: provider.data.partnerName || provider.data.name,
+                role: provider.data.partnerRole || provider.data.role,
+              },
+            }}
+            onClose={() => setProvider(undefined)}
+            notify={(message, tone) => {
+              notify(message, tone);
+              void resource.reload();
+            }}
+          />
+        </Suspense>
       )}
     </ResourcePage>
   );
