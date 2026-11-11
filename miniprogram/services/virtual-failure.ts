@@ -1,9 +1,4 @@
-interface NativeFailure {
-  errCode?: number | string;
-  errMsg?: string;
-  err_code?: number | string;
-  err_msg?: string;
-}
+import type { NativeFailure } from "./types";
 
 // Source: WeChat wx.requestVirtualPayment error table. Unknown results remain pending.
 const rejected: Record<number, string> = {

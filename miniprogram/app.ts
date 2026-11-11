@@ -1,5 +1,6 @@
 import { enforceAccess } from "./services/access";
 import { pauseVisit, resumeVisit } from "./services/analytics";
+import { trialDebug } from "./services/trial-debug";
 App({
   globalData: {},
   onShow(options) {
@@ -8,6 +9,7 @@ App({
   },
   onHide: pauseVisit,
   onLaunch() {
+    void trialDebug(() => Promise.resolve());
     wx.setBackgroundColor({
       backgroundColor: "#131516",
       backgroundColorTop: "#131516",

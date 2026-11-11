@@ -7,12 +7,9 @@ import {
   errorMessage,
 } from "./errors";
 import type { LoginPurpose } from "./login-context";
-import type { Session, LoginResponse } from "./session-types";
-let pendingLogin:
-  | { promise: Promise<void>; resolve: () => void; reject: (e: Error) => void }
-  | undefined;
-let exchange:
-  { generation: number; mode: string; promise: Promise<void> } | undefined;
+import type { Session, LoginResponse, PendingLogin, LoginExchange } from "./session-types";
+let pendingLogin: PendingLogin | undefined;
+let exchange: LoginExchange | undefined;
 let authGeneration = 0;
 function storedSession() {
   return wx.getStorageSync("douboSession") as Session | undefined;

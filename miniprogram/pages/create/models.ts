@@ -15,6 +15,7 @@ export function modelChoices(models: Model[], kind: string): ModelChoice[] {
     .filter((model) => model.kind === kind)
     .map((model) => ({
       ...model,
+      icon: model.icon && !/^(https?:|\/)/i.test(model.icon) ? model.icon : "",
       label: model.name,
       description: model.settings?.description || "",
       estimate: model.settings?.estSeconds
@@ -22,7 +23,7 @@ export function modelChoices(models: Model[], kind: string): ModelChoice[] {
         : "",
       iconURL:
         model.icon &&
-        (model.icon.startsWith("/") || model.icon.startsWith("https://"))
+        (/^https?:\/\//i.test(model.icon) || /^\/(?!\/)/.test(model.icon))
           ? media(model.icon)
           : "",
       badges: (model.settings?.badges || []).map((b, i) => ({

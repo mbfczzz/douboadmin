@@ -1,3 +1,15 @@
+export interface NativeFailure {
+  errCode?: number | string;
+  errMsg?: string;
+  err_code?: number | string;
+  err_msg?: string;
+}
+export interface JobPage {
+  items: Job[];
+  total: number;
+  page: number;
+  size: number;
+}
 export interface ResponseMeta {
   code?: string;
   error?: string;

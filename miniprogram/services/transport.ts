@@ -1,5 +1,6 @@
 import { API_BASE } from "../config";
 import { RequestError } from "./errors";
+import { trialDebug } from "./trial-debug";
 
 // Authentication requests must not depend on the authenticated request wrapper.
 export function publicRequest<T>(
@@ -7,7 +8,7 @@ export function publicRequest<T>(
   method: "GET" | "POST" | "PUT" = "GET",
   data?: unknown,
 ): Promise<T> {
-  return new Promise((resolve, reject) =>
+  return trialDebug(() => new Promise<T>((resolve, reject) =>
     wx.request({
       url: API_BASE + "/api" + path,
       method,
@@ -30,5 +31,5 @@ export function publicRequest<T>(
         reject(new Error("连接失败，请检查网络后重试"));
       },
     }),
-  );
+  ));
 }

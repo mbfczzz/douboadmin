@@ -192,9 +192,9 @@ Page({
   closeModels() {
     this.setData({ showModels: false });
   },
-  // An icon that fails to load is dropped instead of leaving an empty white box.
+  // Failed brand images fall back to the native icon in the menu.
   hideModelIcon(e: WechatMiniprogram.CustomEvent) {
-    const index = Number(e.currentTarget.dataset.index);
+    const index = this.data.availableModels.findIndex((m: ModelChoice) => m.id === e.currentTarget.dataset.id);
     if (this.data.availableModels[index])
       this.setData({
         [`availableModels[${index}].iconURL`]: "",

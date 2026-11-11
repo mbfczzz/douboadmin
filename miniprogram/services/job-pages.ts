@@ -1,12 +1,6 @@
 import { request } from "./request";
-import type { Job } from "./types";
-
-export type JobPage = {
-  items: Job[];
-  total: number;
-  page: number;
-  size: number;
-};
+import type { Job, JobPage } from "./types";
+export type { JobPage } from "./types";
 export async function jobPage(
   page: number,
   filters = "",

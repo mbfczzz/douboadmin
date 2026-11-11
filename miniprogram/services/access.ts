@@ -1,6 +1,7 @@
 import { API_BASE } from "../config";
 import { sessionToken, storedToken, clearSession } from "./session";
 import { AuthCancelledError, RequestError } from "./errors";
+import { trialDebug } from "./trial-debug";
 
 import type { AccessStatus } from "./access-types";
 export type { AccessStatus } from "./access-types";
@@ -28,7 +29,7 @@ export function accessStatus(): Promise<AccessStatus> {
   const token = sessionToken();
   if (!token) return Promise.resolve({ active: false, status: "login" });
   if (pending?.token === token) return pending.promise;
-  const promise = new Promise<AccessStatus>((resolve, reject) => {
+  const promise = trialDebug(() => new Promise<AccessStatus>((resolve, reject) => {
     wx.request({
       url: API_BASE + "/api/access",
       header: { Authorization: "Bearer " + token },
@@ -61,7 +62,7 @@ export function accessStatus(): Promise<AccessStatus> {
         reject(new Error("连接失败，请检查网络后重试"));
       },
     });
-  });
+  }));
   const attempt = { token, promise };
   pending = attempt;
   void promise.then(

@@ -1,16 +1,8 @@
 import { API_BASE } from "../config";
 import { sessionToken } from "./session";
 import { AuthCancelledError, RequestError } from "./errors";
-import type { Input } from "./types";
-
-export type EstimateInput = Pick<
-  Input,
-  "kind" | "model" | "resolution" | "ratio" | "quality" | "duration"
->;
-interface Estimate {
-  units: number;
-  billingEnabled: boolean;
-}
+import type { EstimateInput, Estimate } from "./estimate-types";
+export type { EstimateInput } from "./estimate-types";
 export function estimateCost(input: EstimateInput, owner: string) {
   let task: WechatMiniprogram.RequestTask | undefined;
   const promise = new Promise<Estimate>((resolve, reject) => {

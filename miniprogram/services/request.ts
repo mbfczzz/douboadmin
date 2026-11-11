@@ -9,6 +9,7 @@ import { media } from "./media";
 import type { Row, Asset, ResponseMeta } from "./types";
 import { requestPurpose } from "./login-context";
 import { activationRedirect } from "./access";
+import { trialDebug } from "./trial-debug";
 export function request<T>(
   path: string,
   method: "GET" | "POST" | "PUT" | "DELETE" = "GET",
@@ -21,7 +22,7 @@ export function request<T>(
     auth ? login(requestPurpose(path, method, data)) : Promise.resolve()
   ).then(
     () =>
-      new Promise<T>((resolve, reject) => {
+      trialDebug(() => new Promise<T>((resolve, reject) => {
         const sentToken = sessionToken();
         const storedAtSend = storedToken();
         if (expectedToken !== undefined && sentToken !== expectedToken) {
@@ -94,7 +95,7 @@ export function request<T>(
             reject(new Error("连接失败，请检查网络后重试"));
           },
         });
-      }),
+      })),
   );
 }
 export function upload(

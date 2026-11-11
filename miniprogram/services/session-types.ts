@@ -4,6 +4,16 @@ export interface Session {
   expiresAt: number;
   provider: string;
 }
+export interface PendingLogin {
+  promise: Promise<void>;
+  resolve: () => void;
+  reject: (e: Error) => void;
+}
+export interface LoginExchange {
+  generation: number;
+  mode: string;
+  promise: Promise<void>;
+}
 export interface LoginResponse {
   activationRequired?: boolean;
   token: string;
