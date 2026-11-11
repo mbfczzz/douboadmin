@@ -12,7 +12,6 @@
     "pages/library/index",
     "pages/upload-preview/index",
     "pages/login/index",
-    "pages/transition/index",
     "pages/works/index",
     "pages/wallet/index",
     "pages/orders/index",

@@ -11,11 +11,11 @@
   padding: 10px 0;
   border-bottom: 2px solid transparent;
   font-size: 14px;
-  color: #a0a8ac;
+  color: var(--ui-muted);
 }
 .work-filter.active {
   color: #e9eceb;
-  border-color: #9bcbaa;
+  border-color: var(--ui-brand);
   font-weight: 600;
 }
 .works-page .completed-grid {
@@ -40,14 +40,14 @@
   margin-top: 5px;
   font-size: 11px;
   line-height: 1.5;
-  color: #a0a8ac;
+  color: var(--ui-muted);
 }
 .works-note {
   display: block;
   margin-top: 28px;
   text-align: center;
   font-size: 12px;
-  color: #a0a8ac;
+  color: var(--ui-muted);
 }
 
 @import "../../styles/job-pagination.wxss";

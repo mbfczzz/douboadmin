@@ -16,7 +16,7 @@
 .activation-path + .activation-path {
   margin-top: 24px;
   padding-top: 24px;
-  border-top: 1px solid #353b3e;
+  border-top: 1px solid var(--ui-border);
 }
 .activation-logo {
   display: block;
@@ -35,7 +35,7 @@
 .activation-links {
   display: flex;
   justify-content: space-between;
-  color: #9bcbaa;
+  color: var(--ui-brand);
   font-size: 26rpx;
   margin-top: 30rpx;
 }
@@ -47,7 +47,7 @@
   display: block;
   text-align: center;
   font-size: 24rpx;
-  color: #a0a8ac;
+  color: var(--ui-muted);
   margin-top: 36rpx;
 }
 .activation-path .biz-input + .biz-input {

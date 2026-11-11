@@ -1,4 +1,6 @@
 view,
+image,
+scroll-view,
 text,
 button,
 input,
@@ -22,16 +24,16 @@ image {
   padding: 24px 20px calc(25px + env(safe-area-inset-bottom));
 }
 .muted {
-  color: #a0a8ac;
+  color: var(--ui-muted);
 }
 .small {
-  font-size: 24rpx;
+  font-size: var(--ui-font-note);
 }
 .tiny {
-  font-size: 21rpx;
+  font-size: var(--ui-font-caption);
 }
 .accent {
-  color: #9bcbaa;
+  color: var(--ui-brand);
 }
 .row {
   display: flex;
@@ -46,8 +48,8 @@ image {
   margin: 40rpx 0 22rpx;
 }
 .surface {
-  background: #1c1f21;
-  border: 1rpx solid #353b3e;
+  background: var(--ui-surface);
+  border: 1rpx solid var(--ui-border);
   border-radius: 20rpx;
 }
 .row.section-title {
@@ -55,14 +57,14 @@ image {
 }
 .text-button {
   background: transparent;
-  color: #9bcbaa;
+  color: var(--ui-brand);
   padding: 16rpx 0;
   line-height: 1.5;
   font-size: 25rpx;
 }
 .note {
-  font-size: 23rpx;
-  color: #a0a8ac;
+  font-size: var(--ui-font-note);
+  color: var(--ui-muted);
   text-align: center;
   margin: 24rpx 0;
   line-height: 1.7;
@@ -70,7 +72,7 @@ image {
 .empty {
   padding: 100rpx 20rpx;
   text-align: center;
-  color: #a0a8ac;
+  color: var(--ui-muted);
 }
 .empty .title {
   display: block;
@@ -90,10 +92,10 @@ image {
 }
 .error-box {
   padding: 24rpx;
-  background: #352925;
-  border: 1rpx solid #69483b;
+  background: var(--ui-danger-bg);
+  border: 1rpx solid var(--ui-danger-border);
   border-radius: 14rpx;
-  color: #dfb4a0;
+  color: var(--ui-danger);
   font-size: 25rpx;
   line-height: 1.8;
   margin: 20rpx 0;
@@ -108,8 +110,8 @@ image {
   align-items: center;
   gap: 20rpx;
   padding: 25rpx 24rpx;
-  background: #1c1f21;
-  border: 1rpx solid #353b3e;
+  background: var(--ui-surface);
+  border: 1rpx solid var(--ui-border);
   border-radius: 16rpx;
   margin-top: 40rpx;
 }
@@ -122,28 +124,24 @@ image {
   margin-top: 8rpx;
 }
 .form-input {
-  background: #1c1f21;
-  border: 1rpx solid #353b3e;
+  background: var(--ui-surface);
+  border: 1rpx solid var(--ui-border);
   border-radius: 16rpx;
   padding: 22rpx;
   width: 100%;
   color: #e9eceb;
   font-size: 28rpx;
 }
-.sheet {
-  padding: 30rpx 38rpx calc(40rpx + env(safe-area-inset-bottom));
-  color: #e9eceb;
-}
 .pill {
   font-size: 21rpx;
   border-radius: 8rpx;
   padding: 8rpx 13rpx;
-  background: #272b2d;
-  color: #a0a8ac;
+  background: var(--ui-field);
+  color: var(--ui-muted);
 }
 .pill.succeeded {
   background: #25372c;
-  color: #9bcbaa;
+  color: var(--ui-brand);
 }
 .pill.failed {
   background: #352925;
@@ -162,12 +160,12 @@ image {
   padding: 18rpx 0;
   margin-right: 42rpx;
   font-size: 27rpx;
-  color: #a0a8ac;
+  color: var(--ui-muted);
   border-bottom: 3rpx solid transparent;
 }
 .filter.active {
   color: #e9eceb;
-  border-color: #9bcbaa;
+  border-color: var(--ui-brand);
 }
 .controls-busy {
   opacity: 0.6;

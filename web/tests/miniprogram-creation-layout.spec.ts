@@ -10,6 +10,7 @@ function css(file: string, width: number): string {
     )
     .replace(/(^|\n)page\s*{/g, "$1body {")
     .replace(/\bview\b/g, "div")
+    .replace(/(?<![\w.-])image\b/g, "img")
     .replace(/(?<![\w.-])text\b(?=\s*[,>{:])/g, "span")
     .replace(/([\d.]+)rpx/g, (_, n) => `${(Number(n) * width) / 750}px`);
 }
@@ -20,6 +21,7 @@ for (const width of [320, 375, 430]) {
     await page.setViewportSize({ width, height: 900 });
     const styles = [
       "styles/theme.wxss",
+      "styles/common.wxss",
       "styles/common.wxss",
       "pages/create/settings.wxss",
       "pages/create/workspace.wxss",
@@ -32,7 +34,7 @@ for (const width of [320, 375, 430]) {
     await page.setContent(`<style>body{margin:0;font-family:sans-serif}t-icon{display:block;width:16px;height:16px}${styles}</style>
       <div style="padding:20px">
         <div class="workspace"><div class="workspace-foot">
-          <div class="model-select"><t-icon></t-icon><span class="model-name">${long}</span><t-icon></t-icon></div>
+          <div class="model-select"><img class="model-logo" alt="" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" /><span class="model-name">${long}</span><t-icon></t-icon></div>
           <span class="spec">4096×2160 · 120秒</span><button class="generate-button">生成</button>
         </div></div>
         <div class="resolution-options">${["720p", "1080p", "2160p", "4096×2160", "8192×4320", long].map((v) => `<div class="resolution-option">${v}</div>`).join("")}</div>
@@ -61,6 +63,7 @@ for (const width of [320, 375, 430]) {
       ).toBe(true);
     }
     expect((await page.locator(".favorite").boundingBox())!.width).toBe(28);
+    expect((await page.locator(".model-select .model-logo").boundingBox())!.width).toBe(22);
     expect((await page.locator(".generate-button").boundingBox())!.width).toBe(
       78,
     );

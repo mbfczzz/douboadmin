@@ -1,5 +1,5 @@
 <nav-bar title="任务队列" back />
-<view class="subpage queue-page page-motion {{pageMotion}}">
+<view class="subpage queue-page">
   <view class="loading" wx:if="{{loading}}"><t-loading /></view>
   <view wx:elif="{{needsLogin}}" class="empty">
     <t-icon name="task" size="40" />

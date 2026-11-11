@@ -120,7 +120,7 @@ test("a server failure keeps loaded template content and offers retry", async ({
     await expect(
       page.getByRole("heading", { name: row.data.title, exact: true }),
     ).toBeVisible();
-    await page.route("**/api/admin/templates", (route) =>
+    await page.route("**/api/admin/templates?*", (route) =>
       route.fulfill({
         status: 503,
         contentType: "text/html",
@@ -132,7 +132,7 @@ test("a server failure keeps loaded template content and offers retry", async ({
     await expect(
       page.getByRole("heading", { name: row.data.title, exact: true }),
     ).toBeVisible();
-    await page.unroute("**/api/admin/templates");
+    await page.unroute("**/api/admin/templates?*");
     await page.getByRole("button", { name: "刷新", exact: true }).click();
     await expect(page.getByRole("alert")).toHaveCount(0);
   } finally {

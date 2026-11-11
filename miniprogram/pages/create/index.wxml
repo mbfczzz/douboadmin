@@ -1,9 +1,11 @@
 <nav-bar title="创作" />
-<view class="page create-page page-motion {{pageMotion}} {{showModels||expanded||assetsOpen?'motion-overlay-open':''}}">
+<view class="page create-page">
   <view class="mode-tabs {{busy||uploading||restoring?'controls-busy':''}}">
     <view
       class="mode-tab {{kind==='video'?'active':''}}"
       data-kind="video"
+      aria-role="button"
+      aria-label="{{'生成视频'+(kind==='video'?'，已选中':'')}}"
       bindtap="mode"
       hover-class="mode-tab-pressed"
     >
@@ -12,6 +14,8 @@
     <view
       class="mode-tab {{kind==='image'?'active':''}}"
       data-kind="image"
+      aria-role="button"
+      aria-label="{{'生成图片'+(kind==='image'?'，已选中':'')}}"
       bindtap="mode"
       hover-class="mode-tab-pressed"
     >
@@ -26,6 +30,7 @@
         <view
           wx:if="{{allowImage||allowVideo||allowAudio}}"
           class="add-reference"
+          aria-role="button"
           bindtap="showAssets"
           aria-label="添加参考素材"
         >
@@ -35,12 +40,12 @@
           <image
             wx:if="{{item.isImage}}"
             src="{{item.data.url}}"
-            data-url="{{item.data.url}}"
+            data-id="{{item.id}}"
             bindtap="previewReference"
             mode="aspectFill"
           />
           <t-icon wx:else name="file" size="24" />
-          <view class="reference-remove" data-id="{{item.id}}" catchtap="remove"
+          <view class="reference-remove" data-id="{{item.id}}" catchtap="remove" aria-role="button" aria-label="删除参考素材"
             ><t-icon name="close" size="12"
           /></view>
         </view>
@@ -69,8 +74,8 @@
       <view class="count">{{prompt.length}} / {{maxPromptChars}}</view>
     </view>
     <view class="workspace-foot">
-      <view class="model-select" bindtap="showModels">
-        <t-icon name="{{kind==='video'?'video-camera':'image'}}" size="16" />
+      <view class="model-select" bindtap="showModels" aria-role="button" aria-label="{{'选择模型，当前'+modelName}}">
+        <template is="model-icon" data="{{...availableModels[modelIndex],kind}}" />
         <text class="model-name">{{modelName}}</text>
         <t-icon name="chevron-down" size="14" />
       </view>
@@ -93,10 +98,10 @@
         wx:key="id"
         data-id="{{item.id}}"
         bindtap="selectModel"
+        aria-role="button"
+        aria-label="{{item.label+(item.description?'，'+item.description:'')+(model===item.id?'，已选中':'')}}"
       >
-        <image wx:if="{{item.iconURL}}" class="model-logo" src="{{item.iconURL}}" mode="aspectFit" data-id="{{item.id}}" data-url="{{item.iconURL}}" binderror="hideModelIcon" />
-        <text wx:elif="{{item.icon}}" class="model-glyph">{{item.icon}}</text>
-        <t-icon wx:else name="{{kind==='video'?'video-camera':'image'}}" size="22" />
+        <template is="model-icon" data="{{...item,kind}}" />
         <view class="model-info"><view class="model-title"><text>{{item.label}}</text><view wx:if="{{item.badges.length}}" class="model-badges"><text wx:for="{{item.badges}}" wx:for-item="badge" wx:key="id" class="{{badge.tone}}">{{badge.text}}</text></view></view><text wx:if="{{item.description}}" class="model-description">{{item.description}}</text></view>
         <text wx:if="{{item.estimate}}" class="model-estimate">{{item.estimate}}</text>
         <t-icon wx:if="{{model===item.id}}" name="check" size="18" />
@@ -125,6 +130,8 @@
         wx:key="*this"
         data-value="{{item}}"
         bindtap="chooseResolution"
+        aria-role="button"
+        aria-label="{{item+(resolution===item?'，已选中':'')}}"
       >
         {{item}}
       </view>
@@ -159,6 +166,8 @@
         class="ratio {{ratio===item?'selected':''}}"
         data-value="{{item}}"
         bindtap="chooseRatio"
+        aria-role="button"
+        aria-label="{{item+(ratio===item?'，已选中':'')}}"
         hover-class="ratio-pressed"
       >
         <view class="ratio-visual">
@@ -196,11 +205,16 @@
         ><t-icon name="close" size="20" /></view
     ></view>
     <view wx:if="{{allowImage}}" class="source-option" data-kind="image" bindtap="addAsset"
-      ><t-icon name="image" size="24" /><view
+      ><t-icon name="image" size="24" /><view class="source-copy"
         ><text>图片</text><text class="source-hint">从相册选择图片</text></view
       ><t-icon name="chevron-right" size="18"
     /></view>
-    <view wx:if="{{allowVideo}}" class="source-option" data-kind="video" bindtap="addAsset"><t-icon name="video-camera" size="24" /><view><text>视频</text><text class="source-hint">从相册选择参考视频</text></view><t-icon name="chevron-right" size="18" /></view>
-    <view wx:if="{{allowAudio}}" class="source-option" data-kind="audio" bindtap="addAsset"><t-icon name="sound" size="24" /><view><text>音频</text><text class="source-hint">选择参考音频文件</text></view><t-icon name="chevron-right" size="18" /></view>
+    <view wx:if="{{allowVideo}}" class="source-option" data-kind="video" bindtap="addAsset"><t-icon name="video-camera" size="24" /><view class="source-copy"><text>视频</text><text class="source-hint">从相册选择参考视频</text></view><t-icon name="chevron-right" size="18" /></view>
+    <view wx:if="{{allowAudio}}" class="source-option" data-kind="audio" bindtap="addAsset"><t-icon name="sound" size="24" /><view class="source-copy"><text>音频</text><text class="source-hint">选择参考音频文件</text></view><t-icon name="chevron-right" size="18" /></view>
   </view>
 </t-popup>
+<template name="model-icon">
+  <image wx:if="{{iconURL}}" class="model-logo" src="{{iconURL}}" mode="aspectFit" data-id="{{id}}" data-url="{{iconURL}}" binderror="hideModelIcon" />
+  <text wx:elif="{{icon}}" class="model-glyph">{{icon}}</text>
+  <t-icon wx:else name="{{kind==='video'?'video-camera':'image'}}" size="22" />
+</template>

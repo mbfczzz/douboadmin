@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { login, usersList, usersPage } from "./helpers";
+import { pagedFixture } from "./paged-fixture";
 
 test("page location survives reload, supports history and resets scroll", async ({
   page,
@@ -8,9 +9,9 @@ test("page location survives reload, supports history and resets scroll", async 
   const response = await page.request.get("/api/admin/models"),
     models = await response.json(),
     source = models[0];
-  await page.route("**/api/admin/models", (route) =>
+  await page.route("**/api/admin/models?*", (route) =>
     route.fulfill({
-      json: Array.from({ length: 25 }, (_, i) => ({
+      json: pagedFixture(Array.from({ length: 25 }, (_, i) => ({
         ...source,
         id: `paging-model-${i}`,
         data: {
@@ -18,7 +19,7 @@ test("page location survives reload, supports history and resets scroll", async 
           name: `${source.data.name} ${i + 1}`,
           key: `${source.data.key}-${i + 1}`,
         },
-      })),
+      })), new URL(route.request().url())),
     }),
   );
   await page.getByRole("button", { name: "模型管理", exact: true }).click();

@@ -2,12 +2,14 @@ const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const { harness } = require("./harness.cjs");
 
-function menuFixture(height, bottom, count = 20) {
+function menuFixture(height, bottom, count = 20, safeBottom = 0) {
   const h = harness();
   h.wx.getWindowInfo = () => ({
     windowHeight: height,
+    windowWidth: 390,
     statusBarHeight: 24,
     screenHeight: height,
+    safeArea: { bottom: height - safeBottom },
   });
   let measure;
   const query = {
@@ -49,6 +51,19 @@ test("a roomy screen retains the designed downward dropdown", () => {
   f.measure();
   assert.equal(f.page.data.modelMenuUp, false);
   assert.equal(f.page.data.modelMenuHeight, 316);
+});
+
+test("model menus reserve the custom tab bar as well as the home indicator", () => {
+  const f = menuFixture(844, 450, 20, 34);
+  f.page.showModels();
+  f.measure();
+  assert.equal(f.page.data.modelMenuUp, true);
+  assert.ok(450 - 64 - f.page.data.modelMenuHeight >= 76);
+  const down = menuFixture(844, 420, 20, 34);
+  down.page.showModels();
+  down.measure();
+  assert.equal(down.page.data.modelMenuUp, false);
+  assert.ok(420 - 8 + down.page.data.modelMenuHeight <= 844 - 34 - 61 - 10);
 });
 
 test("late measurement cannot reopen a dismissed or hidden menu", () => {

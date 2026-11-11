@@ -12,8 +12,10 @@ export default function JobTable({
   jobs,
   onAction,
   pagination,
+  refreshKey,
 }: {
   jobs: Job[];
+  refreshKey?: number;
   onAction: (kind: JobAction, j: Job) => void;
   pagination?: {
     page: number;
@@ -33,7 +35,7 @@ export default function JobTable({
           render: (j) => {
             return (
               <div className="task-name">
-                <JobThumbnail job={j} />
+                <JobThumbnail job={j} refreshKey={refreshKey} />
                 <div>
                   <b title={j.input.prompt}>{j.input.prompt}</b>
                   <small>{j.id.slice(0, 12)}</small>

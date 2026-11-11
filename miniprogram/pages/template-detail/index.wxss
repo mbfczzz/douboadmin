@@ -121,7 +121,7 @@
   flex-shrink: 0;
   margin-left: auto;
   font-size: 22rpx;
-  color: #9bcbaa;
+  color: var(--ui-brand);
 }
 .format {
   display: block;
@@ -144,7 +144,7 @@
   border: 1px solid #2d3235;
   border-radius: 8px;
   font-size: 15px;
-  color: #a0a8ac;
+  color: var(--ui-muted);
 }
 .optional-grid text {
   flex: 1;
@@ -168,8 +168,8 @@
   z-index: 80;
   /* Design: 14 / 20 / 24 / 20. */
   padding: 14px 20px calc(24px + env(safe-area-inset-bottom));
-  border-top: 1px solid #353b3e;
-  background: #1c1f21;
+  border-top: 1px solid var(--ui-border);
+  background: var(--ui-surface);
   --td-button-border-radius: 7px;
 }
 .detail .queue-link {
@@ -196,7 +196,7 @@
 .submit-caption {
   font-size: 13px;
   line-height: 18px;
-  color: #a0a8ac;
+  color: var(--ui-muted);
 }
 .submit-quote {
   flex-shrink: 0;
@@ -210,8 +210,8 @@
   align-items: center;
   gap: 20rpx;
   padding: 20rpx;
-  background: #1c1f21;
-  border: 1rpx solid #353b3e;
+  background: var(--ui-surface);
+  border: 1rpx solid var(--ui-border);
   border-radius: 16rpx;
   margin-top: 25rpx;
 }
@@ -243,7 +243,7 @@
 }
 .template-description {
   display: block;
-  color: #a0a8ac;
+  color: var(--ui-muted);
   font-size: 12px;
   line-height: 1.7;
   margin: 8px 0 0;

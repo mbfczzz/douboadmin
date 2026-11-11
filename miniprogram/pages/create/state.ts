@@ -13,6 +13,7 @@ export const creationData = {
   allowVideo: false,
   allowAudio: false,
   model: "",
+  modelIndex: 0,
   modelName: "正在加载模型",
   models: [] as Model[],
   availableModels: [] as ModelChoice[],

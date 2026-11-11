@@ -1,5 +1,5 @@
 <nav-bar title="我的积分" back />
-<view class="subpage page-motion {{pageMotion}}">
+<view class="subpage">
   <view wx:if="{{needsLogin}}" class="biz-empty"
     ><text>登录后查看积分与充值记录</text
     ><button class="biz-action" bindtap="signIn">去登录</button></view

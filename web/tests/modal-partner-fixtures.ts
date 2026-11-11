@@ -3,6 +3,12 @@ import { surfaceFixtures } from "./surface-fixtures";
 
 export async function modalPartnerFixtures(page: Page) {
   await surfaceFixtures(page);
+  // A root-level pending provider is reviewable by the platform itself.
+  await page.route("**/api/admin/registrations?*", (route) => route.fulfill({ json: {
+    page: 1, size: 20, total: 1, items: [{ id: "qa-user", version: 1, createdAt: "2026-11-11",
+      data: { role: "branch", partnerId: "qa-pending", parentId: "root", canReview: true,
+        codeKind: "bind", code: "ABCD2345", method: "scan", name: "待审核分公司", phone: "13900000002", status: "pending" } }],
+  } }));
   const record = {
     id: "qa-child",
     version: 1,

@@ -23,6 +23,7 @@ Page({
     this.visible = false;
     this.loadVersion++;
     this.fetching = false;
+    this.setData({ loading: false });
   },
   onUnload() {
     this.onHide();
@@ -33,7 +34,7 @@ Page({
     this.visible = true;
     tab(this, 0);
     void this.loadCategories();
-    void this.load(true);
+    if (!this.loadedQuery) void this.load(true);
   },
   async load(keepContent = false, append = false) {
     if (this.destroyed || !this.visible) return;

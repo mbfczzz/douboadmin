@@ -5,7 +5,7 @@
   bind:back="back"
   disabled="{{busy}}"
 />
-<view class="subpage profile-page page-motion {{pageMotion}}">
+<view class="subpage profile-page">
   <view wx:if="{{loading}}" class="loading"
     ><t-loading text="正在读取资料"
   /></view>

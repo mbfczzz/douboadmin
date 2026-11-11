@@ -18,6 +18,8 @@ func TestInvalidSettingsNeverPersistOrAudit(t *testing.T) {
 		{"embedded credentials", "relay", Values{"RELAY_BASE_URL": "https://name:password@example.test"}, nil},
 		{"invalid origin", "site", Values{"WEB_ORIGIN": "https://example.test/admin"}, nil},
 		{"invalid AppID", "wechat", Values{"WECHAT_APP_ID": "wrong-app-id"}, nil},
+		{"OSS endpoint in region", "oss", Values{"OSS_REGION": "oss-cn-shanghai.aliyuncs.com"}, nil},
+		{"OSS endpoint URL in region", "oss", Values{"OSS_REGION": "https://oss-cn-shanghai.aliyuncs.com"}, nil},
 		{"invalid flag", "virtual", Values{"WECHAT_VIRTUAL_ENABLED": "yes"}, nil},
 		{"incomplete payment", "virtual", Values{"WECHAT_VIRTUAL_ENABLED": "true"}, nil},
 		{"production sandbox", "virtual", Values{"WECHAT_VIRTUAL_SANDBOX_APP_KEY": "fixture"}, nil},

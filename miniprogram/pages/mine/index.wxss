@@ -44,7 +44,7 @@
 }
 .numbers {
   display: flex;
-  background: #1c1f21;
+  background: var(--ui-surface);
   height: 71px;
   padding: 10px 0;
 }
@@ -59,7 +59,7 @@
 }
 .numbers > view > text:last-child {
   font-size: 11px;
-  color: #a0a8ac;
+  color: var(--ui-muted);
   display: block;
   margin-top: 10px;
 }
@@ -70,7 +70,7 @@
 }
 .work {
   min-width: 0;
-  background: #1c1f21;
+  background: var(--ui-surface);
   border-radius: 10px;
   overflow: hidden;
 }
@@ -102,7 +102,7 @@
 .work-kind {
   display: block;
   font-size: 11px;
-  color: #a0a8ac;
+  color: var(--ui-muted);
   margin: 0 8px 8px;
 }
 .empty-work {
@@ -111,9 +111,9 @@
   flex-direction: column;
   align-items: center;
   gap: 22rpx;
-  border: 1rpx solid #353b3e;
+  border: 1rpx solid var(--ui-border);
   border-radius: 18rpx;
-  color: #a0a8ac;
+  color: var(--ui-muted);
   font-size: 24rpx;
 }
 .menu {
@@ -126,7 +126,7 @@
   font-size: 14px;
 }
 .menu > t-icon:first-child {
-  color: #a0a8ac;
+  color: var(--ui-muted);
 }
 .menu text {
   flex: 1;
@@ -176,7 +176,7 @@
 .guest-copy {
   display: block;
   font-size: 27rpx;
-  color: #a0a8ac;
+  color: var(--ui-muted);
   line-height: 1.9;
   margin-bottom: 60rpx;
 }

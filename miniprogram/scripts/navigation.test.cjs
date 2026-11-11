@@ -117,7 +117,7 @@ test("returning to templates preserves rendered items during paged refresh", asy
   assert.equal(page.data.columns.flatMap((c) => c.items).length, 7);
 });
 
-test("route changes animate while foregrounding the same page preserves motion and content", () => {
+test("route changes and foregrounding keep page content fully visible without restarting an animation", () => {
   const h = harness(),
     page = h.page("create");
   page.setData({ prompt: "keep this input" });
@@ -127,7 +127,7 @@ test("route changes animate while foregrounding the same page preserves motion a
   assert.equal(page.data.pageMotion, first);
   h.api.enterPage(h.page("templates"));
   h.api.enterPage(page);
-  assert.notEqual(page.data.pageMotion, first);
+  assert.equal(page.data.pageMotion, first);
   assert.equal(page.data.prompt, "keep this input");
 });
 

@@ -65,6 +65,7 @@ Page({
   },
   onHide() {
     this.visible = false;
+    this.loadVersion++;
     if (this.refreshTimer !== undefined) clearTimeout(this.refreshTimer);
   },
   onUnload() {

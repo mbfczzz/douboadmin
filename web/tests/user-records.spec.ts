@@ -4,7 +4,7 @@ import { miniUser } from "./partner-helpers";
 
 test("user rows open model use and activity records", async ({ page }) => {
   const user = await miniUser(page.request);
-  await page.route(`**/api/admin/users/${user.userId}/models`, (route) =>
+  await page.route(`**/api/admin/users/${user.userId}/models?*`, (route) =>
     route.fulfill({
       json: {
         models: [
@@ -80,7 +80,7 @@ test("without 日志管理 / 生成任务 the user records hide those views", as
     const me = await (await route.fetch()).json();
     await route.fulfill({ json: { ...me, role: "custom", menus: ["users"] } });
   });
-  await page.route(`**/api/admin/users/${user.userId}/models`, (route) =>
+  await page.route(`**/api/admin/users/${user.userId}/models?*`, (route) =>
     route.fulfill({
       json: {
         models: [

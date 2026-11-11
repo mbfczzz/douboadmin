@@ -46,7 +46,7 @@ var definitions = []Group{
 		{Key: "SMS_TEMPLATE_CODE", Label: "验证码模板 CODE", Kind: "text", Hint: "例如 SMS_123456789。"},
 	}},
 	{ID: "oss", Name: "阿里云 OSS", Hint: "API 和 Worker 需使用同一个存储配置。更换地域或存储桶前，需要迁移已有媒体文件。", Fields: []Field{
-		{Key: "OSS_REGION", Label: "地域 Region", Kind: "text", Hint: "例如 cn-shanghai。"},
+		{Key: "OSS_REGION", Label: "地域 Region", Kind: "text", Hint: "填写 cn-shanghai 这样的地域 ID，不填写 oss-cn-shanghai.aliyuncs.com 或 HTTPS 地址。"},
 		{Key: "OSS_BUCKET", Label: "存储桶 Bucket", Kind: "text"},
 		{Key: "OSS_ACCESS_KEY_ID", Label: "AccessKey ID", Kind: "secret"},
 		{Key: "OSS_ACCESS_KEY_SECRET", Label: "AccessKey Secret", Kind: "secret"},

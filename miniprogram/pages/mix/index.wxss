@@ -11,7 +11,7 @@
 .mix-add {
   height: calc((100vw - 86px) / 3);
   border-radius: 14rpx;
-  background: #272b2d;
+  background: var(--ui-field);
   position: relative;
   overflow: hidden;
 }
@@ -31,7 +31,7 @@
   align-items: center;
   justify-content: center;
   gap: 12rpx;
-  color: #9bcbaa;
+  color: var(--ui-brand);
   font-size: 23rpx;
 }
 .mix-add {

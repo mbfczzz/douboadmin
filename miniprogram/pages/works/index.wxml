@@ -1,5 +1,5 @@
 <nav-bar title="我的作品" back />
-<view class="subpage works-page page-motion {{pageMotion}}">
+<view class="subpage works-page">
   <view wx:if="{{loading}}" class="loading"><t-loading text="正在加载作品" /></view>
   <view wx:elif="{{needsLogin}}" class="empty">
     <t-icon name="image" size="36" />

@@ -2,7 +2,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { api } from "../api";
 
 // Page-local query snapshots: never show another query's records, and discard
-// unfinished requests on navigation. A refresh/write invalidates every snapshot.
+// unfinished requests on navigation. A refresh invalidates other snapshots,
+// while the visible query stays readable if its network request fails.
 export function useCachedResource<T>(path: string | null, pollMs = 0) {
   const cache = useRef(new Map<string, T>());
   const active = useRef<AbortController | null>(null);
@@ -46,8 +47,11 @@ export function useCachedResource<T>(path: string | null, pollMs = 0) {
   // and stop requesting entirely once its page or dialog has unmounted.
   const reload = useCallback(() => {
     if (!mounted.current) return Promise.resolve();
+    const key = current.current;
+    const previous = key ? cache.current.get(key) : undefined;
     cache.current.clear();
-    return latestLoad.current();
+    if (key && previous !== undefined) cache.current.set(key, previous);
+    return latestLoad.current(true);
   }, []);
   useEffect(() => {
     mounted.current = true;

@@ -61,6 +61,22 @@ test("model dropdown repairs unsupported parameters and keeps the chosen model",
   await page.loadModels();
   assert.equal(page.data.model, "alternate");
 });
+
+test("same-name model variants retain public identifiers and configured descriptions", async () => {
+  const h = harness(), page = h.page("create");
+  h.api.request = async () => ({ models: [
+    { ...models[0], id: "variant-a", key: "seedance-2.5-fast", name: "Seedance 2.5" },
+    { ...models[0], id: "variant-b", key: "seedance-2.5-standard", name: "Seedance 2.5" },
+    { ...models[0], id: "configured", key: "public-key", settings: { description: "运营配置说明" } },
+  ] });
+  await page.loadModels();
+  assert.deepEqual(Array.from(page.data.availableModels, (m) => m.description), [
+    "seedance-2.5-fast", "seedance-2.5-standard", "运营配置说明",
+  ]);
+  page.selectModel(event({ id: "variant-b" }));
+  assert.equal(page.data.model, "variant-b");
+  assert.equal(page.data.modelName, "Seedance 2.5");
+});
 test("reference sheet selects the requested type and cancel preserves existing assets", async () => {
   const h = harness(),
     page = h.page("create");

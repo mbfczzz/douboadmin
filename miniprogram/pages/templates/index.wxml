@@ -3,7 +3,7 @@
     <t-icon name="search" size="22" />
   </view>
 </nav-bar>
-<view class="page templates-page page-motion {{pageMotion}}">
+<view class="page templates-page">
   <view class="search-field" wx:if="{{searching}}">
     <input
       placeholder="搜索你想要的画面"

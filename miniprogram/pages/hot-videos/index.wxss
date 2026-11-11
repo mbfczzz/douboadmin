@@ -25,10 +25,10 @@
 .hot-words text {
   max-width: 100%;
   overflow-wrap: anywhere;
-  background: #272b2d;
+  background: var(--ui-field);
   padding: 12rpx 18rpx;
   border-radius: 10rpx;
-  color: #9bcbaa;
+  color: var(--ui-brand);
   font-size: 25rpx;
 }
 .hot-title {

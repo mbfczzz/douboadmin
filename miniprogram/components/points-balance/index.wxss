@@ -6,7 +6,7 @@
   margin: 0;
   padding: 24rpx;
   border-radius: 20rpx;
-  background: var(--td-bg-color-container, #1c1f21);
+  background: var(--td-bg-color-container, var(--ui-surface, #1c1f21));
 }
 .balance-copy {
   min-width: 0;
@@ -15,8 +15,8 @@
 .label,
 .note {
   display: block;
-  color: var(--td-text-color-secondary, #a0a8ac);
-  font-size: 24rpx;
+  color: var(--td-text-color-secondary, var(--ui-muted, #a0a8ac));
+  font-size: var(--ui-font-note, 12px);
 }
 .amount {
   display: block;
@@ -27,15 +27,16 @@
   overflow-wrap: anywhere;
 }
 button.action {
+  min-height: 44px;
   width: auto;
   flex-shrink: 0;
   margin: 0;
-  padding: 20rpx 24rpx;
-  line-height: 1.6;
+  padding: 11px 12px;
+  line-height: 22px;
   border-radius: 14rpx;
-  color: var(--td-button-primary-color, #17281d);
-  background: var(--td-brand-color, #9bcbaa);
-  font-size: 28rpx;
+  color: var(--td-button-primary-color, var(--ui-on-brand, #17281d));
+  background: var(--td-brand-color, var(--ui-brand, #9bcbaa));
+  font-size: var(--ui-font-body, 14px);
 }
 .action::after {
   border: 0;

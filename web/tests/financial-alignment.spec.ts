@@ -62,9 +62,7 @@ test("financial values share a right edge while mobile cards keep their reading 
   await expect(
     cards.first().getByText("金额 / 积分", { exact: true }),
   ).toBeVisible();
-  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(
-    390,
-  );
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   expect(
     await cards
       .first()

@@ -11,7 +11,7 @@ export function modelChoices(models: Model[], kind: string): ModelChoice[] {
       ...model,
       icon: model.icon && !/^(https?:|\/)/i.test(model.icon) ? model.icon : "",
       label: model.name,
-      description: model.settings?.description || "",
+      description: model.settings?.description || model.key || "",
       estimate: model.settings?.estSeconds
         ? "约 " + model.settings.estSeconds + " 秒"
         : "",

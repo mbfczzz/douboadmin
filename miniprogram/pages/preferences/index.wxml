@@ -1,4 +1,4 @@
-<nav-bar title="设置" back /><view class="subpage page-motion {{pageMotion}}"
+<nav-bar title="设置" back /><view class="subpage"
   ><view wx:if="{{needsLogin}}" class="biz-empty"
     >登录后设置个人偏好<button class="biz-action" bindtap="signIn">
       去登录

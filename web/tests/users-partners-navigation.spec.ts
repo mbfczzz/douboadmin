@@ -30,6 +30,7 @@ test("users and providers are isolated sidebar routes", async ({ page }) => {
   await expect(
     page.getByRole("button", { name: "编辑", exact: true }).first(),
   ).toBeVisible();
+  await page.getByRole("button", { name: `展开${longName}`, exact: true }).click();
   await expect(page.getByText("质检子级服务商", { exact: true })).toBeVisible();
   await page
     .getByRole("button", { name: `收起${longName}`, exact: true })
@@ -60,6 +61,8 @@ test("users and providers are isolated sidebar routes", async ({ page }) => {
     await row.getByRole("button", { name: button, exact: true }).click();
     const dialog = page.getByRole("dialog", { name: title, exact: true });
     await expect(dialog).toBeVisible();
+    if (button === "分享码")
+      await dialog.getByRole("tab", { name: "子账号开通码", exact: true }).click();
     if (heading)
       await expect(
         dialog.getByRole("heading", { name: heading, exact: true }),

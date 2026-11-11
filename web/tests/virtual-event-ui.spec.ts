@@ -67,8 +67,8 @@ for (const width of [1440, 390]) {
       dialog.getByRole("button", { name: "保存核对说明" }),
     ).toBeEnabled();
     expect(
-      await page.evaluate(() => document.documentElement.scrollWidth),
-    ).toBe(width);
+      await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth),
+    ).toBe(true);
     const bounds = await dialog.boundingBox();
     expect(bounds!.x).toBeGreaterThanOrEqual(0);
     expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(width);

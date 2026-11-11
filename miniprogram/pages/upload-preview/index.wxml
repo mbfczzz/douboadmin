@@ -1,5 +1,5 @@
 <nav-bar title="确认照片" back />
-<view class="subpage preview-page page-motion {{pageMotion}}">
+<view class="subpage preview-page">
   <view class="preview-frame">
     <image class="preview" src="{{path}}" mode="aspectFit" bindtap="zoom" />
     <view class="preview-zoom" bindtap="zoom" aria-label="放大检查照片">

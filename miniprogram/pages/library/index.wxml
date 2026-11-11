@@ -1,5 +1,5 @@
 <nav-bar title="{{title}}" back />
-<view class="subpage page-motion {{pageMotion}}">
+<view class="subpage">
   <view wx:if="{{loading}}" class="loading"><t-loading /></view>
   <view wx:elif="{{needsLogin}}" class="empty">
     <text class="title">登录后查看{{title}}</text>
@@ -28,7 +28,7 @@
         bindtap="detail"
       >
         <image src="{{item.data.cover}}" mode="aspectFill" />
-        <view>
+        <view class="favorite-copy">
           <text>{{item.data.title}}</text>
           <text class="muted small">{{item.data.category}} · 制作同款 ↗</text>
         </view>

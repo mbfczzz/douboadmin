@@ -44,13 +44,13 @@ test("monitor filters offline instances, refreshes all data and acknowledges ale
     calls.monitor++;
     return route.fulfill({ json: health() });
   });
-  await page.route("**/api/admin/alerts", (route) => {
+  await page.route("**/api/admin/alerts?*", (route) => {
     calls.alerts++;
     return route.fulfill({
       json: [{ ...row, data: { message: "测试节点告警", acknowledged } }],
     });
   });
-  await page.route("**/api/admin/logs", (route) => {
+  await page.route("**/api/admin/logs?*", (route) => {
     calls.logs++;
     return route.fulfill({
       json: [

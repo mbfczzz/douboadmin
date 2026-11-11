@@ -1,6 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { login } from "./helpers";
 import { longName, surfaceFixtures } from "./surface-fixtures";
+import { providerTreeFixture, expandProviderTree } from "./provider-tree-fixture";
 
 const record = (id: string, name: string, role: string, parentId: string) => ({
   id,
@@ -25,6 +26,7 @@ const row = (page: Page, name: string) =>
   page.locator(".provider-tree-row").filter({ hasText: name }).first();
 
 async function open(page: Page, provider?: string) {
+  await login(page);
   // A provider login is scoped to its own node and below.
   if (provider)
     await page.route("**/api/admin/me", async (route) => {
@@ -32,14 +34,12 @@ async function open(page: Page, provider?: string) {
       if (!response.ok()) return route.fulfill({ response });
       const me = await response.json();
       await route.fulfill({
-        json: { ...me, scope: "partner", partnerId: provider },
+        json: { ...me, role: "s1", scope: "partner", partnerId: provider, menus: ["partners"] },
       });
     });
-  await login(page);
+  if (provider) await page.reload();
   await surfaceFixtures(page);
-  await page.route("**/api/admin/partners/tree", (route) =>
-    route.fulfill({ json: tree }),
-  );
+  await providerTreeFixture(page, tree, provider);
   await page.route("**/api/admin/partners/qa-s2", (route) =>
     route.fulfill({
       json: {
@@ -50,7 +50,9 @@ async function open(page: Page, provider?: string) {
     }),
   );
   await page.getByRole("button", { name: "服务商管理", exact: true }).click();
-  await expect(page.locator(".provider-tree-row")).toHaveCount(3);
+  const count = provider ? 2 : 3;
+  await expect(page.locator(".provider-tree-row")).toHaveCount(1);
+  await expandProviderTree(page, count);
 }
 
 test("分享码 tabs follow the role", async ({ page }) => {
@@ -97,7 +99,7 @@ test("分享码 tabs follow the role", async ({ page }) => {
   ).toBeVisible();
   await dialog.locator(".owner-bind > summary").click();
   await expect(dialog.locator(".owner-bind .share-code")).toHaveText(
-    "BIND-2345",
+    "ABCD-6789",
   );
   await expect(dialog.locator(".owner-bind .code-info")).toContainText(
     "一次有效",
@@ -124,8 +126,7 @@ test("provider logins grow only by codes and see no registrations", async ({
   await expect(page.getByRole("button", { name: "分销规则" })).toHaveCount(0);
   const requests: string[] = [];
   page.on("request", (r) => requests.push(new URL(r.url()).pathname));
-  await page.getByRole("button", { name: "小程序用户", exact: true }).click();
-  await expect(page.getByLabel("搜索用户")).toBeVisible();
+  await expect(page.getByRole("button", { name: "小程序用户", exact: true })).toHaveCount(0);
   await expect(page.getByRole("tab", { name: "扫码登记" })).toHaveCount(0);
   await expect(page.getByRole("region", { name: "扫码登记" })).toHaveCount(0);
   expect(requests).not.toContain("/api/admin/registrations");

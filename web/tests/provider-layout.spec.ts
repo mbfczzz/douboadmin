@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { login } from "./helpers";
+import { providerTreeFixture, expandProviderTree } from "./provider-tree-fixture";
 
 const ids = Array.from(
   { length: 8 },
@@ -35,11 +36,10 @@ const rows = ids.map((id, i) => ({
 
 test.beforeEach(async ({ page }) => {
   await login(page);
-  await page.route("**/api/admin/partners/tree", (route) =>
-    route.fulfill({ json: rows }),
-  );
+  await providerTreeFixture(page, rows);
   await page.getByRole("button", { name: "服务商管理", exact: true }).click();
-  await expect(page.locator(".provider-tree-row")).toHaveCount(8);
+  await expect(page.locator(".provider-tree-row")).toHaveCount(3);
+  await expandProviderTree(page, 8);
 });
 
 test("provider layout stays aligned and contained across desktop, tablet and mobile", async ({
@@ -95,7 +95,7 @@ test("provider layout stays aligned and contained across desktop, tablet and mob
   }
 });
 
-test("search, expansion, expand-all and the edit action keep working", async ({
+test("search, lazy expansion and the edit action keep working", async ({
   page,
 }) => {
   await page
@@ -109,11 +109,10 @@ test("search, expansion, expand-all and the edit action keep working", async ({
     page.getByText("没有匹配的服务商", { exact: true }),
   ).toBeVisible();
   await page.getByLabel("搜索服务商").fill("");
-  await page.getByRole("button", { name: "全部展开", exact: true }).click();
-  await expect(page.locator(".provider-tree-row")).toHaveCount(8);
-  await page.getByRole("button", { name: "全部收起", exact: true }).click();
+  await expandProviderTree(page, 8);
+  await page.getByRole("button", { name: `收起${names[0]}`, exact: true }).click();
   expect(await page.locator(".provider-tree-row").count()).toBeLessThan(8);
-  await page.getByRole("button", { name: "全部展开", exact: true }).click();
+  await expandProviderTree(page, 8);
   // Provider numbers are plain text; the full id is available on hover.
   const titles = await page
     .locator(".provider-id")

@@ -1,5 +1,5 @@
 <nav-bar title="模板详情" back />
-<view class="subpage detail page-motion {{pageMotion}}">
+<view class="subpage detail">
   <view wx:if="{{loading}}" aria-label="正在加载模板详情">
     <view class="hero skeleton" />
     <view class="skeleton skeleton-line" />

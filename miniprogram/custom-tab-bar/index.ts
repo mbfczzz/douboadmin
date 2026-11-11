@@ -8,10 +8,22 @@ Component({
   },
   pageLifetimes: {
     show() {
-      this.setData({ switching: false });
+      this.syncSelected();
+    },
+  },
+  lifetimes: {
+    attached() {
+      this.syncSelected();
     },
   },
   methods: {
+    syncSelected() {
+      const pages = getCurrentPages();
+      const route = pages[pages.length - 1]?.route;
+      const index = this.data.items.findIndex((item: { path: string }) => item.path === "/" + route);
+      if (index >= 0) this.setData({ selected: index, switching: false });
+      else this.setData({ switching: false });
+    },
     switchTab(e: WechatMiniprogram.TouchEvent) {
       const i = Number(e.currentTarget.dataset.index);
       if (
@@ -21,12 +33,19 @@ Component({
       )
         return;
       this.setData({ switching: true });
-      wx.switchTab({
-        url: this.data.items[i].path,
-        success: () => this.setData({ selected: i }),
-        fail: () => wx.showToast({ title: "切换失败，请重试", icon: "none" }),
-        complete: () => this.setData({ switching: false }),
-      });
+      const fail = () => {
+        this.setData({ switching: false });
+        wx.showToast({ title: "切换失败，请重试", icon: "none" });
+      };
+      try {
+        wx.switchTab({
+          url: this.data.items[i].path,
+          fail,
+          complete: () => this.setData({ switching: false }),
+        });
+      } catch {
+        fail();
+      }
     },
   },
 });

@@ -30,8 +30,11 @@ export function error(e: unknown) {
 export function tab(page: any, index: number) {
   track("page_view", ["templates", "mix", "create", "agent", "mine"][index]);
   enterPage(page);
-  const bar = page.getTabBar?.();
-  bar?.setData({ selected: index, switching: false });
+  const select = (bar: any) => {
+    if (bar && (bar.data?.selected !== index || bar.data?.switching))
+      bar.setData({ selected: index, switching: false });
+  };
+  select(page.getTabBar?.(select));
 }
 export function date(s: string) {
   const d = new Date(s);

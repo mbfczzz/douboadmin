@@ -137,6 +137,6 @@ Page({
     });
   },
   upload() {
-    openTab(this, "/pages/mix/index");
+    openTab(this, "/pages/create/index");
   },
 });

@@ -44,6 +44,9 @@ Page({
     this.timer = setInterval(() => void this.load(), 3000);
   },
   onHide() {
+    this.loadVersion++;
+    this.fetching = false;
+    this.setData({ loadingOlder: false });
     clearInterval(this.timer);
   },
   onUnload() {
@@ -97,7 +100,8 @@ Page({
         });
     } catch (e) {
       // One toast per outage, not one every poll.
-      if (version === this.loadVersion && !this.failed) error(e);
+      if (version !== this.loadVersion) return;
+      if (!this.failed) error(e);
       this.failed = true;
     } finally {
       if (version === this.loadVersion) this.fetching = false;
@@ -125,9 +129,9 @@ Page({
         hasOlder: this.history.length < result.total,
       });
     } catch (e) {
-      error(e);
+      if (version === this.loadVersion) error(e);
     } finally {
-      if (!this.destroyed) this.setData({ loadingOlder: false });
+      if (version === this.loadVersion && !this.destroyed) this.setData({ loadingOlder: false });
     }
   },
   quick(e: WechatMiniprogram.TouchEvent) {

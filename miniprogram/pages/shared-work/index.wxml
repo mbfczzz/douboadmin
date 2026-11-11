@@ -1,4 +1,4 @@
-<nav-bar title="作品分享" /><view class="subpage page-motion {{pageMotion}}"
+<nav-bar title="作品分享" /><view class="subpage"
   ><view wx:if="{{loadError}}" class="biz-error" bindtap="load"
     >{{loadError}}</view
   ><view wx:if="{{work}}" class="biz-card"

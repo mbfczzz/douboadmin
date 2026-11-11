@@ -47,6 +47,7 @@ test("repeating a member search retries the same failed query", async ({
     .getByRole("button", { name: "分享码", exact: true })
     .click();
   const members = page.getByRole("region", { name: "已加入的会员" });
+  await page.getByRole("dialog").getByRole("tab", { name: "子账号开通码", exact: true }).click();
   await members.getByLabel("查询记录").fill("same");
   await members.getByRole("button", { name: "查询", exact: true }).click();
   await expect(members.getByRole("alert")).toBeVisible();

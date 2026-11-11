@@ -1,5 +1,5 @@
 <nav-bar title="视频详情" back /><view
-  class="subpage page-motion {{pageMotion}}"
+  class="subpage"
   ><view wx:if="{{loadError}}" class="biz-error" bindtap="load"
     >{{loadError}} · 点击重试</view
   ><view wx:if="{{loading&&!video}}" class="biz-empty">正在加载视频…</view

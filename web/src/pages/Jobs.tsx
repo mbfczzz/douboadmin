@@ -17,7 +17,7 @@ export default function Jobs({ notify }: PageProps) {
   const [filter, setFilter] = useRememberedState("jobs.status", "all"),
     [search, setSearch] = useRememberedState("jobs.query", ""),
     [detail, setDetail] = useState<Job | null>(null);
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(1), [refreshKey, setRefreshKey] = useState(0);
   const resource = useCachedResource<{
     items: Job[];
     total: number;
@@ -27,6 +27,10 @@ export default function Jobs({ notify }: PageProps) {
     15000,
   );
   const jobs = resource.data?.items || [];
+  const refresh = () => {
+    setRefreshKey((value) => value + 1);
+    void resource.reload();
+  };
   const act = async (kind: JobAction, job: Job) => {
     if (kind === "detail") return setDetail(job);
     try {
@@ -44,7 +48,7 @@ export default function Jobs({ notify }: PageProps) {
       <PageHeader
         page="jobs"
         loading={resource.loading}
-        onRefresh={resource.reload}
+        onRefresh={refresh}
       />
       <section className="panel">
         <FilterBar
@@ -68,11 +72,12 @@ export default function Jobs({ notify }: PageProps) {
           label="生成任务列表"
           loading={resource.loading && !resource.data && !resource.error}
           error={resource.error}
-          retry={resource.reload}
+          retry={refresh}
         >
           {filteredJobs.length ? (
             <JobTable
               jobs={filteredJobs}
+              refreshKey={refreshKey}
               pagination={{
                 page,
                 total: resource.data?.total || 0,

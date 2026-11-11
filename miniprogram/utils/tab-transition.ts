@@ -1,4 +1,4 @@
-import { openPage } from "./navigation";
+import { switchPageTab } from "./navigation";
 
 export const TAB_ITEMS = [
   { text: "模板", icon: "app", path: "/pages/templates/index" },
@@ -14,11 +14,5 @@ export function tabDestination(path: string) {
 
 export function openTab(page: object, path: string, onFail?: () => void) {
   if (!tabDestination(path)) return false;
-  return openPage(page, {
-    url: "/pages/transition/index?target=" + encodeURIComponent(path),
-    fail() {
-      onFail?.();
-      wx.showToast({ title: "页面打开失败，请重试", icon: "none" });
-    },
-  });
+  return switchPageTab(page, path, onFail);
 }

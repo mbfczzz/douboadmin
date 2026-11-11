@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   forgetCover,
   rememberCover,
@@ -13,6 +13,9 @@ const delays = [15_000, 60_000, 180_000];
 export function useThumbnailRetry(owner: string, id: string, visible: boolean) {
   const [failures, setFailures] = useState<Record<string, Failure>>({});
   const [tick, wake] = useState(0);
+  const reset = useCallback(() => {
+    setFailures((current) => Object.keys(current).length ? {} : current);
+  }, []);
   useEffect(() => {
     const onVisible = () => wake((n) => n + 1);
     document.addEventListener("visibilitychange", onVisible);
@@ -65,5 +68,5 @@ export function useThumbnailRetry(owner: string, id: string, visible: boolean) {
       return next;
     });
   };
-  return { allowed, failed, loaded };
+  return { allowed, failed, loaded, reset };
 }

@@ -10,6 +10,7 @@ import type { Row, Asset } from "../../services/types";
 import type { MixEditor as Editor } from "../../services/page-contracts";
 
 export async function addAssets(page: Editor) {
+  if (!page.data.config?.enabled) return;
   if (page.data.uploading || page.data.restoring || page.data.busy) return;
   const revision = page.assetRevision;
   page.setData({ uploading: true });
@@ -42,6 +43,7 @@ export async function addAssets(page: Editor) {
 }
 
 export async function uploadMusic(page: Editor) {
+  if (!page.data.config?.enabled) return;
   if (page.data.uploading || page.data.busy) return;
   const revision = page.assetRevision;
   page.setData({ uploading: true });

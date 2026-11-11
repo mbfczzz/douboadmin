@@ -18,9 +18,9 @@
   width: 248px;
   max-width: calc(100% - 28px);
   padding: 6px;
-  border: 1px solid #353b3e;
+  border: 1px solid var(--ui-border);
   border-radius: 10px;
-  background: #1c1f21;
+  background: var(--ui-surface);
   z-index: 1001;
   box-shadow: 0 8px 24px #00000040;
 }
@@ -71,7 +71,7 @@
   background: #25372c;
 }
 .model-option t-icon {
-  color: #9bcbaa;
+  color: var(--ui-brand);
 }
 .reference-sheet {
   padding: 16px 20px calc(24px + env(safe-area-inset-bottom));
@@ -100,23 +100,19 @@
   padding: 12px;
   margin-top: 8px;
   border-radius: 10px;
-  background: #272b2d;
+  background: var(--ui-field);
   font-size: 16px;
 }
-.source-option > view {
+.source-copy {
   flex: 1;
   min-width: 0;
   overflow-wrap: anywhere;
-}
-.source-option > t-icon,
-.model-option > t-icon {
-  flex-shrink: 0;
 }
 .source-hint {
   display: block;
   margin-top: 5px;
   font-size: 12px;
-  color: #a0a8ac;
+  color: var(--ui-muted);
 }
 .model-logo {
   width: 22px;
@@ -136,7 +132,7 @@
 .model-description {
   display: block;
   overflow: hidden;
-  font-size: 11px;
+  font-size: var(--ui-font-note);
   color: #9ba7a0;
   margin-top: 2px;
   text-overflow: ellipsis;
@@ -149,7 +145,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   text-align: right;
-  font-size: 10px;
+  font-size: var(--ui-font-caption);
   color: #9ba7a0;
 }
 .model-badges {
@@ -159,7 +155,7 @@
   white-space: nowrap;
 }
 .model-badges text {
-  font-size: 10px;
+  font-size: var(--ui-font-caption);
   padding: 2px 4px;
   background: #2c3430;
   color: #bac7bf;
@@ -171,7 +167,7 @@
 }
 .model-badges .new {
   background: #223631;
-  color: #9bcbaa;
+  color: var(--ui-brand);
 }
 .model-glyph {
   width: 22px;

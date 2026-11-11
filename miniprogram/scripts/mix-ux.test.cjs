@@ -57,6 +57,7 @@ test("a late music lookup cannot overwrite a newer user selection", async () => 
 test("leaving while a music picker is open prevents a late upload", async () => {
   const h = harness(),
     page = h.page("mix");
+  page.setData({ config: { enabled: true } });
   let finish,
     uploads = 0;
   h.api.chooseReferenceFile = () =>

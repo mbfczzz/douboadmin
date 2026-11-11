@@ -3,8 +3,8 @@
   align-items: center;
   gap: 22rpx;
   padding: 22rpx;
-  background: #1c1f21;
-  border: 1rpx solid #353b3e;
+  background: var(--ui-surface);
+  border: 1rpx solid var(--ui-border);
   border-radius: 20rpx;
   margin-bottom: 20rpx;
 }
@@ -27,17 +27,17 @@
   min-width: 0;
   overflow-wrap: anywhere;
 }
-.favorite-card > view {
+.favorite-copy {
   flex: 1;
   min-width: 0;
   word-break: break-all;
 }
-.favorite-card > view text {
+.favorite-copy text {
   display: block;
   margin: 15rpx 0;
   font-size: 27rpx;
 }
-.favorite-card > view .small {
+.favorite-copy .small {
   font-size: 23rpx;
 }
 .help-card {
@@ -46,7 +46,7 @@
 .help-card text {
   display: block;
   font-size: 25rpx;
-  color: #a0a8ac;
+  color: var(--ui-muted);
   line-height: 1.9;
 }
 .help-card .help-title {
@@ -70,8 +70,8 @@
   gap: 12px;
   padding: 14px;
   margin-bottom: 12px;
-  background: #1c1f21;
-  border: 1px solid #353b3e;
+  background: var(--ui-surface);
+  border: 1px solid var(--ui-border);
   border-radius: 10px;
   font-size: 14px;
 }

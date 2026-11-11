@@ -5,14 +5,14 @@
 .order-state {
   padding: 2px 8px;
   border-radius: 6px;
-  background: #272b2d;
-  color: #a0a8ac;
+  background: var(--ui-field);
+  color: var(--ui-muted);
   font-size: 12px;
   line-height: 18px;
 }
 .order-state.paid {
   background: #25372c;
-  color: #9bcbaa;
+  color: var(--ui-brand);
 }
 .order-state.created,
 .order-state.refunding {

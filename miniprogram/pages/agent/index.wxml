@@ -1,5 +1,5 @@
 <nav-bar title="Agent" size="{{23}}" />
-<view class="agent-page page-motion {{pageMotion}}">
+<view class="agent-page">
   <scroll-view
     scroll-y
     class="chat-scroll"

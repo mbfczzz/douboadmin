@@ -17,6 +17,7 @@ func invalid(field, message string) error { return &ValidationError{field, messa
 
 var appIDPattern = regexp.MustCompile(`^wx[0-9a-fA-F]{16}$`)
 var mappingField = regexp.MustCompile(`^[A-Za-z][A-Za-z0-9_]{0,39}$`)
+var ossRegionPattern = regexp.MustCompile(`^[a-z][a-z0-9]*(?:-[a-z0-9]+)+$`)
 
 func validURL(value string, query bool) bool {
 	u, err := url.Parse(value)
@@ -65,6 +66,12 @@ func validate(g Group, v Values, production bool) error {
 	}
 	if g.ID == "wechat" && v["WECHAT_APP_ID"] != "" && !appIDPattern.MatchString(v["WECHAT_APP_ID"]) {
 		return invalid("WECHAT_APP_ID", "请填写有效的小程序 AppID")
+	}
+	if g.ID == "oss" && v["OSS_REGION"] != "" {
+		region := v["OSS_REGION"]
+		if len(region) > 64 || !ossRegionPattern.MatchString(region) || strings.HasPrefix(region, "oss-") || strings.HasSuffix(region, "-internal") {
+			return invalid("OSS_REGION", "地域请填写 cn-shanghai 这样的 Region ID，不能填写 Endpoint、访问域名或内网地址")
+		}
 	}
 	if g.ID == "virtual" {
 		cfg, err := v.Virtual()

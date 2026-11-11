@@ -28,7 +28,7 @@
   padding: 1px 8px;
   border-radius: 4px;
   background: #22332a;
-  color: #9bcbaa;
+  color: var(--ui-brand);
   font-size: 12px;
   line-height: 18px;
 }
@@ -53,17 +53,20 @@
   justify-content: center;
   gap: 8px 16px;
   margin-bottom: 14px;
-  color: #a0a8ac;
+  color: var(--ui-muted);
   font-size: 14px;
 }
 .provider-tabs text {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--ui-touch-size);
   padding: 4px 0;
   border-bottom: 2px solid transparent;
 }
 .provider-tabs .on {
   color: #e9eceb;
   font-weight: 600;
-  border-bottom-color: #9bcbaa;
+  border-bottom-color: var(--ui-brand);
 }
 .provider-qr {
   display: block;
@@ -88,6 +91,11 @@
 }
 .provider-code .biz-link,
 .provider-secret .biz-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--ui-touch-size);
+  min-height: var(--ui-touch-size);
   font-family: inherit;
   font-size: 13px;
   letter-spacing: 0;
@@ -99,7 +107,7 @@
 .provider-section {
   display: block;
   margin: 20px 2px 10px;
-  color: #a0a8ac;
+  color: var(--ui-muted);
   font-size: 13px;
 }
 .provider-off {

@@ -5,6 +5,8 @@
     wx:key="path"
     data-index="{{index}}"
     bindtap="switchTab"
+    aria-role="button"
+    aria-label="{{item.text+(selected===index?'，已选中':'')}}"
     hover-class="item-pressed"
   >
     <view class="glyph"><t-icon name="{{item.icon}}" size="{{selected===index?18:24}}" /></view>

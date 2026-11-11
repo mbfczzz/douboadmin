@@ -5,10 +5,12 @@ import { mediaURL, cachedCover } from "./thumbnail-sources";
 import { useThumbnailRetry } from "./useThumbnailRetry";
 import "./job-thumbnail.css";
 
-export default function JobThumbnail({ job }: { job: Job }) {
+export default function JobThumbnail({ job, refreshKey = 0 }: { job: Job; refreshKey?: number }) {
   const box = useRef<HTMLSpanElement>(null);
   const [visible, setVisible] = useState(false);
   const retry = useThumbnailRetry(job.userId, job.id, visible);
+  const reset = retry.reset;
+  useEffect(reset, [refreshKey, reset]);
   useEffect(() => {
     if (!box.current) return;
     if (typeof IntersectionObserver === "undefined") {

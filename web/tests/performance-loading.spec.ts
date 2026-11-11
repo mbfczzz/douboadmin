@@ -46,7 +46,7 @@ test("model editor styles load on first entry and survive refresh and mobile lay
   const styles = files("src/pages/Models.tsx");
   await login(page);
   for (const file of styles) expect(loaded.has(file)).toBe(false);
-  await page.route("**/api/admin/models", (route) =>
+  await page.route(/\/api\/admin\/models(?:\?|$)/, (route) =>
     route.fulfill({
       json: [
         {
@@ -127,5 +127,5 @@ test("provider and integration styles are lazy and applied on first navigation",
   for (const file of settings) expect(loaded.has(file)).toBe(true);
   expect(
     await first.evaluate((element) => getComputedStyle(element).marginTop),
-  ).toBe("16px");
+  ).toBe("12px");
 });

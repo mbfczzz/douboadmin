@@ -26,7 +26,7 @@ button.profile-avatar-row {
   justify-content: center;
   border-radius: 50%;
   background: #25372c;
-  color: #9bcbaa;
+  color: var(--ui-brand);
 }
 .profile-avatar image {
   width: 100%;
@@ -42,9 +42,9 @@ button.profile-avatar-row {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #9bcbaa;
-  color: #17281d;
-  border: 2px solid #131516;
+  background: var(--ui-brand);
+  color: var(--ui-on-brand);
+  border: 2px solid var(--ui-bg);
   border-radius: 50%;
 }
 .profile-avatar-copy {
@@ -59,33 +59,33 @@ button.profile-avatar-row {
 }
 .profile-note {
   display: block;
-  color: #a0a8ac;
+  color: var(--ui-muted);
   font-size: 12px;
   line-height: 1.7;
 }
 .profile-chevron {
   flex-shrink: 0;
-  color: #a0a8ac;
+  color: var(--ui-muted);
 }
 .profile-section {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin: 22px 2px 10px;
-  color: #a0a8ac;
+  color: var(--ui-muted);
   font-size: 13px;
   font-weight: 500;
 }
 .profile-optional {
-  color: #a0a8ac;
+  color: var(--ui-muted);
   font-size: 12px;
   font-weight: 400;
 }
 .profile-fields,
 .profile-bio {
-  border: 1px solid #353b3e;
+  border: 1px solid var(--ui-border);
   border-radius: 12px;
-  background: #1c1f21;
+  background: var(--ui-surface);
   overflow: hidden;
 }
 .profile-field {
@@ -97,7 +97,7 @@ button.profile-avatar-row {
   transition: background 120ms;
 }
 .profile-field + .profile-field {
-  border-top: 1px solid #353b3e;
+  border-top: 1px solid var(--ui-border);
 }
 .profile-label {
   width: 64px;
@@ -116,18 +116,18 @@ button.profile-avatar-row {
   height: 36px;
   padding: 0;
   color: #e9eceb;
-  caret-color: #9bcbaa;
+  caret-color: var(--ui-brand);
   font-size: 16px;
   text-align: right;
 }
 .profile-field.focused {
-  background: #272b2d;
+  background: var(--ui-field);
 }
 .focused .profile-label {
-  color: #9bcbaa;
+  color: var(--ui-brand);
 }
 .profile-placeholder {
-  color: #a0a8ac;
+  color: var(--ui-muted);
 }
 .profile-field-error {
   display: block;
@@ -152,7 +152,7 @@ button.profile-avatar-row {
   height: 88px;
   padding: 0;
   color: #e9eceb;
-  caret-color: #9bcbaa;
+  caret-color: var(--ui-brand);
   font-size: 15px;
   line-height: 1.7;
 }
@@ -169,7 +169,7 @@ button.profile-avatar-row {
 }
 .profile-count {
   flex-shrink: 0;
-  color: #a0a8ac;
+  color: var(--ui-muted);
   font-size: 12px;
   line-height: 1.6;
   font-variant-numeric: tabular-nums;
@@ -217,7 +217,7 @@ button.profile-submit {
   align-items: center;
   gap: 8px;
   min-height: 36px;
-  color: #a0a8ac;
+  color: var(--ui-muted);
   font-size: 16px;
   font-variant-numeric: tabular-nums;
 }
@@ -225,7 +225,7 @@ button.profile-submit {
   padding: 1px 6px;
   border-radius: 4px;
   background: #22332a;
-  color: #9bcbaa;
+  color: var(--ui-brand);
   font-size: 12px;
   line-height: 18px;
 }
@@ -251,7 +251,7 @@ button.profile-submit {
 }
 .profile-identity.s2 {
   background: #22332a;
-  color: #9bcbaa;
+  color: var(--ui-brand);
 }
 /* Long provider names give way to the identity label. */
 .profile-partner {

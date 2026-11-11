@@ -1,4 +1,4 @@
-import { request, tab, openPage } from "../../utils/api";
+import { request, tab, openPage, sessionToken } from "../../utils/api";
 import type { Config, Row, Asset, Input } from "../../services/types";
 import { creationData } from "./state";
 import { generate } from "./submit";
@@ -7,7 +7,8 @@ import { openModelMenu } from "./model-menu";
 import { modelChoices, modelSettings, resolutionSettings } from "./models";
 import type { ModelChoice } from "./editor-types";
 import { addReference, selectedModel } from "./references";
-import { chooseMention, removeMention } from "./mentions";
+import { chooseMention, removeMention, clearMentions, cancelMention } from "./mentions";
+import { openReferencePreview, cancelPreview } from "./reference-preview";
 import {
   restoreEditorAssets,
   clearEditorAssets,
@@ -17,11 +18,15 @@ Page({
   assetRevision: 0,
   restoreIds: [] as string[],
   modelVersion: 0,
+  quoteOwner: "",
   visible: true,
   destroyed: false,
   onHide() {
     this.visible = false;
-    cancelEstimate(this, true);
+    cancelMention(this);
+    cancelPreview(this);
+    this.modelVersion++;
+    cancelEstimate(this);
     this.closeModels();
   },
   onResize() {
@@ -30,8 +35,10 @@ Page({
 
   onShow() {
     this.visible = true;
+    const owner = sessionToken();
+    if (owner !== this.quoteOwner) cancelEstimate(this, true);
+    this.quoteOwner = owner;
     tab(this, 2);
-    void this.loadModels();
     const draft = wx.getStorageSync("edit-draft") as Input;
     if (draft) {
       wx.removeStorageSync("edit-draft");
@@ -46,13 +53,15 @@ Page({
         duration: draft.duration || 5,
         assets: [],
       });
-      void this.loadModels();
       void this.restoreAssets(draft.assets || []);
     }
+    void this.loadModels();
   },
   onUnload() {
     this.destroyed = true;
     this.visible = false;
+    cancelMention(this);
+    cancelPreview(this);
     cancelEstimate(this);
     this.assetRevision++;
     this.modelVersion++;
@@ -67,11 +76,15 @@ Page({
     void this.restoreAssets(this.restoreIds);
   },
   clearReferences() {
+    cancelMention(this);
+    cancelPreview(this);
+    const prompt = clearMentions(this.data.prompt);
+    this.setData({ prompt, hasPrompt: !!prompt.trim(), promptCursor: -1 });
     clearEditorAssets(this);
     this.refreshParameters();
   },
   previewReference(e: WechatMiniprogram.TouchEvent) {
-    wx.previewImage({ urls: [e.currentTarget.dataset.url] });
+    void openReferencePreview(this, e.currentTarget.dataset.id);
   },
   refreshParameters() {
     const model = selectedModel(this);
@@ -83,8 +96,11 @@ Page({
   },
   async loadModels() {
     const version = ++this.modelVersion;
-    this.setData({ modelsLoading: true, modelError: "" });
-    updateEstimate(this);
+    this.setData({
+      modelsLoading: !this.data.availableModels.some((m: ModelChoice) => m.kind === this.data.kind),
+      modelError: "",
+    });
+    if (this.data.modelsLoading) updateEstimate(this);
     try {
       const c = await request<Config>(
         "/config",
@@ -101,6 +117,7 @@ Page({
         this.setData({
           models: c.models,
           availableModels: available,
+          modelIndex: available.indexOf(m),
           ...modelSettings(m, this.data),
         });
       } else
@@ -215,6 +232,7 @@ Page({
     if (m)
       this.setData({
         ...modelSettings(m, this.data),
+        modelIndex: this.data.availableModels.indexOf(m),
         showModels: false,
       });
     updateEstimate(this);

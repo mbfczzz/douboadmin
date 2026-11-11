@@ -10,6 +10,7 @@ export function openModelMenu(page: MenuPage) {
   });
   if (typeof wx.createSelectorQuery !== "function") return;
   const info = wx.getWindowInfo();
+  const bar = Math.max(44, info.windowWidth * 96 / 750) + info.windowWidth * 20 / 750;
   wx.createSelectorQuery()
     .select(".workspace")
     .boundingClientRect((value) => {
@@ -21,7 +22,7 @@ export function openModelMenu(page: MenuPage) {
         : 0;
       const below = Math.max(
         0,
-        info.windowHeight - safeBottom - 12 - (rect.bottom - 8),
+        info.windowHeight - safeBottom - bar - 12 - (rect.bottom - 8),
       );
       const above = Math.max(0, rect.bottom - 64 - top);
       const up = page.data.expanded || (below < desired && above > below);

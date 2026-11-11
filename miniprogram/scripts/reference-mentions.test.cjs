@@ -93,3 +93,30 @@ test("removing a reference clears that mention and renumbers later images only",
   assert.equal(page.data.prompt, "@图片1 作为背景， 和 @图片2 保持姿态");
   assert.equal(page.data.assets.length, 2);
 });
+
+test("clearing references removes every image mention but keeps ordinary text",()=>{
+  const h=harness(),page=h.page("create");
+  page.refreshParameters=()=>{};
+  page.setData({assets:[image(1),image(2)],prompt:"让 @图片1 与 @图片2 同框",promptCursor:15});
+  page.clearReferences();
+  assert.equal(page.data.prompt,"让  与  同框");
+  assert.equal(page.data.hasPrompt,true);
+  assert.equal(page.data.assets.length,0);
+  assert.equal(page.data.promptCursor,-1);
+});
+
+test("a cancelled old mention sheet cannot change the draft or unlock a new sheet",()=>{
+  const h=harness(),page=h.page("create"),sheets=[];
+  h.wx.showActionSheet=o=>sheets.push(o);
+  page.setData({assets:[image(1)],maxPromptChars:500});
+  page.input(event("@"));
+  page.onHide();page.visible=true;
+  page.input(event("@"));
+  assert.equal(sheets.length,2);
+  sheets[0].success({tapIndex:0});
+  sheets[0].fail({errMsg:"old failure"});
+  page.input(event("@"));
+  assert.equal(sheets.length,2);
+  sheets[1].success({tapIndex:0});
+  assert.equal(page.data.prompt,"@图片1 ");
+});

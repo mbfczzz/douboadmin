@@ -22,7 +22,7 @@
 }
 .search-field {
   display: flex;
-  background: #1c1f21;
+  background: var(--ui-surface);
   padding: 18rpx 24rpx;
   gap: 20rpx;
   border-radius: 14rpx;
@@ -36,7 +36,7 @@
   margin: -12px -12px -12px 0;
   padding: 12px;
   font-size: 25rpx;
-  color: #9bcbaa;
+  color: var(--ui-brand);
 }
 .waterfall {
   display: flex;
@@ -54,7 +54,7 @@
   position: relative;
   border-radius: 9px;
   overflow: hidden;
-  background: #272b2d;
+  background: var(--ui-field);
 }
 .cover.alternate {
   height: 174px;

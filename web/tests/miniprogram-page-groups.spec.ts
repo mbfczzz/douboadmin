@@ -11,25 +11,56 @@ function css(file: string, width: number): string {
     )
     .replace(/^page\s*{/gm, "body {")
     .replace(/(?<![\w.-])view\b/g, "div")
+    .replace(/(?<![\w.-])image\b/g, "img")
     .replace(/(?<![\w.-])text\b(?=\s*[,>{:])/g, "span")
     .replace(/([\d.]+)rpx/g, (_, n) => `${(Number(n) * width) / 750}px`);
 }
 for (const width of [320, 375, 430]) {
+  test(`virtual-host icons leave room for source and favorite text at ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 900 });
+    const styles = ["styles/theme.wxss", "styles/common.wxss", "pages/create/menus.wxss", "pages/library/index.wxss"]
+      .map((file) => css(file, width)).join("\n");
+    const source = readFileSync(path.join(root, "pages/create/index.wxml"), "utf8");
+    const sheet = source.slice(source.indexOf('<view wx:if="{{allowImage}}"'), source.lastIndexOf("</t-popup>"))
+      .replace(/<t-icon\b[^>]*size="(\d+)"[^>]*\/>/g, (_, size) => `<view class="icon-root" style="width:${size}px;height:${size}px"></view>`)
+      .replace(/{{[^}]+}}/g, "")
+      .replace(/<(\/?)(view|text)\b/g, (_, close, tag) => `<${close}${tag === "view" ? "div" : "span"}`);
+    await page.setContent(`<style>body{margin:0;font-family:sans-serif}.icon-root{flex-shrink:0}${styles}scroll-view{display:block}</style>
+      <div class="reference-sheet">${sheet}
+      <div class="favorite-card"><img alt="" /><div class="favorite-copy"><span>收藏的模板名称</span><span class="small">分类 · 制作同款</span></div><div class="icon-root" style="width:24px;height:24px"></div></div>
+      <scroll-view class="model-menu is-open" style="position:relative;left:0;height:248px"></scroll-view>`);
+    await expect(page.locator(".source-copy")).toHaveCount(3);
+    for (const hint of await page.locator(".source-hint").all()) {
+      expect((await hint.boundingBox())!.height).toBeLessThan(20);
+    }
+    for (const arrow of await page.locator(".source-option > .icon-root:last-child").all()) {
+      expect((await arrow.boundingBox())!.width).toBe(18);
+    }
+    expect((await page.locator(".favorite-card > .icon-root").boundingBox())!.width).toBe(24);
+    expect((await page.locator(".favorite-copy").boundingBox())!.width).toBeGreaterThan(100);
+    const menu = (await page.locator(".model-menu").boundingBox())!;
+    expect(menu.width).toBe(248);
+    expect(menu.height).toBe(248);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(width);
+  });
+
   test(`profile grouping and work placeholders at ${width}px`, async ({
     page,
   }) => {
     await page.setViewportSize({ width, height: 900 });
     const markup = readFileSync(
-      path.join(root, "pages/mine/index.wxml"),
+      path.join(root, "pages/profile/index.wxml"),
       "utf8",
     );
     const form = markup
       .slice(
-        markup.indexOf('<form bindsubmit="save">'),
+        markup.indexOf("<form "),
         markup.indexOf("</form>") + 7,
       )
       .replace(/\s(?:disabled|loading)="[^"]*"/g, "")
       .replace(/{{[^}]+}}/g, "")
+      .replace(/<textarea\b([^>]*)\/>/g, "<textarea$1></textarea>")
+      .replace(/<(\/?)image\b/g, "<$1img")
       .replace(
         /<(\/?)(view|text)\b/g,
         (_, close, tag) => `<${close}${tag === "view" ? "div" : "span"}`,
@@ -38,30 +69,36 @@ for (const width of [320, 375, 430]) {
       "styles/theme.wxss",
       "styles/common.wxss",
       "pages/mine/index.wxss",
+      "pages/profile/index.wxss",
     ]
       .map((file) => css(file, width))
       .join("\n");
     await page.setContent(
-      `<style>body{margin:0}t-icon{display:block;width:32px;height:32px;background:#9bcbaa55}${styles}</style><div class="sheet">${form}<div class="works"><div class="work"><div class="work-cover"><div class="work-placeholder"><t-icon></t-icon></div><span class="work-state">已完成</span></div></div></div></div>`,
+      `<style>body{margin:0}input,textarea{background:transparent;border:0;font:inherit}t-icon{display:block;width:32px;height:32px;background:#9bcbaa55}${styles}</style><div class="subpage profile-page">${form}<div class="works"><div class="work"><div class="work-cover"><div class="work-placeholder"><t-icon></t-icon></div><span class="work-state">已完成</span></div></div></div></div>`,
     );
-    const fields = await page.locator(".profile-field").evaluateAll((nodes) =>
+    await expect(page.locator(".profile-field:has(input)")).toHaveCount(2);
+    const fields = await page.locator(".profile-field:has(input)").evaluateAll((nodes) =>
       nodes.map((node) => {
-        const label = node
-          .querySelector(".field-label")!
-          .getBoundingClientRect();
+        const labelNode = node.querySelector(".profile-label")!;
+        const label = labelNode.getBoundingClientRect();
+        const labelStyle = getComputedStyle(labelNode);
         const input = node.querySelector("input")!.getBoundingClientRect();
         return {
           top: label.top,
           inputTop: input.top,
           inputBottom: input.bottom,
           labelBottom: label.bottom,
+          labelRight: label.right,
+          inputLeft: input.left,
+          labelCenter: label.top + parseFloat(labelStyle.paddingTop) + parseFloat(labelStyle.lineHeight) / 2,
         };
       }),
     );
     for (let i = 0; i < fields.length; i++) {
-      expect(fields[i].inputTop - fields[i].labelBottom).toBeCloseTo(8, 0);
+      expect(fields[i].inputLeft - fields[i].labelRight).toBeCloseTo(12, 0);
+      expect((fields[i].inputTop + fields[i].inputBottom) / 2).toBeCloseTo(fields[i].labelCenter, 0);
       if (i)
-        expect(fields[i].top - fields[i - 1].inputBottom).toBeCloseTo(20, 0);
+        expect(fields[i].inputTop - fields[i - 1].inputBottom).toBeGreaterThanOrEqual(24);
     }
     const icon = await page.locator(".work-placeholder t-icon").boundingBox();
     const cover = await page.locator(".work-cover").boundingBox();

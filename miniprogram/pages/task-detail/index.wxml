@@ -1,5 +1,5 @@
 <nav-bar title="任务详情" back />
-<view class="subpage task-detail-page page-motion {{pageMotion}}">
+<view class="subpage task-detail-page">
   <view class="loading" wx:if="{{loading}}"><t-loading /></view>
   <view wx:elif="{{needsLogin}}" class="empty">
     <text class="title">登录后查看这份作品</text>

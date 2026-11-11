@@ -1,4 +1,4 @@
-import { request, error, tab, openPage } from "../../utils/api";
+import { request, error, tab, openPage, openTab } from "../../utils/api";
 import type { Row, Asset, Input, Config } from "../../services/types";
 import {
   restoreEditorAssets,
@@ -51,8 +51,12 @@ Page({
       void this.restoreAssets(draft.assets);
     }
   },
+  create() {
+    openTab(this, "/pages/create/index");
+  },
   onHide() {
     this.visible = false;
+    this.revision++;
   },
   onUnload() {
     this.destroyed = true;

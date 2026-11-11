@@ -109,6 +109,7 @@ export interface Job {
   updatedAt: string;
 }
 export interface Model {
+  key?: string;
   resolutionByMode?: Record<string, string[]>;
   referenceRules?: Record<
     string,

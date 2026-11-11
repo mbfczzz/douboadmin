@@ -1,9 +1,9 @@
 .workspace {
   position: relative;
   height: 300px;
-  border: 1px solid #353b3e;
+  border: 1px solid var(--ui-border);
   border-radius: 16px;
-  background: #1c1f21;
+  background: var(--ui-surface);
 }
 .reference-strip {
   position: absolute;
@@ -24,8 +24,8 @@
   height: 56px;
   flex-shrink: 0;
   border-radius: 9px;
-  background: #272b2d;
-  border: 1px solid #353b3e;
+  background: var(--ui-field);
+  border: 1px solid var(--ui-border);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -60,10 +60,10 @@
 }
 .expand-editor {
   position: absolute;
-  right: 8px;
-  top: 8px;
-  width: 34px;
-  height: 34px;
+  right: 3px;
+  top: 3px;
+  width: var(--ui-touch-size);
+  height: var(--ui-touch-size);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -82,7 +82,7 @@
   color: #e9eceb;
 }
 .prompt-placeholder {
-  color: #a0a8ac;
+  color: var(--ui-muted);
   line-height: 1.6;
 }
 .count {
@@ -100,15 +100,16 @@
   min-height: 32px;
   display: flex;
   align-items: center;
-  font-size: 11px;
-  line-height: 18px;
-  color: #a0a8ac;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 20px;
+  color: var(--ui-muted);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .quote-note.has-cost {
-  color: #9bcbaa;
+  color: var(--ui-brand);
 }
 .quote-note.quote-retry {
   color: #b6c4bb;
@@ -134,7 +135,7 @@
   height: 44px;
   padding: 0 8px;
   border-radius: 8px;
-  background: #272b2d;
+  background: var(--ui-field);
   font-size: 13px;
   font-weight: 500;
 }
@@ -167,8 +168,8 @@
   padding: 0;
   margin: 0;
   border-radius: 7px;
-  background-color: #9bcbaa;
-  color: #17281d;
+  background-color: var(--ui-brand);
+  color: var(--ui-on-brand);
   font-size: 14px;
   font-weight: 700;
 }

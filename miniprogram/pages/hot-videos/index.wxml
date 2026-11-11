@@ -1,5 +1,5 @@
 <nav-bar title="热门视频灵感" back /><view
-  class="subpage page-motion {{pageMotion}}"
+  class="subpage"
   ><view class="hot-search"
     ><input
       class="biz-input"
@@ -13,11 +13,11 @@
       搜索
     </button></view
   ><view wx:if="{{!enabled}}" class="biz-error"
-    >热门视频暂不可用，可以先上传自己的素材。<button
+    >热门视频暂不可用，可以先使用创作功能。<button
       class="biz-action biz-secondary"
       bindtap="upload"
     >
-      上传素材混剪
+      去创作
     </button></view
   ><view wx:if="{{loadError}}" class="biz-error">{{loadError}}</view
   ><view class="biz-tabs"

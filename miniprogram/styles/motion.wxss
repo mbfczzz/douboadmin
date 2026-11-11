@@ -1,29 +1,3 @@
-.page-motion.enter-a {
-  animation: page-enter-a 180ms ease-out;
-}
-.page-motion.enter-b {
-  animation: page-enter-b 180ms ease-out;
-}
-.page-motion.enter-a.motion-overlay-open,
-.page-motion.enter-b.motion-overlay-open {
-  animation: none;
-}
-@keyframes page-enter-a {
-  from {
-    opacity: 0.55;
-  }
-  to {
-    opacity: 1;
-  }
-}
-@keyframes page-enter-b {
-  from {
-    opacity: 0.55;
-  }
-  to {
-    opacity: 1;
-  }
-}
 .content-reveal {
   animation: content-reveal 180ms ease-out;
 }
@@ -86,8 +60,6 @@
   transform: scale(0.985);
 }
 @media (prefers-reduced-motion: reduce) {
-  .page-motion.enter-a,
-  .page-motion.enter-b,
   .content-reveal,
   .skeleton {
     animation: none;

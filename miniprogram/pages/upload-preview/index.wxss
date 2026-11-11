@@ -9,7 +9,7 @@
   width: 100%;
   height: 438px;
   max-height: 55vh;
-  background: #1c1f21;
+  background: var(--ui-surface);
   border-radius: 8px;
 }
 .preview-frame {
@@ -41,7 +41,7 @@
 .preview-hint {
   font-size: 14px;
   line-height: 1.5;
-  color: #a0a8ac;
+  color: var(--ui-muted);
 }
 .preview-page .foot-actions {
   position: fixed;
@@ -50,5 +50,5 @@
   bottom: calc(26px + env(safe-area-inset-bottom));
   gap: 10px;
   margin: 0;
-  background: #131516;
+  background: var(--ui-bg);
 }

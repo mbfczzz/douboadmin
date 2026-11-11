@@ -1,6 +1,6 @@
 type RouteKind = "navigateBack" | "switchTab";
 
-const departing = new WeakSet<object>();
+const departing = new WeakMap<object, object>();
 
 export function isNavigating(page: object) {
   return departing.has(page);
@@ -15,15 +15,32 @@ export function openPage(
   page: object,
   options: WechatMiniprogram.NavigateToOption,
 ) {
+  return startNavigation(page, (fail) => wx.navigateTo({ ...options, fail }), options.fail);
+}
+
+export function switchPageTab(page: object, url: string, onFail?: () => void) {
+  return startNavigation(page, (fail) => wx.switchTab({ url, fail }), () => {
+    onFail?.();
+    wx.showToast({ title: "页面打开失败，请重试", icon: "none" });
+  });
+}
+
+function startNavigation(
+  page: object,
+  navigate: (fail: (reason: WechatMiniprogram.GeneralCallbackResult) => void) => void,
+  onFail?: (reason: WechatMiniprogram.GeneralCallbackResult) => void,
+) {
   if (departing.has(page)) return false;
-  departing.add(page);
+  const ticket = {};
+  departing.set(page, ticket);
   const fail = (reason: WechatMiniprogram.GeneralCallbackResult) => {
+    if (departing.get(page) !== ticket) return;
     departing.delete(page);
-    if (options.fail) options.fail(reason);
+    if (onFail) onFail(reason);
     else wx.showToast({ title: "页面打开失败，请重试", icon: "none" });
   };
   try {
-    wx.navigateTo({ ...options, fail });
+    navigate(fail);
   } catch {
     fail({ errMsg: "navigateTo:fail" });
   }

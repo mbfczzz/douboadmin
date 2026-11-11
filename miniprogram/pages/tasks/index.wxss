@@ -20,7 +20,7 @@
   align-items: center;
   gap: 14px;
   padding: 16px 0;
-  border-bottom: 1px solid #353b3e;
+  border-bottom: 1px solid var(--ui-border);
 }
 .queue-thumb {
   width: 64px;
@@ -28,7 +28,7 @@
   flex-shrink: 0;
   border-radius: 6px;
   background: #202326;
-  color: #a0a8ac;
+  color: var(--ui-muted);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -53,10 +53,10 @@
 .queue-state {
   font-size: 12px;
   white-space: nowrap;
-  color: #a0a8ac;
+  color: var(--ui-muted);
 }
 .queue-state.running {
-  color: #9bcbaa;
+  color: var(--ui-brand);
 }
 .queue-state.failed {
   color: #e6ab94;
@@ -66,7 +66,7 @@
   display: block;
   font-size: 12px;
   line-height: 1.5;
-  color: #a0a8ac;
+  color: var(--ui-muted);
   margin-top: 7px;
 }
 .queue-time {
@@ -76,7 +76,7 @@
   justify-content: space-between;
   gap: 8px;
   font-size: 12px;
-  color: #a0a8ac;
+  color: var(--ui-muted);
   margin-top: 16px;
 }
 .completed-heading {

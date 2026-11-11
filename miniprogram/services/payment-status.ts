@@ -79,11 +79,13 @@ export function watchPayments(
   onSettled: (row: Row<Order>) => void,
   onWaiting: () => void,
 ) {
-  let remaining = ids.length;
+  const unique = [...new Set(ids)];
+  const spacing = Math.max(5000, unique.length * 1000);
+  let remaining = unique.length;
   const finish = () => {
     if (--remaining === 0) onWaiting();
   };
-  const stops = ids.map((id) =>
+  const stops = unique.map((id, index) =>
     watchPayment(
       id,
       (row) => {
@@ -91,6 +93,8 @@ export function watchPayments(
         onSettled(row);
       },
       finish,
+      spacing,
+      index * 1000,
     ),
   );
   return () => stops.forEach((stop) => stop());
@@ -109,6 +113,8 @@ export function watchPayment(
   id: string,
   onSettled: (row: Row<Order>) => void,
   onWaiting: () => void,
+  spacing = 5000,
+  offset = 0,
 ) {
   const token = sessionToken();
   let stopped = false,
@@ -155,9 +161,11 @@ export function watchPayment(
     if (round >= 12) {
       stopped = true;
       onWaiting();
-    } else timer = setTimeout(() => void poll(), 5000);
+    } else timer = setTimeout(() => void poll(), spacing);
   }
-  timer = setTimeout(() => void poll(), 1500);
+  // Spread a page of pending orders across time instead of querying all at
+  // once. Keep headroom below the user's API limit for balance and page loads.
+  timer = setTimeout(() => void poll(), 1500 + offset);
   return () => {
     stopped = true;
     if (timer !== undefined) clearTimeout(timer);

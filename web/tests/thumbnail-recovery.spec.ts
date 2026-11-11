@@ -36,6 +36,23 @@ async function jobs(
 const open = (page: Page) =>
   page.getByRole("button", { name: "生成任务", exact: true }).click();
 
+test("manual refresh keeps a healthy thumbnail mounted without another image request", async ({ page }) => {
+  await jobs(page, () => ({ result: "/healthy-refresh.svg" }));
+  let loads = 0;
+  await page.route("**/healthy-refresh.svg", (route) => {
+    loads++;
+    return route.fulfill({ contentType: "image/svg+xml", body: svg });
+  });
+  await open(page);
+  const image = page.getByRole("img", { name: "生成图片缩略图" });
+  await expect.poll(() => image.evaluate((node: HTMLImageElement) => node.naturalWidth)).toBeGreaterThan(0);
+  const node = await image.elementHandle();
+  await page.getByRole("button", { name: "刷新", exact: true }).click();
+  await expect(page.getByRole("button", { name: "刷新", exact: true })).toBeEnabled();
+  expect(await image.evaluate((element, previous) => element === previous, node)).toBe(true);
+  expect(loads).toBe(1);
+});
+
 test("a fresh signed cover replaces a failed address during background polling", async ({
   page,
 }) => {

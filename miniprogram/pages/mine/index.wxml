@@ -1,5 +1,5 @@
 <nav-bar title="我的" size="{{23}}" />
-<view class="page mine-page page-motion {{pageMotion}}">
+<view class="page mine-page">
   <view wx:if="{{loading}}" class="loading"><t-loading /></view>
   <view wx:elif="{{loadError&&!me}}" class="error-box" bindtap="load">
     {{loadError}} · 点击重试

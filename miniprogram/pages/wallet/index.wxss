@@ -10,10 +10,10 @@
   min-height: 44px;
   line-height: 44px;
   padding: 0;
-  border: 1px solid #353b3e;
+  border: 1px solid var(--ui-border);
   border-radius: 8px;
-  background: #1c1f21;
-  color: #a0a8ac;
+  background: var(--ui-surface);
+  color: var(--ui-muted);
   font-size: 13px;
 }
 .purchase-tabs button::after {
@@ -22,7 +22,7 @@
 .purchase-tabs .selected {
   border-color: #577b62;
   background: #25372c;
-  color: #9bcbaa;
+  color: var(--ui-brand);
   font-weight: 600;
 }
 .checkout-error {
@@ -42,9 +42,9 @@ button.virtual-product {
   justify-content: flex-start;
   width: 100%;
   padding: 12px 8px;
-  background: #1c1f21;
+  background: var(--ui-surface);
   color: #e9eceb;
-  border: 1px solid #353b3e;
+  border: 1px solid var(--ui-border);
   border-radius: 8px;
   line-height: 1.6;
   font-size: 13px;
@@ -72,7 +72,7 @@ button.virtual-product::after {
   color: #e9eceb;
 }
 .virtual-product.selected .product-price {
-  color: #9bcbaa;
+  color: var(--ui-brand);
 }
 .wallet-links {
   flex-wrap: wrap;
@@ -106,5 +106,5 @@ button.virtual-product::after {
   overflow-wrap: anywhere;
 }
 .ledger-change.plus {
-  color: #9bcbaa;
+  color: var(--ui-brand);
 }

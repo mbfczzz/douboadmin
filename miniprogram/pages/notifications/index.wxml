@@ -1,5 +1,5 @@
 <nav-bar title="消息通知" back /><view
-  class="subpage page-motion {{pageMotion}}"
+  class="subpage"
   ><view wx:if="{{needsLogin}}" class="biz-empty"
     >登录后查看消息<button class="biz-action" bindtap="signIn">
       去登录
