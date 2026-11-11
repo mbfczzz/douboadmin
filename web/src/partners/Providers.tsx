@@ -15,10 +15,12 @@ import ProviderSelf from "./ProviderSelf";
 import Modal from "../components/Modal";
 import type { ProviderAction } from "./ProviderActions";
 import { useRegistrationDecision } from "../users/useRegistrationDecision";
+import { useBusinessRoleNames } from "../roles/business";
 
 const ProviderModule = lazy(() => import("./ProviderModule"));
 
 export default function Providers({ notify }: { notify: Notify }) {
+  const roleName = useBusinessRoleNames();
   const [refresh, setRefresh] = useState(0),
     [query, setQuery] = useState(""),
     [creating, setCreating] = useState(false),
@@ -84,6 +86,7 @@ export default function Providers({ notify }: { notify: Notify }) {
         <PagedProviderTree
           key={query}
           refresh={refresh}
+          roleName={roleName}
           query={query}
           busy={review.busy}
           open={(kind, row) => {

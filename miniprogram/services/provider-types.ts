@@ -1,5 +1,6 @@
 export type Code = { code: string; qr: string };
 export interface Child {
+  roleName?: string;
   id: string;
   name: string;
   role: string;
@@ -10,6 +11,7 @@ export interface Child {
   createdAt: string;
 }
 export interface Center {
+  roleName?: string;
   name: string;
   status: string;
   role: string; // branch, s1 or s2

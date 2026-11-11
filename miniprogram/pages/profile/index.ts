@@ -66,7 +66,7 @@ Page({
     return false;
   },
   loadIdentity(revision = this.revision) {
-    request<typeof profileState.identity>("/me/identity").then(
+    request<typeof profileState.identity>("/me/role").then(
       (identity) => this.current(revision) && this.setData({ identity }),
       () => {},
     );

@@ -46,6 +46,8 @@ var adminRouteMenus = map[string][]string{
 
 func routeMenus(method, path string) ([]string, bool) {
 	switch {
+	case method == http.MethodGet && path == "/api/admin/roles/labels":
+		return []string{"roles", "users", "partners", "accounts"}, true
 	case strings.HasPrefix(path, "/api/admin/registrations/") && (method == http.MethodGet || method == http.MethodPut):
 		return []string{"users", "partners"}, true
 	case method == http.MethodGet && (path == "/api/admin/roles"):
@@ -102,7 +104,7 @@ func (a *Server) adminAccess(ctx context.Context, account core.AdminAccount) (co
 	if err != nil {
 		return role, "", err
 	}
-	if !ok || (role.Scope == core.RoleScopePartner) != (account.PartnerID != "") {
+	if !ok || role.Scope == core.RoleScopeUser || (role.Scope == core.RoleScopePartner) != (account.PartnerID != "") {
 		return role, "管理账号角色无效", nil
 	}
 	if account.PartnerID != "" {

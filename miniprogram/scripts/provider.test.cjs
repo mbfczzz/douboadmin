@@ -158,17 +158,17 @@ test("我的 shows 服务商中心 to providers and 我的推广码 to members",
     const h = harness();
     await h.api.signIn();
     const page = h.page("mine");
-    h.api.request = async (path) => (path === "/me/identity" ? { kind } : []);
+    h.api.request = async (path) => (path === "/me/role" ? { kind } : []);
     await page.loadIdentity();
     assert.equal(page.data.menus[0].mode === mode, mode !== "", kind || "none");
   }
 });
 
-test("the profile page shows the account's identity", async () => {
+test("the profile page shows the account's role from the shared catalog", async () => {
   const h = harness();
   await h.api.signIn();
   h.api.request = async (path) =>
-    path === "/me/identity"
+    path === "/me/role"
       ? { kind: "member", label: "会员", partner: "华东分公司" }
       : {
           profile: {

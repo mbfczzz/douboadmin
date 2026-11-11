@@ -6,7 +6,8 @@ import FilterBar from "../components/FilterBar";
 import CatalogResults from "../components/CatalogResults";
 import Tag, { IdChip } from "../components/Tag";
 import Table from "../business/Table";
-import { codeKindName, roleName } from "../business/types";
+import { codeKindName } from "../business/types";
+import { useBusinessRoleNames } from "../roles/business";
 import {
   useRegistrationDecision,
   type Registration,
@@ -125,6 +126,7 @@ function List({
   setPage: (page: number) => void;
   decide: (row: Row<Registration>, approve: boolean) => Promise<void>;
 }) {
+  const roleName = useBusinessRoleNames();
   const tree = useResource<Row<{ name: string }>[]>("/admin/partners/tree"),
     names = new Map((tree.data || []).map((r) => [r.id, r.data.name]));
   const source = (r: Row<Registration>) => {
@@ -168,7 +170,7 @@ function List({
           ),
         },
         {
-          title: "身份",
+          title: "角色",
           render: (r) => (
             <Tag tone={r.data.role === "member" ? "info" : "accent"}>
               {roleName(r.data.role)}

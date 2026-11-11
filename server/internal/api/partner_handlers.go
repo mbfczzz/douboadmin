@@ -122,6 +122,10 @@ func (a *Server) createPartner(w http.ResponseWriter, r *http.Request) {
 	}
 	hash, key, actor := "", r.Header.Get("Idempotency-Key"), identity(r).ID
 	if v.Account != nil {
+		if core.IsBusinessRole(v.Account.Role) && v.Account.Role != v.Role {
+			fail(w, 400, "角色与当前服务商层级不匹配")
+			return
+		}
 		// A retried request whose provider and login were both created is a success.
 		if done, replayed, e := a.Partners.Replay(r.Context(), actor, key); e != nil {
 			dbError(w, e)

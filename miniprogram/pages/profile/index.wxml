@@ -129,7 +129,7 @@
         </view>
       </view>
       <view wx:if="{{identity.label}}" class="profile-field">
-        <text class="profile-label">身份</text
+        <text class="profile-label">角色</text
         ><view class="profile-field-content">
           <view class="profile-readonly">
             <text wx:if="{{identity.partner}}" class="profile-partner">{{identity.partner}}</text

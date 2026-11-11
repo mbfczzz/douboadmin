@@ -54,7 +54,7 @@ Page({
     const version = this.loadVersion;
     if (!hasSession()) return this.setData({ menus: baseMenus });
     try {
-      const { kind } = await request<{ kind: string }>("/me/identity");
+      const { kind } = await request<{ kind: string }>("/me/role");
       if (version !== this.loadVersion || !hasSession()) return;
       const extra =
         roleMenus[["branch", "s1", "s2"].includes(kind) ? "provider" : kind];

@@ -42,10 +42,12 @@ const FormError = ({ text }: { text: string }) =>
 // First login for a provider that has none yet.
 export function AccountCreate({
   id,
+  providerRole,
   onClose,
   onSaved,
 }: {
   id: string;
+  providerRole: string;
   onClose: () => void;
   onSaved: () => Promise<void>;
 }) {
@@ -55,7 +57,7 @@ export function AccountCreate({
     createAccount(id, {
       username: String(data.get("username") || "").trim(),
       password: String(data.get("password") || ""),
-      role: String(data.get("role") || "partner"),
+      role: String(data.get("role") || providerRole),
     }),
   );
   return (
@@ -94,7 +96,7 @@ export function AccountCreate({
           </label>
           <label>
             角色
-            <RoleSelect scope="partner" />
+            <RoleSelect scope="partner" providerRole={providerRole} />
           </label>
           <FormError text={error} />
         </fieldset>
@@ -114,12 +116,14 @@ export function AccountCreate({
 // Change only the role of an existing provider login.
 export function RoleChange({
   partnerId,
+  providerRole,
   account,
   onClose,
   onSaved,
   onFailed,
 }: {
   partnerId: string;
+  providerRole: string;
   account: Row<AdminAccount>;
   onClose: () => void;
   onSaved: () => Promise<void>;
@@ -157,7 +161,11 @@ export function RoleChange({
           <fieldset disabled={busy}>
             <label>
               角色
-              <RoleSelect scope="partner" value={account.data.role} />
+              <RoleSelect
+                scope="partner"
+                value={account.data.role}
+                providerRole={providerRole}
+              />
             </label>
             <p className="quiet">角色决定该服务商登录后可见的菜单。</p>
             <FormError text={error} />

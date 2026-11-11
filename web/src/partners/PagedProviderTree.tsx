@@ -9,10 +9,10 @@ import type { Row } from "../api";
 import type { Partner } from "./types";
 import ProviderActions, { type ProviderAction } from "./ProviderActions";
 import ProviderId from "./ProviderId";
-import { roleName } from "../business/types";
 
 export type ProviderItem = Row<Partner> & { children: number };
 type Props = {
+  roleName: (role?: string) => string;
   query: string;
   refresh: number;
   busy?: boolean;
@@ -62,7 +62,7 @@ function ProviderNode({ row, ...props }: Props & { row: ProviderItem }) {
           <div className="provider-tree-identity">
             <b>{row.data.name}</b>
             <div className="provider-tree-detail quiet">
-              <span>{roleName(row.data.role)} · </span>
+              <span>{props.roleName(row.data.role)} · </span>
               <ProviderId id={row.id} />
               {row.children > 0 && <span> · {row.children} 个下级</span>}
               {row.data.ownerUser && <span> · 扫码加入</span>}

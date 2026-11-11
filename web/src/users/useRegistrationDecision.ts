@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { api, type Row } from "../api";
 import { ask } from "../confirm/ask";
-import { roleName } from "../business/types";
 import type { Notify } from "../navigation";
 
 export type Registration = {
@@ -70,13 +69,17 @@ export function useRegistrationDecision(
         await changed();
         return;
       }
+      const names = await api<Record<string, string>>("/admin/roles/labels", {
+        signal: controller.signal,
+      });
+      if (!current()) return;
       const who = row.data.name || row.id,
-        role = roleName(row.data.role);
+        role = names[row.data.role] || row.data.role;
       const ok = await ask({
         signal: controller.signal,
         title: approve ? "开通登记" : "拒绝登记",
         message: approve
-          ? `「${who}」将以${role}身份开通，开通后即可使用。`
+          ? `「${who}」将以${role}角色开通，开通后即可使用。`
           : `拒绝「${who}」的${role}登记，用户可重新扫码登记。`,
         confirmText: approve ? "开通" : "拒绝",
         danger: !approve,

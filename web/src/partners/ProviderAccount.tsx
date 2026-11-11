@@ -66,6 +66,7 @@ export default function ProviderAccount({
       {resource.data && !account && (
         <AccountCreate
           id={row.id}
+          providerRole={row.data.role}
           onClose={onClose}
           onSaved={() => done("登录账号已开通")}
         />
@@ -134,6 +135,7 @@ export default function ProviderAccount({
       {account && sub === "role" && (
         <RoleChange
           partnerId={row.id}
+          providerRole={row.data.role}
           account={account}
           onClose={() => setSub(undefined)}
           onFailed={() => void resource.reload()}

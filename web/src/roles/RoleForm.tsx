@@ -30,9 +30,11 @@ export default function RoleForm({
     [error, setError] = useState(""),
     [dirty, setDirty] = useState(false);
   const groups =
-    scope === "partner"
-      ? [{ label: "服务商菜单", pages: partnerMenus as PageId[] }]
-      : navGroups;
+    scope === "user"
+      ? []
+      : scope === "partner"
+        ? [{ label: "服务商菜单", pages: partnerMenus as PageId[] }]
+        : navGroups;
   const toggle = (id: string, on: boolean) =>
     setMenus((current) =>
       on ? [...current, id] : current.filter((m) => m !== id),
@@ -42,7 +44,8 @@ export default function RoleForm({
     const chosen = menus.filter((m) =>
       groups.some((g) => g.pages.includes(m as PageId)),
     );
-    if (!chosen.length) return setError("请至少选择一个菜单");
+    if (scope !== "user" && !chosen.length)
+      return setError("请至少选择一个菜单");
     setBusy(true);
     setError("");
     try {
@@ -109,7 +112,10 @@ export default function RoleForm({
                 setMenus([]);
               }}
             >
-              {(["platform", "partner"] as const).map((s) => (
+              {(row?.data.scope === "user"
+                ? (["user"] as const)
+                : (["platform", "partner"] as const)
+              ).map((s) => (
                 <option key={s} value={s}>
                   {roleScopeLabel[s]}
                 </option>
@@ -117,9 +123,11 @@ export default function RoleForm({
             </select>
           </label>
           <p className="quiet">
-            {scope === "partner"
-              ? "服务商角色绑定到具体服务商，只能看到本服务商及其下级的数据。"
-              : "平台角色用于管理后台账号，可访问勾选的全部菜单。"}
+            {scope === "user"
+              ? "此角色用于小程序用户展示，不授予管理后台登录或菜单权限。"
+              : scope === "partner"
+                ? "服务商角色绑定到具体服务商，只能看到本服务商及其下级的数据。"
+                : "平台角色用于管理后台账号，可访问勾选的全部菜单。"}
           </p>
           {groups.map((group) => (
             <fieldset key={group.label} className="role-menus">

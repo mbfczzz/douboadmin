@@ -1,6 +1,6 @@
 import { useResource } from "../hooks/useResource";
 
-export type RoleScope = "platform" | "partner";
+export type RoleScope = "platform" | "partner" | "user";
 export interface AdminRoleDef {
   name: string;
   scope: RoleScope;
@@ -16,6 +16,7 @@ export interface RoleRow {
 export const roleScopeLabel: Record<RoleScope, string> = {
   platform: "平台角色",
   partner: "服务商角色",
+  user: "小程序角色",
 };
 // Provider roles may only see provider data; mirrors core.PartnerMenus.
 export const partnerMenus = ["partners"];

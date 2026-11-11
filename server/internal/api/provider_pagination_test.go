@@ -109,7 +109,7 @@ func TestRolePagesMergeBuiltinPrefixWithoutGaps(t *testing.T) {
 			Items []roleView `json:"items"`
 			Total int        `json:"total"`
 		}
-		if w.Code != 200 || json.Unmarshal(w.Body.Bytes(), &out) != nil || out.Total != 45 {
+		if w.Code != 200 || json.Unmarshal(w.Body.Bytes(), &out) != nil || out.Total != 42+len(core.BuiltinAdminRoleIDs()) {
 			t.Fatal(w.Code, w.Body.String())
 		}
 		for _, row := range out.Items {
@@ -119,7 +119,7 @@ func TestRolePagesMergeBuiltinPrefixWithoutGaps(t *testing.T) {
 			ids[row.ID] = true
 		}
 	}
-	if len(ids) != 45 {
+	if len(ids) != 42+len(core.BuiltinAdminRoleIDs()) {
 		t.Fatal("missing role", len(ids))
 	}
 }

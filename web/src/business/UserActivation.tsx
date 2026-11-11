@@ -3,7 +3,8 @@ import { useResource } from "../hooks/useResource";
 import Badge from "../components/Badge";
 import Tag, { IdChip } from "../components/Tag";
 import RequestState from "../components/RequestState";
-import { codeKindName, joinMethod, roleName } from "./types";
+import { codeKindName, joinMethod } from "./types";
+import { useBusinessRoleNames } from "../roles/business";
 import "./user-activation.css";
 
 interface Source {
@@ -40,6 +41,7 @@ const pretty = (code: string) => code.match(/.{1,4}/g)?.join("-");
 // How a mini-program user registered and where they sit: the owner of a
 // provider or a 会员 of one, the registration's review and the chain.
 export default function UserActivation({ userId }: { userId: string }) {
+  const roleName = useBusinessRoleNames();
   const resource = useResource<Source>(`/admin/users/${userId}/activation`),
     source = resource.data,
     reg = source?.registration,
@@ -81,7 +83,7 @@ export default function UserActivation({ userId }: { userId: string }) {
           <dl className="source-grid">
             {reg && (
               <>
-                <dt>登记身份</dt>
+                <dt>登记角色</dt>
                 <dd>{roleName(reg.role)}</dd>
                 <dt>登记码</dt>
                 <dd>
@@ -116,7 +118,7 @@ export default function UserActivation({ userId }: { userId: string }) {
               <>
                 <dt>服务商链路</dt>
                 <dd>
-                  <Chain chain={source.chain} />
+                  <Chain chain={source.chain} roleName={roleName} />
                 </dd>
               </>
             )}
@@ -128,7 +130,13 @@ export default function UserActivation({ userId }: { userId: string }) {
 }
 
 // Platform → provider chain, the last entry being the user's own provider.
-function Chain({ chain }: { chain: Source["chain"] }) {
+function Chain({
+  chain,
+  roleName,
+}: {
+  chain: Source["chain"];
+  roleName: (id?: string) => string;
+}) {
   return (
     <ol className="source-chain" aria-label="服务商链路">
       <li>总账号</li>

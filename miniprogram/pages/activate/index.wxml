@@ -35,7 +35,7 @@
           <button class="biz-action" loading="{{busy}}" disabled="{{busy||loading}}" bindtap="scan">扫码登记</button>
           <input class="biz-input" placeholder="或输入 8 位码" value="{{code}}" maxlength="24" bindinput="input" disabled="{{busy}}" />
           <button class="biz-action biz-secondary" disabled="{{busy||loading||!code}}" bindtap="confirm">确认登记</button>
-          <text class="biz-note">扫哪种码就登记为对应身份，上级开通后生效</text>
+          <text class="biz-note">扫码登记对应角色，上级开通后生效</text>
         </view>
       </view>
     </block>

@@ -60,7 +60,7 @@ Page({
       const center = await request<Center>("/provider?children=paged");
       this.setData({
         center,
-        roleName: roles[center.role] || "服务商",
+        roleName: center.roleName || roles[center.role] || "服务商",
         tabs: tabs
           .filter(([key]) => center.codes[key])
           .map(([key, label]) => ({ key, label })),
@@ -97,7 +97,7 @@ Page({
       if (revision !== this.childRevision) return;
       const incoming = result.items.map((c) => ({
         ...c,
-        roleName: roles[c.role] || "",
+        roleName: c.roleName || roles[c.role] || "",
         date: c.createdAt.slice(0, 10),
       }));
       const rows = reset ? incoming : [...this.data.children, ...incoming];

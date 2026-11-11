@@ -102,7 +102,12 @@ func (a *Server) providerChildren(w http.ResponseWriter, r *http.Request) {
 			dbError(w, e)
 			return
 		}
-		items = append(items, childView{ID: row.ID, Name: p.Name, Role: p.Role, Status: p.Status, Members: n, Account: account.Username, Scanned: p.OwnerUser != "", CreatedAt: row.CreatedAt})
+		role, _, e := a.adminRole(r.Context(), p.Role)
+		if e != nil {
+			dbError(w, e)
+			return
+		}
+		items = append(items, childView{ID: row.ID, Name: p.Name, Role: p.Role, RoleName: role.Name, Status: p.Status, Members: n, Account: account.Username, Scanned: p.OwnerUser != "", CreatedAt: row.CreatedAt})
 	}
 	reply(w, 200, map[string]any{"items": items, "page": page, "size": 20, "total": out.Total})
 }

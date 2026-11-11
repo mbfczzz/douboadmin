@@ -20,6 +20,7 @@ var browseReads = map[string]bool{
 	"GET /api/templates/{id}":      true,
 	"GET /api/me":                  true,
 	"GET /api/me/identity":         true,
+	"GET /api/me/role":             true,
 	"GET /api/jobs":                true,
 	"GET /api/jobs/{id}":           true,
 	"GET /api/jobs/estimate":       true,

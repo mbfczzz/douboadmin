@@ -17,6 +17,7 @@ const (
 	RoleBranch = "branch"
 	RoleS1     = "s1"
 	RoleS2     = "s2"
+	RoleMember = "member"
 )
 
 type Partner struct {

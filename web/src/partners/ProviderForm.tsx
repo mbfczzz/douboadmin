@@ -54,7 +54,7 @@ export default function ProviderForm({
               account: {
                 username: String(data.get("accountUsername") || "").trim(),
                 password: String(data.get("accountPassword") || ""),
-                role: String(data.get("accountRole") || "partner"),
+                role: String(data.get("accountRole") || "branch"),
               },
             });
           await onSaved();

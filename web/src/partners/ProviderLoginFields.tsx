@@ -44,7 +44,7 @@ export default function ProviderLoginFields({
       </div>
       <label>
         角色
-        <RoleSelect scope="partner" name="accountRole" />
+        <RoleSelect scope="partner" name="accountRole" providerRole="branch" />
       </label>
     </fieldset>
   );

@@ -33,11 +33,17 @@ func (a *Server) adminRole(ctx context.Context, id string) (core.AdminRole, bool
 	}
 	if b, ok := builtin[id]; ok {
 		role.Scope, role.System = b.Scope, true
+		if b.Scope == core.RoleScopeUser {
+			role.Menus = []string{}
+		}
 	}
 	return role, true, nil
 }
 
 func validRoleMenus(scope string, menus []string) bool {
+	if scope == core.RoleScopeUser {
+		return len(menus) == 0
+	}
 	allowed := core.AdminMenus
 	if scope == core.RoleScopePartner {
 		allowed = core.PartnerMenus
@@ -81,7 +87,7 @@ func (a *Server) listAdminRoles(w http.ResponseWriter, r *http.Request) {
 			used[account.Role]++
 		}
 	}
-	ids := []string{core.SuperAdminRole, "operator", "partner"}
+	ids := core.BuiltinAdminRoleIDs()
 	versions := map[string]int64{}
 	for _, row := range stored {
 		versions[row.ID] = row.Version
@@ -140,7 +146,7 @@ func (a *Server) saveAdminRole(w http.ResponseWriter, r *http.Request) {
 		input.Scope = current.Scope
 	}
 	if input.Name == "" || len([]rune(input.Name)) > 20 || !validRoleMenus(input.Scope, input.Menus) {
-		fail(w, 400, "请填写 1–20 字的角色名称，并至少选择一个可用菜单")
+		fail(w, 400, "角色名称或菜单权限无效；小程序角色不能分配后台菜单")
 		return
 	}
 	if taken, err := a.roleNameTaken(r.Context(), id, input.Name); err != nil {

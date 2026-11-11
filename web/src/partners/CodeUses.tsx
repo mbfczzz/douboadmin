@@ -6,7 +6,8 @@ import { usePageLimit } from "../hooks/usePageLimit";
 import CatalogResults from "../components/CatalogResults";
 import Table from "../business/Table";
 import Tag, { IdChip } from "../components/Tag";
-import { codeKindName, joinMethod, roleName } from "../business/types";
+import { codeKindName, joinMethod } from "../business/types";
+import { useBusinessRoleNames } from "../roles/business";
 import type { PageData } from "./types";
 import type { Notify } from "../navigation";
 import { useMe } from "../session";
@@ -46,6 +47,7 @@ export default function CodeUses({
 }) {
   const me = useMe(),
     canReview = !!me && (me.partnerId || "root") === reviewerId;
+  const roleName = useBusinessRoleNames();
   const [query, setQuery] = useState(""),
     [status, setStatus] = useState("");
   const key = `${id}/${kind}/${code || ""}`;
@@ -180,7 +182,7 @@ export default function CodeUses({
                 ),
               },
               { title: "手机号", render: (r) => r.data.phone || "未记录" },
-              { title: "登记身份", render: (r) => roleName(r.data.role) },
+              { title: "登记角色", render: (r) => roleName(r.data.role) },
               {
                 title: "使用码",
                 render: (r) => (

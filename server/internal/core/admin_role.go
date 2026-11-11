@@ -1,7 +1,8 @@
 package core
 
-// AdminRole grants an admin account a set of menus. Partner-scope roles are
-// bound to one provider account and only ever see that provider's subtree.
+// AdminRole is the shared role definition for permissions and user labels.
+// Platform/partner scopes grant admin menus; user scope never grants admin
+// access. Partner accounts continue to see only their provider's subtree.
 type AdminRole struct {
 	Name   string   `json:"name"`
 	Scope  string   `json:"scope"`
@@ -14,6 +15,7 @@ type AdminRole struct {
 const (
 	RoleScopePlatform = "platform"
 	RoleScopePartner  = "partner"
+	RoleScopeUser     = "user"
 	SuperAdminRole    = "super_admin"
 )
 
@@ -37,5 +39,17 @@ func BuiltinAdminRoles() map[string]AdminRole {
 		SuperAdminRole: {Name: "超级管理员", Scope: RoleScopePlatform, Menus: AdminMenus, System: true},
 		"operator":     {Name: "平台运营", Scope: RoleScopePlatform, Menus: operator, System: true},
 		"partner":      {Name: "服务商", Scope: RoleScopePartner, Menus: PartnerMenus, System: true},
+		RoleBranch:     {Name: "分公司", Scope: RoleScopePartner, Menus: PartnerMenus, System: true},
+		RoleS1:         {Name: "S1 服务商", Scope: RoleScopePartner, Menus: PartnerMenus, System: true},
+		RoleS2:         {Name: "S2 推荐官", Scope: RoleScopePartner, Menus: PartnerMenus, System: true},
+		RoleMember:     {Name: "会员", Scope: RoleScopeUser, Menus: []string{}, System: true},
 	}
+}
+
+func BuiltinAdminRoleIDs() []string {
+	return []string{SuperAdminRole, "operator", "partner", RoleBranch, RoleS1, RoleS2, RoleMember}
+}
+
+func IsBusinessRole(id string) bool {
+	return id == RoleBranch || id == RoleS1 || id == RoleS2 || id == RoleMember
 }

@@ -45,6 +45,7 @@ type childView struct {
 	ID        string    `json:"id"`
 	Name      string    `json:"name"`
 	Role      string    `json:"role"`
+	RoleName  string    `json:"roleName"`
 	Status    string    `json:"status"`
 	Members   int       `json:"members"`
 	Account   string    `json:"account"`
@@ -80,7 +81,11 @@ func (a *Server) children(ctx context.Context, id string) ([]childView, error) {
 		if e != nil {
 			return nil, e
 		}
-		out = append(out, childView{ID: row.ID, Name: p.Name, Role: p.Role, Status: p.Status, Members: n, Account: logins[row.ID], Scanned: p.OwnerUser != "", CreatedAt: row.CreatedAt})
+		role, _, err := a.adminRole(ctx, p.Role)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, childView{ID: row.ID, Name: p.Name, Role: p.Role, RoleName: role.Name, Status: p.Status, Members: n, Account: logins[row.ID], Scanned: p.OwnerUser != "", CreatedAt: row.CreatedAt})
 	}
 	return out, nil
 }
@@ -109,6 +114,12 @@ func (a *Server) providerCenter(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	out := map[string]any{"name": p.Name, "status": p.Status, "role": p.Role, "members": count, "account": "", "owner": owner}
+	role, _, e := a.adminRole(ctx, p.Role)
+	if e != nil {
+		dbError(w, e)
+		return
+	}
+	out["roleName"] = role.Name
 	codes := map[string]shareView{}
 	for name, kind := range partners.ProviderKinds {
 		if kind == partners.BindCode || (kind != partners.MemberCode && !partners.CanGrow(p.Role, kind)) {

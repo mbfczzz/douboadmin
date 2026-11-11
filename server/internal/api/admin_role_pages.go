@@ -14,7 +14,7 @@ func (a *Server) adminRolePage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	provider := identity(r).PartnerID != ""
-	builtinIDs := []string{core.SuperAdminRole, "operator", "partner"}
+	builtinIDs := core.BuiltinAdminRoleIDs()
 	builtins := []roleView{}
 	for _, id := range builtinIDs {
 		role, found, e := a.adminRole(r.Context(), id)

@@ -88,7 +88,7 @@ test("开通 confirms first; 拒绝 needs a reason", async ({ page }) => {
     section = page.getByRole("region", { name: "扫码登记", exact: true });
   await section.getByRole("button", { name: "开通", exact: true }).click();
   const approve = page.getByRole("dialog", { name: "开通登记" });
-  await expect(approve).toContainText("「质检登记用户」将以分公司身份开通");
+  await expect(approve).toContainText("「质检登记用户」将以分公司角色开通");
   await approve.getByRole("button", { name: "开通", exact: true }).click();
   await expect(approve).toHaveCount(0);
   // ask() already confirmed: no second change summary.

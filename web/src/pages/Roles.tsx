@@ -50,6 +50,10 @@ export default function Roles({ notify }: PageProps) {
         )
       }
     >
+      <p className="quiet">
+        角色同时用于菜单权限和用户角色展示；分公司、S1 服务商、S2
+        推荐官、会员按原有归属自动对应，不改变层级或业务规则。
+      </p>
       <Table
         rows={roles.data?.items || []}
         pagination={
@@ -91,10 +95,10 @@ export default function Roles({ notify }: PageProps) {
                 .map((id) => pageInfo[id as PageId][0]);
               return names.length > 4
                 ? `${names.slice(0, 3).join("、")} 等 ${names.length} 个菜单`
-                : names.join("、");
+                : names.join("、") || "无后台菜单";
             },
           },
-          { title: "账号数", render: (row) => row.accounts },
+          { title: "后台账号数", render: (row) => row.accounts },
           {
             title: "操作",
             action: true,

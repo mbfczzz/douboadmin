@@ -72,7 +72,7 @@ func (a *Server) providerPassword(w http.ResponseWriter, r *http.Request) {
 		fail(w, 400, "请先完成手机号验证")
 		return
 	}
-	in := providerAccountInput{Username: profile.Phone, Role: "partner"}
+	in := providerAccountInput{Username: profile.Phone, Role: p.Role}
 	created, e := a.createProviderAccount(r.Context(), id, p.Name, hash, in, "user:"+identity(r).ID)
 	if errors.Is(e, core.ErrConflict) {
 		fail(w, 409, "该手机号已被其他后台账号使用，请联系上级服务商开通登录")

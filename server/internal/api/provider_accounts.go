@@ -46,11 +46,22 @@ func (a *Server) prepareProviderAccount(r *http.Request, in providerAccountInput
 }
 
 func (a *Server) createProviderAccount(ctx context.Context, partnerID, name, hash string, in providerAccountInput, actor string) (core.Record, error) {
+	row, err := a.Store.Get(ctx, "partners", partnerID)
+	if err != nil {
+		return core.Record{}, err
+	}
+	var p core.Partner
+	if err = json.Unmarshal(row.Data, &p); err != nil {
+		return core.Record{}, err
+	}
 	if in.Role == "" {
-		in.Role = "partner"
+		in.Role = p.Role
+	}
+	if core.IsBusinessRole(in.Role) && in.Role != p.Role {
+		return core.Record{}, errors.New("角色与当前服务商层级不匹配")
 	}
 	account := core.AdminAccount{Username: strings.TrimSpace(in.Username), Name: name, Role: in.Role, PartnerID: partnerID, PasswordHash: hash, PasswordChangedAt: time.Now().UTC(), CreatedBy: actor}
-	row, err := a.Store.Put(ctx, "admin_accounts", core.Record{ID: adminID(account.Username), Data: core.Data(account)}, 0)
+	row, err = a.Store.Put(ctx, "admin_accounts", core.Record{ID: adminID(account.Username), Data: core.Data(account)}, 0)
 	if err == nil && in.Password != "" {
 		a.saveAdminPassword(ctx, partnerID, in.Password, account.PasswordChangedAt)
 	}
@@ -111,6 +122,10 @@ func (a *Server) saveProviderAccount(w http.ResponseWriter, r *http.Request) {
 	}
 	var p core.Partner
 	_ = json.Unmarshal(partner.Data, &p)
+	if core.IsBusinessRole(in.Role) && in.Role != p.Role {
+		fail(w, 400, "角色与当前服务商层级不匹配，请保留对应角色或选择自定义权限角色")
+		return
+	}
 	row, account, ok, err := a.providerAccount(r.Context(), id)
 	if err != nil {
 		dbError(w, err)
