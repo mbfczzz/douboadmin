@@ -1,11 +1,11 @@
-import { Image, Bot, Film, Music, ArrowUpRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { date, kindText, type Job } from "../api";
 import Badge from "./Badge";
 import Table from "../business/Table";
 import { releasable } from "./JobRecovery";
+import JobThumbnail from "./JobThumbnail";
 
 export type JobAction = "detail" | "release";
-const icons = { image: Image, chat: Bot, audio: Music } as const;
 
 // Shared record table: wraps text, and turns into cards when it cannot fit.
 export default function JobTable({
@@ -31,12 +31,9 @@ export default function JobTable({
         {
           title: "创作内容",
           render: (j) => {
-            const Icon = icons[j.input.kind as keyof typeof icons] || Film;
             return (
               <div className="task-name">
-                <span className="task-icon">
-                  <Icon size={18} />
-                </span>
+                <JobThumbnail job={j} />
                 <div>
                   <b title={j.input.prompt}>{j.input.prompt}</b>
                   <small>{j.id.slice(0, 12)}</small>

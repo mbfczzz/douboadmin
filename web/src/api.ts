@@ -53,6 +53,7 @@ export interface Job {
   status: string;
   progress: number;
   result?: string;
+  thumbnailUrl?: string;
   error?: string;
   demo: boolean;
   attempts: number;

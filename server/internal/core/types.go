@@ -71,6 +71,7 @@ type Job struct {
 	Status              string    `json:"status"`
 	Progress            int       `json:"progress"`
 	Result              string    `json:"result,omitempty"`
+	ThumbnailURL        string    `json:"thumbnailUrl,omitempty"`
 	Error               string    `json:"error,omitempty"`
 	Demo                bool      `json:"demo"`
 	Attempts            int       `json:"attempts"`

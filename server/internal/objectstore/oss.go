@@ -47,3 +47,18 @@ func (o *OSS) InputURL(ctx context.Context, key string) (string, error) {
 	}
 	return r.URL, nil
 }
+
+// Processing parameters must be included before signing private objects.
+func (o *OSS) Thumbnail(ctx context.Context, key, kind string) (string, error) {
+	process := "image/resize,m_lfit,w_160,h_160/auto-orient,1"
+	if kind == "video" || kind == "mix" {
+		process = "video/snapshot,t_0,f_jpg,w_160,h_0,m_fast"
+	} else if kind != "image" {
+		return "", fmt.Errorf("unsupported thumbnail kind")
+	}
+	r, err := o.client.Presign(ctx, &oss.GetObjectRequest{Bucket: oss.Ptr(o.bucket), Key: oss.Ptr(key), Process: oss.Ptr(process)}, func(p *oss.PresignOptions) { p.Expires = 15 * time.Minute })
+	if err != nil {
+		return "", err
+	}
+	return r.URL, nil
+}

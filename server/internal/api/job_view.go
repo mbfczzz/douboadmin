@@ -12,6 +12,8 @@ import (
 var uncertainPrefix = strings.SplitN(provider.ErrUncertain.Error(), "，", 2)[0]
 
 func (a *Server) presentJob(ctx context.Context, j *core.Job) {
+	resultRef := j.Result
+	j.ThumbnailURL = ""
 	if strings.HasPrefix(j.Result, "asset:") {
 		j.ResultAssetID = strings.TrimPrefix(j.Result, "asset:")
 	}
@@ -55,6 +57,9 @@ func (a *Server) presentJob(ctx context.Context, j *core.Job) {
 		} else {
 			j.Result = ""
 		}
+	}
+	if actor, ok := ctx.Value(identityKey).(Identity); ok && actor.Role == "admin" && j.Status == "succeeded" && !j.Deleted && j.Result != "" && a.Media != nil {
+		j.ThumbnailURL, _ = a.Media.Thumbnail(ctx, resultRef, j.Input.Kind)
 	}
 	j.Retryable = false
 	if j.Input.Assets == nil {
