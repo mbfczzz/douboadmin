@@ -64,4 +64,10 @@ page {
   --td-popup-bg-color: var(--ui-surface);
   --td-popup-border-radius: 32rpx;
   min-height: 100vh;
+  --td-button-primary-outline-color: #ffffff;
+  --td-button-primary-outline-border-color: #ffffff4d;
+  --td-button-primary-text-color: var(--ui-link);
+  --td-loading-color: #ffffff;
+  --td-loading-text-color: var(--ui-muted);
+  --td-overlay-bg-color: #000000b3;
 }

@@ -82,12 +82,17 @@ image {
 }
 /* TDesign buttons have no host element (virtualHost); style them through
    their t-class external class rather than a "t-button" tag selector. */
+/* Empty-state lines stack; the action sits below them. */
+.empty > text {
+  display: block;
+}
 .empty-action {
   margin-top: 20px;
 }
 .empty .desc {
   font-size: 24rpx;
   line-height: 1.8;
+  display: block;
 }
 .error-box {
   padding: 24rpx;
