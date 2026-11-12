@@ -55,7 +55,7 @@
       auto-height
       maxlength="500"
       placeholder="说说你的创作想法…"
-      placeholder-style="color:#a6a6a6"
+      placeholder-style="color:#8b9aab"
       value="{{prompt}}"
       bindinput="input"
       cursor-spacing="130"

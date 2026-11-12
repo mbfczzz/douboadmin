@@ -6,7 +6,7 @@
   margin: 0;
   padding: 16px;
   border-radius: 16px;
-  background: var(--td-bg-color-container, var(--ui-surface, #1a1a1a));
+  background: var(--td-bg-color-container, var(--ui-surface, #0b1b2c));
 }
 .balance-copy {
   min-width: 0;
@@ -15,7 +15,7 @@
 .label,
 .note {
   display: block;
-  color: var(--td-text-color-secondary, var(--ui-muted, #a6a6a6));
+  color: var(--td-text-color-secondary, var(--ui-muted, #8b9aab));
   font-size: var(--ui-font-note, 12px);
 }
 .amount {
@@ -34,7 +34,7 @@ button.action {
   padding: 11px 18px;
   line-height: 22px;
   border-radius: 22px;
-  color: var(--ui-on-brand, #121212);
+  color: var(--ui-on-brand, #02070d);
   background: var(--ui-primary, #ffffff);
   font-size: var(--ui-font-body, 14px);
   font-weight: 600;

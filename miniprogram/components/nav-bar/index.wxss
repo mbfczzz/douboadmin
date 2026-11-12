@@ -1,5 +1,5 @@
 .nav {
-  background: var(--ui-bg, #121212);
+  background: #010203;
   color: #ffffff;
   position: sticky;
   top: 0;

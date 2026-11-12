@@ -145,7 +145,7 @@ image {
   color: #ff3355;
 }
 .pill.running {
-  background: #009efa1f;
+  background: #00cae01f;
   color: var(--ui-brand);
 }
 .filter-scroll {

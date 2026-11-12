@@ -94,11 +94,11 @@ for (const width of [320, 375, 430]) {
         color: getComputedStyle(el).color,
       }));
     expect(await look(".mode-tab.active")).toEqual({
-      background: "rgb(51, 51, 51)",
+      background: "rgb(29, 54, 80)",
       color: "rgb(255, 255, 255)",
     });
     expect((await look(".item.active")).color).toBe("rgb(255, 255, 255)");
-    expect((await look(".item:not(.active)")).color).toBe("rgb(166, 166, 166)");
+    expect((await look(".item:not(.active)")).color).toBe("rgb(139, 154, 171)");
     expect((await page.locator(".item.active").boundingBox())!.height).toBeGreaterThanOrEqual(44);
     await page.screenshot({ path: `../.runtime/mini-selection-${width}.png` });
   });

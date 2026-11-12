@@ -4,11 +4,11 @@
   left: 0;
   right: 0;
   z-index: 100;
-  background: #121212;
-  border-top: 1rpx solid #ffffff0f;
+  background: #03172b;
+  border-top: 1rpx solid #ffffff12;
   display: flex;
   padding: 12rpx 12rpx calc(8rpx + env(safe-area-inset-bottom));
-  color: #a6a6a6;
+  color: #8b9aab;
 }
 .item {
   position: relative;
@@ -43,7 +43,7 @@
   width: 52px;
   height: 36px;
   border-radius: 12px;
-  color: #121212;
+  color: #02070d;
   background: #ffffff;
 }
 .active {

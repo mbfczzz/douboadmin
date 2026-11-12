@@ -19,7 +19,7 @@
   border: 0;
 }
 .purchase-tabs .selected {
-  background: #333333;
+  background: #1d3650;
   color: #ffffff;
   font-weight: 600;
 }

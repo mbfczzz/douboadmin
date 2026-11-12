@@ -68,7 +68,7 @@
   white-space: nowrap;
 }
 .model-option.selected {
-  background: #2e2e2e;
+  background: #1b3249;
 }
 .model-option t-icon {
   color: #ffffff;
@@ -133,7 +133,7 @@
   display: block;
   overflow: hidden;
   font-size: var(--ui-font-note);
-  color: #a6a6a6;
+  color: #8b9aab;
   margin-top: 2px;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -146,7 +146,7 @@
   text-overflow: ellipsis;
   text-align: right;
   font-size: var(--ui-font-caption);
-  color: #a6a6a6;
+  color: #8b9aab;
 }
 .model-badges {
   display: flex;
@@ -157,8 +157,8 @@
 .model-badges text {
   font-size: var(--ui-font-caption);
   padding: 2px 4px;
-  background: #262626;
-  color: #b3b3b3;
+  background: #13283d;
+  color: #a9b6c4;
   border-radius: 3px;
 }
 .model-badges .hot {

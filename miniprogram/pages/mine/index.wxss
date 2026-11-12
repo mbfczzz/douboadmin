@@ -126,7 +126,7 @@
   flex: 1;
 }
 .menu > t-icon:last-child {
-  color: #a6a6a6;
+  color: #8b9aab;
 }
 .menu::after {
   content: "";

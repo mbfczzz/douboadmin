@@ -10,7 +10,7 @@
   align-items: center;
   justify-content: center;
   border-radius: 8px;
-  background: #262626;
+  background: #13283d;
 }
 .completed-cover image {
   width: 100%;

@@ -55,7 +55,7 @@
   right: 5rpx;
   padding: 3rpx 12rpx;
   border-radius: 50%;
-  background: #121212d9;
+  background: #02070dd9;
   color: #fff;
   font-size: 32rpx;
 }

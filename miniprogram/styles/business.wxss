@@ -74,8 +74,8 @@ button.biz-action::after {
   border: 0;
 }
 button.biz-action[disabled] {
-  background: #262626;
-  color: #a6a6a6;
+  background: #13283d;
+  color: #8b9aab;
 }
 button.biz-secondary {
   background: var(--ui-field);
@@ -116,7 +116,7 @@ button.biz-secondary {
 }
 .biz-tabs .selected {
   color: #ffffff;
-  background: #333333;
+  background: #1d3650;
   font-weight: 600;
 }
 .biz-list-title {

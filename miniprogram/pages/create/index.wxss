@@ -23,11 +23,11 @@
   line-height: 18px;
   font-weight: 500;
   border-radius: 9px;
-  color: #a6a6a6;
+  color: #8b9aab;
 }
 .mode-tab.active {
   color: #ffffff;
-  background: #333333;
+  background: #1d3650;
   font-weight: 600;
 }
 .mode-tab-pressed {
@@ -76,7 +76,7 @@
 }
 .creation-ideas view {
   background: var(--ui-surface);
-  color: #b3b3b3;
+  color: #a9b6c4;
   border-radius: 10px;
   padding: 8px 12px;
   font-size: 12px;
