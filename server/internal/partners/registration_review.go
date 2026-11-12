@@ -8,9 +8,10 @@ import (
 )
 
 var ErrReviewDenied = errors.New("只能审核直属下级或本服务商会员的登记")
+var ErrApprovalDenied = errors.New("仅超级管理员可开通账号")
 
-// A provider opens its direct children and its own members. Binding a
-// provider's owner is reviewed by that provider's parent, never itself.
+// Providers can inspect and reject their direct registrations. Activation
+// uses the separately authorized super-administrator entry point.
 func checkRegistrationReviewer(r Reader, reg core.Registration, reviewer string) error {
 	if reviewer == "" { // Trusted internal operations; HTTP always supplies a node.
 		return nil
@@ -52,6 +53,9 @@ func (s *Service) RegistrationForReview(ctx context.Context, user, reviewer stri
 func (s *Service) DecideForProvider(ctx context.Context, user string, approve bool, reason string, version int64, actor, reviewer string) (core.Record, error) {
 	if reviewer == "" {
 		return core.Record{}, ErrReviewDenied
+	}
+	if approve {
+		return core.Record{}, ErrApprovalDenied
 	}
 	return s.decide(ctx, user, approve, reason, version, actor, reviewer)
 }

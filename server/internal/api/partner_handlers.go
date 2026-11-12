@@ -12,7 +12,7 @@ import (
 func partnerError(w http.ResponseWriter, e error) {
 	var rule *partners.RuleError
 	switch {
-	case errors.Is(e, partners.ErrReviewDenied):
+	case errors.Is(e, partners.ErrReviewDenied), errors.Is(e, partners.ErrApprovalDenied):
 		fail(w, 403, e.Error())
 	case errors.As(e, &rule):
 		fail(w, 400, e.Error())

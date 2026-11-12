@@ -8,8 +8,8 @@ import (
 	"doubo/server/internal/core"
 )
 
-// Platform-wide scan registration search; providers review their own rows
-// from the provider tree and code usage records.
+// Platform-wide registration search. Only super administrators can activate;
+// providers retain scoped inspection and rejection from their own records.
 func (a *Server) registrationList(w http.ResponseWriter, r *http.Request) {
 	if !platformOnly(w, r) {
 		return
@@ -56,15 +56,20 @@ func (a *Server) replyRegistrations(w http.ResponseWriter, r *http.Request, quer
 			if e = json.Unmarshal(rows.Items[i].Data, &reg); e != nil {
 				break
 			}
-			var allowed bool
-			allowed, e = a.Partners.CanReviewRegistration(r.Context(), reg, registrationReviewer(r))
+			approve := canApproveRegistrations(r)
+			reject := approve
+			if !reject {
+				reject, e = a.Partners.CanReviewRegistration(r.Context(), reg, registrationReviewer(r))
+			}
 			if e != nil {
 				break
 			}
 			rows.Items[i].Data = core.Data(struct {
 				core.Registration
-				CanReview bool `json:"canReview"`
-			}{reg, allowed})
+				CanReview  bool `json:"canReview"` // Legacy clients also hide approval.
+				CanApprove bool `json:"canApprove"`
+				CanReject  bool `json:"canReject"`
+			}{reg, approve, approve, reject})
 		}
 	}
 	partnerResult(w, rows, e)
@@ -79,13 +84,31 @@ func (a *Server) decideRegistration(w http.ResponseWriter, r *http.Request) {
 	if !decode(w, r, &v) {
 		return
 	}
+	if canApproveRegistrations(r) {
+		out, e := a.Partners.Decide(r.Context(), r.PathValue("id"), v.Approve, v.Reason, v.Version, identity(r).ID)
+		partnerResult(w, out, e)
+		return
+	}
+	if v.Approve {
+		fail(w, 403, "仅超级管理员可开通账号")
+		return
+	}
 	out, e := a.Partners.DecideForProvider(r.Context(), r.PathValue("id"), v.Approve, v.Reason, v.Version, identity(r).ID, registrationReviewer(r))
 	partnerResult(w, out, e)
 }
 
 func (a *Server) registrationForReview(w http.ResponseWriter, r *http.Request) {
+	if canApproveRegistrations(r) {
+		row, e := a.Store.Get(r.Context(), "registrations", r.PathValue("id"))
+		partnerResult(w, row, e)
+		return
+	}
 	row, e := a.Partners.RegistrationForReview(r.Context(), r.PathValue("id"), registrationReviewer(r))
 	partnerResult(w, row, e)
+}
+
+func canApproveRegistrations(r *http.Request) bool {
+	return identity(r).AdminRole == core.SuperAdminRole
 }
 
 func registrationReviewer(r *http.Request) string {

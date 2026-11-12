@@ -8,10 +8,9 @@ test("a stale provider row cannot open the same user's newer provider registrati
   await page.route("**/api/admin/me", (route) =>
     route.fulfill({
       json: {
-        id: "branch-login",
-        role: "partner",
-        scope: "partner",
-        partnerId: "branch",
+        id: "super-login",
+        role: "super_admin",
+        scope: "platform",
         menus: ["partners"],
       },
     }),

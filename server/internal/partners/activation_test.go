@@ -37,7 +37,7 @@ func TestScanRegistersAndOnlyApprovalOpensTheAccount(t *testing.T) {
 	if _, m, _ := get[core.Membership](reader{ctx, s.Store}, "memberships", "a"); m.Status != "pending" || m.CodeID != code {
 		t.Fatal("membership", m)
 	}
-	if _, e = s.Join(ctx, "a", code, "scan"); e == nil || !strings.Contains(e.Error(), "等待上级开通") {
+	if _, e = s.Join(ctx, "a", code, "scan"); e == nil || !strings.Contains(e.Error(), "等待超级管理员开通") {
 		t.Fatal("registered twice while in review", e)
 	}
 	decide(t, s, ctx, "a", true)

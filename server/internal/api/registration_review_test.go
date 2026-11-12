@@ -19,7 +19,7 @@ func reviewLogin(t *testing.T, a *Server, admin, partner string) string {
 	return adminLoginToken(t, a, username, "review-parent-password-2026")
 }
 
-func TestRegistrationReviewIsOnlyForTheDirectParent(t *testing.T) {
+func TestRegistrationApprovalIsOnlyForSuperAdmin(t *testing.T) {
 	cases := []struct{ kind, target, parent string }{
 		{"member", "branch", "branch"}, {"member", "s1", "s1"}, {"member", "s2", "s2"},
 		{"s1", "branch", "branch"}, {"s2", "branch", "branch"}, {"s2", "s1", "s1"},
@@ -30,7 +30,8 @@ func TestRegistrationReviewIsOnlyForTheDirectParent(t *testing.T) {
 		for _, approve := range []bool{true, false} {
 			name := tc.kind + "-" + tc.target + map[bool]string{true: "-approve", false: "-reject"}[approve]
 			t.Run(name, func(t *testing.T) {
-				a, user, admin := activationFixture(t)
+				a, user, _ := activationFixture(t)
+				admin := adminLoginToken(t, a, "admin", "test-pass")
 				branch := createBranch(t, a, admin, "review-matrix")
 				s1 := createProvider(t, a, admin, "review-s1", branch, "S1", "s1", nil)
 				s2 := createProvider(t, a, admin, "review-s2", s1, "S2", "s2", nil)
@@ -56,26 +57,33 @@ func TestRegistrationReviewIsOnlyForTheDirectParent(t *testing.T) {
 				var view struct {
 					CanReview bool `json:"canReview"`
 				}
-				if listed.Total != 1 || json.Unmarshal(listed.Items[0].Data, &view) != nil || view.CanReview != (tc.parent == "root") {
-					t.Fatal("platform list offered a non-direct decision", listed)
+				if listed.Total != 1 || json.Unmarshal(listed.Items[0].Data, &view) != nil || !view.CanReview {
+					t.Fatal("super administrator cannot review registration", listed)
 				}
 				before, _ := a.Store.Get(t.Context(), "registrations", "user-a")
 				for level, token := range tokens {
-					if level == tc.parent {
+					readStatus := 403
+					if level == "root" || level == tc.parent {
+						readStatus = 200
+					}
+					if w := call(a, "GET", path, token, "", nil); w.Code != readStatus {
+						t.Fatal("incorrect inspection scope", level, w.Code, w.Body.String())
+					}
+					if level == "root" || (!approve && level == tc.parent) {
 						continue
 					}
-					if w := call(a, "GET", path, token, "", nil); w.Code != 403 {
-						t.Fatal("non-parent read registration", level, w.Code, w.Body.String())
-					}
 					if status, body := decideHTTP(t, a, token, "user-a", approve, "资料不符"); status != 403 {
-						t.Fatal("non-parent decided registration", level, status, body)
+						t.Fatal("unauthorized decision accepted", level, status, body)
 					}
 				}
 				after, _ := a.Store.Get(t.Context(), "registrations", "user-a")
 				if after.Version != before.Version || string(after.Data) != string(before.Data) {
 					t.Fatal("unauthorized review changed registration")
 				}
-				parent := tokens[tc.parent]
+				parent := admin
+				if !approve {
+					parent = tokens[tc.parent]
+				}
 				if w := call(a, "GET", path, parent, "", nil); w.Code != 200 {
 					t.Fatal("parent cannot read selected registration", w.Code, w.Body.String())
 				}

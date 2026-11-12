@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { api, type Row } from "../api";
 import { ask } from "../confirm/ask";
 import type { Notify } from "../navigation";
+import { useMe, canApproveRegistrations } from "../session";
 
 export type Registration = {
   role: string;
@@ -17,6 +18,8 @@ export type Registration = {
   reason?: string;
   registeredAt?: string;
   canReview?: boolean;
+  canApprove?: boolean;
+  canReject?: boolean;
 };
 
 // Every entry uses the registration's version, never a provider/usage version.
@@ -26,27 +29,34 @@ export function useRegistrationDecision(
   changed: () => Promise<void>,
   scope = "",
 ) {
+  const me = useMe(),
+    canApprove = canApproveRegistrations(me);
+  const permissionScope = `${scope}/${me?.id}/${me?.role}/${me?.canApproveRegistrations}`;
   const [busy, setBusy] = useState(false);
   const active = useRef<AbortController | null>(null);
-  const currentScope = useRef(scope);
-  currentScope.current = scope;
+  const currentScope = useRef(permissionScope);
+  currentScope.current = permissionScope;
   useEffect(() => {
     setBusy(false);
     return () => {
       active.current?.abort();
       active.current = null;
     };
-  }, [scope]);
+  }, [permissionScope]);
   async function decide(
     selected: string | Row<Registration>,
     approve: boolean,
     expected?: { code?: string; partnerId?: string; role?: string },
   ) {
+    if (approve && !canApprove) {
+      notify("仅超级管理员可开通账号", "error");
+      return;
+    }
     if (active.current) return;
     const controller = new AbortController();
     active.current = controller;
     const current = () =>
-      !controller.signal.aborted && currentScope.current === scope;
+      !controller.signal.aborted && currentScope.current === permissionScope;
     setBusy(true);
     try {
       const row =

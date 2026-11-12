@@ -100,7 +100,8 @@ func TestScannedProviderHasNoBindCode(t *testing.T) {
 
 // Unbinding a pending bind leaves nothing for a later approval to restore.
 func TestUnbindWhilePendingClosesTheRegistration(t *testing.T) {
-	a, user, admin := activationFixture(t)
+	a, user, _ := activationFixture(t)
+	admin := adminLoginToken(t, a, "admin", "test-pass")
 	branch := newBranch(t, a, "unbind-pending")
 	code := providerCode(t, a, "GET", branch, "bind", admin)
 	if status, body := joinHTTP(a, user, code.Code); status != 200 {

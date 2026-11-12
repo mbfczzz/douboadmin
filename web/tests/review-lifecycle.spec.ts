@@ -5,7 +5,7 @@ for (const leave of ["close", "tab"] as const) {
   test(`a late review read cannot open a confirmation after ${leave}`, async ({
     page,
   }) => {
-    const { dialog } = await openCodes(page, "branch", false, true);
+    const { dialog } = await openCodes(page);
     let release!: () => void,
       arrived = false,
       completed = false,

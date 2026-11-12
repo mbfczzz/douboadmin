@@ -6,10 +6,10 @@ import (
 	"errors"
 )
 
-const reviewMessage = "已登记，等待上级开通"
+const reviewMessage = "已登记，等待超级管理员开通"
 
 // access is what a mini-program user may do. Scanning only registers; the
-// direct parent's approval opens generation access.
+// super-administrator approval opens generation access.
 func access(r Reader, user string) (core.Access, error) {
 	if out, ok, e := ownerAccess(r, user); ok || e != nil {
 		return out, e

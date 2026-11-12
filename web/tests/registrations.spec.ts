@@ -42,8 +42,7 @@ test("扫码登记 lists pending registrations with their source", async ({
   await expect(row.locator(".badge")).toHaveText("待开通");
   await expect(
     row.getByRole("button", { name: "开通", exact: true }),
-  ).toHaveCount(0);
-  await expect(row).toContainText("等待直属上级开通");
+  ).toHaveCount(1);
   const filter = page.waitForRequest(
     (r) =>
       r.url().includes("/api/admin/registrations?") &&

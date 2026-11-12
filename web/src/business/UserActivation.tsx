@@ -58,7 +58,7 @@ export default function UserActivation({ userId }: { userId: string }) {
       />
       {source && !reg && source.kind === "none" && (
         <p className="quiet">
-          尚未登记：用户需扫描服务商的二维码登记，上级开通后才能使用生成功能。
+          尚未登记：用户需扫描服务商的二维码登记，超级管理员开通后才能使用生成功能。
         </p>
       )}
       {source && (reg || source.kind !== "none") && (

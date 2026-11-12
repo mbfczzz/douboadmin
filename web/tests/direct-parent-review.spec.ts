@@ -5,7 +5,7 @@ import { mockLogin } from "./mock-login";
 test("an old usage record cannot approve a newer registration", async ({
   page,
 }) => {
-  const { dialog } = await openCodes(page, "branch", false, true);
+  const { dialog } = await openCodes(page);
   let writes = 0;
   await page.route("**/code-provider/code-uses?*", (route) =>
     route.fulfill({
@@ -60,12 +60,12 @@ test("an old usage record cannot approve a newer registration", async ({
 });
 
 for (const kind of ["s1", "s2", "member"] as const) {
-  test(`a provider reviews its own ${kind} scans using the registration version`, async ({
+  test(`a super administrator reviews ${kind} scans using the registration version`, async ({
     page,
   }) => {
     if (kind === "member")
       await page.setViewportSize({ width: 320, height: 1000 });
-    const { dialog } = await openCodes(page, "branch", false, true);
+    const { dialog } = await openCodes(page);
     let status = "pending";
     const writes: unknown[] = [];
     const reg = () => ({
@@ -157,17 +157,16 @@ for (const kind of ["s1", "s2", "member"] as const) {
   });
 }
 
-test("provider rows offer opening only for the direct parent and refresh after confirmation", async ({
+test("super administrators can open pending providers at any level and refresh after confirmation", async ({
   page,
 }) => {
   await mockLogin(page);
   await page.route("**/api/admin/me", (route) =>
     route.fulfill({
       json: {
-        id: "branch-login",
-        role: "partner",
-        scope: "partner",
-        partnerId: "branch",
+        id: "super-login",
+        role: "super_admin",
+        scope: "platform",
         menus: ["partners"],
         name: "分公司负责人",
       },
@@ -225,10 +224,9 @@ test("provider rows offer opening only for the direct parent and refresh after c
   const indirect = page
     .locator(".provider-tree-row")
     .filter({ hasText: "隔级S2" });
-  await expect(indirect).toContainText("等待上级开通");
   await expect(
     indirect.getByRole("button", { name: "开通", exact: true }),
-  ).toHaveCount(0);
+  ).toHaveCount(1);
   await direct.getByRole("button", { name: "开通", exact: true }).click();
   const confirm = page.getByRole("dialog", { name: "开通登记", exact: true });
   await expect(confirm).toBeVisible();

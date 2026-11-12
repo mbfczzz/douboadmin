@@ -28,7 +28,7 @@ func (a *Server) replyBind(w http.ResponseWriter, r *http.Request, v core.Partne
 	if row, err := a.Store.Get(r.Context(), "users", v.User); err == nil {
 		_ = json.Unmarshal(row.Data, &u)
 	}
-	// Until the direct parent approves, the binding is only a registration.
+	// Until a super administrator approves, the binding is only a registration.
 	access, e := a.Partners.Access(r.Context(), v.User)
 	if e != nil {
 		dbError(w, e)

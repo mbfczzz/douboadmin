@@ -11,7 +11,8 @@ import (
 func TestSubprovidersStillJoinByScanAndWaitForApproval(t *testing.T) {
 	for _, c := range []struct{ parentRole, role string }{{"branch", "s1"}, {"branch", "s2"}, {"s1", "s2"}} {
 		t.Run(c.parentRole+"-"+c.role, func(t *testing.T) {
-			a, user, admin := activationFixture(t)
+			a, user, _ := activationFixture(t)
+			admin := adminLoginToken(t, a, "admin", "test-pass")
 			parent := createBranch(t, a, admin, "scan-only")
 			if c.parentRole == "s1" {
 				parent = createProvider(t, a, admin, "scan-parent", parent, "已有S1", "s1", nil)
@@ -30,7 +31,10 @@ func TestSubprovidersStillJoinByScanAndWaitForApproval(t *testing.T) {
 			if data["status"] != "pending" {
 				t.Fatal("scan bypassed approval")
 			}
-			if status, body := decideHTTP(t, a, reviewer, "user-a", true, ""); status != 200 {
+			if status, body := decideHTTP(t, a, reviewer, "user-a", true, ""); status != 403 {
+				t.Fatal("provider bypassed super-admin approval", status, body)
+			}
+			if status, body := decideHTTP(t, a, admin, "user-a", true, ""); status != 200 {
 				t.Fatal("approval failed", status, body)
 			}
 			_, data = providerData(t, a, admin, reg.PartnerID)

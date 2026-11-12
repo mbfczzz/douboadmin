@@ -7,7 +7,7 @@ export type Partner = {
   role: string;
   parentId: string;
   path: string[];
-  // active, disabled, or pending until the direct parent approves a scan.
+  // active, disabled, or pending until a super administrator approves a scan.
   status: string;
   retailPer100Fen: number;
   childMarginBps: number;

@@ -1,11 +1,11 @@
 import { expect, test } from "@playwright/test";
 import { codes, openCodes } from "./provider-code-fixture";
 
-test("the provider member inbox opens pending users from a retired QR code", async ({
+test("super administrators open pending members from a retired QR code", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 320, height: 1000 });
-  const { dialog } = await openCodes(page, "branch", false, true);
+  const { dialog } = await openCodes(page);
   await dialog.getByRole("button", { name: "关闭", exact: true }).click();
   let status = "pending";
   const writes: unknown[] = [];
@@ -46,8 +46,8 @@ test("the provider member inbox opens pending users from a retired QR code", asy
     status = "approved";
     return route.fulfill({ json: reg() });
   });
-  await page.getByRole("button", { name: "会员开通", exact: true }).click();
-  const inbox = page.getByRole("dialog", { name: "会员开通", exact: true });
+  await page.getByRole("button", { name: "会员登记", exact: true }).click();
+  const inbox = page.getByRole("dialog", { name: "会员登记", exact: true });
   await expect(inbox).toContainText("旧码登记会员");
   expect(
     await inbox.evaluate((el) => el.scrollWidth <= el.clientWidth + 1),

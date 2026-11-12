@@ -74,7 +74,7 @@ for (const width of [1440, 390, 320]) {
     await expect(records).toContainText("资料不符");
     await expect(
       records.getByRole("button", { name: "开通", exact: true }),
-    ).toHaveCount(0);
+    ).toHaveCount(1);
     expect(
       await records.evaluate((el) => el.scrollWidth <= el.clientWidth + 1),
     ).toBe(true);

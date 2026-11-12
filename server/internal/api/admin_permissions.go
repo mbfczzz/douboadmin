@@ -122,6 +122,7 @@ func (a *Server) adminAccess(ctx context.Context, account core.AdminAccount) (co
 func (a *Server) adminMe(w http.ResponseWriter, r *http.Request) {
 	v := identity(r)
 	out := map[string]any{"id": v.ID, "account": v.Account, "role": v.AdminRole, "scope": core.RoleScopePlatform, "menus": core.AdminMenus}
+	out["canApproveRegistrations"] = canApproveRegistrations(r)
 	if v.AdminRole == "" {
 		out["role"] = core.SuperAdminRole
 	} else {

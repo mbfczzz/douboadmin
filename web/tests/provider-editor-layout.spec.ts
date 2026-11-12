@@ -66,12 +66,12 @@ test("each provider function opens its own readable, contained dialog", async ({
           await panel.getByRole("tab", { name: "子账号开通码" }).click();
           await expect(panel.locator(".share-code")).toHaveText("ABCD-2345");
           await expect(panel.locator(".code-info")).toContainText(
-            "用户扫码登记为子账号（会员），直接归属本服务商，服务商开通后生效",
+            "用户扫码登记为子账号（会员），直接归属本服务商，超级管理员开通后生效",
           );
           await panel.getByRole("tab", { name: "S1 服务商邀请码" }).click();
           await expect(panel.locator(".share-code")).toHaveText("KMNP-2345");
           await expect(panel.locator(".code-info")).toContainText(
-            "新用户扫码登记为本服务商下的 S1 服务商，上级开通后生效",
+            "新用户扫码登记为本服务商下的 S1 服务商，超级管理员开通后生效",
           );
           await panel.getByRole("tab", { name: "S2 推荐官邀请码" }).click();
           await expect(panel.locator(".share-code")).toHaveText("WXYZ-6789");

@@ -54,6 +54,7 @@ export async function surfaceFixtures(page: Page, catalog?: Row<Model>[]) {
     activatedAt: now,
   };
   const registration = row("qa-user", {
+    canReview: true, canApprove: true, canReject: true,
     role: "member",
     partnerId: "qa-provider",
     referrer: "qa-referrer",

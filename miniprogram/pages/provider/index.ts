@@ -131,7 +131,7 @@ Page({
     if (!code) return;
     this.setData({
       tab: found[0],
-      note: found[2] + "，上级开通后生效",
+      note: found[2] + "，超级管理员开通后生效",
       shown: { code: pretty(code.code), raw: code.code, qr: code.qr },
     });
   },

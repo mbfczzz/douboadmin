@@ -17,7 +17,7 @@ const ShareCode = lazy(() => import("./ShareCode")),
 export const modules = {
   share: "分享码",
   commissions: "算力分佣",
-  registrations: "会员开通",
+  registrations: "会员登记",
 } as const;
 export type ModuleKey = keyof typeof modules;
 

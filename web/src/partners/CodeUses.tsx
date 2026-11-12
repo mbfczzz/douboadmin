@@ -10,7 +10,7 @@ import { codeKindName, joinMethod } from "../business/types";
 import { useBusinessRoleNames } from "../roles/business";
 import type { PageData } from "./types";
 import type { Notify } from "../navigation";
-import { useMe } from "../session";
+import { useMe, canApproveRegistrations } from "../session";
 import { useRegistrationDecision } from "../users/useRegistrationDecision";
 import "./records.css";
 
@@ -46,7 +46,8 @@ export default function CodeUses({
   changed: () => Promise<void>;
 }) {
   const me = useMe(),
-    canReview = !!me && (me.partnerId || "root") === reviewerId;
+    canApprove = canApproveRegistrations(me),
+    canReject = canApprove || (!!me && (me.partnerId || "root") === reviewerId);
   const roleName = useBusinessRoleNames();
   const [query, setQuery] = useState(""),
     [status, setStatus] = useState("");
@@ -215,7 +216,7 @@ export default function CodeUses({
               },
               { title: "登记时间", render: (r) => date(r.data.registeredAt) },
               { title: "登记方式", render: (r) => joinMethod(r.data.method) },
-              ...(canReview
+              ...(canApprove || canReject
                 ? [
                     {
                       title: "操作",
@@ -223,27 +224,31 @@ export default function CodeUses({
                       render: (r: PageData<Use>["items"][number]) =>
                         r.data.status === "pending" ? (
                           <div className="business-actions">
-                            <button
-                              disabled={review.busy}
-                              onClick={() =>
-                                void review.decide(r.data.userId, true, {
-                                  code: r.data.code,
-                                })
-                              }
-                            >
-                              开通
-                            </button>
-                            <button
-                              className="danger-text"
-                              disabled={review.busy}
-                              onClick={() =>
-                                void review.decide(r.data.userId, false, {
-                                  code: r.data.code,
-                                })
-                              }
-                            >
-                              拒绝
-                            </button>
+                            {canApprove && (
+                              <button
+                                disabled={review.busy}
+                                onClick={() =>
+                                  void review.decide(r.data.userId, true, {
+                                    code: r.data.code,
+                                  })
+                                }
+                              >
+                                开通
+                              </button>
+                            )}
+                            {canReject && (
+                              <button
+                                className="danger-text"
+                                disabled={review.busy}
+                                onClick={() =>
+                                  void review.decide(r.data.userId, false, {
+                                    code: r.data.code,
+                                  })
+                                }
+                              >
+                                拒绝
+                              </button>
+                            )}
                           </div>
                         ) : (
                           "—"

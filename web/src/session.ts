@@ -7,6 +7,7 @@ export interface Me {
   name?: string;
   role: string;
   roleName?: string;
+  canApproveRegistrations?: boolean;
   scope: "platform" | "partner";
   menus: string[];
   partnerId?: string;
@@ -20,3 +21,5 @@ export interface Me {
 export const MeContext = createContext<Me | null>(null);
 export const useMe = () => useContext(MeContext);
 export const isProviderAccount = (me: Me | null) => me?.scope === "partner";
+export const canApproveRegistrations = (me: Me | null) =>
+  me?.role === "super_admin" && me.canApproveRegistrations !== false;

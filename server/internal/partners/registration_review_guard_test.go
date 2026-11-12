@@ -22,6 +22,9 @@ func TestPublicReviewHelpersRejectMissingReviewer(t *testing.T) {
 	if _, e := s.DecideForProvider(ctx, row.ID, true, "", row.Version, "admin", ""); !errors.Is(e, ErrReviewDenied) {
 		t.Fatal("missing reviewer opened account", e)
 	}
+	if _, e := s.DecideForProvider(ctx, row.ID, true, "", row.Version, "provider", s1); !errors.Is(e, ErrApprovalDenied) {
+		t.Fatal("direct provider service call bypassed role approval", e)
+	}
 	access, _ := s.Access(ctx, row.ID)
 	if access.Active || access.Status != "review" {
 		t.Fatal("denied review changed access", access)

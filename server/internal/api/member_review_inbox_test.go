@@ -20,7 +20,8 @@ func memberReviewPage(t *testing.T, a *Server, id, token, query string) core.Rec
 }
 
 func TestPendingMembersRemainReviewableAfterTheirCodeIsReset(t *testing.T) {
-	a, user, admin := activationFixture(t)
+	a, user, _ := activationFixture(t)
+	admin := adminLoginToken(t, a, "admin", "test-pass")
 	branch := createBranch(t, a, admin, "member-inbox")
 	parent := reviewLogin(t, a, admin, branch)
 	other := createBranch(t, a, admin, "other-inbox")
@@ -45,23 +46,28 @@ func TestPendingMembersRemainReviewableAfterTheirCodeIsReset(t *testing.T) {
 	for _, row := range append(first.Items, second.Items...) {
 		var view struct {
 			core.Registration
-			CanReview bool `json:"canReview"`
+			CanReview  bool `json:"canReview"`
+			CanApprove bool `json:"canApprove"`
+			CanReject  bool `json:"canReject"`
 		}
-		if json.Unmarshal(row.Data, &view) != nil || !view.CanReview || view.Code != old.Code || view.PartnerID != branch || view.Role != "member" {
+		if json.Unmarshal(row.Data, &view) != nil || view.CanReview || view.CanApprove || !view.CanReject || view.Code != old.Code || view.PartnerID != branch || view.Role != "member" {
 			t.Fatal("wrong member inbox data", string(row.Data))
 		}
 	}
 	if page := memberReviewPage(t, a, branch, parent, "?q=pending-member-04"); page.Total != 1 {
 		t.Fatal("member search failed", page.Total)
 	}
-	if status, body := decideHTTP(t, a, parent, "pending-member-04", true, ""); status != 200 {
-		t.Fatal("direct parent could not open old-code member", status, body)
+	if status, body := decideHTTP(t, a, parent, "pending-member-04", true, ""); status != 403 {
+		t.Fatal("provider opened old-code member", status, body)
+	}
+	if status, body := decideHTTP(t, a, admin, "pending-member-04", true, ""); status != 200 {
+		t.Fatal("super administrator could not open old-code member", status, body)
 	}
 	if page := memberReviewPage(t, a, branch, parent, "?status=pending"); page.Total != 22 {
 		t.Fatal("approved member stayed pending")
 	}
-	if page := memberReviewPage(t, a, branch, admin, "?status=approved"); page.Total != 1 || !strings.Contains(string(page.Items[0].Data), `"canReview":false`) {
-		t.Fatal("platform ancestor offered direct review")
+	if page := memberReviewPage(t, a, branch, admin, "?status=approved"); page.Total != 1 || !strings.Contains(string(page.Items[0].Data), `"canApprove":true`) {
+		t.Fatal("super administrator lost approval capability")
 	}
 	path := "/api/admin/partners/" + branch + "/member-registrations"
 	for _, token := range []string{user, unrelated} {

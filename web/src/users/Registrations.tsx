@@ -17,6 +17,7 @@ import { useCachedResource } from "../hooks/useCachedResource";
 import { usePageLimit } from "../hooks/usePageLimit";
 import type { Notify } from "../navigation";
 import { createdCell } from "./cells";
+import { useMe, canApproveRegistrations } from "../session";
 
 type Page = { items: Row<Registration>[]; page: number; total: number };
 const states = [
@@ -25,7 +26,7 @@ const states = [
   ["rejected", "已拒绝", "failed"],
 ] as const;
 
-// The platform searches all registrations; direct parents review from providers.
+// Super administrators activate registrations; other accounts retain scoped viewing.
 export default function Registrations({
   notify,
   refresh,
@@ -126,6 +127,7 @@ function List({
   setPage: (page: number) => void;
   decide: (row: Row<Registration>, approve: boolean) => Promise<void>;
 }) {
+  const canApprove = canApproveRegistrations(useMe());
   const roleName = useBusinessRoleNames();
   const tree = useResource<Row<{ name: string }>[]>("/admin/partners/tree"),
     names = new Map((tree.data || []).map((r) => [r.id, r.data.name]));
@@ -202,18 +204,22 @@ function List({
           title: "操作",
           action: true,
           render: (r) =>
-            r.data.status === "pending" && r.data.canReview ? (
+            r.data.status === "pending" ? (
               <div className="business-actions">
-                <button onClick={() => void decide(r, true)}>开通</button>
-                <button
-                  className="danger-text"
-                  onClick={() => void decide(r, false)}
-                >
-                  拒绝
-                </button>
+                {canApprove && (r.data.canApprove ?? r.data.canReview) ? (
+                  <button onClick={() => void decide(r, true)}>开通</button>
+                ) : (
+                  <span className="quiet">等待超级管理员开通</span>
+                )}
+                {(r.data.canReject ?? r.data.canReview) && (
+                  <button
+                    className="danger-text"
+                    onClick={() => void decide(r, false)}
+                  >
+                    拒绝
+                  </button>
+                )}
               </div>
-            ) : r.data.status === "pending" ? (
-              "等待直属上级开通"
             ) : (
               "—"
             ),

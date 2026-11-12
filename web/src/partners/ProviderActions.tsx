@@ -1,5 +1,5 @@
 import type { Row } from "../api";
-import { useMe } from "../session";
+import { useMe, canApproveRegistrations } from "../session";
 import type { Partner } from "./types";
 
 export type ProviderAction =
@@ -26,7 +26,9 @@ export default function ProviderActions({
 }) {
   const me = useMe(),
     self = me?.partnerId === item.id,
-    canReview = !!me && (me.partnerId || "root") === item.data.parentId,
+    canApprove = canApproveRegistrations(me),
+    canReject =
+      canApprove || (!!me && (me.partnerId || "root") === item.data.parentId),
     pending = item.data.status === "pending",
     button = (kind: ProviderAction, label: string, subtle = false) => (
       <button
@@ -41,13 +43,17 @@ export default function ProviderActions({
   if (pending)
     return (
       <div className="provider-tree-actions">
-        {canReview && item.data.ownerUser ? (
+        {item.data.ownerUser && (canApprove || canReject) ? (
           <>
-            {button("approve", "开通")}
-            {button("reject", "拒绝")}
+            {canApprove ? (
+              button("approve", "开通")
+            ) : (
+              <span className="quiet provider-waiting">等待超级管理员开通</span>
+            )}
+            {canReject && button("reject", "拒绝")}
           </>
         ) : (
-          <span className="quiet provider-waiting">等待上级开通</span>
+          <span className="quiet provider-waiting">等待超级管理员开通</span>
         )}
       </div>
     );
@@ -55,7 +61,7 @@ export default function ProviderActions({
     <div className="provider-tree-actions">
       <span className="provider-action-group">
         {button("share", "分享码")}
-        {self && button("registrations", "会员开通")}
+        {(self || canApprove) && button("registrations", "会员登记")}
         {button("commissions", "分佣")}
       </span>
       <span className="provider-action-group">
