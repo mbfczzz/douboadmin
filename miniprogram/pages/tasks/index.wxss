@@ -56,10 +56,14 @@
   color: var(--ui-muted);
 }
 .queue-state.running {
-  color: var(--ui-brand);
+  color: var(--ui-info);
 }
+.failure-count.failed,
 .queue-state.failed {
   color: var(--ui-danger);
+}
+.queue-state.queued {
+  color: var(--ui-warning);
 }
 .queue-spec {
   overflow-wrap: anywhere;

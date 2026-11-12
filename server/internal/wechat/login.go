@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -24,9 +25,12 @@ type HTTPClient interface {
 	Do(*http.Request) (*http.Response, error)
 }
 type Client struct {
-	AppID  string
-	Secret string
-	HTTP   HTTPClient
+	phoneMu         sync.Mutex
+	phoneToken      string
+	phoneTokenUntil time.Time
+	AppID           string
+	Secret          string
+	HTTP            HTTPClient
 }
 
 func New(appID, secret string) *Client {

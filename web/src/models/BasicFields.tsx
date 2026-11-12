@@ -17,7 +17,7 @@ export default function BasicFields({
   return (
     <Card title="基础信息">
       <div className="config-grid">
-        <Field label="名称" span={2}>
+        <Field label="名称" span={4}>
           <input
             aria-label="名称"
             value={m.name}
@@ -25,9 +25,6 @@ export default function BasicFields({
             required
             maxLength={100}
           />
-        </Field>
-        <Field label="模型 ID" span={2} hint="来自已同步的上游模型标识">
-          <input aria-label="模型 ID" value={m.key} readOnly />
         </Field>
         <Field label="类型">
           <select aria-label="类型" value={m.kind} disabled>

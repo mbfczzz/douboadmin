@@ -62,7 +62,7 @@ test("model dropdown repairs unsupported parameters and keeps the chosen model",
   assert.equal(page.data.model, "alternate");
 });
 
-test("same-name model variants retain public identifiers and configured descriptions", async () => {
+test("same-name model variants hide identifiers and retain configured descriptions", async () => {
   const h = harness(), page = h.page("create");
   h.api.request = async () => ({ models: [
     { ...models[0], id: "variant-a", key: "seedance-2.5-fast", name: "Seedance 2.5" },
@@ -71,7 +71,7 @@ test("same-name model variants retain public identifiers and configured descript
   ] });
   await page.loadModels();
   assert.deepEqual(Array.from(page.data.availableModels, (m) => m.description), [
-    "seedance-2.5-fast", "seedance-2.5-standard", "运营配置说明",
+    "", "", "运营配置说明",
   ]);
   page.selectModel(event({ id: "variant-b" }));
   assert.equal(page.data.model, "variant-b");

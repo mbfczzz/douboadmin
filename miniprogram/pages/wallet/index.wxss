@@ -23,6 +23,10 @@
   color: var(--ui-link);
   font-weight: 600;
 }
+.purchase-tabs button[disabled],
+.virtual-product[disabled] {
+  opacity: 0.55;
+}
 .checkout-error {
   display: block;
   color: var(--ui-danger);
@@ -31,7 +35,7 @@
 }
 .virtual-products {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
 }
 button.virtual-product {
@@ -39,10 +43,10 @@ button.virtual-product {
   flex-direction: column;
   justify-content: flex-start;
   width: 100%;
-  padding: 12px 8px;
-  background: var(--ui-field);
+  padding: 14px 12px;
+  background: var(--ui-surface);
   color: var(--ui-text);
-  border: 1px solid transparent;
+  border: 1px solid var(--ui-border);
   border-radius: 12px;
   line-height: 1.6;
   font-size: 13px;
@@ -55,28 +59,18 @@ button.virtual-product::after {
   border-color: var(--ui-brand);
   background: var(--ui-selected);
 }
-.virtual-product text {
+.virtual-product > text {
   display: block;
   width: 100%;
 }
-.virtual-product text:first-child {
-  min-height: 3.2em;
-  flex: 1;
-}
 .product-price {
   margin: 4px 0;
-  font-size: 18px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--ui-text);
 }
 .virtual-product.selected .product-price {
-  color: var(--ui-text);
-}
-.wallet-links {
-  flex-wrap: wrap;
-}
-.wallet-refresh {
-  padding: 12px 0;
+  color: var(--ui-link);
 }
 .ledger-row {
   align-items: flex-start;
@@ -95,7 +89,8 @@ button.virtual-product::after {
   margin-top: 4px;
 }
 .ledger-change {
-  flex: 0 0 35%;
+  flex: 0 0 auto;
+  max-width: 34%;
   text-align: right;
   line-height: 1.5;
   font-size: 15px;
@@ -108,4 +103,123 @@ button.virtual-product::after {
 }
 .wallet-purchase {
   margin: 28px 0;
+}
+.product-icons {
+  width: 100%;
+  color: var(--ui-link);
+  margin-bottom: 12px;
+}
+.product-points {
+  color: var(--ui-gold);
+  font-size: 24px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.product-unit {
+  font-size: 12px;
+  font-weight: 400;
+  margin-left: 4px;
+}
+.product-name {
+  font-size: 12px;
+  color: var(--ui-muted);
+  flex: 1;
+  margin: 4px 0 12px;
+}
+.virtual-products.pair {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.virtual-products.single {
+  grid-template-columns: 1fr;
+}
+.single .virtual-product {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  text-align: left;
+}
+.single .product-icons {
+  grid-column: 1 / -1;
+}
+.single .product-price {
+  grid-column: 2;
+  grid-row: 2 / 4;
+  align-self: center;
+  margin-left: 16px;
+}
+.single .product-name {
+  margin-bottom: 0;
+}
+.summary-label,
+.summary-held,
+.wallet-shortcuts > view,
+.purchase-summary,
+button.wallet-refresh {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.wallet-summary .biz-value {
+  color: var(--ui-gold);
+  min-width: 0;
+  flex: 1;
+  font-size: 34px;
+  margin: 12px 0 16px;
+}
+.summary-label {
+  color: var(--ui-gold-muted);
+}
+.summary-held {
+  border-top: 1px solid var(--ui-gold-border);
+  color: var(--ui-gold-muted);
+  padding-top: 16px;
+  flex-wrap: wrap;
+  font-size: 13px;
+}
+.summary-held .biz-small {
+  margin-left: auto;
+}
+button.wallet-refresh {
+  flex-shrink: 0;
+  min-height: 44px;
+  background: var(--ui-surface);
+  color: var(--ui-gold);
+  font-size: 13px;
+  padding: 0 12px;
+  border-radius: 10px;
+}
+.wallet-shortcuts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.wallet-shortcuts > view {
+  min-height: 48px;
+  font-size: 14px;
+}
+.wallet-shortcuts text {
+  flex: 1;
+}
+.purchase-summary {
+  margin-top: 16px;
+  font-size: 13px;
+  line-height: 22px;
+  color: var(--ui-gold);
+}
+.wallet-summary {
+  background: var(--ui-gold-bg);
+  border-color: var(--ui-gold-border);
+}
+.wallet-summary .icon-tile,
+.wallet-summary .biz-small {
+  color: var(--ui-gold-muted);
+  background: transparent;
+}
+.icon-tile.plus {
+  background: var(--ui-success-bg);
+  color: var(--ui-success);
+}
+@media (max-width: 350px) {
+  .virtual-products {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }

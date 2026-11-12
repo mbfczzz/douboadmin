@@ -1,34 +1,110 @@
 @import "../../styles/business.wxss";
-.biz-card-head .biz-heading {
-  margin-bottom: 0;
-}
 .order-state {
   padding: 2px 8px;
-  border-radius: 6px;
-  background: var(--ui-field);
-  color: var(--ui-muted);
-  font-size: 12px;
   line-height: 18px;
 }
-.order-state.paid {
-  background: var(--ui-success-bg);
-  color: var(--ui-success);
-}
-.order-state.created,
-.order-state.refunding {
-  background: var(--ui-warning-bg);
-  color: var(--ui-warning);
-}
 .order-meta {
-  flex-wrap: wrap;
-  gap: 4px 12px;
-  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 16px;
+  border-top: 1px solid var(--ui-border);
+  color: var(--ui-muted);
+  font-size: 12px;
 }
 .order-amount {
   flex: 1;
   min-width: 0;
-  font-size: 17px;
+  display: block;
+  font-size: 24px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   overflow-wrap: anywhere;
+}
+.orders-heading {
+  margin-bottom: 24px;
+}
+.orders-heading .biz-heading {
+  margin-bottom: 8px;
+}
+.order-card {
+  padding: 20px;
+  margin-bottom: 20px;
+}
+.order-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.order-title {
+  flex: 1;
+  min-width: 0;
+  font-size: 15px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.order-title text {
+  display: block;
+}
+.order-title .biz-small {
+  margin-top: 4px;
+  font-weight: 400;
+}
+.order-state {
+  max-width: 40%;
+  flex-shrink: 0;
+}
+.order-values {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin: 24px 0 20px;
+}
+.order-values > view {
+  min-width: 0;
+}
+.order-head .icon-tile {
+  color: var(--ui-gold);
+  background: var(--ui-gold-bg);
+}
+.order-values > view:last-child .order-amount {
+  color: var(--ui-gold);
+}
+.order-values.long-values {
+  grid-template-columns: 1fr;
+}
+.order-unit {
+  font-size: 12px;
+  font-weight: 400;
+  margin-left: 6px;
+}
+.order-id,
+.order-result {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--ui-muted);
+}
+.order-id {
+  min-height: 44px;
+}
+.id-value {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.order-result.paid {
+  color: var(--ui-success);
+}
+.order-card .biz-action {
+  min-height: 48px;
+  padding: 12px 6px;
+  font-size: 13px;
+}
+.order-card .button-content {
+  gap: 6px;
+  white-space: nowrap;
 }

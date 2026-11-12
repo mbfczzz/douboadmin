@@ -46,7 +46,6 @@ export default function ModelTable({
                   </span>
                   <div>
                     <b>{r.data.name}</b>
-                    <small>{r.data.key}</small>
                     <div className="model-display-badges">
                       {r.data.settings?.badges?.map((b, i) => (
                         <small className={b.tone} key={i}>

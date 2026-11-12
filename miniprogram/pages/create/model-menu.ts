@@ -22,9 +22,9 @@ export function openModelMenu(page: MenuPage) {
         : 0;
       const below = Math.max(
         0,
-        info.windowHeight - safeBottom - bar - 12 - (rect.bottom - 8),
+        info.windowHeight - safeBottom - bar - 12 - (rect.bottom - 12),
       );
-      const above = Math.max(0, rect.bottom - 64 - top);
+      const above = Math.max(0, rect.bottom - 68 - top);
       const up = page.data.expanded || (below < desired && above > below);
       page.setData({
         modelMenuUp: up,

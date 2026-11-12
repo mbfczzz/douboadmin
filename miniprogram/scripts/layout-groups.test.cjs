@@ -22,17 +22,18 @@ test("task prompt heading and content stay adjacent; status and actions stay out
   assert.ok(text.indexOf("<points-balance") > text.indexOf('class="specs"'));
 });
 
-test("generation follows its parameters and profile balance precedes grouped menus", () => {
+test("generation stays inside the editor and profile balance precedes the menu grid", () => {
   const create = source("create"),
     mine = source("mine");
   assert.ok(
-    create.indexOf("<points-balance") > create.indexOf('class="ratio-grid"'),
+    create.indexOf("<points-balance") < create.indexOf('class="workspace-foot"'),
   );
   assert.ok(
     create.indexOf("<points-balance") < create.indexOf('class="queue-link"'),
   );
-  assert.ok(create.indexOf('class="creation-action"') > create.indexOf('class="ratio-grid"'));
-  assert.ok(create.indexOf('class="creation-action"') < create.indexOf("<points-balance"));
+  assert.ok(!create.includes('class="creation-action"'));
+  assert.ok(create.indexOf('is="generate-action"') < create.indexOf('class="model-menu'));
+  assert.ok(!create.includes('试试示例'));
   assert.ok(mine.indexOf('class="profile"') < mine.indexOf("<points-balance"));
   assert.ok(
     mine.indexOf("<points-balance") <
@@ -55,10 +56,10 @@ test("profile fields share explicit grouping while preserving form field names",
   assert.ok(!source("mine").includes("<t-popup"));
 });
 
-test("the compact profile uses icon-and-text menus without loading media previews", () => {
+test("the profile exposes recent media and icon-text navigation", () => {
   const mine = source("mine");
-  assert.match(mine, /class="icon-tile"[\s\S]*?name="{{item.icon}}"/);
+  assert.match(mine, /class="menu-grid"[\s\S]*?name="{{item.icon}}"/);
   assert.ok(mine.includes('class="menu-label"'));
-  assert.ok(mine.includes('item.group===group'));
-  assert.ok(!mine.includes('class="works"'));
+  assert.ok(mine.includes('class="completed-grid"'));
+  assert.ok(mine.includes('item.thumbnailUrl||item.result'));
 });

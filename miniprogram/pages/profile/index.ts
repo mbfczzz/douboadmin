@@ -182,6 +182,7 @@ Page({
           title: "放弃修改？",
           content: "本次修改尚未保存，离开后将不会保留。",
           confirmText: "放弃修改",
+          confirmColor: "#b42338",
           cancelText: "继续编辑",
         });
         if (!result.confirm || this.destroyed) return;

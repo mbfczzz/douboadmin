@@ -55,7 +55,7 @@ test("mobile user actions stay accessible and failed balances remain unknown", a
   await page.route("**/api/admin/users/ui-polish-user/ledger?*", (route) =>
     route.fulfill({ json: { items: [], page: 1, size: 20, total: 0 } }),
   );
-  await page.getByRole("button", { name: "小程序用户", exact: true }).click();
+  await page.getByRole("button", { name: "用户管理", exact: true }).click();
   await page.setViewportSize({ width: 390, height: 844 });
   const action = page.getByRole("button", { name: "详情", exact: true });
   await action.scrollIntoViewIfNeeded();

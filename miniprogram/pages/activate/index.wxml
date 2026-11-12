@@ -8,13 +8,18 @@
   <text wx:elif="{{!status||status.status==='pending'||status.status==='unbound'||status.status==='rejected'}}" class="biz-note activation-intro">第 2 步：扫描服务商或会员给你的二维码登记。</text>
   <view wx:if="{{loading}}" class="biz-note">正在确认授权状态…</view>
   <view wx:if="{{loadError}}" class="biz-error" bindtap="load">{{loadError}} · 点击重试</view>
-  <button wx:if="{{!logged}}" class="biz-action" loading="{{busy}}" disabled="{{busy||loading||!wechatReady}}" bindtap="login">微信登录</button>
+  <block wx:if="{{!logged}}">
+    <button wx:if="{{phoneReady}}" class="biz-action" open-type="getPhoneNumber" bindgetphonenumber="phoneLogin" loading="{{busy}}" disabled="{{busy||loading||!wechatReady}}">手机号授权登录</button>
+    <button wx:else class="biz-action" loading="{{busy}}" disabled="{{busy||loading||!wechatReady}}" bindtap="login">微信登录</button>
+    <button wx:if="{{phoneReady}}" class="text-button phone-alternative" bindtap="login" disabled="{{busy||loading}}">使用其他手机号</button>
+  </block>
   <block wx:else>
     <view wx:if="{{status.profileRequired}}" class="biz-card activation-options">
       <view class="activation-path">
         <text class="biz-heading">填写资料</text>
         <input class="biz-input" placeholder="姓名" value="{{name}}" maxlength="30" data-field="name" bindinput="field" disabled="{{busy}}" />
-        <input class="biz-input" type="number" placeholder="手机号" value="{{phone}}" maxlength="11" data-field="phone" bindinput="field" disabled="{{busy}}" />
+        <input class="biz-input" type="number" placeholder="手机号" value="{{phone}}" maxlength="11" data-field="phone" bindinput="field" disabled="{{busy||status.phoneVerified}}" />
+        <text wx:if="{{status.phoneVerified}}" class="biz-note">手机号已验证，填写姓名即可继续。</text>
         <block wx:if="{{status.smsRequired!==false}}">
           <view class="activation-sms">
             <input class="biz-input" type="number" placeholder="短信验证码" value="{{smsCode}}" maxlength="6" data-field="smsCode" bindinput="field" disabled="{{busy}}" />

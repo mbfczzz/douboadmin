@@ -44,6 +44,7 @@ for (const width of [320, 375, 430]) {
     const styles = [
       "styles/theme.wxss",
       "styles/common.wxss",
+      "pages/orders/index.wxss",
       "pages/wallet/index.wxss",
     ]
       .map((file) => css(file, width))
@@ -60,6 +61,7 @@ for (const width of [320, 375, 430]) {
       "item.amount": "999999.99",
       "item.time": "2026/11/06 12:30",
       "item.id": "long-order-id-".repeat(8),
+      "item.amount.length>7||item.points.length>8?'long-values':''": "long-values",
     });
     await page.setContent(
       `<style>body{margin:0}button:not([size=mini]){width:184px}${styles}</style><div class="subpage"><div class="biz-card">${ledger}</div>${order}</div>`,
@@ -72,11 +74,11 @@ for (const width of [320, 375, 430]) {
     expect(amount!.x).toBeGreaterThanOrEqual(copy!.x + copy!.width);
     expect(Math.abs(amount!.y - copy!.y)).toBeLessThan(1);
     const head = await page
-      .locator(".biz-card-head > span")
+      .locator(".order-values > div")
       .evaluateAll((nodes) =>
         nodes.map((node) => node.getBoundingClientRect().top),
       );
-    expect(Math.abs(head[0] - head[1])).toBeLessThan(1);
+    expect(head[1]).toBeGreaterThan(head[0]);
     for (const button of await page.locator(".biz-pair button").all()) {
       expect(
         await button.evaluate(

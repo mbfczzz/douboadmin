@@ -13,10 +13,10 @@ test("quick jump and page filters remember recent work", async ({ page }) => {
   await expect(
     page.getByRole("heading", { name: "服务商列表", exact: true }),
   ).toBeVisible();
-  await page.getByRole("button", { name: "小程序用户", exact: true }).click();
+  await page.getByRole("button", { name: "用户管理", exact: true }).click();
   await page.getByLabel("搜索用户").fill("需要记住");
   await page.getByRole("button", { name: "管理账号", exact: true }).click();
-  await page.getByRole("button", { name: "小程序用户", exact: true }).click();
+  await page.getByRole("button", { name: "用户管理", exact: true }).click();
   await expect(page.getByLabel("搜索用户")).toHaveValue("需要记住");
   await page.keyboard.press("Control+K");
   await expect(
@@ -65,7 +65,7 @@ test("mobile records expose every field without horizontal discovery", async ({
 }) => {
   await login(page);
   await surfaceFixtures(page);
-  await page.getByRole("button", { name: "小程序用户", exact: true }).click();
+  await page.getByRole("button", { name: "用户管理", exact: true }).click();
   await page.setViewportSize({ width: 390, height: 844 });
   const record = page.locator(".mobile-record").first();
   await expect(record).toBeVisible();

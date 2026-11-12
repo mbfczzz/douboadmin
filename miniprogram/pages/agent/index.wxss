@@ -66,12 +66,16 @@
   text-align: right;
 }
 .user .bubble {
-  background: var(--ui-field);
+  background: var(--ui-selected);
   margin-left: 50rpx;
   color: var(--ui-text);
 }
 .assistant .bubble {
+  border: 1px solid var(--ui-border);
   margin-right: 20rpx;
+}
+.assistant .message-label {
+  color: var(--ui-info);
 }
 .use-script {
   display: flex;

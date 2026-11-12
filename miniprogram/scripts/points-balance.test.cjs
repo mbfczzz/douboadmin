@@ -92,3 +92,16 @@ test("returning to the balance card unlocks navigation without allowing double t
   assert.equal(f.h.nav.length, 2);
   f.balance.stop();
 });
+
+test("editor balance retries a failed refresh instead of navigating with stale credit", async () => {
+  const f = await fixture();
+  f.balance.setData({ loadError: "刷新失败" });
+  f.balance.balanceTap();
+  await new Promise(setImmediate);
+  assert.equal(f.h.nav.length, 0);
+  assert.equal(f.balance.data.available, "1000");
+  assert.equal(f.balance.data.loadError, "");
+  f.balance.balanceTap();
+  assert.equal(f.h.nav.at(-1).url, "/pages/wallet/index");
+  f.balance.stop();
+});

@@ -61,6 +61,12 @@ image {
   line-height: 1.5;
   font-size: 25rpx;
 }
+.phone-alternative {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  text-align: center;
+}
 .note {
   font-size: var(--ui-font-note);
   color: var(--ui-muted);
@@ -136,7 +142,7 @@ image {
   font-size: 28rpx;
 }
 .pill {
-  font-size: 21rpx;
+  font-size: 12px;
   border-radius: 6px;
   padding: 8rpx 13rpx;
   background: var(--ui-field);
@@ -151,8 +157,13 @@ image {
   color: var(--ui-danger);
 }
 .pill.running {
-  background: var(--ui-selected);
-  color: var(--ui-brand);
+  background: var(--ui-info-bg);
+  color: var(--ui-info);
+}
+.pill.queued,
+.pill.warning {
+  background: var(--ui-warning-bg);
+  color: var(--ui-warning);
 }
 .filter-scroll {
   white-space: nowrap;

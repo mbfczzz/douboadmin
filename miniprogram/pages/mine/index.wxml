@@ -18,23 +18,36 @@
       </view>
       <view class="profile-copy">
         <text class="nickname">{{me.profile.data.nickname}}</text>
-        <text class="muted small">{{me.profile.data.bio}}</text>
+        <text wx:if="{{roleLabel}}" class="role-label">{{roleLabel}}</text>
       </view>
       <view class="profile-edit"><text>编辑资料</text><t-icon name="chevron-right" size="16" /></view>
     </view>
+    <text wx:if="{{me.profile.data.bio}}" class="profile-bio">{{me.profile.data.bio}}</text>
+    <view class="statistics">
+      <view data-mode="works" bindtap="menu" aria-role="button" aria-label="查看我的作品"><text>{{me.works}}</text><text>作品</text></view>
+      <view data-mode="tasks" bindtap="menu" aria-role="button" aria-label="查看生成中任务"><text class="accent">{{me.running}}</text><text>生成中</text></view>
+      <view data-mode="favorites" bindtap="menu" aria-role="button" aria-label="查看收藏"><text>{{me.favorites}}</text><text>收藏</text></view>
+    </view>
     <view class="mine-balance"><points-balance /></view>
-    <view wx:for="{{groups}}" wx:for-item="group" wx:key="*this" class="menu-group">
-      <text class="section-title common-heading">{{group}}</text>
-      <view class="menu-list">
-        <block wx:for="{{menus}}" wx:key="mode">
-          <view wx:if="{{item.group===group}}" class="menu" data-mode="{{item.mode}}" bindtap="menu" aria-role="button" aria-label="{{item.label}}" hover-class="card-pressed">
-            <view class="icon-tile"><t-icon name="{{item.icon}}" size="20" /></view>
-            <text class="menu-label">{{item.label}}</text>
-            <text wx:if="{{item.mode==='tasks'&&me.running}}" class="menu-count">{{me.running}}</text>
-            <t-icon name="chevron-right" size="16" />
-          </view>
-        </block>
+    <view class="row works-heading"><text class="section-title">最近作品</text><view class="profile-edit accent" data-mode="works" bindtap="menu">查看全部<t-icon name="chevron-right" size="16" /></view></view>
+    <view wx:if="{{worksError}}" class="error-box" bindtap="load">{{worksError}}</view>
+    <view wx:if="{{jobs.length}}" class="completed-grid">
+      <view wx:for="{{jobs}}" wx:key="id" data-id="{{item.id}}" bindtap="detail" hover-class="card-pressed">
+        <view class="completed-cover">
+          <image wx:if="{{item.thumbnailUrl||(item.input.kind==='image'&&item.result)}}" src="{{item.thumbnailUrl||item.result}}" mode="aspectFill" lazy-load data-id="{{item.id}}" binderror="coverError" />
+          <t-icon wx:else name="{{item.input.kind==='image'?'image':'play-circle'}}" size="32" />
+          <text wx:if="{{item.input.kind!=='image'&&item.input.duration}}" class="completed-duration">{{item.input.duration}} 秒</text>
+        </view>
+        <text class="completed-title">{{item.shortTitle||'未命名作品'}}</text>
+        <text class="work-meta">{{item.kindText}} · {{item.time}}</text>
       </view>
     </view>
+    <view wx:elif="{{!worksError}}" class="empty-work" bindtap="create"><t-icon name="image" size="28" /><text>暂无作品</text><text class="accent">去创作</text></view>
+    <view wx:if="{{me.running}}" class="running-link" data-mode="tasks" bindtap="menu"><t-icon name="time" size="20" /><text>{{me.running}} 个任务生成中</text><text>查看</text><t-icon name="chevron-right" size="16" /></view>
+    <text class="section-title common-heading">常用功能</text>
+    <view class="menu-grid">
+      <view wx:for="{{menus}}" wx:key="mode" class="menu {{item.mode}}" data-mode="{{item.mode}}" bindtap="menu" aria-role="button" aria-label="{{item.label}}" hover-class="card-pressed"><t-icon name="{{item.icon}}" size="24" /><text class="menu-label">{{item.label}}</text></view>
+    </view>
+    <view class="settings-link" data-mode="settings" bindtap="menu"><t-icon name="setting" size="20" /><text>设置</text><t-icon name="chevron-right" size="16" /></view>
   </view>
 </view>

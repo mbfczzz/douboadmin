@@ -163,6 +163,7 @@ Page({
         title: "重置后台密码？",
         content: "原密码会立即失效，需要用新密码重新登录管理后台。",
         confirmText: "重置",
+        confirmColor: "#b42338",
       });
       if (!confirm) return;
     }

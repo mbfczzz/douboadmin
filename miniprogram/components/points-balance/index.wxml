@@ -1,9 +1,14 @@
-<view class="balance {{compact?'compact':''}}">
+<view wx:if="{{compact}}" class="inline-balance" bindtap="balanceTap" aria-role="button">
+  <t-icon name="wallet" size="16" /><text>{{loadError?'余额更新失败，重试':logged?'可用 '+available+' 积分':'登录后查看积分'}}</text><t-icon name="chevron-right" size="12" />
+</view>
+<view wx:else class="balance">
   <view class="balance-copy">
     <text class="label">可用积分</text>
     <text class="amount">{{logged?available:'登录后查看'}}</text>
-    <text wx:if="{{logged&&loaded&&held!=='0'}}" class="note">预留 {{held}} 积分</text>
     <text wx:if="{{loadError}}" class="error" bindtap="reload">{{loadError}}</text>
   </view>
-  <button class="action" bindtap="openWallet"><t-icon name="wallet" size="18" /><text>{{logged&&rechargeEnabled?'微信充值':'我的积分'}}</text></button>
+  <view class="balance-bottom">
+    <view class="note"><t-icon name="lock-on" size="14" /><text>预留 {{held}} 积分</text></view>
+    <button class="action" bindtap="openWallet"><text>我的积分</text><t-icon name="arrow-right" size="18" /></button>
+  </view>
 </view>

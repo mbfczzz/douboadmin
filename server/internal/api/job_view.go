@@ -58,7 +58,7 @@ func (a *Server) presentJob(ctx context.Context, j *core.Job) {
 			j.Result = ""
 		}
 	}
-	if actor, ok := ctx.Value(identityKey).(Identity); ok && actor.Role == "admin" && j.Status == "succeeded" && !j.Deleted && j.Result != "" && a.Media != nil {
+	if actor, ok := ctx.Value(identityKey).(Identity); ok && (actor.Role == "admin" || actor.Role == "user" && actor.ID == j.UserID) && j.Status == "succeeded" && !j.Deleted && j.Result != "" && a.Media != nil {
 		j.ThumbnailURL, _ = a.Media.Thumbnail(ctx, resultRef, j.Input.Kind)
 	}
 	j.Retryable = false

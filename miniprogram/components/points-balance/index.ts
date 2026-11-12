@@ -33,6 +33,10 @@ Component({
     },
   },
   methods: {
+    balanceTap() {
+      if (this.data.loadError) void this.reload();
+      else this.openWallet();
+    },
     start() {
       if (this._visible) return;
       this.stop();

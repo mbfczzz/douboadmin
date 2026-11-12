@@ -27,6 +27,9 @@ import {
   confirmAdditionalPurchase,
 } from "../../services/wallet-checkout";
 Page({
+  explain() {
+    wx.showModal({ title: "积分说明", content: "提交创作时预留积分，生成成功后从预留中结算，明确失败后退回。预留中的积分暂时不可用，最终变动以积分明细为准。", showCancel: false, confirmText: "知道了" });
+  },
   data: walletData,
   revision: 0,
   loadedLedgerPage: 1,

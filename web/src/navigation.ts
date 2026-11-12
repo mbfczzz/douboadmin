@@ -34,7 +34,7 @@ export const pageInfo = {
     ScrollText,
   ],
   users: [
-    "小程序用户",
+    "用户管理",
     "管理微信用户资料、扫码登记开通、使用授权与积分。",
     Users,
   ],

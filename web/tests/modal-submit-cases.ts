@@ -72,7 +72,7 @@ export const submitCases: SubmitCase[] = [
   },
   {
     name: "拒绝登记",
-    nav: "小程序用户",
+    nav: "用户管理",
     tab: "扫码登记",
     open: "拒绝",
     submit: "拒绝",

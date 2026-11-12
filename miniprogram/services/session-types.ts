@@ -10,6 +10,7 @@ export interface PendingLogin {
   reject: (e: Error) => void;
 }
 export interface LoginExchange {
+  phoneCode?: string;
   generation: number;
   mode: string;
   promise: Promise<void>;

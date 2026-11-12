@@ -12,7 +12,7 @@
     /><button class="biz-action" bindtap="search" loading="{{loading}}">
       搜索
     </button></view
-  ><view wx:if="{{!enabled}}" class="biz-error"
+  ><view wx:if="{{!enabled}}" class="biz-note"
     >热门视频暂不可用，可以先使用创作功能。<button
       class="biz-action biz-secondary"
       bindtap="upload"

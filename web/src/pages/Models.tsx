@@ -153,7 +153,7 @@ export default function Models({ notify }: PageProps) {
             <input
               type="search"
               aria-label="搜索模型"
-              placeholder="搜索名称或模型 ID"
+              placeholder="搜索模型名称"
               value={q}
               onChange={(e) => {
                 setQ(e.target.value);

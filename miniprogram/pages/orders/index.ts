@@ -21,12 +21,17 @@ import {
   watchPayments,
 } from "../../services/payment-status";
 Page({
+  copyId(e: WechatMiniprogram.TouchEvent) {
+    const id = e.currentTarget.dataset.id;
+    if (this.data.rows.some((row: Row<Order>) => row.id === id)) wx.setClipboardData({ data: id, fail: error });
+  },
   data: {
     rows: [] as Array<
       Row<Order> & {
         amount: string;
         points: string;
         state: string;
+        tone: string;
         time: string;
         canPay: boolean;
       }
@@ -116,6 +121,7 @@ Page({
             ...r,
             amount: money(r.data.amountFen),
             points: points(r.data.pointsUnits),
+            tone: r.data.status === "paid" ? "succeeded" : r.data.status === "refunding" || awaiting ? "running" : r.data.status === "created" && !expired ? "warning" : "",
             state:
               r.data.status === "created"
                 ? awaiting

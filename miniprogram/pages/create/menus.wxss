@@ -13,7 +13,7 @@
     transform 160ms ease,
     visibility 0s linear 160ms;
   position: absolute;
-  top: calc(100% - 8px);
+  top: calc(100% - 12px);
   left: 14px;
   width: 248px;
   max-width: calc(100% - 28px);
@@ -52,7 +52,7 @@
 }
 .model-menu.menu-up {
   top: auto;
-  bottom: 64px;
+  bottom: 68px;
 }
 /* Name and badges share one line (design: gap 8), description below. */
 .model-title {
@@ -163,12 +163,12 @@
   border-radius: 3px;
 }
 .model-badges .hot {
-  background: var(--ui-danger-bg);
-  color: var(--ui-danger);
+  background: var(--ui-gold-bg);
+  color: var(--ui-gold);
 }
 .model-badges .new {
-  background: var(--ui-selected);
-  color: var(--ui-link);
+  background: var(--ui-info-bg);
+  color: var(--ui-info);
 }
 .model-glyph {
   width: 22px;

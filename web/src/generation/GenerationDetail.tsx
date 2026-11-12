@@ -40,7 +40,7 @@ export default function GenerationDetail({
     done = j && (j.status === "succeeded" || j.status === "failed");
   const params: [string, string][] = j
     ? [
-        ["模型", j.modelName || j.input.model],
+        ["模型", j.modelName || "模型信息暂缺"],
         ...paramLabels
           .map(([key, label]): [string, string] => {
             const v = j.input[key];
@@ -92,7 +92,7 @@ export default function GenerationDetail({
             <div className="detail-tags">
               <Badge state={j.status} />
               <Tag tone="info">{kindNames[j.input.kind] || j.input.kind}</Tag>
-              <Tag tone="accent">{j.modelName || j.input.model}</Tag>
+              <Tag tone="accent">{j.modelName || "模型信息暂缺"}</Tag>
             </div>
             {retrying && !j.error && (
               <section className="gen-warn" aria-label="正在重试">
@@ -152,11 +152,6 @@ export default function GenerationDetail({
                   "未返回"
                 )}
               </Field>
-              {g.execution?.modelKey && (
-                <Field label="上游模型">
-                  <span className="mono">{g.execution.modelKey}</span>
-                </Field>
-              )}
               {g.execution && (
                 <Field label="执行阶段">
                   {phaseNames[g.execution.phase] || g.execution.phase}

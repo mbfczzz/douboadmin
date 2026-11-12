@@ -89,6 +89,7 @@ export interface Input {
   parentId?: string;
 }
 export interface Job {
+  thumbnailUrl?: string;
   costUnits?: number;
   billingState?: string;
   stage?: string;
@@ -140,6 +141,7 @@ export interface Model {
   demo: boolean;
 }
 export interface Config {
+  wechatPhoneLogin?: boolean;
   brandIcon?: string;
   activationRequired?: boolean;
   completionTemplateId?: string;

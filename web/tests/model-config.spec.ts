@@ -22,11 +22,7 @@ const escape = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 async function openModel(page: Page, key: string, part = "基础信息") {
   await page.getByRole("button", { name: "模型管理", exact: true }).click();
   await page.getByLabel("搜索模型").fill(key);
-  const row = page.locator("tbody tr").filter({
-    has: page.locator("small", {
-      hasText: new RegExp("^" + escape(key) + "$"),
-    }),
-  });
+  const row = page.locator("tbody tr").first();
   await row.getByRole("button", { name: part, exact: true }).click();
   return page.getByRole("dialog");
 }

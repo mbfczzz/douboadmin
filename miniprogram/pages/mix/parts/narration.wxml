@@ -17,7 +17,7 @@
       disabled="{{!config.enabled}}"
       data-field="transcribe"
       bindchange="toggle"
-      color="#2563eb" /></view
+      color="#4255c7" /></view
   ><view class="biz-row"
     ><view
       ><text>AI 改写文案</text
@@ -29,7 +29,7 @@
       disabled="{{!config.enabled}}"
       data-field="rewrite"
       bindchange="toggle"
-      color="#2563eb" /></view
+      color="#4255c7" /></view
   ><view class="biz-row"
     ><view
       ><text>AI 配音</text
@@ -41,7 +41,7 @@
       disabled="{{!config.enabled}}"
       data-field="narration"
       bindchange="toggle"
-      color="#2563eb" /></view
+      color="#4255c7" /></view
   ><block wx:if="{{narration}}"
     ><picker range="{{modelNames}}" value="{{modelIndex}}" bindchange="model"
       ><view class="biz-row biz-picker-row"
@@ -65,7 +65,7 @@
       disabled="{{!config.enabled}}"
       data-field="captions"
       bindchange="toggle"
-      color="#2563eb" /></view
+      color="#4255c7" /></view
   ><text wx:if="{{captions}}" class="biz-note"
     >有识别时间轴时沿用时间轴；手动或改写文案按时长分句生成字幕。</text
   ></view

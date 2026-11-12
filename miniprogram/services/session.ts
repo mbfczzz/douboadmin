@@ -79,13 +79,13 @@ export function login(purpose: LoginPurpose = "default"): Promise<void> {
   });
   return promise;
 }
-export async function signIn(mode: "wechat" | "demo" = "wechat") {
+export async function signIn(mode: "wechat" | "demo" = "wechat", phoneCode?: string) {
   const generation = authGeneration;
   if (exchange?.generation === generation) {
-    if (exchange.mode !== mode) throw new Error("请等待当前登录完成");
+    if (exchange.mode !== mode || exchange.phoneCode !== phoneCode) throw new Error("请等待当前登录完成");
     return exchange.promise;
   }
-  const attempt = { generation, mode, promise: Promise.resolve() };
+  const attempt = { generation, mode, phoneCode, promise: Promise.resolve() };
   attempt.promise = (async () => {
     let body: object;
     let endpoint = "/auth/wechat";
@@ -101,7 +101,7 @@ export async function signIn(mode: "wechat" | "demo" = "wechat") {
       }
       if (generation !== authGeneration) throw new AuthCancelledError();
       if (!result?.code) throw new Error("未能获取微信登录凭证，请重试");
-      body = { code: result.code };
+      body = { code: result.code, ...(phoneCode ? { phoneCode } : {}) };
     } else {
       let id = wx.getStorageSync("demoId");
       if (!id) {

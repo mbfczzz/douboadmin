@@ -21,7 +21,7 @@
     <view wx:if="{{childrenError}}" class="biz-error" bindtap="moreChildren">{{childrenError}} · 点击重试</view>
     <view wx:if="{{!children.length&&!childrenLoading&&!childrenError}}" class="biz-card biz-note">还没有下级服务商</view>
     <view wx:for="{{children}}" wx:key="id" class="biz-card provider-child">
-      <view class="provider-title"><text class="biz-list-title">{{item.name}}</text><text class="provider-level {{item.role}}">{{item.roleName}}</text><text wx:if="{{item.status!=='active'}}" class="provider-off">{{item.status==='pending'?'待开通':'已停用'}}</text></view>
+      <view class="provider-title"><text class="biz-list-title">{{item.name}}</text><text class="provider-level {{item.role}}">{{item.roleName}}</text><text wx:if="{{item.status!=='active'}}" class="provider-off pill {{item.status==='pending'?'warning':''}}">{{item.status==='pending'?'待开通':'已停用'}}</text></view>
       <view class="provider-facts">
         <view><text class="biz-label">会员</text><text>{{item.members}}</text></view>
         <view><text class="biz-label">加入</text><text>{{item.date}}</text></view>

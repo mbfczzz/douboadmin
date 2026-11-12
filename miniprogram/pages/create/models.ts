@@ -11,7 +11,7 @@ export function modelChoices(models: Model[], kind: string): ModelChoice[] {
       ...model,
       icon: model.icon && !/^(https?:|\/)/i.test(model.icon) ? model.icon : "",
       label: model.name,
-      description: model.settings?.description || model.key || "",
+      description: model.settings?.description || "",
       estimate: model.settings?.estSeconds
         ? "约 " + model.settings.estSeconds + " 秒"
         : "",
@@ -47,7 +47,6 @@ export function modelSettings(
   return {
     prompt,
     hasPrompt: !!prompt.trim(),
-    ideas: model.settings?.ideas || [],
     maxPromptChars: model.settings?.maxPromptChars || 500,
     ...referenceSettings(model),
     durations,

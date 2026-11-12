@@ -5,14 +5,20 @@ page {
   --ui-border: #d7dee6;
   --ui-text: #202632;
   --ui-muted: #667085;
-  --ui-brand: #2563eb;
+  --ui-brand: #4255c7;
   --ui-accent: var(--ui-brand);
-  --ui-nav: #1d4ed8;
+  --ui-nav: #3445aa;
   --ui-on-brand: #ffffff;
-  --ui-primary: #2563eb;
-  /* Approved Pixso light theme; see docs/ui-alignment.md. */
-  --ui-link: #1d4ed8;
-  --ui-selected: #e8effc;
+  --ui-primary: #4255c7;
+  /* Creative workspace: indigo actions, teal activity, amber credit. */
+  --ui-link: #3445aa;
+  --ui-selected: #eef0ff;
+  --ui-gold: #825718;
+  --ui-gold-muted: #7e6b49;
+  --ui-gold-bg: #fff8e8;
+  --ui-gold-border: #e7d1a4;
+  --ui-info: #0b7269;
+  --ui-info-bg: #e9f6f3;
   --ui-danger: #b42338;
   --ui-danger-bg: #fff0f2;
   --ui-danger-border: #ecc4cb;
@@ -35,9 +41,12 @@ page {
     sans-serif;
   font-size: var(--ui-font-body);
   --td-brand-color: var(--ui-brand);
-  --td-brand-color-active: #1d4ed8;
-  --td-button-primary-active-bg-color: #1d4ed8;
-  --td-button-primary-active-border-color: #1d4ed8;
+  --td-error-color: var(--ui-danger);
+  --td-success-color: var(--ui-success);
+  --td-warning-color: var(--ui-warning);
+  --td-brand-color-active: #3445aa;
+  --td-button-primary-active-bg-color: #3445aa;
+  --td-button-primary-active-border-color: #3445aa;
   --td-brand-color-disabled: var(--ui-disabled);
   --td-text-color-primary: var(--ui-text);
   --td-text-color-secondary: var(--ui-muted);

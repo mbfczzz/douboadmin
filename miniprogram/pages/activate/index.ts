@@ -18,6 +18,7 @@ import {
 import type { AccessStatus } from "../../services/access";
 import { trackVisit } from "../../services/analytics";
 import type { Config } from "../../services/types";
+import { supportsPhoneLogin, authorizedPhoneCode } from "../../services/phone-login";
 import {
   registerState,
   prefill,
@@ -35,6 +36,7 @@ Page({
     code: "",
     loadError: "",
     wechatReady: false,
+    phoneReady: false,
     status: null as AccessStatus | null,
     ...registerState,
   },
@@ -69,7 +71,7 @@ Page({
           false,
         );
         if (revision === this.revision)
-          this.setData({ brandIcon: media(c.brandIcon || "/api/brand-icon"), wechatReady: c.wechatLogin, status: null });
+          this.setData({ brandIcon: media(c.brandIcon || "/api/brand-icon"), wechatReady: c.wechatLogin, phoneReady: !!c.wechatPhoneLogin && supportsPhoneLogin(), status: null });
         return;
       }
       const status = await accessStatus();
@@ -105,10 +107,18 @@ Page({
     if (status?.active) this.enter();
   },
   async login() {
+    await this.authenticate();
+  },
+  async phoneLogin(e: WechatMiniprogram.CustomEvent) {
+    if (this.destroyed || this.data.busy) return;
+    const code = authorizedPhoneCode(e);
+    if (code) await this.authenticate(code);
+  },
+  async authenticate(phoneCode?: string) {
     if (this.data.busy) return;
     this.setData({ busy: true, loadError: "" });
     try {
-      await signIn();
+      await signIn("wechat", phoneCode);
       if (!this.destroyed) await this.load();
     } catch (e) {
       if (!this.destroyed && !(e instanceof AuthCancelledError)) {

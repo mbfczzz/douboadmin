@@ -104,7 +104,7 @@ test("existing user profile requires approval and cancellation leaves the editor
 }) => {
   await login(page);
   await surfaceFixtures(page);
-  await page.getByRole("button", { name: "小程序用户", exact: true }).click();
+  await page.getByRole("button", { name: "用户管理", exact: true }).click();
   await page.getByRole("button", { name: "编辑", exact: true }).first().click();
   const editor = page.getByRole("dialog", { name: "编辑用户资料" });
   await editor.getByLabel("昵称", { exact: true }).fill("保留的资料草稿");

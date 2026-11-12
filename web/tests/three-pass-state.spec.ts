@@ -7,7 +7,7 @@ test("pending point adjustment locks the submitted fields and preserves failed i
 }) => {
   await login(page);
   await surfaceFixtures(page);
-  await page.getByRole("button", { name: "小程序用户", exact: true }).click();
+  await page.getByRole("button", { name: "用户管理", exact: true }).click();
   await page.getByRole("button", { name: "积分", exact: true }).click();
   const dialog = page.getByRole("dialog"),
     amount = dialog.getByLabel("积分变动（负数为扣减）"),

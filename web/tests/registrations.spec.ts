@@ -24,7 +24,7 @@ async function decisions(page: Page) {
 test.beforeEach(async ({ page }) => {
   await mockLogin(page);
   await surfaceFixtures(page, []);
-  await page.getByRole("button", { name: "小程序用户", exact: true }).click();
+  await page.getByRole("button", { name: "用户管理", exact: true }).click();
   await page.getByRole("tab", { name: "扫码登记", exact: true }).click();
 });
 

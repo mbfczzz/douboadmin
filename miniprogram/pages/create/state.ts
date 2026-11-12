@@ -2,7 +2,6 @@ import type { Model, Row, Asset } from "../../services/types";
 import type { ModelChoice } from "./editor-types";
 
 export const creationData = {
-  ideas: [] as string[],
   maxPromptChars: 500,
   maxReferences: 0,
   kind: "video",

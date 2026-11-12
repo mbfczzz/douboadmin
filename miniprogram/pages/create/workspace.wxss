@@ -1,6 +1,6 @@
 .workspace {
   position: relative;
-  height: 289px;
+  height: 320px;
   border: 1px solid var(--ui-border);
   border-radius: var(--ui-radius-card);
   background: var(--ui-surface);
@@ -91,44 +91,54 @@
   color: var(--ui-muted);
   line-height: 1.6;
 }
+.editor-meta {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 72px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  border-top: 1px solid var(--ui-border);
+}
+.editor-balance {
+  flex: 1;
+  min-width: 0;
+}
 .count {
   position: absolute;
   right: 16px;
-  bottom: 72px;
+  bottom: 124px;
   font-size: 12px;
   color: var(--ui-muted);
 }
 .quote-note {
-  position: absolute;
-  left: 16px;
-  right: 76px;
-  bottom: 64px;
-  min-height: 32px;
+  max-width: 45%;
+  min-height: 44px;
   display: flex;
   align-items: center;
-  font-size: 13px;
+  justify-content: flex-end;
+  text-align: right;
+  font-size: 12px;
   font-weight: 500;
-  line-height: 20px;
-  color: var(--ui-muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.quote-note.has-cost {
-  color: var(--ui-link);
+  line-height: 18px;
+  color: var(--ui-text);
+  overflow-wrap: anywhere;
+  word-break: keep-all;
 }
 .quote-note.quote-retry {
-  color: var(--ui-muted);
+  color: var(--ui-warning);
 }
 .workspace-foot {
   position: absolute;
-  bottom: 14px;
-  left: 14px;
-  right: 14px;
+  bottom: 16px;
+  left: 16px;
+  right: 16px;
   display: flex;
   align-items: center;
   gap: 8px;
-  height: 44px;
+  min-height: 48px;
 }
 .model-select {
   display: flex;
@@ -137,37 +147,41 @@
   /* Real model names are longer than the designed placeholder. */
   flex: 1 1 auto;
   min-width: 0;
-  height: 44px;
-  padding: 0 12px;
+  height: 48px;
+  padding: 0 8px;
   border-radius: 10px;
   background: var(--ui-field);
   border: 1px solid var(--ui-border);
   font-size: 13px;
   font-weight: 500;
 }
-.model-name {
+.model-copy {
   min-width: 0;
   flex: 1;
+}
+.model-name {
+  display: block;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
 }
-/* The summary ("1080p · 5秒") always shows in full; the model name gives
-   way with an ellipsis (its full name is in the dropdown). */
+/* The model yields width; estimated cost wraps instead of hiding digits. */
 .spec {
-  flex: 0 0 auto;
+  display: block;
+  margin-top: 2px;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
-  text-align: center;
+  color: var(--ui-muted);
   white-space: nowrap;
   font-size: 12px;
 }
 .generate-button {
-  width: 100%;
+  width: 80px;
+  flex-shrink: 0;
   min-height: 48px;
   line-height: 24px;
-  padding: 12px;
+  padding: 12px 4px;
   margin: 0;
   border-radius: var(--ui-radius-control);
   background-color: var(--ui-primary);
@@ -179,14 +193,20 @@
   background-color: var(--ui-disabled);
   color: var(--ui-disabled-text);
 }
-.workspace .generate-button {
-  width: 104px;
-  flex-shrink: 0;
-  padding: 10px 6px;
-  min-height: 44px;
+.generate-button .button-content {
+  gap: 4px;
+  white-space: nowrap;
 }
-.expanded .spec {
-  display: none;
+@media (max-width: 350px) {
+  .workspace-foot {
+    gap: 6px;
+  }
+  .generate-button {
+    width: 68px;
+  }
+  .model-select {
+    gap: 4px;
+  }
 }
 .workspace.expanded {
   position: fixed;
@@ -199,11 +219,5 @@
   box-shadow: 0 0 0 100vmax #20263299;
 }
 .expanded .prompt-input {
-  height: calc(100% - 188px);
-}
-@media (max-width: 350px) {
-  .model-select {
-    gap: 4px;
-    padding: 0 6px;
-  }
+  height: calc(100% - 242px);
 }

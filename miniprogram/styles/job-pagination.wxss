@@ -19,5 +19,6 @@
   background: var(--ui-field);
 }
 .job-pagination button[disabled] {
-  color: var(--ui-muted);
+  color: var(--ui-disabled-text);
+  background: var(--ui-disabled);
 }

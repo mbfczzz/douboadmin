@@ -7,34 +7,40 @@ import {
   hasSession,
   login,
   AuthCancelledError,
+  jobView,
+  openTask,
+  openTab,
+  sessionUserId,
 } from "../../utils/api";
 import type { Me } from "../../services/types";
+import { jobPage } from "../../services/job-pages";
 
 const baseMenus = [
-  { icon: "order", label: "充值订单", mode: "orders", group: "账户与服务" },
-  { icon: "image", label: "我的作品", mode: "works", group: "创作记录" },
-  { icon: "heart", label: "我的收藏", mode: "favorites", group: "创作记录" },
-  { icon: "history", label: "生成记录", mode: "tasks", group: "创作记录" },
-  { icon: "notification", label: "消息通知", mode: "notifications", group: "帮助与设置" },
-  { icon: "chat", label: "帮助与反馈", mode: "help", group: "帮助与设置" },
-  { icon: "setting", label: "设置", mode: "settings", group: "帮助与设置" },
+  { icon: "order", label: "充值订单", mode: "orders" },
+  { icon: "heart", label: "我的收藏", mode: "favorites" },
+  { icon: "history", label: "生成记录", mode: "tasks" },
+  { icon: "notification", label: "消息通知", mode: "notifications" },
+  { icon: "chat", label: "帮助与反馈", mode: "help" },
 ];
 // Providers manage their codes in 服务商中心; members share their 推广码.
 const roleMenus: Record<string, typeof baseMenus[number]> =
   {
-    provider: { icon: "shop", label: "服务商中心", mode: "provider", group: "账户与服务" },
-    member: { icon: "qrcode", label: "我的推广码", mode: "promo", group: "账户与服务" },
+    provider: { icon: "shop", label: "服务商中心", mode: "provider" },
+    member: { icon: "qrcode", label: "我的推广码", mode: "promo" },
   };
 Page({
   data: {
     me: null as Me | null,
-    groups: ["账户与服务", "创作记录", "帮助与设置"],
+    jobs: [] as ReturnType<typeof jobView>[],
+    worksError: "",
+    roleLabel: "",
     loading: true,
     loadError: "",
     menus: baseMenus,
   },
   loadVersion: 0,
   visible: true,
+  owner: "",
   refreshTimer: undefined as ReturnType<typeof setTimeout> | undefined,
   onShow() {
     this.visible = true;
@@ -48,11 +54,11 @@ Page({
     const version = this.loadVersion;
     if (!hasSession()) return this.setData({ menus: baseMenus });
     try {
-      const { kind } = await request<{ kind: string }>("/me/role");
+      const { kind, label } = await request<{ kind: string; label: string }>("/me/role");
       if (version !== this.loadVersion || !hasSession()) return;
       const extra =
         roleMenus[["branch", "s1", "s2"].includes(kind) ? "provider" : kind];
-      this.setData({ menus: extra ? [extra, ...baseMenus] : baseMenus });
+      this.setData({ menus: extra ? [...baseMenus.slice(0, 3), extra, ...baseMenus.slice(3)] : baseMenus, roleLabel: label || "" });
     } catch {
       // keep the menu as it is
     }
@@ -69,18 +75,27 @@ Page({
   },
   async load() {
     const version = ++this.loadVersion;
+    const owner = sessionUserId();
+    if (owner !== this.owner) {
+      this.owner = owner;
+      this.setData({ me: null, jobs: [], worksError: "", roleLabel: "", menus: baseMenus, loading: true });
+    }
     if (this.refreshTimer !== undefined) clearTimeout(this.refreshTimer);
     if (!hasSession()) {
       this.setData({ me: null, loading: false, loadError: "" });
       return;
     }
     try {
-      const me = await request<Me>("/me");
+      const [me, recent] = await Promise.all([
+        request<Me>("/me"), jobPage(1, "&works=true", 2).catch(() => null),
+      ]);
       if (version !== this.loadVersion) return;
       if (me.profile.data.avatarUrl)
         me.profile.data.avatarUrl = media(me.profile.data.avatarUrl);
       this.setData({
         me,
+        jobs: recent ? recent.items.filter(j => j.status === "succeeded" && !j.deleted).slice(0, 2).map(jobView) : this.data.jobs,
+        worksError: recent ? "" : "作品暂时无法加载，点击重试",
         loading: false,
         loadError: "",
       });
@@ -118,5 +133,15 @@ Page({
   },
   edit() {
     if (this.data.me) openPage(this, { url: "/pages/profile/index" });
+  },
+  detail(e: WechatMiniprogram.TouchEvent) {
+    openTask(e.currentTarget.dataset.id, this);
+  },
+  coverError(e: WechatMiniprogram.CustomEvent) {
+    const i = this.data.jobs.findIndex((j: { id: string }) => j.id === e.currentTarget.dataset.id);
+    if (i >= 0) this.setData({ [`jobs[${i}].thumbnailUrl`]: "", [`jobs[${i}].result`]: "" });
+  },
+  create() {
+    openTab(this, "/pages/create/index");
   },
 });

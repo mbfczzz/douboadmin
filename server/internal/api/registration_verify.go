@@ -33,18 +33,27 @@ func (a *Server) register(w http.ResponseWriter, r *http.Request) {
 	case !mainlandPhone.MatchString(phone):
 		fail(w, 400, "请输入 11 位手机号")
 		return
-	case phoneRequired && !smsDigits.MatchString(v.Code):
-		fail(w, 400, "请输入 6 位验证码")
-		return
 	}
 	if !a.allowAll(w, r, "验证过于频繁，请稍后再试", limit{"sms-verify:" + user, 10}) {
 		return
 	}
 	var problem string
+	verified := false
 	var e error
-	if phoneRequired {
+	if v.Code == "" {
+		verified, e = a.registerVerifiedPhone(r.Context(), user, name, phone)
+	}
+	if e != nil {
+		dbError(w, e)
+		return
+	}
+	if !verified && phoneRequired && !smsDigits.MatchString(v.Code) {
+		fail(w, 400, "请输入 6 位验证码")
+		return
+	}
+	if !verified && phoneRequired {
 		problem, e = a.verifyAndRegister(r.Context(), user, name, phone, v.Code)
-	} else {
+	} else if !verified {
 		problem, e = a.registerWithoutSMS(r.Context(), user, name, phone)
 	}
 	if e != nil {

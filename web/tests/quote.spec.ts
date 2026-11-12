@@ -39,7 +39,7 @@ test("admin adjusts points with an immutable visible ledger", async ({
   const id = process.env.QUOTE_TEST_USER_ID;
   test.skip(!id, "Provide a local temporary QA user id");
   await login(page);
-  await page.getByRole("button", { name: "小程序用户", exact: true }).click();
+  await page.getByRole("button", { name: "用户管理", exact: true }).click();
   await page.getByLabel("搜索用户").fill(id!);
   await page
     .locator("tbody tr")

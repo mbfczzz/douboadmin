@@ -12,7 +12,7 @@
         ><switch
           checked="{{row.data.inAppNotifications}}"
           disabled="{{busy}}"
-          color="#2563eb"
+          color="#4255c7"
           data-field="inAppNotifications"
           bindchange="change" /></view
       ><view class="biz-row"
@@ -20,7 +20,7 @@
         ><switch
           checked="{{row.data.autoplay}}"
           disabled="{{busy}}"
-          color="#2563eb"
+          color="#4255c7"
           data-field="autoplay"
           bindchange="change" /></view
       ><view class="biz-row"
@@ -28,7 +28,7 @@
         ><switch
           checked="{{row.data.analytics}}"
           disabled="{{busy}}"
-          color="#2563eb"
+          color="#4255c7"
           data-field="analytics"
           bindchange="change" /></view
       ><text class="biz-note"

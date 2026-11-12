@@ -14,7 +14,7 @@ test.skip(
 
 // The registration row of one mini-program user on the 小程序用户 page.
 async function registration(page: Page, userId: string) {
-  await page.getByRole("button", { name: "小程序用户", exact: true }).click();
+  await page.getByRole("button", { name: "用户管理", exact: true }).click();
   await page.getByRole("tab", { name: "扫码登记", exact: true }).click();
   const section = page.getByRole("region", { name: "扫码登记" });
   await section.getByPlaceholder("搜索姓名、手机号或用户编号").fill(userId);

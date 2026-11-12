@@ -28,8 +28,8 @@
 .provider-level {
   padding: 1px 8px;
   border-radius: 6px;
-  background: var(--ui-selected);
-  color: var(--ui-link);
+  background: var(--ui-info-bg);
+  color: var(--ui-info);
   font-size: 12px;
   line-height: 18px;
 }
@@ -55,7 +55,7 @@
   padding: 4px 0;
 }
 .provider-tabs .on {
-  color: var(--ui-text);
+  color: var(--ui-link);
   font-weight: 600;
 }
 .provider-qr {
@@ -102,10 +102,6 @@
 }
 .provider-off {
   padding: 1px 6px;
-  border-radius: 4px;
-  background: var(--ui-warning-bg);
-  color: var(--ui-warning);
-  font-size: 12px;
 }
 .provider-facts {
   display: flex;

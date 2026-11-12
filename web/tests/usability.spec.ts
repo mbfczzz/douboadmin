@@ -38,12 +38,12 @@ test("page location survives reload, supports history and resets scroll", async 
   await expect(modelTable).toBeInViewport();
   expect((await modelTable.boundingBox())!.y).toBeGreaterThanOrEqual(0);
   await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-  await page.getByRole("button", { name: "小程序用户", exact: true }).click();
+  await page.getByRole("button", { name: "用户管理", exact: true }).click();
   await expect(page).toHaveURL(/#users$/);
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
   await page.reload();
   await expect(
-    page.getByRole("heading", { name: "小程序用户", exact: true }),
+    page.getByRole("heading", { name: "用户管理", exact: true }),
   ).toBeVisible();
   await page.goBack();
   await expect(
@@ -51,7 +51,7 @@ test("page location survives reload, supports history and resets scroll", async 
   ).toBeVisible();
   await page.goForward();
   await expect(
-    page.getByRole("heading", { name: "小程序用户", exact: true }),
+    page.getByRole("heading", { name: "用户管理", exact: true }),
   ).toBeVisible();
 });
 
@@ -93,7 +93,7 @@ test("mobile navigation closes accessibly and keeps page actions available", asy
     page.getByRole("heading", { name: "服务商列表", exact: true }),
   ).toBeVisible();
   await menu.click();
-  await drawer.getByRole("button", { name: "小程序用户", exact: true }).click();
+  await drawer.getByRole("button", { name: "用户管理", exact: true }).click();
   await expect(page.getByLabel("搜索用户")).toBeVisible();
   await menu.click();
   await page.setViewportSize({ width: 1440, height: 900 });
@@ -128,7 +128,7 @@ test("failed lists never claim to be empty and polling preserves table position"
           },
     );
   });
-  await page.getByRole("button", { name: "小程序用户", exact: true }).click();
+  await page.getByRole("button", { name: "用户管理", exact: true }).click();
   await expect(page.getByRole("alert")).toBeVisible();
   await expect(page.getByText("暂无用户", { exact: true })).toHaveCount(0);
   await expect(page.getByText("共 0 条", { exact: true })).toHaveCount(0);
@@ -161,7 +161,7 @@ test("local filters return to page one and single page lists hide useless contro
   await page.route(usersList, (route) =>
     route.fulfill({ json: usersPage(route.request().url(), users) }),
   );
-  await page.getByRole("button", { name: "小程序用户", exact: true }).click();
+  await page.getByRole("button", { name: "用户管理", exact: true }).click();
   const userTable = page.locator(".table-scroll");
   await expect(page.getByText("user-0", { exact: true })).toBeVisible();
   // The page scrolls (no inner box); paging brings the list top back.
@@ -192,7 +192,7 @@ test("browser back first dismisses the mobile drawer and unlocks the page", asyn
   const menu = page.getByRole("button", { name: "切换菜单", exact: true });
   const drawer = page.getByRole("dialog", { name: "工作空间导航" });
   await menu.click();
-  await drawer.getByRole("button", { name: "小程序用户", exact: true }).click();
+  await drawer.getByRole("button", { name: "用户管理", exact: true }).click();
   await expect(page).toHaveURL(/#users$/);
   await menu.click();
   await expect(drawer).toBeVisible();

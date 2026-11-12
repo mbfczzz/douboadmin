@@ -165,16 +165,6 @@ Page({
     });
     chooseMention(this, e.detail.cursor ?? e.detail.value.length);
   },
-  useExample(e?: WechatMiniprogram.TouchEvent) {
-    if (this.data.prompt.trim() || this.data.busy) return;
-    const prompt =
-      e?.currentTarget.dataset.value ||
-      this.data.ideas[0] ||
-      (this.data.kind === "image"
-        ? "一瓶香水放在窗边，阳光穿过瓶身，背景是柔和虚化的绿植，清新的产品摄影。"
-        : "一瓶香水放在窗边，暖阳穿过瓶身，镜头缓缓推进，背景绿植柔和虚化。");
-    this.setData({ prompt, hasPrompt: true });
-  },
   chooseResolution(e: WechatMiniprogram.TouchEvent) {
     if (this.data.modelsLoading || this.data.busy) return;
     this.setData({ resolution: e.currentTarget.dataset.value });

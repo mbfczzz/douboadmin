@@ -22,7 +22,7 @@ test("admin accounts and mini users have separate management controls", async ({
   await expect(account.getByLabel("初始密码")).toBeVisible();
   await account.getByRole("button", { name: "关闭", exact: true }).click();
 
-  await page.getByRole("button", { name: "小程序用户", exact: true }).click();
+  await page.getByRole("button", { name: "用户管理", exact: true }).click();
   // Each user action has its own button in the row and its own small dialog.
   // The 扫码登记 table sits above the user list; take a user row.
   const row = page

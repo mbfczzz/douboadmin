@@ -9,6 +9,7 @@ export interface AccessStatus {
   profileRequired?: boolean;
   // Missing on older APIs: keep SMS validation unless explicitly disabled.
   smsRequired?: boolean;
+  phoneVerified?: boolean;
   name?: string;
   phone?: string;
 }

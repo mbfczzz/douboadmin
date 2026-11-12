@@ -13,7 +13,7 @@ const MaxBody = 16 << 10
 
 // Field names whose values never reach the log (matched case-insensitively
 // against the whole key, so "description" is not mistaken for a secret).
-var secretKey = regexp.MustCompile(`(?i)^(password|passwd|newpassword|current|next|token|accesstoken|refreshtoken|secret|appsecret|apikey|api_key|privatekey|private_key|sessionkey|session_key|paysig|pay_sig|signature|sign|apiv3key|mchkey|aeskey|encodingaeskey|cookie|authorization|debugcode)$`)
+var secretKey = regexp.MustCompile(`(?i)^(password|passwd|newpassword|current|next|token|accesstoken|refreshtoken|secret|appsecret|apikey|api_key|privatekey|private_key|sessionkey|session_key|paysig|pay_sig|signature|sign|apiv3key|mchkey|aeskey|encodingaeskey|cookie|authorization|debugcode|phonecode)$`)
 
 // Setting names such as WECHAT_APP_SECRET, RELAY_API_KEY or *_TOKEN.
 var secretPart = regexp.MustCompile(`(?i)(secret|password|private_?key|api_?key|app_?key|aes_?key|mch_?key|v3_?key|access_?key|_token$)`)

@@ -20,6 +20,7 @@ export function ledgerView(row: Row<Ledger>) {
   const entry = row.data,
     settling = entry.kind === "job_charge" || entry.kind === "refund_complete";
   return {
+    icon: entry.kind === "topup" ? "arrow-down-left" : entry.kind.includes("hold") ? "lock-on" : entry.kind.includes("release") || entry.kind.includes("refund") ? "rollback" : entry.kind === "admin_adjust" ? "setting" : "image",
     id: row.id,
     title: labels[entry.kind] || entry.kind,
     note:

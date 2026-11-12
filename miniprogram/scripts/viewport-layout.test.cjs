@@ -37,12 +37,12 @@ function menuFixture(height, bottom, count = 20, safeBottom = 0) {
 }
 
 test("long model menus flip upward on short screens and stay inside the viewport", () => {
-  const f = menuFixture(568, 438);
+  const f = menuFixture(568, 500);
   f.page.showModels();
   f.measure();
   assert.equal(f.page.data.modelMenuUp, true);
-  assert.equal(f.page.data.modelMenuHeight, 298);
-  assert.ok(438 - 64 - f.page.data.modelMenuHeight >= 76);
+  assert.equal(f.page.data.modelMenuHeight, 320);
+  assert.ok(500 - 68 - f.page.data.modelMenuHeight >= 76);
 });
 
 test("a roomy screen retains the designed downward dropdown", () => {
@@ -54,16 +54,16 @@ test("a roomy screen retains the designed downward dropdown", () => {
 });
 
 test("model menus reserve the custom tab bar as well as the home indicator", () => {
-  const f = menuFixture(844, 450, 20, 34);
+  const f = menuFixture(844, 580, 20, 34);
   f.page.showModels();
   f.measure();
   assert.equal(f.page.data.modelMenuUp, true);
-  assert.ok(450 - 64 - f.page.data.modelMenuHeight >= 76);
+  assert.ok(580 - 68 - f.page.data.modelMenuHeight >= 76);
   const down = menuFixture(844, 420, 20, 34);
   down.page.showModels();
   down.measure();
   assert.equal(down.page.data.modelMenuUp, false);
-  assert.ok(420 - 8 + down.page.data.modelMenuHeight <= 844 - 34 - 61 - 10);
+  assert.ok(420 - 12 + down.page.data.modelMenuHeight <= 844 - 34 - 70 - 12);
 });
 
 test("late measurement cannot reopen a dismissed or hidden menu", () => {

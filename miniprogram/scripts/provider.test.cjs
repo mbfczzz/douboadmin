@@ -160,7 +160,7 @@ test("我的 shows 服务商中心 to providers and 我的推广码 to members",
     const page = h.page("mine");
     h.api.request = async (path) => (path === "/me/role" ? { kind } : []);
     await page.loadIdentity();
-    assert.equal(page.data.menus[0].mode === mode, mode !== "", kind || "none");
+    assert.equal(page.data.menus.some(item => item.mode === mode), mode !== "", kind || "none");
   }
 });
 

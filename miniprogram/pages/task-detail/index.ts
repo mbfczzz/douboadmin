@@ -241,6 +241,7 @@ Page({
       title: "删除作品",
       content: "删除后作品不再展示，分享链接会失效，订单和积分记录会保留。",
       confirmText: "删除",
+      confirmColor: "#b42338",
     });
     if (!answer.confirm) return;
     this.setData({ busy: true });

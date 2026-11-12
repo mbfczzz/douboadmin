@@ -14,14 +14,19 @@ func (a *Server) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var v struct {
-		Code   string `json:"code"`
-		DemoID string `json:"demoId"`
+		Code      string `json:"code"`
+		DemoID    string `json:"demoId"`
+		PhoneCode string `json:"phoneCode"`
 	}
 	if !decode(w, r, &v) {
 		return
 	}
 	if (v.Code == "") == (v.DemoID == "") {
 		fail(w, 400, "请提供微信登录凭证")
+		return
+	}
+	if len(v.PhoneCode) > 256 || v.PhoneCode != "" && v.DemoID != "" {
+		fail(w, 400, "手机号授权参数无效")
 		return
 	}
 	id, provider := "", "wechat"
@@ -78,6 +83,22 @@ func (a *Server) login(w http.ResponseWriter, r *http.Request) {
 	} else if disabled {
 		fail(w, 403, "账号已停用，请联系管理员")
 		return
+	}
+	if v.PhoneCode != "" {
+		phone, err := a.WeChat.Phone(r.Context(), v.PhoneCode)
+		if err != nil || !mainlandPhone.MatchString(phone) {
+			fail(w, 400, "手机号授权失败，请重新授权或使用其他手机号登录")
+			return
+		}
+		problem, err := a.bindLoginPhone(r.Context(), id, phone)
+		if err != nil {
+			dbError(w, err)
+			return
+		}
+		if problem != "" {
+			fail(w, 409, problem)
+			return
+		}
 	}
 	token, err := a.Sessions.Create(r.Context(), id, "user")
 	if err != nil {

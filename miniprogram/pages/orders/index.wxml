@@ -1,50 +1,32 @@
-<nav-bar title="充值订单" back /><view
-  class="subpage"
->
-  <view wx:if="{{needsLogin}}" class="biz-empty"
-    >登录后查看充值订单<button class="biz-action" bindtap="signIn">
-      去登录
-    </button></view
-  >
-  <view wx:if="{{loadError}}" class="biz-error" bindtap="load"
-    >{{loadError}} · 重试</view
-  >
+<nav-bar title="充值订单" back />
+<view class="subpage orders-page">
+  <view wx:if="{{needsLogin}}" class="biz-empty">登录后查看充值订单<button class="biz-action" bindtap="signIn">去登录</button></view>
+  <view wx:if="{{loadError}}" class="biz-error" bindtap="load">{{loadError}} · 重试</view>
+  <view wx:if="{{!needsLogin}}" class="orders-heading">
+    <view class="row"><text class="biz-heading">充值记录</text><text class="biz-small">共 {{total}} 笔</text></view>
+    <text class="biz-small">查看支付进度与积分到账结果</text>
+  </view>
   <view wx:if="{{loading&&!needsLogin&&!rows.length}}" class="biz-empty">正在加载充值订单…</view>
-  <view wx:elif="{{!needsLogin&&!loadError&&!rows.length}}" class="biz-empty"
-    >暂无充值订单</view
-  >
-  <view wx:for="{{rows}}" wx:key="id" class="biz-card"
-    ><view class="row biz-card-head"
-      ><text class="biz-heading">{{item.points}} 积分</text
-      ><text class="order-state {{item.data.status}}">{{item.state}}</text></view
-    ><view class="row order-meta"
-      ><text class="order-amount">¥{{item.amount}}</text
-      ><text class="biz-small">{{item.time}}</text></view
-    ><text class="biz-small biz-record-meta" selectable>订单号 {{item.id}}</text
-    ><text wx:if="{{item.data.status==='created'&&item.data.virtual.issued}}" class="biz-note">此支付单不能再次拉起支付。若已取消，可返回积分页重新购买；已付款请先查支付结果。</text
-    ><view wx:if="{{item.data.status==='created'}}" class="biz-pair"
-      ><view
-        ><button
-          class="biz-action biz-secondary"
-          disabled="{{busy}}"
-          data-id="{{item.id}}"
-          bindtap="refresh"
-        >
-          查支付结果
-        </button></view
-      ><view wx:if="{{item.canPay}}"
-        ><button
-          class="biz-action"
-          loading="{{busy===item.id}}"
-          disabled="{{busy}}"
-          data-id="{{item.id}}"
-          bindtap="pay"
-        >
-          继续支付
-        </button></view
-      ></view
-    ></view
-  >
+  <view wx:elif="{{!needsLogin&&!loadError&&!rows.length}}" class="biz-empty"><t-icon name="order" size="32" /><text>暂无充值订单</text></view>
+  <view wx:for="{{rows}}" wx:key="id" class="biz-card order-card">
+    <view class="order-head">
+      <view class="icon-tile"><t-icon name="{{item.data.status==='refunded'?'rollback':'wallet'}}" size="22" /></view>
+      <view class="order-title"><text>{{item.data.virtual.productName||'积分充值'}}</text><text class="biz-small">{{item.data.channel==='wechat_virtual'?'虚拟支付':'微信支付'}}</text></view>
+      <text class="order-state pill {{item.tone}}">{{item.state}}</text>
+    </view>
+    <view class="order-values {{item.amount.length>7||item.points.length>8?'long-values':''}}">
+      <view><text class="biz-small">订单金额</text><text class="order-amount">¥{{item.amount}}</text></view>
+      <view><text class="biz-small">购买积分</text><text class="order-amount">{{item.points}}<text class="order-unit">积分</text></text></view>
+    </view>
+    <view class="order-meta"><t-icon name="time" size="16" /><text>{{item.time}}</text></view>
+    <view class="order-id" data-id="{{item.id}}" bindtap="copyId" aria-role="button" aria-label="{{'复制订单号'+item.id}}"><text>订单号</text><text class="id-value">{{item.id}}</text><t-icon name="copy" size="16" /></view>
+    <view wx:if="{{item.data.status==='paid'||item.data.status==='refunded'}}" class="order-result {{item.data.status}}"><t-icon name="{{item.data.status==='paid'?'check-circle':'rollback'}}" size="16" /><text>{{item.data.status==='paid'?'积分已到账':'退款已完成'}}</text></view>
+    <text wx:if="{{item.data.status==='created'&&item.data.virtual.issued}}" class="biz-note">此支付单不能再次拉起支付。若已取消，可返回积分页重新购买；已付款请先查支付结果。</text>
+    <view wx:if="{{item.data.status==='created'}}" class="biz-pair">
+      <view><button class="biz-action biz-secondary" disabled="{{busy}}" data-id="{{item.id}}" bindtap="refresh"><view class="button-content"><t-icon name="refresh" size="16" /><text>查支付结果</text></view></button></view>
+      <view wx:if="{{item.canPay}}"><button class="biz-action" loading="{{busy===item.id}}" disabled="{{busy}}" data-id="{{item.id}}" bindtap="pay"><view class="button-content"><t-icon name="arrow-right" size="16" /><text>继续支付</text></view></button></view>
+    </view>
+  </view>
   <view wx:if="{{!needsLogin&&pages>1}}" class="biz-pair">
     <view><button class="biz-action biz-secondary" disabled="{{loading||busy||page<=1}}" data-step="-1" bindtap="changePage">上一页</button></view>
     <view><button class="biz-action biz-secondary" disabled="{{loading||busy||page>=pages}}" data-step="1" bindtap="changePage">下一页</button></view>

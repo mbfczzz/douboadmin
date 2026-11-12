@@ -9,7 +9,7 @@
       bindtap="mode"
       hover-class="mode-tab-pressed"
     >
-      生成视频
+      <t-icon name="video-camera" size="18" />生成视频
     </view>
     <view
       class="mode-tab {{kind==='image'?'active':''}}"
@@ -19,7 +19,7 @@
       bindtap="mode"
       hover-class="mode-tab-pressed"
     >
-      生成图片
+      <t-icon name="image" size="18" />生成图片
     </view>
   </view>
   <view wx:if="{{modelError}}" class="error-box" bindtap="loadModels">{{modelError}}</view>
@@ -68,22 +68,22 @@
         placeholder="{{kind==='video'?videoPlaceholder:imagePlaceholder}}"
         placeholder-class="prompt-placeholder"
         bindinput="input"
-        cursor-spacing="100"
+        cursor-spacing="120"
         fixed="{{expanded}}"
       />
-      <view class="quote-note {{quoteUnits>0?'has-cost':''}} {{quoteError?'quote-retry':''}}" bindtap="retryEstimate" aria-role="{{quoteError?'button':'text'}}" aria-label="{{quoteText}}">{{quoteText}}</view>
-      <view class="count">{{prompt.length}} / {{maxPromptChars}}</view>
+      <text class="count">{{prompt.length}} / {{maxPromptChars}}</text>
+      <view class="editor-meta">
+        <view class="editor-balance"><points-balance compact /></view>
+        <view class="quote-note {{quoteError?'quote-retry':''}}" bindtap="retryEstimate" aria-role="{{quoteError?'button':'text'}}" aria-label="{{quoteText}}">{{quoteError?'估价失败 · 重试':quoteText}}</view>
+      </view>
     </view>
     <view class="workspace-foot">
       <view class="model-select" bindtap="showModels" aria-role="button" aria-label="{{'选择模型，当前'+modelName}}">
         <template is="model-icon" data="{{...availableModels[modelIndex],kind}}" />
-        <text class="model-name">{{modelName}}</text>
+        <view class="model-copy"><text class="model-name">{{modelName}}</text><text class="spec">{{resolution}} · {{kind==='video'?duration+'秒':ratio}}</text></view>
         <t-icon name="chevron-down" size="14" />
       </view>
-      <text class="spec"
-        >{{resolution}} · {{kind==='video'?duration+'秒':ratio}}</text
-      >
-      <block wx:if="{{expanded}}"><template is="generate-action" data="{{busy,uploading,restoring,modelsLoading,modelError,parameterError,restoreError,hasPrompt,kind}}" /></block>
+      <template is="generate-action" data="{{busy,uploading,restoring,modelsLoading,modelError,parameterError,restoreError,hasPrompt,kind}}" />
     </view>
     <scroll-view scroll-y class="model-menu {{showModels?'is-open':''}} {{modelMenuUp?'menu-up':''}}" style="height:{{modelMenuHeight||240}}px" aria-hidden="{{!showModels}}">
       <view
@@ -103,10 +103,8 @@
     </scroll-view>
   </view>
   <view class="creation-hint">
-    <text>{{modelsLoading?'正在准备模型参数':modelError?'请选择可用模型':parameterError?'请调整创作参数':hasPrompt?'参数已选好，可以直接生成':'填写创作描述后即可生成。'}}</text>
-    <view wx:if="{{!hasPrompt}}" class="example-link" bindtap="useExample" hover-class="card-pressed">试试示例 ›</view>
+    <t-icon name="mentioned" size="16" /><text>输入 @ 可引用已上传的图片</text>
   </view>
-  <view wx:if="{{ideas.length&&!hasPrompt}}" class="creation-ideas"><view wx:for="{{ideas}}" wx:key="*this" data-value="{{item}}" bindtap="useExample">{{item}}</view></view>
   <view wx:if="{{restoring}}" class="note">正在恢复参考素材…</view>
   <view wx:if="{{restoreError}}" class="error-box">
     <text>{{restoreError}}</text>
@@ -139,9 +137,9 @@
         max="{{durations.length-1}}"
         step="1"
         value="{{durationIndex}}"
-        activeColor="#2563eb"
+        activeColor="#4255c7"
         backgroundColor="#d7dee6"
-        block-color="#2563eb"
+        block-color="#4255c7"
         block-size="20"
         bindchange="duration"
         bindchanging="duration"
@@ -175,8 +173,6 @@
       </view>
     </view>
   </view>
-  <view wx:if="{{!expanded}}" class="creation-action"><template is="generate-action" data="{{busy,uploading,restoring,modelsLoading,modelError,parameterError,restoreError,hasPrompt,kind}}" /></view>
-  <view class="creation-balance"><points-balance compact /></view>
   <view class="queue-link" bindtap="queue">
     <t-icon name="task" size="22" />
     <view class="copy">
@@ -209,8 +205,8 @@
   </view>
 </t-popup>
 <template name="generate-action">
-  <button class="generate-button {{busy||uploading||restoring||modelsLoading||modelError||parameterError||restoreError||!hasPrompt?'is-disabled':''}}" loading="{{busy}}" disabled="{{busy||uploading||restoring||modelsLoading||modelError||parameterError||restoreError||!hasPrompt}}" bindtap="generate">
-    <view class="button-content"><t-icon name="{{kind==='video'?'video-camera':'image'}}" size="18" /><text>{{kind==='video'?'生成视频':'生成图片'}}</text></view>
+  <button class="generate-button {{busy||uploading||restoring||modelsLoading||modelError||parameterError||restoreError||!hasPrompt?'is-disabled':''}}" loading="{{busy}}" disabled="{{busy||uploading||restoring||modelsLoading||modelError||parameterError||restoreError||!hasPrompt}}" bindtap="generate" aria-label="{{kind==='video'?'生成视频':'生成图片'}}">
+    <view class="button-content"><t-icon wx:if="{{!busy}}" name="{{kind==='video'?'video-camera':'image'}}" size="16" /><text>生成</text></view>
   </button>
 </template>
 <template name="model-icon">

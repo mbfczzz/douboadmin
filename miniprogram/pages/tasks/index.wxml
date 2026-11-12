@@ -21,7 +21,7 @@
     <view wx:if="{{loadError}}" class="error-box" bindtap="load">刷新失败，已保留上次结果 · 点击重试</view>
     <view class="queue-summary"
       ><text>进行中 · {{runningCount}}</text
-      ><text class="failure-count">失败 · {{failedCount}}</text></view
+      ><text class="failure-count {{failedCount?'failed':''}}">失败 · {{failedCount}}</text></view
     >
     <view
       class="queue-item"

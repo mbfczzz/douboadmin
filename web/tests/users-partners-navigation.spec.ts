@@ -10,7 +10,7 @@ test("users and providers are isolated sidebar routes", async ({ page }) => {
     requests.push(new URL(request.url()).pathname),
   );
 
-  await page.getByRole("button", { name: "小程序用户", exact: true }).click();
+  await page.getByRole("button", { name: "用户管理", exact: true }).click();
   await expect(page).toHaveURL(/#users$/);
   await expect(page.getByLabel("搜索用户")).toBeVisible();
   expect(requests).toContain("/api/admin/users");
@@ -93,7 +93,7 @@ test("users and providers are isolated sidebar routes", async ({ page }) => {
   await page.getByRole("button", { name: "切换菜单" }).click();
   await page
     .getByRole("dialog", { name: "工作空间导航" })
-    .getByRole("button", { name: "小程序用户", exact: true })
+    .getByRole("button", { name: "用户管理", exact: true })
     .click();
   await expect(page).toHaveURL(/#users$/);
   await expect(page.getByLabel("搜索用户")).toBeVisible();

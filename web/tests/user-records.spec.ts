@@ -38,7 +38,7 @@ test("user rows open model use and activity records", async ({ page }) => {
     }),
   );
   await login(page);
-  await page.getByRole("button", { name: "小程序用户", exact: true }).click();
+  await page.getByRole("button", { name: "用户管理", exact: true }).click();
   const row = page.locator("tbody tr").filter({ hasText: user.userId });
   await row.getByRole("button", { name: "模型记录", exact: true }).click();
   let dialog = page.getByRole("dialog", { name: "模型使用记录" });
@@ -115,7 +115,7 @@ test("without 日志管理 / 生成任务 the user records hide those views", as
     }),
   );
   await page.reload();
-  await page.getByRole("button", { name: "小程序用户", exact: true }).click();
+  await page.getByRole("button", { name: "用户管理", exact: true }).click();
   const row = page.locator("tbody tr").filter({ hasText: user.userId });
   await expect(row.getByRole("button", { name: "模型记录" })).toBeVisible();
   await expect(row.getByRole("button", { name: "行为日志" })).toHaveCount(0);

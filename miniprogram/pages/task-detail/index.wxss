@@ -26,11 +26,17 @@
 .task-state .small {
   font-size: 12px;
 }
-.task-state t-icon {
-  color: var(--ui-muted);
-}
-.task-state.failed t-icon {
+.task-state.failed .state-label {
   color: var(--ui-danger);
+}
+.task-state.running .state-label {
+  color: var(--ui-info);
+}
+.task-state.succeeded .state-label {
+  color: var(--ui-success);
+}
+.task-state.queued .state-label {
+  color: var(--ui-warning);
 }
 .failure-reason {
   overflow-wrap: anywhere;

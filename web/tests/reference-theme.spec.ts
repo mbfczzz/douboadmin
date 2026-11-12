@@ -6,9 +6,9 @@ for (const width of [320, 390, 430]) {
   test(`reference mini creator, model menu and material popup at ${width}px`, async ({page}) => {
     await page.setViewportSize({width,height:844});
     await page.setContent(styles(width,["pages/create/index.wxss","custom-tab-bar/index.wxss"])+creator());
-    await expect(page.locator(".generate-button")).toHaveCSS("background-color","rgb(37, 99, 235)");
+    await expect(page.locator(".generate-button")).toHaveCSS("background-color","rgb(66, 85, 199)");
     await expect(page.locator(".generate-button")).toHaveCSS("color","rgb(255, 255, 255)");
-    await expect(page.locator(".item.primary .glyph")).toHaveCSS("background-color","rgb(37, 99, 235)");
+    await expect(page.locator(".item.primary .glyph")).toHaveCSS("background-color","rgb(66, 85, 199)");
     expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBe(width);
     await page.screenshot({path:`../.runtime/reference-theme/mini-create-${width}.png`});
     await page.locator(".workspace").evaluate((element, logo) => {
@@ -18,7 +18,7 @@ for (const width of [320, 390, 430]) {
       menu.innerHTML=["Seedance 2.0 Fast VIP","Seedance 2.0 Mini","Seedance 2.0 VIP","Seedance 2.5"].map((label,i)=>`<div class="model-option ${i===0?"selected":""}"><img class="model-logo" src="${logo}" alt=""/><div class="model-info"><div class="model-title"><span>${label}</span></div></div>${i===0?"✓":""}</div>`).join("");
       element.append(menu);
     },image("model-icons/bytedance.png"));
-    await expect(page.locator(".model-option.selected")).toHaveCSS("background-color","rgb(232, 239, 252)");
+    await expect(page.locator(".model-option.selected")).toHaveCSS("background-color","rgb(238, 240, 255)");
     await page.screenshot({path:`../.runtime/reference-theme/mini-models-${width}.png`});
     await page.locator("body").evaluate((body, content) => {
       const overlay=document.createElement("div");
@@ -38,9 +38,9 @@ for (const width of [320,390]) {
       <div class="biz-card"><span class="biz-label">可用积分</span><span class="biz-value">200</span><div class="row wallet-links"><span class="biz-small">预留积分 10 · 刷新</span><span class="biz-link">充值订单 ›</span></div></div>
       <div class="biz-card"><span class="biz-heading">购买积分</span><span class="biz-label">充值金额（元）</span><input class="biz-input" aria-label="充值金额" placeholder="输入充值金额"/><span class="biz-note">1 元约 10 积分</span><button class="biz-action">购买积分</button><button class="biz-action" disabled>充值暂未开放</button></div>
       <div class="biz-card"><span class="biz-heading">积分流水</span><div class="biz-row"><span>积分充值</span><span class="ledger-change plus">+100</span></div><div class="biz-row"><span>图片创作</span><span>−2</span></div></div>
-      <div class="biz-error">余额暂时无法更新 · 点击重试</div><span class="order-state paid">已支付</span><span class="order-state created">待支付</span>
+      <div class="biz-error">余额暂时无法更新 · 点击重试</div><span class="order-state pill succeeded">已支付</span><span class="order-state pill warning">待支付</span>
       </div>`);
-    await expect(page.locator(".order-state.paid")).toHaveCSS("color","rgb(21, 128, 61)");
+    await expect(page.locator(".order-state.succeeded")).toHaveCSS("color","rgb(21, 128, 61)");
     await expect(page.getByRole("button",{name:"充值暂未开放"})).toHaveCSS("background-color","rgb(233, 237, 242)");
     expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBe(width);
     await page.screenshot({path:`../.runtime/reference-theme/mini-wallet-${width}.png`,fullPage:true});

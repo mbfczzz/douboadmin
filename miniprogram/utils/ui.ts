@@ -61,7 +61,7 @@ export function jobView(j: Job) {
     input: { ...j.input, assets: j.input.assets || [] },
     stateText: states[j.status],
     kindText: kinds[j.input.kind],
-    modelName: j.modelName || j.input.model,
+    modelName: j.modelName || "模型信息暂缺",
     time: date(j.createdAt),
     result: j.result && j.input.kind !== "chat" ? media(j.result) : j.result,
     shortTitle: j.input.prompt.slice(0, 24),

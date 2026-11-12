@@ -2,6 +2,21 @@
   padding: 40px 20px calc(24px + env(safe-area-inset-bottom));
   text-align: center;
 }
+.phone-login {
+  width: 100%;
+  padding: 12px;
+  min-height: 48px;
+  line-height: 24px;
+  border-radius: 12px;
+  background: var(--ui-primary);
+  color: var(--ui-on-brand);
+  font-size: 16px;
+  font-weight: 600;
+}
+.phone-login[disabled] {
+  background: var(--ui-disabled);
+  color: var(--ui-disabled-text);
+}
 .login-brand {
   width: 160px;
   height: 78px;

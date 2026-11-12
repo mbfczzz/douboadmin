@@ -12,6 +12,7 @@ import (
 // provider additionally requires proof that the user owns that phone.
 type userFlags struct {
 	Disabled, Registered bool
+	PhoneVerified        bool
 	Name, Phone          string
 }
 
@@ -31,7 +32,7 @@ func (a *Server) userState(ctx context.Context, id string) (userFlags, error) {
 		return userFlags{}, fmt.Errorf("账号状态异常")
 	}
 	registered := strings.TrimSpace(p.Name) != "" && mainlandPhone.MatchString(p.Phone) && (!a.registrationRequired() || p.VerifiedPhone == p.Phone)
-	return userFlags{Disabled: p.Disabled || p.Archived, Registered: registered, Name: p.Name, Phone: p.Phone}, nil
+	return userFlags{Disabled: p.Disabled || p.Archived, Registered: registered, Name: p.Name, Phone: p.Phone, PhoneVerified: mainlandPhone.MatchString(p.Phone) && p.VerifiedPhone == p.Phone}, nil
 }
 
 func (a *Server) userDisabled(ctx context.Context, id string) (bool, error) {
@@ -47,6 +48,7 @@ type accessView struct {
 	PhoneVerificationRequired bool   `json:"smsRequired"`
 	Name                      string `json:"name,omitempty"`
 	Phone                     string `json:"phone,omitempty"`
+	PhoneVerified             bool   `json:"phoneVerified"`
 }
 
 const errProfileRequired = "请先填写姓名并验证手机号"
@@ -69,7 +71,7 @@ func (a *Server) accessFor(ctx context.Context, id string) (accessView, error) {
 		return accessView{}, e
 	}
 	phoneRequired := a.registrationRequired()
-	v := accessView{Access: access, ProfileRequired: !flags.Registered, CanBrowse: canBrowse(access, flags.Registered), PhoneVerificationRequired: phoneRequired}
+	v := accessView{Access: access, ProfileRequired: !flags.Registered, CanBrowse: canBrowse(access, flags.Registered), PhoneVerificationRequired: phoneRequired && !flags.PhoneVerified, PhoneVerified: flags.PhoneVerified}
 	if v.ProfileRequired {
 		v.Active, v.Message, v.Name, v.Phone = false, a.profileRequiredMessage(), flags.Name, flags.Phone
 	}

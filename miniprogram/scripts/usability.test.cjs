@@ -106,19 +106,12 @@ test("a guest can browse back from the work-library login without an automatic l
   assert.equal(page.data.signingIn, false);
 });
 
-test("example insertion fills the prompt but neither submits nor overwrites user input", () => {
+test("removed example action cannot replace the user's prompt", () => {
   const h = harness(),
     page = h.page("create");
-  page.useExample();
-  assert.equal(page.data.hasPrompt, true);
-  assert.match(page.data.prompt, /镜头/);
+  assert.equal(page.useExample, undefined);
   page.input({ detail: { value: "我的描述" } });
-  page.useExample();
   assert.equal(page.data.prompt, "我的描述");
-  page.input({ detail: { value: "" } });
-  page.setData({ kind: "image" });
-  page.useExample();
-  assert.match(page.data.prompt, /产品摄影/);
   assert.equal(h.sent.length, 0);
 });
 

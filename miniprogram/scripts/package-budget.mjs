@@ -31,7 +31,11 @@ console.log(
 // after consolidating response parsing. See docs/miniprogram-browse-budget.md.
 // Explicit feature allowance: native @ reference selection and preview,
 // measured +2.6 KiB with no new SDK components. See the feature budget note.
-const budget = 548 * 1024;
+// Reviewed UI v4 feature increment: real recent-work previews, responsive SKU
+// selection, richer order states and editor actions. See docs/miniprogram-ui-v4-budget.md.
+// Phone authorization login adds a shared grant handler and native entry points;
+// see docs/wechat-phone-login.md for the measured feature delta.
+const budget = 562 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

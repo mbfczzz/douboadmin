@@ -8,7 +8,7 @@
   border-top: 1px solid var(--ui-border, #d7dee6);
   display: flex;
   padding: 0 10px env(safe-area-inset-bottom);
-  color: var(--ui-muted);
+  color: var(--ui-muted, #667085);
 }
 .item {
   position: relative;
@@ -44,17 +44,17 @@
   width: 52px;
   height: 40px;
   border-radius: 14px;
-  color: var(--ui-on-brand);
-  background: var(--ui-primary);
+  color: var(--ui-on-brand, #ffffff);
+  background: var(--ui-primary, #4255c7);
 }
 .active {
-  color: var(--ui-nav);
+  color: var(--ui-nav, #3445aa);
 }
 .active:not(.primary) .glyph {
-  background: var(--ui-selected);
+  background: var(--ui-selected, #eef0ff);
 }
 .primary .label {
-  color: var(--ui-link);
+  color: var(--ui-link, #3445aa);
 }
 .active .label {
   font-weight: 600;

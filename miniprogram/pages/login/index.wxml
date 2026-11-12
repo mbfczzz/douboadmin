@@ -11,7 +11,9 @@
     <view wx:if="{{!wechatReady}}" class="login-notice">
       {{activationRequired?'微信登录暂不可用，请稍后重试。':'微信登录暂不可用，可以先逛逛，稍后再试。'}}
     </view>
+    <button wx:if="{{phoneReady}}" class="phone-login" open-type="getPhoneNumber" bindgetphonenumber="phoneLogin" loading="{{busy}}" disabled="{{!wechatReady||busy||returning}}">手机号授权登录</button>
     <t-button
+      wx:else
       theme="primary"
       size="large"
       block
@@ -21,7 +23,7 @@
     >
       {{returning?'登录成功，正在返回':'微信登录并继续'}}
     </t-button>
-    <text class="login-explain">头像和昵称可稍后填写，不会自动获取手机号。</text>
+    <text class="login-explain">手机号仅在你同意后获取，用于登录及资料登记。头像和昵称可稍后填写。</text>
     <button
       wx:if="{{demoAllowed}}"
       class="demo-entry"
@@ -31,6 +33,7 @@
       开发演示登录
     </button>
   </block>
+  <button wx:if="{{phoneReady}}" class="text-button phone-alternative" disabled="{{busy||returning}}" bindtap="wechat">使用其他手机号</button>
   <button class="text-button browse" disabled="{{busy||returning}}" bindtap="back">
     {{activationRequired?'返回授权页':backLabel}}
   </button>

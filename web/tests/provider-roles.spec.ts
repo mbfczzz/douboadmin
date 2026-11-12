@@ -126,7 +126,7 @@ test("provider logins grow only by codes and see no registrations", async ({
   await expect(page.getByRole("button", { name: "分销规则" })).toHaveCount(0);
   const requests: string[] = [];
   page.on("request", (r) => requests.push(new URL(r.url()).pathname));
-  await expect(page.getByRole("button", { name: "小程序用户", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "用户管理", exact: true })).toHaveCount(0);
   await expect(page.getByRole("tab", { name: "扫码登记" })).toHaveCount(0);
   await expect(page.getByRole("region", { name: "扫码登记" })).toHaveCount(0);
   expect(requests).not.toContain("/api/admin/registrations");

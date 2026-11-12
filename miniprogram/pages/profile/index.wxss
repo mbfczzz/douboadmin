@@ -202,7 +202,7 @@ button.profile-submit {
   color: var(--ui-danger);
 }
 .profile-bio.invalid {
-  border-color: var(--ui-danger-border);
+  border-color: var(--ui-danger);
 }
 .profile-readonly {
   display: flex;
@@ -225,8 +225,8 @@ button.profile-submit {
 .profile-identity {
   padding: 1px 8px;
   border-radius: 6px;
-  background: var(--ui-selected);
-  color: var(--ui-link);
+  background: var(--ui-info-bg);
+  color: var(--ui-info);
   font-size: 12px;
   line-height: 18px;
 }

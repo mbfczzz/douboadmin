@@ -65,7 +65,7 @@ test("collapsed account actions do not trap keyboard focus", async ({
   await page.route("**/api/admin/users/focus-user/ledger?*", (route) =>
     route.fulfill({ json: { items: [], page: 1, size: 20, total: 0 } }),
   );
-  await page.getByRole("button", { name: "小程序用户", exact: true }).click();
+  await page.getByRole("button", { name: "用户管理", exact: true }).click();
   await page.getByRole("button", { name: "停用", exact: true }).click();
   const dialog = page.getByRole("dialog"),
     close = dialog.getByRole("button", { name: "关闭", exact: true }),

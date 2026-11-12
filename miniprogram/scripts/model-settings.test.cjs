@@ -27,7 +27,7 @@ test("backend model settings initialize the editor without overwriting an existi
   assert.equal(page.data.prompt, "默认产品摄影");
   assert.equal(page.data.maxPromptChars, 100);
   assert.equal(page.data.maxReferences, 2);
-  assert.deepEqual(Array.from(page.data.ideas), ["夜色街景"]);
+  assert.equal(page.data.ideas, undefined);
   page.input({ detail: { value: "我的描述" } });
   await page.loadModels();
   assert.equal(page.data.prompt, "我的描述");

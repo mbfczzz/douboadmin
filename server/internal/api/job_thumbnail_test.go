@@ -26,7 +26,7 @@ func (s *thumbnailObjects) Thumbnail(context.Context, string, string) (string, e
 	return "https://fixture.test/signed-small", nil
 }
 
-func TestJobThumbnailOnlyDecoratesCompletedAdminResults(t *testing.T) {
+func TestJobThumbnailDecoratesCompletedAuthorizedResults(t *testing.T) {
 	a, _, _ := setup(t)
 	objects := &thumbnailObjects{}
 	a.Media = &media.Service{Store: a.Store, Objects: objects}
@@ -39,16 +39,24 @@ func TestJobThumbnailOnlyDecoratesCompletedAdminResults(t *testing.T) {
 		fail, want   bool
 	}{
 		{"admin", "succeeded", false, true},
-		{"user", "succeeded", false, false},
+		{"user", "succeeded", false, true},
+		{"guest", "succeeded", false, false},
 		{"admin", "running", false, false},
 		{"admin", "succeeded", true, false},
 	} {
 		objects.fail = scenario.fail
-		j := core.Job{ID: "job-one", Status: scenario.status, Input: core.JobInput{Kind: "image", Model: "demo-image"}, Result: "asset:thumbnail-result"}
+		j := core.Job{ID: "job-one", UserID: "user-a", Status: scenario.status, Input: core.JobInput{Kind: "image", Model: "demo-image"}, Result: "asset:thumbnail-result"}
 		ctx := context.WithValue(t.Context(), identityKey, Identity{Role: scenario.role, ID: "user-a"})
 		a.presentJob(ctx, &j)
 		if (j.ThumbnailURL != "") != scenario.want || j.Result != "https://fixture.test/original" {
 			t.Fatal(scenario, j)
+		}
+		if scenario.role == "user" {
+			other := context.WithValue(t.Context(), identityKey, Identity{Role: "user", ID: "other-user"})
+			a.presentJob(other, &j)
+			if j.ThumbnailURL != "" {
+				t.Fatal("thumbnail was exposed to another user")
+			}
 		}
 	}
 }

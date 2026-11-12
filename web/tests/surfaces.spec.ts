@@ -131,7 +131,7 @@ for (const width of [1440, 390, 320]) {
       await page.getByLabel("搜索模型").fill(model.data.key);
       const item = page
         .locator("tbody tr")
-        .filter({ has: page.getByText(model.data.key, { exact: true }) });
+        .filter({ has: page.getByText(model.data.name, { exact: true }) });
       // One dialog per settings part, each from its own row button.
       for (const part of ["基础信息", "生成能力", "提示词", "定价", "状态"]) {
         const button = item.getByRole("button", { name: part, exact: true });
@@ -169,7 +169,7 @@ for (const width of [1440, 390, 320]) {
     await modal("添加管理账号", "添加管理账号");
     await modal("编辑", "编辑账号资料");
     await modal("重置密码", "重置密码");
-    await nav("小程序用户");
+    await nav("用户管理");
     await modal("详情", "用户详情");
     await modal("积分", "调整积分");
     await modal("编辑", "编辑用户资料");
