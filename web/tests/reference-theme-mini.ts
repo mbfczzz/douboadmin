@@ -37,7 +37,7 @@ export function creator() {
     </div>
     <div class="creation-hint"><span>输入 @ 可引用已上传的图片</span></div>
     <div class="settings"><span class="setting-title first-setting">分辨率</span><div class="resolution-options"><div class="resolution-option selected">720p</div><div class="resolution-option">1080p</div></div>
-    <span class="setting-title">视频时长 · 4 秒</span><input type="range" value="0" aria-label="视频时长" style="width:100%;accent-color:#4255c7"/><div class="duration-limits"><span>4 秒</span><span>15 秒</span></div>
+    <span class="setting-title">视频时长 · 4 秒</span><input type="range" value="0" aria-label="视频时长" style="width:100%;accent-color:var(--ui-brand)"/><div class="duration-limits"><span>4 秒</span><span>15 秒</span></div>
     <span class="setting-title">选择画幅</span><div class="ratio-grid">${["16:9","9:16","1:1","4:3","3:4"].map((s,i)=>`<div class="ratio ${i===0?"selected":""}"><div class="ratio-visual"><div class="ratio-shape ${["shape-wide","shape-portrait","shape-square","shape-landscape","shape-photo"][i]}"></div></div><span class="ratio-label">${s}</span></div>`).join("")}</div></div>
   </div>${tabs()}`;
 }

@@ -87,18 +87,18 @@ for (const width of [320, 375, 430]) {
       `<style>body{margin:0;font-family:sans-serif}${styles}</style><div class="create-page"><div class="mode-tabs"><div class="mode-tab active">生成视频</div><div class="mode-tab">生成图片</div></div></div><div class="tabbar">${["模板", "混剪", "创作", "Agent", "我的"].map((name, i) => `<div class="item ${i === 2 ? "active" : ""}"><div class="glyph"><t-icon>◇</t-icon></div><span class="label">${name}</span></div>`).join("")}</div>`,
     );
     expect((await page.locator(".mode-tabs").boundingBox())!.height).toBe(44);
-    // Selected controls and navigation share the approved indigo accent.
+    // Selected controls use cyan; the active native tab uses white for hierarchy.
     const look = (selector: string) =>
       page.locator(selector).first().evaluate((el) => ({
         background: getComputedStyle(el).backgroundColor,
         color: getComputedStyle(el).color,
       }));
     expect(await look(".mode-tab.active")).toEqual({
-      background: "rgb(238, 240, 255)",
-      color: "rgb(52, 69, 170)",
+      background: "rgb(23, 54, 59)",
+      color: "rgb(102, 227, 238)",
     });
-    expect((await look(".item.active")).color).toBe("rgb(52, 69, 170)");
-    expect((await look(".item:not(.active)")).color).toBe("rgb(102, 112, 133)");
+    expect((await look(".item.active")).color).toBe("rgb(244, 245, 247)");
+    expect((await look(".item:not(.active)")).color).toBe("rgb(166, 171, 181)");
     expect((await page.locator(".item.active").boundingBox())!.height).toBeGreaterThanOrEqual(44);
     await page.screenshot({ path: `../.runtime/mini-selection-${width}.png` });
   });

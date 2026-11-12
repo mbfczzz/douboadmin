@@ -11,9 +11,9 @@ App({
   onLaunch() {
     void trialDebug(() => Promise.resolve());
     wx.setBackgroundColor({
-      backgroundColor: "#f4f6f8",
-      backgroundColorTop: "#f4f6f8",
-      backgroundColorBottom: "#f4f6f8",
+      backgroundColor: "#0f0f11",
+      backgroundColorTop: "#0f0f11",
+      backgroundColorBottom: "#0f0f11",
     });
   },
 });

@@ -22,7 +22,7 @@
   border-radius: 10px;
   background: var(--ui-surface);
   z-index: 1001;
-  box-shadow: 0 8px 24px #2026321a;
+  box-shadow: 0 8px 24px #00000066;
 }
 .model-menu.is-open {
   opacity: 1;

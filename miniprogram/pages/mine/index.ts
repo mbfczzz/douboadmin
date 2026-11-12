@@ -36,6 +36,7 @@ Page({
     me: null as Me | null,
     jobs: [] as ReturnType<typeof jobView>[],
     worksError: "",
+    worksLoading: false,
     roleLabel: "",
     loading: true,
     loadError: "",
@@ -55,11 +56,11 @@ Page({
   // Providers get 服务商中心, members 我的推广码. A failed request keeps the
   // current menu; a newer load or a signed-out session wins.
   async loadIdentity() {
-    const version = this.loadVersion;
+    const version = this.loadVersion, owner = sessionUserId();
     if (!hasSession()) return this.setData({ roleMenu: null });
     try {
       const { kind, label } = await request<{ kind: string; label: string }>("/me/role");
-      if (version !== this.loadVersion || !hasSession()) return;
+      if (version !== this.loadVersion || owner !== sessionUserId() || !hasSession()) return;
       const extra =
         roleMenus[["branch", "s1", "s2"].includes(kind) ? "provider" : kind];
       this.setData({ roleMenu: extra || null, roleLabel: label || "" });
@@ -89,30 +90,33 @@ Page({
       this.setData({ me: null, loading: false, loadError: "" });
       return;
     }
+    this.setData({ worksLoading: true });
+    const recentRequest = jobPage(1, "&works=true", 2).catch(() => null);
     try {
-      const [me, recent] = await Promise.all([
-        request<Me>("/me"), jobPage(1, "&works=true", 2).catch(() => null),
-      ]);
-      if (version !== this.loadVersion) return;
+      const me = await request<Me>("/me");
+      if (version !== this.loadVersion || owner !== sessionUserId()) return;
       if (me.profile.data.avatarUrl)
         me.profile.data.avatarUrl = media(me.profile.data.avatarUrl);
+      this.setData({ me, loading: false, loadError: "" });
+      const recent = await recentRequest;
+      if (version !== this.loadVersion || owner !== sessionUserId()) return;
       this.setData({
-        me,
         jobs: recent ? recent.items.filter(j => j.status === "succeeded" && !j.deleted).slice(0, 2).map(jobView) : this.data.jobs,
         worksError: recent ? "" : "作品暂时无法加载，点击重试",
-        loading: false,
-        loadError: "",
+        worksLoading: false,
       });
       if (this.visible && me.running > 0)
         this.refreshTimer = setTimeout(() => void this.load(), 3000);
     } catch (e) {
-      if (version !== this.loadVersion) return;
+      if (version !== this.loadVersion || owner !== sessionUserId()) return;
       if (!hasSession()) {
         this.setData({ me: null, loadError: "", loading: false });
         return;
       }
-      if (e instanceof AuthCancelledError) return;
-      this.setData({ loadError: (e as Error).message, loading: false });
+      this.setData({
+        loadError: e instanceof AuthCancelledError ? "加载已中断，请重试" : (e as Error).message,
+        loading: false, worksLoading: false,
+      });
     }
   },
   async signIn() {

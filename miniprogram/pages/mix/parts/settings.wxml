@@ -25,7 +25,7 @@
     ><switch
       checked="{{autoScenes}}"
       disabled="{{!config.enabled}}"
-      color="#4255c7"
+      color="#00c8dc"
       data-field="autoScenes"
       bindchange="toggle" /></view
   ><view class="biz-label">画面比例</view

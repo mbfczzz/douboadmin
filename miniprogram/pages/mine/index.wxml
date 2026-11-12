@@ -1,6 +1,6 @@
 <nav-bar title="我的" />
 <view class="page mine-page">
-  <view wx:if="{{loading}}" class="loading"><t-loading /></view>
+  <view wx:if="{{loading}}" class="loading"><t-loading text="正在加载个人信息" /></view>
   <view wx:elif="{{loadError&&!me}}" class="error-box" bindtap="load">{{loadError}} · 点击重试</view>
   <view wx:elif="{{!me}}" class="guest-profile">
     <view class="avatar"><t-icon name="user" size="28" /></view>
@@ -30,6 +30,7 @@
     </view>
     <view class="mine-balance"><points-balance /></view>
     <view class="row works-heading"><text class="section-title">最近作品</text><view class="profile-edit accent" data-mode="works" bindtap="menu">查看全部<t-icon name="chevron-right" size="16" /></view></view>
+    <view wx:if="{{worksLoading&&!jobs.length}}" class="loading"><t-loading text="正在加载作品" /></view>
     <view wx:if="{{worksError}}" class="error-box" bindtap="load">{{worksError}}</view>
     <view wx:if="{{jobs.length}}" class="completed-grid">
       <view wx:for="{{jobs}}" wx:key="id" data-id="{{item.id}}" bindtap="detail" hover-class="card-pressed">
@@ -42,7 +43,7 @@
         <text class="work-meta">{{item.kindText}} · {{item.time}}</text>
       </view>
     </view>
-    <view wx:elif="{{!worksError}}" class="empty-work" bindtap="create"><t-icon name="image" size="28" /><text>暂无作品</text><text class="accent">去创作</text></view>
+    <view wx:elif="{{!worksLoading&&!worksError}}" class="empty-work" bindtap="create"><t-icon name="image" size="28" /><text>暂无作品</text><text class="accent">去创作</text></view>
     <view wx:if="{{me.running}}" class="running-link" data-mode="tasks" bindtap="menu"><t-icon name="time" size="20" /><text>{{me.running}} 个任务生成中</text><text>查看</text><t-icon name="chevron-right" size="16" /></view>
     <view wx:if="{{roleMenu}}" class="role-link" data-mode="{{roleMenu.mode}}" bindtap="menu" aria-role="button" hover-class="card-pressed"><t-icon name="{{roleMenu.icon}}" size="20" /><text>{{roleMenu.label}}</text><t-icon name="chevron-right" size="16" /></view>
     <text class="section-title common-heading">常用功能</text>

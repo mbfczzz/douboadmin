@@ -42,8 +42,8 @@ button.action {
   padding: 12px;
   line-height: 22px;
   border-radius: 12px;
-  color: var(--ui-on-brand, #ffffff);
-  background: var(--ui-primary, #4255c7);
+  color: var(--ui-on-brand, #082b30);
+  background: var(--ui-primary, #00c8dc);
   font-size: var(--ui-font-body, 14px);
   font-weight: 600;
 }
