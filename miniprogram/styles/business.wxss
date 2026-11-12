@@ -1,8 +1,7 @@
 .biz-card {
   background: var(--ui-surface);
-  border: 1px solid var(--ui-border);
   border-radius: var(--ui-radius-card);
-  padding: 16px 14px;
+  padding: 20px 16px;
   margin-bottom: 12px;
 }
 .biz-heading {
@@ -20,7 +19,7 @@
   font-size: 30px;
   line-height: 38px;
   font-weight: 600;
-  color: #f5f6f7;
+  color: #ffffff;
   margin: 6px 0 10px;
 }
 .biz-row {
@@ -29,7 +28,7 @@
   justify-content: space-between;
   gap: 12px;
   padding: 12px 0;
-  border-bottom: 1px solid #ffffff1a;
+  border-bottom: 1px solid #ffffff0f;
 }
 .biz-row:last-child {
   border-bottom: 0;
@@ -46,11 +45,11 @@
 }
 .biz-input {
   background: var(--ui-field);
-  border: 1px solid var(--ui-border);
+  border: 1px solid transparent;
   border-radius: var(--ui-radius-control);
   min-height: 44px;
   padding: 11px 12px;
-  color: #f5f6f7;
+  color: #ffffff;
   width: 100%;
   font-size: 15px;
   box-sizing: border-box;
@@ -61,13 +60,13 @@
 }
 button.biz-action {
   width: 100%;
-  background: var(--ui-brand);
+  background: var(--ui-primary);
   color: var(--ui-on-brand);
-  border-radius: var(--ui-radius-control);
+  border-radius: 24px;
   font-size: 15px;
   font-weight: 600;
   line-height: 22px;
-  padding: 11px 12px;
+  padding: 13px 12px;
   text-align: center;
   margin: 12px 0 0;
 }
@@ -75,13 +74,12 @@ button.biz-action::after {
   border: 0;
 }
 button.biz-action[disabled] {
-  background: #292b30;
-  color: #969ba4;
+  background: #262626;
+  color: #a6a6a6;
 }
 button.biz-secondary {
   background: var(--ui-field);
-  color: #f5f6f7;
-  border: 1px solid var(--ui-border);
+  color: #ffffff;
 }
 .biz-note {
   overflow-wrap: anywhere;
@@ -96,7 +94,7 @@ button.biz-secondary {
   color: var(--ui-danger);
   border: 1px solid var(--ui-danger-border);
   padding: 11px 12px;
-  border-radius: 8px;
+  border-radius: 12px;
   line-height: 1.6;
   font-size: 13px;
   margin-bottom: 12px;
@@ -110,17 +108,16 @@ button.biz-secondary {
 .biz-tabs view {
   padding: 10px 14px;
   white-space: nowrap;
-  border: 1px solid var(--ui-border);
-  border-radius: 8px;
-  background: var(--ui-surface);
+  border-radius: 10px;
+  background: var(--ui-field);
   color: var(--ui-muted);
   font-size: 13px;
   line-height: 18px;
 }
 .biz-tabs .selected {
-  color: var(--ui-brand);
-  border-color: #22c55e;
-  background: #2d2f34;
+  color: #ffffff;
+  background: #333333;
+  font-weight: 600;
 }
 .biz-list-title {
   font-size: 14px;
@@ -167,7 +164,7 @@ button.biz-secondary {
   white-space: nowrap;
 }
 .biz-link {
-  color: var(--ui-accent);
+  color: var(--ui-link);
   font-size: 13px;
   padding: 6px 0;
 }

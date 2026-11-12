@@ -13,7 +13,7 @@ button.profile-avatar-row {
   text-align: left;
   line-height: 1.5;
   background: transparent;
-  color: #f5f6f7;
+  color: #ffffff;
   border-radius: 12px;
 }
 .profile-avatar {
@@ -25,8 +25,8 @@ button.profile-avatar-row {
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: #2d2f34;
-  color: var(--ui-brand);
+  background: #2e2e2e;
+  color: #a6a6a6;
 }
 .profile-avatar image {
   width: 100%;
@@ -42,7 +42,7 @@ button.profile-avatar-row {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--ui-brand);
+  background: var(--ui-primary);
   color: var(--ui-on-brand);
   border: 2px solid var(--ui-bg);
   border-radius: 50%;
@@ -83,8 +83,8 @@ button.profile-avatar-row {
 }
 .profile-fields,
 .profile-bio {
-  border: 1px solid var(--ui-border);
-  border-radius: 12px;
+  border: 1px solid transparent;
+  border-radius: 16px;
   background: var(--ui-surface);
   overflow: hidden;
 }
@@ -97,13 +97,13 @@ button.profile-avatar-row {
   transition: background 120ms;
 }
 .profile-field + .profile-field {
-  border-top: 1px solid var(--ui-border);
+  border-top: 1px solid #ffffff0f;
 }
 .profile-label {
   width: 64px;
   flex-shrink: 0;
   padding-top: 6px;
-  color: #f5f6f7;
+  color: #ffffff;
   font-size: 14px;
   line-height: 24px;
 }
@@ -115,7 +115,7 @@ button.profile-avatar-row {
   width: 100%;
   height: 36px;
   padding: 0;
-  color: #f5f6f7;
+  color: #ffffff;
   caret-color: var(--ui-brand);
   font-size: 16px;
   text-align: right;
@@ -124,7 +124,7 @@ button.profile-avatar-row {
   background: var(--ui-field);
 }
 .focused .profile-label {
-  color: var(--ui-brand);
+  color: #ffffff;
 }
 .profile-placeholder {
   color: var(--ui-muted);
@@ -132,7 +132,7 @@ button.profile-avatar-row {
 .profile-field-error {
   display: block;
   margin-top: 4px;
-  color: #f05252;
+  color: #ff3355;
   font-size: 12px;
   line-height: 1.6;
 }
@@ -144,14 +144,14 @@ button.profile-avatar-row {
   transition: border-color 120ms;
 }
 .profile-bio.focused {
-  border-color: #22c55e;
+  border-color: #ffffff4d;
 }
 .profile-bio textarea {
   display: block;
   width: 100%;
   height: 88px;
   padding: 0;
-  color: #f5f6f7;
+  color: #ffffff;
   caret-color: var(--ui-brand);
   font-size: 15px;
   line-height: 1.7;
@@ -181,7 +181,7 @@ button.profile-submit {
   min-height: 48px;
   margin: 0;
   padding: 12px;
-  border-radius: 12px;
+  border-radius: 22px;
   font-size: 16px;
   font-weight: 600;
   line-height: 24px;
@@ -191,7 +191,7 @@ button.profile-submit {
   margin-bottom: 0;
 }
 .profile-error {
-  color: #f05252;
+  color: #ff3355;
 }
 .profile-login {
   padding-top: 48px;
@@ -206,10 +206,10 @@ button.profile-submit {
 }
 
 .profile-field.invalid .profile-label {
-  color: #f05252;
+  color: #ff3355;
 }
 .profile-bio.invalid {
-  border-color: #6a302b;
+  border-color: #66202f;
 }
 .profile-readonly {
   display: flex;
@@ -231,27 +231,11 @@ button.profile-submit {
 }
 .profile-identity {
   padding: 1px 8px;
-  border-radius: 4px;
-  background: #242529;
-  color: #c5c8ce;
+  border-radius: 6px;
+  background: #ffffff14;
+  color: #ffffffcc;
   font-size: 12px;
   line-height: 18px;
-}
-.profile-identity.branch {
-  background: #2f2a3a;
-  color: #c9b6ef;
-}
-.profile-identity.member {
-  background: #22303a;
-  color: #9cc3e0;
-}
-.profile-identity.s1 {
-  background: #33290f;
-  color: #f5c84b;
-}
-.profile-identity.s2 {
-  background: #183024;
-  color: var(--ui-brand);
 }
 /* Long provider names give way to the identity label. */
 .profile-partner {

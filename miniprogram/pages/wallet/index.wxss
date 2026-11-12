@@ -10,9 +10,8 @@
   min-height: 44px;
   line-height: 44px;
   padding: 0;
-  border: 1px solid var(--ui-border);
-  border-radius: 8px;
-  background: var(--ui-surface);
+  border-radius: 10px;
+  background: var(--ui-field);
   color: var(--ui-muted);
   font-size: 13px;
 }
@@ -20,14 +19,13 @@
   border: 0;
 }
 .purchase-tabs .selected {
-  border-color: #22c55e;
-  background: #2d2f34;
-  color: var(--ui-brand);
+  background: #333333;
+  color: #ffffff;
   font-weight: 600;
 }
 .checkout-error {
   display: block;
-  color: #f05252;
+  color: #ff3355;
   font-size: 12px;
   margin: 8px 0;
 }
@@ -42,10 +40,10 @@ button.virtual-product {
   justify-content: flex-start;
   width: 100%;
   padding: 12px 8px;
-  background: var(--ui-surface);
-  color: #f5f6f7;
-  border: 1px solid var(--ui-border);
-  border-radius: 8px;
+  background: var(--ui-field);
+  color: #ffffff;
+  border: 1px solid transparent;
+  border-radius: 12px;
   line-height: 1.6;
   font-size: 13px;
   overflow-wrap: anywhere;
@@ -54,8 +52,8 @@ button.virtual-product::after {
   border: 0;
 }
 .virtual-product.selected {
-  border-color: #22c55e;
-  background: #2d2f34;
+  border-color: #ffffff;
+  background: var(--ui-field);
 }
 .virtual-product text {
   display: block;
@@ -69,10 +67,10 @@ button.virtual-product::after {
   margin: 4px 0;
   font-size: 18px;
   font-weight: 600;
-  color: #f5f6f7;
+  color: #ffffff;
 }
 .virtual-product.selected .product-price {
-  color: var(--ui-brand);
+  color: #ffffff;
 }
 .wallet-links {
   flex-wrap: wrap;

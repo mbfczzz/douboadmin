@@ -10,7 +10,7 @@
   }
 }
 .skeleton {
-  background: #202125;
+  background: #262626;
   border-radius: 9px;
   animation: skeleton-pulse 1.2s ease-in-out infinite alternate;
 }

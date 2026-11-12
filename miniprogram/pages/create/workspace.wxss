@@ -1,8 +1,7 @@
 .workspace {
   position: relative;
   height: 300px;
-  border: 1px solid var(--ui-border);
-  border-radius: 14px;
+  border-radius: 20px;
   background: var(--ui-surface);
 }
 .reference-strip {
@@ -10,7 +9,7 @@
   top: 14px;
   left: 14px;
   width: calc(100% - 62px);
-  height: 64px;
+  height: 72px;
   white-space: nowrap;
 }
 .reference-items {
@@ -20,26 +19,31 @@
 }
 .add-reference,
 .reference {
-  width: 56px;
-  height: 56px;
+  width: 64px;
+  height: 64px;
   flex-shrink: 0;
-  border-radius: 9px;
+  border-radius: 12px;
   background: var(--ui-field);
-  border: 1px solid var(--ui-border);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 .add-reference {
-  color: #f5f6f7;
+  color: #ffffffb3;
+  flex-direction: column;
+  gap: 4px;
 }
 .reference {
   position: relative;
 }
+.add-label {
+  font-size: 10px;
+  line-height: 14px;
+}
 .reference image {
   width: 100%;
   height: 100%;
-  border-radius: 8px;
+  border-radius: 12px;
 }
 .reference-remove {
   position: absolute;
@@ -51,7 +55,7 @@
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: #2d2f34;
+  background: #2e2e2e;
 }
 .reference-remove::after {
   content: "";
@@ -67,7 +71,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #c5c8ce;
+  color: #b3b3b3;
 }
 .prompt-input {
   position: absolute;
@@ -79,7 +83,7 @@
   padding: 0;
   font-size: 16px;
   line-height: 1.6;
-  color: #f5f6f7;
+  color: #ffffff;
 }
 .prompt-placeholder {
   color: var(--ui-muted);
@@ -90,7 +94,7 @@
   right: 16px;
   bottom: 72px;
   font-size: 11px;
-  color: #969ba4;
+  color: #a6a6a6;
 }
 .quote-note {
   position: absolute;
@@ -109,10 +113,10 @@
   text-overflow: ellipsis;
 }
 .quote-note.has-cost {
-  color: var(--ui-brand);
+  color: var(--ui-link);
 }
 .quote-note.quote-retry {
-  color: #c5c8ce;
+  color: #b3b3b3;
 }
 .workspace-foot {
   position: absolute;
@@ -133,8 +137,8 @@
   max-width: 180px;
   min-width: 0;
   height: 44px;
-  padding: 0 8px;
-  border-radius: 8px;
+  padding: 0 12px;
+  border-radius: 10px;
   background: var(--ui-field);
   font-size: 13px;
   font-weight: 500;
@@ -167,15 +171,15 @@
   line-height: 44px;
   padding: 0;
   margin: 0;
-  border-radius: 7px;
-  background-color: var(--ui-brand);
+  border-radius: 10px;
+  background-color: #e8ecf0;
   color: var(--ui-on-brand);
   font-size: 14px;
   font-weight: 600;
 }
 .workspace .generate-button.is-disabled {
-  background-color: #292b30;
-  color: #969ba4;
+  background-color: #262626;
+  color: #a6a6a6;
 }
 .workspace.expanded {
   position: fixed;
@@ -185,12 +189,17 @@
   right: 20px;
   height: auto;
   z-index: 900;
-  box-shadow: 0 0 0 100vmax #101113ed;
+  box-shadow: 0 0 0 100vmax #121212ed;
 }
 .expanded .prompt-input {
   height: calc(100% - 188px);
 }
 @media (max-width: 350px) {
-  .model-select { gap: 4px; padding: 0 6px; }
-  .model-select t-icon:first-child { display: none; }
+  .model-select {
+    gap: 4px;
+    padding: 0 6px;
+  }
+  .model-select t-icon:first-child {
+    display: none;
+  }
 }

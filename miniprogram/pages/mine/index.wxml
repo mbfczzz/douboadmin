@@ -77,13 +77,12 @@
             <t-icon
               name="{{item.input.kind==='image'?'image':'play-circle'}}"
               size="32"
-              color="#22c55e"
+              color="#a6a6a6"
             />
           </view>
           <text class="work-state">{{item.stateText}}</text>
         </view>
         <text class="work-title">{{item.shortTitle}}</text>
-        <text class="work-kind">{{item.kindText}}作品</text>
       </view>
     </view>
     <view wx:else class="empty-work" bindtap="emptyWorks">

@@ -2,20 +2,21 @@
   padding: 12rpx;
 }
 .templates-page {
-  padding: 19px 20px calc(90px + env(safe-area-inset-bottom));
+  padding: 8px 12px calc(90px + env(safe-area-inset-bottom));
 }
 .templates-page .filter-scroll {
-  margin: 0 0 16px;
+  margin: 0 4px 12px;
 }
 .templates-page .filter.active {
   font-weight: 600;
+  font-size: 16px;
 }
 .templates-page .filter {
-  font-size: 14px;
-  line-height: 20px;
-  padding: 8px 0 7px;
-  margin-right: 31px;
-  border-bottom-width: 2px;
+  font-size: 15px;
+  line-height: 22px;
+  padding: 11px 0;
+  margin-right: 24px;
+  border-bottom-width: 0;
 }
 .templates-page .filter:last-child {
   margin-right: 0;
@@ -23,36 +24,38 @@
 .search-field {
   display: flex;
   background: var(--ui-surface);
-  padding: 18rpx 24rpx;
-  gap: 20rpx;
-  border-radius: 14rpx;
-  margin: 12rpx 0 12px;
+  padding: 0 16px;
+  gap: 12px;
+  border-radius: 12px;
+  margin: 4px 0 8px;
+  height: 44px;
+  align-items: center;
 }
 .search-field input {
   flex: 1;
-  font-size: 25rpx;
+  font-size: 14px;
 }
 .search-field text {
-  margin: -12px -12px -12px 0;
+  margin: 0 -12px 0 0;
   padding: 12px;
-  font-size: 25rpx;
-  color: var(--ui-brand);
+  font-size: 14px;
+  color: #ffffff;
 }
 .waterfall {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
+  gap: 8px;
 }
 .column {
-  width: calc(50% - 6px);
+  width: calc(50% - 4px);
 }
 .template {
-  margin-bottom: 24px;
+  margin-bottom: 16px;
 }
 .cover {
   height: 213px;
   position: relative;
-  border-radius: 9px;
+  border-radius: 12px;
   overflow: hidden;
   background: var(--ui-field);
 }
@@ -69,26 +72,18 @@
   width: 100%;
   height: 100%;
 }
-.cover-line {
-  position: absolute;
-  top: 0;
-  height: 2px;
-  left: 5px;
-  right: 5px;
-  background: #22d3ee;
-}
 .play {
   position: absolute;
-  right: 13px;
-  bottom: 10px;
-  background: #202125;
+  right: 8px;
+  background: #00000066;
   color: #fff;
   border-radius: 50%;
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   display: flex;
   align-items: center;
   justify-content: center;
+  top: 8px;
 }
 /* At most two lines, so long titles keep the two columns aligned. */
 .title {
@@ -97,14 +92,15 @@
   overflow: hidden;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 1.25;
-  margin: 10px 0 0;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 18px;
+  margin: 8px 4px 0;
+  color: #ffffffe0;
 }
 .end {
   text-align: center;
-  color: #f5f6f7;
+  color: var(--ui-muted);
   font-size: 13px;
   padding: 0 0 28px;
 }

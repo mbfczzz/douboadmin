@@ -9,14 +9,13 @@
 }
 .work-filter {
   padding: 10px 0;
-  border-bottom: 2px solid transparent;
   font-size: 14px;
   color: var(--ui-muted);
 }
 .work-filter.active {
-  color: #f5f6f7;
-  border-color: var(--ui-brand);
+  color: #ffffff;
   font-weight: 600;
+  font-size: 15px;
 }
 .works-page .completed-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -24,10 +23,10 @@
 }
 .works-page .completed-cover {
   height: 180px;
-  border-radius: 9px;
+  border-radius: 8px;
 }
 .works-page .completed-cover image {
-  border-radius: 9px;
+  border-radius: 8px;
 }
 .works-page .completed-title {
   font-size: 14px;

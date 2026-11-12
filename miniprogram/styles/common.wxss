@@ -33,7 +33,7 @@ image {
   font-size: var(--ui-font-caption);
 }
 .accent {
-  color: var(--ui-accent);
+  color: var(--ui-link);
 }
 .row {
   display: flex;
@@ -49,15 +49,14 @@ image {
 }
 .surface {
   background: var(--ui-surface);
-  border: 1rpx solid var(--ui-border);
-  border-radius: 20rpx;
+  border-radius: var(--ui-radius-card);
 }
 .row.section-title {
   display: flex;
 }
 .text-button {
   background: transparent;
-  color: var(--ui-brand);
+  color: var(--ui-link);
   padding: 16rpx 0;
   line-height: 1.5;
   font-size: 25rpx;
@@ -76,7 +75,7 @@ image {
 }
 .empty .title {
   display: block;
-  color: #f5f6f7;
+  color: #ffffff;
   font-weight: 500;
   font-size: 30rpx;
   margin: 24rpx 0 14rpx;
@@ -94,7 +93,7 @@ image {
   padding: 24rpx;
   background: var(--ui-danger-bg);
   border: 1rpx solid var(--ui-danger-border);
-  border-radius: 14rpx;
+  border-radius: 12px;
   color: var(--ui-danger);
   font-size: 25rpx;
   line-height: 1.8;
@@ -111,8 +110,7 @@ image {
   gap: 20rpx;
   padding: 25rpx 24rpx;
   background: var(--ui-surface);
-  border: 1rpx solid var(--ui-border);
-  border-radius: 16rpx;
+  border-radius: var(--ui-radius-card);
   margin-top: 40rpx;
 }
 .queue-link .copy {
@@ -124,17 +122,16 @@ image {
   margin-top: 8rpx;
 }
 .form-input {
-  background: var(--ui-surface);
-  border: 1rpx solid var(--ui-border);
-  border-radius: 16rpx;
+  background: var(--ui-field);
+  border-radius: 12px;
   padding: 22rpx;
   width: 100%;
-  color: #f5f6f7;
+  color: #ffffff;
   font-size: 28rpx;
 }
 .pill {
   font-size: 21rpx;
-  border-radius: 8rpx;
+  border-radius: 6px;
   padding: 8rpx 13rpx;
   background: var(--ui-field);
   color: var(--ui-muted);
@@ -144,12 +141,12 @@ image {
   color: #32d47a;
 }
 .pill.failed {
-  background: #331b1a;
-  color: #f05252;
+  background: #33141b;
+  color: #ff3355;
 }
 .pill.running {
-  background: #12303a;
-  color: #22d3ee;
+  background: #009efa1f;
+  color: var(--ui-brand);
 }
 .filter-scroll {
   white-space: nowrap;
@@ -161,11 +158,10 @@ image {
   margin-right: 42rpx;
   font-size: 27rpx;
   color: var(--ui-muted);
-  border-bottom: 3rpx solid transparent;
 }
 .filter.active {
-  color: #f5f6f7;
-  border-color: var(--ui-brand);
+  color: #ffffff;
+  font-weight: 600;
 }
 .controls-busy {
   opacity: 0.6;
@@ -174,5 +170,5 @@ image {
   display: flex;
   gap: 24px;
   margin-top: 10px;
-  color: #4ade80;
+  color: var(--ui-link);
 }

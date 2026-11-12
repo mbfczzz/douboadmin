@@ -21,7 +21,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #101113bb;
+  background: #121212bb;
   border-radius: 50%;
 }
 .title-row {
@@ -30,7 +30,7 @@
 .detail-divider {
   height: 1px;
   margin: 15px 0 20px;
-  background: #2d2f34;
+  background: #2e2e2e;
 }
 .detail-title {
   flex: 1;
@@ -54,7 +54,7 @@
 .upload-description {
   display: block;
   margin-top: 14px;
-  color: #c5c8ce;
+  color: #b3b3b3;
   font-size: 15px;
   line-height: 1.4;
 }
@@ -71,15 +71,14 @@
   position: relative;
   gap: 12px;
   padding: 16px;
-  background: #1a1b1f;
-  border: 1px solid #36383e;
-  border-radius: 10px;
+  background: var(--ui-surface);
+  border-radius: 16px;
 }
 .upload-icon {
   width: 44px;
   height: 44px;
-  background: #202125;
-  color: #c5c8ce;
+  background: #262626;
+  color: #b3b3b3;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -100,9 +99,9 @@
   height: 44px;
   line-height: 44px;
   text-align: center;
-  color: #101113;
+  color: #121212;
   font-size: 14px;
-  background: #fafafa;
+  background: #ffffff;
   border-radius: 7px;
   margin-top: 4px;
 }
@@ -112,18 +111,18 @@
 }
 .upload-hint {
   font-size: 14px;
-  color: #c5c8ce;
+  color: #b3b3b3;
 }
 .required {
   flex-shrink: 0;
   margin-left: auto;
   font-size: 22rpx;
-  color: var(--ui-brand);
+  color: var(--ui-link);
 }
 .format {
   display: block;
   font-size: 21rpx;
-  color: #969ba4;
+  color: #a6a6a6;
   margin-top: 17rpx;
 }
 .optional-grid {
@@ -137,9 +136,8 @@
   gap: 10px;
   min-height: 58px;
   padding: 12px 14px;
-  background: #202125;
-  border: 1px solid #36383e;
-  border-radius: 8px;
+  background: var(--ui-surface);
+  border-radius: 12px;
   font-size: 15px;
   color: var(--ui-muted);
 }
@@ -165,16 +163,16 @@
   z-index: 80;
   /* Design: 14 / 20 / 24 / 20. */
   padding: 14px 20px calc(24px + env(safe-area-inset-bottom));
-  border-top: 1px solid var(--ui-border);
+  border-top: 1px solid #ffffff0f;
   background: var(--ui-surface);
-  --td-button-border-radius: 7px;
+  --td-button-border-radius: 22px;
 }
 .detail .queue-link {
   height: 58px;
   padding: 0 14px;
   gap: 12px;
   margin-top: 20px;
-  border-radius: 10px;
+  border-radius: 16px;
   font-size: 14px;
 }
 .detail .queue-link .copy .muted {
@@ -197,10 +195,10 @@
 }
 .submit-quote {
   flex-shrink: 0;
-  color: #f5f6f7;
+  color: #ffffff;
 }
 .is-ready .submit-status {
-  color: #4ade80;
+  color: #ffffff;
 }
 .uploaded {
   display: flex;
@@ -208,15 +206,14 @@
   gap: 20rpx;
   padding: 20rpx;
   background: var(--ui-surface);
-  border: 1rpx solid var(--ui-border);
-  border-radius: 16rpx;
+  border-radius: 12px;
   margin-top: 25rpx;
 }
 .uploaded image {
   flex-shrink: 0;
   height: 110rpx;
   width: 110rpx;
-  border-radius: 12rpx;
+  border-radius: 10px;
 }
 .uploaded-copy {
   flex: 1;

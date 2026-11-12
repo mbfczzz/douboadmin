@@ -16,6 +16,7 @@
   white-space: nowrap;
   padding: 20rpx 32rpx;
   margin: 0;
+  border-radius: 12px;
 }
 .hot-words {
   display: flex;
@@ -28,7 +29,7 @@
   background: var(--ui-field);
   padding: 12rpx 18rpx;
   border-radius: 10rpx;
-  color: var(--ui-brand);
+  color: var(--ui-link);
   font-size: 25rpx;
 }
 .hot-title {

@@ -61,7 +61,6 @@
       >
         <view class="cover {{col===1?'alternate':''}}">
           <image mode="aspectFill" src="{{item.data.cover}}" lazy-load />
-          <view class="cover-line" />
           <view class="play">
             <t-icon
               name="{{item.data.kind==='image'?'image':'play'}}"

@@ -10,7 +10,7 @@
 .mix-material,
 .mix-add {
   height: calc((100vw - 86px) / 3);
-  border-radius: 14rpx;
+  border-radius: 12px;
   background: var(--ui-field);
   position: relative;
   overflow: hidden;
@@ -31,13 +31,16 @@
   align-items: center;
   justify-content: center;
   gap: 12rpx;
-  color: var(--ui-brand);
+  color: #ffffffb3;
   font-size: 23rpx;
+  background: var(--ui-field);
+  border-radius: 12px;
 }
 .mix-add {
   /* Same size as the material tiles beside it. */
   height: calc((100vw - 86px) / 3);
-  border: 1px dashed #22c55e;
+  background: var(--ui-field);
+  color: #ffffffb3;
 }
 .mix-video text {
   max-width: 150rpx;
@@ -52,7 +55,7 @@
   right: 5rpx;
   padding: 3rpx 12rpx;
   border-radius: 50%;
-  background: #101113d9;
+  background: #121212d9;
   color: #fff;
   font-size: 32rpx;
 }

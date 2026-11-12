@@ -68,10 +68,10 @@
   white-space: nowrap;
 }
 .model-option.selected {
-  background: #2d2f34;
+  background: #2e2e2e;
 }
 .model-option t-icon {
-  color: var(--ui-brand);
+  color: #ffffff;
 }
 .reference-sheet {
   padding: 16px 20px calc(24px + env(safe-area-inset-bottom));
@@ -133,7 +133,7 @@
   display: block;
   overflow: hidden;
   font-size: var(--ui-font-note);
-  color: #969ba4;
+  color: #a6a6a6;
   margin-top: 2px;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -146,7 +146,7 @@
   text-overflow: ellipsis;
   text-align: right;
   font-size: var(--ui-font-caption);
-  color: #969ba4;
+  color: #a6a6a6;
 }
 .model-badges {
   display: flex;
@@ -157,17 +157,17 @@
 .model-badges text {
   font-size: var(--ui-font-caption);
   padding: 2px 4px;
-  background: #242529;
-  color: #c5c8ce;
+  background: #262626;
+  color: #b3b3b3;
   border-radius: 3px;
 }
 .model-badges .hot {
-  background: #331b1a;
-  color: #f05252;
+  background: #33141b;
+  color: #ff3355;
 }
 .model-badges .new {
-  background: #22c55e21;
-  color: var(--ui-brand);
+  background: #ffffff14;
+  color: #ffffffcc;
 }
 .model-glyph {
   width: 22px;

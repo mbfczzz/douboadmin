@@ -1,6 +1,6 @@
 .task-detail-page {
   padding: 24px 20px calc(30px + env(safe-area-inset-bottom));
-  --td-button-border-radius: 6px;
+  --td-button-border-radius: 22px;
 }
 .task-heading {
   word-break: break-all;
@@ -9,12 +9,12 @@
   font-weight: 500;
   line-height: 1.4;
   margin: 0 0 12px;
-  color: #fafafa;
+  color: #ffffff;
 }
 .task-state {
   flex-wrap: wrap;
   font-size: 13px;
-  color: #969ba4;
+  color: #a6a6a6;
   gap: 8px;
 }
 .state-label {
@@ -28,15 +28,15 @@
   font-size: 12px;
 }
 .task-state t-icon {
-  color: var(--ui-brand);
+  color: #ffffffb3;
 }
 .task-state.failed t-icon {
-  color: #f05252;
+  color: #ff3355;
 }
 .failure-reason {
   overflow-wrap: anywhere;
   font-size: 14px;
-  color: #c5c8ce;
+  color: #b3b3b3;
   line-height: 1.5;
   margin-top: 12px;
 }
@@ -53,14 +53,14 @@
   display: block;
   margin-top: 8px;
   padding: 6px 0;
-  color: #4ade80;
+  color: #ffffff;
 }
 .result {
   position: relative;
   margin-top: 24px;
-  border-radius: 8px;
+  border-radius: 12px;
   overflow: hidden;
-  background: #101113;
+  background: #121212;
 }
 .result image,
 .result video {
@@ -74,7 +74,7 @@
   margin: 12px 0 0;
 }
 .result-actions .danger-link {
-  color: #f05252;
+  color: #ff3355;
 }
 .result-actions {
   margin-top: 8px;
@@ -95,7 +95,7 @@
 .task-detail-page .section-title {
   font-size: 12px;
   font-weight: 400;
-  color: #969ba4;
+  color: #a6a6a6;
   margin: 24px 0 10px;
 }
 .task-detail-page .section-title .small {
@@ -106,7 +106,7 @@
   display: block;
   font-size: 15px;
   line-height: 1.65;
-  color: #c5c8ce;
+  color: #b3b3b3;
   white-space: pre-wrap;
 }
 .asset-grid {
@@ -127,12 +127,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #202125;
+  background: #262626;
 }
 .asset-row > text {
   display: block;
   font-size: 12px;
-  color: #c5c8ce;
+  color: #b3b3b3;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -140,15 +140,15 @@
 }
 .asset-row > text.tiny {
   font-size: 11px;
-  color: #969ba4;
+  color: #a6a6a6;
   margin-top: 3px;
 }
 .specs {
   overflow-wrap: anywhere;
   font-size: 12px;
   line-height: 1.8;
-  color: #969ba4;
-  border-top: 1px solid var(--ui-border);
+  color: #a6a6a6;
+  border-top: 1px solid #ffffff0f;
   padding-top: 16px;
   margin-top: 24px;
 }

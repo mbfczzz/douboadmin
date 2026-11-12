@@ -18,6 +18,7 @@
 .provider-off {
   flex-shrink: 0;
   white-space: nowrap;
+  border-radius: 6px;
 }
 .provider-name {
   font-size: 22px;
@@ -26,20 +27,11 @@
 }
 .provider-level {
   padding: 1px 8px;
-  border-radius: 4px;
-  background: #183024;
-  color: var(--ui-brand);
+  border-radius: 6px;
+  background: #ffffff14;
+  color: #ffffffcc;
   font-size: 12px;
   line-height: 18px;
-}
-/* Same colours as the identity label on the profile page. */
-.provider-level.branch {
-  background: #2f2a3a;
-  color: #c9b6ef;
-}
-.provider-level.s1 {
-  background: #33290f;
-  color: #f5c84b;
 }
 .provider-head .biz-error {
   margin: 10px 0 0;
@@ -61,12 +53,10 @@
   align-items: center;
   min-height: var(--ui-touch-size);
   padding: 4px 0;
-  border-bottom: 2px solid transparent;
 }
 .provider-tabs .on {
-  color: #f5f6f7;
+  color: #ffffff;
   font-weight: 600;
-  border-bottom-color: var(--ui-brand);
 }
 .provider-qr {
   display: block;

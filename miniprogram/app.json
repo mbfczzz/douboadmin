@@ -27,14 +27,14 @@
   "window": {
     "navigationStyle": "custom",
     "navigationBarTextStyle": "white",
-    "backgroundColor": "#101113",
+    "backgroundColor": "#121212",
     "backgroundTextStyle": "light"
   },
   "tabBar": {
     "custom": true,
-    "color": "#969ba4",
-    "selectedColor": "#fafafa",
-    "backgroundColor": "#1a1b1f",
+    "color": "#a6a6a6",
+    "selectedColor": "#ffffff",
+    "backgroundColor": "#121212",
     "list": [
       {
         "pagePath": "pages/templates/index",

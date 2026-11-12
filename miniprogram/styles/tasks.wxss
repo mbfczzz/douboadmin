@@ -1,8 +1,7 @@
 .task-card {
   padding: 28rpx;
-  border: 1rpx solid var(--ui-border);
   background: var(--ui-surface);
-  border-radius: 20rpx;
+  border-radius: 16px;
   margin-bottom: 20rpx;
 }
 .task-title {

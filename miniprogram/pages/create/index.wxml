@@ -34,7 +34,8 @@
           bindtap="showAssets"
           aria-label="添加参考素材"
         >
-          <t-icon name="{{uploading?'time':'add'}}" size="24" />
+          <t-icon name="{{uploading?'time':'add'}}" size="20" />
+          <text class="add-label">{{uploading?'上传中':'添加参考'}}</text>
         </view>
         <view class="reference" wx:for="{{assets}}" wx:key="id">
           <image
@@ -145,9 +146,9 @@
         max="{{durations.length-1}}"
         step="1"
         value="{{durationIndex}}"
-        activeColor="#22c55e"
-        backgroundColor="#2d2f34"
-        block-color="#22c55e"
+        activeColor="#009efa"
+        backgroundColor="#2e2e2e"
+        block-color="#009efa"
         block-size="20"
         bindchange="duration"
         bindchanging="duration"
@@ -183,7 +184,7 @@
   </view>
   <view class="creation-balance"><points-balance /></view>
   <view class="queue-link" bindtap="queue">
-    <t-icon name="task" size="22" color="#22c55e" />
+    <t-icon name="task" size="22" />
     <view class="copy">
       <text>任务队列</text>
       <text class="muted">查看生成进度与结果</text>

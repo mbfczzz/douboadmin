@@ -2,10 +2,6 @@
 .activation-page {
   padding-top: 40px;
 }
-.activation-page .biz-action:not(.biz-secondary):not([disabled]) {
-  background: var(--ui-magenta);
-  color: #fff;
-}
 .activation-intro {
   max-width: 300px;
   margin: 12px auto 0;
@@ -39,7 +35,7 @@
 .activation-links {
   display: flex;
   justify-content: space-between;
-  color: var(--ui-brand);
+  color: var(--ui-link);
   font-size: 26rpx;
   margin-top: 30rpx;
 }
@@ -54,6 +50,7 @@
   color: var(--ui-muted);
   margin-top: 36rpx;
 }
+.activation-path .biz-action + .biz-input,
 .activation-path .biz-input + .biz-input {
   margin-top: 12px;
 }
@@ -68,7 +65,7 @@
 }
 .activation-sms button.biz-action {
   flex-shrink: 0;
-  width: 120px;
+  width: 108px;
   margin: 0;
   padding: 11px 8px;
   font-size: 14px;
