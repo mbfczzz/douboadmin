@@ -4,6 +4,7 @@ export const TAB_ITEMS = [
   {
     text: "模板",
     icon: "app",
+    on: "app-filled",
     path: "/pages/templates/index",
   },
   { text: "混剪", icon: "cut", path: "/pages/mix/index" },
@@ -17,9 +18,10 @@ export const TAB_ITEMS = [
   {
     text: "Agent",
     icon: "chat-bubble",
+    on: "chat-bubble-filled",
     path: "/pages/agent/index",
   },
-  { text: "我的", icon: "user", path: "/pages/mine/index" },
+  { text: "我的", icon: "user", on: "user-filled", path: "/pages/mine/index" },
 ];
 
 export function tabDestination(path: string) {

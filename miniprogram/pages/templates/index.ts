@@ -1,4 +1,4 @@
-import { request, tab, media, error, openPage } from "../../utils/api";
+import { request, tab, media, error, openPage, openTab } from "../../utils/api";
 import type { Row, Template, Config } from "../../services/types";
 Page({
   data: {
@@ -124,6 +124,13 @@ Page({
   },
   search() {
     void this.load();
+  },
+  clearSearch() {
+    this.setData({ search: "" });
+    void this.load();
+  },
+  create() {
+    openTab(this, "/pages/create/index");
   },
   detail(e: WechatMiniprogram.TouchEvent) {
     openPage(this, {

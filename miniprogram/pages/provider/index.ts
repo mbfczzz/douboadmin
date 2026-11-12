@@ -9,12 +9,13 @@ const roles: Record<string, string> = {
   s2: "S2 推荐官",
 };
 const tabs = [
-  ["s1", "S1 服务商邀请码", "新用户扫码登记为你的 S1 服务商"],
-  ["s2", "S2 推荐官邀请码", "新用户扫码登记为你的 S2 推荐官"],
+  ["s1", "S1 服务商邀请码", "新用户扫码登记为你的 S1 服务商", "S1 服务商"],
+  ["s2", "S2 推荐官邀请码", "新用户扫码登记为你的 S2 推荐官", "S2 推荐官"],
   [
     "member",
     "子账号开通码",
     "用户扫码登记为子账号（会员），直接归属当前服务商",
+    "子账号",
   ],
 ] as const;
 const pretty = (code: string) => code.slice(0, 4) + "-" + code.slice(4);
@@ -27,7 +28,7 @@ Page({
     promo: false,
     center: null as Center | null,
     roleName: "",
-    tabs: [] as { key: string; label: string }[],
+    tabs: [] as { key: string; label: string; short: string }[],
     tab: "",
     note: "",
     shown: { code: "", raw: "", qr: "" },
@@ -63,7 +64,7 @@ Page({
         roleName: center.roleName || roles[center.role] || "服务商",
         tabs: tabs
           .filter(([key]) => center.codes[key])
-          .map(([key, label]) => ({ key, label })),
+          .map(([key, label, , short]) => ({ key, label, short })),
         password: center.password || "",
         loadError: "",
       });

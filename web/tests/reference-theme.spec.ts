@@ -6,9 +6,9 @@ for (const width of [320, 390, 430]) {
   test(`reference mini creator, model menu and material popup at ${width}px`, async ({page}) => {
     await page.setViewportSize({width,height:844});
     await page.setContent(styles(width,["pages/create/index.wxss","custom-tab-bar/index.wxss"])+creator());
-    await expect(page.locator(".generate-button")).toHaveCSS("background-color","rgb(0, 200, 220)");
-    await expect(page.locator(".generate-button")).toHaveCSS("color","rgb(8, 43, 48)");
-    await expect(page.locator(".item.primary .glyph")).toHaveCSS("background-color","rgb(0, 200, 220)");
+    await expect(page.locator(".generate-button")).toHaveCSS("background-color","rgb(235, 248, 255)");
+    await expect(page.locator(".generate-button")).toHaveCSS("color","rgb(21, 22, 26)");
+    await expect(page.locator(".item.primary .glyph")).toHaveCSS("background-color","rgb(44, 44, 46)");
     expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBe(width);
     await page.screenshot({path:`../.runtime/reference-theme/mini-create-${width}.png`});
     await page.locator(".workspace").evaluate((element, logo) => {
@@ -18,7 +18,7 @@ for (const width of [320, 390, 430]) {
       menu.innerHTML=["Seedance 2.0 Fast VIP","Seedance 2.0 Mini","Seedance 2.0 VIP","Seedance 2.5"].map((label,i)=>`<div class="model-option ${i===0?"selected":""}"><img class="model-logo" src="${logo}" alt=""/><div class="model-info"><div class="model-title"><span>${label}</span></div></div>${i===0?"✓":""}</div>`).join("");
       element.append(menu);
     },image("model-icons/bytedance.png"));
-    await expect(page.locator(".model-option.selected")).toHaveCSS("background-color","rgb(23, 54, 59)");
+    await expect(page.locator(".model-option.selected")).toHaveCSS("background-color","rgb(71, 75, 84)");
     await page.screenshot({path:`../.runtime/reference-theme/mini-models-${width}.png`});
     await page.locator("body").evaluate((body, content) => {
       const overlay=document.createElement("div");
@@ -41,7 +41,7 @@ for (const width of [320,390]) {
       <div class="biz-error">余额暂时无法更新 · 点击重试</div><span class="order-state pill succeeded">已支付</span><span class="order-state pill warning">待支付</span>
       </div>`);
     await expect(page.locator(".order-state.succeeded")).toHaveCSS("color","rgb(111, 218, 160)");
-    await expect(page.getByRole("button",{name:"充值暂未开放"})).toHaveCSS("background-color","rgb(41, 44, 50)");
+    await expect(page.getByRole("button",{name:"充值暂未开放"})).toHaveCSS("background-color","rgb(52, 55, 62)");
     expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBe(width);
     await page.screenshot({path:`../.runtime/reference-theme/mini-wallet-${width}.png`,fullPage:true});
   });

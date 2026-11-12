@@ -7,7 +7,8 @@
     </view>
   </view>
   <view class="preview-name">{{name}}</view>
-  <text class="preview-hint">确认商品主体清晰、完整，没有被遮挡。</text>
+  <view wx:if="{{uploaded}}" class="preview-hint"><t-icon name="check-circle" size="16" /> 已上传，返回后继续创作</view>
+  <text wx:else class="preview-hint">确认商品主体清晰、完整，没有被遮挡。</text>
   <view class="foot-actions">
     <view>
       <t-button block bind:tap="back">重新选择</t-button>

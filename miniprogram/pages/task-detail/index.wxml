@@ -18,11 +18,11 @@
     <text class="task-heading">{{job.shortTitle}}</text>
     <view class="row task-state {{job.status}}">
       <view class="state-label">
-        <t-loading wx:if="{{job.status==='running'}}" size="15px" />
+        <t-loading wx:if="{{job.status==='running'}}" size="16px" />
         <t-icon
           wx:else
           name="{{job.status==='queued'?'time':job.status==='failed'?'error-circle':'check-circle'}}"
-          size="15"
+          size="16"
         />
         <text>{{job.kindText}}{{job.stateText}}</text>
       </view>
@@ -89,10 +89,8 @@
         </t-button>
       </view>
     </view>
-    <view wx:if="{{job.status==='succeeded'&&!job.deleted}}" class="row result-actions"
-      ><button class="text-button" bindtap="share">
-        分享作品</button
-      ><button class="text-button danger-link" bindtap="remove">删除作品</button></view
+    <view wx:if="{{job.status==='succeeded'&&!job.deleted}}" class="result-actions"
+      ><t-button block bind:tap="share">分享作品</t-button></view
     >
     <text class="section-title">提示词</text>
     <text class="full-prompt" selectable>{{job.input.prompt}}</text>
@@ -122,6 +120,7 @@
       <text wx:if="{{job.input.duration}}">· {{job.input.duration}}秒</text>
       <text wx:if="{{job.costUnits}}" class="billing-summary">本次积分 {{job.costUnits/100}} · {{job.billingState==='reserved'?'已预留':job.billingState==='charged'?'已扣除':job.billingState==='released'?'已退回':''}}</text>
     </view>
-    <view class="task-balance"><points-balance /></view>
+    <view class="task-balance"><points-balance compact /></view>
+    <button wx:if="{{job.status==='succeeded'&&!job.deleted}}" class="text-button danger-link" bindtap="remove">删除作品</button>
   </view>
 </view>

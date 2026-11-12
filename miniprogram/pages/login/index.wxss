@@ -7,7 +7,7 @@
   padding: 12px;
   min-height: 48px;
   line-height: 24px;
-  border-radius: 12px;
+  border-radius: var(--ui-radius-pill);
   background: var(--ui-primary);
   color: var(--ui-on-brand);
   font-size: 16px;
@@ -25,7 +25,7 @@
 }
 .login-heading {
   display: block;
-  font-size: 23px;
+  font-size: 20px;
   font-weight: 600;
   line-height: 1.4;
 }
@@ -33,14 +33,14 @@
   display: block;
   max-width: 300px;
   margin: 12px auto 28px;
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1.7;
   color: var(--ui-muted);
 }
 .login-explain {
   display: block;
   margin: 16px 0;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.7;
   color: var(--ui-muted);
 }
@@ -64,13 +64,13 @@
 .login-page .browse {
   margin: 4px auto 0;
   padding: 12px 18px;
-  font-size: 14px;
+  font-size: 15px;
 }
 .privacy-link {
   display: block;
   margin-top: 8px;
   padding: 12px;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--ui-muted);
 }
 .login-page .loading {

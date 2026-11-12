@@ -2,7 +2,7 @@
 .video-copy {
   white-space: pre-wrap;
   line-height: 1.7;
-  font-size: 27rpx;
+  font-size: 15px;
 }
 .biz-preview,
 .biz-image {

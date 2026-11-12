@@ -15,6 +15,7 @@
         <t-icon name="heart" size="40" />
         <text class="title">把喜欢的灵感收藏起来</text>
         <text class="desc">在模板详情点击爱心，就能在这里找到它。</text>
+        <t-button t-class="empty-action" theme="primary" bind:tap="browse">去逛模板</t-button>
       </view>
       <view class="unavailable-favorite" wx:for="{{unavailableFavorites}}" wx:key="id">
         <view><text>模板暂不可用</text><text class="muted small">可能已下架，可取消收藏</text></view>
@@ -30,9 +31,9 @@
         <image src="{{item.data.cover}}" mode="aspectFill" />
         <view class="favorite-copy">
           <text>{{item.data.title}}</text>
-          <text class="muted small">{{item.data.category}} · 制作同款 ↗</text>
+          <text class="muted small">{{item.data.category}} · 制作同款</text>
         </view>
-        <t-icon name="chevron-right" />
+        <t-icon name="chevron-right" size="20" />
       </view>
     </block>
     <block wx:elif="{{mode==='notifications'}}">
@@ -53,11 +54,11 @@
           <text class="tiny muted">{{item.time}}</text>
         </view>
         <text class="task-title">{{item.shortTitle}}</text>
-        <text class="small accent">查看详情 ↗</text>
+        <text class="small accent">查看详情 ›</text>
       </view>
     </block>
     <block wx:elif="{{mode==='help'}}">
-      <text class="section-title">关于当前版本</text>
+      <text class="section-title">常见问题</text>
       <view class="help-card surface">
         <text class="help-title">生成需要多久？</text>
         <text>图片、视频与创作助手通过服务端连接真实模型。生成耗时取决于模型和排队情况。</text>
@@ -72,7 +73,7 @@
         maxlength="1000"
         value="{{content}}"
         placeholder="遇到的问题，或你希望增加的功能…"
-        placeholder-style="color:#a6abb5"
+        placeholder-style="color:#868a93"
         bindinput="input"
       />
       <view class="send">

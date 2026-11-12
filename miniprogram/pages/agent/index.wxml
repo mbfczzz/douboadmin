@@ -9,7 +9,7 @@
     <view class="conversation">
       <button wx:if="{{hasOlder}}" class="secondary" bindtap="older" loading="{{loadingOlder}}" disabled="{{loadingOlder}}">加载更早对话</button>
       <view class="agent-intro">
-        <view class="agent-mark"><t-icon name="chat" size="27" /></view>
+        <view class="agent-mark"><t-icon name="ai-edit" size="24" /></view>
         <text class="headline">让想法，再往前一步。</text>
         <text class="muted small">从一个模糊的念头，到一份清晰的创作脚本。</text>
 
@@ -35,7 +35,7 @@
           {{item.role==='user'?'你':'豆播 Agent'}}
         </view>
         <view class="bubble">
-          <t-loading wx:if="{{item.pending}}" size="28rpx" />
+          <t-loading wx:if="{{item.pending}}" size="16px" />
           <text selectable>{{item.text}}</text>
         </view>
         <view
@@ -45,7 +45,7 @@
           bindtap="use"
         >
           带到创作
-          <t-icon name="arrow-right" size="14" />
+          <t-icon name="arrow-right" size="16" />
         </view>
       </view>
     </view>
@@ -55,7 +55,7 @@
       auto-height
       maxlength="500"
       placeholder="说说你的创作想法…"
-      placeholder-style="color:#a6abb5"
+      placeholder-style="color:#868a93"
       value="{{prompt}}"
       bindinput="input"
       cursor-spacing="130"

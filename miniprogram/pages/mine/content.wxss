@@ -20,9 +20,6 @@
   text-align: center;
   min-height: 64px;
 }
-.statistics > view + view {
-  border-left: 1px solid var(--ui-border);
-}
 .statistics text {
   display: block;
   font-size: 24px;
@@ -31,14 +28,14 @@
   font-variant-numeric: tabular-nums;
 }
 .statistics text:last-child {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 400;
   color: var(--ui-muted);
   margin-top: 8px;
 }
 .works-heading .section-title {
   margin: 0;
-  font-size: 18px;
+  font-size: 16px;
 }
 .works-heading {
   margin-bottom: 12px;
@@ -53,7 +50,7 @@
   border-radius: 12px;
 }
 .mine-page .completed-title {
-  font-size: 14px;
+  font-size: 15px;
   line-height: 22px;
   margin-top: 10px;
 }
@@ -77,11 +74,8 @@
   font-size: 13px;
 }
 .running-link {
-  color: var(--ui-info);
-  background: var(--ui-info-bg);
-}
-.statistics .accent {
-  color: var(--ui-info);
+  color: var(--ui-text);
+  background: var(--ui-surface);
 }
 .role-link {
   color: var(--ui-link);
@@ -89,7 +83,7 @@
 }
 .empty-work {
   color: var(--ui-muted);
-  border: 1px solid var(--ui-border);
+  border: 1px solid transparent;
   background: var(--ui-surface);
 }
 .running-link > text:first-of-type,

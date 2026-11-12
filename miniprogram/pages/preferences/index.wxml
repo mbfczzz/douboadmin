@@ -39,8 +39,8 @@
       ><text class="biz-note"
         >{{completionTemplateId?'需要微信授权订阅，是否能送达以微信授权状态为准。':'通知模板尚未配置，当前可使用站内通知。'}}</text
       ><button
+        wx:if="{{completionTemplateId}}"
         class="biz-action biz-secondary"
-        disabled="{{!completionTemplateId}}"
         bindtap="subscribe"
       >
         授权订阅通知

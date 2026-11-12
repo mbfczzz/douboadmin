@@ -1,19 +1,19 @@
 .task-card {
-  padding: 28rpx;
+  padding: 14px;
   background: var(--ui-surface);
-  border-radius: 16px;
-  margin-bottom: 20rpx;
+  border-radius: var(--ui-radius-card);
+  margin-bottom: 10px;
 }
 .task-title {
-  font-size: 29rpx;
+  font-size: 15px;
   line-height: 1.6;
   display: block;
-  margin: 20rpx 0 15rpx;
+  margin: 10px 0 8px;
 }
 .foot-actions {
   display: flex;
-  gap: 20rpx;
-  margin: 28rpx 0;
+  gap: 10px;
+  margin: 14px 0;
 }
 .foot-actions > view {
   flex: 1;

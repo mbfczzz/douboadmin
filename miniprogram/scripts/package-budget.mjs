@@ -37,7 +37,9 @@ console.log(
 // see docs/wechat-phone-login.md for the measured feature delta.
 // UI review fixes (video covers, empty states, menu layout): +2,462 bytes,
 // see docs/miniprogram-ui-review-fixes.md.
-const budget = 565 * 1024;
+// Jimeng UI alignment: typography, navigation, upload and payment states.
+// Closeout estimate: 579,421 bytes; see docs/miniprogram-ui-closeout.md.
+const budget = 566 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

@@ -4,7 +4,6 @@ import {
   media,
   chooseMediaFile,
   cancelled,
-  upload,
   submitInput,
   openTask,
   hasSession,
@@ -30,7 +29,6 @@ Page({
     favorite: false,
     favoriteVersion: 0,
     favoriteBusy: false,
-    previewing: false,
     sourceOpen: false,
     sources: [
       { label: "从相册选择", icon: "image" },
@@ -199,8 +197,5 @@ Page({
     } finally {
       if (!this.destroyed) this.setData({ busy: false });
     }
-  },
-  queue() {
-    openPage(this, { url: "/pages/tasks/index" });
   },
 });

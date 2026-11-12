@@ -34,7 +34,7 @@ for (const width of [320, 375, 430]) {
       expect((await hint.boundingBox())!.height).toBeLessThan(20);
     }
     for (const arrow of await page.locator(".source-option > .icon-root:last-child").all()) {
-      expect((await arrow.boundingBox())!.width).toBe(18);
+      expect((await arrow.boundingBox())!.width).toBe(20);
     }
     expect((await page.locator(".favorite-card > .icon-root").boundingBox())!.width).toBe(24);
     expect((await page.locator(".favorite-copy").boundingBox())!.width).toBeGreaterThan(100);

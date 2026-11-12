@@ -28,6 +28,7 @@
         ><text class="biz-link" bindtap="copy">复制</text></view
       ><text selectable="true" class="video-copy">{{video.text}}</text></view
     ><text wx:if="{{busy}}" class="biz-note">{{progress}}</text
+    ><text wx:elif="{{!video.url}}" class="biz-note">该视频暂不支持导入混剪。</text
     ><button
       class="biz-action"
       loading="{{busy}}"

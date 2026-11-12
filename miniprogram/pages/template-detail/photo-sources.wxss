@@ -5,7 +5,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 500;
   margin-bottom: 10px;
 }
@@ -37,7 +37,7 @@
 }
 .photo-source-note {
   display: block;
-  font-size: 11px;
+  font-size: 13px;
   color: var(--ui-muted);
   margin-top: 20px;
 }

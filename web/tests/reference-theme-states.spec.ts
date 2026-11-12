@@ -8,12 +8,12 @@ const sdk = readFileSync("../miniprogram/node_modules/tdesign-miniprogram/minipr
   .replace(/([\d.]+)rpx/g, (_, n) => `${Number(n)*390/750}px`);
 
 for (const item of [
-  {name:"login press",scope:"login-page",classes:"primary t-button--hover",bg:"rgb(0, 173, 189)",fg:"rgb(8, 43, 48)"},
-  {name:"secondary press",scope:"",classes:"default t-button--hover",bg:"rgb(23, 54, 59)",fg:"rgb(244, 245, 247)"},
-  {name:"text press",scope:"",classes:"default t-button--text t-button--hover",bg:"rgb(23, 54, 59)",fg:"rgb(244, 245, 247)"},
-  {name:"disabled secondary",scope:"",classes:"default t-button--disabled",bg:"rgb(41, 44, 50)",fg:"rgb(133, 139, 150)"},
-  {name:"primary outline press",scope:"",classes:"primary t-button--outline t-button--hover",bg:"rgb(23, 54, 59)",fg:"rgb(0, 173, 189)"},
-  {name:"disabled primary outline",scope:"",classes:"primary t-button--outline t-button--disabled",bg:"rgba(0, 0, 0, 0)",fg:"rgb(166, 171, 181)"},
+  {name:"login press",scope:"login-page",classes:"primary t-button--hover",bg:"rgb(212, 226, 233)",fg:"rgb(21, 22, 26)"},
+  {name:"secondary press",scope:"",classes:"default t-button--hover",bg:"rgb(71, 75, 84)",fg:"rgb(255, 255, 255)"},
+  {name:"text press",scope:"",classes:"default t-button--text t-button--hover",bg:"rgb(71, 75, 84)",fg:"rgb(255, 255, 255)"},
+  {name:"disabled secondary",scope:"",classes:"default t-button--disabled",bg:"rgb(52, 55, 62)",fg:"rgb(133, 139, 150)"},
+  {name:"primary outline press",scope:"",classes:"primary t-button--outline t-button--hover",bg:"rgb(71, 75, 84)",fg:"rgb(212, 226, 233)"},
+  {name:"disabled primary outline",scope:"",classes:"primary t-button--outline t-button--disabled",bg:"rgba(0, 0, 0, 0)",fg:"rgb(166, 168, 173)"},
 ]) {
   test(`native SDK theme: ${item.name}`, async({page})=>{
     await page.setContent(styles(390,["pages/login/index.wxss"])+`<style>${sdk}</style><div class="${item.scope}"><button class="t-button t-button--${item.classes}">操作按钮</button></div>`);

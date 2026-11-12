@@ -4,11 +4,11 @@
   left: 0;
   right: 0;
   z-index: 100;
-  background: var(--ui-surface, #1c1e22);
-  border-top: 1px solid var(--ui-border, #3b3e46);
+  background: var(--ui-tabbar, #191a1f);
+  border-top: 1px solid var(--ui-border, #34373e);
   display: flex;
   padding: 0 10px env(safe-area-inset-bottom);
-  color: var(--ui-muted, #a6abb5);
+  color: var(--ui-muted, #a6a8ad);
 }
 .item {
   position: relative;
@@ -38,26 +38,19 @@
 .label {
   font-size: 12px;
   line-height: 18px;
-  font-weight: 500;
 }
 .primary .glyph {
   width: 52px;
   height: 40px;
-  border-radius: 14px;
-  color: var(--ui-on-brand, #082b30);
-  background: var(--ui-primary, #00c8dc);
+  border-radius: 999px;
+  color: var(--ui-text, #ffffff);
+  background: var(--ui-tab-pill, #2c2c2e);
 }
 .active {
-  color: var(--ui-nav, #f4f5f7);
-}
-.active:not(.primary) .glyph {
-  background: var(--ui-selected, #17363b);
-}
-.primary .label {
-  color: var(--ui-link, #66e3ee);
+  color: var(--ui-nav, #ffffff);
 }
 .active .label {
-  font-weight: 600;
+  font-weight: 500;
 }
 .item-pressed {
   opacity: 0.65;

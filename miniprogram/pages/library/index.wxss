@@ -1,16 +1,16 @@
 .favorite-card {
   display: flex;
   align-items: center;
-  gap: 22rpx;
-  padding: 22rpx;
+  gap: 11px;
+  padding: 11px;
   background: var(--ui-surface);
-  border-radius: 16px;
-  margin-bottom: 20rpx;
+  border-radius: var(--ui-radius-card);
+  margin-bottom: 10px;
 }
 .favorite-card image {
   flex-shrink: 0;
-  width: 150rpx;
-  height: 170rpx;
+  width: 75px;
+  height: 85px;
   border-radius: 10px;
 }
 .favorite-card > t-icon {
@@ -33,34 +33,34 @@
 }
 .favorite-copy text {
   display: block;
-  margin: 15rpx 0;
-  font-size: 27rpx;
+  margin: 8px 0;
+  font-size: 15px;
 }
 .favorite-copy .small {
-  font-size: 23rpx;
+  font-size: 13px;
 }
 .help-card {
-  padding: 28rpx;
+  padding: 14px;
 }
 .help-card text {
   display: block;
-  font-size: 25rpx;
+  font-size: 13px;
   color: var(--ui-muted);
   line-height: 1.9;
 }
 .help-card .help-title {
-  font-size: 28rpx;
+  font-size: 15px;
   color: var(--ui-text);
-  margin: 28rpx 0 14rpx;
+  margin: 14px 0 7px;
 }
 .help-card .help-title:first-child {
   margin-top: 0;
 }
 .feedback {
-  height: 300rpx;
+  height: 150px;
 }
 .send {
-  margin-top: 30rpx;
+  margin-top: 15px;
 }
 .unavailable-favorite {
   display: flex;
@@ -71,12 +71,12 @@
   margin-bottom: 12px;
   background: var(--ui-surface);
   border-radius: 12px;
-  font-size: 14px;
+  font-size: 15px;
 }
 .unavailable-favorite .muted {
   display: block;
   margin-top: 6px;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 @import "../../styles/job-pagination.wxss";

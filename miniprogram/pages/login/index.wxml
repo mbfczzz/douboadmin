@@ -1,4 +1,4 @@
-<nav-bar title="登录豆播" back disabled="{{returning}}" />
+<nav-bar title="登录" back disabled="{{returning}}" />
 <view class="subpage login-page">
   <image class="login-brand brand-tile" src="{{brandIcon}}" mode="aspectFit" aria-label="豆播 AI" />
   <text class="login-heading">{{heading}}</text>

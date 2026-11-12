@@ -11,12 +11,13 @@ const luminance = (hex) => hex.slice(1).match(/../g).map((v) => parseInt(v, 16) 
   .reduce((sum, v, i) => sum + v * [.2126, .7152, .0722][i], 0);
 const contrast = (a, b) => (Math.max(luminance(a), luminance(b)) + .05) / (Math.min(luminance(a), luminance(b)) + .05);
 
-// Approved Jimeng-style dark canvas with cyan actions and layered surfaces.
+// Sampled Jimeng app palette: neutral dark layers, light primary actions and
+// cyan kept as a small accent.
 test("mini-program dark palette matches native chrome", () => {
   assert.equal(mini["--ui-bg"], "#0f0f11");
-  assert.equal(mini["--ui-surface"], "#1c1e22");
+  assert.equal(mini["--ui-surface"], "#24252b");
   assert.equal(mini["--ui-brand"], "#00c8dc");
-  assert.equal(mini["--ui-primary"], "#00c8dc");
+  assert.equal(mini["--ui-primary"], "#ebf8ff");
   assert.match(read("styles/theme.wxss"), /background: var\(--ui-bg\)/);
   assert.equal(JSON.parse(read("app.json")).window.navigationBarTextStyle, "white");
   assert.equal(JSON.parse(read("app.json")).window.backgroundColor, mini["--ui-bg"]);
@@ -27,7 +28,7 @@ test("mini-program dark palette matches native chrome", () => {
     assert.ok(read("app.ts").includes(`${key}: "${mini["--ui-bg"]}"`));
   }
   assert.equal(app.window.backgroundTextStyle, "light");
-  assert.equal(app.tabBar.backgroundColor, mini["--ui-surface"]);
+  assert.equal(app.tabBar.backgroundColor, mini["--ui-tabbar"]);
   assert.equal(app.tabBar.selectedColor, mini["--ui-nav"]);
   for (const route of app.pages) {
     const config = JSON.parse(read(route + ".json"));

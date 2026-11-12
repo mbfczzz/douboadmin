@@ -1,5 +1,5 @@
 .balance {
-  border: 1px solid var(--ui-points-border);
+  border: 1px solid transparent;
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -8,7 +8,7 @@
   box-sizing: border-box;
   margin: 0;
   padding: 16px;
-  border-radius: 16px;
+  border-radius: var(--ui-radius-card);
   min-height: 152px;
   background: var(--ui-points-bg);
 }
@@ -20,7 +20,7 @@
 .note {
   display: block;
   color: var(--ui-points-muted);
-  font-size: var(--ui-font-note, 12px);
+  font-size: var(--ui-font-note, 13px);
 }
 .amount {
   display: block;
@@ -41,10 +41,10 @@ button.action {
   margin: 0;
   padding: 12px;
   line-height: 22px;
-  border-radius: 12px;
-  color: var(--ui-on-brand, #082b30);
-  background: var(--ui-primary, #00c8dc);
-  font-size: var(--ui-font-body, 14px);
+  border-radius: 999px;
+  color: var(--ui-on-brand, #15161a);
+  background: var(--ui-primary, #ebf8ff);
+  font-size: var(--ui-font-body, 15px);
   font-weight: 600;
 }
 .action::after {
@@ -52,9 +52,9 @@ button.action {
 }
 .error {
   display: block;
-  color: var(--ui-danger, #b42338);
-  font-size: 24rpx;
-  padding: 12rpx 0;
+  color: var(--ui-danger, #ff91a1);
+  font-size: 13px;
+  padding: 6px 0;
 }
 .balance-bottom,
 .note {
@@ -76,11 +76,16 @@ button.action {
   align-items: center;
   gap: 6px;
   min-height: 44px;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 18px;
   color: var(--ui-points);
 }
 .inline-balance text {
   min-width: 0;
-  overflow-wrap: anywhere;
+  white-space: nowrap;
+}
+
+.points-mark {
+  margin-right: 4px;
+  font-size: 1em;
 }

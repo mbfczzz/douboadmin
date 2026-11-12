@@ -4,7 +4,7 @@
 }
 .hero {
   position: relative;
-  height: 260px;
+  height: 400px;
   border-radius: 12px;
   overflow: hidden;
 }
@@ -14,16 +14,16 @@
 }
 .hero-preview {
   position: absolute;
-  left: calc(50% - 24px);
-  top: calc(50% - 24px);
-  width: 48px;
-  height: 48px;
+  right: 12px;
+  top: 12px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: #0f0f11bb;
   color: #ffffff;
-  border-radius: 50%;
+  border-radius: 10px;
 }
 .title-row {
   margin: 20px 0 0;
@@ -37,7 +37,7 @@
   flex: 1;
   min-width: 0;
   overflow-wrap: anywhere;
-  font-size: 21px;
+  font-size: 20px;
   font-weight: 600;
   line-height: 1.4;
 }
@@ -60,8 +60,8 @@
   line-height: 1.4;
 }
 .upload-title {
-  font-size: 18px;
-  font-weight: 600;
+  font-size: 16px;
+  font-weight: 500;
 }
 .row .section-title {
   margin: 0;
@@ -73,7 +73,7 @@
   gap: 12px;
   padding: 16px;
   background: var(--ui-surface);
-  border-radius: 16px;
+  border-radius: var(--ui-radius-card);
 }
 .upload-icon {
   width: 44px;
@@ -96,35 +96,30 @@
 }
 .upload-text {
   max-width: 100%;
-  width: 140px;
+  width: 150px;
   height: 44px;
   line-height: 44px;
   text-align: center;
   color: var(--ui-on-brand);
-  font-size: 14px;
+  font-size: 15px;
+  font-weight: 600;
   background: var(--ui-primary);
-  border-radius: 7px;
+  border-radius: var(--ui-radius-pill);
   margin-top: 4px;
 }
 .upload-name {
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: 500;
 }
 .upload-hint {
-  font-size: 14px;
+  font-size: 13px;
   color: var(--ui-muted);
-}
-.required {
-  flex-shrink: 0;
-  margin-left: auto;
-  font-size: 22rpx;
-  color: var(--ui-link);
 }
 .format {
   display: block;
-  font-size: 21rpx;
+  font-size: 13px;
   color: var(--ui-muted);
-  margin-top: 17rpx;
+  margin-top: 8px;
 }
 .optional-grid {
   display: grid;
@@ -167,25 +162,13 @@
   border-top: 1px solid var(--ui-border);
   background: var(--ui-bg);
 }
-.detail .queue-link {
-  height: 58px;
-  padding: 0 14px;
-  gap: 12px;
-  margin-top: 20px;
-  border-radius: 16px;
-  font-size: 14px;
-}
-.detail .queue-link .copy .muted {
-  font-size: 12px;
-  margin-top: 3px;
-}
 .submit-action {
   margin-top: 10px;
 }
 .submit-area .note {
   display: block;
   margin: 8px 0 0;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.5;
 }
 .submit-caption {
@@ -203,16 +186,16 @@
 .uploaded {
   display: flex;
   align-items: center;
-  gap: 20rpx;
-  padding: 20rpx;
+  gap: 10px;
+  padding: 10px;
   background: var(--ui-surface);
   border-radius: 12px;
-  margin-top: 25rpx;
+  margin-top: 12px;
 }
 .uploaded image {
   flex-shrink: 0;
-  height: 110rpx;
-  width: 110rpx;
+  height: 55px;
+  width: 55px;
   border-radius: 10px;
 }
 .uploaded-copy {
@@ -224,12 +207,12 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  margin: 10rpx 0;
-  font-size: 25rpx;
+  margin: 5px 0;
+  font-size: 13px;
 }
 .delete {
   flex-shrink: 0;
-  padding: 15rpx;
+  padding: 8px;
 }
 .hero video {
   width: 100%;
@@ -238,7 +221,7 @@
 .template-description {
   display: block;
   color: var(--ui-muted);
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.7;
   margin: 8px 0 0;
 }

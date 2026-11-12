@@ -13,14 +13,14 @@
   <view wx:elif="{{!jobs.length}}" class="empty">
     <t-icon name="task" size="40" /><text class="title">这里还没有任务</text>
     <text class="desc">每个作品，都从一个想法开始。</text>
-    <t-button t-class="empty-action" theme="primary" variant="outline" bind:tap="create"
+    <t-button t-class="empty-action" theme="primary" bind:tap="create"
       >去创作</t-button
     >
   </view>
   <view wx:else class="content-reveal">
     <view wx:if="{{loadError}}" class="error-box" bindtap="load">刷新失败，已保留上次结果 · 点击重试</view>
     <view class="queue-summary"
-      ><text>进行中 · {{runningCount}}</text
+      ><text>处理中 · {{runningCount}}</text
       ><text class="failure-count {{failedCount?'failed':''}}">失败 · {{failedCount}}</text></view
     >
     <view
@@ -34,7 +34,7 @@
       <view class="queue-thumb"
         ><t-icon
           name="{{item.input.kind==='image'?'image':'video-camera'}}"
-          size="22"
+          size="32"
       /></view>
       <view class="queue-copy">
         <view class="queue-title-row"
@@ -75,7 +75,7 @@
             data-id="{{item.id}}"
             binderror="coverError"
           />
-          <t-icon wx:else name="play-circle" size="36" />
+          <t-icon wx:else name="play-circle" size="32" />
           <text wx:if="{{item.input.duration}}" class="completed-duration"
             >{{item.input.duration}} 秒</text
           >

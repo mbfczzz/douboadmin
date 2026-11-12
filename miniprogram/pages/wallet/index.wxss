@@ -15,13 +15,10 @@
   color: var(--ui-muted);
   font-size: 13px;
 }
-.purchase-tabs button::after {
-  border: 0;
-}
 .purchase-tabs .selected {
   background: var(--ui-selected);
   color: var(--ui-link);
-  font-weight: 600;
+  font-weight: 500;
 }
 .purchase-tabs button[disabled],
 .virtual-product[disabled] {
@@ -30,7 +27,7 @@
 .checkout-error {
   display: block;
   color: var(--ui-danger);
-  font-size: 12px;
+  font-size: 13px;
   margin: 8px 0;
 }
 .virtual-products {
@@ -46,17 +43,14 @@ button.virtual-product {
   padding: 14px 12px;
   background: var(--ui-surface);
   color: var(--ui-text);
-  border: 1px solid var(--ui-border);
+  border: 1px solid transparent;
   border-radius: 12px;
   line-height: 1.6;
   font-size: 13px;
   overflow-wrap: anywhere;
 }
-button.virtual-product::after {
-  border: 0;
-}
 .virtual-product.selected {
-  border-color: var(--ui-brand);
+  border-color: var(--ui-selected-line);
   background: var(--ui-selected);
 }
 .virtual-product > text {
@@ -83,7 +77,6 @@ button.virtual-product::after {
 .ledger-note,
 .ledger-time {
   display: block;
-  line-height: 1.6;
 }
 .ledger-time {
   margin-top: 4px;
@@ -106,8 +99,10 @@ button.virtual-product::after {
 }
 .product-icons {
   width: 100%;
+  height: 16px;
+  justify-content: flex-end;
   color: var(--ui-link);
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 .product-points {
   color: var(--ui-points);
@@ -116,12 +111,13 @@ button.virtual-product::after {
   font-variant-numeric: tabular-nums;
 }
 .product-unit {
-  font-size: 12px;
+  display: block;
+  font-size: 13px;
   font-weight: 400;
-  margin-left: 4px;
+  white-space: nowrap;
 }
 .product-name {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--ui-muted);
   flex: 1;
   margin: 4px 0 12px;
@@ -192,16 +188,20 @@ button.wallet-refresh {
   border-radius: 10px;
 }
 .wallet-shortcuts {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  padding: 0 16px;
+  border-radius: var(--ui-radius-card);
+  background: var(--ui-surface);
 }
 .wallet-shortcuts > view {
   min-height: 48px;
-  font-size: 14px;
+  font-size: 15px;
+}
+.wallet-shortcuts > view + view {
+  border-top: 1px solid var(--ui-border);
 }
 .wallet-shortcuts text {
   flex: 1;
+  white-space: nowrap;
 }
 .purchase-summary {
   margin-top: 16px;
@@ -213,7 +213,6 @@ button.wallet-refresh {
   background: var(--ui-points-bg);
   border-color: var(--ui-points-border);
 }
-.wallet-summary .icon-tile,
 .wallet-summary .biz-small {
   color: var(--ui-points-muted);
   background: transparent;

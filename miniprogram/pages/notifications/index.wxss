@@ -12,3 +12,11 @@
   background: var(--ui-brand);
   vertical-align: middle;
 }
+.biz-list-title {
+  font-weight: 400;
+  color: var(--ui-muted);
+}
+.biz-list-title.unread {
+  font-weight: 500;
+  color: var(--ui-text);
+}

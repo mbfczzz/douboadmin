@@ -1,5 +1,5 @@
 <view wx:if="{{compact}}" class="inline-balance" bindtap="balanceTap" aria-role="button">
-  <t-icon name="wallet" size="16" /><text>{{loadError?'余额更新失败，重试':logged?'可用 '+available+' 积分':'登录后查看积分'}}</text><t-icon name="chevron-right" size="12" />
+  <text class="points-mark">✦</text><text>{{loadError?'余额更新失败，重试':logged?'可用 '+available+' 积分':'登录后查看积分'}}</text><t-icon name="chevron-right" size="16" />
 </view>
 <view wx:else class="balance">
   <view class="balance-copy">
@@ -8,7 +8,7 @@
     <text wx:if="{{loadError}}" class="error" bindtap="reload">{{loadError}}</text>
   </view>
   <view class="balance-bottom">
-    <view class="note"><t-icon name="lock-on" size="14" /><text>预留 {{held}} 积分</text></view>
-    <button class="action" bindtap="openWallet"><text>我的积分</text><t-icon name="arrow-right" size="18" /></button>
+    <view class="note"><t-icon name="lock-on" size="16" /><text>预留 {{held}} 积分</text></view>
+    <button class="action" bindtap="openWallet"><text>我的积分</text><t-icon name="arrow-right" size="16" /></button>
   </view>
 </view>

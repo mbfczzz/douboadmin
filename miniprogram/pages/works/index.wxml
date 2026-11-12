@@ -2,7 +2,7 @@
 <view class="subpage works-page">
   <view wx:if="{{loading}}" class="loading"><t-loading text="正在加载作品" /></view>
   <view wx:elif="{{needsLogin}}" class="empty">
-    <t-icon name="image" size="36" />
+    <t-icon name="image" size="40" />
     <text class="title">登录后查看你的作品</text>
     <text class="desc">完成的图片和视频都在这里。</text>
     <t-button t-class="empty-action" theme="primary" loading="{{signingIn}}" bind:tap="signIn">去登录</t-button>
@@ -14,16 +14,16 @@
     </view>
     <view wx:if="{{loadError}}" class="error-box" bindtap="load">刷新失败，已保留作品 · 点击重试</view>
     <view wx:if="{{!filtered.length}}" class="empty">
-      <t-icon name="image" size="36" />
+      <t-icon name="image" size="40" />
       <text class="title">{{filter==='image'?'还没有图片作品':filter==='video'?'还没有视频作品':'还没有完成的作品'}}</text>
-      <text class="desc">可以开始一次创作，或换个分类看看。</text>
-      <t-button t-class="empty-action" variant="outline" theme="primary" bind:tap="create">去创作</t-button>
+      <text class="desc">{{filter==='all'?'从一个想法开始第一次创作。':'可以换个分类看看。'}}</text>
+      <t-button t-class="empty-action" theme="primary" bind:tap="create">去创作</t-button>
     </view>
     <view wx:else class="completed-grid content-reveal">
       <view class="completed-item" wx:for="{{filtered}}" wx:key="id" data-id="{{item.id}}" bindtap="detail" hover-class="card-pressed">
         <view class="completed-cover">
           <image wx:if="{{item.thumbnailUrl||(item.input.kind==='image'&&item.result)}}" src="{{item.thumbnailUrl||item.result}}" mode="aspectFill" lazy-load data-id="{{item.id}}" binderror="coverError" />
-          <t-icon wx:else name="play-circle" size="36" />
+          <t-icon wx:else name="play-circle" size="32" />
           <text wx:if="{{item.input.duration}}" class="completed-duration">{{item.input.duration}} 秒</text>
         </view>
         <text class="completed-title">{{item.shortTitle}}</text>

@@ -1,9 +1,10 @@
 @import "../../styles/business.wxss";
 .hot-search {
   display: flex;
-  gap: 24rpx;
   align-items: center;
-  margin-bottom: 24rpx;
+  margin-bottom: 12px;
+  border-radius: var(--ui-radius-pill);
+  background: var(--ui-field);
 }
 .hot-search input {
   flex: 1;
@@ -12,26 +13,31 @@
 .hot-search button.biz-action {
   width: auto;
   flex: 0 0 auto;
-  min-height: 86rpx;
-  white-space: nowrap;
-  padding: 20rpx 32rpx;
+  min-height: 44px;
+  padding: 0 18px;
   margin: 0;
-  border-radius: 12px;
+  background: transparent;
+  color: var(--ui-link);
+  font-size: 15px;
+}
+.hot-search input.biz-input {
+  background: transparent;
+  padding: 11px 18px;
 }
 .hot-words {
   display: flex;
-  gap: 16rpx;
+  gap: 8px;
   flex-wrap: wrap;
 }
 .hot-words text {
   max-width: 100%;
   overflow-wrap: anywhere;
   background: var(--ui-field);
-  padding: 12rpx 18rpx;
-  border-radius: 10rpx;
+  padding: 6px 9px;
+  border-radius: 6px;
   color: var(--ui-link);
-  font-size: 25rpx;
+  font-size: 13px;
 }
 .hot-title {
-  margin-top: 22rpx;
+  margin-top: 11px;
 }

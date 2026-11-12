@@ -39,7 +39,7 @@ for (const width of [320, 375, 430]) {
     const button = await page.locator(".hot-search button").boundingBox();
     expect(input!.width).toBeGreaterThan(160);
     expect(button!.width).toBeLessThan(100);
-    expect(input!.x + input!.width).toBeLessThan(button!.x);
+    expect(input!.x + input!.width).toBeLessThanOrEqual(button!.x);
     expect(
       await page
         .locator(".row.biz-note")
@@ -55,7 +55,7 @@ for (const width of [320, 375, 430]) {
     );
     expect(
       (await page.locator(".favorite-card img").boundingBox())!.width,
-    ).toBeCloseTo((150 * width) / 750, 0);
+    ).toBeCloseTo(75, 0);
     // The typed code and its confirm button share one row.
     const code = await page.locator(".activation-sms input").boundingBox(),
       confirm = await page.locator(".activation-sms button").boundingBox();
@@ -87,18 +87,18 @@ for (const width of [320, 375, 430]) {
       `<style>body{margin:0;font-family:sans-serif}${styles}</style><div class="create-page"><div class="mode-tabs"><div class="mode-tab active">生成视频</div><div class="mode-tab">生成图片</div></div></div><div class="tabbar">${["模板", "混剪", "创作", "Agent", "我的"].map((name, i) => `<div class="item ${i === 2 ? "active" : ""}"><div class="glyph"><t-icon>◇</t-icon></div><span class="label">${name}</span></div>`).join("")}</div>`,
     );
     expect((await page.locator(".mode-tabs").boundingBox())!.height).toBe(44);
-    // Selected controls use cyan; the active native tab uses white for hierarchy.
+    // Selected controls are a lighter grey with white text, as in Jimeng.
     const look = (selector: string) =>
       page.locator(selector).first().evaluate((el) => ({
         background: getComputedStyle(el).backgroundColor,
         color: getComputedStyle(el).color,
       }));
     expect(await look(".mode-tab.active")).toEqual({
-      background: "rgb(23, 54, 59)",
-      color: "rgb(102, 227, 238)",
+      background: "rgb(71, 75, 84)",
+      color: "rgb(255, 255, 255)",
     });
-    expect((await look(".item.active")).color).toBe("rgb(244, 245, 247)");
-    expect((await look(".item:not(.active)")).color).toBe("rgb(166, 171, 181)");
+    expect((await look(".item.active")).color).toBe("rgb(255, 255, 255)");
+    expect((await look(".item:not(.active)")).color).toBe("rgb(166, 168, 173)");
     expect((await page.locator(".item.active").boundingBox())!.height).toBeGreaterThanOrEqual(44);
     await page.screenshot({ path: `../.runtime/mini-selection-${width}.png` });
   });

@@ -1,10 +1,10 @@
 .settings {
-  margin-top: 16px;
+  margin-top: 20px;
 }
 .setting-title {
   display: block;
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 500;
   line-height: 24px;
   margin: 24px 0 10px;
   color: var(--ui-text);
@@ -35,10 +35,9 @@
   border-radius: 10px;
 }
 .resolution-option.selected {
-  box-shadow: inset 0 0 0 1px var(--ui-brand);
-  color: var(--ui-link);
+  color: var(--ui-text);
   background: var(--ui-selected);
-  font-weight: 600;
+  font-weight: 500;
 }
 .duration-slider {
   margin: 0 10px;
@@ -69,9 +68,9 @@
   border-radius: 12px;
 }
 .ratio.selected {
-  color: var(--ui-link);
+  color: var(--ui-text);
   background: var(--ui-selected);
-  box-shadow: inset 0 0 0 1px var(--ui-brand);
+  box-shadow: inset 0 0 0 1px var(--ui-selected-line);
 }
 .ratio-pressed {
   opacity: 0.75;
@@ -82,7 +81,7 @@
   font-weight: 500;
 }
 .selected .ratio-label {
-  font-weight: 600;
+  font-weight: 500;
 }
 .ratio-visual {
   width: 28px;
@@ -99,10 +98,10 @@
   border-radius: 2px;
 }
 .selected .ratio-visual {
-  color: var(--ui-link);
+  color: var(--ui-text);
 }
 .selected .ratio-shape {
-  border-color: var(--ui-brand);
+  border-color: var(--ui-text);
   background: var(--ui-selected);
 }
 .shape-wide {

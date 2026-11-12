@@ -168,7 +168,7 @@ Page({
         this.setData({
           paymentWaiting: true,
           paymentNotice:
-            "到账仍在确认中，请到充值订单查询；另购前请确认原订单可能仍会到账",
+            "暂未确认到账，请先查看订单状态。另购不会取消原订单。",
         });
       },
     );

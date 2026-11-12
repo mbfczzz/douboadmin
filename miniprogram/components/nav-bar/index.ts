@@ -2,7 +2,7 @@ Component({
   options: { multipleSlots: true },
   properties: {
     title: { type: String, value: "" },
-    size: { type: Number, value: 19 },
+    size: { type: Number, value: 20 },
     back: { type: Boolean, value: false },
     disabled: { type: Boolean, value: false },
     interceptBack: { type: Boolean, value: false },

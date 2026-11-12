@@ -40,7 +40,7 @@
         bindtap="prepare"
         loading="{{busy}}"
       >
-        准备分享</button
+        生成分享链接</button
       ><block wx:else
         ><button class="biz-action" open-type="share">发给微信好友</button
         ><button

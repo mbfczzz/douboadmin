@@ -5,20 +5,18 @@
   margin: 16px 0 20px;
 }
 .templates-page .filter.active {
-  font-weight: 600;
-  color: var(--ui-link);
+  font-weight: 500;
+  color: var(--ui-text);
   background: var(--ui-selected);
 }
 .templates-page .filter {
-  font-size: 13px;
   line-height: 22px;
   padding: 11px 18px;
   min-width: 70px;
   text-align: center;
   margin-right: 6px;
-  border-radius: 10px;
+  border-radius: var(--ui-radius-pill);
   background: var(--ui-surface);
-  border-bottom-width: 0;
 }
 .templates-page .filter:last-child {
   margin-right: 0;
@@ -26,10 +24,9 @@
 .search-field {
   display: flex;
   background: var(--ui-field);
-  border: 1px solid var(--ui-border);
   padding: 0 16px;
-  gap: 12px;
-  border-radius: 12px;
+  gap: 4px;
+  border-radius: var(--ui-radius-pill);
   margin: 0;
   height: 52px;
   color: var(--ui-muted);
@@ -38,27 +35,38 @@
 .search-field input {
   flex: 1;
   min-width: 0;
-  font-size: 14px;
+  font-size: 15px;
 }
 .search-field text {
   margin: 0 -12px 0 0;
   padding: 12px;
-  font-size: 14px;
+  font-size: 15px;
   color: var(--ui-link);
+}
+.clear-search {
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  background: transparent;
+  color: var(--ui-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .waterfall {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
+  gap: 10px;
 }
 .column {
-  width: calc(50% - 6px);
+  width: calc(50% - 5px);
 }
 .template {
-  margin-bottom: 28px;
+  margin-bottom: 18px;
 }
 .cover {
-  height: 144px;
+  height: 212px;
   position: relative;
   border-radius: 12px;
   overflow: hidden;
@@ -81,25 +89,22 @@
   justify-content: center;
   bottom: 8px;
 }
-/* At most two lines, so long titles keep the two columns aligned. */
 .title {
-  word-break: break-all;
-  display: -webkit-box;
+  display: block;
   overflow: hidden;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 15px;
   font-weight: 400;
   line-height: 22px;
-  height: 44px;
-  margin: 10px 0 0;
+  margin: 8px 0 0;
   color: var(--ui-text);
 }
 .end {
   text-align: center;
   color: var(--ui-muted);
   font-size: 13px;
-  border: 1px solid var(--ui-border);
+  border: 1px solid transparent;
   border-radius: 12px;
   background: var(--ui-surface);
   padding: 14px;

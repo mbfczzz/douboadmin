@@ -10,14 +10,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 600;
+  font-weight: 500;
 }
 .back {
   position: absolute;
-  left: 20rpx;
+  left: 10px;
   top: 0;
   height: 100%;
-  width: 80rpx;
+  width: 40px;
   min-width: 44px;
   display: flex;
   align-items: center;

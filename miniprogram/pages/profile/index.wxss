@@ -13,7 +13,7 @@ button.profile-avatar-row {
   text-align: left;
   line-height: 1.5;
   background: var(--ui-surface);
-  border: 1px solid var(--ui-border);
+  border: 1px solid transparent;
   color: var(--ui-text);
   border-radius: var(--ui-radius-card);
 }
@@ -56,12 +56,12 @@ button.profile-avatar-row {
   display: block;
   margin-bottom: 5px;
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 500;
 }
 .profile-note {
   display: block;
   color: var(--ui-muted);
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.7;
 }
 .profile-chevron {
@@ -73,18 +73,17 @@ button.profile-avatar-row {
   align-items: center;
   justify-content: space-between;
   margin: 22px 2px 10px;
-  color: var(--ui-muted);
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 500;
 }
 .profile-optional {
   color: var(--ui-muted);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 400;
 }
 .profile-fields,
 .profile-bio {
-  border: 1px solid var(--ui-border);
+  border: 1px solid transparent;
   border-radius: var(--ui-radius-card);
   background: var(--ui-surface);
   overflow: hidden;
@@ -105,7 +104,7 @@ button.profile-avatar-row {
   flex-shrink: 0;
   padding-top: 6px;
   color: var(--ui-text);
-  font-size: 14px;
+  font-size: 15px;
   line-height: 24px;
 }
 .profile-field-content {
@@ -116,22 +115,22 @@ button.profile-avatar-row {
   width: 100%;
   height: 52px;
   padding: 0 14px;
-  border: 1px solid var(--ui-border);
+  border: 1px solid transparent;
   border-radius: 12px;
   background: var(--ui-field);
   color: var(--ui-text);
   caret-color: var(--ui-brand);
-  font-size: 14px;
+  font-size: 15px;
   text-align: left;
 }
 .profile-placeholder {
-  color: var(--ui-muted);
+  color: var(--ui-placeholder);
 }
 .profile-field-error {
   display: block;
   margin-top: 4px;
   color: var(--ui-danger);
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.6;
 }
 .profile-bio {
@@ -140,7 +139,7 @@ button.profile-avatar-row {
   transition: border-color 120ms;
 }
 .profile-bio.focused {
-  border-color: var(--ui-brand);
+  border-color: var(--ui-selected-line);
 }
 .profile-bio textarea {
   display: block;
@@ -211,7 +210,7 @@ button.profile-submit {
   gap: 8px;
   min-height: 36px;
   color: var(--ui-muted);
-  font-size: 16px;
+  font-size: 15px;
   font-variant-numeric: tabular-nums;
 }
 .profile-verified {
@@ -250,10 +249,10 @@ button.profile-submit {
   padding: 0;
   margin-bottom: 8px;
   color: var(--ui-muted);
-  font-size: 12px;
+  font-size: 13px;
 }
 .profile-field.focused input {
-  border-color: var(--ui-brand);
+  border-color: var(--ui-selected-line);
 }
 .profile-field.invalid input {
   border-color: var(--ui-danger);

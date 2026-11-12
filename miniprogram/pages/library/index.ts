@@ -7,6 +7,7 @@ import {
   openTask,
   enterPage,
   openPage,
+  openTab,
   hasSession,
   login,
 } from "../../utils/api";
@@ -126,6 +127,9 @@ Page({
     } finally {
       if (!this.destroyed) this.setData({ signingIn: false });
     }
+  },
+  browse() {
+    openTab(this, "/pages/templates/index");
   },
   previous() {
     movePage(this, -1);

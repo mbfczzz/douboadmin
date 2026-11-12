@@ -37,21 +37,21 @@
           wx:if="{{avatarUrl}}"
           src="{{avatarUrl}}"
           mode="aspectFill"
-        /><t-icon wx:else name="user" size="30" />
-        <view class="profile-camera"><t-icon name="camera" size="12" /></view>
+        /><t-icon wx:else name="user" size="32" />
+        <view class="profile-camera"><t-icon name="edit" size="16" /></view>
       </view>
       <view class="profile-avatar-copy"
         ><text class="profile-avatar-label"
           >{{uploadingAvatar?'正在上传头像…':'更换头像'}}</text
         >
         <text class="profile-note {{avatarError?'profile-error':''}}"
-          >{{avatarError||'点击更换，图片不超过 5 MB'}}</text
+          >{{avatarError||'点击更换，图片不超过 5MB'}}</text
         ></view
       >
-      <t-icon name="chevron-right" size="18" class="profile-chevron" />
+      <t-icon name="chevron-right" size="20" class="profile-chevron" />
     </button>
     <text class="profile-section"
-      >基础资料<text class="profile-optional">{{me.profile.data.verifiedPhone?'姓名必填，手机号已验证':'姓名选填'}}</text></text
+      >基础资料<text class="profile-optional">{{me.profile.data.verifiedPhone?'昵称、姓名必填':'昵称必填'}}</text></text
     >
     <view class="profile-input-fields">
       <view
@@ -181,7 +181,7 @@
         loading="{{busy}}"
         disabled="{{busy||uploadingAvatar}}"
       >
-        <view class="button-content"><t-icon name="check-circle" size="18" /><text>{{busy?'正在保存…':uploadingAvatar?'头像上传中…':'保存修改'}}</text></view>
+        <view class="button-content"><t-icon name="check-circle" size="16" /><text>{{busy?'正在保存…':uploadingAvatar?'头像上传中…':'保存修改'}}</text></view>
       </button></view
     >
   </form>

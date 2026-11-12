@@ -34,9 +34,9 @@
   },
   "tabBar": {
     "custom": true,
-    "color": "#a6abb5",
-    "selectedColor": "#f4f5f7",
-    "backgroundColor": "#1c1e22",
+    "color": "#a6a8ad",
+    "selectedColor": "#ffffff",
+    "backgroundColor": "#191a1f",
     "list": [
       {
         "pagePath": "pages/templates/index",

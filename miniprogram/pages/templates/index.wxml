@@ -1,7 +1,7 @@
 <nav-bar title="模板" />
 <view class="page templates-page">
   <view class="search-field">
-    <t-icon name="search" size="18" />
+    <t-icon name="search" size="20" />
     <input
       placeholder="搜索你想要的画面"
       placeholder-class="muted"
@@ -10,6 +10,7 @@
       confirm-type="search"
       bindconfirm="search"
     />
+    <button wx:if="{{search}}" class="clear-search" bindtap="clearSearch" aria-label="清空搜索"><t-icon name="close" size="16" /></button>
     <text bindtap="search">搜索</text>
   </view>
   <scroll-view scroll-x class="filter-scroll">
@@ -33,12 +34,13 @@
   </view>
   <view wx:elif="{{loadError}}" class="empty">
     <text>{{loadError}}</text>
-    <t-button t-class="empty-action" variant="outline" bind:tap="load">重试</t-button>
+    <t-button t-class="empty-action" theme="primary" bind:tap="load">重试</t-button>
   </view>
   <view wx:elif="{{!items.length}}" class="empty">
-    <t-icon name="image" size="38" />
+    <t-icon name="image" size="40" />
     <text class="title">{{search?'没有找到相关模板':category===categories[0]?'模板正在上新':'还没有这类模板'}}</text>
     <text class="desc">{{search?'换个关键词试试。':category===categories[0]?'可以先在创作页自由生成。':'换个分类，继续发现灵感。'}}</text>
+    <t-button wx:if="{{!search&&category===categories[0]}}" t-class="empty-action" theme="primary" bind:tap="create">去创作</t-button>
   </view>
   <view wx:else class="waterfall content-reveal">
     <view
@@ -61,7 +63,7 @@
           <view wx:if="{{item.data.kind!=='image'}}" class="play">
             <t-icon
               name="{{item.data.kind==='image'?'image':'play'}}"
-              size="12"
+              size="16"
             />
           </view>
         </view>

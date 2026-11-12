@@ -33,7 +33,7 @@ for (const width of [320, 375, 430]) {
     const long = "LongModelNameWithoutSpaces".repeat(5);
     await page.setContent(`<style>body{margin:0;font-family:sans-serif}t-icon{display:block;width:16px;height:16px}${styles}</style>
       <div style="padding:20px">
-        <div class="workspace"><span class="count">500 / 500</span><div class="editor-meta"><div class="editor-balance"><div class="inline-balance"><span>可用 999999999.99 积分</span></div></div><div class="quote-note">预计 100 积分</div></div><div class="workspace-foot">
+        <div class="workspace"><textarea class="prompt-input">第一行\n第二行\n第三行\n第四行</textarea><span class="count">500 / 500</span><div class="editor-meta"><div class="editor-balance"><div class="inline-balance"><span>可用 999999999.99 积分</span></div></div><div class="quote-note">预计 100 积分</div></div><div class="workspace-foot">
           <div class="model-select"><img class="model-logo" alt="" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" /><div class="model-copy"><span class="model-name">${long}</span><span class="spec">4096×2160 · 120秒</span></div><t-icon></t-icon></div>
           <button class="generate-button">生成</button></div>
         </div>
@@ -76,6 +76,8 @@ for (const width of [320, 375, 430]) {
     expect(meta!.y+meta!.height).toBeLessThan(foot!.y);
     const balance=await page.locator('.editor-balance').boundingBox();
     const count=await page.locator('.count').boundingBox();
+    const prompt=await page.locator('.prompt-input').boundingBox();
+    expect(prompt!.y+prompt!.height).toBeLessThanOrEqual(count!.y);
     const quote=await page.locator('.quote-note').boundingBox();
     expect(balance!.x+balance!.width).toBeLessThan(quote!.x);
     expect(count!.y+count!.height).toBeLessThan(meta!.y);

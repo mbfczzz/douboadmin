@@ -8,7 +8,7 @@
   </view>
   <view wx:if="{{shown.qr}}" class="biz-card provider-share">
     <view wx:if="{{tabs.length>1}}" class="provider-tabs">
-      <text wx:for="{{tabs}}" wx:key="key" class="{{tab===item.key?'on':''}}" data-tab="{{item.key}}" bindtap="switchTab">{{item.label}}</text>
+      <text wx:for="{{tabs}}" wx:key="key" class="{{tab===item.key?'on':''}}" data-tab="{{item.key}}" bindtap="switchTab" aria-label="{{item.label}}">{{item.short}}</text>
     </view>
     <image class="provider-qr" src="{{shown.qr}}" mode="aspectFit" show-menu-by-longpress />
     <text wx:if="{{center}}" class="biz-note">归属服务商：{{center.name}}</text>

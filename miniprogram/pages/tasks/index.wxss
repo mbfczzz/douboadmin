@@ -51,7 +51,7 @@
   white-space: nowrap;
 }
 .queue-state {
-  font-size: 12px;
+  font-size: 13px;
   white-space: nowrap;
   color: var(--ui-muted);
 }
@@ -68,7 +68,7 @@
 .queue-spec {
   overflow-wrap: anywhere;
   display: block;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.5;
   color: var(--ui-muted);
   margin-top: 7px;
@@ -91,7 +91,7 @@
 .completed-more {
   margin: -12px 0;
   padding: 12px 0;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 400;
   color: var(--ui-muted);
 }

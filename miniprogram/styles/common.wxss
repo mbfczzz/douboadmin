@@ -11,14 +11,14 @@ button::after {
   border: 0;
 }
 button {
-  font-size: 28rpx;
+  font-size: 15px;
   margin: 0;
 }
 image {
   display: block;
 }
 .page {
-  padding: 20rpx 38rpx calc(160rpx + env(safe-area-inset-bottom));
+  padding: 10px 20px calc(80px + env(safe-area-inset-bottom));
 }
 .subpage {
   padding: 24px 20px calc(25px + env(safe-area-inset-bottom));
@@ -39,13 +39,13 @@ image {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16rpx;
+  gap: 8px;
 }
 .section-title {
   display: block;
-  font-size: 30rpx;
-  font-weight: 600;
-  margin: 40rpx 0 22rpx;
+  font-size: 16px;
+  font-weight: 500;
+  margin: 20px 0 11px;
 }
 .surface {
   background: var(--ui-surface);
@@ -57,9 +57,9 @@ image {
 .text-button {
   background: transparent;
   color: var(--ui-link);
-  padding: 16rpx 0;
+  padding: 8px 0;
   line-height: 1.5;
-  font-size: 25rpx;
+  font-size: 13px;
 }
 .phone-alternative {
   display: block;
@@ -71,11 +71,11 @@ image {
   font-size: var(--ui-font-note);
   color: var(--ui-muted);
   text-align: center;
-  margin: 24rpx 0;
+  margin: 12px 0;
   line-height: 1.7;
 }
 .empty {
-  padding: 100rpx 20rpx;
+  padding: 50px 10px;
   text-align: center;
   color: var(--ui-muted);
 }
@@ -83,8 +83,8 @@ image {
   display: block;
   color: var(--ui-text);
   font-weight: 500;
-  font-size: 30rpx;
-  margin: 24rpx 0 14rpx;
+  font-size: 16px;
+  margin: 12px 0 7px;
 }
 /* TDesign buttons have no host element (virtualHost); style them through
    their t-class external class rather than a "t-button" tag selector. */
@@ -96,55 +96,55 @@ image {
   margin-top: 20px;
 }
 .empty .desc {
-  font-size: 24rpx;
+  font-size: 13px;
   line-height: 1.8;
   display: block;
 }
 .error-box {
-  padding: 24rpx;
+  padding: 12px;
   background: var(--ui-danger-bg);
-  border: 1rpx solid var(--ui-danger-border);
+  border: 1px solid var(--ui-danger-border);
   border-radius: 12px;
   color: var(--ui-danger);
-  font-size: 25rpx;
+  font-size: 13px;
   line-height: 1.8;
-  margin: 20rpx 0;
+  margin: 10px 0;
 }
 .loading {
   display: flex;
   justify-content: center;
-  padding: 80rpx;
+  padding: 40px;
 }
 .queue-link {
   display: flex;
   align-items: center;
-  gap: 20rpx;
-  padding: 25rpx 24rpx;
+  gap: 10px;
+  padding: 12px 12px;
   background: var(--ui-surface);
   border-radius: var(--ui-radius-card);
-  margin-top: 40rpx;
+  margin-top: 20px;
 }
 .queue-link .copy {
   flex: 1;
 }
 .queue-link .copy .muted {
   display: block;
-  font-size: 23rpx;
-  margin-top: 8rpx;
+  font-size: 13px;
+  margin-top: 4px;
 }
 .form-input {
-  border: 1px solid var(--ui-border);
+  border: 1px solid transparent;
   background: var(--ui-field);
   border-radius: 12px;
-  padding: 22rpx;
+  padding: 11px;
   width: 100%;
   color: var(--ui-text);
-  font-size: 28rpx;
+  font-size: 15px;
 }
 .pill {
   font-size: 12px;
   border-radius: 6px;
-  padding: 8rpx 13rpx;
+  padding: 4px 6px;
   background: var(--ui-field);
   color: var(--ui-muted);
 }
@@ -167,18 +167,18 @@ image {
 }
 .filter-scroll {
   white-space: nowrap;
-  margin: 8rpx 0 30rpx;
+  margin: 4px 0 15px;
 }
 .filter {
   display: inline-block;
-  padding: 18rpx 0;
-  margin-right: 42rpx;
-  font-size: 27rpx;
+  padding: 9px 0;
+  margin-right: 21px;
+  font-size: 13px;
   color: var(--ui-muted);
 }
 .filter.active {
   color: var(--ui-link);
-  font-weight: 600;
+  font-weight: 500;
 }
 .controls-busy {
   opacity: 0.6;
@@ -202,12 +202,22 @@ image {
   flex-shrink: 0;
   width: 32px;
   height: 32px;
-  border-radius: 9px;
+  border-radius: 10px;
   background: var(--ui-field);
   color: var(--ui-muted);
 }
-/* Frames the dark brand artwork as an app tile on light pages. */
+/* Jimeng marks credits with a four-point star. */
+.points-mark {
+  margin-right: 4px;
+  font-size: 1em;
+}
 .brand-tile {
   border-radius: 16px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+.mode-tab.active,
+.resolution-option.selected,
+.filter.active,
+.biz-tabs .selected,
+.purchase-tabs .selected {
+  box-shadow: inset 0 0 0 1px var(--ui-selected-line);
 }

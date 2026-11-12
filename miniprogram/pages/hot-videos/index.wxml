@@ -1,8 +1,8 @@
 <nav-bar title="热门视频灵感" back /><view
   class="subpage"
   ><view wx:if="{{ready&&!enabled}}" class="biz-empty"
-    ><view class="biz-empty-icon"><t-icon name="video" size="32" /></view
-    ><text>热门视频暂不可用，可以先使用创作功能。</text
+    ><view class="biz-empty-icon"><t-icon name="video" size="40" /></view
+    ><text>热门视频暂不可用，先去创作吧。</text
     ><button class="biz-action" bindtap="upload">去创作</button></view
   ><block wx:else
   ><view class="hot-search"
@@ -18,7 +18,7 @@
       搜索
     </button></view
   ><view wx:if="{{loadError}}" class="biz-error">{{loadError}}</view
-  ><view class="biz-tabs"
+  ><view wx:if="{{searched}}" class="biz-tabs"
     ><view
       class="{{sort==='relevance'?'selected':''}}"
       data-value="relevance"

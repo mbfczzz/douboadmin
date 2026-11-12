@@ -22,7 +22,7 @@
     max="100"
     value="{{musicVolume}}"
     activeColor="#00c8dc"
-    backgroundColor="#3b3e46"
+    backgroundColor="#474b54"
     block-color="#00c8dc"
     bindchange="volume"
 /></view>

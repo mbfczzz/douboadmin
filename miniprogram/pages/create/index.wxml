@@ -9,7 +9,7 @@
       bindtap="mode"
       hover-class="mode-tab-pressed"
     >
-      <t-icon name="video-camera" size="18" />生成视频
+      <t-icon name="video-camera" size="20" />生成视频
     </view>
     <view
       class="mode-tab {{kind==='image'?'active':''}}"
@@ -19,11 +19,11 @@
       bindtap="mode"
       hover-class="mode-tab-pressed"
     >
-      <t-icon name="image" size="18" />生成图片
+      <t-icon name="image" size="20" />生成图片
     </view>
   </view>
   <view wx:if="{{modelError}}" class="error-box" bindtap="loadModels">{{modelError}}</view>
-  <view wx:if="{{parameterError}}" class="error-box">{{parameterError}}</view>
+  <view wx:elif="{{parameterError}}" class="error-box">{{parameterError}}</view>
   <view class="workspace {{expanded?'expanded':''}} {{showModels?'model-open':''}}" style="{{expanded&&expandedTop?'top:'+expandedTop+'px':''}}">
     <scroll-view scroll-x class="reference-strip">
       <view class="reference-items">
@@ -47,7 +47,7 @@
           />
           <t-icon wx:else name="file" size="24" />
           <view class="reference-remove" data-id="{{item.id}}" catchtap="remove" aria-role="button" aria-label="删除参考素材"
-            ><t-icon name="close" size="12"
+            ><t-icon name="close" size="16"
           /></view>
         </view>
       </view>
@@ -57,7 +57,7 @@
       bindtap="toggleExpanded"
       aria-label="{{expanded?'收起输入框':'展开输入框'}}"
     >
-      <t-icon name="{{expanded?'fullscreen-exit':'fullscreen'}}" size="18" />
+      <t-icon name="{{expanded?'fullscreen-exit':'fullscreen'}}" size="20" />
     </view>
     <view class="editor">
       <textarea
@@ -80,8 +80,8 @@
     <view class="workspace-foot">
       <view class="model-select" bindtap="showModels" aria-role="button" aria-label="{{'选择模型，当前'+modelName}}">
         <template is="model-icon" data="{{...availableModels[modelIndex],kind}}" />
-        <view class="model-copy"><text class="model-name">{{modelName}}</text><text class="spec">{{resolution}} · {{kind==='video'?duration+'秒':ratio}}</text></view>
-        <t-icon name="chevron-down" size="14" />
+        <view class="model-copy"><text class="model-name">{{modelName}}</text><text class="spec">{{resolution}} · {{kind==='video'?duration+' 秒':ratio}}</text></view>
+        <t-icon name="chevron-down" size="16" />
       </view>
       <template is="generate-action" data="{{busy,uploading,restoring,modelsLoading,modelError,parameterError,restoreError,hasPrompt,kind}}" />
     </view>
@@ -97,11 +97,11 @@
       >
         <template is="model-icon" data="{{...item,kind}}" />
         <view class="model-info"><view class="model-title"><text>{{item.label}}</text><view wx:if="{{item.badges.length}}" class="model-badges"><text wx:for="{{item.badges}}" wx:for-item="badge" wx:key="id" class="{{badge.tone}}">{{badge.text}}</text></view></view><view wx:if="{{item.description||item.estimate}}" class="model-sub"><text class="model-description">{{item.description}}</text><text wx:if="{{item.estimate}}" class="model-estimate">{{item.estimate}}</text></view></view>
-        <t-icon wx:if="{{model===item.id}}" name="check" size="18" />
+        <t-icon wx:if="{{model===item.id}}" name="check" size="20" />
       </view>
     </scroll-view>
   </view>
-  <view class="creation-hint">
+  <view wx:if="{{assets.length}}" class="creation-hint">
     <t-icon name="mentioned" size="16" /><text>输入 @ 可引用已上传的图片</text>
   </view>
   <view wx:if="{{restoring}}" class="note">正在恢复参考素材…</view>
@@ -137,7 +137,7 @@
         step="1"
         value="{{durationIndex}}"
         activeColor="#00c8dc"
-        backgroundColor="#3b3e46"
+        backgroundColor="#474b54"
         block-color="#00c8dc"
         block-size="20"
         bindchange="duration"
@@ -162,7 +162,7 @@
         hover-class="ratio-pressed"
       >
         <view class="ratio-visual">
-          <t-icon wx:if="{{item==='auto'}}" name="scan" size="22" />
+          <t-icon wx:if="{{item==='auto'}}" name="scan" size="20" />
           <view
             wx:else
             class="ratio-shape shape-{{item==='16:9'?'wide':item==='9:16'?'portrait':item==='1:1'?'square':item==='4:3'?'landscape':item==='3:4'?'photo':'cinema'}}"
@@ -173,7 +173,7 @@
     </view>
   </view>
   <view class="queue-link" bindtap="queue">
-    <t-icon name="task" size="22" />
+    <t-icon name="task" size="20" />
     <view class="copy">
       <text>任务队列</text>
       <text class="muted">查看生成进度与结果</text>
@@ -197,19 +197,19 @@
     <view wx:if="{{allowImage}}" class="source-option" data-kind="image" bindtap="addAsset"
       ><t-icon name="image" size="24" /><view class="source-copy"
         ><text>图片</text><text class="source-hint">从相册选择图片</text></view
-      ><t-icon name="chevron-right" size="18"
+      ><t-icon name="chevron-right" size="20"
     /></view>
-    <view wx:if="{{allowVideo}}" class="source-option" data-kind="video" bindtap="addAsset"><t-icon name="video-camera" size="24" /><view class="source-copy"><text>视频</text><text class="source-hint">从相册选择参考视频</text></view><t-icon name="chevron-right" size="18" /></view>
-    <view wx:if="{{allowAudio}}" class="source-option" data-kind="audio" bindtap="addAsset"><t-icon name="sound" size="24" /><view class="source-copy"><text>音频</text><text class="source-hint">选择参考音频文件</text></view><t-icon name="chevron-right" size="18" /></view>
+    <view wx:if="{{allowVideo}}" class="source-option" data-kind="video" bindtap="addAsset"><t-icon name="video-camera" size="24" /><view class="source-copy"><text>视频</text><text class="source-hint">从相册选择参考视频</text></view><t-icon name="chevron-right" size="20" /></view>
+    <view wx:if="{{allowAudio}}" class="source-option" data-kind="audio" bindtap="addAsset"><t-icon name="sound" size="24" /><view class="source-copy"><text>音频</text><text class="source-hint">选择参考音频文件</text></view><t-icon name="chevron-right" size="20" /></view>
   </view>
 </t-popup>
 <template name="generate-action">
   <button class="generate-button {{busy||uploading||restoring||modelsLoading||modelError||parameterError||restoreError||!hasPrompt?'is-disabled':''}}" loading="{{busy}}" disabled="{{busy||uploading||restoring||modelsLoading||modelError||parameterError||restoreError||!hasPrompt}}" bindtap="generate" aria-label="{{kind==='video'?'生成视频':'生成图片'}}">
-    <view class="button-content"><t-icon wx:if="{{!busy}}" name="{{kind==='video'?'video-camera':'image'}}" size="16" /><text>生成</text></view>
+    <text>生成</text>
   </button>
 </template>
 <template name="model-icon">
   <image wx:if="{{iconURL}}" class="model-logo" src="{{iconURL}}" mode="aspectFit" data-id="{{id}}" data-url="{{iconURL}}" binderror="hideModelIcon" />
   <text wx:elif="{{icon}}" class="model-glyph">{{icon}}</text>
-  <t-icon wx:else name="{{kind==='video'?'video-camera':'image'}}" size="22" />
+  <t-icon wx:else name="{{kind==='video'?'video-camera':'image'}}" size="20" />
 </template>

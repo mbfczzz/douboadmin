@@ -3,6 +3,35 @@ const assert = require("node:assert/strict");
 const { harness } = require("./harness.cjs");
 const row = (id) => ({ id, data: { cover: "/media/example.jpg" } });
 
+test("template empty-state creation opens the create tab without submitting a job", () => {
+  const h = harness();
+  const page = h.page("templates");
+  h.wx.switchTab = options => h.nav.push(options);
+  page.create();
+  assert.equal(h.nav.length, 1);
+  assert.equal(h.nav[0].url, "/pages/create/index");
+  assert.equal(h.sent.length, 0);
+});
+
+test("clearing a template search reloads page one and ignores the old response", async () => {
+  const h = harness();
+  const page = h.page("templates");
+  const calls = [];
+  h.api.request = (path) => new Promise(resolve => calls.push({ path, resolve }));
+  page.setData({ search: "海边", page: 4 });
+  const previous = page.load();
+  page.clearSearch();
+  assert.equal(page.data.search, "");
+  assert.match(calls[1].path, /&q=&page=1&size=4$/);
+  calls[1].resolve({ items: [row("all")], total: 20 });
+  await new Promise(setImmediate);
+  calls[0].resolve({ items: [row("old-search")], total: 1 });
+  await previous;
+  assert.equal(page.data.items[0].id, "all");
+  assert.equal(page.data.page, 1);
+  assert.equal(page.data.total, 20);
+});
+
 test("a changed category cannot reuse previous-category content during reentry", async () => {
   const h = harness(),
     page = h.page("templates");

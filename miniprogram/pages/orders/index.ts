@@ -7,6 +7,7 @@ import {
   login,
   cancelled,
   date,
+  openPage,
 } from "../../utils/api";
 import type { Row } from "../../services/types";
 import type { Order } from "../../services/business";
@@ -21,6 +22,9 @@ import {
   watchPayments,
 } from "../../services/payment-status";
 Page({
+  wallet() {
+    openPage(this, { url: "/pages/wallet/index" });
+  },
   copyId(e: WechatMiniprogram.TouchEvent) {
     const id = e.currentTarget.dataset.id;
     if (this.data.rows.some((row: Row<Order>) => row.id === id)) wx.setClipboardData({ data: id, fail: error });

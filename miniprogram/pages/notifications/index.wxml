@@ -13,7 +13,7 @@
     ><view wx:if="{{loading&&!items.length}}" class="biz-empty"
       >正在加载消息…</view
     ><view wx:elif="{{!loadError&&!items.length}}" class="biz-empty"
-      ><view class="biz-empty-icon"><t-icon name="notification" size="32" /></view
+      ><view class="biz-empty-icon"><t-icon name="notification" size="40" /></view
       ><text>暂时没有新消息</text></view
     ><view
       wx:for="{{items}}"

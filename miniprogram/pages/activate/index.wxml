@@ -36,7 +36,7 @@
       </view>
       <view wx:if="{{!loadError&&(!status||status.status==='pending'||status.status==='unbound'||status.status==='rejected')}}" class="biz-card activation-options">
         <view class="activation-path">
-          <text class="biz-heading">扫码登记</text>
+          <text class="biz-heading">加入服务商</text>
           <text class="biz-note">扫码登记对应角色，上级开通后生效</text>
           <button class="biz-action" loading="{{busy}}" disabled="{{busy||loading}}" bindtap="scan">扫码登记</button>
           <view class="activation-sms">
@@ -46,8 +46,8 @@
         </view>
       </view>
     </block>
-    <button wx:if="{{status.canBrowse&&!status.active}}" class="biz-action biz-secondary" disabled="{{busy||loading}}" bindtap="enter">先浏览小程序</button>
-    <view class="activation-links"><text bindtap="load">刷新授权状态</text><text bindtap="signOut">退出登录</text></view>
+    <button wx:if="{{status.canBrowse&&!status.active}}" class="text-button browse-link" disabled="{{busy||loading}}" bindtap="enter">先浏览小程序</button>
+    <view class="activation-links"><text bindtap="load">刷新授权状态</text><text class="sign-out" bindtap="signOut">退出登录</text></view>
   </block>
   <text class="activation-privacy" bindtap="privacy">隐私保护指引</text>
 </view>

@@ -9,7 +9,7 @@
     aria-label="{{item.text+(selected===index?'，已选中':'')}}"
     hover-class="item-pressed"
   >
-    <view class="glyph"><t-icon name="{{item.icon}}" size="24" /></view>
+    <view class="glyph"><t-icon name="{{selected===index&&item.on?item.on:item.icon}}" size="24" /></view>
     <text class="label">{{item.text}}</text>
   </view>
 </view>

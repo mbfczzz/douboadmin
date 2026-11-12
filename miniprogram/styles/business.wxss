@@ -1,5 +1,4 @@
 .biz-card {
-  border: 1px solid var(--ui-border);
   background: var(--ui-surface);
   border-radius: var(--ui-radius-card);
   padding: 20px 16px;
@@ -9,7 +8,7 @@
   overflow-wrap: anywhere;
   font-size: 16px;
   line-height: 22px;
-  font-weight: 600;
+  font-weight: 500;
   display: block;
   margin-bottom: 12px;
 }
@@ -46,7 +45,7 @@
 }
 .biz-input {
   background: var(--ui-field);
-  border: 1px solid var(--ui-border);
+  border: 1px solid transparent;
   border-radius: var(--ui-radius-control);
   min-height: 52px;
   padding: 11px 12px;
@@ -63,7 +62,7 @@ button.biz-action {
   width: 100%;
   background: var(--ui-primary);
   color: var(--ui-on-brand);
-  border-radius: var(--ui-radius-control);
+  border-radius: var(--ui-radius-pill);
   font-size: 15px;
   font-weight: 600;
   line-height: 22px;
@@ -79,15 +78,14 @@ button.biz-action[disabled] {
   color: var(--ui-disabled-text);
 }
 button.biz-secondary {
-  border: 1px solid var(--ui-border);
-  background: var(--ui-surface);
+  background: var(--ui-field);
   color: var(--ui-text);
 }
 .biz-note {
   overflow-wrap: anywhere;
   display: block;
   color: var(--ui-muted);
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.7;
   margin-top: 8px;
 }
@@ -117,19 +115,19 @@ button.biz-secondary {
   line-height: 18px;
 }
 .biz-tabs .selected {
-  color: var(--ui-link);
+  color: var(--ui-text);
   background: var(--ui-selected);
-  font-weight: 600;
+  font-weight: 500;
 }
 .biz-list-title {
-  font-size: 14px;
+  font-size: 15px;
   line-height: 20px;
   font-weight: 500;
   display: block;
   margin-bottom: 4px;
 }
 .biz-small {
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.6;
   overflow-wrap: anywhere;
   color: var(--ui-muted);
@@ -174,8 +172,14 @@ button.biz-secondary {
   text-align: center;
   padding: 44px 12px;
   color: var(--ui-muted);
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1.8;
+}
+.biz-empty button.biz-action {
+  display: block;
+  width: auto;
+  padding: 10px 32px;
+  margin: 16px auto 0;
 }
 .biz-empty-icon {
   display: flex;

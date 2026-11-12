@@ -21,12 +21,6 @@
   font-variant-numeric: tabular-nums;
   overflow-wrap: anywhere;
 }
-.orders-heading {
-  margin-bottom: 24px;
-}
-.orders-heading .biz-heading {
-  margin-bottom: 8px;
-}
 .order-card {
   padding: 20px;
   margin-bottom: 20px;
@@ -40,7 +34,7 @@
   flex: 1;
   min-width: 0;
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 500;
   overflow-wrap: anywhere;
 }
 .order-title text {
@@ -66,6 +60,9 @@
 .order-head .icon-tile {
   color: var(--ui-points);
   background: var(--ui-points-bg);
+}
+.order-values > view:first-child .order-amount {
+  font-size: 18px;
 }
 .order-values > view:last-child .order-amount {
   color: var(--ui-points);

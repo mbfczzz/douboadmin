@@ -14,7 +14,7 @@
       class="biz-note"
       >{{work.prompt}}</text
     ></view
-  ><button class="biz-action biz-secondary" bindtap="home">
+  ><button class="biz-action" bindtap="home">
     去豆播找灵感
   </button></view
 >
