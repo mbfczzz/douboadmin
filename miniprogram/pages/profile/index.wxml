@@ -17,7 +17,7 @@
       loading="{{busy}}"
       disabled="{{busy}}"
     >
-      微信登录
+      去登录
     </button></view
   >
   <view wx:elif="{{loadError&&!me}}" class="biz-error" bindtap="load"
@@ -51,7 +51,7 @@
       <t-icon name="chevron-right" size="18" class="profile-chevron" />
     </button>
     <text class="profile-section"
-      >基础资料<text class="profile-optional">姓名、手机号选填</text></text
+      >基础资料<text class="profile-optional">{{me.profile.data.verifiedPhone?'姓名必填，手机号已验证':'姓名选填'}}</text></text
     >
     <view class="profile-input-fields">
       <view

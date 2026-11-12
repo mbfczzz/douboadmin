@@ -8,9 +8,9 @@ for(const width of [320,390,430]) {
       <div class="page mine-page"><div class="mine-balance"><div class="balance"><div class="balance-copy"><span class="label">可用积分</span><span class="amount">99999.50</span></div><div class="balance-bottom"><span class="note">预留 2 积分</span><button class="action">我的积分</button></div></div></div>
       <span class="section-title common-heading">常用功能</span><div class="menu-grid">${["服务商中心","充值订单","我的收藏","生成记录","消息通知","帮助与反馈"].map(label=>`<div class="menu">${glyph("image")}<span class="menu-label">${label}</span></div>`).join("")}</div></div>${tabs()}`);
     for(const selector of [".balance",".menu-grid"]){
-      await expect(page.locator(selector)).toHaveCSS("background-color",selector===".balance"?"rgb(255, 248, 232)":"rgb(255, 255, 255)");
+      await expect(page.locator(selector)).toHaveCSS("background-color",selector===".balance"?"rgb(242, 244, 255)":"rgb(255, 255, 255)");
       await expect(page.locator(selector)).toHaveCSS("border-top-width","1px");
-      await expect(page.locator(selector)).toHaveCSS("border-top-color",selector===".balance"?"rgb(231, 209, 164)":"rgb(215, 222, 230)");
+      await expect(page.locator(selector)).toHaveCSS("border-top-color",selector===".balance"?"rgb(221, 226, 251)":"rgb(215, 222, 230)");
     }
     const balance=await page.locator(".balance").boundingBox(), button=await page.locator(".balance .action").boundingBox();
     expect(button!.x+button!.width).toBeLessThan(balance!.x+balance!.width);

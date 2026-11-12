@@ -1,5 +1,5 @@
 .balance {
-  border: 1px solid var(--ui-gold-border, #e7d1a4);
+  border: 1px solid var(--ui-points-border);
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -10,7 +10,7 @@
   padding: 16px;
   border-radius: 16px;
   min-height: 152px;
-  background: var(--ui-gold-bg, #fff8e8);
+  background: var(--ui-points-bg);
 }
 .balance-copy {
   min-width: 0;
@@ -19,13 +19,13 @@
 .label,
 .note {
   display: block;
-  color: var(--ui-gold-muted, #7e6b49);
+  color: var(--ui-points-muted);
   font-size: var(--ui-font-note, 12px);
 }
 .amount {
   display: block;
   margin: 8px 0 0;
-  color: var(--ui-gold, #825718);
+  color: var(--ui-points);
   font-size: 32px;
   font-weight: 600;
   overflow-wrap: anywhere;
@@ -78,7 +78,7 @@ button.action {
   min-height: 44px;
   font-size: 12px;
   line-height: 18px;
-  color: var(--ui-gold, #825718);
+  color: var(--ui-points);
 }
 .inline-balance text {
   min-width: 0;

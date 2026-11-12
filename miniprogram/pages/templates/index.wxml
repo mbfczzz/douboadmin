@@ -37,8 +37,8 @@
   </view>
   <view wx:elif="{{!items.length}}" class="empty">
     <t-icon name="image" size="38" />
-    <text class="title">{{search?'没有找到相关模板':'还没有这类模板'}}</text>
-    <text class="desc">{{search?'换个关键词试试。':'换个分类，继续发现灵感。'}}</text>
+    <text class="title">{{search?'没有找到相关模板':category===categories[0]?'模板正在上新':'还没有这类模板'}}</text>
+    <text class="desc">{{search?'换个关键词试试。':category===categories[0]?'可以先在创作页自由生成。':'换个分类，继续发现灵感。'}}</text>
   </view>
   <view wx:else class="waterfall content-reveal">
     <view

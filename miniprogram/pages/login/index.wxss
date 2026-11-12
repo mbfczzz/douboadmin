@@ -22,7 +22,6 @@
   height: 78px;
   display: block;
   margin: 0 auto 24px;
-  border-radius: 8px;
 }
 .login-heading {
   display: block;

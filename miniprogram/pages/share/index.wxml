@@ -9,12 +9,13 @@
     ><view class="biz-card"
       ><image
         wx:if="{{job.input.kind==='image'}}"
-        class="biz-preview"
+        class="biz-preview share-preview"
         src="{{job.result}}"
-        mode="widthFix" /><video
+        mode="aspectFit" /><video
         wx:else
-        class="biz-preview"
+        class="biz-preview share-preview"
         src="{{job.result}}"
+        object-fit="contain"
         controls /></view
     ><view
       wx:if="{{job.deleted}}"

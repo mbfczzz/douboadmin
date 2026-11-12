@@ -1,1 +1,6 @@
 @import "../../styles/business.wxss";
+/* Keeps the title and share action on the first screen. */
+.share-preview {
+  display: block;
+  height: 240px;
+}

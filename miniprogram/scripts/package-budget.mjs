@@ -35,7 +35,9 @@ console.log(
 // selection, richer order states and editor actions. See docs/miniprogram-ui-v4-budget.md.
 // Phone authorization login adds a shared grant handler and native entry points;
 // see docs/wechat-phone-login.md for the measured feature delta.
-const budget = 562 * 1024;
+// UI review fixes (video covers, empty states, menu layout): +2,462 bytes,
+// see docs/miniprogram-ui-review-fixes.md.
+const budget = 565 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

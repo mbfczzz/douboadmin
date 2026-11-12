@@ -110,7 +110,7 @@ button.virtual-product::after {
   margin-bottom: 12px;
 }
 .product-points {
-  color: var(--ui-gold);
+  color: var(--ui-points);
   font-size: 24px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
@@ -159,18 +159,21 @@ button.wallet-refresh {
   gap: 8px;
 }
 .wallet-summary .biz-value {
-  color: var(--ui-gold);
+  color: var(--ui-points);
   min-width: 0;
   flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   font-size: 34px;
   margin: 12px 0 16px;
 }
 .summary-label {
-  color: var(--ui-gold-muted);
+  color: var(--ui-points-muted);
 }
 .summary-held {
-  border-top: 1px solid var(--ui-gold-border);
-  color: var(--ui-gold-muted);
+  border-top: 1px solid var(--ui-points-border);
+  color: var(--ui-points-muted);
   padding-top: 16px;
   flex-wrap: wrap;
   font-size: 13px;
@@ -180,9 +183,10 @@ button.wallet-refresh {
 }
 button.wallet-refresh {
   flex-shrink: 0;
+  width: auto;
   min-height: 44px;
   background: var(--ui-surface);
-  color: var(--ui-gold);
+  color: var(--ui-points);
   font-size: 13px;
   padding: 0 12px;
   border-radius: 10px;
@@ -203,15 +207,15 @@ button.wallet-refresh {
   margin-top: 16px;
   font-size: 13px;
   line-height: 22px;
-  color: var(--ui-gold);
+  color: var(--ui-points);
 }
 .wallet-summary {
-  background: var(--ui-gold-bg);
-  border-color: var(--ui-gold-border);
+  background: var(--ui-points-bg);
+  border-color: var(--ui-points-border);
 }
 .wallet-summary .icon-tile,
 .wallet-summary .biz-small {
-  color: var(--ui-gold-muted);
+  color: var(--ui-points-muted);
   background: transparent;
 }
 .icon-tile.plus {

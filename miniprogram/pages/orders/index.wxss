@@ -64,11 +64,11 @@
   min-width: 0;
 }
 .order-head .icon-tile {
-  color: var(--ui-gold);
-  background: var(--ui-gold-bg);
+  color: var(--ui-points);
+  background: var(--ui-points-bg);
 }
 .order-values > view:last-child .order-amount {
-  color: var(--ui-gold);
+  color: var(--ui-points);
 }
 .order-values.long-values {
   grid-template-columns: 1fr;

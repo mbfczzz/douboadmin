@@ -22,7 +22,7 @@
     <view wx:else class="completed-grid content-reveal">
       <view class="completed-item" wx:for="{{filtered}}" wx:key="id" data-id="{{item.id}}" bindtap="detail" hover-class="card-pressed">
         <view class="completed-cover">
-          <image wx:if="{{item.input.kind==='image'}}" src="{{item.result}}" mode="aspectFill" lazy-load />
+          <image wx:if="{{item.thumbnailUrl||(item.input.kind==='image'&&item.result)}}" src="{{item.thumbnailUrl||item.result}}" mode="aspectFill" lazy-load data-id="{{item.id}}" binderror="coverError" />
           <t-icon wx:else name="play-circle" size="36" />
           <text wx:if="{{item.input.duration}}" class="completed-duration">{{item.input.duration}} 秒</text>
         </view>

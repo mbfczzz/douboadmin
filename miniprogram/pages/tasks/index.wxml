@@ -68,10 +68,12 @@
       >
         <view class="completed-cover">
           <image
-            wx:if="{{item.input.kind==='image'}}"
-            src="{{item.result}}"
+            wx:if="{{item.thumbnailUrl||(item.input.kind==='image'&&item.result)}}"
+            src="{{item.thumbnailUrl||item.result}}"
             mode="aspectFill"
             lazy-load
+            data-id="{{item.id}}"
+            binderror="coverError"
           />
           <t-icon wx:else name="play-circle" size="36" />
           <text wx:if="{{item.input.duration}}" class="completed-duration"

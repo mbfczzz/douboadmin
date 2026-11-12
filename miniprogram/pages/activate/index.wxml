@@ -1,6 +1,6 @@
 <nav-bar title="授权开通" />
 <view class="subpage activation-page">
-  <image class="activation-logo" src="{{brandIcon}}" mode="aspectFit" aria-label="豆播 AI" />
+  <image class="activation-logo brand-tile" src="{{brandIcon}}" mode="aspectFit" aria-label="豆播 AI" />
   <text class="activation-title">开通你的创作空间</text>
   <text wx:if="{{!logged}}" class="biz-note activation-intro">登录后填写资料。</text>
   <text wx:elif="{{status.profileRequired}}" class="biz-note activation-intro">第 1 步：填写资料。</text>

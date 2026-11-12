@@ -1,6 +1,6 @@
 <nav-bar title="登录豆播" back disabled="{{returning}}" />
 <view class="subpage login-page">
-  <image class="login-brand" src="{{brandIcon}}" mode="aspectFit" aria-label="豆播 AI" />
+  <image class="login-brand brand-tile" src="{{brandIcon}}" mode="aspectFit" aria-label="豆播 AI" />
   <text class="login-heading">{{heading}}</text>
   <text class="login-description">{{description}}</text>
   <view wx:if="{{loading}}" class="loading"><t-loading text="正在连接" /></view>

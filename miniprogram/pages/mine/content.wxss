@@ -65,7 +65,7 @@
   margin-top: 4px;
 }
 .running-link,
-.settings-link,
+.role-link,
 .empty-work {
   display: flex;
   align-items: center;
@@ -80,25 +80,20 @@
   color: var(--ui-info);
   background: var(--ui-info-bg);
 }
-.statistics .accent,
-.menu.provider,
-.menu.promo {
+.statistics .accent {
   color: var(--ui-info);
 }
-.menu.orders {
-  color: var(--ui-gold);
+.role-link {
+  color: var(--ui-link);
+  background: var(--ui-selected);
 }
-.menu.favorites {
-  color: var(--ui-brand);
-}
-.settings-link,
 .empty-work {
   color: var(--ui-muted);
   border: 1px solid var(--ui-border);
   background: var(--ui-surface);
 }
 .running-link > text:first-of-type,
-.settings-link > text,
+.role-link > text,
 .empty-work > text:first-of-type {
   flex: 1;
   min-width: 0;

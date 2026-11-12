@@ -149,6 +149,20 @@
   font-size: var(--ui-font-caption);
   color: var(--ui-muted);
 }
+/* Price shares the description line; the name keeps the full width. */
+.model-sub {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+}
+.model-sub .model-description {
+  flex: 1;
+  margin-top: 0;
+}
+.model-sub .model-estimate {
+  max-width: none;
+}
 .model-badges {
   display: flex;
   flex-shrink: 0;
@@ -163,8 +177,8 @@
   border-radius: 3px;
 }
 .model-badges .hot {
-  background: var(--ui-gold-bg);
-  color: var(--ui-gold);
+  background: var(--ui-points-bg);
+  color: var(--ui-points);
 }
 .model-badges .new {
   background: var(--ui-info-bg);

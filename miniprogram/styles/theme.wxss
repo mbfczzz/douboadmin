@@ -13,12 +13,12 @@ page {
   /* Creative workspace: indigo actions, teal activity, amber credit. */
   --ui-link: #3445aa;
   --ui-selected: #eef0ff;
-  --ui-gold: #825718;
-  --ui-gold-muted: #7e6b49;
-  --ui-gold-bg: #fff8e8;
-  --ui-gold-border: #e7d1a4;
-  --ui-info: #0b7269;
-  --ui-info-bg: #e9f6f3;
+  --ui-points: #3445aa;
+  --ui-points-muted: #5f6b8a;
+  --ui-points-bg: #f2f4ff;
+  --ui-points-border: #dde2fb;
+  --ui-info: #1b67c0;
+  --ui-info-bg: #e8f1fc;
   --ui-danger: #b42338;
   --ui-danger-bg: #fff0f2;
   --ui-danger-border: #ecc4cb;

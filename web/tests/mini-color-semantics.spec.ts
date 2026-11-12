@@ -9,7 +9,7 @@ test('business colors distinguish progress, completion, closure and unavailable 
     <h2>服务商状态</h2><div class="sample"><span class="provider-off pill warning">待开通</span><span class="provider-off pill">已停用</span></div>
     <h2>暂不可用的操作</h2><div class="purchase-tabs"><button disabled>积分套餐</button><button>自定义金额</button></div><div class="virtual-products single"><button class="virtual-product selected" disabled><span>购买处理中，套餐不可切换</span></button></div><div class="job-pagination"><button disabled>上一页</button><button>下一页</button></div>
     <p>真实样式状态预览 · 非微信真机截图</p>`);
-  const colors:Record<string,string>={'待支付':'rgb(138, 90, 0)','确认到账中':'rgb(11, 114, 105)','已支付':'rgb(21, 128, 61)','已过期':'rgb(102, 112, 133)','退款处理中':'rgb(11, 114, 105)','已退款':'rgb(102, 112, 133)','排队中':'rgb(138, 90, 0)','生成中':'rgb(11, 114, 105)','已完成':'rgb(21, 128, 61)','生成失败':'rgb(180, 35, 56)','待开通':'rgb(138, 90, 0)','已停用':'rgb(102, 112, 133)'};
+  const colors:Record<string,string>={'待支付':'rgb(138, 90, 0)','确认到账中':'rgb(27, 103, 192)','已支付':'rgb(21, 128, 61)','已过期':'rgb(102, 112, 133)','退款处理中':'rgb(27, 103, 192)','已退款':'rgb(102, 112, 133)','排队中':'rgb(138, 90, 0)','生成中':'rgb(27, 103, 192)','已完成':'rgb(21, 128, 61)','生成失败':'rgb(180, 35, 56)','待开通':'rgb(138, 90, 0)','已停用':'rgb(102, 112, 133)'};
   for(const [label,color] of Object.entries(colors))await expect(page.getByText(label,{exact:true})).toHaveCSS('color',color);
   await expect(page.locator('.purchase-tabs button[disabled]')).toHaveCSS('opacity','0.55');
   await expect(page.locator('.virtual-product[disabled]')).toHaveCSS('opacity','0.55');

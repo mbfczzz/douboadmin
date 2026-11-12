@@ -23,7 +23,6 @@
   width: 160px;
   height: 78px;
   margin: 0 auto 24px;
-  border-radius: 8px;
 }
 .activation-title {
   display: block;

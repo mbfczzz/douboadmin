@@ -10,6 +10,7 @@ import {
   error,
 } from "../../utils/api";
 import { jobPage } from "../../services/job-pages";
+import { dropCover } from "../../services/cover";
 Page({
   data: {
     jobs: [] as ReturnType<typeof jobView>[],
@@ -115,6 +116,9 @@ Page({
   },
   detail(e: WechatMiniprogram.TouchEvent) {
     openTask(e.currentTarget.dataset.id, this);
+  },
+  coverError(e: WechatMiniprogram.CustomEvent) {
+    dropCover(this, e.currentTarget.dataset.id, "completed");
   },
   onPullDownRefresh() {
     this.setData({ page: 1 });

@@ -39,7 +39,7 @@ test("body, helper text, primary actions and selected options meet text contrast
   const pairs = [["--ui-text","--ui-bg"],["--ui-text","--ui-surface"],["--ui-muted","--ui-surface"],["--ui-muted","--ui-field"],["--ui-on-brand","--ui-primary"],["--ui-on-brand","--ui-brand"],["--ui-danger","--ui-danger-bg"],["--ui-text","--ui-selected"]];
   for (const [fg,bg] of pairs) assert.ok(contrast(mini[fg],mini[bg]) >= 4.5, `${fg} on ${bg}`);
   assert.ok(contrast(mini["--ui-brand"],mini["--ui-surface"]) >= 4.5);
-  for(const [fg,bg] of [["--ui-gold","--ui-gold-bg"],["--ui-gold-muted","--ui-gold-bg"],["--ui-link","--ui-selected"],["--ui-info","--ui-info-bg"],["--ui-success","--ui-success-bg"],["--ui-warning","--ui-warning-bg"]])
+  for(const [fg,bg] of [["--ui-points","--ui-points-bg"],["--ui-points-muted","--ui-points-bg"],["--ui-link","--ui-selected"],["--ui-info","--ui-info-bg"],["--ui-success","--ui-success-bg"],["--ui-warning","--ui-warning-bg"]])
     assert.ok(contrast(mini[fg],mini[bg]) >= 4.5, `${fg} on ${bg}`);
 });
 

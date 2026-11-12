@@ -10,6 +10,7 @@ import {
 } from "../../utils/api";
 import type { Job } from "../../services/types";
 import { jobPage } from "../../services/job-pages";
+import { dropCover } from "../../services/cover";
 
 Page({
   data: {
@@ -130,6 +131,9 @@ Page({
   },
   detail(e: WechatMiniprogram.TouchEvent) {
     openTask(e.currentTarget.dataset.id, this);
+  },
+  coverError(e: WechatMiniprogram.CustomEvent) {
+    dropCover(this, e.currentTarget.dataset.id, "works", "filtered");
   },
   create() {
     openTab(this, "/pages/create/index");

@@ -177,6 +177,11 @@ button.biz-secondary {
   font-size: 14px;
   line-height: 1.8;
 }
+.biz-empty-icon {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 12px;
+}
 .biz-pair {
   display: flex;
   gap: 10px;
@@ -203,12 +208,6 @@ button.biz-secondary {
 .biz-card-head > text:last-child {
   flex-shrink: 0;
   text-align: right;
-}
-.biz-record-meta {
-  display: block;
-  margin-top: 6px;
-  line-height: 1.6;
-  overflow-wrap: anywhere;
 }
 .biz-row > switch {
   flex-shrink: 0;

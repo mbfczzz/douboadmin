@@ -79,7 +79,7 @@
   justify-content: center;
   gap: 10px;
   min-height: 80px;
-  color: var(--ui-muted);
+  color: var(--ui-brand);
 }
 .menu-label {
   min-width: 0;
@@ -94,6 +94,13 @@
 }
 .guest-profile .avatar {
   margin: 0 auto 20px;
+}
+.guest-note {
+  display: block;
+  margin-top: 16px;
+  color: var(--ui-muted);
+  font-size: var(--ui-font-note);
+  line-height: 1.6;
 }
 .guest-title {
   display: block;

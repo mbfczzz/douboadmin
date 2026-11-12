@@ -7,7 +7,7 @@
     <text class="biz-small">查看支付进度与积分到账结果</text>
   </view>
   <view wx:if="{{loading&&!needsLogin&&!rows.length}}" class="biz-empty">正在加载充值订单…</view>
-  <view wx:elif="{{!needsLogin&&!loadError&&!rows.length}}" class="biz-empty"><t-icon name="order" size="32" /><text>暂无充值订单</text></view>
+  <view wx:elif="{{!needsLogin&&!loadError&&!rows.length}}" class="biz-empty"><view class="biz-empty-icon"><t-icon name="order" size="32" /></view><text>暂无充值订单</text></view>
   <view wx:for="{{rows}}" wx:key="id" class="biz-card order-card">
     <view class="order-head">
       <view class="icon-tile"><t-icon name="{{item.data.status==='refunded'?'rollback':'wallet'}}" size="22" /></view>

@@ -14,6 +14,8 @@ Page({
     query: "",
     sort: "relevance",
     enabled: false,
+    // Until discovery answers, "not enabled" only means "not read yet".
+    ready: false,
     words: [] as string[],
     wordSource: "推荐关键词",
     history: [] as { keyword: string }[],
@@ -51,6 +53,7 @@ Page({
       if (version !== this.discoveryRevision) return;
       this.setData({
         enabled: d.enabled,
+        ready: true,
         words: d.keywords,
         wordSource: d.source,
       });

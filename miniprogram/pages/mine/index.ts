@@ -14,6 +14,7 @@ import {
 } from "../../utils/api";
 import type { Me } from "../../services/types";
 import { jobPage } from "../../services/job-pages";
+import { dropCover } from "../../services/cover";
 
 const baseMenus = [
   { icon: "order", label: "充值订单", mode: "orders" },
@@ -21,8 +22,10 @@ const baseMenus = [
   { icon: "history", label: "生成记录", mode: "tasks" },
   { icon: "notification", label: "消息通知", mode: "notifications" },
   { icon: "chat", label: "帮助与反馈", mode: "help" },
+  { icon: "setting", label: "设置", mode: "settings" },
 ];
 // Providers manage their codes in 服务商中心; members share their 推广码.
+// The role entry gets its own row so the six common entries stay a 3 × 2 grid.
 const roleMenus: Record<string, typeof baseMenus[number]> =
   {
     provider: { icon: "shop", label: "服务商中心", mode: "provider" },
@@ -37,6 +40,7 @@ Page({
     loading: true,
     loadError: "",
     menus: baseMenus,
+    roleMenu: null as (typeof baseMenus)[number] | null,
   },
   loadVersion: 0,
   visible: true,
@@ -52,13 +56,13 @@ Page({
   // current menu; a newer load or a signed-out session wins.
   async loadIdentity() {
     const version = this.loadVersion;
-    if (!hasSession()) return this.setData({ menus: baseMenus });
+    if (!hasSession()) return this.setData({ roleMenu: null });
     try {
       const { kind, label } = await request<{ kind: string; label: string }>("/me/role");
       if (version !== this.loadVersion || !hasSession()) return;
       const extra =
         roleMenus[["branch", "s1", "s2"].includes(kind) ? "provider" : kind];
-      this.setData({ menus: extra ? [...baseMenus.slice(0, 3), extra, ...baseMenus.slice(3)] : baseMenus, roleLabel: label || "" });
+      this.setData({ roleMenu: extra || null, roleLabel: label || "" });
     } catch {
       // keep the menu as it is
     }
@@ -78,7 +82,7 @@ Page({
     const owner = sessionUserId();
     if (owner !== this.owner) {
       this.owner = owner;
-      this.setData({ me: null, jobs: [], worksError: "", roleLabel: "", menus: baseMenus, loading: true });
+      this.setData({ me: null, jobs: [], worksError: "", roleLabel: "", roleMenu: null, loading: true });
     }
     if (this.refreshTimer !== undefined) clearTimeout(this.refreshTimer);
     if (!hasSession()) {
@@ -138,8 +142,7 @@ Page({
     openTask(e.currentTarget.dataset.id, this);
   },
   coverError(e: WechatMiniprogram.CustomEvent) {
-    const i = this.data.jobs.findIndex((j: { id: string }) => j.id === e.currentTarget.dataset.id);
-    if (i >= 0) this.setData({ [`jobs[${i}].thumbnailUrl`]: "", [`jobs[${i}].result`]: "" });
+    dropCover(this, e.currentTarget.dataset.id, "jobs");
   },
   create() {
     openTab(this, "/pages/create/index");
