@@ -37,7 +37,7 @@
     <t-button t-class="empty-action" theme="primary" bind:tap="load">重试</t-button>
   </view>
   <view wx:elif="{{!items.length}}" class="empty">
-    <t-icon name="image" size="40" />
+    <t-icon name="video-camera" size="40" />
     <text class="title">{{search?'没有找到相关模板':category===categories[0]?'模板正在上新':'还没有这类模板'}}</text>
     <text class="desc">{{search?'换个关键词试试。':category===categories[0]?'可以先在创作页自由生成。':'换个分类，继续发现灵感。'}}</text>
     <t-button wx:if="{{!search&&category===categories[0]}}" t-class="empty-action" theme="primary" bind:tap="create">去创作</t-button>
@@ -60,11 +60,8 @@
       >
         <view class="cover {{col===1?'alternate':''}}">
           <image mode="aspectFill" src="{{item.data.cover}}" lazy-load />
-          <view wx:if="{{item.data.kind!=='image'}}" class="play">
-            <t-icon
-              name="{{item.data.kind==='image'?'image':'play'}}"
-              size="16"
-            />
+          <view class="play">
+            <t-icon name="play" size="16" />
           </view>
         </view>
         <text class="title">{{item.data.title}}</text>

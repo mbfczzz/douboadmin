@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Plus, Search, Image, Film } from "lucide-react";
+import { Plus, Search, Film } from "lucide-react";
 import { api, type Row, type Template, type Model } from "../api";
 import type { PageProps } from "../navigation";
 import { useResource } from "../hooks/useResource";
@@ -17,7 +17,7 @@ import { ask } from "../confirm/ask";
 const blank: Template = {
   title: "",
   category: "",
-  kind: "image",
+  kind: "video",
   cover: "",
   prompt: "",
   description: "",
@@ -34,8 +34,8 @@ const blank: Template = {
 };
 export default function Templates({ notify }: PageProps) {
   const models = useResource<Row<Model>[]>("/admin/models");
-  const [kind, setKind] = useRememberedState("templates.kind", "image"),
-    [status, setStatus] = useRememberedState("templates.status", ""),
+  const kind = "video";
+  const [status, setStatus] = useRememberedState("templates.status", ""),
     [category, setCategory] = useRememberedState("templates.category", ""),
     [q, setQ] = useRememberedState("templates.query", ""),
     [sort, setSort] = useRememberedState("templates.sort", "sort"),
@@ -49,7 +49,7 @@ export default function Templates({ notify }: PageProps) {
   const [edit, setEdit] = useState<Row<Template> | null>(null),
     [busy, setBusy] = useState("");
   const rows = resource.data?.items || [],
-    modelRows = models.data || [];
+    modelRows = (models.data || []).filter((r) => r.data.kind === "video");
   // A remembered category whose templates are all gone no longer filters.
   useEffect(() => {
     if (category && categories.data && !categories.data.includes(category)) {
@@ -63,7 +63,7 @@ export default function Templates({ notify }: PageProps) {
         Math.min(current, Math.max(1, Math.ceil(resource.data!.total / 12))),
       );
   }, [resource.data]);
-  const filtered = rows,
+  const filtered = rows.filter((r) => r.data.kind === "video"),
     current = page;
   function create(data = blank) {
     setEdit({
@@ -121,30 +121,13 @@ export default function Templates({ notify }: PageProps) {
       >
         <button className="primary" onClick={() => create()}>
           <Plus size={16} />
-          新增模板
+          新增视频模板
         </button>
       </PageHeader>
       <div className="catalog-toolbar panel">
-        <div className="catalog-tabs">
-          {[
-            ["image", "图片", Image],
-            ["video", "视频", Film],
-          ].map(([id, label, Icon]) => {
-            const I = Icon as typeof Film;
-            return (
-              <button
-                className={kind === id ? "active" : ""}
-                key={String(id)}
-                onClick={() => {
-                  setKind(String(id));
-                  setPage(1);
-                }}
-              >
-                <I size={14} />
-                {String(label)}
-              </button>
-            );
-          })}
+        <div className="business-actions">
+          <Film size={16} />
+          <span>视频模板</span>
         </div>
         <select
           aria-label="模板状态"

@@ -13,7 +13,7 @@ test("cover upload locks its URL and restores editing on failure", async ({
 }) => {
   await login(page);
   await page.getByRole("button", { name: "创作模板", exact: true }).click();
-  await page.getByRole("button", { name: "新增模板", exact: true }).click();
+  await page.getByRole("button", { name: "新增视频模板", exact: true }).click();
   const dialog = page.getByRole("dialog"),
     url = dialog.getByLabel("模板封面", { exact: true });
   await url.fill("/media/design/cover-1.jpg");
@@ -107,7 +107,7 @@ test("an unresponsive cover upload can be cancelled without affecting the next e
 }) => {
   await login(page);
   await page.getByRole("button", { name: "创作模板", exact: true }).click();
-  await page.getByRole("button", { name: "新增模板", exact: true }).click();
+  await page.getByRole("button", { name: "新增视频模板", exact: true }).click();
   let release!: () => void,
     started = false;
   const pending = new Promise<void>((resolve) => {
@@ -136,7 +136,7 @@ test("an unresponsive cover upload can be cancelled without affecting the next e
   } finally {
     release();
   }
-  await page.getByRole("button", { name: "新增模板", exact: true }).click();
+  await page.getByRole("button", { name: "新增视频模板", exact: true }).click();
   await expect(
     page.getByRole("dialog").getByLabel("模板封面", { exact: true }),
   ).toHaveValue("");

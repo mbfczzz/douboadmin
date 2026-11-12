@@ -5,7 +5,6 @@ import (
 	"doubo/server/internal/store"
 	"encoding/json"
 	"net/http"
-	"slices"
 	"sort"
 	"strings"
 )
@@ -25,7 +24,7 @@ func (a *Server) templates(w http.ResponseWriter, r *http.Request) {
 		var t core.Template
 		_ = json.Unmarshal(row.Data, &t)
 		// Users only see templates they can actually submit with.
-		if t.Deleted || (!admin && (!t.Published || !ready(t.Model))) {
+		if t.Kind != "video" || t.Deleted || (!admin && (!t.Published || !ready(t.Model))) {
 			continue
 		}
 		q := r.URL.Query()
@@ -59,7 +58,7 @@ func (a *Server) template(w http.ResponseWriter, r *http.Request) {
 	}
 	var t core.Template
 	_ = json.Unmarshal(row.Data, &t)
-	if !t.Published || t.Deleted || !a.modelReady(r)(t.Model) {
+	if t.Kind != "video" || !t.Published || t.Deleted || !a.modelReady(r)(t.Model) {
 		fail(w, 404, "模板已下架")
 		return
 	}
@@ -77,7 +76,11 @@ func (a *Server) saveTemplate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	t := v.Data
-	if strings.TrimSpace(t.Title) == "" || len([]rune(t.Title)) > 50 || t.Prompt == "" || len([]rune(t.Prompt)) > 500 || !slices.Contains([]string{"video", "image"}, t.Kind) || t.RequiredImages < 0 || t.RequiredImages > 5 || t.Sort < 0 {
+	if t.Kind != "video" {
+		fail(w, 400, "模板仅支持视频")
+		return
+	}
+	if strings.TrimSpace(t.Title) == "" || len([]rune(t.Title)) > 50 || t.Prompt == "" || len([]rune(t.Prompt)) > 500 || t.RequiredImages < 0 || t.RequiredImages > 5 || t.Sort < 0 {
 		fail(w, 400, "模板标题、提示词、类型或素材数量无效")
 		return
 	}
@@ -105,7 +108,7 @@ func (a *Server) templateVisible(r *http.Request, ready func(string) bool, id st
 		return false
 	}
 	var t core.Template
-	return json.Unmarshal(row.Data, &t) == nil && t.Published && !t.Deleted && ready(t.Model)
+	return json.Unmarshal(row.Data, &t) == nil && t.Kind == "video" && t.Published && !t.Deleted && ready(t.Model)
 }
 
 // visibleTemplates lists the ids users can open, in one read of templates.
@@ -117,7 +120,7 @@ func (a *Server) visibleTemplates(r *http.Request) (map[string]bool, error) {
 	ready, out := a.modelReady(r), map[string]bool{}
 	for _, row := range rows {
 		var t core.Template
-		if json.Unmarshal(row.Data, &t) == nil && t.Published && !t.Deleted && ready(t.Model) {
+		if json.Unmarshal(row.Data, &t) == nil && t.Kind == "video" && t.Published && !t.Deleted && ready(t.Model) {
 			out[row.ID] = true
 		}
 	}

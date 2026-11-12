@@ -41,13 +41,14 @@ func awaitingBrowser(t *testing.T, kind string) (*Server, string, string) {
 	if _, e := a.Store.Put(t.Context(), "models", row, row.Version); e != nil {
 		t.Fatal(e)
 	}
+	videoModel := templateVideoModel(t, a)
 	for _, published := range []bool{true, false} {
 		id, title := "visible-template", "可浏览模板"
 		if !published {
 			id, title = "hidden-template", "内部未上架"
 		}
-		template := core.Template{Kind: "image", Title: title, Prompt: "example", Published: published}
-		template.Model = model.ID
+		template := core.Template{Kind: "video", Title: title, Prompt: "example", Published: published}
+		template.Model = videoModel
 		_, e := a.Store.Put(t.Context(), "templates", core.Record{ID: id, Data: core.Data(template)}, 0)
 		if e != nil {
 			t.Fatal(e)

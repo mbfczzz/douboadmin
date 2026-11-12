@@ -43,7 +43,7 @@ export async function createTemplate(
 ): Promise<Row<Template>> {
   const models = await catalog(page),
     m = models.find(
-      (r) => r.data.kind === "image" && r.data.published && r.data.available,
+      (r) => r.data.kind === "video" && r.data.published && r.data.available,
     )!;
   expect(m).toBeTruthy();
   const image = await cover(page),
@@ -51,11 +51,11 @@ export async function createTemplate(
   const data: Template = {
     title: id,
     category: "测试分类",
-    kind: "image",
+    kind: "video",
     family: "style",
     cover: image.data.url,
     coverAssetId: image.id,
-    prompt: "一张窗边静物摄影",
+    prompt: "镜头缓慢推进，展示窗边的产品细节",
     description: "浏览器回归测试，结束后删除",
     published,
     sort: 0,
@@ -64,8 +64,8 @@ export async function createTemplate(
     resolution: m.data.resolutions[0] || "",
     ratio: m.data.ratios[0] || "",
     quality: m.data.qualities[0] || "",
-    duration: 0,
-    mode: "t2i",
+    duration: m.data.durations[0] || 5,
+    mode: "t2v",
   };
   const res = await page.request.put("/api/admin/templates/" + id, {
     data: { version: 0, data },

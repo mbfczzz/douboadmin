@@ -67,6 +67,10 @@ Page({
         undefined,
         false,
       );
+      if (t.data.kind !== "video") {
+        this.setData({ template: null, quoteText: "" });
+        throw new Error("模板已下架");
+      }
       t.data.cover = media(t.data.cover);
       if (this.destroyed) return;
       // Image-to-video and keyframe take an exact photo count; extra
@@ -173,11 +177,12 @@ Page({
   async generate() {
     if (this.data.busy || !this.data.template || isNavigating(this)) return;
     const t = this.data.template;
+    if (t.data.kind !== "video") return error(new Error("模板仅支持视频"));
     this.setData({ busy: true });
     try {
       const j = await submitInput(
         {
-          kind: t.data.kind,
+          kind: "video",
           templateId: t.id,
           prompt: t.data.prompt,
           model: t.data.model,

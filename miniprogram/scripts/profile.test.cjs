@@ -6,7 +6,7 @@ test("favorite lookup failure does not replace publicly accessible template cont
   await h.api.signIn();
   h.api.request = async (p) => {
     if (p.startsWith("/templates/"))
-      return { id: "t", data: { cover: "/cover.jpg", title: "template" } };
+      return { id: "t", data: { kind: "video", cover: "/cover.jpg", title: "template" } };
     throw new h.api.RequestError(503, "暂时不可用");
   };
   const page = h.page("template-detail");

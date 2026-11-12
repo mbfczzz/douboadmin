@@ -20,7 +20,7 @@ export const pageInfo = {
   overview: ["工作概览", "查看用户、生成任务与收支统计。", LayoutDashboard],
   templates: [
     "创作模板",
-    "管理创作配方与展示效果，配置后上架到小程序。",
+    "管理视频创作模板与展示效果，配置后上架到小程序。",
     Layers,
   ],
   jobs: ["生成任务", "查看任务进度、生成结果与失败原因。", Film],

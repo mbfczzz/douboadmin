@@ -23,7 +23,7 @@ export default function TemplateEditor({
   onSaved,
   notify,
 }: Props) {
-  const [data, setData] = useState(initial.data),
+  const [data, setData] = useState({ ...initial.data, kind: "video" }),
     [busy, setBusy] = useState(false),
     [uploading, setUploading] = useState(false),
     [dirty, setDirty] = useState(false);
@@ -59,7 +59,7 @@ export default function TemplateEditor({
     if (busy || uploading) return;
     setBusy(true);
     try {
-      if (!(await record.save(data))) return;
+      if (!(await record.save({ ...data, kind: "video" }))) return;
       notify("模板已保存");
       onSaved();
       onClose();
@@ -69,7 +69,7 @@ export default function TemplateEditor({
   }
   return (
     <Modal
-      title={initial.version ? "编辑创作模板" : "新增创作模板"}
+      title={initial.version ? "编辑视频模板" : "新增视频模板"}
       className="form-modal"
       onClose={close}
     >
@@ -106,7 +106,7 @@ export default function TemplateEditor({
                 value={data.category}
                 onChange={(e) => patch({ category: e.target.value })}
                 maxLength={40}
-                placeholder="例如：产品摄影"
+                placeholder="例如：产品展示"
               />
             </label>
             <label>

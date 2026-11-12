@@ -1,4 +1,4 @@
-import { Image, Pencil, Copy, Trash2, Eye, EyeOff } from "lucide-react";
+import { Film, Pencil, Copy, Trash2, Eye, EyeOff } from "lucide-react";
 import type { Row, Template, Model } from "../api";
 interface Props {
   r: Row<Template>;
@@ -24,7 +24,7 @@ export default function TemplateCard({
         {r.data.cover ? (
           <img src={r.data.cover} alt={r.data.title} loading="lazy" />
         ) : (
-          <Image size={30} />
+          <Film size={30} />
         )}
       </div>
       <div className="studio-body">

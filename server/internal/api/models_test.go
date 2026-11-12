@@ -122,17 +122,17 @@ func TestDeletedModelDoesNotReappearOnSync(t *testing.T) {
 func TestPublishedTemplateRequiresRealModelAndParameters(t *testing.T) {
 	a, token := modelServer(t)
 	_ = call(a, "POST", "/api/admin/models/sync", token, "", nil)
-	tmpl := core.Template{Title: "Real template", Kind: "image", Prompt: "A product photo", Cover: "https://example.com/cover.png", Published: true}
+	tmpl := core.Template{Title: "Real template", Kind: "video", Prompt: "A product video", Cover: "https://example.com/cover.png", Published: true}
 	request := func() int {
 		return call(a, "PUT", "/api/admin/templates/created", token, "", map[string]any{"version": 0, "data": tmpl}).Code
 	}
 	if request() != 400 {
 		t.Fatal("published without a model")
 	}
-	tmpl.Model = core.Digest("image-live")[:32]
+	tmpl.Model = templateVideoModel(t, a)
 	tmpl.Ratio = "1:1"
-	tmpl.Resolution = "1k"
-	tmpl.Quality = "high"
+	tmpl.Resolution = "720p"
+	tmpl.Duration = 5
 	if request() != 200 {
 		t.Fatal("valid template rejected")
 	}

@@ -81,7 +81,8 @@ func TestSessionRevocationAndOrigin(t *testing.T) {
 func TestAdminVersionConflict(t *testing.T) {
 	a, _, _ := setup(t)
 	token, _ := a.Sessions.Create(context.Background(), "admin", "admin")
-	template := core.Template{Title: "Test template", Kind: "image", Prompt: "test", Cover: "https://example.test/cover.jpg", GenerationOptions: core.GenerationOptions{Model: "demo-image", Resolution: "1K", Ratio: "1:1"}}
+	model := templateVideoModel(t, a)
+	template := core.Template{Title: "Test template", Kind: "video", Prompt: "test", Cover: "https://example.test/cover.jpg", GenerationOptions: core.GenerationOptions{Model: model, Resolution: "720p", Ratio: "1:1", Duration: 5}}
 	body := map[string]any{"version": 0, "data": template}
 	w := call(a, "PUT", "/api/admin/templates/test", token, "", body)
 	if w.Code != 200 {

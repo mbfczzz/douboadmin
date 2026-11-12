@@ -49,7 +49,7 @@ test("unsaved edits survive cancel, focus stays in dialog and returns to opener"
 }) => {
   await login(page);
   await page.getByRole("button", { name: "创作模板", exact: true }).click();
-  const opener = page.getByRole("button", { name: "新增模板" });
+  const opener = page.getByRole("button", { name: "新增视频模板" });
   await opener.click();
   const dialog = page.getByRole("dialog"),
     title = dialog.getByLabel("模板名称");

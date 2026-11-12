@@ -42,7 +42,7 @@ Page({
     const page = append ? this.data.page + 1 : 1;
     const version = ++this.loadVersion;
     const query = append ? this.loadedQuery :
-      "/templates?category=" +
+      "/templates?kind=video&category=" +
       encodeURIComponent(this.data.category) +
       "&q=" +
       encodeURIComponent(this.data.search);

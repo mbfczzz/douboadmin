@@ -117,7 +117,7 @@ func (a *Server) validateJob(ctx context.Context, user string, in *core.JobInput
 		}
 		var t core.Template
 		_ = json.Unmarshal(r.Data, &t)
-		if !t.Published || t.Deleted || t.Kind != in.Kind || t.Model != in.Model {
+		if t.Kind != "video" || !t.Published || t.Deleted || t.Kind != in.Kind || t.Model != in.Model {
 			return fmt.Errorf("模板或关联模型已变化，请重新打开模板")
 		}
 		if counts["image"] < t.RequiredImages {

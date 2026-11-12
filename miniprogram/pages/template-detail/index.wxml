@@ -11,7 +11,7 @@
     <t-button t-class="empty-action" theme="primary" wx:if="{{loadError!=='模板已下架'}}" bind:tap="load">重试</t-button>
   </view>
   <view wx:elif="{{template}}" class="content-reveal">
-    <view wx:if="{{template.data.kind==='video'&&template.data.preview}}" class="hero"><video src="{{template.data.preview}}" poster="{{template.data.cover}}" controls object-fit="contain" /></view>
+    <view wx:if="{{template.data.preview}}" class="hero"><video src="{{template.data.preview}}" poster="{{template.data.cover}}" controls object-fit="contain" /></view>
     <view wx:else class="hero" bindtap="preview">
       <image src="{{template.data.cover}}" mode="aspectFill" />
       <view class="hero-preview"><t-icon name="fullscreen" size="20" /></view>
@@ -32,7 +32,7 @@
       <text class="section-title upload-title">上传商品照片</text>
       <text class="small muted">{{template.data.requiredImages?'必填 ':'选填'}}<block wx:if="{{template.data.requiredImages}}">{{assets.length>=template.data.requiredImages?template.data.requiredImages:assets.length}} / {{template.data.requiredImages}}</block></text>
     </view>
-    <text class="upload-description"><block wx:if="{{template.data.requiredImages}}">只需 {{template.data.requiredImages}} 张照片，即可制作同款{{template.data.kind==='image'?'图片':'视频'}}</block><block wx:else>可以直接生成，也可以添加参考照片。</block></text>
+    <text class="upload-description"><block wx:if="{{template.data.requiredImages}}">只需 {{template.data.requiredImages}} 张照片，即可制作同款视频</block><block wx:else>可以直接生成，也可以添加参考照片。</block></text>
     <view class="required-upload" wx:if="{{!assets.length||assets.length<template.data.requiredImages}}" bindtap="choose">
       <view class="upload-icon"><t-icon name="image-add" size="24" /></view>
       <view>

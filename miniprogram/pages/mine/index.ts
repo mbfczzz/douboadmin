@@ -28,7 +28,7 @@ const baseMenus = [
 // The role entry gets its own row so the six common entries stay a 3 × 2 grid.
 const roleMenus: Record<string, typeof baseMenus[number]> =
   {
-    provider: { icon: "shop", label: "服务商中心", mode: "provider" },
+    provider: { icon: "cooperate", label: "服务商中心", mode: "provider" },
     member: { icon: "qrcode", label: "我的推广码", mode: "promo" },
   };
 Page({

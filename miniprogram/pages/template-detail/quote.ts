@@ -15,7 +15,7 @@ export function loadQuote(page: QuotePage, t: Row<Template>) {
   }
   const request = estimateCost(
     {
-      kind: t.data.kind,
+      kind: "video",
       model: t.data.model,
       resolution: t.data.resolution,
       ratio: t.data.ratio,

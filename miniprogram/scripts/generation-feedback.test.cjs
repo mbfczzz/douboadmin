@@ -89,9 +89,9 @@ for (const entry of ["image", "video", "template", "agent", "retry"]) {
         template: {
           id: "template",
           data: {
-            kind: "image",
+            kind: "video",
             prompt: "模板描述",
-            model: "image-model",
+            model: "video-model",
             resolution: "1k",
             ratio: "1:1",
           },

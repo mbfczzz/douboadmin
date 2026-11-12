@@ -13,9 +13,9 @@ test("real catalog, template upload, publish, copy, unpublish and delete", async
   const models = await catalog(page);
   expect(models.length).toBeGreaterThan(0);
   const m = models.find(
-    (r) => r.data.kind === "image" && r.data.published && r.data.available,
+    (r) => r.data.kind === "video" && r.data.published && r.data.available,
   )!;
-  await page.getByRole("tab", { name: "图片模型", exact: true }).click();
+  await page.getByRole("tab", { name: "视频模型", exact: true }).click();
   await page.getByLabel("搜索模型").fill(m.data.key);
   await expect(page.locator("tbody tr").first()).toContainText(m.data.name);
   await page
@@ -33,7 +33,7 @@ test("real catalog, template upload, publish, copy, unpublish and delete", async
     fullPage: true,
   });
   await page.getByRole("button", { name: "创作模板", exact: true }).click();
-  await page.getByRole("button", { name: "新增模板", exact: true }).click();
+  await page.getByRole("button", { name: "新增视频模板", exact: true }).click();
   const title = "e2e-browser-" + Date.now();
   const ids: string[] = [];
   try {

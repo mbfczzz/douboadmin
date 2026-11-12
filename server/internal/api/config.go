@@ -62,7 +62,7 @@ func (a *Server) config(w http.ResponseWriter, r *http.Request) {
 	seen := map[string]bool{"推荐": true}
 	for _, row := range templates {
 		var t core.Template
-		if json.Unmarshal(row.Data, &t) == nil && t.Published && !t.Deleted && t.Category != "" && !seen[t.Category] {
+		if json.Unmarshal(row.Data, &t) == nil && t.Kind == "video" && t.Published && !t.Deleted && t.Category != "" && !seen[t.Category] {
 			categories = append(categories, t.Category)
 			seen[t.Category] = true
 		}

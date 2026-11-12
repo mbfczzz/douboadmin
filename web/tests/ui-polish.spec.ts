@@ -6,7 +6,7 @@ test("template editor keeps save and close visible while the fields scroll", asy
 }) => {
   await login(page);
   await page.getByRole("button", { name: "创作模板", exact: true }).click();
-  await page.getByRole("button", { name: "新增模板", exact: true }).click();
+  await page.getByRole("button", { name: "新增视频模板", exact: true }).click();
   await page.setViewportSize({ width: 390, height: 720 });
   const dialog = page.getByRole("dialog"),
     body = dialog.locator(".form-body");

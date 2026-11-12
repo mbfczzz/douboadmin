@@ -9,8 +9,9 @@ import (
 
 func TestCatalogPagingFiltersBeforeSlicing(t *testing.T) {
 	a, token, _ := setup(t)
+	model := templateVideoModel(t, a)
 	for i := 0; i < 521; i++ {
-		_, e := a.Store.Put(t.Context(), "templates", core.Record{ID: fmt.Sprintf("template-%04d", i), Data: core.Data(core.Template{Title: fmt.Sprintf("template %d", i), Category: "all", GenerationOptions: core.GenerationOptions{Model: "demo-image"}, Published: true, Kind: "image", Sort: i})}, 0)
+		_, e := a.Store.Put(t.Context(), "templates", core.Record{ID: fmt.Sprintf("template-%04d", i), Data: core.Data(core.Template{Title: fmt.Sprintf("template %d", i), Category: "all", GenerationOptions: core.GenerationOptions{Model: model}, Published: true, Kind: "video", Sort: i})}, 0)
 		if e != nil {
 			t.Fatal(e)
 		}
@@ -75,7 +76,8 @@ func TestNotificationPagingAndReadAllBeyondFiveHundred(t *testing.T) {
 
 func TestFavoriteStateAndTemplateBeyondListCap(t *testing.T) {
 	a, token, _ := setup(t)
-	_, e := a.Store.Put(t.Context(), "templates", core.Record{ID: "old-template", Data: core.Data(core.Template{Title: "old", GenerationOptions: core.GenerationOptions{Model: "demo-image"}, Published: true, Kind: "image"})}, 0)
+	model := templateVideoModel(t, a)
+	_, e := a.Store.Put(t.Context(), "templates", core.Record{ID: "old-template", Data: core.Data(core.Template{Title: "old", GenerationOptions: core.GenerationOptions{Model: model}, Published: true, Kind: "video"})}, 0)
 	if e != nil {
 		t.Fatal(e)
 	}

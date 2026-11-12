@@ -14,9 +14,9 @@ import (
 func TestTemplateHiddenWhenModelUnpublished(t *testing.T) {
 	a, token := modelServer(t)
 	_ = call(a, "POST", "/api/admin/models/sync", token, "", nil)
-	id := core.Digest("image-live")[:32]
-	tmpl := core.Template{Title: "Model gated", Kind: "image", Prompt: "A product photo", Cover: "https://example.com/cover.png", Published: true}
-	tmpl.Model, tmpl.Ratio, tmpl.Resolution, tmpl.Quality = id, "1:1", "1k", "high"
+	id := templateVideoModel(t, a)
+	tmpl := core.Template{Title: "Model gated", Kind: "video", Prompt: "A product video", Cover: "https://example.com/cover.png", Published: true}
+	tmpl.Model, tmpl.Ratio, tmpl.Resolution, tmpl.Duration = id, "1:1", "720p", 5
 	if code := call(a, "PUT", "/api/admin/templates/gated", token, "", map[string]any{"version": 0, "data": tmpl}).Code; code != 200 {
 		t.Fatalf("save template: %d", code)
 	}

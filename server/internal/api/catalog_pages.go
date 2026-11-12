@@ -19,7 +19,7 @@ func (a *Server) templateCategories(w http.ResponseWriter, r *http.Request) {
 	categories := []string{}
 	for _, row := range rows {
 		var t core.Template
-		if json.Unmarshal(row.Data, &t) == nil && !t.Deleted && t.Category != "" && !seen[t.Category] {
+		if json.Unmarshal(row.Data, &t) == nil && t.Kind == "video" && !t.Deleted && t.Category != "" && !seen[t.Category] {
 			seen[t.Category] = true
 			categories = append(categories, t.Category)
 		}
@@ -36,10 +36,12 @@ func (a *Server) templatePage(w http.ResponseWriter, r *http.Request, ids []stri
 	q.IDs = ids
 	q.Fields["deleted"] = "false"
 	params := r.URL.Query()
-	for _, key := range []string{"kind", "category"} {
-		if value := params.Get(key); value != "" && value != "推荐" {
-			q.Fields[key] = value
-		}
+	q.Fields["kind"] = "video"
+	if kind := params.Get("kind"); kind != "" && kind != "video" {
+		q.IDs = []string{}
+	}
+	if value := params.Get("category"); value != "" && value != "推荐" {
+		q.Fields["category"] = value
 	}
 	if params.Get("sort") != "newest" {
 		q.SortField = "sort"
@@ -143,7 +145,7 @@ func (a *Server) favoriteTemplates(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		var t core.Template
-		if err != nil || json.Unmarshal(template.Data, &t) != nil || t.Deleted || !t.Published || !ready(t.Model) {
+		if err != nil || json.Unmarshal(template.Data, &t) != nil || t.Kind != "video" || t.Deleted || !t.Published || !ready(t.Model) {
 			unavailable = append(unavailable, row)
 			continue
 		}

@@ -10,7 +10,7 @@
 | POST | /auth/logout | 撤销当前会话 |
 | GET / POST | /access、/access/join | 查询使用授权 / 用服务商分享码加入；微信登录本身不授予业务权限 |
 | GET / PUT | /me | 当前用户资料、作品统计 / 版本化更新 |
-| GET | /templates | 已发布模板，支持 `category`、`kind`、`q` |
+| GET | /templates | 已发布视频模板，支持 `category`、`q`；`kind=video`，其他类型返回空列表 |
 | GET | /templates/{id} | 已发布模板详情及新签名封面 URL |
 | POST | /assets | multipart `file`，本人素材；头像最多 5 MB |
 | GET | /assets/{id} | 本人素材详情及新签名 URL |
@@ -27,8 +27,8 @@
 | POST | /admin/models/sync | 同步上游，返回 created / updated / conflicts / total |
 | PUT | /admin/models/{id} | `{version,data}`，编辑显示名称、排序、积分配置、上架状态 |
 | DELETE | /admin/models/{id} | `{version}`，软删除，不影响已有任务记录 |
-| GET | /admin/templates | 全部未删除模板 |
-| PUT | /admin/templates/{id} | `{version,data}`，新增或编辑模板 |
+| GET | /admin/templates | 全部未删除的视频模板 |
+| PUT | /admin/templates/{id} | `{version,data}`，新增或编辑视频模板，`data.kind` 必须为 `video` |
 | DELETE | /admin/templates/{id} | `{version}`，下架并软删除 |
 | POST | /admin/assets?purpose=cover | 上传封面，JPG / PNG / WebP，最多 5 MB |
 | GET / POST | /admin/jobs | 管理任务列表 / 管理员发起真实模型测试任务 |
@@ -70,7 +70,7 @@
 ## 创作模板
 
 `data` 包括 `title/category/kind/family/description/prompt/coverAssetId/cover/preview/model/resolution/ratio/quality/duration/mode/requiredImages/sort/published`。
-`family` 为 `style` 或 `inspiration`，`kind` 为 `image` 或 `video`。
+`family` 为 `style` 或 `inspiration`，`kind` 仅允许 `video`，关联模型也必须是视频模型。图片模板（包括草稿）保存时返回 400。旧图片模板不再出现在列表和分类中，详情返回 404，不能收藏或提交生成；已有收藏按不可用处理。
 封面可使用后台上传得到的 `coverAssetId` 或 HTTPS 地址；签名 URL 不作为持久标识。
 发布前校验模型状态与参数，`requiredImages` 须在模型参考图数量上下限内。已删除或已下架的模板不能继续提交任务；关联模型下架、维护或删除时，模板对用户隐藏（列表不返回、详情 404），也不能被收藏，收藏数只统计仍可打开的模板。
 

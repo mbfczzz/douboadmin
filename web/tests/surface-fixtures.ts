@@ -23,8 +23,8 @@ export const qr =
 // Browser-only read fixtures. Writes are blocked; no payments or providers change.
 export async function surfaceFixtures(page: Page, catalog?: Row<Model>[]) {
   const models = catalog || await (await page.request.get("/api/admin/models")).json();
-  const imageModel = models.find(
-    (r: { data: { kind: string } }) => r.data.kind === "image",
+  const videoModel = models.find(
+    (r: { data: { kind: string } }) => r.data.kind === "video",
   );
   const partner = row("qa-provider", {
       name: longName,
@@ -94,13 +94,13 @@ export async function surfaceFixtures(page: Page, catalog?: Row<Model>[]) {
         title: "弹窗质检模板",
         category: "测试分类",
         family: "style",
-        kind: "image",
-        model: imageModel?.id || "",
-        resolution: imageModel?.data.resolutions[0] || "",
-        ratio: imageModel?.data.ratios[0] || "",
+        kind: "video",
+        model: videoModel?.id || "",
+        resolution: videoModel?.data.resolutions[0] || "",
+        ratio: videoModel?.data.ratios[0] || "",
         quality: "",
         mode: "",
-        duration: 0,
+        duration: videoModel?.data.durations[0] || 5,
         cover: "/media/design/cover-1.jpg",
         prompt: "只读界面验收提示词",
         description: "只读测试模板，不写入业务数据库",

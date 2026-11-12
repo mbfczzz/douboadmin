@@ -14,7 +14,7 @@ function result(kind: string, total = 1, published = false, title?: string) {
             version: 1,
             createdAt: "2026-11-10T00:00:00Z",
             data: {
-              title: title || (kind === "image" ? "图片模板" : "视频模板"),
+              title: title || "视频模板",
               kind,
               category: "测试",
               published,
@@ -57,7 +57,7 @@ function stable(
 }
 
 for (const width of [1440, 390, 320]) {
-  test(`delayed image/video switching keeps controls stable at ${width}px`, async ({
+  test(`delayed video status filtering keeps controls stable at ${width}px`, async ({
     page,
   }) => {
     await page.setViewportSize({ width, height: 900 });
@@ -68,21 +68,23 @@ for (const width of [1440, 390, 320]) {
     });
     const calls: string[] = [];
     await open(page, async (route) => {
-      const kind = new URL(route.request().url()).searchParams.get("kind")!;
-      calls.push(kind);
-      if (kind === "video") {
+      const status = new URL(route.request().url()).searchParams.get("status")!;
+      calls.push(status);
+      if (status === "published") {
         arrived = true;
         await pending;
       }
-      await route.fulfill({ json: result(kind, kind === "image" ? 1 : 0) });
+      await route.fulfill({ json: result("video", status === "" ? 1 : 0) });
     });
     await expect(
-      page.getByRole("heading", { name: "图片模板", exact: true }),
+      page.getByRole("heading", { name: "视频模板", exact: true }),
     ).toBeVisible();
     const before = await controls(page);
     const region = page.getByRole("region", { name: "模板列表" });
     const height = (await region.boundingBox())!.height;
-    await page.getByRole("button", { name: "视频", exact: true }).click();
+    await page
+      .getByRole("combobox", { name: "模板状态" })
+      .selectOption("published");
     await expect.poll(() => arrived).toBe(true);
     try {
       await expect(region).toHaveAttribute("aria-busy", "true");
@@ -90,9 +92,9 @@ for (const width of [1440, 390, 320]) {
       await expect(page.locator(".catalog-caption")).toContainText(
         "正在加载模板",
       );
-      await expect(page.getByText("暂无创作模板", { exact: true })).toHaveCount(
-        0,
-      );
+      await expect(
+        page.getByText("没有匹配的模板", { exact: true }),
+      ).toHaveCount(0);
       stable(await controls(page), before);
       expect((await region.boundingBox())!.height).toBeGreaterThanOrEqual(
         height - 1,
@@ -105,14 +107,16 @@ for (const width of [1440, 390, 320]) {
       release();
     }
     await expect(page.locator(".catalog-caption")).toContainText("0 个模板");
-    await expect(page.getByText("暂无创作模板", { exact: true })).toBeVisible();
-    stable(await controls(page), before);
-    await page.getByRole("button", { name: "图片", exact: true }).click();
     await expect(
-      page.getByRole("heading", { name: "图片模板", exact: true }),
+      page.getByText("没有匹配的模板", { exact: true }),
+    ).toBeVisible();
+    stable(await controls(page), before);
+    await page.getByRole("combobox", { name: "模板状态" }).selectOption("");
+    await expect(
+      page.getByRole("heading", { name: "视频模板", exact: true }),
     ).toBeVisible();
     await expect(region).toHaveAttribute("aria-busy", "false");
-    expect(calls).toEqual(["image", "video"]);
+    expect(calls).toEqual(["", "published"]);
     stable(await controls(page), before);
     expect(
       await page.evaluate(
@@ -129,21 +133,23 @@ test("an error stays below the toolbar and retry does not revive another tab's c
 }) => {
   let fail = true;
   await open(page, (route) => {
-    const kind = new URL(route.request().url()).searchParams.get("kind")!;
+    const status = new URL(route.request().url()).searchParams.get("status")!;
     return route.fulfill(
-      kind === "video" && fail
+      status === "published" && fail
         ? { status: 503, json: { error: "视频模板读取失败" } }
-        : { json: result(kind) },
+        : { json: result("video") },
     );
   });
   await expect(
-    page.getByRole("heading", { name: "图片模板", exact: true }),
+    page.getByRole("heading", { name: "视频模板", exact: true }),
   ).toBeVisible();
   const before = await controls(page);
-  await page.getByRole("button", { name: "视频", exact: true }).click();
+  await page
+    .getByRole("combobox", { name: "模板状态" })
+    .selectOption("published");
   await expect(page.getByRole("alert")).toContainText("视频模板读取失败");
   await expect(
-    page.getByRole("heading", { name: "图片模板", exact: true }),
+    page.getByRole("heading", { name: "视频模板", exact: true }),
   ).toHaveCount(0);
   stable(await controls(page), before);
   fail = false;
@@ -160,38 +166,40 @@ test("publishing invalidates cached tabs so revisiting loads current records", a
   let published = false;
   const calls: string[] = [];
   await open(page, (route) => {
-    const kind = new URL(route.request().url()).searchParams.get("kind")!;
-    calls.push(kind);
+    const status = new URL(route.request().url()).searchParams.get("status")!;
+    calls.push(status);
     return route.fulfill({
       json: result(
-        kind,
-        1,
+        "video",
+        status === "published" && !published ? 0 : 1,
         published,
-        published && kind === "video" ? "已更新的视频模板" : undefined,
+        published ? "已更新的视频模板" : undefined,
       ),
     });
   });
-  await page.route("**/api/admin/templates/image-1", (route) => {
+  await page.route("**/api/admin/templates/video-1", (route) => {
     published = true;
     return route.fulfill({
-      json: { ...result("image", 1, true).items[0], version: 2 },
+      json: { ...result("video", 1, true).items[0], version: 2 },
     });
   });
   await expect(
-    page.getByRole("heading", { name: "图片模板", exact: true }),
-  ).toBeVisible();
-  await page.getByRole("button", { name: "视频", exact: true }).click();
-  await expect(
     page.getByRole("heading", { name: "视频模板", exact: true }),
   ).toBeVisible();
-  await page.getByRole("button", { name: "图片", exact: true }).click();
+  await page
+    .getByRole("combobox", { name: "模板状态" })
+    .selectOption("published");
+  await expect(page.getByText("没有匹配的模板", { exact: true })).toBeVisible();
+  await page.getByRole("combobox", { name: "模板状态" }).selectOption("");
   await page.getByRole("button", { name: "上架", exact: true }).click();
   await confirmSubmission(page);
   await expect(page.getByRole("status")).toContainText("模板已发布");
-  await page.getByRole("button", { name: "视频", exact: true }).click();
+  await page
+    .getByRole("combobox", { name: "模板状态" })
+    .selectOption("published");
   await expect(
     page.getByRole("heading", { name: "已更新的视频模板", exact: true }),
   ).toBeVisible();
-  expect(calls.filter((kind) => kind === "image")).toHaveLength(2);
-  expect(calls.filter((kind) => kind === "video")).toHaveLength(2);
+  expect(calls.filter((status) => status === "")).toHaveLength(2);
+  expect(calls.filter((status) => status === "published")).toHaveLength(2);
 });
