@@ -1,4 +1,5 @@
 .biz-card {
+  border: 1px solid var(--ui-border);
   background: var(--ui-surface);
   border-radius: var(--ui-radius-card);
   padding: 20px 16px;
@@ -28,7 +29,7 @@
   justify-content: space-between;
   gap: 12px;
   padding: 12px 0;
-  border-bottom: 1px solid #ffffff0f;
+  border-bottom: 1px solid var(--ui-border);
 }
 .biz-row:last-child {
   border-bottom: 0;
@@ -45,9 +46,9 @@
 }
 .biz-input {
   background: var(--ui-field);
-  border: 1px solid transparent;
+  border: 1px solid var(--ui-border);
   border-radius: var(--ui-radius-control);
-  min-height: 44px;
+  min-height: 52px;
   padding: 11px 12px;
   color: var(--ui-text);
   width: 100%;
@@ -62,7 +63,7 @@ button.biz-action {
   width: 100%;
   background: var(--ui-primary);
   color: var(--ui-on-brand);
-  border-radius: 24px;
+  border-radius: var(--ui-radius-control);
   font-size: 15px;
   font-weight: 600;
   line-height: 22px;
@@ -74,11 +75,12 @@ button.biz-action::after {
   border: 0;
 }
 button.biz-action[disabled] {
-  background: #22262e;
-  color: #a6abb4;
+  background: var(--ui-disabled);
+  color: var(--ui-disabled-text);
 }
 button.biz-secondary {
-  background: var(--ui-field);
+  border: 1px solid var(--ui-border);
+  background: var(--ui-surface);
   color: var(--ui-text);
 }
 .biz-note {
@@ -115,8 +117,8 @@ button.biz-secondary {
   line-height: 18px;
 }
 .biz-tabs .selected {
-  color: var(--ui-text);
-  background: #2e333d;
+  color: var(--ui-link);
+  background: var(--ui-selected);
   font-weight: 600;
 }
 .biz-list-title {

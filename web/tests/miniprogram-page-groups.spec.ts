@@ -44,7 +44,7 @@ for (const width of [320, 375, 430]) {
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(width);
   });
 
-  test(`profile grouping and work placeholders at ${width}px`, async ({
+  test(`profile labels and read-only fields at ${width}px`, async ({
     page,
   }) => {
     await page.setViewportSize({ width, height: 900 });
@@ -68,13 +68,12 @@ for (const width of [320, 375, 430]) {
     const styles = [
       "styles/theme.wxss",
       "styles/common.wxss",
-      "pages/mine/index.wxss",
       "pages/profile/index.wxss",
     ]
       .map((file) => css(file, width))
       .join("\n");
     await page.setContent(
-      `<style>body{margin:0}input,textarea{background:transparent;border:0;font:inherit}t-icon{display:block;width:32px;height:32px;background:#9bcbaa55}${styles}</style><div class="subpage profile-page">${form}<div class="works"><div class="work"><div class="work-cover"><div class="work-placeholder"><t-icon></t-icon></div><span class="work-state">已完成</span></div></div></div></div>`,
+      `<style>body{margin:0}input,textarea{background:transparent;border:0;font:inherit}t-icon{display:block;width:20px;height:20px;flex-shrink:0}${styles}</style><div class="subpage profile-page">${form}</div>`,
     );
     await expect(page.locator(".profile-field:has(input)")).toHaveCount(2);
     const fields = await page.locator(".profile-field:has(input)").evaluateAll((nodes) =>
@@ -95,19 +94,12 @@ for (const width of [320, 375, 430]) {
       }),
     );
     for (let i = 0; i < fields.length; i++) {
-      expect(fields[i].inputLeft - fields[i].labelRight).toBeCloseTo(12, 0);
-      expect((fields[i].inputTop + fields[i].inputBottom) / 2).toBeCloseTo(fields[i].labelCenter, 0);
+      expect(fields[i].inputTop - fields[i].labelBottom).toBeCloseTo(8, 0);
+      expect(fields[i].inputBottom - fields[i].inputTop).toBe(52);
       if (i)
         expect(fields[i].inputTop - fields[i - 1].inputBottom).toBeGreaterThanOrEqual(24);
     }
-    const icon = await page.locator(".work-placeholder t-icon").boundingBox();
-    const cover = await page.locator(".work-cover").boundingBox();
-    const state = await page.locator(".work-state").boundingBox();
-    expect(icon!.y).toBeGreaterThan(state!.y + state!.height);
-    expect(icon!.x + icon!.width / 2).toBeCloseTo(
-      cover!.x + cover!.width / 2,
-      0,
-    );
+    await expect(page.locator(".profile-readonly-fields input")).toHaveCount(0);
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth),
     ).toBe(width);

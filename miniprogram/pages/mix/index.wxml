@@ -1,4 +1,4 @@
-<nav-bar title="混剪" size="{{23}}" /><view class="page">
+<nav-bar title="混剪" /><view class="page">
   <view wx:if="{{config.enabled}}" class="row biz-title-row mix-heading"
     ><text class="biz-heading">素材与灵感</text
     ><text class="biz-link" bindtap="hot">热门视频 ›</text></view

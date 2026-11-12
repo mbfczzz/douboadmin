@@ -26,15 +26,17 @@
   ],
   "window": {
     "navigationStyle": "custom",
-    "navigationBarTextStyle": "white",
-    "backgroundColor": "#0f0f11",
-    "backgroundTextStyle": "light"
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#f4f6f8",
+    "backgroundColorTop": "#f4f6f8",
+    "backgroundColorBottom": "#f4f6f8",
+    "backgroundTextStyle": "dark"
   },
   "tabBar": {
     "custom": true,
-    "color": "#a6abb4",
-    "selectedColor": "#ebf8ff",
-    "backgroundColor": "#0f0f11",
+    "color": "#667085",
+    "selectedColor": "#1d4ed8",
+    "backgroundColor": "#ffffff",
     "list": [
       {
         "pagePath": "pages/templates/index",

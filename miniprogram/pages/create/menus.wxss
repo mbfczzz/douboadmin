@@ -22,7 +22,7 @@
   border-radius: 10px;
   background: var(--ui-surface);
   z-index: 1001;
-  box-shadow: 0 8px 24px #00000040;
+  box-shadow: 0 8px 24px #2026321a;
 }
 .model-menu.is-open {
   opacity: 1;
@@ -68,7 +68,8 @@
   white-space: nowrap;
 }
 .model-option.selected {
-  background: #272b34;
+  background: var(--ui-selected);
+  color: var(--ui-link);
 }
 .model-option t-icon {
   color: var(--ui-text);
@@ -133,7 +134,7 @@
   display: block;
   overflow: hidden;
   font-size: var(--ui-font-note);
-  color: #a6abb4;
+  color: var(--ui-muted);
   margin-top: 2px;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -146,7 +147,7 @@
   text-overflow: ellipsis;
   text-align: right;
   font-size: var(--ui-font-caption);
-  color: #a6abb4;
+  color: var(--ui-muted);
 }
 .model-badges {
   display: flex;
@@ -157,17 +158,17 @@
 .model-badges text {
   font-size: var(--ui-font-caption);
   padding: 2px 4px;
-  background: #22262e;
-  color: #aab4bd;
+  background: var(--ui-field);
+  color: var(--ui-muted);
   border-radius: 3px;
 }
 .model-badges .hot {
-  background: #33141b;
-  color: #ff526c;
+  background: var(--ui-danger-bg);
+  color: var(--ui-danger);
 }
 .model-badges .new {
-  background: #ffffff14;
-  color: #d4dde3;
+  background: var(--ui-selected);
+  color: var(--ui-link);
 }
 .model-glyph {
   width: 22px;

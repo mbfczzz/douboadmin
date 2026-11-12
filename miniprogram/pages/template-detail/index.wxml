@@ -21,7 +21,7 @@
       <view class="favorite" bindtap="favorite">
         <t-icon
           name="{{favorite?'heart-filled':'heart'}}"
-          color="{{favorite?'#00c8dc':'#a6abb4'}}"
+          color="{{favorite?'#2563eb':'#667085'}}"
           size="25"
         />
       </view>

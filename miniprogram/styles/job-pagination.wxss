@@ -4,7 +4,7 @@
   justify-content: space-between;
   gap: 8px;
   padding: 12px 0;
-  color: #a6abb4;
+  color: var(--ui-muted);
   font-size: 13px;
 }
 .job-pagination button {
@@ -16,8 +16,8 @@
   line-height: 20px;
   font-size: inherit;
   color: var(--ui-text);
-  background: #22262e;
+  background: var(--ui-field);
 }
 .job-pagination button[disabled] {
-  color: #a6abb4;
+  color: var(--ui-muted);
 }

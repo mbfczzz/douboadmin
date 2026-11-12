@@ -13,7 +13,7 @@
   color: var(--ui-muted);
 }
 .work-filter.active {
-  color: var(--ui-text);
+  color: var(--ui-link);
   font-weight: 600;
   font-size: 15px;
 }
@@ -22,7 +22,7 @@
   gap: 24px 12px;
 }
 .works-page .completed-cover {
-  height: 180px;
+  height: 144px;
   border-radius: 8px;
 }
 .works-page .completed-cover image {
@@ -37,7 +37,7 @@
   flex-direction: column;
   gap: 3px;
   margin-top: 5px;
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.5;
   color: var(--ui-muted);
 }

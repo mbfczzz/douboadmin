@@ -23,7 +23,7 @@ export function styles(width: number, files: string[]) {
 }
 export const header = (title: string) => `<div class="nav"><div class="nav-inner" style="height:76px;font-size:23px">${title}</div></div>`;
 export function tabs() {
-  return `<div class="tabbar">${[AppWindow, Scissors, Plus, MessageCircle, User].map((Icon, i) => `<div class="item ${i === 2 ? "active" : ""}"><div class="glyph">${renderToStaticMarkup(createElement(Icon,{size:23,strokeWidth:1.75}))}</div><span class="label">${["模板","混剪","创作","Agent","我的"][i]}</span></div>`).join("")}</div>`;
+  return `<div class="tabbar">${[AppWindow, Scissors, Plus, MessageCircle, User].map((Icon, i) => `<div class="item ${i === 2 ? "active primary" : ""}"><div class="glyph">${renderToStaticMarkup(createElement(Icon,{size:24,strokeWidth:1.75}))}</div><span class="label">${["模板","混剪","创作","Agent","我的"][i]}</span></div>`).join("")}</div>`;
 }
 export function creator() {
   return `${header("创作")}<div class="page create-page">
@@ -33,12 +33,13 @@ export function creator() {
       <div class="expand-editor">↗</div>
       <textarea class="prompt-input" placeholder="描述主体、动作和镜头，&#10;也可以先添加参考素材。"></textarea>
       <div class="quote-note has-cost">预计 10 积分</div><div class="count">0 / 500</div>
-      <div class="workspace-foot"><div class="model-select"><img class="model-logo" src="${image("model-icons/bytedance.png")}" alt=""/><span class="model-name">Seedance 2.0 Fast VIP</span><span>⌄</span></div><span class="spec">720p · 4秒</span><button class="generate-button">生成</button></div>
+      <div class="workspace-foot"><div class="model-select"><img class="model-logo" src="${image("model-icons/bytedance.png")}" alt=""/><span class="model-name">Seedance 2.0 Fast VIP</span><span>⌄</span></div><span class="spec">720p · 4秒</span></div>
     </div>
     <div class="creation-hint"><span>参数已选好，可以直接生成</span><span class="example-link">试试示例 ›</span></div>
     <div class="settings"><span class="setting-title first-setting">分辨率</span><div class="resolution-options"><div class="resolution-option selected">720p</div><div class="resolution-option">1080p</div></div>
-    <span class="setting-title">视频时长 · 4 秒</span><input type="range" value="0" aria-label="视频时长" style="width:100%;accent-color:#22c55e"/><div class="duration-limits"><span>4 秒</span><span>15 秒</span></div>
+    <span class="setting-title">视频时长 · 4 秒</span><input type="range" value="0" aria-label="视频时长" style="width:100%;accent-color:#2563eb"/><div class="duration-limits"><span>4 秒</span><span>15 秒</span></div>
     <span class="setting-title">选择画幅</span><div class="ratio-grid">${["16:9","9:16","1:1","4:3","3:4"].map((s,i)=>`<div class="ratio ${i===0?"selected":""}"><div class="ratio-visual"><div class="ratio-shape ${["shape-wide","shape-portrait","shape-square","shape-landscape","shape-photo"][i]}"></div></div><span class="ratio-label">${s}</span></div>`).join("")}</div></div>
+    <div class="creation-action"><button class="generate-button">生成视频</button></div>
   </div>${tabs()}`;
 }
 export function materialSheet() {

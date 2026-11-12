@@ -10,7 +10,7 @@ export function openModelMenu(page: MenuPage) {
   });
   if (typeof wx.createSelectorQuery !== "function") return;
   const info = wx.getWindowInfo();
-  const bar = Math.max(44, info.windowWidth * 96 / 750) + info.windowWidth * 20 / 750;
+  const bar = 70; // custom-tab-bar content height; safe area is added below.
   wx.createSelectorQuery()
     .select(".workspace")
     .boundingClientRect((value) => {

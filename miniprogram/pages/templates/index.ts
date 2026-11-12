@@ -10,7 +10,6 @@ Page({
     category: "推荐",
     categories: ["推荐"],
     search: "",
-    searching: false,
     loading: true,
     loadError: "",
   },
@@ -119,9 +118,6 @@ Page({
   choose(e: WechatMiniprogram.TouchEvent) {
     this.setData({ category: e.currentTarget.dataset.value });
     void this.load();
-  },
-  toggleSearch() {
-    this.setData({ searching: !this.data.searching });
   },
   input(e: WechatMiniprogram.Input) {
     this.setData({ search: e.detail.value });

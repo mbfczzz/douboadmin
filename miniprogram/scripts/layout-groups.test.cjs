@@ -22,7 +22,7 @@ test("task prompt heading and content stay adjacent; status and actions stay out
   assert.ok(text.indexOf("<points-balance") > text.indexOf('class="specs"'));
 });
 
-test("balance cards no longer separate editor parameters or profile statistics", () => {
+test("generation follows its parameters and profile balance precedes grouped menus", () => {
   const create = source("create"),
     mine = source("mine");
   assert.ok(
@@ -31,8 +31,9 @@ test("balance cards no longer separate editor parameters or profile statistics",
   assert.ok(
     create.indexOf("<points-balance") < create.indexOf('class="queue-link"'),
   );
-  assert.ok(mine.indexOf('class="numbers"') < mine.indexOf("<points-balance"));
-  assert.ok(mine.indexOf('class="works"') < mine.indexOf("<points-balance"));
+  assert.ok(create.indexOf('class="creation-action"') > create.indexOf('class="ratio-grid"'));
+  assert.ok(create.indexOf('class="creation-action"') < create.indexOf("<points-balance"));
+  assert.ok(mine.indexOf('class="profile"') < mine.indexOf("<points-balance"));
   assert.ok(
     mine.indexOf("<points-balance") <
       mine.indexOf('class="section-title common-heading"'),
@@ -54,9 +55,10 @@ test("profile fields share explicit grouping while preserving form field names",
   assert.ok(!source("mine").includes("<t-popup"));
 });
 
-test("missing covers have a distinct media-aware placeholder separate from status", () => {
+test("the compact profile uses icon-and-text menus without loading media previews", () => {
   const mine = source("mine");
-  assert.match(mine, /class="work-placeholder"[\s\S]*?'image':'play-circle'/);
-  assert.match(mine, /<\/view>\s*<text class="work-state">/);
-  assert.ok(mine.includes('src="{{item.result}}"'));
+  assert.match(mine, /class="icon-tile"[\s\S]*?name="{{item.icon}}"/);
+  assert.ok(mine.includes('class="menu-label"'));
+  assert.ok(mine.includes('item.group===group'));
+  assert.ok(!mine.includes('class="works"'));
 });

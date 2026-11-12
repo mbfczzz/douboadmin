@@ -3,40 +3,34 @@ import {
   error,
   tab,
   media,
-  jobView,
-  openTask,
   openPage,
-  openTab,
   hasSession,
   login,
   AuthCancelledError,
 } from "../../utils/api";
 import type { Me } from "../../services/types";
-import { jobPage } from "../../services/job-pages";
 
 const baseMenus = [
-  { icon: "wallet", label: "我的积分", mode: "wallet" },
-  { icon: "order", label: "充值订单", mode: "orders" },
-  { icon: "heart", label: "我的收藏", mode: "favorites" },
-  { icon: "history", label: "生成记录", mode: "tasks" },
-  { icon: "notification", label: "消息通知", mode: "notifications" },
-  { icon: "chat", label: "帮助与反馈", mode: "help" },
-  { icon: "setting", label: "设置", mode: "settings" },
+  { icon: "order", label: "充值订单", mode: "orders", group: "账户与服务" },
+  { icon: "image", label: "我的作品", mode: "works", group: "创作记录" },
+  { icon: "heart", label: "我的收藏", mode: "favorites", group: "创作记录" },
+  { icon: "history", label: "生成记录", mode: "tasks", group: "创作记录" },
+  { icon: "notification", label: "消息通知", mode: "notifications", group: "帮助与设置" },
+  { icon: "chat", label: "帮助与反馈", mode: "help", group: "帮助与设置" },
+  { icon: "setting", label: "设置", mode: "settings", group: "帮助与设置" },
 ];
 // Providers manage their codes in 服务商中心; members share their 推广码.
-const roleMenus: Record<string, { icon: string; label: string; mode: string }> =
+const roleMenus: Record<string, typeof baseMenus[number]> =
   {
-    provider: { icon: "shop", label: "服务商中心", mode: "provider" },
-    member: { icon: "qrcode", label: "我的推广码", mode: "promo" },
+    provider: { icon: "shop", label: "服务商中心", mode: "provider", group: "账户与服务" },
+    member: { icon: "qrcode", label: "我的推广码", mode: "promo", group: "账户与服务" },
   };
 Page({
   data: {
     me: null as Me | null,
-    jobs: [] as ReturnType<typeof jobView>[],
+    groups: ["账户与服务", "创作记录", "帮助与设置"],
     loading: true,
     loadError: "",
-    avatarLetter: "豆",
-    cover: "",
     menus: baseMenus,
   },
   loadVersion: 0,
@@ -77,29 +71,16 @@ Page({
     const version = ++this.loadVersion;
     if (this.refreshTimer !== undefined) clearTimeout(this.refreshTimer);
     if (!hasSession()) {
-      this.setData({ me: null, jobs: [], loading: false, loadError: "" });
+      this.setData({ me: null, loading: false, loadError: "" });
       return;
     }
     try {
-      const [me, result] = await Promise.all([
-        request<Me>("/me"),
-        jobPage(1, "&works=true", 3),
-      ]);
+      const me = await request<Me>("/me");
       if (version !== this.loadVersion) return;
       if (me.profile.data.avatarUrl)
         me.profile.data.avatarUrl = media(me.profile.data.avatarUrl);
       this.setData({
         me,
-        avatarLetter: Array.from(me.profile.data.nickname)[0] || "豆",
-        jobs: result.items
-          .filter(
-            (j) =>
-              ["image", "video", "mix"].includes(j.input.kind) &&
-              j.status === "succeeded" &&
-              !j.deleted,
-          )
-          .slice(0, 3)
-          .map(jobView),
         loading: false,
         loadError: "",
       });
@@ -108,7 +89,7 @@ Page({
     } catch (e) {
       if (version !== this.loadVersion) return;
       if (!hasSession()) {
-        this.setData({ me: null, jobs: [], loadError: "", loading: false });
+        this.setData({ me: null, loadError: "", loading: false });
         return;
       }
       if (e instanceof AuthCancelledError) return;
@@ -129,32 +110,13 @@ Page({
     if (m === "tasks") openPage(this, { url: "/pages/tasks/index" });
     else if (m === "promo")
       openPage(this, { url: "/pages/provider/index?mode=promo" });
-    else if (["wallet", "orders", "notifications", "provider"].includes(m))
+    else if (["wallet", "orders", "notifications", "provider", "works"].includes(m))
       openPage(this, { url: "/pages/" + m + "/index" });
     else if (m === "settings")
       openPage(this, { url: "/pages/preferences/index" });
     else openPage(this, { url: "/pages/library/index?mode=" + m });
   },
-  detail(e: WechatMiniprogram.TouchEvent) {
-    openTask(e.currentTarget.dataset.id, this);
-  },
-  tasks() {
-    openPage(this, { url: "/pages/tasks/index" });
-  },
-  works() {
-    openPage(this, { url: "/pages/works/index" });
-  },
-  emptyWorks() {
-    if (this.data.me?.running) this.tasks();
-    else this.create();
-  },
-  favorites() {
-    openPage(this, { url: "/pages/library/index?mode=favorites" });
-  },
   edit() {
     if (this.data.me) openPage(this, { url: "/pages/profile/index" });
-  },
-  create() {
-    openTab(this, "/pages/create/index");
   },
 });

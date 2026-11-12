@@ -57,6 +57,7 @@ export default function Fields({
               <input
                 type="checkbox"
                 disabled={disabled}
+                aria-invalid={errorField === field.key}
                 checked={value === "true"}
                 onChange={(e) => change(field.key, String(e.target.checked))}
               />

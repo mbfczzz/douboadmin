@@ -1,6 +1,5 @@
 .preview-page {
   padding: 24px 20px calc(130px + env(safe-area-inset-bottom));
-  --td-button-border-radius: 22px;
 }
 .preview {
   width: 100%;

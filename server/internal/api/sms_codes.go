@@ -71,12 +71,21 @@ func (a *Server) allowAll(w http.ResponseWriter, r *http.Request, message string
 // smsReady reports a configured provider; smsDebug is the local demo mode
 // (demo login on, never in production) that shows codes instead of sending.
 func (a *Server) smsReady() bool { return a.SMS != nil && a.SMS.Ready() }
-func (a *Server) smsDebug() bool { return !a.smsReady() && a.demoLoginEnabled() }
+func (a *Server) smsDebug() bool {
+	return a.Config.SMSVerificationEnabled == nil && !a.smsReady() && a.demoLoginEnabled()
+}
 
-// registrationRequired: the SMS step is enforced only when codes can be
-// delivered, so deploying before configuring SMS never locks everyone out.
+func (a *Server) smsVerificationEnabled() bool {
+	if a.Config.SMSVerificationEnabled != nil {
+		return *a.Config.SMSVerificationEnabled
+	}
+	return a.smsReady() || a.smsDebug()
+}
+
+// An explicitly enabled policy never falls back to unverified registration,
+// even when the provider becomes unavailable.
 func (a *Server) registrationRequired() bool {
-	return a.Config.RequireActivation && (a.smsReady() || a.smsDebug())
+	return a.Config.RequireActivation && a.smsVerificationEnabled()
 }
 
 // smsDay counts sends per Beijing-time day.
@@ -102,6 +111,10 @@ func (a *Server) sendSMSCode(w http.ResponseWriter, r *http.Request) {
 	user, phone := identity(r).ID, strings.TrimSpace(v.Phone)
 	if !mainlandPhone.MatchString(phone) {
 		fail(w, 400, "请输入 11 位手机号")
+		return
+	}
+	if a.Config.SMSVerificationEnabled != nil && !*a.Config.SMSVerificationEnabled {
+		fail(w, 403, "短信验证已关闭，无需获取验证码")
 		return
 	}
 	if !a.smsReady() && !a.smsDebug() {

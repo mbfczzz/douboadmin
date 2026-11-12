@@ -83,14 +83,7 @@
       <text class="spec"
         >{{resolution}} · {{kind==='video'?duration+'秒':ratio}}</text
       >
-      <button
-        class="generate-button {{busy||uploading||restoring||modelsLoading||modelError||parameterError||restoreError||!hasPrompt?'is-disabled':''}}"
-        loading="{{busy}}"
-        disabled="{{busy||uploading||restoring||modelsLoading||modelError||parameterError||restoreError||!hasPrompt}}"
-        bindtap="generate"
-      >
-        生成
-      </button>
+      <block wx:if="{{expanded}}"><template is="generate-action" data="{{busy,uploading,restoring,modelsLoading,modelError,parameterError,restoreError,hasPrompt,kind}}" /></block>
     </view>
     <scroll-view scroll-y class="model-menu {{showModels?'is-open':''}} {{modelMenuUp?'menu-up':''}}" style="height:{{modelMenuHeight||240}}px" aria-hidden="{{!showModels}}">
       <view
@@ -110,7 +103,7 @@
     </scroll-view>
   </view>
   <view class="creation-hint">
-    <text>{{modelsLoading?'正在准备模型参数':modelError?'请选择可用模型':parameterError?'请调整创作参数':'参数已选好，可以直接生成'}}</text>
+    <text>{{modelsLoading?'正在准备模型参数':modelError?'请选择可用模型':parameterError?'请调整创作参数':hasPrompt?'参数已选好，可以直接生成':'填写创作描述后即可生成。'}}</text>
     <view wx:if="{{!hasPrompt}}" class="example-link" bindtap="useExample" hover-class="card-pressed">试试示例 ›</view>
   </view>
   <view wx:if="{{ideas.length&&!hasPrompt}}" class="creation-ideas"><view wx:for="{{ideas}}" wx:key="*this" data-value="{{item}}" bindtap="useExample">{{item}}</view></view>
@@ -146,9 +139,9 @@
         max="{{durations.length-1}}"
         step="1"
         value="{{durationIndex}}"
-        activeColor="#00c8dc"
-        backgroundColor="#272b34"
-        block-color="#00c8dc"
+        activeColor="#2563eb"
+        backgroundColor="#d7dee6"
+        block-color="#2563eb"
         block-size="20"
         bindchange="duration"
         bindchanging="duration"
@@ -182,7 +175,8 @@
       </view>
     </view>
   </view>
-  <view class="creation-balance"><points-balance /></view>
+  <view wx:if="{{!expanded}}" class="creation-action"><template is="generate-action" data="{{busy,uploading,restoring,modelsLoading,modelError,parameterError,restoreError,hasPrompt,kind}}" /></view>
+  <view class="creation-balance"><points-balance compact /></view>
   <view class="queue-link" bindtap="queue">
     <t-icon name="task" size="22" />
     <view class="copy">
@@ -214,6 +208,11 @@
     <view wx:if="{{allowAudio}}" class="source-option" data-kind="audio" bindtap="addAsset"><t-icon name="sound" size="24" /><view class="source-copy"><text>音频</text><text class="source-hint">选择参考音频文件</text></view><t-icon name="chevron-right" size="18" /></view>
   </view>
 </t-popup>
+<template name="generate-action">
+  <button class="generate-button {{busy||uploading||restoring||modelsLoading||modelError||parameterError||restoreError||!hasPrompt?'is-disabled':''}}" loading="{{busy}}" disabled="{{busy||uploading||restoring||modelsLoading||modelError||parameterError||restoreError||!hasPrompt}}" bindtap="generate">
+    <view class="button-content"><t-icon name="{{kind==='video'?'video-camera':'image'}}" size="18" /><text>{{kind==='video'?'生成视频':'生成图片'}}</text></view>
+  </button>
+</template>
 <template name="model-icon">
   <image wx:if="{{iconURL}}" class="model-logo" src="{{iconURL}}" mode="aspectFit" data-id="{{id}}" data-url="{{iconURL}}" binderror="hideModelIcon" />
   <text wx:elif="{{icon}}" class="model-glyph">{{icon}}</text>

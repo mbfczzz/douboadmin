@@ -14,7 +14,7 @@ import (
 )
 
 // Name and phone are always required. Only the verification code depends on
-// SMS availability; the unverified path never creates proof of phone ownership.
+// the SMS policy; the unverified path never creates proof of phone ownership.
 func (a *Server) register(w http.ResponseWriter, r *http.Request) {
 	var v struct {
 		Name  string `json:"name"`

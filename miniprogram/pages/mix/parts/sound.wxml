@@ -5,7 +5,7 @@
     ><switch
       checked="{{keepOriginalAudio}}"
       disabled="{{!config.enabled}}"
-      color="#00c8dc"
+      color="#2563eb"
       data-field="keepOriginalAudio"
       bindchange="toggle" /></view
   ><picker
@@ -21,8 +21,8 @@
     min="0"
     max="100"
     value="{{musicVolume}}"
-    activeColor="#00c8dc"
-    backgroundColor="#272b34"
-    block-color="#00c8dc"
+    activeColor="#2563eb"
+    backgroundColor="#d7dee6"
+    block-color="#2563eb"
     bindchange="volume"
 /></view>

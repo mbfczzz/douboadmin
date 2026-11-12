@@ -20,14 +20,14 @@
   align-items: center;
   gap: 14px;
   padding: 16px 0;
-  border-bottom: 1px solid #ffffff0f;
+  border-bottom: 1px solid var(--ui-border);
 }
 .queue-thumb {
   width: 64px;
   height: 80px;
   flex-shrink: 0;
   border-radius: 8px;
-  background: #22262e;
+  background: var(--ui-field);
   color: var(--ui-muted);
   display: flex;
   align-items: center;
@@ -59,7 +59,7 @@
   color: var(--ui-brand);
 }
 .queue-state.failed {
-  color: #ff526c;
+  color: var(--ui-danger);
 }
 .queue-spec {
   overflow-wrap: anywhere;
@@ -89,7 +89,7 @@
   padding: 12px 0;
   font-size: 12px;
   font-weight: 400;
-  color: #aab4bd;
+  color: var(--ui-muted);
 }
 
 @import "../../styles/job-pagination.wxss";

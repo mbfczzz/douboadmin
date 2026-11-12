@@ -22,7 +22,7 @@
         ><text class="biz-link" bindtap="orders">充值订单 ›</text></view
       ></view
     >
-    <view class="biz-card" wx:if="{{info}}"
+    <view class="wallet-purchase" wx:if="{{info}}"
       ><text class="biz-heading">购买积分</text
       ><block wx:if="{{info.paymentChannel==='wechat_virtual'}}">
         <view wx:if="{{info.virtualCustom||purchaseMode==='custom'}}" class="purchase-tabs">
@@ -56,7 +56,7 @@
         disabled="{{busy||!allowed||pendingOrderId||(info.paymentChannel==='wechat_virtual'&&purchaseMode==='package'&&!productId)}}"
         bindtap="pay"
       >
-        {{pendingOrderId?'正在确认到账':allowed?(info.paymentChannel==='wechat_virtual'?'购买积分':'微信支付'):'充值暂未开放'}}</button
+        <view class="button-content"><t-icon name="wallet" size="18" /><text>{{pendingOrderId?'正在确认到账':allowed?(info.paymentChannel==='wechat_virtual'?'购买积分':'微信支付'):'充值暂未开放'}}</text></view></button
       ><text wx:if="{{!allowed}}" class="biz-note"
         >{{info.pricing.message||'支付服务或当前设备尚未开放充值。'}}</text
       ></view
@@ -65,7 +65,7 @@
       ><text class="biz-heading">积分流水</text
       ><view wx:if="{{!ledger.length}}" class="biz-empty">暂无积分变动</view
       ><view wx:for="{{ledger}}" wx:key="id" class="biz-row ledger-row"
-        ><view class="ledger-copy"
+        ><view class="icon-tile"><t-icon name="{{item.tone==='plus'?'arrow-down-left':'image'}}" size="20" /></view><view class="ledger-copy"
           ><text class="biz-list-title">{{item.title}}</text
           ><text wx:if="{{item.note}}" class="biz-small ledger-note">{{item.note}}</text
           ><text class="biz-small ledger-time">{{item.time}}</text></view

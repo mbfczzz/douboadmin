@@ -35,6 +35,8 @@ func integrations(ctx context.Context, app *api.Server, values settings.Values) 
 		app.Media.BrandIcons = media.NewBrandIcons(filepath.Join(app.Media.Dir, "brand"), objects)
 	}
 	app.SMS = &sms.Aliyun{KeyID: values["SMS_ACCESS_KEY_ID"], Secret: values["SMS_ACCESS_KEY_SECRET"], SignName: values["SMS_SIGN_NAME"], Template: values["SMS_TEMPLATE_CODE"]}
+	smsEnabled := values["SMS_VERIFICATION_ENABLED"] == "true"
+	app.Config.SMSVerificationEnabled = &smsEnabled
 	ai := &provider.Relay{Client: app.Relay, Store: app.Store, Assets: app.Media.Inputs, SaveResult: app.Media.Save}
 	app.Hot = &hotvideo.Service{Client: &hotvideo.Client{BaseURL: values["TIKHUB_BASE_URL"], Key: values["TIKHUB_API_KEY"]}, Store: app.Store}
 	return provider.Router{AI: ai, Import: hotvideo.Importer{Service: app.Hot, Media: app.Media}}, nil

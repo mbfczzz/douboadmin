@@ -92,6 +92,7 @@ func (m *Manager) resolve(r reader) (Values, map[string]core.Record, error) {
 			values[field.Key] = value // An explicitly cleared secret must never fall back to ENV.
 		}
 	}
+	normalizeSMS(values)
 	return values, records, nil
 }
 
@@ -100,6 +101,9 @@ func (m *Manager) LoadStartup(ctx context.Context) (Values, error) {
 	values, records, err := m.snapshot(ctx)
 	if err != nil {
 		return nil, err
+	}
+	if flag := values["SMS_VERIFICATION_ENABLED"]; flag != "true" && flag != "false" {
+		return nil, invalid("SMS_VERIFICATION_ENABLED", "短信验证开关必须为 true 或 false")
 	}
 	m.mu.Lock()
 	defer m.mu.Unlock()

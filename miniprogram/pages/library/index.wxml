@@ -72,7 +72,7 @@
         maxlength="1000"
         value="{{content}}"
         placeholder="遇到的问题，或你希望增加的功能…"
-        placeholder-style="color:#a6abb4"
+        placeholder-style="color:#667085"
         bindinput="input"
       />
       <view class="send">

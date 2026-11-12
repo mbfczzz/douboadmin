@@ -1,6 +1,5 @@
 .task-detail-page {
   padding: 24px 20px calc(30px + env(safe-area-inset-bottom));
-  --td-button-border-radius: 22px;
 }
 .task-heading {
   word-break: break-all;
@@ -14,7 +13,7 @@
 .task-state {
   flex-wrap: wrap;
   font-size: 13px;
-  color: #a6abb4;
+  color: var(--ui-muted);
   gap: 8px;
 }
 .state-label {
@@ -28,15 +27,15 @@
   font-size: 12px;
 }
 .task-state t-icon {
-  color: #aab4bd;
+  color: var(--ui-muted);
 }
 .task-state.failed t-icon {
-  color: #ff526c;
+  color: var(--ui-danger);
 }
 .failure-reason {
   overflow-wrap: anywhere;
   font-size: 14px;
-  color: #aab4bd;
+  color: var(--ui-muted);
   line-height: 1.5;
   margin-top: 12px;
 }
@@ -74,7 +73,7 @@
   margin: 12px 0 0;
 }
 .result-actions .danger-link {
-  color: #ff526c;
+  color: var(--ui-danger);
 }
 .result-actions {
   margin-top: 8px;
@@ -95,7 +94,7 @@
 .task-detail-page .section-title {
   font-size: 12px;
   font-weight: 400;
-  color: #a6abb4;
+  color: var(--ui-muted);
   margin: 24px 0 10px;
 }
 .task-detail-page .section-title .small {
@@ -106,7 +105,7 @@
   display: block;
   font-size: 15px;
   line-height: 1.65;
-  color: #aab4bd;
+  color: var(--ui-muted);
   white-space: pre-wrap;
 }
 .asset-grid {
@@ -127,12 +126,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #22262e;
+  background: var(--ui-field);
 }
 .asset-row > text {
   display: block;
   font-size: 12px;
-  color: #aab4bd;
+  color: var(--ui-muted);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -140,15 +139,15 @@
 }
 .asset-row > text.tiny {
   font-size: 11px;
-  color: #a6abb4;
+  color: var(--ui-muted);
   margin-top: 3px;
 }
 .specs {
   overflow-wrap: anywhere;
   font-size: 12px;
   line-height: 1.8;
-  color: #a6abb4;
-  border-top: 1px solid #ffffff0f;
+  color: var(--ui-muted);
+  border-top: 1px solid var(--ui-border);
   padding-top: 16px;
   margin-top: 24px;
 }

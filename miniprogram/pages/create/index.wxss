@@ -6,11 +6,10 @@
 }
 .mode-tabs {
   display: flex;
-  height: 42px;
-  padding: 4px;
-  gap: 4px;
+  height: 44px;
+  gap: 6px;
   border-radius: 12px;
-  background: var(--ui-surface);
+  background: transparent;
   margin-bottom: 16px;
 }
 .mode-tab {
@@ -23,11 +22,12 @@
   line-height: 18px;
   font-weight: 500;
   border-radius: 9px;
-  color: #a6abb4;
+  background: var(--ui-surface);
+  color: var(--ui-muted);
 }
 .mode-tab.active {
-  color: var(--ui-text);
-  background: #2e333d;
+  color: var(--ui-link);
+  background: var(--ui-selected);
   font-weight: 600;
 }
 .mode-tab-pressed {
@@ -42,7 +42,10 @@
   font-size: 14px;
 }
 .creation-balance {
-  margin-top: 24px;
+  margin-top: 16px;
+}
+.creation-action {
+  margin-top: 20px;
 }
 .create-page .queue-link .copy .muted {
   font-size: 12px;
@@ -65,7 +68,7 @@
 .example-link {
   margin: -8px 0;
   padding: 12px 0;
-  color: var(--ui-text);
+  color: var(--ui-link);
   white-space: nowrap;
 }
 .creation-ideas {
@@ -76,7 +79,7 @@
 }
 .creation-ideas view {
   background: var(--ui-surface);
-  color: #aab4bd;
+  color: var(--ui-muted);
   border-radius: 10px;
   padding: 8px 12px;
   font-size: 12px;

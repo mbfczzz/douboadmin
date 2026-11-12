@@ -31,7 +31,7 @@
 .detail-divider {
   height: 1px;
   margin: 15px 0 20px;
-  background: #272b34;
+  background: var(--ui-field);
 }
 .detail-title {
   flex: 1;
@@ -55,7 +55,7 @@
 .upload-description {
   display: block;
   margin-top: 14px;
-  color: #aab4bd;
+  color: var(--ui-muted);
   font-size: 15px;
   line-height: 1.4;
 }
@@ -78,8 +78,8 @@
 .upload-icon {
   width: 44px;
   height: 44px;
-  background: #22262e;
-  color: #aab4bd;
+  background: var(--ui-field);
+  color: var(--ui-muted);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -112,7 +112,7 @@
 }
 .upload-hint {
   font-size: 14px;
-  color: #aab4bd;
+  color: var(--ui-muted);
 }
 .required {
   flex-shrink: 0;
@@ -123,7 +123,7 @@
 .format {
   display: block;
   font-size: 21rpx;
-  color: #a6abb4;
+  color: var(--ui-muted);
   margin-top: 17rpx;
 }
 .optional-grid {
@@ -164,9 +164,8 @@
   z-index: 80;
   /* Design: 14 / 20 / 24 / 20. */
   padding: 14px 20px calc(24px + env(safe-area-inset-bottom));
-  border-top: 1px solid #ffffff0f;
+  border-top: 1px solid var(--ui-border);
   background: var(--ui-bg);
-  --td-button-border-radius: 22px;
 }
 .detail .queue-link {
   height: 58px;

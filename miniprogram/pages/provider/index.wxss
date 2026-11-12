@@ -28,8 +28,8 @@
 .provider-level {
   padding: 1px 8px;
   border-radius: 6px;
-  background: #ffffff14;
-  color: #d4dde3;
+  background: var(--ui-selected);
+  color: var(--ui-link);
   font-size: 12px;
   line-height: 18px;
 }
@@ -103,8 +103,8 @@
 .provider-off {
   padding: 1px 6px;
   border-radius: 4px;
-  background: #33290f;
-  color: #f5c84b;
+  background: var(--ui-warning-bg);
+  color: var(--ui-warning);
   font-size: 12px;
 }
 .provider-facts {

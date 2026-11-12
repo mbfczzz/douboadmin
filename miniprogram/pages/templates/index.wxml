@@ -1,10 +1,7 @@
-<nav-bar title="模板" size="{{27}}">
-  <view slot="actions" class="search-icon" bindtap="toggleSearch" aria-label="搜索模板">
-    <t-icon name="search" size="22" />
-  </view>
-</nav-bar>
+<nav-bar title="模板" />
 <view class="page templates-page">
-  <view class="search-field" wx:if="{{searching}}">
+  <view class="search-field">
+    <t-icon name="search" size="18" />
     <input
       placeholder="搜索你想要的画面"
       placeholder-class="muted"
@@ -61,7 +58,7 @@
       >
         <view class="cover {{col===1?'alternate':''}}">
           <image mode="aspectFill" src="{{item.data.cover}}" lazy-load />
-          <view class="play">
+          <view wx:if="{{item.data.kind!=='image'}}" class="play">
             <t-icon
               name="{{item.data.kind==='image'?'image':'play'}}"
               size="12"
@@ -72,5 +69,5 @@
       </view>
     </view>
   </view>
-  <view class="end" wx:if="{{total>page*4}}" bindtap="more">{{loading?'加载中…':'查看更多 →'}}</view>
+  <view class="end" wx:if="{{total>page*4}}" bindtap="more" aria-role="button">{{loading?'加载中…':'查看更多模板'}}</view>
 </view>

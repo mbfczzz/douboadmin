@@ -127,6 +127,7 @@ image {
   margin-top: 8rpx;
 }
 .form-input {
+  border: 1px solid var(--ui-border);
   background: var(--ui-field);
   border-radius: 12px;
   padding: 22rpx;
@@ -142,15 +143,15 @@ image {
   color: var(--ui-muted);
 }
 .pill.succeeded {
-  background: #183024;
-  color: #45d18a;
+  background: var(--ui-success-bg);
+  color: var(--ui-success);
 }
 .pill.failed {
-  background: #33141b;
-  color: #ff526c;
+  background: var(--ui-danger-bg);
+  color: var(--ui-danger);
 }
 .pill.running {
-  background: #2e333d;
+  background: var(--ui-selected);
   color: var(--ui-brand);
 }
 .filter-scroll {
@@ -165,7 +166,7 @@ image {
   color: var(--ui-muted);
 }
 .filter.active {
-  color: var(--ui-text);
+  color: var(--ui-link);
   font-weight: 600;
 }
 .controls-busy {
@@ -176,4 +177,21 @@ image {
   gap: 24px;
   margin-top: 10px;
   color: var(--ui-link);
+}
+.button-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.icon-tile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: var(--ui-field);
+  color: var(--ui-muted);
 }

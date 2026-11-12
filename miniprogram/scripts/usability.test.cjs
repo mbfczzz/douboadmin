@@ -54,7 +54,7 @@ test("login shows contextual copy and handles unknown context safely", async () 
 
 test("all works opens a completed-work library instead of the task queue", () => {
   const h = harness();
-  h.page("mine").works();
+  h.page("mine").menu({ currentTarget: { dataset: { mode: "works" } } });
   assert.equal(h.nav[0].url, "/pages/works/index");
 });
 
@@ -137,8 +137,8 @@ test("pending works point to task progress while finished works remain in the li
         };
   h.wx.request = async o => o.success({statusCode:200,data:await h.api.request(o.url.split("/api")[1])});
   await page.load();
-  assert.equal(page.data.jobs.length, 0);
-  page.emptyWorks();
+  assert.equal(page.data.me.running, 1);
+  page.menu({ currentTarget: { dataset: { mode: "tasks" } } });
   assert.equal(h.nav[0].url, "/pages/tasks/index");
   page.onUnload();
 });

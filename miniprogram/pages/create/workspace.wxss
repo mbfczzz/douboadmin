@@ -1,7 +1,8 @@
 .workspace {
   position: relative;
-  height: 300px;
-  border-radius: 20px;
+  height: 289px;
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius-card);
   background: var(--ui-surface);
 }
 .reference-strip {
@@ -29,7 +30,8 @@
   justify-content: center;
 }
 .add-reference {
-  color: #aab4bd;
+  border: 1px dashed var(--ui-muted);
+  color: var(--ui-muted);
   flex-direction: column;
   gap: 4px;
 }
@@ -37,7 +39,7 @@
   position: relative;
 }
 .add-label {
-  font-size: 10px;
+  font-size: 12px;
   line-height: 14px;
 }
 .reference image {
@@ -55,7 +57,7 @@
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: #272b34;
+  background: var(--ui-field);
 }
 .reference-remove::after {
   content: "";
@@ -71,17 +73,17 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #aab4bd;
+  color: var(--ui-muted);
 }
 .prompt-input {
   position: absolute;
   top: 90px;
   left: 16px;
   width: calc(100% - 32px);
-  /* Exactly four lines (16px × 1.6), so no line is cut in half. */
-  height: 102px;
+  /* Four 14px lines fit without clipping at the bottom. */
+  height: 90px;
   padding: 0;
-  font-size: 16px;
+  font-size: 14px;
   line-height: 1.6;
   color: var(--ui-text);
 }
@@ -93,8 +95,8 @@
   position: absolute;
   right: 16px;
   bottom: 72px;
-  font-size: 11px;
-  color: #a6abb4;
+  font-size: 12px;
+  color: var(--ui-muted);
 }
 .quote-note {
   position: absolute;
@@ -116,7 +118,7 @@
   color: var(--ui-link);
 }
 .quote-note.quote-retry {
-  color: #aab4bd;
+  color: var(--ui-muted);
 }
 .workspace-foot {
   position: absolute;
@@ -134,12 +136,12 @@
   gap: 5px;
   /* Real model names are longer than the designed placeholder. */
   flex: 1 1 auto;
-  max-width: 180px;
   min-width: 0;
   height: 44px;
   padding: 0 12px;
   border-radius: 10px;
   background: var(--ui-field);
+  border: 1px solid var(--ui-border);
   font-size: 13px;
   font-weight: 500;
 }
@@ -161,25 +163,30 @@
   white-space: nowrap;
   font-size: 12px;
 }
-.model-select t-icon {
-  flex-shrink: 0;
-}
-.workspace .generate-button {
-  flex: 0 0 78px;
-  width: 78px;
-  height: 44px;
-  line-height: 44px;
-  padding: 0;
+.generate-button {
+  width: 100%;
+  min-height: 48px;
+  line-height: 24px;
+  padding: 12px;
   margin: 0;
-  border-radius: 10px;
-  background-color: #ddeaf0;
+  border-radius: var(--ui-radius-control);
+  background-color: var(--ui-primary);
   color: var(--ui-on-brand);
   font-size: 14px;
   font-weight: 600;
 }
-.workspace .generate-button.is-disabled {
-  background-color: #22262e;
-  color: #a6abb4;
+.generate-button.is-disabled {
+  background-color: var(--ui-disabled);
+  color: var(--ui-disabled-text);
+}
+.workspace .generate-button {
+  width: 104px;
+  flex-shrink: 0;
+  padding: 10px 6px;
+  min-height: 44px;
+}
+.expanded .spec {
+  display: none;
 }
 .workspace.expanded {
   position: fixed;
@@ -189,7 +196,7 @@
   right: 20px;
   height: auto;
   z-index: 900;
-  box-shadow: 0 0 0 100vmax #0f0f11ed;
+  box-shadow: 0 0 0 100vmax #20263299;
 }
 .expanded .prompt-input {
   height: calc(100% - 188px);
@@ -198,8 +205,5 @@
   .model-select {
     gap: 4px;
     padding: 0 6px;
-  }
-  .model-select t-icon:first-child {
-    display: none;
   }
 }

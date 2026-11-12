@@ -35,8 +35,8 @@ for (const width of [320, 375, 430]) {
       <div style="padding:20px">
         <div class="workspace"><div class="workspace-foot">
           <div class="model-select"><img class="model-logo" alt="" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" /><span class="model-name">${long}</span><t-icon></t-icon></div>
-          <span class="spec">4096×2160 · 120秒</span><button class="generate-button">生成</button>
-        </div></div>
+          <span class="spec">4096×2160 · 120秒</span>
+        </div></div><button class="generate-button">生成视频</button>
         <div class="resolution-options">${["720p", "1080p", "2160p", "4096×2160", "8192×4320", long].map((v) => `<div class="resolution-option">${v}</div>`).join("")}</div>
         <div class="model-option"><t-icon></t-icon><div class="model-info">${long}<span class="model-description">${long}</span><div class="model-badges"><span>高清</span><span>推荐</span></div></div><span class="model-estimate">123456789 积分</span><t-icon></t-icon></div>
         <div class="row title-row"><span class="detail-title">${long}</span><div class="favorite"></div></div>
@@ -65,7 +65,7 @@ for (const width of [320, 375, 430]) {
     expect((await page.locator(".favorite").boundingBox())!.width).toBe(28);
     expect((await page.locator(".model-select .model-logo").boundingBox())!.width).toBe(22);
     expect((await page.locator(".generate-button").boundingBox())!.width).toBe(
-      78,
+      width - 40,
     );
     await page.screenshot({
       path: `../.runtime/mini-creation-layout-${width}.png`,

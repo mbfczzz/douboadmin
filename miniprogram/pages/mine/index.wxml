@@ -1,109 +1,39 @@
-<nav-bar title="我的" size="{{23}}" />
+<nav-bar title="我的" />
 <view class="page mine-page">
   <view wx:if="{{loading}}" class="loading"><t-loading /></view>
-  <view wx:elif="{{loadError&&!me}}" class="error-box" bindtap="load">
-    {{loadError}} · 点击重试
-  </view>
+  <view wx:elif="{{loadError&&!me}}" class="error-box" bindtap="load">{{loadError}} · 点击重试</view>
   <view wx:elif="{{!me}}" class="guest-profile">
-    <view class="avatar"><t-icon name="user" size="34" /></view>
+    <view class="avatar"><t-icon name="user" size="28" /></view>
     <text class="guest-title">欢迎来到你的创作空间</text>
-    <text class="guest-copy">登录后，保存作品、收藏灵感，
-继续每一个未完成的好想法。</text>
+    <text class="guest-copy">登录后，保存作品、收藏灵感，继续每一个未完成的好想法。</text>
     <t-button theme="primary" block bind:tap="signIn">微信登录</t-button>
     <text class="note">登录不会自动获取你的头像、昵称或手机号</text>
   </view>
-  <view wx:elif="{{me}}" class="content-reveal">
-    <view wx:if="{{loadError}}" class="error-box" bindtap="load"
-      >刷新失败，已保留上次信息 · 点击重试</view
-    >
-    <view
-      class="profile"
-      bindtap="edit"
-      aria-role="button"
-      aria-label="编辑个人资料"
-      hover-class="card-pressed"
-    >
+  <view wx:elif="{{me}}">
+    <view wx:if="{{loadError}}" class="error-box" bindtap="load">刷新失败，已保留上次信息 · 点击重试</view>
+    <view class="profile" bindtap="edit" aria-role="button" aria-label="编辑个人资料" hover-class="card-pressed">
       <view class="avatar">
-        <image
-          wx:if="{{me.profile.data.avatarUrl}}"
-          src="{{me.profile.data.avatarUrl}}"
-          mode="aspectFill"
-        />
-        <text wx:else>{{avatarLetter}}</text>
+        <image wx:if="{{me.profile.data.avatarUrl}}" src="{{me.profile.data.avatarUrl}}" mode="aspectFill" />
+        <t-icon wx:else name="user" size="24" />
       </view>
       <view class="profile-copy">
         <text class="nickname">{{me.profile.data.nickname}}</text>
         <text class="muted small">{{me.profile.data.bio}}</text>
       </view>
-      <t-icon name="chevron-right" size="20" />
-    </view>
-    <view class="numbers">
-      <view bindtap="works">
-        <text>{{me.works}}</text>
-        <text>作品数量</text>
-      </view>
-      <view bindtap="tasks">
-        <text>{{me.running}}</text>
-        <text>正在生成</text>
-      </view>
-      <view bindtap="favorites">
-        <text>{{me.favorites}}</text>
-        <text>收藏</text>
-      </view>
-    </view>
-    <view class="row section-title works-heading">
-      <text>我的作品</text>
-      <text class="small muted" bindtap="works">查看全部 ›</text>
-    </view>
-    <view class="works" wx:if="{{jobs.length}}">
-      <view
-        class="work"
-        wx:for="{{jobs}}"
-        wx:key="id"
-        data-id="{{item.id}}"
-        bindtap="detail"
-        hover-class="card-pressed"
-      >
-        <view class="work-cover">
-          <image
-            wx:if="{{item.input.kind==='image'&&item.result}}"
-            src="{{item.result}}"
-            mode="aspectFill"
-          />
-          <view
-            wx:if="{{item.input.kind!=='image'||!item.result}}"
-            class="work-placeholder"
-          >
-            <t-icon
-              name="{{item.input.kind==='image'?'image':'play-circle'}}"
-              size="32"
-              color="#a6abb4"
-            />
-          </view>
-          <text class="work-state">{{item.stateText}}</text>
-        </view>
-        <text class="work-title">{{item.shortTitle}}</text>
-      </view>
-    </view>
-    <view wx:else class="empty-work" bindtap="emptyWorks">
-      <t-icon name="{{me.running?'time':'image'}}" size="30" />
-      <text>{{me.running?'作品正在生成中':'你的第一份作品，从这里开始'}}</text>
-      <text class="accent">{{me.running?'查看生成进度 ›':'去创作 ↗'}}</text>
+      <view class="profile-edit"><text>编辑资料</text><t-icon name="chevron-right" size="16" /></view>
     </view>
     <view class="mine-balance"><points-balance /></view>
-    <text class="section-title common-heading">常用功能</text>
-    <view class="menu-list">
-      <view
-        class="menu"
-        wx:for="{{menus}}"
-        wx:key="mode"
-        data-mode="{{item.mode}}"
-        bindtap="menu"
-        hover-class="card-pressed"
-      >
-        <t-icon name="{{item.icon}}" size="21" />
-        <text>{{item.label}}</text>
-        <t-icon name="chevron-right" size="18" />
+    <view wx:for="{{groups}}" wx:for-item="group" wx:key="*this" class="menu-group">
+      <text class="section-title common-heading">{{group}}</text>
+      <view class="menu-list">
+        <block wx:for="{{menus}}" wx:key="mode">
+          <view wx:if="{{item.group===group}}" class="menu" data-mode="{{item.mode}}" bindtap="menu" aria-role="button" aria-label="{{item.label}}" hover-class="card-pressed">
+            <view class="icon-tile"><t-icon name="{{item.icon}}" size="20" /></view>
+            <text class="menu-label">{{item.label}}</text>
+            <text wx:if="{{item.mode==='tasks'&&me.running}}" class="menu-count">{{me.running}}</text>
+            <t-icon name="chevron-right" size="16" />
+          </view>
+        </block>
       </view>
     </view>
   </view>

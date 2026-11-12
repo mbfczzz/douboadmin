@@ -4,11 +4,11 @@
   left: 0;
   right: 0;
   z-index: 100;
-  background: var(--ui-bg);
-  border-top: 1rpx solid #ffffff14;
+  background: var(--ui-surface, #ffffff);
+  border-top: 1px solid var(--ui-border, #d7dee6);
   display: flex;
-  padding: 12rpx 12rpx calc(8rpx + env(safe-area-inset-bottom));
-  color: #a6abb4;
+  padding: 0 10px env(safe-area-inset-bottom);
+  color: var(--ui-muted);
 }
 .item {
   position: relative;
@@ -18,36 +18,43 @@
     transform 120ms ease;
   flex: 1;
   min-width: 0;
-  height: 96rpx;
+  height: 70px;
   min-height: 44px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
+  gap: 4px;
 }
 .glyph {
   position: relative;
-  width: 48rpx;
-  height: 48rpx;
+  width: 44px;
+  height: 40px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 .label {
-  font-size: 10px;
-  line-height: 14px;
+  font-size: 12px;
+  line-height: 18px;
   font-weight: 500;
 }
 .primary .glyph {
   width: 52px;
-  height: 36px;
-  border-radius: 12px;
+  height: 40px;
+  border-radius: 14px;
   color: var(--ui-on-brand);
   background: var(--ui-primary);
 }
 .active {
   color: var(--ui-nav);
+}
+.active:not(.primary) .glyph {
+  background: var(--ui-selected);
+}
+.primary .label {
+  color: var(--ui-link);
 }
 .active .label {
   font-weight: 600;

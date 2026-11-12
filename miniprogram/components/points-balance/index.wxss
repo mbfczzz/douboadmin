@@ -1,4 +1,5 @@
 .balance {
+  border: 1px solid var(--ui-border, #d7dee6);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -6,7 +7,8 @@
   margin: 0;
   padding: 16px;
   border-radius: 16px;
-  background: var(--td-bg-color-container, var(--ui-surface, #1d1e23));
+  min-height: 132px;
+  background: var(--ui-surface, #ffffff);
 }
 .balance-copy {
   min-width: 0;
@@ -15,27 +17,32 @@
 .label,
 .note {
   display: block;
-  color: var(--td-text-color-secondary, var(--ui-muted, #a6abb4));
+  color: var(--ui-muted, #667085);
   font-size: var(--ui-font-note, 12px);
 }
 .amount {
   display: block;
   margin: 6rpx 0;
-  color: var(--td-text-color-primary, #ebf8ff);
-  font-size: 38rpx;
+  color: var(--ui-text, #202632);
+  font-size: 32px;
   font-weight: 600;
   overflow-wrap: anywhere;
 }
 button.action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   min-height: 44px;
   width: auto;
   flex-shrink: 0;
   margin: 0;
-  padding: 11px 18px;
+  padding: 12px;
   line-height: 22px;
-  border-radius: 22px;
-  color: var(--ui-on-brand, #0f0f11);
-  background: var(--ui-primary, #ebf8ff);
+  border-radius: 12px;
+  border: 1px solid var(--ui-border, #d7dee6);
+  color: var(--ui-text, #202632);
+  background: var(--ui-surface, #ffffff);
   font-size: var(--ui-font-body, 14px);
   font-weight: 600;
 }
@@ -44,7 +51,27 @@ button.action {
 }
 .error {
   display: block;
-  color: #ff526c;
+  color: var(--ui-danger, #b42338);
   font-size: 24rpx;
   padding: 12rpx 0;
+}
+.compact {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  min-height: 44px;
+}
+.compact .label,
+.compact .amount {
+  display: inline;
+  font-size: 14px;
+  font-weight: 400;
+  margin-right: 6px;
+}
+.compact .action {
+  border: 0;
+  padding: 10px 0 10px 8px;
+  background: transparent;
+  font-size: 12px;
+  color: var(--ui-link);
 }

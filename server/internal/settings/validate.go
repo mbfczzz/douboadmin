@@ -105,14 +105,8 @@ func validate(g Group, v Values, production bool) error {
 		return invalid("ALERT_WEBHOOK_URL", "告警地址须为有效的 HTTP/HTTPS URL")
 	}
 	if g.ID == "sms" {
-		set := 0
-		for _, f := range g.Fields {
-			if strings.TrimSpace(v[f.Key]) != "" {
-				set++
-			}
-		}
-		if set != 0 && set != len(g.Fields) {
-			return invalid("SMS_SIGN_NAME", "短信配置需完整填写 AccessKey、签名和模板 CODE")
+		if err := validateSMS(v); err != nil {
+			return err
 		}
 	}
 	if g.ID == "relay" && v["RELAY_API_KEY"] != "" && v["RELAY_BASE_URL"] == "" {

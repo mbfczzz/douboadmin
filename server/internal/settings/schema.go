@@ -40,6 +40,7 @@ var definitions = []Group{
 		{Key: "RELAY_API_KEY", Label: "API Key", Kind: "secret"},
 	}},
 	{ID: "sms", Name: "短信验证码", Hint: "小程序用户注册时验证手机号，使用阿里云短信服务。模板须包含 ${code} 变量；RAM 账号需授予短信发送权限。保存后重启服务生效。", Fields: []Field{
+		{Key: "SMS_VERIFICATION_ENABLED", Label: "开启短信验证", Kind: "bool", Hint: "关闭后仅填写姓名和手机号，不发送或校验验证码；开启后必须完成短信验证。保存后重启服务生效。"},
 		{Key: "SMS_ACCESS_KEY_ID", Label: "AccessKey ID", Kind: "secret"},
 		{Key: "SMS_ACCESS_KEY_SECRET", Label: "AccessKey Secret", Kind: "secret"},
 		{Key: "SMS_SIGN_NAME", Label: "短信签名", Kind: "text", Hint: "与阿里云短信控制台审核通过的签名一致。"},

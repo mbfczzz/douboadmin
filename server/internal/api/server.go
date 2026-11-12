@@ -19,22 +19,24 @@ import (
 )
 
 type Config struct {
-	PaymentChannel       string
-	RequireActivation    bool
-	Production           bool
-	DemoLogin            bool
-	Storage              string
-	AdminUser            string
-	AdminPassword        string
-	MediaDir             string
-	WebOrigin            string
-	WeChatAppID          string
-	WeChatSecret         string
-	RelayURL             string
-	RelayKey             string
-	PublicBaseURL        string
-	CompletionTemplateID string
-	CompletionReady      bool
+	// Nil retains the legacy automatic policy for embedded callers.
+	SMSVerificationEnabled *bool
+	PaymentChannel         string
+	RequireActivation      bool
+	Production             bool
+	DemoLogin              bool
+	Storage                string
+	AdminUser              string
+	AdminPassword          string
+	MediaDir               string
+	WebOrigin              string
+	WeChatAppID            string
+	WeChatSecret           string
+	RelayURL               string
+	RelayKey               string
+	PublicBaseURL          string
+	CompletionTemplateID   string
+	CompletionReady        bool
 }
 type Objects interface {
 	Put(context.Context, string, io.Reader, string) error

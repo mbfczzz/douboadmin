@@ -36,6 +36,7 @@ export function prefill(page: Register, status: AccessStatus) {
 }
 
 export async function sendCode(page: Register) {
+  if (page.data.status?.smsRequired === false) return;
   const phone = page.data.phone.trim();
   if (page.data.sending || page.data.countdown > 0) return;
   if (!validPhone(phone)) {

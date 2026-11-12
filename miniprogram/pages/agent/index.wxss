@@ -32,20 +32,20 @@
   margin: 8rpx 0 45rpx;
 }
 .suggestions > view {
-  border-bottom: 1rpx solid #ffffff0f;
+  border-bottom: 1rpx solid var(--ui-border);
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 23rpx 0;
   font-size: 25rpx;
-  color: #aab4bd;
+  color: var(--ui-muted);
 }
 .message {
   margin-top: 30rpx;
 }
 .message-label {
   font-size: var(--ui-font-note);
-  color: #a6abb4;
+  color: var(--ui-muted);
   margin-bottom: 12rpx;
 }
 .bubble {
@@ -66,7 +66,7 @@
   text-align: right;
 }
 .user .bubble {
-  background: #272b34;
+  background: var(--ui-field);
   margin-left: 50rpx;
   color: var(--ui-text);
 }
@@ -84,10 +84,18 @@
   margin: 0;
 }
 .composer {
+  border: 1px solid var(--ui-border);
   margin: 12rpx 38rpx 24rpx;
   background: var(--ui-surface);
   border-radius: 16px;
   padding: 22rpx 24rpx;
+}
+.secondary {
+  background: var(--ui-surface);
+  color: var(--ui-link);
+  border: 1px solid var(--ui-border);
+  border-radius: 12px;
+  font-size: 14px;
 }
 .composer textarea {
   width: 100%;

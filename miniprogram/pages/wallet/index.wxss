@@ -19,13 +19,13 @@
   border: 0;
 }
 .purchase-tabs .selected {
-  background: #2e333d;
-  color: var(--ui-text);
+  background: var(--ui-selected);
+  color: var(--ui-link);
   font-weight: 600;
 }
 .checkout-error {
   display: block;
-  color: #ff526c;
+  color: var(--ui-danger);
   font-size: 12px;
   margin: 8px 0;
 }
@@ -52,8 +52,8 @@ button.virtual-product::after {
   border: 0;
 }
 .virtual-product.selected {
-  border-color: var(--ui-text);
-  background: var(--ui-field);
+  border-color: var(--ui-brand);
+  background: var(--ui-selected);
 }
 .virtual-product text {
   display: block;
@@ -104,5 +104,8 @@ button.virtual-product::after {
   overflow-wrap: anywhere;
 }
 .ledger-change.plus {
-  color: #45d18a;
+  color: var(--ui-success);
+}
+.wallet-purchase {
+  margin: 28px 0;
 }

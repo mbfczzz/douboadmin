@@ -9,24 +9,25 @@ button.profile-avatar-row {
   gap: 16px;
   width: 100%;
   margin: 0;
-  padding: 10px 0;
+  padding: 16px;
   text-align: left;
   line-height: 1.5;
-  background: transparent;
+  background: var(--ui-surface);
+  border: 1px solid var(--ui-border);
   color: var(--ui-text);
-  border-radius: 12px;
+  border-radius: var(--ui-radius-card);
 }
 .profile-avatar {
   position: relative;
-  width: 64px;
-  height: 64px;
+  width: 48px;
+  height: 48px;
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: #272b34;
-  color: #a6abb4;
+  background: var(--ui-field);
+  color: var(--ui-muted);
 }
 .profile-avatar image {
   width: 100%;
@@ -73,8 +74,8 @@ button.profile-avatar-row {
   justify-content: space-between;
   margin: 22px 2px 10px;
   color: var(--ui-muted);
-  font-size: 13px;
-  font-weight: 500;
+  font-size: 16px;
+  font-weight: 600;
 }
 .profile-optional {
   color: var(--ui-muted);
@@ -83,8 +84,8 @@ button.profile-avatar-row {
 }
 .profile-fields,
 .profile-bio {
-  border: 1px solid transparent;
-  border-radius: 16px;
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius-card);
   background: var(--ui-surface);
   overflow: hidden;
 }
@@ -97,7 +98,7 @@ button.profile-avatar-row {
   transition: background 120ms;
 }
 .profile-field + .profile-field {
-  border-top: 1px solid #ffffff0f;
+  border-top: 1px solid var(--ui-border);
 }
 .profile-label {
   width: 64px;
@@ -113,18 +114,15 @@ button.profile-avatar-row {
 }
 .profile-field input {
   width: 100%;
-  height: 36px;
-  padding: 0;
+  height: 52px;
+  padding: 0 14px;
+  border: 1px solid var(--ui-border);
+  border-radius: 12px;
+  background: var(--ui-field);
   color: var(--ui-text);
   caret-color: var(--ui-brand);
-  font-size: 16px;
-  text-align: right;
-}
-.profile-field.focused {
-  background: var(--ui-field);
-}
-.focused .profile-label {
-  color: var(--ui-text);
+  font-size: 14px;
+  text-align: left;
 }
 .profile-placeholder {
   color: var(--ui-muted);
@@ -132,24 +130,22 @@ button.profile-avatar-row {
 .profile-field-error {
   display: block;
   margin-top: 4px;
-  color: #ff526c;
+  color: var(--ui-danger);
   font-size: 12px;
   line-height: 1.6;
 }
-.profile-field .profile-field-error {
-  text-align: right;
-}
 .profile-bio {
+  background: var(--ui-field);
   padding: 14px 16px;
   transition: border-color 120ms;
 }
 .profile-bio.focused {
-  border-color: #ffffff4d;
+  border-color: var(--ui-brand);
 }
 .profile-bio textarea {
   display: block;
   width: 100%;
-  height: 88px;
+  height: 64px;
   padding: 0;
   color: var(--ui-text);
   caret-color: var(--ui-brand);
@@ -181,9 +177,6 @@ button.profile-submit {
   min-height: 48px;
   margin: 0;
   padding: 12px;
-  border-radius: 22px;
-  font-size: 16px;
-  font-weight: 600;
   line-height: 24px;
 }
 .profile-save-error {
@@ -191,7 +184,7 @@ button.profile-submit {
   margin-bottom: 0;
 }
 .profile-error {
-  color: #ff526c;
+  color: var(--ui-danger);
 }
 .profile-login {
   padding-top: 48px;
@@ -206,10 +199,10 @@ button.profile-submit {
 }
 
 .profile-field.invalid .profile-label {
-  color: #ff526c;
+  color: var(--ui-danger);
 }
 .profile-bio.invalid {
-  border-color: #80313d;
+  border-color: var(--ui-danger-border);
 }
 .profile-readonly {
   display: flex;
@@ -224,16 +217,16 @@ button.profile-submit {
 .profile-verified {
   padding: 1px 6px;
   border-radius: 4px;
-  background: #183024;
-  color: #45d18a;
+  background: var(--ui-success-bg);
+  color: var(--ui-success);
   font-size: 12px;
   line-height: 18px;
 }
 .profile-identity {
   padding: 1px 8px;
   border-radius: 6px;
-  background: #ffffff14;
-  color: #d4dde3;
+  background: var(--ui-selected);
+  color: var(--ui-link);
   font-size: 12px;
   line-height: 18px;
 }
@@ -243,4 +236,25 @@ button.profile-submit {
   text-overflow: ellipsis;
   white-space: nowrap;
   min-width: 0;
+}
+.profile-input-fields .profile-field {
+  display: block;
+  padding: 0;
+  margin: 0 0 16px;
+  border: 0;
+  background: transparent;
+}
+.profile-input-fields .profile-label {
+  display: block;
+  width: auto;
+  padding: 0;
+  margin-bottom: 8px;
+  color: var(--ui-muted);
+  font-size: 12px;
+}
+.profile-field.focused input {
+  border-color: var(--ui-brand);
+}
+.profile-field.invalid input {
+  border-color: var(--ui-danger);
 }
