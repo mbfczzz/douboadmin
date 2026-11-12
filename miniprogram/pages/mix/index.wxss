@@ -31,7 +31,7 @@
   align-items: center;
   justify-content: center;
   gap: 12rpx;
-  color: #ffffffb3;
+  color: #aab4bd;
   font-size: 23rpx;
   background: var(--ui-field);
   border-radius: 12px;
@@ -40,7 +40,7 @@
   /* Same size as the material tiles beside it. */
   height: calc((100vw - 86px) / 3);
   background: var(--ui-field);
-  color: #ffffffb3;
+  color: #aab4bd;
 }
 .mix-video text {
   max-width: 150rpx;
@@ -55,7 +55,7 @@
   right: 5rpx;
   padding: 3rpx 12rpx;
   border-radius: 50%;
-  background: #02070dd9;
+  background: #0f0f11bb;
   color: #fff;
   font-size: 32rpx;
 }

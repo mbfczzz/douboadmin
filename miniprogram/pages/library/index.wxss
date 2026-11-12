@@ -50,7 +50,7 @@
 }
 .help-card .help-title {
   font-size: 28rpx;
-  color: #ffffff;
+  color: var(--ui-text);
   margin: 28rpx 0 14rpx;
 }
 .help-card .help-title:first-child {

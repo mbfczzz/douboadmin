@@ -29,7 +29,7 @@
   justify-content: center;
 }
 .add-reference {
-  color: #ffffffb3;
+  color: #aab4bd;
   flex-direction: column;
   gap: 4px;
 }
@@ -55,7 +55,7 @@
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: #1b3249;
+  background: #272b34;
 }
 .reference-remove::after {
   content: "";
@@ -71,7 +71,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #a9b6c4;
+  color: #aab4bd;
 }
 .prompt-input {
   position: absolute;
@@ -83,7 +83,7 @@
   padding: 0;
   font-size: 16px;
   line-height: 1.6;
-  color: #ffffff;
+  color: var(--ui-text);
 }
 .prompt-placeholder {
   color: var(--ui-muted);
@@ -94,7 +94,7 @@
   right: 16px;
   bottom: 72px;
   font-size: 11px;
-  color: #8b9aab;
+  color: #a6abb4;
 }
 .quote-note {
   position: absolute;
@@ -116,7 +116,7 @@
   color: var(--ui-link);
 }
 .quote-note.quote-retry {
-  color: #a9b6c4;
+  color: #aab4bd;
 }
 .workspace-foot {
   position: absolute;
@@ -172,14 +172,14 @@
   padding: 0;
   margin: 0;
   border-radius: 10px;
-  background-color: #e8ecf0;
+  background-color: #ddeaf0;
   color: var(--ui-on-brand);
   font-size: 14px;
   font-weight: 600;
 }
 .workspace .generate-button.is-disabled {
-  background-color: #13283d;
-  color: #8b9aab;
+  background-color: #22262e;
+  color: #a6abb4;
 }
 .workspace.expanded {
   position: fixed;
@@ -189,7 +189,7 @@
   right: 20px;
   height: auto;
   z-index: 900;
-  box-shadow: 0 0 0 100vmax #02070ded;
+  box-shadow: 0 0 0 100vmax #0f0f11ed;
 }
 .expanded .prompt-input {
   height: calc(100% - 188px);

@@ -9,12 +9,12 @@
   font-weight: 500;
   line-height: 1.4;
   margin: 0 0 12px;
-  color: #ffffff;
+  color: var(--ui-text);
 }
 .task-state {
   flex-wrap: wrap;
   font-size: 13px;
-  color: #8b9aab;
+  color: #a6abb4;
   gap: 8px;
 }
 .state-label {
@@ -28,15 +28,15 @@
   font-size: 12px;
 }
 .task-state t-icon {
-  color: #ffffffb3;
+  color: #aab4bd;
 }
 .task-state.failed t-icon {
-  color: #ff3355;
+  color: #ff526c;
 }
 .failure-reason {
   overflow-wrap: anywhere;
   font-size: 14px;
-  color: #a9b6c4;
+  color: #aab4bd;
   line-height: 1.5;
   margin-top: 12px;
 }
@@ -53,14 +53,14 @@
   display: block;
   margin-top: 8px;
   padding: 6px 0;
-  color: #ffffff;
+  color: var(--ui-text);
 }
 .result {
   position: relative;
   margin-top: 24px;
   border-radius: 12px;
   overflow: hidden;
-  background: #02070d;
+  background: var(--ui-field);
 }
 .result image,
 .result video {
@@ -74,7 +74,7 @@
   margin: 12px 0 0;
 }
 .result-actions .danger-link {
-  color: #ff3355;
+  color: #ff526c;
 }
 .result-actions {
   margin-top: 8px;
@@ -95,7 +95,7 @@
 .task-detail-page .section-title {
   font-size: 12px;
   font-weight: 400;
-  color: #8b9aab;
+  color: #a6abb4;
   margin: 24px 0 10px;
 }
 .task-detail-page .section-title .small {
@@ -106,7 +106,7 @@
   display: block;
   font-size: 15px;
   line-height: 1.65;
-  color: #a9b6c4;
+  color: #aab4bd;
   white-space: pre-wrap;
 }
 .asset-grid {
@@ -127,12 +127,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #13283d;
+  background: #22262e;
 }
 .asset-row > text {
   display: block;
   font-size: 12px;
-  color: #a9b6c4;
+  color: #aab4bd;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -140,14 +140,14 @@
 }
 .asset-row > text.tiny {
   font-size: 11px;
-  color: #8b9aab;
+  color: #a6abb4;
   margin-top: 3px;
 }
 .specs {
   overflow-wrap: anywhere;
   font-size: 12px;
   line-height: 1.8;
-  color: #8b9aab;
+  color: #a6abb4;
   border-top: 1px solid #ffffff0f;
   padding-top: 16px;
   margin-top: 24px;

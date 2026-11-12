@@ -75,7 +75,7 @@ image {
 }
 .empty .title {
   display: block;
-  color: #ffffff;
+  color: var(--ui-text);
   font-weight: 500;
   font-size: 30rpx;
   margin: 24rpx 0 14rpx;
@@ -131,7 +131,7 @@ image {
   border-radius: 12px;
   padding: 22rpx;
   width: 100%;
-  color: #ffffff;
+  color: var(--ui-text);
   font-size: 28rpx;
 }
 .pill {
@@ -143,14 +143,14 @@ image {
 }
 .pill.succeeded {
   background: #183024;
-  color: #32d47a;
+  color: #45d18a;
 }
 .pill.failed {
   background: #33141b;
-  color: #ff3355;
+  color: #ff526c;
 }
 .pill.running {
-  background: #00cae01f;
+  background: #2e333d;
   color: var(--ui-brand);
 }
 .filter-scroll {
@@ -165,7 +165,7 @@ image {
   color: var(--ui-muted);
 }
 .filter.active {
-  color: #ffffff;
+  color: var(--ui-text);
   font-weight: 600;
 }
 .controls-busy {

@@ -1,6 +1,6 @@
 .nav {
-  background: #010203;
-  color: #ffffff;
+  background: #0f0f11;
+  color: var(--ui-text);
   position: sticky;
   top: 0;
   z-index: 50;

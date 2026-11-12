@@ -33,11 +33,11 @@
 }
 .photo-source t-icon {
   flex-shrink: 0;
-  color: #a9b6c4;
+  color: #aab4bd;
 }
 .photo-source-note {
   display: block;
   font-size: 11px;
-  color: #8b9aab;
+  color: #a6abb4;
   margin-top: 20px;
 }

@@ -87,18 +87,18 @@ for (const width of [320, 375, 430]) {
       `<style>body{margin:0;font-family:sans-serif}${styles}</style><div class="create-page"><div class="mode-tabs"><div class="mode-tab active">生成视频</div><div class="mode-tab">生成图片</div></div></div><div class="tabbar">${["模板", "混剪", "创作", "Agent", "我的"].map((name, i) => `<div class="item ${i === 2 ? "active" : ""}"><div class="glyph"><t-icon>◇</t-icon></div><span class="label">${name}</span></div>`).join("")}</div>`,
     );
     expect((await page.locator(".mode-tabs").boundingBox())!.height).toBe(42);
-    // Selected mode: a lighter grey block with white text; selected tab: white.
+    // Selected mode uses a neutral raised surface; navigation uses the light text.
     const look = (selector: string) =>
       page.locator(selector).first().evaluate((el) => ({
         background: getComputedStyle(el).backgroundColor,
         color: getComputedStyle(el).color,
       }));
     expect(await look(".mode-tab.active")).toEqual({
-      background: "rgb(29, 54, 80)",
-      color: "rgb(255, 255, 255)",
+      background: "rgb(46, 51, 61)",
+      color: "rgb(235, 248, 255)",
     });
-    expect((await look(".item.active")).color).toBe("rgb(255, 255, 255)");
-    expect((await look(".item:not(.active)")).color).toBe("rgb(139, 154, 171)");
+    expect((await look(".item.active")).color).toBe("rgb(235, 248, 255)");
+    expect((await look(".item:not(.active)")).color).toBe("rgb(166, 171, 180)");
     expect((await page.locator(".item.active").boundingBox())!.height).toBeGreaterThanOrEqual(44);
     await page.screenshot({ path: `../.runtime/mini-selection-${width}.png` });
   });

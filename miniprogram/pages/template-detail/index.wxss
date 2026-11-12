@@ -21,7 +21,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #02070dbb;
+  background: #0f0f11bb;
+  color: #ffffff;
   border-radius: 50%;
 }
 .title-row {
@@ -30,7 +31,7 @@
 .detail-divider {
   height: 1px;
   margin: 15px 0 20px;
-  background: #1b3249;
+  background: #272b34;
 }
 .detail-title {
   flex: 1;
@@ -54,7 +55,7 @@
 .upload-description {
   display: block;
   margin-top: 14px;
-  color: #a9b6c4;
+  color: #aab4bd;
   font-size: 15px;
   line-height: 1.4;
 }
@@ -77,8 +78,8 @@
 .upload-icon {
   width: 44px;
   height: 44px;
-  background: #13283d;
-  color: #a9b6c4;
+  background: #22262e;
+  color: #aab4bd;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -99,9 +100,9 @@
   height: 44px;
   line-height: 44px;
   text-align: center;
-  color: #02070d;
+  color: var(--ui-on-brand);
   font-size: 14px;
-  background: #ffffff;
+  background: var(--ui-primary);
   border-radius: 7px;
   margin-top: 4px;
 }
@@ -111,7 +112,7 @@
 }
 .upload-hint {
   font-size: 14px;
-  color: #a9b6c4;
+  color: #aab4bd;
 }
 .required {
   flex-shrink: 0;
@@ -122,7 +123,7 @@
 .format {
   display: block;
   font-size: 21rpx;
-  color: #8b9aab;
+  color: #a6abb4;
   margin-top: 17rpx;
 }
 .optional-grid {
@@ -164,7 +165,7 @@
   /* Design: 14 / 20 / 24 / 20. */
   padding: 14px 20px calc(24px + env(safe-area-inset-bottom));
   border-top: 1px solid #ffffff0f;
-  background: #03172b;
+  background: var(--ui-bg);
   --td-button-border-radius: 22px;
 }
 .detail .queue-link {
@@ -195,10 +196,10 @@
 }
 .submit-quote {
   flex-shrink: 0;
-  color: #ffffff;
+  color: var(--ui-text);
 }
 .is-ready .submit-status {
-  color: #ffffff;
+  color: var(--ui-text);
 }
 .uploaded {
   display: flex;

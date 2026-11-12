@@ -13,7 +13,7 @@
   color: var(--ui-muted);
 }
 .work-filter.active {
-  color: #ffffff;
+  color: var(--ui-text);
   font-weight: 600;
   font-size: 15px;
 }

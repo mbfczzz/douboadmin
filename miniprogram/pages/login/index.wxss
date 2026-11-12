@@ -35,7 +35,7 @@
   padding: 12px;
   border-radius: 8px;
   background: var(--ui-field);
-  color: #a9b6c4;
+  color: #aab4bd;
   font-size: 13px;
   line-height: 1.6;
 }

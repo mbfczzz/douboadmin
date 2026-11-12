@@ -11,14 +11,14 @@ const luminance = (hex) => hex.slice(1).match(/../g).map((v) => parseInt(v, 16) 
   .reduce((sum, v, i) => sum + v * [.2126, .7152, .0722][i], 0);
 const contrast = (a, b) => (Math.max(luminance(a), luminance(b)) + .05) / (Math.min(luminance(a), luminance(b)) + .05);
 
-// The mini-program follows the reference creation app: near-black to deep
-// navy, navy panels, white primary actions and a cyan accent.
-test("mini-program palette is the navy creation theme", () => {
-  assert.equal(mini["--ui-bg"], "#02070d");
-  assert.equal(mini["--ui-surface"], "#0b1b2c");
-  assert.equal(mini["--ui-brand"], "#00cae0");
-  assert.equal(mini["--ui-primary"], "#ffffff");
-  assert.match(read("styles/theme.wxss"), /linear-gradient\(\s*180deg,\s*#010203/);
+// The sampled app theme applies to pages, native chrome and components.
+test("mini-program uses neutral app surfaces and matching native chrome", () => {
+  assert.equal(mini["--ui-bg"], "#0f0f11");
+  assert.equal(mini["--ui-surface"], "#1d1e23");
+  assert.equal(mini["--ui-brand"], "#00c8dc");
+  assert.equal(mini["--ui-primary"], "#ebf8ff");
+  assert.match(read("styles/theme.wxss"), /background: var\(--ui-bg\)/);
+  assert.equal(JSON.parse(read("app.json")).window.navigationBarTextStyle, "white");
   assert.equal(JSON.parse(read("app.json")).window.backgroundColor, mini["--ui-bg"]);
   assert.ok(read("app.ts").includes(`backgroundColor: "${mini["--ui-bg"]}"`));
 });
@@ -29,13 +29,13 @@ test("body, helper text, primary actions and selected options meet text contrast
   assert.ok(contrast(mini["--ui-brand"],mini["--ui-surface"]) >= 4.5);
 });
 
-test("authored UI has no obsolete mint theme or old page background", () => {
+test("authored UI has no obsolete navy, light-blue or mint surfaces", () => {
   const walk = (dir) => fs.readdirSync(dir,{withFileTypes:true}).flatMap((entry) => {
     const file=path.join(dir,entry.name);
     return entry.isDirectory() ? walk(file) : /\.(wxss|wxml|ts)$/.test(file) ? [file] : [];
   });
   for (const file of ["app.ts",...walk("pages"),...walk("components"),...walk("styles"),...walk("custom-tab-bar")]) {
-    assert.doesNotMatch(read(file), /#(?:9bcbaa|131516|86b796|39463d)\b/i, file);
+    assert.doesNotMatch(read(file), /#(?:9bcbaa|131516|86b796|39463d|02070d|0b1b2c|03172b|13283d|1d3650|f5f6f8|365bc0)\b/i, file);
   }
-  for (const file of ["pages/orders/index.wxss","pages/wallet/index.wxss"]) assert.ok(read(file).includes("#32d47a"));
+  for (const file of ["pages/orders/index.wxss","pages/wallet/index.wxss"]) assert.ok(read(file).includes("#45d18a"));
 });

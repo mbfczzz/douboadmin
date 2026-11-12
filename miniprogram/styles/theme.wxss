@@ -1,51 +1,45 @@
 page {
-  --ui-bg: #02070d;
-  --ui-surface: #0b1b2c;
-  --ui-field: #13283d;
+  --ui-bg: #0f0f11;
+  --ui-surface: #1d1e23;
+  --ui-field: #22262e;
   --ui-border: #ffffff14;
-  --ui-text: #ffffff;
-  --ui-muted: #8b9aab;
-  --ui-brand: #00cae0;
+  --ui-text: #ebf8ff;
+  --ui-muted: #a6abb4;
+  --ui-brand: #00c8dc;
   --ui-accent: var(--ui-brand);
-  --ui-nav: #ffffff;
-  --ui-on-brand: #02070d;
-  --ui-primary: #ffffff;
-  /* Secondary links and costs: muted white, as in the reference app. */
-  --ui-link: #ffffffb3;
-  --ui-selected: #1d3650;
-  --ui-danger: #ff3355;
+  --ui-nav: #ebf8ff;
+  --ui-on-brand: #0f0f11;
+  --ui-primary: #ebf8ff;
+  /* Sampled from app UI screenshots; see docs/ui-alignment.md. */
+  --ui-link: #aab4bd;
+  --ui-selected: #2e333d;
+  --ui-danger: #ff526c;
   --ui-danger-bg: #33141b;
-  --ui-danger-border: #66202f;
+  --ui-danger-border: #80313d;
   --ui-radius-control: 12px;
   --ui-radius-card: 20px;
   --ui-font-body: 14px;
   --ui-font-note: 12px;
   --ui-font-caption: 11px;
   --ui-touch-size: 44px;
-  background: linear-gradient(
-    180deg,
-    #010203 0px,
-    #020a14 360px,
-    #031427 900px,
-    #04203a 100%
-  );
+  background: var(--ui-bg);
   color: var(--ui-text);
   font-family:
     -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei",
     sans-serif;
   font-size: var(--ui-font-body);
   --td-brand-color: var(--ui-brand);
-  --td-brand-color-active: #00b4cc;
-  --td-button-primary-active-bg-color: #dfe7ee;
-  --td-button-primary-active-border-color: #dfe7ee;
-  --td-brand-color-disabled: #13283d;
+  --td-brand-color-active: #00adbf;
+  --td-button-primary-active-bg-color: #cbdce5;
+  --td-button-primary-active-border-color: #cbdce5;
+  --td-brand-color-disabled: #22262e;
   --td-text-color-primary: var(--ui-text);
   --td-text-color-secondary: var(--ui-muted);
   --td-text-color-disabled: var(--ui-muted);
   --td-bg-color-container: var(--ui-surface);
   --td-bg-color-container-active: var(--ui-selected);
   --td-bg-color-component-active: var(--ui-selected);
-  --td-bg-color-component-disabled: #13283d;
+  --td-bg-color-component-disabled: #22262e;
   --td-component-border: var(--ui-border);
   --td-bg-color-page: var(--ui-bg);
   --td-border-level-1-color: var(--ui-border);
@@ -56,18 +50,18 @@ page {
   --td-button-default-bg-color: var(--ui-field);
   --td-button-default-color: var(--ui-text);
   --td-button-default-border-color: var(--ui-border);
-  --td-button-default-disabled-bg: #13283d;
-  --td-button-primary-disabled-bg: #13283d;
-  --td-button-primary-disabled-color: #8b9aab;
+  --td-button-default-disabled-bg: #22262e;
+  --td-button-primary-disabled-bg: #22262e;
+  --td-button-primary-disabled-color: #a6abb4;
   --td-button-primary-outline-disabled-color: var(--ui-muted);
   --td-button-primary-text-disabled-color: var(--ui-muted);
   --td-popup-bg-color: var(--ui-surface);
   --td-popup-border-radius: 32rpx;
   min-height: 100vh;
-  --td-button-primary-outline-color: #ffffff;
+  --td-button-primary-outline-color: var(--ui-text);
   --td-button-primary-outline-border-color: #ffffff4d;
   --td-button-primary-text-color: var(--ui-link);
-  --td-loading-color: #ffffff;
+  --td-loading-color: var(--ui-muted);
   --td-loading-text-color: var(--ui-muted);
-  --td-overlay-bg-color: #000000b3;
+  --td-overlay-bg-color: #00000099;
 }

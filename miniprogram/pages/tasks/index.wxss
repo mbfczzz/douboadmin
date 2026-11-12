@@ -27,7 +27,7 @@
   height: 80px;
   flex-shrink: 0;
   border-radius: 8px;
-  background: #13283d;
+  background: #22262e;
   color: var(--ui-muted);
   display: flex;
   align-items: center;
@@ -59,7 +59,7 @@
   color: var(--ui-brand);
 }
 .queue-state.failed {
-  color: #ff3355;
+  color: #ff526c;
 }
 .queue-spec {
   overflow-wrap: anywhere;
@@ -89,7 +89,7 @@
   padding: 12px 0;
   font-size: 12px;
   font-weight: 400;
-  color: #a9b6c4;
+  color: #aab4bd;
 }
 
 @import "../../styles/job-pagination.wxss";

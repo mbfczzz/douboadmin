@@ -16,7 +16,7 @@
   justify-content: center;
   border-radius: 50%;
   background: var(--ui-field);
-  color: #ffffff;
+  color: var(--ui-text);
   font-size: 22px;
   flex-shrink: 0;
 }
@@ -86,7 +86,8 @@
   top: 6px;
   left: 6px;
   font-size: 11px;
-  background: #00000066;
+  background: #0f0f11bb;
+  color: #ffffff;
   padding: 2px 6px;
   border-radius: 6px;
 }
@@ -120,13 +121,13 @@
   font-size: 15px;
 }
 .menu > t-icon:first-child {
-  color: #ffffff;
+  color: var(--ui-text);
 }
 .menu text {
   flex: 1;
 }
 .menu > t-icon:last-child {
-  color: #8b9aab;
+  color: #a6abb4;
 }
 .menu::after {
   content: "";

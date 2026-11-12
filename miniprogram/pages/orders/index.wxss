@@ -12,7 +12,7 @@
 }
 .order-state.paid {
   background: #183024;
-  color: #32d47a;
+  color: #45d18a;
 }
 .order-state.created,
 .order-state.refunding {

@@ -13,7 +13,7 @@ button.profile-avatar-row {
   text-align: left;
   line-height: 1.5;
   background: transparent;
-  color: #ffffff;
+  color: var(--ui-text);
   border-radius: 12px;
 }
 .profile-avatar {
@@ -25,8 +25,8 @@ button.profile-avatar-row {
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: #1b3249;
-  color: #8b9aab;
+  background: #272b34;
+  color: #a6abb4;
 }
 .profile-avatar image {
   width: 100%;
@@ -103,7 +103,7 @@ button.profile-avatar-row {
   width: 64px;
   flex-shrink: 0;
   padding-top: 6px;
-  color: #ffffff;
+  color: var(--ui-text);
   font-size: 14px;
   line-height: 24px;
 }
@@ -115,7 +115,7 @@ button.profile-avatar-row {
   width: 100%;
   height: 36px;
   padding: 0;
-  color: #ffffff;
+  color: var(--ui-text);
   caret-color: var(--ui-brand);
   font-size: 16px;
   text-align: right;
@@ -124,7 +124,7 @@ button.profile-avatar-row {
   background: var(--ui-field);
 }
 .focused .profile-label {
-  color: #ffffff;
+  color: var(--ui-text);
 }
 .profile-placeholder {
   color: var(--ui-muted);
@@ -132,7 +132,7 @@ button.profile-avatar-row {
 .profile-field-error {
   display: block;
   margin-top: 4px;
-  color: #ff3355;
+  color: #ff526c;
   font-size: 12px;
   line-height: 1.6;
 }
@@ -151,7 +151,7 @@ button.profile-avatar-row {
   width: 100%;
   height: 88px;
   padding: 0;
-  color: #ffffff;
+  color: var(--ui-text);
   caret-color: var(--ui-brand);
   font-size: 15px;
   line-height: 1.7;
@@ -191,7 +191,7 @@ button.profile-submit {
   margin-bottom: 0;
 }
 .profile-error {
-  color: #ff3355;
+  color: #ff526c;
 }
 .profile-login {
   padding-top: 48px;
@@ -206,10 +206,10 @@ button.profile-submit {
 }
 
 .profile-field.invalid .profile-label {
-  color: #ff3355;
+  color: #ff526c;
 }
 .profile-bio.invalid {
-  border-color: #66202f;
+  border-color: #80313d;
 }
 .profile-readonly {
   display: flex;
@@ -225,7 +225,7 @@ button.profile-submit {
   padding: 1px 6px;
   border-radius: 4px;
   background: #183024;
-  color: #32d47a;
+  color: #45d18a;
   font-size: 12px;
   line-height: 18px;
 }
@@ -233,7 +233,7 @@ button.profile-submit {
   padding: 1px 8px;
   border-radius: 6px;
   background: #ffffff14;
-  color: #ffffffcc;
+  color: #d4dde3;
   font-size: 12px;
   line-height: 18px;
 }

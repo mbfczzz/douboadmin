@@ -29,7 +29,7 @@
   padding: 1px 8px;
   border-radius: 6px;
   background: #ffffff14;
-  color: #ffffffcc;
+  color: #d4dde3;
   font-size: 12px;
   line-height: 18px;
 }
@@ -55,7 +55,7 @@
   padding: 4px 0;
 }
 .provider-tabs .on {
-  color: #ffffff;
+  color: var(--ui-text);
   font-weight: 600;
 }
 .provider-qr {
