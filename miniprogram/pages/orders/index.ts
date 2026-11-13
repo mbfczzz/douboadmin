@@ -1,4 +1,4 @@
-import { templateCovers } from "../../services/covers";
+import { tierByAmount } from "../../services/points-art";
 import { pullRefresh } from "../../utils/refresh";
 import { orderExtras } from "./details";
 import {
@@ -48,10 +48,10 @@ Page({
         tone: string;
         time: string;
         canPay: boolean;
+        photo: string;
       } & ReturnType<typeof orderExtras>
     >,
     open: "", // the order whose details are showing
-    art: [] as string[], // real template covers, one per card
     loading: true,
     needsLogin: false,
     loadError: "",
@@ -67,7 +67,6 @@ Page({
   watching: "",
   stopWatching: undefined as (() => void) | undefined,
   onLoad() {
-    void templateCovers().then((c) => !this.destroyed && this.setData({ art: c.map((x) => x.cover) }));
   },
   onShow() {
     this.visible = true;
@@ -142,6 +141,7 @@ Page({
           return {
             ...r,
             amount: money(r.data.amountFen),
+            photo: tierByAmount(r.data.amountFen),
             points: points(r.data.pointsUnits),
             tone: r.data.status === "paid" ? "succeeded" : r.data.status === "refunding" || awaiting ? "running" : r.data.status === "created" && !expired ? "warning" : "",
             state:

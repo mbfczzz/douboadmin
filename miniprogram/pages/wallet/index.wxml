@@ -16,10 +16,9 @@
     </view>
     <view wx:elif="{{paymentNotice}}" class="biz-note" aria-role="status">{{paymentNotice}}</view>
     <view wx:if="{{info}}" class="biz-card wallet-summary">
-      <view wx:if="{{heroArt.length}}" class="hero-art" aria-hidden="true"><image wx:for="{{heroArt}}" wx:key="*this" src="{{item}}" mode="aspectFill" class="fan-{{index}}" /></view>
-      <image wx:elif="{{backdrop}}" class="summary-photo" src="{{backdrop}}" mode="aspectFill" aria-hidden="true" />
-      <view class="summary-label"><text class="points-mark">✦</text><text>可用积分</text></view>
-      <view class="row"><text class="biz-value">{{available}}</text><button class="wallet-refresh" bindtap="load" disabled="{{loading}}"><image class="gl gl-16" src="/assets/glyphs/refresh.png" /><text>刷新</text></button></view>
+      <image wx:if="{{backdrop}}" class="summary-photo" src="{{backdrop}}" mode="aspectFill" aria-hidden="true" />
+      <view class="summary-label"><image class="points-mark gl gl-14" src="/assets/glyphs/points-star.png" /><text>可用积分</text></view>
+      <view class="row"><text class="biz-value">{{available}}</text></view>
       <view class="summary-held"><image class="gl gl-16" src="/assets/glyphs/lock-points.png" /><text>预留 {{held}} 积分</text><text class="biz-small">处理中暂时冻结</text></view>
       <view wx:if="{{price100}}" class="summary-price"><text>当前价格</text><text class="price-value">¥{{price100}} / 100 积分</text></view>
     </view>
@@ -48,14 +47,14 @@
         <block wx:if="{{purchaseMode==='custom'}}">
           <text class="biz-label">充值金额（元）</text>
           <input class="biz-input" type="digit" maxlength="10" value="{{amount}}" disabled="{{busy||pendingOrderId}}" bindinput="input" placeholder="输入充值金额" aria-label="自定义充值金额" />
-          <text wx:if="{{customStep}}" class="biz-note">按 {{customStep}} 元递增，预计获得 {{estimated}} 积分</text>
+          <view wx:if="{{customStep}}" class="custom-estimate"><image class="custom-photo" src="/assets/photos/tier-3.jpg" mode="aspectFill" aria-hidden="true" /><view class="custom-copy"><text class="custom-points">{{estimated}}</text><text class="biz-small">预计获得积分 · 按 {{customStep}} 元递增</text></view></view>
           <text wx:if="{{checkoutError}}" class="checkout-error">{{checkoutError}}</text>
         </block>
         <view wx:else class="virtual-products {{products.length===1?'single':products.length===2||products.length===4?'pair':''}}">
           <button wx:for="{{products}}" wx:key="id" class="virtual-product {{productId===item.id?'selected':''}}" aria-label="{{item.name}}，{{item.amount}}元，{{item.points}}积分，{{productId===item.id?'已选择':'未选择'}}" data-id="{{item.id}}" bindtap="chooseProduct" disabled="{{busy||pendingOrderId}}">
             <view class="row product-icons"><t-icon wx:if="{{productId===item.id}}" name="check-circle" size="16" /></view>
             <text wx:if="{{item.best}}" class="product-badge">最划算</text>
-            <view wx:if="{{item.art.length}}" class="product-art art-{{item.art.length}}" aria-hidden="true"><image wx:for="{{item.art}}" wx:for-item="src" wx:key="*this" src="{{src}}" mode="aspectFill" /></view>
+            <image class="product-photo" src="{{item.photo}}" mode="aspectFill" aria-hidden="true" />
             <text class="product-points">{{item.points}}<text class="product-unit">积分</text></text><text class="product-name">{{item.name}}</text><text class="product-price">¥{{item.amount}}</text>
             <text wx:if="{{item.bonus||item.per100}}" class="product-rate">{{item.bonus||'¥'+item.per100+'/百积分'}}</text>
           </button>

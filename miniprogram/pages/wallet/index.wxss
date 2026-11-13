@@ -157,8 +157,7 @@ button.virtual-product.selected .product-price {
 .summary-label,
 .summary-held,
 .wallet-shortcuts > view,
-.purchase-summary,
-button.wallet-refresh {
+.purchase-summary {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -185,16 +184,6 @@ button.wallet-refresh {
 }
 .summary-held .biz-small {
   margin-left: auto;
-}
-button.wallet-refresh {
-  flex-shrink: 0;
-  width: auto;
-  min-height: 44px;
-  background: var(--ui-surface);
-  color: var(--ui-points);
-  font-size: 13px;
-  padding: 0 12px;
-  border-radius: 10px;
 }
 .wallet-shortcuts {
   padding: 0 16px;

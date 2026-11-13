@@ -9,6 +9,7 @@ import type { Ledger } from "../../services/wallet-ledger";
 import { ledgerView } from "../../services/wallet-ledger";
 import { withDays } from "../../utils/day";
 import { templateCovers } from "../../services/covers";
+import { tierByRank } from "../../services/points-art";
 
 // Everything here is derived from real data: product prices, live quotes
 // for each kind's default model, and ledger rows. Nothing is invented.
@@ -16,6 +17,7 @@ import { templateCovers } from "../../services/covers";
 const per100 = (fen: number, units: number) => money(Math.round((fen * 10000) / units)); // ¥ per 100 points
 
 export function productCards(products: VirtualProduct[]) {
+  const sizes = products.map((p) => p.pointsUnits).sort((a, b) => a - b);
   const rate = (p: VirtualProduct) => p.pointsUnits / p.amountFen;
   const valid = products.filter((p) => p.amountFen > 0 && p.pointsUnits > 0);
   const worst = Math.min(...valid.map(rate)),
@@ -32,7 +34,7 @@ export function productCards(products: VirtualProduct[]) {
       per100: r ? per100(p.amountFen, p.pointsUnits) : "",
       bonus: bonus >= 1 ? `多得 ${bonus}%` : "",
       best: valid.length > 1 && r === best && best > worst,
-      art: [] as string[], // filled by loadArt
+      photo: tierByRank(sizes.indexOf(p.pointsUnits), products.length),
     };
   });
 }
@@ -99,22 +101,17 @@ export async function loadInsights(page: InsightPage) {
 type ArtPage = {
   destroyed?: boolean;
   revision?: number;
-  data: { products: ReturnType<typeof productCards>; uses: { kind: string }[] };
+  data: { uses: { kind: string }[] };
   setData(value: Record<string, unknown>): void;
 };
 
-// Decoration from real template covers: each package fans out more works the
-// bigger it is (1 → 3 covers), the balance card carries a small fan and each
-// "能做什么" tile shows a work of its kind. No covers, no decoration.
+// Each "能做什么" tile shows a real template cover of its kind. Packages use
+// product photos (services/points-art) and need no covers.
 export async function loadArt(page: ArtPage) {
   const owner = sessionToken(), revision = page.revision;
   const covers = (await templateCovers()).map((c) => c.cover);
   if (page.destroyed || !covers.length || sessionToken() !== owner || page.revision !== revision) return;
-  const take = (start: number, count: number) =>
-    Array.from({ length: Math.min(count, covers.length) }, (_, i) => covers[(start + i) % covers.length]);
   page.setData({
-    heroArt: take(0, 3),
-    products: page.data.products.map((p, i) => ({ ...p, art: take(i, Math.min(i + 1, 3)) })),
     useArt: { image: covers[1 % covers.length], video: covers[2 % covers.length] },
   });
 }

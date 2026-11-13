@@ -55,14 +55,18 @@ test("points group thousands and keep cents only when present", () => {
   assert.equal(points(-12000000), "-120,000");
 });
 
-test("packages fan out more real covers the bigger they are; none without covers", async () => {
+test("packages and orders show more tokens the bigger they are", async () => {
   const h = harness();
   const { loadArt, productCards } = h.service("../pages/wallet/insights");
-  const page = { data: { products: productCards([1, 2, 3, 4].map((n) => ({ id: "p" + n, name: "x", amountFen: n * 1000, pointsUnits: n * 100000 }))), uses: [] }, setData(v) { Object.assign(this.data, v); } };
+  const { tierByAmount } = h.service("points-art");
+  // Offered out of order: the photo follows the size, not the position.
+  const cards = productCards([3, 1, 4, 2].map((n) => ({ id: "p" + n, name: "x", amountFen: n * 1000, pointsUnits: n * 100000 })));
+  assert.deepEqual(cards.map((p) => p.photo.match(/tier-(\d)/)[1]), ["3", "1", "4", "2"]);
+  assert.equal(productCards([{ id: "a", name: "x", amountFen: 990, pointsUnits: 100000 }])[0].photo, "/assets/photos/tier-2.jpg");
+  assert.deepEqual([990, 4990, 9990, 19990].map((f) => tierByAmount(f).match(/tier-(\d)/)[1]), ["1", "2", "3", "4"]);
+  const page = { data: { uses: [] }, setData(v) { Object.assign(this.data, v); } };
   h.wx.request = (o) => o.success({ statusCode: 200, data: { items: [1, 2, 3].map((n) => ({ id: "t" + n, data: { cover: "https://cdn.test/" + n + ".jpg", title: "t", duration: 5 } })) } });
   await loadArt(page);
-  assert.deepEqual([...page.data.products].map((p) => p.art.length), [1, 2, 3, 3]);
-  assert.equal(page.data.heroArt.length, 3);
   assert.ok(page.data.useArt.video);
 });
 

@@ -10,7 +10,7 @@
   </view>
   <view wx:for="{{rows}}" wx:key="id" class="order-card {{open===item.id?'open':''}}">
     <view class="order-head" data-id="{{item.id}}" bindtap="toggle" aria-role="button" aria-label="{{open===item.id?'收起订单详情':'展开订单详情'}}">
-      <view class="order-art {{item.data.status}}"><image wx:if="{{art.length}}" src="{{art[index%art.length]}}" mode="aspectFill" /><view class="order-badge"><t-icon name="{{item.data.status==='refunded'?'rollback':item.data.status==='paid'?'check':'time'}}" size="12" /></view></view>
+      <view class="order-art {{item.data.status}}"><image src="{{item.photo}}" mode="aspectFill" /><view class="order-badge"><t-icon name="{{item.data.status==='refunded'?'rollback':item.data.status==='paid'?'check':'time'}}" size="12" /></view></view>
       <view class="order-title"><text class="order-points">{{item.points}} 积分</text><text class="biz-small">{{item.data.virtual.productName||'积分充值'}} · {{item.time}}</text></view>
       <view class="order-side"><text class="order-amount">¥{{item.amount}}</text><text class="order-state pill {{item.tone}}">{{item.state}}</text></view>
     </view>

@@ -1,5 +1,5 @@
 <view wx:if="{{compact}}" class="inline-balance" bindtap="balanceTap" aria-role="button">
-  <text class="points-mark">✦</text><text>{{loadError?'余额更新失败，重试':logged?'可用 '+available+' 积分':'登录后查看积分'}}</text><t-icon name="chevron-right" size="16" />
+  <image class="points-mark gl gl-14" src="/assets/glyphs/points-star.png" /><text>{{loadError?'余额更新失败，重试':logged?'可用 '+available+' 积分':'登录后查看积分'}}</text><t-icon name="chevron-right" size="16" />
 </view>
 <view wx:elif="{{row}}" class="balance-row" bindtap="balanceTap" hover-class="row-pressed" aria-role="button" aria-label="{{'可用积分 '+available}}">
   <view class="row-mark"><image class="row-mark-art" src="{{markArt}}" /></view>

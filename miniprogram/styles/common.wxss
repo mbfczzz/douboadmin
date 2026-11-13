@@ -209,7 +209,6 @@ button.phone-alternative {
 /* Jimeng marks credits with a four-point star. */
 .points-mark {
   margin-right: 4px;
-  font-size: 1em;
 }
 .brand-tile {
   border-radius: 16px;

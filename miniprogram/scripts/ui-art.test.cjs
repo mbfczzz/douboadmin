@@ -37,7 +37,7 @@ test("each photo slot keeps a flat fallback", () => {
     "pages/agent/index.wxml": /wx:if="\{\{item\.image\}\}" class="starter-photo"[^]*?wx:else/,
     "pages/login/index.wxml": /wx:if="\{\{backdrop\}\}" class="page-backdrop"/,
     "pages/activate/index.wxml": /wx:if="\{\{backdrop\}\}" class="page-backdrop"/,
-    "pages/wallet/index.wxml": /wx:elif="\{\{backdrop\}\}" class="summary-photo"/,
+    "pages/wallet/index.wxml": /wx:if="\{\{backdrop\}\}" class="summary-photo"/,
   };
   for (const [file, pattern] of Object.entries(slots)) assert.match(read(file), pattern, file);
   // The grey under a loading photo comes from the slot itself.

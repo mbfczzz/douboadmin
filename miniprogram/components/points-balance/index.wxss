@@ -87,7 +87,6 @@ button.action {
 
 .points-mark {
   margin-right: 4px;
-  font-size: 1em;
 }
 .balance-row {
   display: flex;

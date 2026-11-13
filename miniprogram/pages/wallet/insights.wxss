@@ -152,68 +152,55 @@ button.virtual-product > text.product-badge {
   opacity: 0.7;
 }
 
-/* Balance card: a small fan of real works drifting off the right edge. */
+/* Balance card: glass stars fading in from the right edge. */
 .wallet-summary {
   position: relative;
   overflow: hidden;
 }
-.wallet-summary > view:not(.hero-art) {
+.wallet-summary > view {
   position: relative;
   z-index: 1;
 }
-/* Fallback picture when there are no works yet: fades out to the left so
-   the balance stays on plain card colour. */
 .summary-photo {
   position: absolute;
   top: 0;
   right: 0;
   width: 72%;
   height: 100%;
-  opacity: 0.5;
+  opacity: 0.55;
   -webkit-mask-image: linear-gradient(to right, transparent, #000 60%);
   mask-image: linear-gradient(to right, transparent, #000 60%);
   pointer-events: none;
 }
-.hero-art {
-  position: absolute;
-  top: 18px;
-  right: -14px;
-  width: 132px;
-  height: 120px;
-  opacity: 0.5;
-  pointer-events: none;
-}
-.hero-art image {
-  position: absolute;
-  top: 0;
-  width: 62px;
-  height: 84px;
-  border-radius: 10px;
-  box-shadow: 0 6px 16px #00000080;
-}
-.hero-art .fan-0 { right: 58px; transform: rotate(-12deg); }
-.hero-art .fan-1 { right: 30px; top: -6px; transform: rotate(-2deg); z-index: 1; }
-.hero-art .fan-2 { right: 0; transform: rotate(10deg); }
-/* Packages: bigger packs fan out more works above their figure. */
-.product-art {
-  position: relative;
-  height: 64px;
+/* Packages: one product photo, more stars for bigger packs. */
+.product-photo {
+  display: block;
+  width: 76px;
+  height: 76px;
   margin: 2px auto 10px;
+  border-radius: 18px;
+  box-shadow: 0 6px 16px #00000066;
 }
-.product-art image {
-  position: absolute;
-  top: 0;
-  width: 44px;
-  height: 60px;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px #00000066, 0 0 0 1.5px #ffffff26;
+/* Custom amount: what the typed sum buys, as large as a package figure. */
+.custom-estimate {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 16px;
+  background: var(--ui-surface);
 }
-.art-1 { width: 44px; }
-.art-1 image { left: 0; }
-.art-2 { width: 72px; }
-.art-2 image:nth-child(1) { left: 0; transform: rotate(-8deg); }
-.art-2 image:nth-child(2) { left: 28px; transform: rotate(7deg); }
-.art-3 { width: 92px; }
-.art-3 image:nth-child(1) { left: 0; transform: rotate(-12deg); }
-.art-3 image:nth-child(2) { left: 24px; top: -4px; z-index: 1; }
-.art-3 image:nth-child(3) { left: 48px; transform: rotate(12deg); }
+.custom-photo {
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  border-radius: 14px;
+}
+.custom-points {
+  display: block;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 30px;
+  color: var(--ui-text);
+}

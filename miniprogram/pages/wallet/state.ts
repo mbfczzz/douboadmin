@@ -6,8 +6,7 @@ export const walletData = {
   productId: "",
   products: [] as ReturnType<typeof import("./insights").productCards>,
   price100: "",
-  heroArt: [] as string[],
-  backdrop: UI_ART.walletBackdrop, // until the user has works to fan out
+  backdrop: UI_ART.walletBackdrop, // glass stars fading in from the right
   useArt: { image: "", video: "" } as Record<string, string>,
   uses: [] as Array<{ kind: string; title: string; cost: string; units: number; count: number; unit: string; model: string }>,
   purchaseMode: "package" as PurchaseMode,

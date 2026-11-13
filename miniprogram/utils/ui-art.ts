@@ -13,7 +13,7 @@ import { media } from "../services/media";
 // fails to load leaves the plain design rather than a hole. Bump ART_VERSION
 // after replacing a picture so caches fetch the new one.
 const ART_BASE = "";
-const ART_VERSION = 2;
+const ART_VERSION = 4;
 const art = (name: string) =>
   ART_BASE
     ? `${ART_BASE}/${name}.jpg?v=${ART_VERSION}`
