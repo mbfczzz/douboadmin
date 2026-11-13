@@ -75,15 +75,19 @@ func (s ModelSettings) Validate(m Model) error {
 			return fmt.Errorf("上游不支持该参考素材类型")
 		}
 	}
-	if s.MaxPromptChars < 0 || s.MaxPromptChars > 500 || len([]rune(s.DefaultPrompt)) > 500 || len(s.Ideas) > 10 {
-		return fmt.Errorf("提示词设置无效，当前小程序最多支持 500 字")
+	if s.MaxPromptChars < 0 || s.MaxPromptChars > MaxPromptChars(m.Kind) {
+		return fmt.Errorf("提示词字数上限需为 0–%d 的整数，0 使用模型类型默认值", MaxPromptChars(m.Kind))
 	}
-	if s.MaxPromptChars > 0 && len([]rune(s.DefaultPrompt)) > s.MaxPromptChars {
-		return fmt.Errorf("默认提示词超过所设字数限制")
+	limit := s.PromptLimit(m.Kind)
+	if len([]rune(s.DefaultPrompt)) > limit {
+		return fmt.Errorf("默认提示词最多 %d 字", limit)
+	}
+	if len(s.Ideas) > 10 {
+		return fmt.Errorf("最多设置 10 条灵感提示词")
 	}
 	for _, idea := range s.Ideas {
-		if len([]rune(idea)) > 500 {
-			return fmt.Errorf("灵感提示词超过 500 字")
+		if len([]rune(idea)) > limit {
+			return fmt.Errorf("灵感提示词最多 %d 字", limit)
 		}
 	}
 	if !slices.Contains([]string{"", "duration", "per_request"}, s.VideoBillingMode) {

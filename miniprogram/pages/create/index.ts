@@ -5,7 +5,7 @@ import { creationData } from "./state";
 import { generate } from "./submit";
 import { cancelEstimate, updateEstimate } from "./estimate";
 import { openModelMenu, measureModelMenu } from "./model-menu";
-import { modelChoices, modelSettings, resolutionSettings } from "./models";
+import { modelChoices, modelSettings, resolutionSettings, defaultPromptChars } from "./models";
 import type { ModelChoice } from "./editor-types";
 import { addReference, selectedModel } from "./references";
 import { chooseMention, removeMention, clearMentions, cancelMention } from "./mentions";
@@ -50,6 +50,7 @@ Page({
       wx.removeStorageSync("edit-draft");
       this.setData({
         kind: draft.kind === "image" ? "image" : "video",
+        maxPromptChars: defaultPromptChars(draft.kind),
         prompt: draft.prompt,
         hasPrompt: !!draft.prompt?.trim(),
         model: draft.model || "",
@@ -158,6 +159,7 @@ Page({
     if (kind === this.data.kind) return;
     this.setData({
       kind,
+      maxPromptChars: defaultPromptChars(kind),
       showModels: false,
       resolution: "",
       ratio: kind === "image" ? "1:1" : "9:16",

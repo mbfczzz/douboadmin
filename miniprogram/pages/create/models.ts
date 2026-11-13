@@ -27,6 +27,8 @@ export function modelChoices(models: Model[], kind: string): ModelChoice[] {
     }));
 }
 
+export const defaultPromptChars = (kind: string) => kind === "image" ? 2000 : 20000;
+
 export function modelSettings(
   model: ModelChoice,
   current: {
@@ -47,7 +49,7 @@ export function modelSettings(
   return {
     prompt,
     hasPrompt: !!prompt.trim(),
-    maxPromptChars: model.settings?.maxPromptChars || 500,
+    maxPromptChars: model.settings?.maxPromptChars || defaultPromptChars(model.kind),
     ...referenceSettings(model),
     durations,
     duration,

@@ -20,15 +20,15 @@ func (a *Server) validateJob(ctx context.Context, user string, in *core.JobInput
 	if a.Config.Production && core.IsWork(in.Kind) && a.Objects == nil {
 		return fmt.Errorf("请先在后台系统设置中配置 OSS 存储")
 	}
-	if len([]rune(strings.TrimSpace(in.Prompt))) == 0 || len([]rune(in.Prompt)) > 500 {
-		return fmt.Errorf("请输入 1–500 字的创作描述")
-	}
 	m, err := a.model(ctx, in.Model)
 	if err != nil || !m.Usable() || m.Kind != in.Kind {
 		return fmt.Errorf("请选择已上架的有效模型")
 	}
-	if m.Settings.MaxPromptChars > 0 && len([]rune(in.Prompt)) > m.Settings.MaxPromptChars {
-		return fmt.Errorf("此模型的提示词最多 %d 字", m.Settings.MaxPromptChars)
+	if strings.TrimSpace(in.Prompt) == "" {
+		return fmt.Errorf("请输入创作描述")
+	}
+	if limit := m.Settings.PromptLimit(m.Kind); len([]rune(in.Prompt)) > limit {
+		return fmt.Errorf("此模型的提示词最多 %d 字", limit)
 	}
 	if in.Kind != "chat" {
 		if (len(m.Resolutions) > 0 && !slices.Contains(m.Resolutions, in.Resolution)) || (len(m.Ratios) > 0 && !slices.Contains(m.Ratios, in.Ratio)) {

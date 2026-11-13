@@ -35,6 +35,7 @@ func (a *Server) config(w http.ResponseWriter, r *http.Request) {
 				continue
 			}
 			m.Settings.CostUSD = ""
+			m.Settings.MaxPromptChars = m.Settings.PromptLimit(m.Kind)
 			m.Icon = m.DisplayIcon()
 			if a.Media != nil && a.Media.ModelIcons != nil {
 				m.Icon = a.Media.ModelIcons.URL(r.Context(), m.Icon)

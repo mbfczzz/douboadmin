@@ -4,18 +4,21 @@ import type { SettingsProps } from "./settings";
 
 export default function PromptFields({ model, onChange }: SettingsProps) {
   const s = model.settings,
-    ideas = s.ideas || [];
+    ideas = s.ideas || [],
+    defaultLimit = model.kind === "image" ? 2000 : model.kind === "video" ? 20000 : 500,
+    limit = s.maxPromptChars || defaultLimit,
+    maxLimit = ["image", "video"].includes(model.kind) ? 100000 : 500;
   return (
     <Card title="提示词配置">
       <Section
         label="提示词字数限制"
-        hint="0 沿用当前小程序的 500 字上限。超限请求会在提交上游前拦截。"
+        hint={`当前上限 ${limit} 字。未配置或填 0 时，图片默认 2000 字、视频默认 20000 字，其他类型默认 500 字。`}
       >
         <div className="config-grid">
           <NumberField
             label="最大提示词字数"
-            value={s.maxPromptChars || 0}
-            max={500}
+            value={limit}
+            max={maxLimit}
             integer
             onChange={(maxPromptChars) => onChange({ maxPromptChars })}
           />
@@ -29,7 +32,7 @@ export default function PromptFields({ model, onChange }: SettingsProps) {
           aria-label="默认提示词"
           rows={3}
           value={s.defaultPrompt || ""}
-          maxLength={500}
+          maxLength={limit}
           onChange={(e) => onChange({ defaultPrompt: e.target.value })}
           placeholder="填写该模型的默认创作描述"
         />
@@ -40,7 +43,7 @@ export default function PromptFields({ model, onChange }: SettingsProps) {
             <input
               aria-label={`灵感提示词 ${i + 1}`}
               value={idea}
-              maxLength={500}
+              maxLength={limit}
               onChange={(e) =>
                 onChange({
                   ideas: ideas.map((v, n) => (i === n ? e.target.value : v)),

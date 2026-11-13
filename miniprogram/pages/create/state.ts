@@ -2,7 +2,7 @@ import type { Row, Asset } from "../../services/types";
 import type { ModelChoice } from "./editor-types";
 
 export const creationData = {
-  maxPromptChars: 500,
+  maxPromptChars: 20000,
   maxReferences: 0,
   kind: "video",
   prompt: "",
