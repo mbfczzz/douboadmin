@@ -1,3 +1,4 @@
+import { readView, writeView, rememberRows, VIEW_MAX_AGE, noteIssued } from "../../utils/view-cache";
 import { unfavorite } from "./unfavorite";
 import { pullRefresh } from "../../utils/refresh";
 import { movePage } from "../../services/list-page";
@@ -56,6 +57,14 @@ Page({
   },
   onShow() {
     enterPage(this);
+    // First open of 我的收藏: last favorites show at once while they refresh.
+    if (this.data.mode === "favorites" && this.data.loading && hasSession()) {
+      const seen = readView<{ templates: Row<Template>[]; total: number }>("favorites", VIEW_MAX_AGE);
+      if (seen?.templates) {
+        rememberRows(seen.templates);
+        this.setData({ templates: seen.templates, total: seen.total, loading: false });
+      }
+    }
     void this.load();
   },
   onPullDownRefresh() {
@@ -86,12 +95,16 @@ Page({
           unavailable?: Row<{ templateId: string; active: boolean }>[];
         }>(`/favorites/templates?page=${this.data.page}&size=20`);
         if (version !== this.loadVersion) return;
+        const templates = result.items.map((t) => ({
+          ...t,
+          data: { ...t.data, cover: media(t.data.cover) },
+        }));
+        rememberRows(templates);
+        noteIssued(...templates.map((t) => t.data.cover));
+        if (this.data.page === 1) writeView("favorites", { templates, total: result.total });
         this.setData({
           total: result.total,
-          templates: result.items.map((t) => ({
-            ...t,
-            data: { ...t.data, cover: media(t.data.cover) },
-          })),
+          templates,
           unavailableFavorites: result.unavailable || [],
         });
       }

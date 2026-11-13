@@ -1,3 +1,4 @@
+import { loadConfig } from "../../utils/config-cache";
 import { request } from "../../services/request";
 import { estimateCost } from "../../services/estimate";
 import { sessionToken } from "../../services/session";
@@ -57,10 +58,21 @@ const defaults = (m: Model) => ({
 
 // "积分能做什么": quote one default image and one default video, then say how
 // many of each the current balance covers. Fails quietly.
+// Quotes rarely change; the wallet reloads every 3 s while a payment is
+// pending, so price the two examples at most every two minutes per account.
+const quoted = new Map<string, number>();
 export async function loadInsights(page: InsightPage) {
   const owner = sessionToken();
+  const shown = (page.data as { uses?: { units: number; count: number }[] }).uses || [];
+  if (Date.now() - (quoted.get(owner) || 0) < 2 * 60 * 1000 && shown.length) {
+    // Same prices, new balance: recount without asking the server.
+    const available = page.data.info?.wallet.availableUnits || 0;
+    page.setData({ uses: shown.map((u) => ({ ...u, count: Math.floor(available / u.units) })) });
+    return;
+  }
+  quoted.set(owner, Date.now());
   try {
-    const config = await request<Config>("/config", "GET", undefined, undefined, false);
+    const config = await loadConfig();
     const pick = (kind: string) => config.models.find((m) => m.kind === kind && !m.demo) || config.models.find((m) => m.kind === kind);
     const models = [pick("image"), pick("video")].filter(Boolean) as Model[];
     const quotes = await Promise.all(models.map((m) => estimateCost(defaults(m), owner).promise.then((q) => ({ m, q })).catch(() => null)));
@@ -73,6 +85,7 @@ export async function loadInsights(page: InsightPage) {
         icon: m.kind === "video" ? "video-camera" : "image",
         title: m.kind === "video" ? `${defaults(m).duration} 秒视频` : "图片",
         cost: points(q.units),
+        units: q.units,
         count: Math.floor(available / q.units),
         unit: m.kind === "video" ? "条" : "张",
         model: m.name,

@@ -7,7 +7,7 @@ export const walletData = {
   price100: "",
   heroArt: [] as string[],
   useArt: { image: "", video: "" } as Record<string, string>,
-  uses: [] as Array<{ kind: string; icon: string; title: string; cost: string; count: number; unit: string; model: string }>,
+  uses: [] as Array<{ kind: string; icon: string; title: string; cost: string; units: number; count: number; unit: string; model: string }>,
   purchaseMode: "package" as PurchaseMode,
   customAmount: "",
   customStep: "",

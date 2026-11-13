@@ -1,7 +1,6 @@
 {
   "enablePullDownRefresh": true,
   "usingComponents": {
-    "t-loading": "tdesign-miniprogram/loading/loading",
     "showcase": "/components/showcase/index"
   }
 }

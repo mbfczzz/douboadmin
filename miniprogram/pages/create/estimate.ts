@@ -18,7 +18,7 @@ export function cancelEstimate(page: Editor, reset = false) {
       quoteUnits: null,
       quoteBusy: false,
       quoteError: false,
-      quoteText: "请选择生成参数",
+      quoteText: "正在加载积分…", // a reset is not the user's mistake
     });
 }
 export function updateEstimate(page: Editor, force = false) {
@@ -36,9 +36,9 @@ export function updateEstimate(page: Editor, force = false) {
     page.setData({
       quoteText: !owner
         ? "登录后查看积分"
-        : data.modelsLoading
-          ? "正在加载积分…"
-          : "请选择生成参数",
+        : data.parameterError || (data.modelError && !data.modelsLoading)
+          ? "请选择生成参数"
+          : "正在加载积分…", // models still arriving: not the user's mistake
     });
     return;
   }
@@ -54,11 +54,13 @@ export function updateEstimate(page: Editor, force = false) {
   cancelEstimate(page);
   const ticket: Ticket = { key, at: Date.now() };
   pending.set(page, ticket);
+  // While a new quote is on its way the last price stays on screen (dragging
+  // the duration slider must not flicker between a price and "正在估算").
+  const shown = data.quoteUnits !== null && !data.quoteError;
   page.setData({
-    quoteUnits: null,
     quoteBusy: true,
     quoteError: false,
-    quoteText: "正在估算积分…",
+    ...(shown ? {} : { quoteUnits: null, quoteText: "正在估算积分…" }),
   });
   const current = () =>
     pending.get(page) === ticket && page.visible && !page.destroyed;

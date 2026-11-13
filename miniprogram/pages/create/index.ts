@@ -1,9 +1,10 @@
+import { loadConfig, peekConfig } from "../../utils/config-cache";
 import { request, tab, openPage, openTab, sessionToken } from "../../utils/api";
 import type { Config, Row, Asset, Input } from "../../services/types";
 import { creationData } from "./state";
 import { generate } from "./submit";
 import { cancelEstimate, updateEstimate } from "./estimate";
-import { openModelMenu } from "./model-menu";
+import { openModelMenu, measureModelMenu } from "./model-menu";
 import { modelChoices, modelSettings, resolutionSettings } from "./models";
 import type { ModelChoice } from "./editor-types";
 import { addReference, selectedModel } from "./references";
@@ -33,6 +34,9 @@ Page({
   },
   onResize() {
     this.closeModels();
+  },
+  onReady() {
+    measureModelMenu(this); // so the first open lands in place
   },
 
   onShow() {
@@ -95,27 +99,30 @@ Page({
   },
   async loadModels() {
     const version = ++this.modelVersion;
+    // Cold start: paint the last known models at once, then refresh.
+    const known = !this.data.availableModels.length && peekConfig(10 * 60 * 1000);
+    if (known) {
+      const first = modelChoices(known.models, this.data.kind);
+      const m = first.find((item) => item.id === this.data.model) || first[0];
+      if (m) this.setData({ availableModels: first, modelIndex: first.indexOf(m), ...modelSettings(m, this.data) });
+    }
     this.setData({
       modelsLoading: !this.data.availableModels.some((m: ModelChoice) => m.kind === this.data.kind),
       modelError: "",
     });
     if (this.data.modelsLoading) updateEstimate(this);
     try {
-      const c = await request<Config>(
-        "/config",
-        "GET",
-        undefined,
-        undefined,
-        false,
-      );
+      // Always refresh: a model changed in the admin must show on return.
+      const c = await loadConfig(true);
       if (version !== this.modelVersion) return;
       const available = modelChoices(c.models, this.data.kind);
       if (available.length) {
         const m =
           available.find((item) => item.id === this.data.model) || available[0];
+        // Unchanged catalog: skip re-sending the model list to the view.
+        const same = JSON.stringify(available) === JSON.stringify(this.data.availableModels);
         this.setData({
-          models: c.models,
-          availableModels: available,
+          ...(same ? {} : { availableModels: available }),
           modelIndex: available.indexOf(m),
           ...modelSettings(m, this.data),
         });

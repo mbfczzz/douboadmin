@@ -1,3 +1,4 @@
+import { loadConfig } from "../../utils/config-cache";
 import { request, error, tab, openPage, openTab } from "../../utils/api";
 import type { Row, Asset, Input, Config } from "../../services/types";
 import {
@@ -67,13 +68,7 @@ Page({
   async load() {
     const version = ++this.revision;
     try {
-      const config = await request<Config>(
-        "/config",
-        "GET",
-        undefined,
-        undefined,
-        false,
-      );
+      const config = await loadConfig();
       if (version !== this.revision || !this.visible || this.destroyed) return;
       this.setData({
         config: {

@@ -96,7 +96,14 @@ console.log(
 // Share card restyled after WeChat's own mini-program code material (white
 // sheet, round code, scan line, code pill), on the page and the saved
 // image; finally the plain white card WeChat itself uses: 701,488 B.
-const budget = 687 * 1024;
+// Responsiveness: shared /config cache, last-seen page data for instant
+// paint, list→detail handoff, stable image URLs while polling, model menu
+// geometry, opt-in debug console: 712,604 B (+11,116). Review fixes (URL
+// issue times, cached agent/favorites views, quote throttling): 716,720 B.
+// Layout skeletons instead of full-page spinners, bounded URL table: 719,639 B.
+// Simulated user journey fixes (price kept while re-quoting, agent bubble
+// skeleton, neutral loading text): 720,555 B.
+const budget = 705 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

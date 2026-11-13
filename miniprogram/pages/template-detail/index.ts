@@ -1,3 +1,4 @@
+import { recallRow, freshUrl } from "../../utils/view-cache";
 import {
   request,
   error,
@@ -52,6 +53,10 @@ Page({
   },
   onLoad(o: Record<string, string>) {
     this.id = o.id;
+    // Opened from a list that already holds this template: show it now.
+    const known = recallRow<Row<Template>>(o.id);
+    if (known?.data.kind === "video")
+      this.setData({ template: known, loading: false, fixedCount: ["i2v", "keyframe"].includes(known.data.mode) });
     this.setData({ autoplay: wx.getStorageSync("autoplay-preference") === true });
   },
   onShow() {
@@ -73,7 +78,10 @@ Page({
         this.setData({ template: null, quoteText: "" });
         throw new Error("模板已下架");
       }
-      t.data.cover = media(t.data.cover);
+      // Keep the cover already on screen: swapping the URL blanks the image
+      // while the new one downloads.
+      const shown = this.data.template?.id === t.id ? this.data.template.data.cover : "";
+      t.data.cover = shown && freshUrl(shown) ? shown : media(t.data.cover);
       if (this.destroyed) return;
       // Image-to-video and keyframe take an exact photo count; extra
       // photos would only be rejected at submit.
@@ -88,7 +96,10 @@ Page({
       }
       if (!this.data.favoriteBusy) void this.refreshFavorite();
     } catch (e) {
-      this.setData({ loadError: (e as Error).message });
+      const message = (e as Error).message;
+      // Already showing this template: a failed refresh keeps it on screen.
+      if (this.data.template && message !== "模板已下架") error(e);
+      else this.setData({ loadError: message });
     } finally {
       if (!this.destroyed) this.setData({ loading: false });
     }

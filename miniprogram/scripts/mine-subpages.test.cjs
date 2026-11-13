@@ -94,3 +94,17 @@ test("task counters filter the list and unfinished tasks say how long they've ru
   page.pick({ currentTarget: { dataset: { filter: "running" } } });
   assert.equal(page.data.filter, "");
 });
+
+test("five quick taps on 当前版本 toggle the debug console", () => {
+  const h = harness();
+  const calls = [];
+  h.wx.setEnableDebug = (o) => calls.push(o.enableDebug);
+  h.wx.showToast = () => {};
+  const page = h.page("preferences");
+  for (let i = 0; i < 4; i++) page.version();
+  assert.deepEqual(calls, []);
+  page.version();
+  assert.deepEqual(calls, [true]);
+  for (let i = 0; i < 5; i++) page.version();
+  assert.deepEqual(calls, [true, false]);
+});

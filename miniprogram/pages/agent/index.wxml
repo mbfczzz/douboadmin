@@ -1,6 +1,9 @@
 <nav-bar title="Agent" />
 <view class="agent-page">
-  <view wx:if="{{!messages.length}}" class="agent-empty">
+  <view wx:if="{{!ready}}" class="chat-scroll agent-skeleton" aria-label="正在加载对话">
+    <view class="skeleton skel-bubble mine" /><view class="skeleton skel-bubble" /><view class="skeleton skel-bubble short" />
+  </view>
+  <view wx:elif="{{!messages.length}}" class="agent-empty">
     <view class="agent-hello">
       <view class="agent-mark"><t-icon name="ai-edit" size="30" /></view>
       <text class="headline">让想法，再往前一步。</text>

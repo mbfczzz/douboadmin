@@ -1,3 +1,5 @@
+import { readView, writeView } from "../../utils/view-cache";
+import { loadConfig } from "../../utils/config-cache";
 import {
   request,
   error,
@@ -20,6 +22,7 @@ Page({
     hasOlder: false,
     loadingOlder: false,
     focus: false,
+    ready: false, // first history load finished (or a cached copy shown)
     // Follow-ups under the latest reply; they fill the composer like starters.
     followUps: ["再精简到 10 秒", "加一个结尾镜头", "改成口播文案"],
     // Starter cards: the prompt fills the composer for editing before send.
@@ -64,14 +67,17 @@ Page({
       this.historyToken = token;
       this.history = [];
       this.historyPage = 1;
-      this.setData({ messages: [], hasOlder: false });
+      // Until history arrives, show this account's last conversation rather
+      // than the empty greeting (which would then jump away).
+      const seen = token ? readView<ChatMessage[]>("agent", 24 * 60 * 60 * 1000) : undefined;
+      this.setData({ messages: seen || [], hasOlder: false, ready: !!seen, bottom: seen?.length ? "m" + seen[seen.length - 1].id : "" });
     }
     if (!hasSession()) {
       this.loadVersion++;
       this.fetching = false;
       this.history = [];
       this.historyPage = 1;
-      this.setData({ messages: [] });
+      this.setData({ messages: [], ready: true });
       return;
     }
     if (this.fetching && !force) return;
@@ -102,11 +108,16 @@ Page({
           messages,
           bottom: messages.length ? "m" + messages[messages.length - 1].id : "",
         });
+      if (!this.data.ready) this.setData({ ready: true });
+      // Replies still being written are not cached: a failed first load
+      // later must not leave typing dots on screen.
+      if (changed) writeView("agent", messages.filter((m) => !m.pending).slice(-30));
     } catch (e) {
       // One toast per outage, not one every poll.
       if (version !== this.loadVersion) return;
       if (!this.failed) error(e);
       this.failed = true;
+      if (!this.data.ready) this.setData({ ready: true });
     } finally {
       if (version === this.loadVersion) this.fetching = false;
     }
@@ -160,13 +171,7 @@ Page({
     this.setData({ busy: true });
     const submitted = this.data.prompt;
     try {
-      const config = await request<Config>(
-        "/config",
-        "GET",
-        undefined,
-        undefined,
-        false,
-      );
+      const config = await loadConfig();
       if (this.destroyed) return;
       const model = config.models.find((m) => m.kind === "chat");
       if (!model) throw new Error("创作助手暂未开放，请稍后再试");

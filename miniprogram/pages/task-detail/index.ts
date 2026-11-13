@@ -1,3 +1,4 @@
+import { keepImages, recallRow, freshUrl, noteIssued } from "../../utils/view-cache";
 import { ask } from "../../services/dialog";
 import {
   request,
@@ -37,6 +38,9 @@ Page({
   destroyed: false,
   onLoad(o: Record<string, string>) {
     this.id = o.id;
+    // Opened from the queue or works list: show that row now, then refresh.
+    const known = recallRow<ReturnType<typeof jobView>>(o.id);
+    if (known) this.setData({ job: known, loading: false });
     // The key is only stored once a retry is attempted, so opening task
     // details does not leave storage entries behind.
     this.retryKey = wx.getStorageSync("retry-" + this.id) || uid();
@@ -94,14 +98,18 @@ Page({
     try {
       const j = await request<Job>("/jobs/" + this.id);
       if (this.destroyed) return;
+      const final = (status?: string) => status === "succeeded" || status === "failed";
+      const wasFinal = final(this.data.job?.status);
+      const [job] = keepImages(this.data.job ? [this.data.job] : [], [jobView(j)]);
       this.setData({
-        job: jobView(j),
+        job, // the result already playing keeps its URL
         loading: false,
         loadError: "",
         needsLogin: false,
       });
       if (j.status === "succeeded" || j.status === "failed")
         clearInterval(this.timer);
+      else if (wasFinal) this.startPolling(); // shown as done, but retried since
       if (
         (j.input.assets || []).length &&
         !this.data.assets.length &&
@@ -207,10 +215,18 @@ Page({
     );
   },
   async save() {
-    const j = this.data.job;
-    if (this.data.busy || !j?.result) return;
+    if (this.data.busy || !this.data.job?.result) return;
     this.setData({ busy: true });
     try {
+      // A finished task stops refreshing; get a newly signed URL if the one
+      // on screen may be close to expiring.
+      if (!freshUrl(this.data.job.result)) {
+        const fresh = jobView(await request<Job>("/jobs/" + this.id));
+        noteIssued(fresh.result, fresh.thumbnailUrl);
+        if (!this.destroyed) this.setData({ job: fresh });
+      }
+      const j = this.data.job!;
+      if (!j.result) throw new Error("作品暂时无法下载");
       const f =
         await new Promise<WechatMiniprogram.DownloadFileSuccessCallbackResult>(
           (resolve, reject) =>

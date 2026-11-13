@@ -1,3 +1,4 @@
+import { readView, writeView, keepImages, rememberRows, VIEW_MAX_AGE, freshUrl, noteIssued } from "../../utils/view-cache";
 import { pullRefresh } from "../../utils/refresh";
 import {
   request,
@@ -98,7 +99,9 @@ Page({
     const owner = sessionUserId();
     if (owner !== this.owner) {
       this.owner = owner;
-      this.setData({ me: null, jobs: [], worksError: "", roleLabel: "", roleMenu: null, loading: true });
+      // Show this account's last profile at once instead of a spinner.
+      const seen = owner ? readView<{ me: Me; jobs: ReturnType<typeof jobView>[] }>("mine", VIEW_MAX_AGE) : undefined;
+      this.setData({ me: seen?.me || null, jobs: seen?.jobs || [], avatarLetter: seen ? Array.from(seen.me.profile.data.nickname || "")[0] || "" : "", worksError: "", roleLabel: "", roleMenu: null, loading: !seen });
     }
     if (this.refreshTimer !== undefined) clearTimeout(this.refreshTimer);
     if (!hasSession()) {
@@ -111,17 +114,24 @@ Page({
     try {
       const me = await request<Me>("/me");
       if (version !== this.loadVersion || owner !== sessionUserId()) return;
-      if (me.profile.data.avatarUrl)
-        me.profile.data.avatarUrl = media(me.profile.data.avatarUrl);
+      const before = this.data.me?.profile.data;
+      const keep = !!me.profile.data.avatarId && before?.avatarId === me.profile.data.avatarId && freshUrl(before?.avatarUrl);
+      if (me.profile.data.avatarUrl) {
+        me.profile.data.avatarUrl = keep ? before!.avatarUrl : media(me.profile.data.avatarUrl); // same avatar, young URL: no reload
+        noteIssued(me.profile.data.avatarUrl);
+      }
       this.setData({ me, loading: false, loadError: "", avatarLetter: Array.from(me.profile.data.nickname || "")[0] || "" });
       void this.loadUnread(version, owner);
       const recent = await recentRequest;
       if (version !== this.loadVersion || owner !== sessionUserId()) return;
+      const jobs = recent ? keepImages(this.data.jobs, recent.items.filter(j => j.status === "succeeded" && !j.deleted).slice(0, 3).map(jobView)) : this.data.jobs;
       this.setData({
-        jobs: recent ? recent.items.filter(j => j.status === "succeeded" && !j.deleted).slice(0, 3).map(jobView) : this.data.jobs,
+        jobs,
         worksError: recent ? "" : "作品暂时无法加载，点击重试",
         worksLoading: false,
       });
+      if (recent) writeView("mine", { me, jobs }); // never re-save an old list as new
+      rememberRows(jobs);
       if (this.visible && me.running > 0)
         this.refreshTimer = setTimeout(() => void this.load(), 3000);
     } catch (e) {

@@ -1,10 +1,11 @@
+import { writeView } from "../../utils/view-cache";
 import { request, error } from "../../utils/api";
 import { ask } from "../../services/dialog";
 import type { Row, Template } from "../../services/types";
 
 type Page = {
   destroyed: boolean;
-  data: { templates: Row<Template>[] };
+  data: { templates: Row<Template>[]; page: number; total: number };
   setData(value: Record<string, unknown>): void;
 };
 
@@ -20,7 +21,11 @@ export async function unfavorite(page: Page, id: string) {
     const current = await request<Row<{ active: boolean }>>("/favorites/" + id);
     if (current?.data.active)
       await request("/favorites/" + id, "PUT", { active: false, version: current.version || 0 });
-    if (!page.destroyed) page.setData({ templates: page.data.templates.filter((t) => t.id !== id) });
+    const left = page.data.templates.filter((t) => t.id !== id);
+    const total = Math.max(0, page.data.total - 1);
+    // A cold start must not show it again; the cache holds page 1 only.
+    if (page.data.page === 1) writeView("favorites", { templates: left, total });
+    if (!page.destroyed) page.setData({ templates: left, total });
     wx.showToast({ title: "已取消收藏", icon: "none" });
   } catch (e) {
     error(e);

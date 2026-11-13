@@ -62,3 +62,24 @@
 .icon-pressed {
   opacity: 0.6;
 }
+/* First load with no cached conversation: bubble shapes, not a blank. */
+.agent-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 24px 20px;
+}
+.skel-bubble {
+  width: 78%;
+  height: 72px;
+  border-radius: 18px;
+}
+.skel-bubble.mine {
+  align-self: flex-end;
+  width: 52%;
+  height: 44px;
+}
+.skel-bubble.short {
+  width: 46%;
+  height: 36px;
+}

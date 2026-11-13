@@ -114,3 +114,25 @@ test("navigation updates capsule spacing after resize and accepts a zero status 
   assert.equal(nav.data.height, 48);
   assert.equal(nav.data.actionsRight, 98);
 });
+
+test("the model menu opens straight into its measured place the second time", () => {
+  const f = menuFixture(568, 500);
+  f.page.showModels();
+  f.measure();
+  assert.equal(f.page.data.modelMenuUp, true);
+  const height = f.page.data.modelMenuHeight;
+  f.page.closeModels();
+  f.page.showModels(); // no measurement yet: remembered geometry, no jump
+  assert.equal(f.page.data.modelMenuUp, true);
+  assert.equal(f.page.data.modelMenuHeight, height);
+});
+
+test("measuring before the models load still opens the menu at the right height", () => {
+  const f = menuFixture(1000, 438, 0);
+  f.page.onReady(); // models not loaded yet
+  f.measure();
+  f.page.setData({ availableModels: Array.from({ length: 4 }, (_, id) => ({ id: String(id) })) });
+  f.page.showModels();
+  assert.equal(f.page.data.modelMenuHeight, 4 * 56 + 14); // not clamped to 44
+  assert.equal(f.page.data.modelMenuUp, false);
+});

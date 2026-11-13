@@ -196,8 +196,11 @@ test("saving a work twice while downloading starts only one download", async () 
     download = options;
   };
   h.wx.saveImageToPhotosAlbum = async () => ({});
+  // The URL on screen has no known issue time, so saving re-fetches it first.
+  h.api.request = async () => job();
   const first = page.save();
   await page.save();
+  await new Promise(setImmediate);
   assert.equal(calls, 1);
   download.success({ statusCode: 200, tempFilePath: "result.jpg" });
   await first;

@@ -1,3 +1,5 @@
+import { loadConfig, peekConfig } from "../../utils/config-cache";
+import { readView, writeView, rememberRows, VIEW_MAX_AGE, noteIssued } from "../../utils/view-cache";
 import { request, tab, media, error, openPage, openTab } from "../../utils/api";
 import type { Row, Template, Config } from "../../services/types";
 import { layout } from "./masonry";
@@ -62,7 +64,15 @@ Page({
       "&q=" +
       encodeURIComponent(this.data.search);
     const preserve = keepContent === true && this.loadedQuery === query;
-    this.setData({ loading: !preserve || append, loadError: "" });
+    // Seen before (this session or a recent launch): show it at once.
+    const cached = !append && !preserve ? readView<{ items: Row<Template>[]; total: number }>("templates:" + query, VIEW_MAX_AGE) : undefined;
+    const seen = cached?.items;
+    if (seen) {
+      rememberRows(seen);
+      this.loadedQuery = query;
+      this.setData({ items: seen, visibleCount: seen.length, page: 1, total: cached.total, hasMore: seen.length < cached.total, ...layout(seen, this.data.category === this.data.categories[0] && !this.data.search) });
+    }
+    this.setData({ loading: !seen && (!preserve || append), loadError: "" });
     try {
       const result = await request<{items:Row<Template>[]; total:number}>(
         query + "&page=" + page + "&size=" + PAGE_SIZE,
@@ -78,6 +88,9 @@ Page({
       const items = [...new Map(combined.map(row=>[row.id,row])).values()];
       items.forEach((t) => (t.data.cover = media(t.data.cover)));
       const visibleCount = items.length;
+      if (!append) writeView("templates:" + query, { items, total: Array.isArray(result) ? result.length : result.total }, !this.data.search);
+      rememberRows(items);
+      noteIssued(...items.map((t) => t.data.cover));
       this.setData({
         items,
         visibleCount,
@@ -98,14 +111,10 @@ Page({
     }
   },
   async loadCategories() {
+    const known = peekConfig();
+    if (known?.categories?.length && !this.data.categories[1]) this.setData({ categories: known.categories });
     try {
-      const c = await request<Config>(
-        "/config",
-        "GET",
-        undefined,
-        undefined,
-        false,
-      );
+      const c = await loadConfig();
       if (this.destroyed || !this.visible) return;
       this.setData({ categories: c.categories });
       if (!c.categories.includes(this.data.category)) {

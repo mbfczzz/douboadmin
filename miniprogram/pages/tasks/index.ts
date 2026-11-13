@@ -1,3 +1,4 @@
+import { readView, writeView, keepImages, rememberRows, VIEW_MAX_AGE } from "../../utils/view-cache";
 import { elapsed, nextFilter } from "./view";
 import { loadRefs } from "./refs";
 import { movePage } from "../../services/list-page";
@@ -30,10 +31,14 @@ Page({
     filter: "", // "", "running" or "failed": the counters filter the list
   },
   timer: 0,
+  shown: "", // last list sent to the view, to skip identical polls
   fetching: false,
   destroyed: false,
   onShow() {
     enterPage(this);
+    // First open: the last list shows at once while the queue refreshes.
+    const seen = this.data.loading && hasSession() ? readView<Record<string, unknown>>("tasks", VIEW_MAX_AGE) : undefined;
+    if (seen) this.setData({ ...seen, loading: false });
     void this.load();
     this.startPolling();
   },
@@ -87,7 +92,7 @@ Page({
       // Nothing in progress: stop polling until the page is shown again.
       if (!jobs.some((j) => /queued|running/.test(j.status)))
         clearInterval(this.timer);
-      this.setData({
+      const view = {
         jobs,
         total: result.total,
         loading: false,
@@ -101,7 +106,16 @@ Page({
           (j) => j.status === "running" || j.status === "queued",
         ).length,
         failedCount: jobs.filter((j) => j.status === "failed").length,
-      });
+      };
+      view.completed = keepImages(this.data.completed, view.completed);
+      rememberRows([...view.ongoing, ...view.completed]);
+      // Polling every 3 s: send nothing to the view when nothing changed.
+      const next = JSON.stringify([view.ongoing, view.completed, view.total]);
+      if (next !== this.shown) {
+        this.shown = next;
+        this.setData(view);
+        if (this.data.page === 1) writeView("tasks", { jobs: view.jobs, ongoing: view.ongoing, completed: view.completed, runningCount: view.runningCount, failedCount: view.failedCount, total: view.total });
+      } else if (this.data.loading || this.data.loadError) this.setData({ loading: false, loadError: "" });
       void loadRefs(this);
     } catch (e) {
       if (this.destroyed) return;

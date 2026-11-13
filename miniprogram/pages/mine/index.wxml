@@ -1,6 +1,10 @@
 <nav-bar title="我的" />
 <view class="page mine-page">
-  <view wx:if="{{loading}}" class="loading"><t-loading text="正在加载个人信息" /></view>
+  <view wx:if="{{loading}}" class="skel-page" aria-label="正在加载个人信息">
+    <view class="skel-profile"><view class="skeleton skel-avatar" /><view class="skel-lines"><view class="skeleton skel-a" /><view class="skeleton skel-b" /></view></view>
+    <view class="skeleton skel-strip" />
+    <view class="skel-grid three"><view class="skeleton" /><view class="skeleton" /><view class="skeleton" /></view>
+  </view>
   <view wx:elif="{{loadError&&!me}}" class="error-box" bindtap="load">{{loadError}} · 点击重试</view>
   <view wx:elif="{{!me}}" class="guest-profile">
     <showcase />

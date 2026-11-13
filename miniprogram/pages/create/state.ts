@@ -1,4 +1,4 @@
-import type { Model, Row, Asset } from "../../services/types";
+import type { Row, Asset } from "../../services/types";
 import type { ModelChoice } from "./editor-types";
 
 export const creationData = {
@@ -14,7 +14,6 @@ export const creationData = {
   model: "",
   modelIndex: 0,
   modelName: "正在加载模型",
-  models: [] as Model[],
   availableModels: [] as ModelChoice[],
   videoPlaceholder: "描述主体、动作和镜头，\n也可以先添加参考素材。",
   imagePlaceholder: "描述主体、构图和画面风格，\n也可以先添加参考图片。",

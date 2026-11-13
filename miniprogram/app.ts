@@ -1,7 +1,8 @@
+import { clearLegacyDebug } from "./services/trial-debug";
+import { loadConfig } from "./utils/config-cache";
 import { captureInvite } from "./services/invitation";
 import { enforceAccess } from "./services/access";
 import { pauseVisit, resumeVisit } from "./services/analytics";
-import { trialDebug } from "./services/trial-debug";
 App({
   globalData: {},
   onShow(options) {
@@ -11,7 +12,9 @@ App({
   },
   onHide: pauseVisit,
   onLaunch() {
-    void trialDebug(() => Promise.resolve());
+    clearLegacyDebug();
+    // Warm the shared config so the first tab paints without waiting on it.
+    void loadConfig().catch(() => undefined);
     wx.setBackgroundColor({
       backgroundColor: "#0f0f11",
       backgroundColorTop: "#0f0f11",

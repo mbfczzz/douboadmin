@@ -46,7 +46,7 @@
     ><view class="biz-card general"
       ><view class="general-row" bindtap="help" hover-class="row-pressed"><t-icon name="help-circle" size="20" /><text>帮助与反馈</text><t-icon name="chevron-right" size="18" /></view
       ><view class="general-row" bindtap="privacy" hover-class="row-pressed"><t-icon name="secured" size="20" /><text>隐私保护指引</text><t-icon name="chevron-right" size="18" /></view
-      ><view wx:if="{{version}}" class="general-row static"><t-icon name="info-circle" size="20" /><text>当前版本</text><text class="general-value">{{version}}</text></view
+      ><view wx:if="{{version}}" class="general-row static" bindtap="version"><t-icon name="info-circle" size="20" /><text>当前版本</text><text class="general-value">{{version}}</text></view
     ></view
     ><view class="sign-out" bindtap="signOut" hover-class="sign-out-pressed" aria-role="button">退出登录</view></block
   ></view

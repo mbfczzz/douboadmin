@@ -1,6 +1,9 @@
 <nav-bar title="任务队列" back />
 <view class="subpage queue-page">
-  <view class="loading" wx:if="{{loading}}"><t-loading /></view>
+  <view wx:if="{{loading}}" class="skel-page" aria-label="正在加载任务">
+    <view class="skel-row"><view class="skeleton" /><view class="skeleton" /><view class="skeleton" /></view>
+    <view class="skeleton skel-card" /><view class="skeleton skel-card" />
+  </view>
   <view wx:elif="{{needsLogin}}" class="empty">
     <showcase />
     <text class="title">登录后查看任务</text>

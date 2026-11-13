@@ -1,3 +1,4 @@
+import { readView, writeView, keepImages, rememberRows, VIEW_MAX_AGE } from "../../utils/view-cache";
 import { movePage } from "../../services/list-page";
 import {
   jobView,
@@ -33,6 +34,12 @@ Page({
   destroyed: false,
   onShow() {
     enterPage(this);
+    // First open: last works show at once while the list refreshes.
+    const seen = this.data.loading && hasSession() ? readView<{ works: ReturnType<typeof jobView>[]; total: number }>("works:" + this.data.filter, VIEW_MAX_AGE) : undefined;
+    if (seen) {
+      this.setData({ works: seen.works, total: seen.total, loading: false });
+      this.filterWorks();
+    }
     void this.load();
   },
   onUnload() {
@@ -64,15 +71,18 @@ Page({
       );
       const jobs = result.items;
       if (version !== this.loadVersion) return;
+      const works = keepImages(this.data.works, jobs
+        .filter(
+          (job) =>
+            job.status === "succeeded" &&
+            ["image", "video", "mix"].includes(job.input.kind) &&
+            !job.deleted,
+        )
+        .map(jobView));
+      rememberRows(works);
+      if (this.data.page === 1) writeView("works:" + this.data.filter, { works, total: result.total });
       this.setData({
-        works: jobs
-          .filter(
-            (job) =>
-              job.status === "succeeded" &&
-              ["image", "video", "mix"].includes(job.input.kind) &&
-              !job.deleted,
-          )
-          .map(jobView),
+        works,
         total: result.total,
         needsLogin: false,
         loadError: "",

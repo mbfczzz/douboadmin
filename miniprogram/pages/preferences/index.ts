@@ -1,3 +1,5 @@
+import { loadConfig } from "../../utils/config-cache";
+import { debugEnabled, setDebug } from "../../services/trial-debug";
 import {
   request,
   error,
@@ -27,6 +29,18 @@ Page({
     const info = wx.getAccountInfoSync?.().miniProgram;
     const env: Record<string, string> = { develop: "开发版", trial: "体验版" };
     this.setData({ version: info?.version ? "v" + info.version : env[info?.envVersion || ""] || "" });
+  },
+  // Five quick taps on 当前版本 switch the debug console (vConsole) on or off.
+  versionTaps: 0,
+  versionTimer: undefined as ReturnType<typeof setTimeout> | undefined,
+  version() {
+    if (this.versionTimer !== undefined) clearTimeout(this.versionTimer);
+    this.versionTimer = setTimeout(() => (this.versionTaps = 0), 1500);
+    if (++this.versionTaps < 5) return;
+    this.versionTaps = 0;
+    const on = !debugEnabled();
+    setDebug(on);
+    wx.showToast({ title: on ? "调试面板已打开，重启后生效" : "调试面板已关闭", icon: "none" });
   },
   privacy() {
     wx.openPrivacyContract({ fail: () => error(new Error("隐私保护指引暂时无法打开")) });
@@ -61,7 +75,7 @@ Page({
     try {
       const [row, c] = await Promise.all([
         request<Row<Preferences>>("/preferences"),
-        request<Config>("/config", "GET", undefined, undefined, false),
+        loadConfig(),
       ]);
       if (revision !== this.revision) return;
       wx.setStorageSync("analytics-consent", row.data.analytics);

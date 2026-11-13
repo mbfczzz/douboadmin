@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"doubo/server/internal/core"
 	"doubo/server/internal/relay"
 	"encoding/json"
@@ -119,7 +120,14 @@ func templateImageLimits(m core.Model, mode string, n int) error {
 	return nil
 }
 
+// List and card covers: OSS-resized, see templateCoverSized.
 func (a *Server) templateCover(r *http.Request, t *core.Template) {
+	a.templateCoverSized(r, t, 720)
+}
+
+// Covers are resized by OSS when the store supports it (lists 720 px wide,
+// the detail hero 1080 px); other stores keep the original URL.
+func (a *Server) templateCoverSized(r *http.Request, t *core.Template, width int) {
 	if t.CoverAssetID == "" {
 		return
 	}
@@ -133,10 +141,19 @@ func (a *Server) templateCover(r *http.Request, t *core.Template) {
 	}
 	_ = json.Unmarshal(row.Data, &v)
 	t.Cover = v.URL
-	if a.Objects != nil {
-		if u, e := a.Objects.URL(r.Context(), v.Key); e == nil {
+	if a.Objects == nil {
+		return
+	}
+	if sized, ok := a.Objects.(interface {
+		ImageURL(context.Context, string, int) (string, error)
+	}); ok {
+		if u, e := sized.ImageURL(r.Context(), v.Key, width); e == nil {
 			t.Cover = u
+			return
 		}
+	}
+	if u, e := a.Objects.URL(r.Context(), v.Key); e == nil {
+		t.Cover = u
 	}
 }
 

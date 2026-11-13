@@ -216,3 +216,20 @@ test("a switched account cannot display the previous owner's estimate", async ()
   await tick();
   assert.equal(f.page.data.quoteUnits, 800);
 });
+
+test("changing a setting keeps the last price on screen until the new one arrives", async () => {
+  const f = await fixture();
+  await f.flush();
+  reply(f.requests[0], 625);
+  await tick();
+  assert.equal(f.page.data.quoteText, "预计 6.25 积分");
+  const seen = [];
+  const set = f.page.setData.bind(f.page);
+  f.page.setData = (v) => { if ("quoteText" in v) seen.push(v.quoteText); set(v); };
+  f.page.chooseResolution(event("2k"));
+  assert.equal(f.page.data.quoteText, "预计 6.25 积分"); // no "正在估算" flicker
+  await f.flush();
+  reply(f.requests.at(-1), 900);
+  await tick();
+  assert.deepEqual(seen, ["预计 9 积分"]);
+});

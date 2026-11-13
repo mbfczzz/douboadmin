@@ -1,6 +1,6 @@
 <nav-bar title="我的作品" back />
 <view class="subpage works-page">
-  <view wx:if="{{loading}}" class="loading"><t-loading text="正在加载作品" /></view>
+  <view wx:if="{{loading}}" class="skel-grid" aria-label="正在加载作品"><view class="skeleton" /><view class="skeleton" /><view class="skeleton" /><view class="skeleton" /></view>
   <view wx:elif="{{needsLogin}}" class="empty">
     <showcase />
     <text class="title">登录后查看你的作品</text>

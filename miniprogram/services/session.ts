@@ -183,7 +183,8 @@ export async function logout() {
   wx.removeStorageSync("mix-add-asset");
   wx.removeStorageSync("mix-source-text");
   for (const key of wx.getStorageInfoSync?.().keys || []) {
-    if (key.startsWith("pending-") || key.startsWith("retry-"))
+    // Last-seen page data (profile, works, tasks) and the cached config.
+    if (key.startsWith("pending-") || key.startsWith("retry-") || key.startsWith("view-cache:") || key === "config-cache")
       wx.removeStorageSync(key);
   }
 }

@@ -1,13 +1,7 @@
+/* Content appears as soon as its data arrives: a fade from transparent read
+   as a flash on the dark background every time a page loaded. */
 .content-reveal {
-  animation: content-reveal 180ms ease-out;
-}
-@keyframes content-reveal {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  animation: none;
 }
 .skeleton {
   background: var(--ui-field);
@@ -119,4 +113,52 @@
   height: 12px;
   margin-top: 8px;
   border-radius: 4px;
+}
+/* Page skeletons: the real layout in grey, shown until data arrives. */
+.skel-page {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.skel-profile {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 0;
+}
+.skel-avatar {
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+  border-radius: 50%;
+}
+.skel-row {
+  display: flex;
+  gap: 8px;
+}
+.skel-row > .skeleton {
+  flex: 1;
+  height: 72px;
+  border-radius: 14px;
+}
+.skel-strip {
+  height: 64px;
+  border-radius: 16px;
+}
+.skel-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.skel-grid.three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+.skel-grid > .skeleton {
+  height: calc((100vw - 50px) * 2 / 3);
+  border-radius: 14px;
+}
+.skel-grid.three > .skeleton {
+  height: calc((100vw - 52px) * 4 / 9);
+  border-radius: 10px;
 }

@@ -23,7 +23,7 @@
   animation: hero-settle 1.4s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 @keyframes hero-settle {
-  from { transform: scale(1.08); opacity: 0.6; }
+  from { transform: scale(1.06); }
 }
 @media (prefers-reduced-motion: reduce) {
   .hero image { animation: none; }

@@ -62,7 +62,7 @@ func (a *Server) template(w http.ResponseWriter, r *http.Request) {
 		fail(w, 404, "模板已下架")
 		return
 	}
-	a.templateCover(r, &t)
+	a.templateCoverSized(r, &t, 1080)
 	row.Data = core.Data(t)
 	reply(w, 200, row)
 }
