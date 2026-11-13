@@ -113,7 +113,15 @@ console.log(
 // wallet card, loaded from the API or OSS (media/ui-art, not in the package),
 // each with a flat fallback: 732,639 B (+5,071). Limit 712 -> 716 KiB for
 // this reviewed increment; see docs/miniprogram-invite-code-budget.md.
-const budget = 716 * 1024;
+// Codex art on 我的 (photo thumbnails for avatar, points, 服务商中心 and the
+// empty works row; bold glyphs for the six common entries) and the tab bar,
+// bundled in assets/ (images are not counted here; see the budget note for
+// their bytes): 734,356 B. Limit 716 -> 720 KiB.
+// Same principle on every page: empty and signed-out states get bundled
+// photos, content icons (actions, rows, mix features, upload slots, Agent)
+// use the generated glyph set; system controls stay TDesign. Dead t-icon
+// styles removed: 738,465 B. Limit 720 -> 724 KiB.
+const budget = 724 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

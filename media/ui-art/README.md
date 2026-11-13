@@ -1,5 +1,12 @@
 # 小程序装饰图（ui-art）
 
+> **阿里云 OSS：需要上传。** 本目录 15 张 `.jpg` 由小程序在线加载，正式环境走阿里云私有 OSS。
+> 正常发布新版本即可：部署时 `doubo-sync-ui-art.service` 会自动上传到 OSS 的
+> `system/ui-art/<内容 SHA-256>/<文件名>.jpg`，无需手动操作；只有自动同步失败时才需按下文手动重试。
+>
+> 不需要上传阿里云的：`miniprogram/assets/`（图标与空状态照片），它们随小程序代码包一起上传到微信，
+> 见 `miniprogram/assets/README.md`。
+
 Codex 生成的实拍风格深色图片，用于小程序界面装饰。所有位置在图片加载失败时都会退回原来的纯色或图标，不影响功能。
 
 代码入口：`miniprogram/utils/ui-art.ts`（名称 → 地址）。

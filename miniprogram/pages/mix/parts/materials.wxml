@@ -6,14 +6,14 @@
         src="{{item.data.url}}"
         mode="aspectFill"
       /><view wx:else class="mix-video"
-        ><t-icon name="video-camera" size="32" /><text
+        ><image class="gl gl-32" src="/assets/glyphs/video-muted-lg.png" /><text
           >{{item.data.name}}</text
         ></view
       ><view class="mix-remove" data-id="{{item.id}}" bindtap="remove" aria-role="button" aria-label="移除素材"
         ><t-icon name="close" size="16" /></view
       ></view
     ><view class="mix-add" bindtap="add"
-      ><t-icon name="add" size="24" /><text
+      ><image class="gl gl-24" src="/assets/glyphs/add-muted.png" /><text
         >{{uploading?'上传中':'添加素材'}}</text
       ></view
     ></view

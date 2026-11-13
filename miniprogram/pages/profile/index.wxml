@@ -10,8 +10,8 @@
     ><t-loading text="正在读取资料"
   /></view>
   <view wx:elif="{{needsLogin}}" class="empty"
-    ><view class="empty-icon"><t-icon name="user" size="30" /></view
-    ><text class="title">登录后编辑你的个人资料</text
+    ><image class="empty-photo" src="/assets/photos/empty-login.jpg" mode="aspectFill" aria-hidden="true"
+    /><text class="title">登录后编辑你的个人资料</text
     ><text class="empty-link" bindtap="signIn">{{busy?'正在登录…':'去登录 ›'}}</text></view
   >
   <view wx:elif="{{loadError&&!me}}" class="biz-error" bindtap="load"
@@ -31,8 +31,8 @@
           wx:if="{{avatarUrl}}"
           src="{{avatarUrl}}"
           mode="aspectFill"
-        /><t-icon wx:else name="user" size="32" />
-        <view class="profile-camera"><t-icon name="camera" size="16" /></view>
+        /><image wx:else src="/assets/photos/avatar.jpg" mode="aspectFill" />
+        <view class="profile-camera"><image class="gl gl-16" src="/assets/glyphs/camera-dark.png" /></view>
       </view>
       <view class="profile-avatar-copy"
         ><text class="profile-avatar-label"

@@ -1,5 +1,6 @@
 @import "./styles/theme.wxss";
 @import "./styles/common.wxss";
+@import "./styles/glyphs.wxss";
 @import "./styles/sheets.wxss";
 @import "./styles/tasks.wxss";
 @import "./styles/motion.wxss";

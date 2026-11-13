@@ -2,7 +2,7 @@
 <view class="page templates-page">
   <view class="catalog-head" style="top:{{stickyTop}}px">
     <view class="search-field">
-      <t-icon name="search" size="20" />
+      <image class="gl gl-20" src="/assets/glyphs/search-muted.png" />
       <input
         placeholder="搜索你想要的画面"
         placeholder-class="muted"
@@ -34,12 +34,12 @@
     </view>
   </view>
   <view wx:elif="{{loadError}}" class="empty">
-    <view class="empty-icon"><t-icon name="wifi-off" size="30" /></view>
+    <image class="empty-photo" src="/assets/photos/empty-offline.jpg" mode="aspectFill" aria-hidden="true" />
     <text>{{loadError}}</text>
     <text class="empty-link" bindtap="load">重试 ›</text>
   </view>
   <view wx:elif="{{!items.length}}" class="empty">
-    <view class="empty-icon"><t-icon name="{{search?'search':'video-camera'}}" size="30" /></view>
+    <image class="empty-photo" src="/assets/photos/empty-{{search?'search':'video'}}.jpg" mode="aspectFill" aria-hidden="true" />
     <text class="title">{{search?'没有找到相关模板':category===categories[0]?'模板正在上新':'还没有这类模板'}}</text>
     <text class="desc">{{search?'换个关键词试试。':category===categories[0]?'可以先在创作页自由生成。':'换个分类，继续发现灵感。'}}</text>
     <text wx:if="{{!search&&category===categories[0]}}" class="empty-link" bindtap="create">去创作 ›</text>

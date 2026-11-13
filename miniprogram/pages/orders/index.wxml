@@ -1,9 +1,9 @@
 <nav-bar title="充值订单" back />
 <view class="subpage orders-page">
-  <view wx:if="{{needsLogin}}" class="biz-empty"><view class="empty-icon"><t-icon name="user" size="30" /></view><text>登录后查看充值订单</text><text class="empty-link" bindtap="signIn">去登录 ›</text></view>
+  <view wx:if="{{needsLogin}}" class="biz-empty"><image class="empty-photo" src="/assets/photos/empty-login.jpg" mode="aspectFill" aria-hidden="true" /><text>登录后查看充值订单</text><text class="empty-link" bindtap="signIn">去登录 ›</text></view>
   <view wx:if="{{loadError}}" class="biz-error" bindtap="load">{{loadError}} · 重试</view>
   <view wx:if="{{loading&&!needsLogin&&!rows.length}}" class="skel-list" aria-label="正在加载充值订单"><view wx:for="{{[1,2]}}" wx:key="*this" class="skeleton skel-card" /></view>
-  <view wx:elif="{{!needsLogin&&!loadError&&!rows.length}}" class="biz-empty"><view class="empty-icon"><t-icon name="order" size="30" /></view><text>暂无充值订单</text><text class="empty-link" bindtap="wallet">去充值 ›</text></view>
+  <view wx:elif="{{!needsLogin&&!loadError&&!rows.length}}" class="biz-empty"><image class="empty-photo" src="/assets/photos/empty-orders.jpg" mode="aspectFill" aria-hidden="true" /><text>暂无充值订单</text><text class="empty-link" bindtap="wallet">去充值 ›</text></view>
   <view wx:if="{{rows.length}}" class="orders-top">
     <view><text class="orders-total">{{total}}</text><text class="orders-label"> 笔充值订单</text></view>
     <text class="orders-buy" bindtap="wallet">继续充值 ›</text>
@@ -18,7 +18,7 @@
       <block wx:for="{{item.steps}}" wx:for-item="step" wx:for-index="n" wx:key="label"><view wx:if="{{n}}" class="step-line {{step.on?'on':''}}" /><view class="step {{step.on?'on':''}}"><view class="step-dot" /><text>{{step.label}}</text></view></block>
       <text wx:if="{{item.window}}" class="order-window">{{item.window}}</text>
     </view>
-    <view class="order-id" data-id="{{item.id}}" bindtap="copyId" aria-role="button" aria-label="{{'复制订单号'+item.id}}"><text>订单号</text><text class="id-value">{{item.id}}</text><t-icon name="copy" size="14" /></view>
+    <view class="order-id" data-id="{{item.id}}" bindtap="copyId" aria-role="button" aria-label="{{'复制订单号'+item.id}}"><text>订单号</text><text class="id-value">{{item.id}}</text><image class="gl gl-14" src="/assets/glyphs/copy-muted.png" /></view>
     <view wx:if="{{open===item.id}}" class="order-lines">
       <view wx:for="{{item.lines}}" wx:for-item="line" wx:key="label" class="order-line" data-text="{{line.value}}" bindlongpress="copyText"><text>{{line.label}}</text><text class="line-value">{{line.value}}</text></view>
       <text class="lines-hint">长按任意一行可复制</text>

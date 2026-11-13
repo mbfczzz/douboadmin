@@ -9,7 +9,7 @@ export const walletData = {
   heroArt: [] as string[],
   backdrop: UI_ART.walletBackdrop, // until the user has works to fan out
   useArt: { image: "", video: "" } as Record<string, string>,
-  uses: [] as Array<{ kind: string; icon: string; title: string; cost: string; units: number; count: number; unit: string; model: string }>,
+  uses: [] as Array<{ kind: string; title: string; cost: string; units: number; count: number; unit: string; model: string }>,
   purchaseMode: "package" as PurchaseMode,
   customAmount: "",
   customStep: "",

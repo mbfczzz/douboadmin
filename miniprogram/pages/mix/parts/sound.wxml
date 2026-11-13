@@ -6,7 +6,7 @@
   </view>
   <picker range="{{musicNames}}" value="{{musicIndex}}" bindchange="chooseMusic">
     <view class="mix-music">
-      <view class="mix-music-icon"><t-icon name="music" size="20" /></view>
+      <view class="mix-music-icon"><image class="gl gl-20" src="/assets/glyphs/music.png" /></view>
       <view class="mix-music-copy"><text>背景音乐</text><text class="biz-small">{{musicLabel}}</text></view>
       <t-icon name="chevron-right" size="18" />
     </view>

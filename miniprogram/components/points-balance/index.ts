@@ -4,11 +4,13 @@ import { points } from "../../services/business";
 import { canRecharge } from "../../services/payment";
 import type { WalletInfo } from "../../services/business";
 import { openPage, resetNavigation } from "../../utils/navigation";
+import { ICON } from "../../utils/ui-art";
 
 Component({
   // compact: one inline link; row: a slim tappable strip; default: the card.
   properties: { compact: { type: Boolean, value: false }, row: { type: Boolean, value: false } },
   data: {
+    markArt: ICON.points,
     logged: false,
     loaded: false,
     available: "—",

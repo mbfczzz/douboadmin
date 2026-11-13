@@ -44,6 +44,10 @@
   color: var(--ui-brand, #00c8dc);
   background: #00c8dc1f;
 }
+.dialog-glyph {
+  width: 26px;
+  height: 26px;
+}
 .tone-danger .dialog-icon {
   color: #ff5c6c;
   background: #ff5c6c1f;

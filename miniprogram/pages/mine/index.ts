@@ -1,4 +1,4 @@
-import { UI_ART } from "../../utils/ui-art";
+import { UI_ART, ICON } from "../../utils/ui-art";
 import { readView, writeView, keepImages, rememberRows, VIEW_MAX_AGE, freshUrl, noteIssued } from "../../utils/view-cache";
 import { pullRefresh } from "../../utils/refresh";
 import {
@@ -20,19 +20,19 @@ import { jobPage } from "../../services/job-pages";
 import { dropCover } from "../../services/cover";
 
 const baseMenus = [
-  { icon: "order", label: "充值订单", mode: "orders" },
-  { icon: "heart", label: "我的收藏", mode: "favorites" },
-  { icon: "history", label: "生成记录", mode: "tasks" },
-  { icon: "notification", label: "消息通知", mode: "notifications" },
-  { icon: "chat", label: "帮助与反馈", mode: "help" },
-  { icon: "setting", label: "设置", mode: "settings" },
+  { icon: "order", art: ICON.orders, label: "充值订单", mode: "orders" },
+  { icon: "heart", art: ICON.favorites, label: "我的收藏", mode: "favorites" },
+  { icon: "history", art: ICON.history, label: "生成记录", mode: "tasks" },
+  { icon: "notification", art: ICON.notifications, label: "消息通知", mode: "notifications" },
+  { icon: "chat", art: ICON.help, label: "帮助与反馈", mode: "help" },
+  { icon: "setting", art: ICON.settings, label: "设置", mode: "settings" },
 ];
 // Providers manage their codes in 服务商中心; members share their 推广码.
 // The role entry gets its own row so the six common entries stay a 3 × 2 grid.
-const roleMenus: Record<string, typeof baseMenus[number] & { hint: string }> =
+const roleMenus: Record<string, { icon: string; art?: string; glyph?: string; label: string; mode: string; hint: string }> =
   {
-    provider: { icon: "cooperate", label: "服务商中心", mode: "provider", hint: "邀请码 · 会员 · 后台登录" },
-    member: { icon: "qrcode", label: "我的推广码", mode: "promo", hint: "分享推广码，邀请好友加入" },
+    provider: { icon: "cooperate", art: ICON.provider, label: "服务商中心", mode: "provider", hint: "邀请码 · 会员 · 后台登录" },
+    member: { icon: "qrcode", glyph: "/assets/glyphs/qrcode-brand.png", label: "我的推广码", mode: "promo", hint: "分享推广码，邀请好友加入" },
   };
 Page({
   data: {
@@ -45,7 +45,7 @@ Page({
     loadError: "",
     menus: baseMenus,
     roleMenu: null as ((typeof baseMenus)[number] & { hint: string }) | null,
-    avatarLetter: "",
+    icons: { avatar: ICON.avatar, create: ICON.create },
     backdrop: UI_ART.mineBackdrop, // shown until the user has a work cover
     unread: 0,
   },
@@ -103,7 +103,7 @@ Page({
       this.owner = owner;
       // Show this account's last profile at once instead of a spinner.
       const seen = owner ? readView<{ me: Me; jobs: ReturnType<typeof jobView>[] }>("mine", VIEW_MAX_AGE) : undefined;
-      this.setData({ me: seen?.me || null, jobs: seen?.jobs || [], avatarLetter: seen ? Array.from(seen.me.profile.data.nickname || "")[0] || "" : "", worksError: "", roleLabel: "", roleMenu: null, loading: !seen });
+      this.setData({ me: seen?.me || null, jobs: seen?.jobs || [], worksError: "", roleLabel: "", roleMenu: null, loading: !seen });
     }
     if (this.refreshTimer !== undefined) clearTimeout(this.refreshTimer);
     if (!hasSession()) {
@@ -122,7 +122,7 @@ Page({
         me.profile.data.avatarUrl = keep ? before!.avatarUrl : media(me.profile.data.avatarUrl); // same avatar, young URL: no reload
         noteIssued(me.profile.data.avatarUrl);
       }
-      this.setData({ me, loading: false, loadError: "", avatarLetter: Array.from(me.profile.data.nickname || "")[0] || "" });
+      this.setData({ me, loading: false, loadError: "" });
       void this.loadUnread(version, owner);
       const recent = await recentRequest;
       if (version !== this.loadVersion || owner !== sessionUserId()) return;

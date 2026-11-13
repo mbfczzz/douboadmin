@@ -36,7 +36,7 @@
     </view>
     <block wx:else>
       <view wx:if="{{status.message&&status.status!=='pending'}}" class="biz-card activation-status">
-        <view wx:if="{{status.status==='review'}}" class="empty-icon status-icon"><t-icon name="time" size="30" /></view>
+        <image wx:if="{{status.status==='review'}}" class="empty-photo status-icon" src="/assets/photos/empty-review.jpg" mode="aspectFill" aria-hidden="true" />
         <text class="biz-list-title">{{status.status==='review'?'等待超级管理员开通':'授权状态'}}</text>
         <text class="biz-note">{{status.status==='review'&&status.partnerName?'已登记到「'+status.partnerName+'」，开通后会通知你，也可稍后刷新查看。':status.message}}</text>
       </view>
@@ -45,7 +45,7 @@
           <button wx:if="{{invite}}" class="biz-action" loading="{{busy}}" disabled="{{busy||loading}}" bindtap="retryInvite">继续登记</button>
           <block wx:elif="{{!codeMode}}">
             <view class="scan-tile {{busy||loading?'is-busy':''}}" bindtap="scan" hover-class="scan-pressed" aria-role="button" aria-label="扫码登记">
-              <view class="scan-frame"><view class="scan-corners" /><t-icon name="scan" size="34" /><view class="scan-line" /></view>
+              <view class="scan-frame"><view class="scan-corners" /><image class="gl gl-34" src="/assets/glyphs/scan-brand.png" /><view class="scan-line" /></view>
               <text class="scan-title">{{busy?'正在登记…':'扫码登记'}}</text>
               <text class="scan-hint">扫码登记对应角色，超级管理员开通后生效</text>
             </view>

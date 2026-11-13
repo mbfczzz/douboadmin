@@ -2,7 +2,7 @@
 <view class="subpage task-detail-page">
   <view class="loading" wx:if="{{loading}}"><t-loading /></view>
   <view wx:elif="{{needsLogin}}" class="empty">
-    <view class="empty-icon"><t-icon name="user" size="30" /></view>
+    <image class="empty-photo" src="/assets/photos/empty-login.jpg" mode="aspectFill" aria-hidden="true" />
     <text class="title">登录后查看这份作品</text>
     <text class="empty-link" bindtap="signIn">{{signingIn?'正在登录…':'去登录 ›'}}</text>
   </view>
@@ -66,13 +66,13 @@
       />
     </view>
     <view wx:if="{{job.status==='succeeded'&&!job.deleted}}" class="result-actions">
-      <view class="act" bindtap="save" hover-class="act-pressed" aria-role="button"><view class="act-icon primary"><t-loading wx:if="{{busy}}" size="20px" /><t-icon wx:else name="download" size="22" /></view><text>保存</text></view>
-      <view class="act" bindtap="share" hover-class="act-pressed" aria-role="button"><view class="act-icon"><t-icon name="share" size="22" /></view><text>分享</text></view>
-      <view class="act" bindtap="edit" hover-class="act-pressed" aria-role="button"><view class="act-icon"><t-icon name="edit-1" size="22" /></view><text>再编辑</text></view>
-      <view class="act" bindtap="remove" hover-class="act-pressed" aria-role="button"><view class="act-icon danger"><t-icon name="delete" size="22" /></view><text>删除</text></view>
+      <view class="act" bindtap="save" hover-class="act-pressed" aria-role="button"><view class="act-icon primary"><t-loading wx:if="{{busy}}" size="20px" /><image wx:else class="gl gl-22" src="/assets/glyphs/download-dark.png" /></view><text>保存</text></view>
+      <view class="act" bindtap="share" hover-class="act-pressed" aria-role="button"><view class="act-icon"><image class="gl gl-22" src="/assets/glyphs/share.png" /></view><text>分享</text></view>
+      <view class="act" bindtap="edit" hover-class="act-pressed" aria-role="button"><view class="act-icon"><image class="gl gl-22" src="/assets/glyphs/edit.png" /></view><text>再编辑</text></view>
+      <view class="act" bindtap="remove" hover-class="act-pressed" aria-role="button"><view class="act-icon"><image class="gl gl-22" src="/assets/glyphs/delete-danger.png" /></view><text>删除</text></view>
     </view>
     <view wx:elif="{{job.status==='failed'&&!job.deleted}}" class="failed-actions">
-      <button wx:if="{{job.retryable}}" class="retry-pill" loading="{{busy}}" disabled="{{busy}}" bindtap="retry"><t-icon wx:if="{{!busy}}" name="refresh" size="18" />重新生成</button>
+      <button wx:if="{{job.retryable}}" class="retry-pill" loading="{{busy}}" disabled="{{busy}}" bindtap="retry"><image wx:if="{{!busy}}" class="gl gl-18" src="/assets/glyphs/refresh-dark.png" />重新生成</button>
       <text class="edit-link" bindtap="edit">修改后再试 ›</text>
     </view>
     <text class="section-title">提示词</text>
@@ -93,7 +93,7 @@
           src="{{item.data.url}}"
           mode="aspectFill"
         />
-        <view wx:else class="asset-file"><t-icon name="file" size="24" /></view>
+        <view wx:else class="asset-file"><image class="gl gl-24" src="/assets/glyphs/file-muted.png" /></view>
         <text>{{item.data.name}}</text>
         <text class="muted tiny">{{item.isImage?'图片':'文件'}}</text>
       </view>

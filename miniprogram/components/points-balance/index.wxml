@@ -2,7 +2,7 @@
   <text class="points-mark">✦</text><text>{{loadError?'余额更新失败，重试':logged?'可用 '+available+' 积分':'登录后查看积分'}}</text><t-icon name="chevron-right" size="16" />
 </view>
 <view wx:elif="{{row}}" class="balance-row" bindtap="balanceTap" hover-class="row-pressed" aria-role="button" aria-label="{{'可用积分 '+available}}">
-  <view class="row-mark"><text>✦</text></view>
+  <view class="row-mark"><image class="row-mark-art" src="{{markArt}}" /></view>
   <view class="row-copy"><text class="row-amount">{{loadError?'更新失败':logged?available:'—'}}</text><text class="row-label">{{loadError?'点击重试':'可用积分 · 预留 '+held}}</text></view>
   <text class="row-go">{{rechargeEnabled?'充值':'明细'}}</text><t-icon name="chevron-right" size="16" />
 </view>
@@ -13,7 +13,7 @@
     <text wx:if="{{loadError}}" class="error" bindtap="reload">{{loadError}}</text>
   </view>
   <view class="balance-bottom">
-    <view class="note"><t-icon name="lock-on" size="16" /><text>预留 {{held}} 积分</text></view>
+    <view class="note"><image class="gl gl-16" src="/assets/glyphs/lock-muted.png" /><text>预留 {{held}} 积分</text></view>
     <button class="action" bindtap="openWallet"><text>我的积分</text><t-icon name="arrow-right" size="16" /></button>
   </view>
 </view>

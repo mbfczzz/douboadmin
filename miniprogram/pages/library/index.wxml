@@ -26,7 +26,7 @@
       <view wx:if="{{templates.length}}" class="favorite-grid">
         <view class="favorite-card" wx:for="{{templates}}" wx:key="id" data-id="{{item.id}}" bindtap="detail" bindlongpress="unfavorite" hover-class="card-pressed" aria-label="{{item.data.title}}">
           <image src="{{item.data.cover}}" mode="aspectFill" lazy-load />
-          <view class="favorite-heart"><t-icon name="heart-filled" size="14" /></view>
+          <view class="favorite-heart"><image class="gl gl-14" src="/assets/glyphs/heart-filled-pink.png" /></view>
           <view class="favorite-copy">
             <text class="favorite-title">{{item.data.title}}</text>
             <text class="favorite-go">{{item.data.category?item.data.category+' · ':''}}做同款 ›</text>
@@ -36,7 +36,7 @@
     </block>
     <block wx:elif="{{mode==='notifications'}}">
       <view wx:if="{{!notifications.length}}" class="empty">
-        <view class="empty-icon"><t-icon name="notification" size="30" /></view>
+        <image class="empty-photo" src="/assets/photos/empty-notice.jpg" mode="aspectFill" aria-hidden="true" />
         <text class="title">暂时没有新消息</text>
         <text class="desc">作品完成或生成失败后，可以在这里查看。</text>
       </view>

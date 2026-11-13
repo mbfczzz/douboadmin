@@ -79,7 +79,7 @@ test("returning from an avatar picker does not reload an edited profile", async 
   assert.equal(page.editVersion, 2);
 });
 
-test("Mine shows an initial for a photo-less avatar and badges unread notices", async () => {
+test("Mine shows the default avatar for a photo-less profile and badges unread notices", async () => {
   const h = harness();
   await h.api.signIn();
   h.api.request = async (path) => {
@@ -91,6 +91,6 @@ test("Mine shows an initial for a photo-less avatar and badges unread notices", 
   const page = h.page("mine");
   await page.load();
   await new Promise(setImmediate);
-  assert.equal(page.data.avatarLetter, "豆");
+  assert.equal(page.data.icons.avatar, "/assets/photos/avatar.jpg");
   assert.equal(page.data.unread, 3);
 });

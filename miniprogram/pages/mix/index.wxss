@@ -23,7 +23,7 @@
   font-size: 13px;
   color: var(--ui-link);
 }
-.mix-material image {
+.mix-material image:not(.gl) {
   width: 100%;
   height: 100%;
 }

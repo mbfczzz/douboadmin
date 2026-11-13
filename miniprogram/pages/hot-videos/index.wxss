@@ -24,9 +24,8 @@
   background: transparent;
   padding: 11px 8px;
 }
-.hot-search > t-icon {
+.hot-search > .gl {
   margin-left: 16px;
-  color: var(--ui-muted);
 }
 /* Sort: text tabs with a short cyan underline, as on the templates page. */
 .sort-tabs {

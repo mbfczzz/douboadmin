@@ -43,3 +43,16 @@ test("each photo slot keeps a flat fallback", () => {
   // The grey under a loading photo comes from the slot itself.
   assert.match(read("styles/sheets.wxss"), /\.source-photo \{[^}]*background: var\(--ui-selected\)/);
 });
+
+test("generated icon art is bundled and every tab glyph has both states", () => {
+  const icons = [...source.matchAll(/(photo|glyph)\("([a-z]+)"\)/g)].map((m) => `${m[2]}.${m[1] === "photo" ? "jpg" : "png"}`);
+  assert.ok(icons.length >= 10);
+  for (const file of icons) assert.ok(fs.existsSync(path.join(root, "assets", file.endsWith(".jpg") ? "photos" : "glyphs", file)), file);
+  const tabs = [...read("utils/tab-transition.ts").matchAll(/art\("([a-z]+)"\)/g)].map((m) => m[1]);
+  assert.equal(tabs.length, 5);
+  for (const name of tabs)
+    for (const state of ["on", "off"]) assert.ok(fs.existsSync(path.join(root, "assets/tab", `${name}-${state}.png`)), `${name}-${state}`);
+  // The vector icon stays as the fallback when an entry has no art.
+  assert.match(read("custom-tab-bar/index.wxml"), /wx:if="\{\{item\.art\}\}"[^]*<t-icon wx:else/);
+  assert.match(read("pages/mine/index.wxml"), /wx:if="\{\{item\.art\}\}" class="menu-icon"[^]*<t-icon wx:else/);
+});

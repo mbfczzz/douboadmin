@@ -29,14 +29,14 @@
   color: var(--ui-muted);
   background: var(--ui-field);
 }
-.task-thumb image {
+.task-thumb image:not(.gl) {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
 }
-.task-thumb.failed image {
+.task-thumb.failed image:not(.gl) {
   filter: grayscale(0.7) brightness(0.55);
 }
 .task-thumb.has-ref.running image,

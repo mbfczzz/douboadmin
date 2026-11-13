@@ -5,7 +5,7 @@
   </view>
   <scroll-view wx:elif="{{!messages.length}}" scroll-y class="chat-scroll"><view class="agent-empty">
     <view class="agent-hello">
-      <view class="agent-mark"><t-icon name="ai-edit" size="30" /></view>
+      <view class="agent-mark"><image class="gl gl-30" src="/assets/glyphs/ai-pen-dark.png" /></view>
       <text class="headline">让想法，再往前一步。</text>
       <text class="intro-sub">从一个模糊的念头，到一份清晰的创作脚本。</text>
     </view>
@@ -13,19 +13,19 @@
       <view wx:for="{{quick}}" wx:key="prompt" class="starter" data-value="{{item.prompt}}" bindtap="quick" hover-class="starter-pressed" aria-role="button">
         <image wx:if="{{item.image}}" class="starter-photo" src="{{item.image}}" mode="aspectFill" lazy-load /><view wx:else class="source-glyph starter-glyph glyph-{{item.tone}}"><t-icon name="{{item.icon}}" size="20" /></view>
         <view class="starter-copy"><text class="starter-title">{{item.prompt}}</text><text class="starter-hint">{{item.hint}}</text></view>
-        <t-icon name="arrow-right-up" size="16" />
+        <image class="gl gl-16" src="/assets/glyphs/open-muted.png" />
       </view>
     </view>
   </view></scroll-view>
   <scroll-view wx:else scroll-y class="chat-scroll" scroll-into-view="{{bottom}}" scroll-with-animation>
     <view class="conversation">
       <view wx:if="{{hasOlder}}" class="older" bindtap="older">
-        <t-loading wx:if="{{loadingOlder}}" size="14px" /><t-icon wx:else name="history" size="14" /><text>{{loadingOlder?'正在加载…':'查看更早对话'}}</text>
+        <t-loading wx:if="{{loadingOlder}}" size="14px" /><image wx:else class="gl gl-14" src="/assets/glyphs/history-muted.png" /><text>{{loadingOlder?'正在加载…':'查看更早对话'}}</text>
       </view>
       <view wx:for="{{messages}}" wx:key="id" id="m{{item.id}}" class="message {{item.role}}">
         <view wx:if="{{item.role==='user'}}" class="bubble"><text selectable>{{item.text}}</text></view>
         <block wx:else>
-          <view class="agent-name"><view class="agent-avatar"><t-icon name="ai-edit" size="14" /></view><text>豆播 Agent</text></view>
+          <view class="agent-name"><view class="agent-avatar"><image class="gl gl-14" src="/assets/glyphs/ai-pen-dark.png" /></view><text>豆播 Agent</text></view>
           <view wx:if="{{item.pending}}" class="typing" aria-label="正在回复"><view /><view /><view /></view>
           <view wx:elif="{{item.failed}}" class="reply-failed">
             <t-icon name="error-circle" size="16" /><text>{{item.text}}</text>
@@ -38,8 +38,8 @@
               </view>
             </view>
             <view class="reply-actions">
-              <view class="reply-icon" data-text="{{item.text}}" bindtap="copy" hover-class="icon-pressed" aria-role="button" aria-label="复制"><t-icon name="copy" size="18" /></view>
-              <view class="use-script" data-text="{{item.text}}" bindtap="use" hover-class="starter-pressed" aria-role="button"><t-icon name="video-camera" size="16" /><text>带到创作</text></view>
+              <view class="reply-icon" data-text="{{item.text}}" bindtap="copy" hover-class="icon-pressed" aria-role="button" aria-label="复制"><image class="gl gl-18" src="/assets/glyphs/copy-muted.png" /></view>
+              <view class="use-script" data-text="{{item.text}}" bindtap="use" hover-class="starter-pressed" aria-role="button"><image class="gl gl-16" src="/assets/glyphs/video.png" /><text>带到创作</text></view>
             </view>
             <scroll-view wx:if="{{index===messages.length-1&&!busy}}" scroll-x class="follow-ups">
               <view class="follow-row">
@@ -55,7 +55,7 @@
     <textarea auto-height maxlength="500" focus="{{focus}}" placeholder="{{messages.length?'继续说说你的想法…':'说说你的创作想法…'}}" placeholder-class="composer-placeholder" value="{{prompt}}" bindinput="input" bindblur="blur" cursor-spacing="24" show-confirm-bar="{{false}}" />
     <text wx:if="{{prompt.length>400}}" class="composer-count {{prompt.length>=500?'full':''}}">{{prompt.length}}/500</text>
     <view class="send {{prompt&&!busy?'ready':''}}" bindtap="send" hover-class="icon-pressed" aria-role="button" aria-label="发送">
-      <t-loading wx:if="{{busy}}" size="18px" /><t-icon wx:else name="arrow-up" size="20" />
+      <t-loading wx:if="{{busy}}" size="18px" /><image wx:else class="gl gl-20" src="/assets/glyphs/send-{{prompt&&!busy?'dark':'muted'}}.png" />
     </view>
   </view>
 </view>

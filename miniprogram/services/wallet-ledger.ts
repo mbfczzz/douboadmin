@@ -16,11 +16,12 @@ const labels: Record<string, string> = {
   refund_cancel: "退款关闭",
 };
 
+const glyph = (name: string) => `/assets/glyphs/${name}.png`;
 export function ledgerView(row: Row<Ledger>) {
   const entry = row.data,
     settling = entry.kind === "job_charge" || entry.kind === "refund_complete";
   return {
-    icon: entry.kind === "topup" ? "add-circle" : entry.kind.includes("hold") ? "lock-on" : entry.kind.includes("release") || entry.kind.includes("refund") ? "rollback" : entry.kind === "admin_adjust" ? "setting" : "image",
+    glyph: glyph(entry.kind === "topup" ? "add-success" : entry.kind.includes("hold") ? "lock-muted" : entry.kind.includes("release") || entry.kind.includes("refund") ? "refresh-muted" : entry.kind === "admin_adjust" ? "settings-muted" : "image-muted"),
     id: row.id,
     title: labels[entry.kind] || entry.kind,
     note:

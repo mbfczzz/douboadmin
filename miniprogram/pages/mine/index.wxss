@@ -62,17 +62,6 @@
   background: var(--ui-field);
   box-shadow: 0 0 0 2px var(--ui-bg), 0 0 0 3px #ffffff1f;
 }
-.avatar-letter {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 26px;
-  font-weight: 600;
-  color: #fff;
-  background: var(--ui-selected);
-}
 .avatar image {
   width: 100%;
   height: 100%;
@@ -199,6 +188,16 @@
   justify-content: center;
   border-radius: 14px;
   background: var(--ui-surface);
+}
+/* Generated icon art fills its tile; the tile clips it to the rounded shape. */
+.glyph-art {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+}
+.menu-icon {
+  width: 22px;
+  height: 22px;
 }
 .menu-label {
   font-size: 12px;

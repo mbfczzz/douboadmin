@@ -1,0 +1,50 @@
+/* Bold glyph set generated with Codex (assets/glyphs, PNG with alpha). The
+   colour is baked into the file name: plain = white, -muted, -danger, -dark (on light tiles). */
+.gl {
+  display: block;
+  flex-shrink: 0;
+}
+.gl-14 {
+  width: 14px;
+  height: 14px;
+}
+.gl-16 {
+  width: 16px;
+  height: 16px;
+}
+.gl-18 {
+  width: 18px;
+  height: 18px;
+}
+.gl-20 {
+  width: 20px;
+  height: 20px;
+}
+.gl-22 {
+  width: 22px;
+  height: 22px;
+}
+.gl-32 {
+  width: 32px;
+  height: 32px;
+}
+.gl-28 {
+  width: 28px;
+  height: 28px;
+}
+.gl-30 {
+  width: 30px;
+  height: 30px;
+}
+.gl-24 {
+  width: 24px;
+  height: 24px;
+}
+.gl-26 {
+  width: 26px;
+  height: 26px;
+}
+.gl-34 {
+  width: 34px;
+  height: 34px;
+}

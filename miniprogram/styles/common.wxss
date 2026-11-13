@@ -226,16 +226,16 @@ button.phone-alternative {
 /* Empty, logged-out and error states: pages with content to point at show
    real template covers (components/showcase); the rest a quiet theme icon.
    The follow-up is a text link, not another button. */
-.empty-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 64px;
-  height: 64px;
-  margin: 0 auto 12px;
-  border-radius: 50%;
+/* Empty and signed-out states show a small photograph (assets/photos,
+   bundled so it also appears offline) instead of a grey icon disc. */
+.empty-photo {
+  display: block;
+  width: 88px;
+  height: 88px;
+  margin: 0 auto 14px;
+  border-radius: 22px;
   background: var(--ui-surface);
-  color: var(--ui-muted);
+  box-shadow: 0 0 0 1px #ffffff12;
 }
 .empty-link {
   display: inline-block;

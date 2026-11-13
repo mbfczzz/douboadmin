@@ -9,7 +9,7 @@
       bindtap="mode"
       hover-class="mode-tab-pressed"
     >
-      <t-icon name="video-camera" size="20" />生成视频
+      <image class="gl gl-20" src="/assets/glyphs/video{{kind==='video'?'':'-muted'}}.png" />生成视频
     </view>
     <view
       class="mode-tab {{kind==='image'?'active':''}}"
@@ -19,7 +19,7 @@
       bindtap="mode"
       hover-class="mode-tab-pressed"
     >
-      <t-icon name="image" size="20" />生成图片
+      <image class="gl gl-20" src="/assets/glyphs/image{{kind==='image'?'':'-muted'}}.png" />生成图片
     </view>
   </view>
   <view wx:if="{{modelError}}" class="error-box" bindtap="loadModels">{{modelError}}</view>
@@ -34,7 +34,7 @@
           bindtap="showAssets"
           aria-label="添加参考素材"
         >
-          <t-icon name="{{uploading?'time':'add'}}" size="20" />
+          <image class="gl gl-20" src="/assets/glyphs/{{uploading?'clock':'add'}}-muted.png" />
           <text class="add-label">{{uploading?'上传中':'添加参考'}}</text>
         </view>
         <view class="reference" wx:for="{{assets}}" wx:key="id">
@@ -45,7 +45,7 @@
             bindtap="previewReference"
             mode="aspectFill"
           />
-          <t-icon wx:else name="file" size="24" />
+          <image wx:else class="gl gl-24" src="/assets/glyphs/file-muted.png" />
           <view class="reference-remove" data-id="{{item.id}}" catchtap="remove" aria-role="button" aria-label="删除参考素材"
             ><t-icon name="close" size="16"
           /></view>
@@ -102,7 +102,7 @@
     </scroll-view>
   </view>
   <view class="creation-hint">
-    <block wx:if="{{assets.length}}"><t-icon name="mentioned" size="16" /><text>输入 @ 可引用已上传的图片</text></block>
+    <block wx:if="{{assets.length}}"><image class="gl gl-16" src="/assets/glyphs/at-muted.png" /><text>输入 @ 可引用已上传的图片</text></block>
     <text class="queue-text" bindtap="queue">任务队列 ›</text>
   </view>
   <view wx:if="{{restoring}}" class="note">正在恢复参考素材…</view>
@@ -114,7 +114,7 @@
     </view>
   </view>
   <view class="params-row {{modelsLoading||busy?'controls-busy':''}}" bindtap="openParams" aria-role="button" aria-label="{{'调整参数，当前'+resolution}}">
-    <view class="params-icon"><t-icon name="adjustment" size="20" /></view>
+    <view class="params-icon"><image class="gl gl-20" src="/assets/glyphs/adjust.png" /></view>
     <view class="params-copy">
       <text class="params-spec">{{resolution}}<block wx:if="{{kind==='video'&&durations.length}}"> · {{duration}} 秒</block><block wx:if="{{ratios.length}}"> · {{ratio==='auto'?'自适应':ratio}}</block><block wx:if="{{qualities.length}}"> · {{quality==='low'?'标准':quality==='medium'?'精细':quality==='high'?'高清':quality}}</block></text>
     </view>

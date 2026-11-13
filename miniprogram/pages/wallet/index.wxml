@@ -1,7 +1,7 @@
 <nav-bar title="我的积分" back />
 <view class="subpage">
   <view wx:if="{{needsLogin}}" class="biz-empty"
-    ><view class="empty-icon"><t-icon name="wallet" size="30" /></view><text>登录后查看积分与充值记录</text><text class="empty-link" bindtap="signIn">去登录 ›</text></view
+    ><image class="empty-photo" src="/assets/photos/empty-login.jpg" mode="aspectFill" aria-hidden="true" /><text>登录后查看积分与充值记录</text><text class="empty-link" bindtap="signIn">去登录 ›</text></view
   >
   <block wx:else>
     <view wx:if="{{error}}" class="biz-error" bindtap="load"
@@ -9,7 +9,7 @@
     >
     <view wx:if="{{loading&&!info}}" class="skel-list" aria-label="正在读取积分余额"><view class="skeleton skel-hero" /><view class="skeleton skel-card" /></view>
     <view wx:if="{{pendingOrderId}}" class="biz-card payment-status">
-      <view class="payment-head"><view class="payment-ring"><t-loading wx:if="{{!paymentWaiting}}" size="20px" /><t-icon wx:else name="time" size="20" /></view><text class="biz-heading">{{paymentWaiting?'到账待确认':'正在确认到账'}}</text></view>
+      <view class="payment-head"><view class="payment-ring"><t-loading wx:if="{{!paymentWaiting}}" size="20px" /><image wx:else class="gl gl-20" src="/assets/glyphs/clock-brand.png" /></view><text class="biz-heading">{{paymentWaiting?'到账待确认':'正在确认到账'}}</text></view>
       <text class="biz-note" aria-role="status">{{paymentNotice}}</text>
       <button class="biz-action" bindtap="orders">查看订单</button>
       <button wx:if="{{paymentWaiting}}" class="text-button phone-alternative" disabled="{{busy}}" bindtap="additionalPurchase">另购积分</button>
@@ -19,15 +19,15 @@
       <view wx:if="{{heroArt.length}}" class="hero-art" aria-hidden="true"><image wx:for="{{heroArt}}" wx:key="*this" src="{{item}}" mode="aspectFill" class="fan-{{index}}" /></view>
       <image wx:elif="{{backdrop}}" class="summary-photo" src="{{backdrop}}" mode="aspectFill" aria-hidden="true" />
       <view class="summary-label"><text class="points-mark">✦</text><text>可用积分</text></view>
-      <view class="row"><text class="biz-value">{{available}}</text><button class="wallet-refresh" bindtap="load" disabled="{{loading}}"><t-icon name="refresh" size="16" /><text>刷新</text></button></view>
-      <view class="summary-held"><t-icon name="lock-on" size="16" /><text>预留 {{held}} 积分</text><text class="biz-small">处理中暂时冻结</text></view>
+      <view class="row"><text class="biz-value">{{available}}</text><button class="wallet-refresh" bindtap="load" disabled="{{loading}}"><image class="gl gl-16" src="/assets/glyphs/refresh.png" /><text>刷新</text></button></view>
+      <view class="summary-held"><image class="gl gl-16" src="/assets/glyphs/lock-points.png" /><text>预留 {{held}} 积分</text><text class="biz-small">处理中暂时冻结</text></view>
       <view wx:if="{{price100}}" class="summary-price"><text>当前价格</text><text class="price-value">¥{{price100}} / 100 积分</text></view>
     </view>
     <view wx:if="{{uses.length}}" class="uses">
       <text class="uses-head">当前积分大约可以</text>
       <view class="uses-row">
         <view wx:for="{{uses}}" wx:key="kind" class="use use-{{item.kind}}">
-          <view class="use-cover"><image wx:if="{{useArt[item.kind]}}" src="{{useArt[item.kind]}}" mode="aspectFill" /><view class="use-icon"><t-icon name="{{item.icon}}" size="18" /></view></view>
+          <view class="use-cover"><image wx:if="{{useArt[item.kind]}}" src="{{useArt[item.kind]}}" mode="aspectFill" /><view class="use-icon"><image class="gl gl-18" src="/assets/glyphs/{{item.kind==='video'?'video':'image'}}.png" /></view></view>
           <text class="use-count">{{item.count}}<text class="use-unit"> {{item.unit}}</text></text>
           <text class="use-title">{{item.title}}</text>
           <text class="use-cost">约 {{item.cost}} 积分 / {{item.unit}}</text>
@@ -35,8 +35,8 @@
       </view>
     </view>
     <view wx:if="{{info}}" class="wallet-shortcuts">
-      <view bindtap="orders" aria-role="button" hover-class="row-pressed"><t-icon name="order" size="20" /><text>充值订单</text><t-icon name="chevron-right" size="20" /></view>
-      <view bindtap="explain" aria-role="button" hover-class="row-pressed"><t-icon name="help-circle" size="20" /><text>积分说明</text><t-icon name="chevron-right" size="20" /></view>
+      <view bindtap="orders" aria-role="button" hover-class="row-pressed"><image class="gl gl-20" src="/assets/glyphs/orders-muted.png" /><text>充值订单</text><t-icon name="chevron-right" size="20" /></view>
+      <view bindtap="explain" aria-role="button" hover-class="row-pressed"><image class="gl gl-20" src="/assets/glyphs/help-muted.png" /><text>积分说明</text><t-icon name="chevron-right" size="20" /></view>
     </view>
     <view class="wallet-purchase" wx:if="{{info&&!pendingOrderId}}"
       ><text class="biz-heading">购买积分</text
@@ -85,11 +85,11 @@
     <view class="biz-card"
       ><text class="biz-heading">积分明细</text
       ><view wx:if="{{loading&&!ledger.length}}" class="skel-list" aria-label="正在读取积分明细"><view wx:for="{{[1,2,3]}}" wx:key="*this" class="skel-row"><view class="skeleton skel-dot" /><view class="skel-lines"><view class="skeleton skel-a" /><view class="skeleton skel-b" /></view></view></view>
-      <view wx:elif="{{!error&&!ledger.length}}" class="biz-empty"><view class="empty-icon"><t-icon name="chart-bar" size="26" /></view><text>暂无积分变动，充值或创作后会记录在这里</text></view
+      <view wx:elif="{{!error&&!ledger.length}}" class="biz-empty"><image class="empty-photo" src="/assets/photos/empty-orders.jpg" mode="aspectFill" aria-hidden="true" /><text>暂无积分变动，充值或创作后会记录在这里</text></view
       ><block wx:for="{{ledger}}" wx:key="id"
         ><text wx:if="{{item.showDay}}" class="ledger-day">{{item.day}}</text
         ><view class="biz-row ledger-row"
-        ><view class="icon-tile {{item.tone}}"><t-icon name="{{item.icon}}" size="20" /></view><view class="ledger-copy"
+        ><view class="icon-tile {{item.tone}}"><image class="gl gl-20" src="{{item.glyph}}" /></view><view class="ledger-copy"
           ><text class="biz-list-title">{{item.title}}</text
           ><text wx:if="{{item.note}}" class="biz-small ledger-note">{{item.note}}</text
           ><text class="biz-small ledger-time">{{item.time}}</text></view

@@ -22,8 +22,7 @@
     <view class="profile" bindtap="edit" aria-role="button" aria-label="编辑个人资料" hover-class="card-pressed">
       <view class="avatar">
         <image wx:if="{{me.profile.data.avatarUrl}}" src="{{me.profile.data.avatarUrl}}" mode="aspectFill" />
-        <text wx:elif="{{avatarLetter}}" class="avatar-letter">{{avatarLetter}}</text>
-        <t-icon wx:else name="user" size="30" />
+        <image wx:else src="{{icons.avatar}}" mode="aspectFill" />
       </view>
       <view class="profile-copy">
         <view class="name-row"><text class="nickname">{{me.profile.data.nickname}}</text><text wx:if="{{roleLabel}}" class="role-label">{{roleLabel}}</text></view>
@@ -37,7 +36,7 @@
       <view data-mode="favorites" bindtap="menu" aria-role="button" aria-label="查看收藏"><text>{{me.favorites}}</text><text>收藏</text></view>
     </view>
     <view class="mine-balance"><points-balance row /></view>
-    <view wx:if="{{roleMenu}}" class="role-link" data-mode="{{roleMenu.mode}}" bindtap="menu" aria-role="button" aria-label="{{roleMenu.label}}" hover-class="card-pressed"><view class="role-glyph"><t-icon name="{{roleMenu.icon}}" size="22" /></view><view class="role-copy"><text class="role-title">{{roleMenu.label}}</text><text class="role-hint">{{roleMenu.hint}}</text></view><t-icon name="chevron-right" size="18" /></view>
+    <view wx:if="{{roleMenu}}" class="role-link" data-mode="{{roleMenu.mode}}" bindtap="menu" aria-role="button" aria-label="{{roleMenu.label}}" hover-class="card-pressed"><view class="role-glyph {{roleMenu.art?'has-art':''}}"><image wx:if="{{roleMenu.art}}" class="glyph-art" src="{{roleMenu.art}}" /><image wx:elif="{{roleMenu.glyph}}" class="gl gl-22" src="{{roleMenu.glyph}}" /><t-icon wx:else name="{{roleMenu.icon}}" size="22" /></view><view class="role-copy"><text class="role-title">{{roleMenu.label}}</text><text class="role-hint">{{roleMenu.hint}}</text></view><t-icon name="chevron-right" size="18" /></view>
     <view class="row works-heading"><text class="section-title">最近作品</text><view class="row small muted profile-edit" data-mode="works" bindtap="menu">全部<t-icon name="chevron-right" size="16" /></view></view>
     <view wx:if="{{worksLoading&&!jobs.length}}" class="cover-grid"><view wx:for="{{[1,2,3]}}" wx:key="*this" class="cover-cell skeleton" /></view>
     <view wx:if="{{worksError}}" class="error-box" bindtap="load">{{worksError}}</view>
@@ -47,16 +46,16 @@
       </view>
       <block wx:for="{{jobs}}" wx:key="id"><view wx:if="{{!(me.running&&index===2)}}" class="cover-cell" data-id="{{item.id}}" bindtap="detail" hover-class="card-pressed" aria-label="{{item.shortTitle||'未命名作品'}}">
         <image wx:if="{{item.thumbnailUrl||(item.input.kind==='image'&&item.result)}}" src="{{item.thumbnailUrl||item.result}}" mode="aspectFill" lazy-load data-id="{{item.id}}" binderror="coverError" />
-        <t-icon wx:else name="{{item.input.kind==='image'?'image':'play-circle'}}" size="28" />
+        <image wx:else class="gl gl-28" src="/assets/glyphs/{{item.input.kind==='image'?'image-muted-lg':'play-muted-lg'}}.png" />
         <view class="cover-badge"><t-icon name="{{item.input.kind==='image'?'image':'play-circle-filled'}}" size="12" /><text wx:if="{{item.input.kind!=='image'&&item.input.duration}}">{{item.input.duration}}s</text></view>
       </view></block>
     </view>
     <view wx:elif="{{!worksLoading&&!worksError}}" class="empty-work" bindtap="create" hover-class="card-pressed">
-      <view class="empty-plus"><t-icon name="add" size="22" /></view><view class="empty-copy"><text class="empty-title">还没有作品</text><text class="empty-hint">写一句描述，生成第一个视频</text></view><t-icon name="chevron-right" size="16" />
+      <view class="empty-plus"><image class="glyph-art" src="{{icons.create}}" /></view><view class="empty-copy"><text class="empty-title">还没有作品</text><text class="empty-hint">写一句描述，生成第一个视频</text></view><t-icon name="chevron-right" size="16" />
     </view>
     <text class="section-title common-heading">常用功能</text>
     <view class="menu-grid">
-      <view wx:for="{{menus}}" wx:key="mode" class="menu {{item.mode}}" data-mode="{{item.mode}}" bindtap="menu" aria-role="button" aria-label="{{item.label}}" hover-class="card-pressed"><view class="menu-glyph"><t-icon name="{{item.icon}}" size="22" /><text wx:if="{{item.mode==='notifications'&&unread}}" class="menu-badge">{{unread>99?'99+':unread}}</text></view><text class="menu-label">{{item.label}}</text></view>
+      <view wx:for="{{menus}}" wx:key="mode" class="menu {{item.mode}}" data-mode="{{item.mode}}" bindtap="menu" aria-role="button" aria-label="{{item.label}}" hover-class="card-pressed"><view class="menu-glyph"><image wx:if="{{item.art}}" class="menu-icon" src="{{item.art}}" /><t-icon wx:else name="{{item.icon}}" size="22" /><text wx:if="{{item.mode==='notifications'&&unread}}" class="menu-badge">{{unread>99?'99+':unread}}</text></view><text class="menu-label">{{item.label}}</text></view>
     </view>
   </view>
 </view>

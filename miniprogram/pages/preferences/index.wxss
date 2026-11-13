@@ -28,9 +28,6 @@
 .general-row + .general-row {
   border-top: 1px solid var(--ui-border);
 }
-.general-row > t-icon:first-child {
-  color: var(--ui-muted);
-}
 .general-row > text:first-of-type {
   flex: 1;
 }
@@ -48,7 +45,4 @@
   display: flex;
   align-items: center;
   gap: 12px;
-}
-.pref-label t-icon {
-  color: var(--ui-muted);
 }

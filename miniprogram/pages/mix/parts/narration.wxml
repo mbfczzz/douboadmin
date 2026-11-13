@@ -3,7 +3,7 @@
   <textarea class="biz-input textarea" value="{{script}}" maxlength="500" placeholder="输入旁白或字幕文案，也可以从原声识别…" bindinput="input" />
   <view class="mix-features">
     <view wx:for="{{features}}" wx:key="field" class="mix-feature {{on[item.field]?'on':''}}" data-field="{{item.field}}" bindtap="flip" aria-role="switch" aria-label="{{item.label}}">
-      <t-icon name="{{item.icon}}" size="22" />
+      <image class="gl gl-22" src="/assets/glyphs/{{item.glyph}}{{on[item.field]?'':'-muted'}}.png" />
       <text>{{item.label}}</text>
       <t-icon wx:if="{{on[item.field]}}" class="mix-check" name="check-circle-filled" size="16" />
     </view>

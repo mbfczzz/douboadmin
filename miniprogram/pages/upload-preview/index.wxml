@@ -12,7 +12,7 @@
     <view class="preview-check"><t-icon name="check-circle" size="16" /><text>无遮挡</text></view>
   </view>
   <view class="preview-bar">
-    <view wx:if="{{!uploaded}}" class="preview-again" bindtap="back" aria-role="button"><t-icon name="refresh" size="18" /><text>重新选择</text></view>
+    <view wx:if="{{!uploaded}}" class="preview-again" bindtap="back" aria-role="button"><image class="gl gl-18" src="/assets/glyphs/refresh.png" /><text>重新选择</text></view>
     <button class="preview-use {{busy?'is-busy':''}}" loading="{{busy}}" disabled="{{busy}}" bindtap="confirm">{{uploaded?'返回继续':'使用这张照片'}}</button>
   </view>
 </view>

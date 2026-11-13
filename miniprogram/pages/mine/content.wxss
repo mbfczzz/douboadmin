@@ -20,7 +20,7 @@
   color: var(--ui-muted);
   background: var(--ui-surface);
 }
-.cover-cell image {
+.cover-cell image:not(.gl) {
   position: absolute;
   top: 0;
   right: 0;
@@ -123,6 +123,13 @@
 .role-glyph {
   color: var(--ui-brand);
   background: #00c8dc1f;
+}
+.role-glyph.has-art {
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px #ffffff14;
+}
+.empty-plus {
+  overflow: hidden;
 }
 .role-copy {
   flex: 1;

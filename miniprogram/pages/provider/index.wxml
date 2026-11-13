@@ -2,7 +2,7 @@
 <view class="subpage">
   <view wx:if="{{loadError}}" class="biz-error" bindtap="load">{{loadError}} · 点击重试</view>
   <view wx:if="{{center}}" class="provider-head">
-    <view class="provider-glyph"><t-icon name="{{promo?'qrcode':'cooperate'}}" size="24" /></view>
+    <view class="provider-glyph {{promo?'is-glyph':''}}"><image wx:if="{{promo}}" class="gl gl-22" src="/assets/glyphs/qrcode.png" /><image wx:else class="provider-photo" src="/assets/photos/provider.jpg" mode="aspectFill" /></view>
     <view class="provider-title"><text class="provider-name">{{center.name}}</text><text class="provider-level {{center.role}}">{{roleName}}</text></view>
     <text class="biz-note">{{promo?'推广码':'服务商'}} · {{center.status==='active'?'正常':'已停用'}}</text>
     <text wx:if="{{center.status!=='active'}}" class="biz-error">服务商已停用，请联系总部</text>

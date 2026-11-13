@@ -181,11 +181,6 @@ button.biz-secondary {
   padding: 10px 32px;
   margin: 16px auto 0;
 }
-.biz-empty-icon {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 12px;
-}
 .biz-pair {
   display: flex;
   gap: 10px;
@@ -234,8 +229,8 @@ button.biz-secondary {
     padding: 10px 10px;
   }
 }
-.biz-empty .empty-icon {
-  margin-bottom: 10px;
+.biz-empty .empty-photo {
+  margin-bottom: 12px;
 }
 .biz-empty > text {
   display: block;

@@ -83,7 +83,6 @@ export async function loadInsights(page: InsightPage) {
       .filter((x): x is NonNullable<typeof x> => !!x && x.q.billingEnabled && x.q.units > 0)
       .map(({ m, q }) => ({
         kind: m.kind,
-        icon: m.kind === "video" ? "video-camera" : "image",
         title: m.kind === "video" ? `${defaults(m).duration} 秒视频` : "图片",
         cost: points(q.units),
         units: q.units,

@@ -7,7 +7,7 @@
     <view class="slot-row loading-row"><view class="slot skeleton" /><view class="slot skeleton" /></view>
   </view>
   <view wx:elif="{{loadError}}" class="empty">
-    <view class="empty-icon"><t-icon name="{{loadError==='模板已下架'?'image-error':'wifi-off'}}" size="30" /></view>
+    <image class="empty-photo" src="/assets/photos/empty-{{loadError==='模板已下架'?'frame':'offline'}}.jpg" mode="aspectFill" aria-hidden="true" />
     <text>{{loadError}}</text>
     <text wx:if="{{loadError!=='模板已下架'}}" class="empty-link" bindtap="load">重试</text>
   </view>
@@ -16,7 +16,7 @@
       <video wx:if="{{template.data.preview}}" src="{{template.data.preview}}" poster="{{template.data.cover}}" controls="{{!autoplay}}" autoplay="{{autoplay}}" loop muted="{{autoplay}}" object-fit="cover" />
       <image wx:else src="{{template.data.cover}}" mode="aspectFill" bindtap="preview" />
       <view class="hero-shade" />
-      <view class="hero-fav {{favorite?'on':''}}" catchtap="favorite" aria-role="button" aria-label="{{favorite?'取消收藏':'收藏'}}"><t-icon name="{{favorite?'heart-filled':'heart'}}" size="22" /></view>
+      <view class="hero-fav {{favorite?'on':''}}" catchtap="favorite" aria-role="button" aria-label="{{favorite?'取消收藏':'收藏'}}"><image class="gl gl-22" src="/assets/glyphs/{{favorite?'heart-filled-pink':'favorites'}}.png" /></view>
       <view class="hero-meta">
         <view class="hero-chips">
           <text wx:if="{{template.data.category}}" class="chip">{{template.data.category}}</text>
@@ -42,11 +42,11 @@
         </view>
         <view wx:if="{{assets.length<template.data.requiredImages}}" class="slot add required" bindtap="choose" hover-class="slot-pressed" aria-role="button" aria-label="上传商品主体图">
           <image wx:if="{{uploadExample}}" class="slot-example" src="{{uploadExample}}" mode="aspectFill" /><text wx:if="{{uploadExample}}" class="slot-example-tag">示例</text>
-          <t-icon name="{{uploading?'time':'add'}}" size="26" /><text class="slot-name">商品主体图</text><text class="slot-hint">正面清晰</text>
+          <image class="gl gl-26" src="/assets/glyphs/{{uploading?'clock-brand-lg':'add-brand'}}.png" /><text class="slot-name">商品主体图</text><text class="slot-hint">正面清晰</text>
         </view>
         <block wx:elif="{{!fixedCount}}">
           <view wx:for="{{optionalNames}}" wx:key="*this" class="slot add optional" bindtap="choose" hover-class="slot-pressed" aria-role="button" aria-label="{{'添加'+item}}">
-            <t-icon name="add" size="20" /><text class="slot-name">{{item}}</text><text class="slot-hint">选填</text>
+            <image class="gl gl-20" src="/assets/glyphs/add-muted.png" /><text class="slot-name">{{item}}</text><text class="slot-hint">选填</text>
           </view>
         </block>
       </view>

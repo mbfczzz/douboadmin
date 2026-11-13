@@ -36,3 +36,22 @@ export const UI_ART = {
   loginBackdrop: art("login-bg"), // 登录 / 授权开通
   walletBackdrop: art("wallet-bg"), // 我的积分 balance card
 };
+
+// Small art bundled in the package so it paints with the page instead of
+// popping in (assets/photos and assets/glyphs, generated with Codex). Thumbnails are photos in
+// the same style as UI_ART; the common entries are one bold white glyph set
+// (PNG with alpha) drawn on the theme tile, matching the tab bar.
+const photo = (name: string) => `/assets/photos/${name}.jpg`;
+const glyph = (name: string) => `/assets/glyphs/${name}.png`;
+export const ICON = {
+  avatar: photo("avatar"), // 我的: profile without a photo
+  create: photo("create"), // 我的: 还没有作品
+  points: photo("points"), // 积分 balance row
+  provider: photo("provider"), // 服务商中心
+  orders: glyph("orders"), // 常用功能
+  favorites: glyph("favorites"),
+  history: glyph("history"),
+  notifications: glyph("notifications"),
+  help: glyph("help"),
+  settings: glyph("settings"),
+};

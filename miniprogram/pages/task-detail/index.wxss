@@ -111,9 +111,6 @@
   color: var(--ui-on-brand);
   background: var(--ui-primary);
 }
-.act-icon.danger {
-  color: #ff8a94;
-}
 .failed-actions {
   display: flex;
   align-items: center;

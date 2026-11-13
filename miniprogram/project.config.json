@@ -62,6 +62,10 @@
       {
         "value": ".md",
         "type": "suffix"
+      },
+      {
+        "value": "assets/README.md",
+        "type": "file"
       }
     ],
     "include": []

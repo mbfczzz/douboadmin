@@ -63,13 +63,13 @@
             data-id="{{item.id}}"
             binderror="coverError"
           />
-          <t-icon wx:else name="play-circle" size="32" />
+          <image wx:else class="gl gl-32" src="/assets/glyphs/play-muted-lg.png" />
           <view class="cover-badge"><t-icon name="{{item.input.kind==='image'?'image':'play-circle-filled'}}" size="12" /><text wx:if="{{item.input.kind!=='image'&&item.input.duration}}">{{item.input.duration}}s</text></view>
         </view>
         <text class="completed-title">{{item.shortTitle}}</text>
       </view>
       <view wx:if="{{completed.length<3}}" class="completed-item create-tile" bindtap="create" hover-class="card-pressed">
-        <view class="completed-cover"><view class="create-plus"><t-icon name="add" size="22" /></view><text class="create-label">去创作</text></view>
+        <view class="completed-cover"><view class="create-plus"><image class="gl gl-22" src="/assets/glyphs/add.png" /></view><text class="create-label">去创作</text></view>
         <text class="completed-title muted">新作品</text>
       </view>
     </view>

@@ -38,13 +38,12 @@ test("orders expose a payment window, progress steps and detail lines", () => {
   assert.equal(paid.lines[3].value, "¥0.96 / 100 积分");
 });
 
-test("every ledger icon exists in the icon font", () => {
+test("every ledger row has a bundled glyph", () => {
   const fs = require("node:fs");
-  const font = fs.readFileSync("node_modules/tdesign-miniprogram/miniprogram_dist/icon/icon.wxss", "utf8");
-  const line = fs.readFileSync("services/wallet-ledger.ts", "utf8").split("\n").find((l) => l.includes("icon:"));
-  const names = [...line.matchAll(/\? "([a-z0-9-]+)"|: "([a-z0-9-]+)",?\s*$/g)].map((m) => m[1] || m[2]);
+  const line = fs.readFileSync("services/wallet-ledger.ts", "utf8").split("\n").find((l) => l.includes("glyph: glyph("));
+  const names = [...line.matchAll(/"([a-z-]+)"/g)].map((m) => m[1]).filter((n) => !["topup", "hold", "release", "refund", "admin_adjust"].includes(n));
   assert.ok(names.length >= 5);
-  for (const name of names) assert.ok(font.includes(`t-icon-${name}:before`), name);
+  for (const name of names) assert.ok(fs.existsSync(`assets/glyphs/${name}.png`), name);
 });
 
 test("points group thousands and keep cents only when present", () => {

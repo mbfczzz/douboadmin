@@ -14,7 +14,7 @@
   </view>
   <view class="viewer-actions" catchtap="hold">
     <view class="viewer-action" catchtap="mention" aria-role="button" aria-label="在描述中引用">
-      <view class="viewer-action-icon"><t-icon name="mentioned" size="22" /></view><text>引用</text>
+      <view class="viewer-action-icon"><image class="gl gl-22" src="/assets/glyphs/at.png" /></view><text>引用</text>
     </view>
     <view class="viewer-action" catchtap="remove" aria-role="button" aria-label="删除这张参考图">
       <view class="viewer-action-icon"><t-icon name="delete" size="22" /></view><text>删除</text>

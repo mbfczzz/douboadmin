@@ -1,12 +1,12 @@
 <nav-bar title="热门视频灵感" back /><view
   class="subpage"
   ><view wx:if="{{ready&&!enabled}}" class="biz-empty"
-    ><view class="empty-icon"><t-icon name="video" size="30" /></view
-    ><text>热门视频暂不可用，先去创作吧。</text
+    ><image class="empty-photo" src="/assets/photos/empty-video.jpg" mode="aspectFill" aria-hidden="true"
+    /><text>热门视频暂不可用，先去创作吧。</text
     ><text class="empty-link" bindtap="upload">去创作 ›</text></view
   ><block wx:else
   ><view class="hot-search"
-    ><t-icon name="search" size="18" /><input
+    ><image class="gl gl-18" src="/assets/glyphs/search-muted.png" /><input
       class="biz-input"
       value="{{query}}"
       bindinput="input"
@@ -82,13 +82,13 @@
     /><text class="biz-list-title hot-title">{{item.title}}</text
     ><text class="biz-small">{{item.author}} · {{item.dateText}}</text
     ><view class="hot-stats"
-      ><view><t-icon name="heart" size="14" /><text>{{item.likesText}}</text></view
-      ><view><t-icon name="play-circle" size="14" /><text>{{item.viewsText}}</text></view></view
+      ><view><image class="gl gl-14" src="/assets/glyphs/favorites-muted.png" /><text>{{item.likesText}}</text></view
+      ><view><image class="gl gl-14" src="/assets/glyphs/play-muted.png" /><text>{{item.viewsText}}</text></view></view
     ></view
   ><view
     wx:if="{{searched&&!loading&&!items.length&&!loadError}}"
     class="biz-empty"
-    ><view class="empty-icon"><t-icon name="search" size="26" /></view><text>没有找到相关视频，换个关键词试试</text></view
+    ><image class="empty-photo" src="/assets/photos/empty-search.jpg" mode="aspectFill" aria-hidden="true" /><text>没有找到相关视频，换个关键词试试</text></view
   ><view wx:if="{{hasMore}}" class="hot-more" bindtap="more">{{loading?'正在加载…':'加载更多'}}</view></block
 ></view
 >

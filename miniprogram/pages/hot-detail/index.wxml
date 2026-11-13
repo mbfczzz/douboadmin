@@ -19,13 +19,13 @@
       /><text class="biz-heading">{{video.title}}</text
       ><text class="biz-small">{{video.author}} · {{video.dateText}}</text
       ><view class="hot-stats"
-        ><view><t-icon name="heart" size="16" /><text>{{video.likesText}}</text></view
-        ><view><t-icon name="play-circle" size="16" /><text>{{video.viewsText}}</text></view></view
+        ><view><image class="gl gl-16" src="/assets/glyphs/favorites-muted.png" /><text>{{video.likesText}}</text></view
+        ><view><image class="gl gl-16" src="/assets/glyphs/play-muted.png" /><text>{{video.viewsText}}</text></view></view
       ></view
     ><view class="biz-card"
       ><view class="row biz-title-row"
         ><text class="biz-heading">视频文案</text
-        ><view class="copy-chip" bindtap="copy"><t-icon name="copy" size="14" /><text>复制</text></view></view
+        ><view class="copy-chip" bindtap="copy"><image class="gl gl-14" src="/assets/glyphs/copy.png" /><text>复制</text></view></view
       ><text selectable="true" class="video-copy">{{video.text}}</text></view
     ><text wx:if="{{busy}}" class="biz-note">{{progress}}</text
     ><text wx:elif="{{!video.url}}" class="biz-note">该视频暂不支持导入混剪。</text

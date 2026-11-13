@@ -24,7 +24,7 @@
       <view class="completed-item" wx:for="{{filtered}}" wx:key="id" data-id="{{item.id}}" bindtap="detail" hover-class="card-pressed">
         <view class="completed-cover">
           <image wx:if="{{item.thumbnailUrl||(item.input.kind==='image'&&item.result)}}" src="{{item.thumbnailUrl||item.result}}" mode="aspectFill" lazy-load data-id="{{item.id}}" binderror="coverError" />
-          <t-icon wx:else name="play-circle" size="32" />
+          <image wx:else class="gl gl-32" src="/assets/glyphs/play-muted-lg.png" />
           <text wx:if="{{item.input.duration}}" class="completed-duration">{{item.input.duration}} 秒</text>
         </view>
         <text class="completed-title">{{item.shortTitle}}</text>

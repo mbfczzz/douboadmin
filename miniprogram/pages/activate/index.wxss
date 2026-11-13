@@ -83,6 +83,5 @@ button.browse-link {
   text-align: center;
 }
 .status-icon {
-  margin-bottom: 10px;
-  background: var(--ui-field);
+  margin-bottom: 12px;
 }

@@ -1,16 +1,16 @@
 <nav-bar title="消息通知" back /><view
   class="subpage"
   ><view wx:if="{{needsLogin}}" class="biz-empty"
-    ><view class="empty-icon"><t-icon name="user" size="30" /></view><text>登录后查看消息</text><text class="empty-link" bindtap="signIn">去登录 ›</text></view
+    ><image class="empty-photo" src="/assets/photos/empty-login.jpg" mode="aspectFill" aria-hidden="true" /><text>登录后查看消息</text><text class="empty-link" bindtap="signIn">去登录 ›</text></view
   ><block wx:else
     ><view wx:if="{{items.length}}" class="row notice-head"
       ><text class="biz-small">未读 {{unread}}</text
-      ><view wx:if="{{unread}}" class="read-all" bindtap="readAll" hover-class="row-pressed"><t-icon name="check-double" size="14" /><text>全部已读</text></view></view
+      ><view wx:if="{{unread}}" class="read-all" bindtap="readAll" hover-class="row-pressed"><image class="gl gl-14" src="/assets/glyphs/check-double-brand.png" /><text>全部已读</text></view></view
     ><view wx:if="{{loadError}}" class="biz-error" bindtap="load"
       >{{loadError}} · 重试</view
     ><view wx:if="{{loading&&!items.length}}" class="skel-list" aria-label="正在加载消息"><view wx:for="{{[1,2,3]}}" wx:key="*this" class="skel-row"><view class="skeleton skel-dot" /><view class="skel-lines"><view class="skeleton skel-a" /><view class="skeleton skel-b" /></view></view></view
     ><view wx:elif="{{!loadError&&!items.length}}" class="biz-empty"
-      ><view class="empty-icon"><t-icon name="notification" size="30" /></view><text>暂时没有新消息</text></view
+      ><image class="empty-photo" src="/assets/photos/empty-notice.jpg" mode="aspectFill" aria-hidden="true" /><text>暂时没有新消息</text></view
     ><block wx:for="{{items}}" wx:key="id"><text wx:if="{{item.showDay}}" class="notice-day">{{item.day}}</text><view
       class="notice {{item.data.read?'':'unread'}}"
       data-id="{{item.id}}"

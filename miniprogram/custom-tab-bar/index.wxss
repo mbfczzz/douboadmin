@@ -35,6 +35,10 @@
   align-items: center;
   justify-content: center;
 }
+.tab-art {
+  width: 24px;
+  height: 24px;
+}
 .label {
   font-size: 12px;
   line-height: 18px;

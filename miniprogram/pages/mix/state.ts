@@ -17,10 +17,10 @@ const choices = {
     { value: "1:1", shape: "square" },
   ],
   features: [
-    { field: "transcribe", label: "语音转文字", icon: "microphone" },
-    { field: "rewrite", label: "AI 改写文案", icon: "edit" },
-    { field: "narration", label: "AI 配音", icon: "sound" },
-    { field: "captions", label: "自动字幕", icon: "subtitle" },
+    { field: "transcribe", label: "语音转文字", glyph: "mic" },
+    { field: "rewrite", label: "AI 改写文案", glyph: "rewrite" },
+    { field: "narration", label: "AI 配音", glyph: "voice" },
+    { field: "captions", label: "自动字幕", glyph: "subtitle" },
   ],
 };
 export const mixState = {
