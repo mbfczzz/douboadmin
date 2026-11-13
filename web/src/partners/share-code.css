@@ -41,9 +41,10 @@
   min-height: 168px;
 }
 .share-qr-slot {
-  flex: 0 0 168px;
-  width: 168px;
-  height: 168px;
+  flex: 0 0 280px;
+  width: 280px;
+  height: 412px;
+  max-width: 100%;
 }
 .share-qr-placeholder {
   display: grid;
@@ -60,14 +61,6 @@
 .share-qr-placeholder .error {
   margin: 0;
   font-size: 12px;
-}
-.share-qr {
-  flex-shrink: 0;
-  width: 168px;
-  height: 168px;
-  padding: 8px;
-  border-radius: var(--radius-sm);
-  background: #fff; /* the quiet zone a scanner needs */
 }
 .code-info {
   flex: 1;
@@ -160,4 +153,19 @@
   color: var(--ink-strong);
   font-size: 18px;
   font-weight: 600;
+}
+
+.share-poster {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+}
+@media (max-width: 720px) {
+  .share-qr-slot {
+    flex: none;
+    height: auto;
+    aspect-ratio: 720 / 1060;
+  }
 }

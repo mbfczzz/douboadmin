@@ -1,3 +1,4 @@
+@import "./poster.wxss";
 @import "../../styles/business.wxss";
 .provider-head {
   padding: 8px 2px 16px;

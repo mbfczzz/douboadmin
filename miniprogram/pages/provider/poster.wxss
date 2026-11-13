@@ -1,0 +1,80 @@
+.invite-card {
+  background: #111317;
+  border: 1px solid #3b3e46;
+  border-radius: 16px;
+  padding: 20px 16px 14px;
+  text-align: center;
+}
+.invite-brand {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  color: #f4f5f7;
+  font-size: 19px;
+  font-weight: 600;
+}
+.invite-brand > text:last-child {
+  color: #a6abb5;
+  font-size: 12px;
+  font-weight: 400;
+}
+.invite-owner {
+  display: block;
+  text-align: left;
+  color: #f4f5f7;
+  font-size: 16px;
+  line-height: 24px;
+  margin: 20px 0;
+  overflow-wrap: anywhere;
+}
+.invite-paper {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px 8px 16px;
+}
+.invite-paper .provider-qr {
+  width: 100%;
+  max-width: 215px;
+  height: 215px;
+  padding: 0;
+  margin: 0 auto 14px;
+}
+.invite-caption {
+  display: block;
+  color: #667085;
+  font-size: 12px;
+  line-height: 20px;
+}
+.invite-number {
+  display: block;
+  color: #202632;
+  font-size: 24px;
+  font-weight: 600;
+  margin: 4px 0 14px;
+  letter-spacing: 2px;
+}
+.invite-open {
+  display: block;
+  background: #00c8dc;
+  color: #082b30;
+  border-radius: 8px;
+  margin-top: 16px;
+  padding: 10px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.invite-footer {
+  display: block;
+  color: #a6abb5;
+  font-size: 12px;
+  margin-top: 14px;
+}
+.poster-canvas {
+  position: fixed;
+  left: -1000px;
+  top: 0;
+  width: 720px;
+  height: 1060px;
+  pointer-events: none;
+}

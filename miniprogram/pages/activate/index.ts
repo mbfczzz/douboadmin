@@ -1,3 +1,9 @@
+import {
+  captureInvite,
+  pendingInvite,
+  clearInvite,
+  scannedInvite,
+} from "../../services/invitation";
 import { loadBrand } from "../../services/branding";
 import {
   request,
@@ -18,7 +24,10 @@ import {
 import type { AccessStatus } from "../../services/access";
 import { trackVisit } from "../../services/analytics";
 import type { Config } from "../../services/types";
-import { supportsPhoneLogin, authorizedPhoneCode } from "../../services/phone-login";
+import {
+  supportsPhoneLogin,
+  authorizedPhoneCode,
+} from "../../services/phone-login";
 import {
   registerState,
   prefill,
@@ -31,6 +40,7 @@ import { codeState, enterCode, clearCode, pasteCode } from "./code-entry";
 Page({
   data: {
     brandIcon: "",
+    invite: "",
     logged: false,
     loading: true,
     busy: false,
@@ -40,6 +50,10 @@ Page({
     phoneReady: false,
     status: null as AccessStatus | null,
     ...registerState,
+  },
+  inviteAttempt: "",
+  onLoad(options: Record<string, string>) {
+    captureInvite(options);
   },
   revision: 0,
   destroyed: false,
@@ -56,9 +70,18 @@ Page({
     stopCountdown(this);
   },
   async load() {
-    void loadBrand(this, () => request<{ icon: string }>("/branding", "GET", undefined, undefined, false));
+    void loadBrand(this, () =>
+      request<{ icon: string }>(
+        "/branding",
+        "GET",
+        undefined,
+        undefined,
+        false,
+      ),
+    );
     const revision = ++this.revision;
     this.setData({
+      invite: pendingInvite(),
       logged: hasSession(),
       loading: true,
       loadError: "",
@@ -73,7 +96,11 @@ Page({
           false,
         );
         if (revision === this.revision)
-          this.setData({ wechatReady: c.wechatLogin, phoneReady: !!c.wechatPhoneLogin && supportsPhoneLogin(), status: null });
+          this.setData({
+            wechatReady: c.wechatLogin,
+            phoneReady: !!c.wechatPhoneLogin && supportsPhoneLogin(),
+            status: null,
+          });
         return;
       }
       const status = await accessStatus();
@@ -84,12 +111,18 @@ Page({
       }
       this.setData({ status, logged: hasSession() });
       prefill(this, status);
-      if (status.active) this.enter();
+      if (status.active) {
+        clearInvite();
+        this.enter();
+      }
     } catch (e) {
       if (revision === this.revision)
         this.setData({ loadError: (e as Error).message });
     } finally {
-      if (revision === this.revision) this.setData({ loading: false });
+      if (revision === this.revision) {
+        this.setData({ loading: false });
+        void this.joinInvite();
+      }
     }
   },
   // The code formats as it is typed: "kmnp2345" shows as "KMNP-2345".
@@ -129,6 +162,7 @@ Page({
     if (this.data.busy || !this.data.logged) return;
     const status = await register(this);
     if (status?.active) this.enter();
+    else if (status) await this.joinInvite();
   },
   async login() {
     await this.authenticate();
@@ -151,15 +185,40 @@ Page({
         error(e);
       }
     } finally {
-      if (!this.destroyed) this.setData({ busy: false });
+      if (!this.destroyed) {
+        this.setData({ busy: false });
+        await this.joinInvite();
+      }
     }
+  },
+  async joinInvite() {
+    const code = pendingInvite(),
+      status = this.data.status;
+    if (
+      !code ||
+      this.destroyed ||
+      this.data.busy ||
+      this.data.loading ||
+      !this.data.logged ||
+      !status ||
+      status.profileRequired ||
+      !["pending", "unbound", "rejected"].includes(status.status) ||
+      this.inviteAttempt === code
+    )
+      return;
+    this.inviteAttempt = code;
+    await this.join(code, "scan");
+  },
+  retryInvite() {
+    this.inviteAttempt = "";
+    void this.joinInvite();
   },
   async scan() {
     if (this.data.busy || !this.data.logged) return;
     try {
-      const result = await wx.scanCode({ scanType: ["qrCode"] });
+      const result = await wx.scanCode({});
       if (this.destroyed) return;
-      await this.join(shareFrom(result.result), "scan");
+      await this.join(scannedInvite(result), "scan");
     } catch (e) {
       if (!this.destroyed && !cancelled(e)) error(e);
     }
@@ -181,6 +240,10 @@ Page({
       });
       if (this.destroyed) return;
       // Scanning registers; approval opens the account later.
+      if (code === pendingInvite()) {
+        clearInvite();
+        this.setData({ invite: "" });
+      }
       this.setData({ status });
       clearCode(this);
       this.setData({ codeMode: false });

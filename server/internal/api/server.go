@@ -30,6 +30,7 @@ type Config struct {
 	AdminPassword          string
 	MediaDir               string
 	WebOrigin              string
+	WeChatCodeVersion      string
 	WeChatAppID            string
 	WeChatSecret           string
 	RelayURL               string

@@ -54,7 +54,7 @@ for (const width of [1440, 390, 320]) {
         "aria-busy",
         "true",
       );
-      await expect(dialog.locator(".share-qr")).toHaveCount(0);
+      await expect(dialog.locator(".share-poster")).toHaveCount(0);
       await expect(
         dialog.getByRole("button", { name: "复制", exact: true }),
       ).toBeDisabled();
@@ -95,7 +95,7 @@ test("failed tab load retains its layout, exposes retry and never shows the prev
   );
   await dialog.getByRole("tab", { name: titles.s2, exact: true }).click();
   await expect(dialog.getByRole("alert")).toContainText("读取暂时失败");
-  await expect(dialog.locator(".share-qr")).toHaveCount(0);
+  await expect(dialog.locator(".share-poster")).toHaveCount(0);
   await expect(
     dialog.getByRole("button", { name: "复制", exact: true }),
   ).toBeDisabled();
@@ -152,8 +152,8 @@ test("a late response from an abandoned tab cannot replace the selected code", a
   await dialog.getByRole("tab", { name: titles.member, exact: true }).click();
   release();
   await expect(dialog.locator(".share-code")).toHaveText("ABCD-2345");
-  await expect(dialog.locator(".share-qr")).toHaveAttribute(
+  await expect(dialog.locator(".share-poster")).toHaveAttribute(
     "alt",
-    titles.member + "二维码",
+    "华东分公司 " + titles.member + "分享卡片",
   );
 });

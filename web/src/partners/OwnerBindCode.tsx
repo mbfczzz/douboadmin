@@ -32,6 +32,7 @@ export default function OwnerBindCode({
       {open && (
         <>
           <CodeView
+            owner={name}
             path={path}
             title="负责人绑定码"
             note="仅用于负责人绑定自己的小程序账号，超级管理员开通后生效；一次有效。"

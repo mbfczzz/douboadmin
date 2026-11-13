@@ -31,3 +31,19 @@ func (o *OSS) EnsureQR(ctx context.Context, key string, body io.Reader) error {
 	}
 	return err
 }
+
+// QRExists avoids generating another WeChat image for the same app/version/code.
+func (o *OSS) QRExists(ctx context.Context, key string) (bool, error) {
+	if !shareCodeKey.MatchString(key) {
+		return false, errors.New("invalid QR image key")
+	}
+	_, err := o.client.HeadObject(ctx, &oss.HeadObjectRequest{Bucket: oss.Ptr(o.bucket), Key: oss.Ptr(key)})
+	if err == nil {
+		return true, nil
+	}
+	var service *oss.ServiceError
+	if errors.As(err, &service) && service.StatusCode == 404 {
+		return false, nil
+	}
+	return false, err
+}

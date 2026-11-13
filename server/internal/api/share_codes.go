@@ -22,6 +22,14 @@ func (a *Server) replyShare(w http.ResponseWriter, r *http.Request, v core.Partn
 		fail(w, 503, "二维码生成失败")
 		return
 	}
+	if r.Method == http.MethodGet && r.URL.Query().Get("image") == "1" {
+		if r.URL.Query().Get("code") != v.Code {
+			fail(w, 409, "邀请码已更新，请刷新后重试")
+			return
+		}
+		a.shareImageFile(w, r, qr)
+		return
+	}
 	reply(w, 200, shareView{Code: v.Code, QR: qr})
 }
 

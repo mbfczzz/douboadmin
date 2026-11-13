@@ -75,6 +75,7 @@ export async function openCodes(
     route.fulfill({ json: { items: [], page: 1, size: 20, total: 0 } }),
   );
   await page.route("**/api/admin/partners/code-provider/codes/*", (route) => {
+    if (new URL(route.request().url()).searchParams.get("image") === "1") return route.fulfill({ contentType:"image/png", body:Buffer.from(qr.split(",")[1],"base64") });
     const kind = new URL(route.request().url()).pathname
       .split("/")
       .pop() as keyof typeof codes;
@@ -85,6 +86,6 @@ export async function openCodes(
   if (self) await page.reload();
   await page.getByRole("button", { name: "分享码", exact: true }).click();
   const dialog = page.getByRole("dialog", { name: "分享码", exact: true });
-  await expect(dialog.locator(".share-qr")).toBeVisible();
+  await expect(dialog.locator(".share-poster")).toBeVisible();
   return { dialog, requests, row };
 }

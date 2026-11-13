@@ -16,11 +16,20 @@
     <view wx:if="{{tabs.length>1}}" class="provider-tabs">
       <text wx:for="{{tabs}}" wx:key="key" class="{{tab===item.key?'on':''}}" data-tab="{{item.key}}" bindtap="switchTab" aria-label="{{item.label}}">{{item.short}}</text>
     </view>
-    <image class="provider-qr" src="{{shown.qr}}" mode="aspectFit" show-menu-by-longpress />
-    <text wx:if="{{center}}" class="biz-note">归属服务商：{{center.name}}</text>
-    <view class="provider-code"><text>{{shown.code}}</text><text class="biz-link" bindtap="copy" data-text="{{shown.raw}}">复制</text></view>
+    <view class="invite-card">
+      <view class="invite-brand"><text>豆播 AI</text><text>{{posterTitle}}</text></view>
+      <text class="invite-owner">{{center.name||'豆播 AI · 创作邀请'}}</text>
+      <view class="invite-paper">
+        <image class="provider-qr" src="{{shown.qr}}" mode="aspectFit" show-menu-by-longpress />
+        <text class="invite-caption">邀请码</text><text class="invite-number">{{shown.code}}</text>
+        <text class="invite-caption">识别后自动带入邀请码</text>
+      </view>
+      <text class="invite-open">微信扫码进入豆播 AI</text>
+      <text class="invite-footer">完成登记后，由超级管理员开通</text>
+    </view>
+    <view class="provider-code"><text class="biz-link" bindtap="copy" data-text="{{shown.raw}}">复制邀请码</text></view>
     <text class="biz-note">{{note}}</text>
-    <button class="biz-action" bindtap="save">保存二维码</button>
+    <button class="biz-action" bindtap="save" loading="{{busy}}" disabled="{{busy}}">保存分享卡片</button>
   </view>
   <block wx:if="{{center&&center.role!=='s2'}}">
     <text class="provider-section">下级服务商 · {{childrenTotal}}</text>
@@ -44,3 +53,5 @@
   </view>
 </view>
 <ui-dialog id="ui-dialog" />
+
+<canvas type="2d" id="invite-poster" class="poster-canvas" />

@@ -34,6 +34,7 @@ Page({
     tabs: [] as { key: string; label: string; short: string }[],
     tab: "",
     note: "",
+    posterTitle: "推广邀请",
     shown: { code: "", raw: "", qr: "" },
     children: [] as (Child & { roleName: string; date: string })[],
     childrenPage: 0,
@@ -137,6 +138,7 @@ Page({
     if (!code) return;
     this.setData({
       tab: found[0],
+      posterTitle: found[1],
       note: found[2] + "，超级管理员开通后生效",
       shown: { code: prettyCode(code.code), raw: code.code, qr: code.qr },
     });
@@ -149,7 +151,7 @@ Page({
     if (!qr || this.data.busy) return;
     this.setData({ busy: true });
     try {
-      await saveQR(qr, raw);
+      await saveQR(qr, raw, this, { code: raw, title: this.data.posterTitle, owner: this.data.center?.name });
       wx.showToast({ title: "已保存到相册", icon: "success" });
     } catch (e) {
       saveFailed(e);

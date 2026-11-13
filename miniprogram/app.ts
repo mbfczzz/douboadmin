@@ -1,9 +1,11 @@
+import { captureInvite } from "./services/invitation";
 import { enforceAccess } from "./services/access";
 import { pauseVisit, resumeVisit } from "./services/analytics";
 import { trialDebug } from "./services/trial-debug";
 App({
   globalData: {},
   onShow(options) {
+    captureInvite(options.query);
     resumeVisit(options.scene);
     void enforceAccess(options.path || "pages/activate/index");
   },

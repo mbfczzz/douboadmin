@@ -102,6 +102,7 @@ func run() error {
 		AdminUser: env("ADMIN_USER", "admin"), AdminPassword: password, MediaDir: mediaDir,
 		WebOrigin: values["WEB_ORIGIN"], WeChatAppID: values["WECHAT_APP_ID"], WeChatSecret: values["WECHAT_APP_SECRET"],
 		RelayURL: values["RELAY_BASE_URL"], RelayKey: values["RELAY_API_KEY"]}
+	cfg.WeChatCodeVersion = env("WECHAT_CODE_VERSION", "trial")
 	cfg.RequireActivation = true
 	app := api.New(s, api.NewSessions(rc), cfg)
 	app.Integrations = connections

@@ -1,3 +1,4 @@
+import { useCodePoster } from "./useCodePoster";
 import type { ReactNode } from "react";
 import { Copy, Download, RotateCcw } from "lucide-react";
 import { api } from "../api";
@@ -18,6 +19,7 @@ export default function CodeView({
   title,
   note,
   file,
+  owner = "",
   notify,
   bound,
   share,
@@ -26,6 +28,7 @@ export default function CodeView({
   title: string;
   note: string;
   file: string;
+  owner?: string;
   notify: Notify;
   share: ReturnType<typeof useShareCode>;
   bound?: (
@@ -35,6 +38,14 @@ export default function CodeView({
   ) => ReactNode;
 }) {
   const s = share.data;
+  const poster = useCodePoster(
+    path,
+    s?.user ? undefined : s?.qr,
+    s?.code || "",
+    title,
+    owner,
+    share.data,
+  );
   async function reset() {
     const ok = await ask({
       title: `重置${title}？`,
@@ -60,19 +71,19 @@ export default function CodeView({
   return (
     <div className="code-view" aria-busy={share.loading}>
       <div className="share-qr-slot">
-        {s ? (
+        {poster.url ? (
           <img
-            className="share-qr"
-            src={s.qr}
-            alt={title + "二维码"}
-            width="168"
-            height="168"
+            className="share-poster"
+            src={poster.url}
+            alt={`${owner} ${title}分享卡片`}
+            width="280"
+            height="412"
           />
         ) : (
           <div className="share-qr-placeholder">
             <RequestState
-              loading={share.loading}
-              error={share.error}
+              loading={share.loading || (!!s && !poster.error)}
+              error={share.error || poster.error}
               retry={share.reload}
             />
           </div>
@@ -90,13 +101,13 @@ export default function CodeView({
         <div className="share-actions">
           <a
             className="primary"
-            href={s?.qr}
-            download={s ? file : undefined}
-            aria-disabled={!s || undefined}
-            tabIndex={s ? undefined : -1}
+            href={poster.url || undefined}
+            download={poster.url ? file : undefined}
+            aria-disabled={!poster.url || undefined}
+            tabIndex={poster.url ? undefined : -1}
           >
             <Download size={15} aria-hidden="true" />
-            下载二维码
+            下载分享卡片
           </a>
           <button
             type="button"

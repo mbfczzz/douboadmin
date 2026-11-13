@@ -83,7 +83,11 @@ console.log(
 // buttons and bare empty states replaced: 681,519 bytes.
 // HTTPS brand loading and OSS QR downloads: measured 684,191 B, no new SDK.
 // Explicit 1 KiB feature allowance; see docs/oss-image-delivery.md.
-const budget = 669 * 1024;
+// Mini-code scene handoff and automatic post-login registration: +2,398 B.
+// Explicit feature increment, see docs/miniprogram-invite-entry.md.
+// Share-card rendering and native PNG export reuse one renderer with the web.
+// Explicit feature allowance, see docs/invite-poster.md.
+const budget = 678 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

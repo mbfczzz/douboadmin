@@ -51,7 +51,14 @@ test("authored UI has no stale light-theme surfaces or indigo controls", () => {
     return entry.isDirectory() ? walk(file) : /\.(wxss|wxml|ts)$/.test(file) ? [file] : [];
   });
   for (const file of ["app.ts",...walk("pages"),...walk("components"),...walk("styles"),...walk("custom-tab-bar")]) {
-    assert.doesNotMatch(read(file), /#(?:f4f6f8|f1f4f8|d7dee6|202632|667085|4255c7|3445aa|eef0ff|f2f4ff|dde2fb|e8f1fc|fff0f2|eaf7ef|fff5d9|e9edf2)\b/i, file);
+    let source = read(file);
+    if (file.replaceAll("\\", "/") === "pages/provider/poster.wxss") {
+      // The scanner's white paper intentionally uses dark, high-contrast text.
+      assert.match(source, /\.invite-paper\s*\{[^}]*background: #fff;/);
+      assert.ok(contrast("#667085", "#ffffff") >= 4.5);
+      source = source.replace(/\.invite-(?:caption|number)\s*\{[^}]*\}/g, "");
+    }
+    assert.doesNotMatch(source, /#(?:f4f6f8|f1f4f8|d7dee6|202632|667085|4255c7|3445aa|eef0ff|f2f4ff|dde2fb|e8f1fc|fff0f2|eaf7ef|fff5d9|e9edf2)\b/i, file);
   }
   for (const file of ["pages/orders/index.wxss","pages/wallet/index.wxss"]) assert.ok(read(file).includes("var(--ui-success)"));
 });

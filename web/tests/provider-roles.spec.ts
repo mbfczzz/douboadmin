@@ -68,7 +68,7 @@ test("分享码 tabs follow the role", async ({ page }) => {
       "S2 推荐官邀请码",
       "子账号开通码",
     ]);
-    await expect(dialog.locator(".share-qr")).toBeVisible();
+    await expect(dialog.locator(".share-poster")).toBeVisible();
     expect(
       await dialog
         .locator(".provider-panel")
