@@ -1,9 +1,8 @@
 @import "./reply.wxss";
 .agent-page {
-  height: calc(100vh - 110px - env(safe-area-inset-bottom));
+  height: calc(100vh - var(--nav-bottom, 68px) - var(--ui-tabbar-height) - 1px - env(safe-area-inset-bottom));
   display: flex;
   flex-direction: column;
-  padding-bottom: 45px;
 }
 .chat-scroll {
   flex: 1;
@@ -15,8 +14,7 @@
 }
 /* Empty conversation: the greeting centred, starters docked above input. */
 .agent-empty {
-  flex: 1;
-  min-height: 0;
+  min-height: 100%;
   display: flex;
   flex-direction: column;
   padding: 0 20px;
@@ -197,7 +195,8 @@
   display: flex;
   align-items: flex-end;
   gap: 8px;
-  margin: 6px 16px 12px;
+  flex-shrink: 0;
+  margin: 24px 16px 16px;
   padding: 6px 6px 6px 16px;
   border-radius: 24px;
   background: var(--ui-surface);

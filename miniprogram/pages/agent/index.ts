@@ -13,8 +13,10 @@ import { chatMessages } from "../../utils/chat";
 import type { ChatMessage } from "../../utils/chat";
 import { jobPage } from "../../services/job-pages";
 import { sessionToken } from "../../services/session";
+import { navBottom } from "../../utils/nav-metrics";
 Page({
   data: {
+    navBottom: 68,
     prompt: "",
     messages: [] as ChatMessage[],
     busy: false,
@@ -41,9 +43,13 @@ Page({
   history: [] as Job[],
   historyToken: "",
   onShow() {
+    this.onResize();
     tab(this, 3);
     void this.load();
     this.poll();
+  },
+  onResize() {
+    this.setData({ navBottom: navBottom() });
   },
   // Poll only while a reply may still arrive; load() stops it when idle.
   poll() {

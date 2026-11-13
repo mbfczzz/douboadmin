@@ -33,6 +33,7 @@ page {
   --ui-radius-pill: 999px;
   --ui-sheet: #27292f;
   --ui-tabbar: #191a1f;
+  --ui-tabbar-height: 70px;
   --ui-tab-pill: #2c2c2e;
   --ui-selected-line: rgba(255, 255, 255, 0.72);
   --ui-radius-card: 20px;

@@ -18,7 +18,7 @@
     transform 120ms ease;
   flex: 1;
   min-width: 0;
-  height: 70px;
+  height: var(--ui-tabbar-height, 70px);
   min-height: 44px;
   display: flex;
   flex-direction: column;

@@ -13,6 +13,8 @@ function harness(timers = {}) {
     capturedComponent;
   const ctx = { storage, sent, nav, pages: [], loginCount: () => loginCount };
   const wx = {
+    getWindowInfo: () => ({ windowWidth: 390, windowHeight: 844, screenHeight: 844, statusBarHeight: 24 }),
+    getMenuButtonBoundingClientRect: () => ({ left: 294, top: 30, height: 32 }),
     getStorageSync: (k) => storage.get(k),
     setStorageSync: (k, v) => storage.set(k, v),
     removeStorageSync: (k) => storage.delete(k),

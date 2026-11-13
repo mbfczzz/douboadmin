@@ -14,6 +14,7 @@ Component({
       this.measure();
     },
     show() {
+      this.measure();
       this.setData({ backing: false });
     },
   },
