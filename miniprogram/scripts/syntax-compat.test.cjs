@@ -40,3 +40,14 @@ test("styles avoid inset/aspect-ratio and target buttons as button.class", () =>
           loose.push(`${f}: .${k}`);
   assert.deepEqual(loose, []);
 });
+
+// A new page draws over its container before its first frame; WeChat's
+// default container is white, which flashed on every tab switch.
+test("every page's container is the dark theme colour", () => {
+  const app = JSON.parse(fs.readFileSync("app.json", "utf8"));
+  for (const page of new Set(app.pages)) {
+    const config = JSON.parse(fs.readFileSync(page + ".json", "utf8"));
+    assert.equal(config.backgroundColorContent, "#0f0f11ff", page);
+    assert.equal(config.backgroundColor, "#0f0f11", page);
+  }
+});

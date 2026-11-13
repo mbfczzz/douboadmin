@@ -1,4 +1,6 @@
 {
+  "backgroundColorContent": "#0f0f11ff",
+  "backgroundColor": "#0f0f11",
   "enablePullDownRefresh": true,
   "usingComponents": {
     "t-loading": "tdesign-miniprogram/loading/loading"

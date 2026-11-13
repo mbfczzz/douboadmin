@@ -103,7 +103,8 @@ console.log(
 // Layout skeletons instead of full-page spinners, bounded URL table: 719,639 B.
 // Simulated user journey fixes (price kept while re-quoting, agent bubble
 // skeleton, neutral loading text): 720,555 B.
-const budget = 705 * 1024;
+// Dark page container on every page (no white frame on tab switch): 722,264 B.
+const budget = 707 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

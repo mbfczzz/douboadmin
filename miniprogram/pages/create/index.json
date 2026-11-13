@@ -1,4 +1,6 @@
 {
+  "backgroundColorContent": "#0f0f11ff",
+  "backgroundColor": "#0f0f11",
   "usingComponents": {
     "points-balance": "/components/points-balance/index",
     "t-popup": "tdesign-miniprogram/popup/popup",
