@@ -1,35 +1,29 @@
 .partner-hub {
   container-type: inline-size;
 }
-@container (max-width: 960px) {
+@container (max-width: 800px) {
   .provider-tree-head {
     display: none;
   }
-  /* Name, then status, then the actions: every row the same shape. */
+  /* Status stays beside the identity; actions use the full next row. */
   .provider-tree-row {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 12px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px 16px;
   }
   .provider-tree-actions {
+    grid-column: 1 / -1;
     justify-content: flex-start;
-    padding-left: calc(
-      min(var(--tree-depth), 5) * var(--tree-indent) + var(--tree-control) + 2px
-    );
+    padding-left: 0;
   }
   .provider-tree-name {
-    grid-column: 1 / -1;
+    grid-column: 1;
   }
   .provider-tree-meta {
     display: flex;
     flex-wrap: wrap;
     gap: 16px 24px;
-    padding-left: calc(
-      min(var(--tree-depth), 5) * var(--tree-indent) + var(--tree-control) + 8px
-    );
-  }
-  .provider-tree-meta small {
-    display: block;
-    margin-bottom: 8px;
+    justify-content: flex-end;
+    padding-left: 0;
   }
 }
 @container (max-width: 520px) {
@@ -37,10 +31,6 @@
     --tree-indent: 12px;
     --tree-control: 44px;
     --tree-inset: 16px;
-  }
-  .provider-tree-meta {
-    grid-column: 1 / -1;
-    padding-left: 0;
   }
   .provider-tree-actions {
     grid-column: 1 / -1;

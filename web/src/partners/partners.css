@@ -6,7 +6,7 @@
 .provider-tree-head,
 .provider-tree-row {
   display: grid;
-  grid-template-columns: minmax(220px, 1fr) 96px 340px;
+  grid-template-columns: minmax(220px, 0.85fr) 88px minmax(0, 1.4fr);
   align-items: center;
   gap: 24px;
 }
@@ -33,6 +33,7 @@
   display: block;
   color: var(--ink-strong);
   font-size: 14px;
+  overflow-wrap: anywhere;
 }
 .provider-tree-row.child .provider-tree-identity b {
   font-size: 13px;
@@ -41,6 +42,7 @@
 .provider-tree-detail {
   margin-top: 3px;
   font-size: 12px;
+  overflow-wrap: anywhere;
 }
 .provider-id {
   color: var(--muted);
@@ -75,26 +77,22 @@
   display: none;
 }
 .provider-tree-head > :last-child {
-  text-align: right;
+  padding-left: 8px;
 }
-/* One row of compact actions: business functions, a thin divider, then the
-   provider's own record. */
-/* Left-aligned so 分享码 and 分佣 line up whatever follows them. */
+/* Keep every action reachable; both semantic groups can wrap within the column. */
 .provider-tree-actions {
+  min-width: 0;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: flex-start;
-  gap: 0;
-  white-space: nowrap;
+  gap: 4px 12px;
 }
 .provider-action-group {
   display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
   align-items: center;
   gap: 2px;
-}
-.provider-action-group + .provider-action-group {
-  margin-left: 6px;
-  padding-left: 6px;
-  border-left: 1px solid var(--line);
 }
 .provider-tree-actions .text-button {
   display: inline-flex;
@@ -103,6 +101,8 @@
   padding: 5px 8px;
   border-radius: var(--radius-sm);
   font-size: 12.5px;
+  white-space: nowrap;
+  min-height: 32px;
   transition: background 120ms;
 }
 .provider-tree-actions .text-button:hover {
