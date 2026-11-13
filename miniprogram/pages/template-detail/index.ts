@@ -1,3 +1,4 @@
+import { UI_ART } from "../../utils/ui-art";
 import { recallRow, freshUrl } from "../../utils/view-cache";
 import {
   request,
@@ -31,11 +32,12 @@ Page({
     favoriteVersion: 0,
     favoriteBusy: false,
     sourceOpen: false,
+    uploadExample: UI_ART.uploadExample, // how a product photo should look
     autoplay: false, // follows the 自动播放 preference, as on the templates page
     sources: [
-      { label: "相册", icon: "image", hint: "已有的商品照", tone: "image" },
-      { label: "拍照", icon: "camera", hint: "现在就拍一张", tone: "video" },
-      { label: "聊天文件", icon: "folder-open", hint: "微信里收到的", tone: "audio" },
+      { label: "相册", icon: "image", hint: "已有的商品照", tone: "image", image: UI_ART.srcImage },
+      { label: "拍照", icon: "camera", hint: "现在就拍一张", tone: "video", image: UI_ART.srcCamera },
+      { label: "聊天文件", icon: "folder-open", hint: "微信里收到的", tone: "audio", image: UI_ART.srcChat },
     ],
   },
   id: "",

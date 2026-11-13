@@ -41,6 +41,7 @@
           <view class="slot-remove" data-id="{{item.id}}" catchtap="remove" aria-role="button" aria-label="删除这张照片"><t-icon name="close" size="14" /></view>
         </view>
         <view wx:if="{{assets.length<template.data.requiredImages}}" class="slot add required" bindtap="choose" hover-class="slot-pressed" aria-role="button" aria-label="上传商品主体图">
+          <image wx:if="{{uploadExample}}" class="slot-example" src="{{uploadExample}}" mode="aspectFill" /><text wx:if="{{uploadExample}}" class="slot-example-tag">示例</text>
           <t-icon name="{{uploading?'time':'add'}}" size="26" /><text class="slot-name">商品主体图</text><text class="slot-hint">正面清晰</text>
         </view>
         <block wx:elif="{{!fixedCount}}">
@@ -71,7 +72,8 @@
     </view>
     <view class="source-grid">
       <view wx:for="{{sources}}" wx:key="label" class="source-tile" data-index="{{index}}" bindtap="chooseSource" hover-class="source-pressed">
-        <view class="source-glyph glyph-{{item.tone}}"><t-icon name="{{item.icon}}" size="26" /></view>
+        <image wx:if="{{item.image}}" class="source-photo" src="{{item.image}}" mode="aspectFill" />
+        <view wx:else class="source-glyph glyph-{{item.tone}}"><t-icon name="{{item.icon}}" size="26" /></view>
         <text class="source-name">{{item.label}}</text>
         <text class="source-hint">{{item.hint}}</text>
       </view>

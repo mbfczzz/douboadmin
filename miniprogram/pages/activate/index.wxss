@@ -1,3 +1,4 @@
+@import "../../styles/backdrop.wxss";
 @import "../../styles/business.wxss";
 @import "./entry.wxss";
 .activation-page {

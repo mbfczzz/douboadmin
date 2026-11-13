@@ -1,8 +1,9 @@
 <view class="biz-card">
   <text class="mix-label">剪辑风格</text>
   <view class="mix-tiles">
-    <view wx:for="{{styles}}" wx:key="value" class="mix-tile {{style===item.value?'on':''}}" data-field="style" data-value="{{item.value}}" bindtap="option" aria-role="button" aria-label="{{item.label+(style===item.value?'，已选中':'')}}">
-      <t-icon name="{{item.icon}}" size="24" />
+    <view wx:for="{{styles}}" wx:key="value" class="mix-tile {{item.image?'mix-style':''}} {{style===item.value?'on':''}}" data-field="style" data-value="{{item.value}}" bindtap="option" aria-role="button" aria-label="{{item.label+(style===item.value?'，已选中':'')}}">
+      <image wx:if="{{item.image}}" class="mix-style-photo" src="{{item.image}}" mode="aspectFill" />
+      <t-icon wx:else name="{{item.icon}}" size="24" />
       <text>{{item.label}}</text>
     </view>
   </view>

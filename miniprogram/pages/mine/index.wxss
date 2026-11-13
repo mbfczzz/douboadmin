@@ -19,7 +19,20 @@
   /* Fade in under the nav bar and out before the works. */
   -webkit-mask-image: linear-gradient(180deg, transparent 6%, #000 40%, #000 50%, transparent 95%);
   mask-image: linear-gradient(180deg, transparent 6%, #000 40%, #000 50%, transparent 95%);
-  background: radial-gradient(120% 80% at 20% 0%, #00c8dc26, transparent 60%), radial-gradient(90% 70% at 90% 10%, #6c63ff26, transparent 60%);
+}
+/* The generated backdrop is already dark and sharp: no blur, full strength,
+   and its light sits at the top, so only the bottom fades out. */
+.mine-hero.photo {
+  top: -12px;
+  height: 420px;
+  -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 55%, transparent 96%);
+  mask-image: linear-gradient(180deg, #000 0%, #000 55%, transparent 96%);
+}
+.mine-hero image.backdrop-photo {
+  height: auto; /* widthFix: keep the lamp at the top in view */
+  opacity: 1;
+  filter: none;
+  transform: none;
 }
 .mine-hero image {
   width: 100%;
@@ -58,7 +71,7 @@
   font-size: 26px;
   font-weight: 600;
   color: #fff;
-  background: linear-gradient(135deg, #00c8dc, #6c63ff);
+  background: var(--ui-selected);
 }
 .avatar image {
   width: 100%;

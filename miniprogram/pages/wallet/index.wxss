@@ -238,7 +238,7 @@ button.wallet-refresh {
 
 /* Balance: the same cyan-violet wash as the points strip on 我的. */
 .wallet-summary {
-  background: linear-gradient(135deg, #00c8dc29, #6c63ff24 55%, var(--ui-surface));
+  background: var(--ui-surface);
   box-shadow: inset 0 0 0 1px #ffffff12;
 }
 .wallet-summary .biz-value {
@@ -248,7 +248,7 @@ button.wallet-refresh {
 
 /* Pending payment: a cyan-tinted card with a live glyph. */
 .payment-status {
-  background: linear-gradient(135deg, #00c8dc1f, var(--ui-surface) 70%);
+  background: var(--ui-surface);
   box-shadow: inset 0 0 0 1px #00c8dc33;
 }
 .payment-head {

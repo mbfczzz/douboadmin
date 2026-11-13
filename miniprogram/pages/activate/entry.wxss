@@ -5,9 +5,7 @@
   align-items: center;
   padding: 22px 12px 18px;
   border-radius: 16px;
-  background:
-    radial-gradient(circle at 50% 38%, #00c8dc1f, transparent 62%),
-    var(--ui-field);
+  background: var(--ui-field);
   transition:
     opacity 120ms ease,
     transform 120ms ease;

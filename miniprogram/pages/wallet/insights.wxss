@@ -71,10 +71,10 @@
   justify-content: center;
   border-radius: 10px;
   color: #fff;
-  background: linear-gradient(135deg, #2bd4c8, #1a8fb8);
+  background: #00000080;
 }
 .use-video .use-icon {
-  background: linear-gradient(135deg, #7b6cff, #4a47c9);
+  background: #00000080;
 }
 .use-count {
   display: block;
@@ -116,7 +116,7 @@ button.virtual-product > text.product-badge {
   font-weight: 600;
   line-height: 18px;
   color: var(--ui-on-brand);
-  background: linear-gradient(90deg, #00c8dc, #6c63ff);
+  background: var(--ui-text);
 }
 .product-rate {
   display: block;
@@ -160,6 +160,19 @@ button.virtual-product > text.product-badge {
 .wallet-summary > view:not(.hero-art) {
   position: relative;
   z-index: 1;
+}
+/* Fallback picture when there are no works yet: fades out to the left so
+   the balance stays on plain card colour. */
+.summary-photo {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 72%;
+  height: 100%;
+  opacity: 0.5;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 60%);
+  mask-image: linear-gradient(to right, transparent, #000 60%);
+  pointer-events: none;
 }
 .hero-art {
   position: absolute;

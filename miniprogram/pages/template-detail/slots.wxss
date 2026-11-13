@@ -93,3 +93,26 @@
 .loading-row {
   padding: 0;
 }
+/* A faint example photo inside the empty required slot: shows what to shoot. */
+.slot-example {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.28;
+}
+.slot.required > t-icon,
+.slot.required > text {
+  position: relative;
+}
+.slot-example-tag {
+  position: absolute !important;
+  top: 6px;
+  left: 6px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-size: 10px;
+  color: #fff;
+  background: #00000080;
+}

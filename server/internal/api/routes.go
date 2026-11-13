@@ -33,6 +33,7 @@ func (a *Server) routes() {
 	m.HandleFunc("GET /api/config", a.config)
 	m.HandleFunc("GET /api/branding", a.branding)
 	m.HandleFunc("GET /api/brand-icon", a.brandIconFile)
+	m.HandleFunc("GET /api/ui-art/{name}", a.uiArtFile)
 	m.HandleFunc("POST /api/auth/login", a.login)
 	m.HandleFunc("POST /api/auth/wechat", a.login)
 	m.HandleFunc("POST /api/auth/phone/code", a.sendPhoneLoginCode)

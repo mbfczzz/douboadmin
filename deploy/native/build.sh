@@ -31,7 +31,7 @@ mkdir -p "$output/bin" "$output/web" "$output/media" "$output/deploy/native"
     go build -trimpath -ldflags='-s -w' -o "$output/bin/doubo-api" ./cmd/server
 )
 cp -R web/dist/. "$output/web/"
-cp -R media/design media/model-icons media/brand "$output/media/"
+cp -R media/design media/model-icons media/brand media/ui-art "$output/media/"
 cp deploy/native/deploy.sh deploy/native/*.service deploy/native/*.example "$output/deploy/native/"
 git rev-parse HEAD > "$output/REVISION"
 

@@ -69,9 +69,9 @@
     <view class="sheet-handle" />
     <view class="reference-heading"><text>添加参考</text><view class="close-sheet" bindtap="closeAssets"><t-icon name="close" size="20" /></view></view>
     <view class="source-grid">
-      <view wx:if="{{allowImage}}" class="source-tile" data-kind="image" bindtap="addAsset" hover-class="source-pressed"><view class="source-glyph glyph-image"><t-icon name="image" size="26" /></view><text class="source-name">图片</text><text class="source-hint">人物 · 商品 · 场景</text></view>
-      <view wx:if="{{allowVideo}}" class="source-tile" data-kind="video" bindtap="addAsset" hover-class="source-pressed"><view class="source-glyph glyph-video"><t-icon name="video-camera" size="26" /></view><text class="source-name">视频</text><text class="source-hint">动作 · 运镜参考</text></view>
-      <view wx:if="{{allowAudio}}" class="source-tile" data-kind="audio" bindtap="addAsset" hover-class="source-pressed"><view class="source-glyph glyph-audio"><t-icon name="sound" size="26" /></view><text class="source-name">音频</text><text class="source-hint">配乐 · 人声</text></view>
+      <view wx:if="{{allowImage}}" class="source-tile" data-kind="image" bindtap="addAsset" hover-class="source-pressed"><image wx:if="{{sourceArt.image}}" class="source-photo" src="{{sourceArt.image}}" mode="aspectFill" /><view wx:else class="source-glyph glyph-image"><t-icon name="image" size="26" /></view><text class="source-name">图片</text><text class="source-hint">人物 · 商品 · 场景</text></view>
+      <view wx:if="{{allowVideo}}" class="source-tile" data-kind="video" bindtap="addAsset" hover-class="source-pressed"><image wx:if="{{sourceArt.video}}" class="source-photo" src="{{sourceArt.video}}" mode="aspectFill" /><view wx:else class="source-glyph glyph-video"><t-icon name="video-camera" size="26" /></view><text class="source-name">视频</text><text class="source-hint">动作 · 运镜参考</text></view>
+      <view wx:if="{{allowAudio}}" class="source-tile" data-kind="audio" bindtap="addAsset" hover-class="source-pressed"><image wx:if="{{sourceArt.audio}}" class="source-photo" src="{{sourceArt.audio}}" mode="aspectFill" /><view wx:else class="source-glyph glyph-audio"><t-icon name="sound" size="26" /></view><text class="source-name">音频</text><text class="source-hint">配乐 · 人声</text></view>
     </view>
     <text class="source-note">已添加 {{assets.length}} / {{maxReferences}}</text>
   </view>

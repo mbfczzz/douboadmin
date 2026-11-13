@@ -158,8 +158,8 @@
   align-items: center;
   justify-content: center;
   border-radius: 14px;
-  color: #fff;
-  background: linear-gradient(135deg, #00c8dc, #6c63ff);
+  color: var(--ui-on-brand);
+  background: var(--ui-text);
 }
 .provider-more {
   padding: 16px 0;

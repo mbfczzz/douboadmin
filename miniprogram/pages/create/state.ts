@@ -1,5 +1,6 @@
 import type { Row, Asset } from "../../services/types";
 import type { ModelChoice } from "./editor-types";
+import { UI_ART } from "../../utils/ui-art";
 
 export const creationData = {
   maxPromptChars: 20000,
@@ -11,6 +12,7 @@ export const creationData = {
   allowImage: false,
   allowVideo: false,
   allowAudio: false,
+  sourceArt: { image: UI_ART.srcImage, video: UI_ART.srcVideo, audio: UI_ART.srcAudio },
   model: "",
   modelIndex: 0,
   modelName: "正在加载模型",

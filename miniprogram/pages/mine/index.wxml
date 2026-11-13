@@ -14,8 +14,9 @@
     <text class="guest-note">手机号仅在你同意后获取</text>
   </view>
   <view wx:elif="{{me}}">
-    <view class="mine-hero" aria-hidden="true">
+    <view class="mine-hero {{jobs[0].thumbnailUrl||jobs[0].result?'':backdrop?'photo':''}}" aria-hidden="true">
       <image wx:if="{{jobs[0].thumbnailUrl||jobs[0].result}}" src="{{jobs[0].thumbnailUrl||jobs[0].result}}" mode="aspectFill" />
+      <image wx:elif="{{backdrop}}" class="backdrop-photo" src="{{backdrop}}" mode="widthFix" />
     </view>
     <view wx:if="{{loadError}}" class="error-box" bindtap="load">刷新失败，已保留上次信息 · 点击重试</view>
     <view class="profile" bindtap="edit" aria-role="button" aria-label="编辑个人资料" hover-class="card-pressed">

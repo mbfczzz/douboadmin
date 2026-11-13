@@ -34,9 +34,8 @@
   align-items: center;
   justify-content: center;
   border-radius: 22px;
-  color: #fff;
-  background: linear-gradient(135deg, #00c8dc, #6c63ff);
-  box-shadow: 0 10px 32px #00c8dc40;
+  color: var(--ui-on-brand);
+  background: var(--ui-text);
   animation: mark-float 4s ease-in-out infinite;
 }
 @keyframes mark-float {
@@ -78,6 +77,13 @@
   height: 40px;
   flex-shrink: 0;
   border-radius: 12px;
+}
+.starter-photo {
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  background: var(--ui-field);
 }
 .starter-copy {
   flex: 1;
@@ -135,8 +141,8 @@
   align-items: center;
   justify-content: center;
   border-radius: 8px;
-  color: #fff;
-  background: linear-gradient(135deg, #00c8dc, #6c63ff);
+  color: var(--ui-on-brand);
+  background: var(--ui-text);
 }
 .typing {
   display: flex;

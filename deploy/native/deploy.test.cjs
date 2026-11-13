@@ -101,6 +101,7 @@ for (const name of [
       "media/design/icon.png",
       "media/model-icons/model.png",
       "media/brand/doubo.png",
+      "media/ui-art/mine-bg.jpg",
       "deploy/native/doubo@.service",
       "deploy/native/doubo-migrate.service",
       "deploy/native/doubo.env.example",

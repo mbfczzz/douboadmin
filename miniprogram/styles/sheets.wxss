@@ -33,14 +33,22 @@
   border-radius: 16px;
   color: #fff;
 }
+/* Photo in place of the glyph; the grey shows while it loads or if it fails. */
+.source-photo {
+  display: block;
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background: var(--ui-selected);
+}
 .glyph-image {
-  background: linear-gradient(135deg, #2bd4c8, #1a8fb8);
+  background: var(--ui-selected);
 }
 .glyph-video {
-  background: linear-gradient(135deg, #7b6cff, #4a47c9);
+  background: var(--ui-selected);
 }
 .glyph-audio {
-  background: linear-gradient(135deg, #ff9a62, #e05a6d);
+  background: var(--ui-selected);
 }
 .source-name {
   margin-top: 12px;

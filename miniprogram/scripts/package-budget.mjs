@@ -107,7 +107,13 @@ console.log(
 // Account lifecycle and owner-bound form submission: 725,322 bytes.
 // Final cross-session guards add 688 bytes, exceeding 708 KiB by 330 bytes.
 // Reviewed feature allowance and measurements: docs/account-lifecycle.md.
-const budget = 709 * 1024;
+// Flat colours instead of decorative cyan-violet gradients; optional
+// generated photo slots (utils/ui-art.ts, empty until published): 727,568 B.
+// Codex photographs on upload sources, mix styles, login/activation and the
+// wallet card, loaded from the API or OSS (media/ui-art, not in the package),
+// each with a flat fallback: 732,639 B (+5,071). Limit 712 -> 716 KiB for
+// this reviewed increment; see docs/miniprogram-invite-code-budget.md.
+const budget = 716 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

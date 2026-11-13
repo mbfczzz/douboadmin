@@ -11,7 +11,7 @@
     </view>
     <view class="starters">
       <view wx:for="{{quick}}" wx:key="prompt" class="starter" data-value="{{item.prompt}}" bindtap="quick" hover-class="starter-pressed" aria-role="button">
-        <view class="source-glyph starter-glyph glyph-{{item.tone}}"><t-icon name="{{item.icon}}" size="20" /></view>
+        <image wx:if="{{item.image}}" class="starter-photo" src="{{item.image}}" mode="aspectFill" lazy-load /><view wx:else class="source-glyph starter-glyph glyph-{{item.tone}}"><t-icon name="{{item.icon}}" size="20" /></view>
         <view class="starter-copy"><text class="starter-title">{{item.prompt}}</text><text class="starter-hint">{{item.hint}}</text></view>
         <t-icon name="arrow-right-up" size="16" />
       </view>

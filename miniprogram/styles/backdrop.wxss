@@ -1,0 +1,19 @@
+/* A photograph behind the top of a page that fades into the page colour.
+   The page container opens its own stacking layer so the photo sits under
+   every in-flow child without touching their styles. */
+.has-backdrop {
+  position: relative;
+  z-index: 0;
+}
+.page-backdrop {
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 400px;
+  opacity: 0.32;
+  -webkit-mask-image: linear-gradient(#000 0%, #000 30%, transparent 88%);
+  mask-image: linear-gradient(#000 0%, #000 30%, transparent 88%);
+  pointer-events: none;
+}

@@ -9,12 +9,12 @@
   background: var(--ui-surface);
 }
 .task-card.failed {
-  background: linear-gradient(135deg, #ff5c6c12, var(--ui-surface) 45%);
+  background: var(--ui-surface);
   box-shadow: inset 0 0 0 1px #ff5c6c26;
 }
 .task-card.running,
 .task-card.queued {
-  background: linear-gradient(135deg, #00c8dc14, var(--ui-surface) 45%);
+  background: var(--ui-surface);
 }
 .task-thumb {
   position: relative;

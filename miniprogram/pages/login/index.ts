@@ -14,9 +14,11 @@ import type { Config } from "../../services/types";
 import { loginContext } from "../../services/login-context";
 import { canEnter, activationRedirect } from "../../services/access";
 import { supportsPhoneLogin, authorizedPhoneCode } from "../../services/phone-login";
+import { UI_ART } from "../../utils/ui-art";
 Page({
   data: {
     brandIcon: "",
+    backdrop: UI_ART.loginBackdrop,
     ...loginContext(),
     loading: true,
     busy: false,

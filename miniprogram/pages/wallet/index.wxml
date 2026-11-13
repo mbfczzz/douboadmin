@@ -17,6 +17,7 @@
     <view wx:elif="{{paymentNotice}}" class="biz-note" aria-role="status">{{paymentNotice}}</view>
     <view wx:if="{{info}}" class="biz-card wallet-summary">
       <view wx:if="{{heroArt.length}}" class="hero-art" aria-hidden="true"><image wx:for="{{heroArt}}" wx:key="*this" src="{{item}}" mode="aspectFill" class="fan-{{index}}" /></view>
+      <image wx:elif="{{backdrop}}" class="summary-photo" src="{{backdrop}}" mode="aspectFill" aria-hidden="true" />
       <view class="summary-label"><text class="points-mark">✦</text><text>可用积分</text></view>
       <view class="row"><text class="biz-value">{{available}}</text><button class="wallet-refresh" bindtap="load" disabled="{{loading}}"><t-icon name="refresh" size="16" /><text>刷新</text></button></view>
       <view class="summary-held"><t-icon name="lock-on" size="16" /><text>预留 {{held}} 积分</text><text class="biz-small">处理中暂时冻结</text></view>

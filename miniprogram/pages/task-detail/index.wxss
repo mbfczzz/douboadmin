@@ -232,7 +232,7 @@ button.retry-pill::after {
   justify-content: center;
   gap: 12px;
   border-radius: 20px;
-  background: linear-gradient(160deg, #00c8dc29, #6c63ff1f 55%, var(--ui-surface));
+  background: var(--ui-surface);
 }
 .live-stage::after {
   content: "";

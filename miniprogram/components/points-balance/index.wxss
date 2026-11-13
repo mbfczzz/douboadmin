@@ -95,7 +95,7 @@ button.action {
   gap: 12px;
   padding: 14px 16px;
   border-radius: 16px;
-  background: linear-gradient(120deg, #00c8dc1f, #6c63ff1a 60%, var(--ui-surface));
+  background: var(--ui-surface);
   color: var(--ui-muted);
 }
 .row-pressed {
@@ -110,8 +110,8 @@ button.action {
   justify-content: center;
   border-radius: 12px;
   font-size: 18px;
-  color: #fff;
-  background: linear-gradient(135deg, #00c8dc, #6c63ff);
+  color: var(--ui-on-brand);
+  background: var(--ui-text);
 }
 .row-copy {
   flex: 1;

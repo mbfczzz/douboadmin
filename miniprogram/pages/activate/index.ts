@@ -38,10 +38,12 @@ import {
   registerRequest,
 } from "./register";
 import { codeState, enterCode, clearCode, pasteCode } from "./code-entry";
+import { UI_ART } from "../../utils/ui-art";
 
 Page({
   data: {
     brandIcon: "",
+    backdrop: UI_ART.loginBackdrop,
     invite: "",
     logged: false,
     loading: true,

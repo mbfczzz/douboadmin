@@ -45,7 +45,7 @@
 .running-cell {
   flex-direction: column;
   gap: 2px;
-  background: linear-gradient(160deg, #00c8dc29, var(--ui-surface) 70%);
+  background: var(--ui-surface);
   box-shadow: inset 0 0 0 1px #00c8dc40;
 }
 .running-cell::after {

@@ -1,11 +1,13 @@
 import type { WalletInfo } from "../../services/business";
 import type { PurchaseMode } from "../../services/virtual-amount";
+import { UI_ART } from "../../utils/ui-art";
 
 export const walletData = {
   productId: "",
   products: [] as ReturnType<typeof import("./insights").productCards>,
   price100: "",
   heroArt: [] as string[],
+  backdrop: UI_ART.walletBackdrop, // until the user has works to fan out
   useArt: { image: "", video: "" } as Record<string, string>,
   uses: [] as Array<{ kind: string; icon: string; title: string; cost: string; units: number; count: number; unit: string; model: string }>,
   purchaseMode: "package" as PurchaseMode,

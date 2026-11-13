@@ -32,7 +32,7 @@ media_dir="${media_dir:-$base/shared/media}"
 [[ "$media_dir" == /* ]] || die "MEDIA_DIR must be an absolute path: $media_dir"
 mkdir -p "$media_dir"
 chown doubo:doubo "$media_dir"
-for assets in design model-icons brand; do
+for assets in design model-icons brand ui-art; do
   mkdir -p "$media_dir/$assets"
   cp -R "$release/media/$assets/." "$media_dir/$assets/"
   chmod -R a+rX "$media_dir/$assets"

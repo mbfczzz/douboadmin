@@ -1,5 +1,6 @@
 @import "../../styles/business.wxss";
 @import "./form.wxss";
+@import "./style-tiles.wxss";
 .mix-heading {
   margin: 6px 0 9px;
 }

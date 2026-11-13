@@ -1,3 +1,4 @@
+import { UI_ART } from "../../utils/ui-art";
 import { readView, writeView, keepImages, rememberRows, VIEW_MAX_AGE, freshUrl, noteIssued } from "../../utils/view-cache";
 import { pullRefresh } from "../../utils/refresh";
 import {
@@ -45,6 +46,7 @@ Page({
     menus: baseMenus,
     roleMenu: null as ((typeof baseMenus)[number] & { hint: string }) | null,
     avatarLetter: "",
+    backdrop: UI_ART.mineBackdrop, // shown until the user has a work cover
     unread: 0,
   },
   loadVersion: 0,
