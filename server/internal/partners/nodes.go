@@ -72,7 +72,9 @@ func createChild(tx store.Transaction, id, parent string, n core.Partner, actor 
 	return created, audit(tx, id, "create_partner", actor, "创建服务商", map[string]any{"partner": n})
 }
 
-func frozen(status string) bool { return status == "pending" || status == "rejected" }
+func frozen(status string) bool {
+	return status == "pending" || status == "rejected" || status == "deleted"
+}
 
 // Tree lists every provider record except rejected registrations; callers
 // filter it to their scope.
@@ -81,7 +83,7 @@ func (s *Service) Tree(ctx context.Context) ([]core.Record, error) {
 	out := rows[:0]
 	for _, row := range rows {
 		var p core.Partner
-		if json.Unmarshal(row.Data, &p) == nil && p.Status != "rejected" {
+		if json.Unmarshal(row.Data, &p) == nil && p.Status != "rejected" && p.Status != "deleted" {
 			out = append(out, row)
 		}
 	}

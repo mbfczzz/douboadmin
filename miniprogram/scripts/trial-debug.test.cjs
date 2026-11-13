@@ -1,41 +1,94 @@
-const {test}=require("node:test");
-const assert=require("node:assert/strict");
-const fs=require("node:fs"),vm=require("node:vm"),ts=require("typescript");
-// The debug console slows every request and render, so it is opt-in only.
-function fixture(env, stored){
-  const calls=[],storage=new Map(stored===undefined?[]:[["debug-console",stored]]);
-  const exports={};
-  const code=ts.transpileModule(fs.readFileSync("services/trial-debug.ts","utf8"),{compilerOptions:{module:ts.ModuleKind.CommonJS}}).outputText;
-  vm.runInNewContext(code,{exports,Promise,wx:{getAccountInfoSync:()=>({miniProgram:{envVersion:env}}),setEnableDebug(o){calls.push(o.enableDebug)},getStorageSync:k=>storage.get(k),setStorageSync:(k,v)=>storage.set(k,v)}});
-  return {...exports,calls,storage};
+const { test } = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const vm = require('node:vm');
+const ts = require('typescript');
+function fixture(env, stored = new Map()) {
+  const calls = [], timers = [], exports = {};
+  const code = ts.transpileModule(fs.readFileSync('services/trial-debug.ts', 'utf8'), {
+    compilerOptions: { module: ts.ModuleKind.CommonJS },
+  }).outputText;
+  vm.runInNewContext(code, {
+    exports, Promise, Error,
+    setTimeout: callback => (timers.push(callback), timers.length),
+    clearTimeout() {},
+    wx: {
+      getAccountInfoSync: () => ({ miniProgram: { envVersion: env } }),
+      setEnableDebug: options => calls.push(options),
+      getStorageSync: key => stored.has(key) ? stored.get(key) : '',
+      setStorageSync: (key, value) => stored.set(key, value),
+    },
+  });
+  return { ...exports, calls, timers, stored };
 }
-test("no environment turns the debug console on by itself, and requests never wait",async()=>{
-  for(const env of ["trial","release","develop",undefined]){
-    const f=fixture(env);let sent=0;
-    await Promise.all([f.trialDebug(async()=>++sent),f.trialDebug(async()=>++sent)]);
-    assert.equal(sent,2);
-    assert.deepEqual(f.calls,[]);
-    assert.equal(f.debugEnabled(),false);
+
+test('trial overrides old off preference and gates all concurrent startup requests', async () => {
+  const f = fixture('trial', new Map([['debug-console', false]]));
+  let sent = 0;
+  const start = f.initializeDebug();
+  const requests = [f.trialDebug(async () => ++sent), f.trialDebug(async () => ++sent)];
+  assert.equal(sent, 0);
+  assert.equal(f.calls.length, 1);
+  assert.equal(f.calls[0].enableDebug, true);
+  f.calls[0].success();
+  await Promise.all([start, ...requests]);
+  assert.equal(sent, 2);
+  assert.equal(f.debugEnabled(), true);
+  await f.trialDebug(async () => ++sent);
+  assert.equal(f.calls.length, 1);
+});
+
+test('release, develop and unknown environments never automatically enable debugging', async () => {
+  for (const env of ['release', 'develop', undefined]) {
+    const f = fixture(env);
+    await f.initializeDebug();
+    let sent = false;
+    const response = f.trialDebug(async () => { sent = true; });
+    assert.equal(sent, true);
+    await response;
+    assert.ok(f.calls.every(call => call.enableDebug === false));
   }
 });
-test("the console is switched on and off explicitly and remembered",()=>{
-  const f=fixture("trial");
-  f.setDebug(true);
-  assert.equal(f.debugEnabled(),true);
-  f.setDebug(false);
-  assert.deepEqual(f.calls,[true,false]);
-  assert.equal(f.storage.get("debug-console"),false);
+
+test('trial default is cleared on release but explicit settings are preserved', async () => {
+  const storage = new Map();
+  const trial = fixture('trial', storage), pending = trial.initializeDebug();
+  trial.calls[0].success();
+  await pending;
+  const release = fixture('release', storage);
+  await release.initializeDebug();
+  assert.deepEqual(release.calls.map(call => call.enableDebug), [false]);
+  release.setDebug(true);
+  const nextRelease = fixture('release', storage);
+  await nextRelease.initializeDebug();
+  assert.equal(nextRelease.calls.length, 0);
 });
-test("a console left on by earlier builds is switched off once, never again",()=>{
-  // WeChat returns "" for a key that was never written.
-  const g=fixture("trial");
-  g.storage.set("debug-console","");
-  g.clearLegacyDebug();
-  assert.deepEqual(g.calls,[false]);
-  assert.equal(g.storage.get("debug-console"),false);
-  g.clearLegacyDebug();
-  assert.deepEqual(g.calls,[false]);
-  const chosen=fixture("trial",true);
-  chosen.clearLegacyDebug();
-  assert.deepEqual(chosen.calls,[]);
+
+test('failed or timed-out enable sends no request and allows another attempt', async () => {
+  for (const timeout of [false, true]) {
+    const f = fixture('trial');
+    let sent = 0;
+    const first = f.trialDebug(async () => ++sent);
+    if (timeout) f.timers[0](); else f.calls[0].fail();
+    await assert.rejects(first, /调试开启失败/);
+    assert.equal(sent, 0);
+    const retry = f.trialDebug(async () => ++sent);
+    f.calls[1].success();
+    await retry;
+    assert.equal(sent, 1);
+  }
+});
+
+test('manual off lasts until next cold trial launch', async () => {
+  const f = fixture('trial'), pending = f.initializeDebug();
+  f.calls[0].success();
+  await pending;
+  f.setDebug(false);
+  assert.equal(f.debugEnabled(), false);
+  await f.trialDebug(async () => undefined);
+  assert.equal(f.calls.length, 2);
+  const next = fixture('trial', f.stored), nextPending = next.initializeDebug();
+  assert.equal(next.calls[0].enableDebug, true);
+  next.calls[0].success();
+  await nextPending;
 });

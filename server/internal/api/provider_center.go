@@ -74,7 +74,7 @@ func (a *Server) children(ctx context.Context, id string) ([]childView, error) {
 	out := []childView{}
 	for _, row := range rows {
 		var p core.Partner
-		if json.Unmarshal(row.Data, &p) != nil || p.Status == "rejected" {
+		if json.Unmarshal(row.Data, &p) != nil || p.Status == "rejected" || p.Status == "deleted" {
 			continue
 		}
 		n, e := a.members(ctx, row.ID)

@@ -27,7 +27,7 @@ for (const width of [1440, 390, 320]) {
     ).toBeVisible();
     await expect(
       page.locator(".provider-tree-row .provider-tree-actions button"),
-    ).toHaveText(["分享码", "会员登记", "分佣", "下级活动轨迹", "分佣比例", "编辑", "登录账号"]);
+    ).toHaveText(["分享码", "会员登记", "分佣", "下级活动轨迹", "分佣比例", "编辑", "登录账号", "删除"]);
     await page.screenshot({
       path: `../.runtime/provider-scan-only-${width}.png`,
       fullPage: true,

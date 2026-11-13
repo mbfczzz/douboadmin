@@ -18,6 +18,7 @@ import type { ProviderAction } from "./ProviderActions";
 import { useRegistrationDecision } from "../users/useRegistrationDecision";
 import { useBusinessRoleNames } from "../roles/business";
 
+const DeleteProvider = lazy(() => import("./DeleteProvider"));
 const ProviderModule = lazy(() => import("./ProviderModule"));
 
 export default function Providers({ notify }: { notify: Notify }) {
@@ -120,6 +121,16 @@ export default function Providers({ notify }: { notify: Notify }) {
             setCreating(false);
           }}
         />
+      )}
+      {manage && action?.kind === "delete" && (
+        <Suspense fallback={<LoadingState label="正在核对删除范围" />}>
+          <DeleteProvider
+            row={action.row}
+            onClose={close}
+            onSaved={reload}
+            notify={notify}
+          />
+        </Suspense>
       )}
       {action?.kind === "pricing" && (
         <ProviderPricing

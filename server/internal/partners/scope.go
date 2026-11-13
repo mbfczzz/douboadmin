@@ -21,7 +21,7 @@ func (s *Service) Subtree(ctx context.Context, root string) ([]string, error) {
 		if json.Unmarshal(row.Data, &p) != nil {
 			continue
 		}
-		if row.ID == root || slices.Contains(p.Path, root) {
+		if p.Status != "deleted" && (row.ID == root || slices.Contains(p.Path, root)) {
 			ids = append(ids, row.ID)
 		}
 	}

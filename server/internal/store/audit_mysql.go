@@ -43,17 +43,27 @@ func scanLog(s interface{ Scan(...any) error }, extra ...any) (core.AuditEntry, 
 }
 
 func logWhere(q core.AuditQuery) (string, []any) {
+	return activityLogWhere(q, nil)
+}
+
+func activityLogWhere(q core.AuditQuery, references map[string]string) (string, []any) {
 	var where []string
 	var args []any
+	ref := func(table string) string {
+		if expression := references[table]; expression != "" {
+			return expression
+		}
+		return "audit_logs.actor_id"
+	}
 	add := func(clause string, values ...any) {
 		where = append(where, clause)
 		args = append(args, values...)
 	}
 	if q.PartnerID != "" && q.MembersOnly {
-		add(`actor_type='user' AND EXISTS(SELECT 1 FROM memberships m WHERE m.id=audit_logs.actor_id AND m.partner_id=? AND m.status IN ('active','pending','disabled'))`, q.PartnerID)
+		add(`actor_type='user' AND EXISTS(SELECT 1 FROM memberships m WHERE m.id=`+ref("memberships")+` AND m.partner_id=? AND m.status IN ('active','pending','disabled'))`, q.PartnerID)
 	} else if q.PartnerID != "" {
-		add(`((actor_type IN ('admin','provider') AND EXISTS(SELECT 1 FROM admin_accounts a WHERE a.id=audit_logs.actor_id AND a.partner_id=?)) OR
-   (actor_type='user' AND (EXISTS(SELECT 1 FROM partner_owners p WHERE p.id=audit_logs.actor_id AND p.partner_id=? AND p.status IN ('active','pending','disabled')) OR EXISTS(SELECT 1 FROM memberships m WHERE m.id=audit_logs.actor_id AND m.partner_id=? AND m.status IN ('active','pending','disabled')))))`, q.PartnerID, q.PartnerID, q.PartnerID)
+		add(`((actor_type IN ('admin','provider') AND EXISTS(SELECT 1 FROM admin_accounts a WHERE a.id=`+ref("admin_accounts")+` AND a.partner_id=?)) OR
+   (actor_type='user' AND (EXISTS(SELECT 1 FROM partner_owners p WHERE p.id=`+ref("partner_owners")+` AND p.partner_id=? AND p.status IN ('active','pending','disabled')) OR EXISTS(SELECT 1 FROM memberships m WHERE m.id=`+ref("memberships")+` AND m.partner_id=? AND m.status IN ('active','pending','disabled')))))`, q.PartnerID, q.PartnerID, q.PartnerID)
 	}
 	if len(q.Categories) > 0 {
 		add(`category IN (`+placeholders(len(q.Categories))+`)`, anyStrings(q.Categories)...)
@@ -107,7 +117,11 @@ func logWhere(q core.AuditQuery) (string, []any) {
 
 func (m *MySQL) Logs(ctx context.Context, q core.AuditQuery) (core.AuditPage, error) {
 	limit, out := logLimit(q), core.AuditPage{Items: []core.AuditEntry{}}
-	where, args := logWhere(q)
+	references, err := m.activityComparisons(ctx, q)
+	if err != nil {
+		return out, err
+	}
+	where, args := activityLogWhere(q, references)
 	rows, err := m.db.QueryContext(ctx, `SELECT `+logColumns+` FROM audit_logs`+where+` ORDER BY id DESC LIMIT ?`, append(args, limit+1)...)
 	if err != nil {
 		return out, err

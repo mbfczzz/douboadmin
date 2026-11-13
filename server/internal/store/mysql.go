@@ -14,8 +14,9 @@ import (
 )
 
 type MySQL struct {
-	db               *sql.DB
-	jobIDComparisons sync.Map
+	db                    *sql.DB
+	jobIDComparisons      sync.Map
+	activityIDComparisons sync.Map
 }
 
 func NewMySQL(dsn string) (*MySQL, error) {

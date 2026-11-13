@@ -22,6 +22,9 @@ func (a *Server) createBranchLogin(ctx context.Context, account core.AdminAccoun
 		if e = json.Unmarshal(row.Data, &p); e != nil {
 			return e
 		}
+		if p.Status == "deleted" {
+			return core.ErrPartnerDisabled
+		}
 		mapping, e := tx.Get("branch_phones", p.Phone)
 		if e != nil {
 			return e

@@ -3,6 +3,7 @@ import { useMe, canApproveRegistrations } from "../session";
 import type { Partner } from "./types";
 
 export type ProviderAction =
+  | "delete"
   | "activity"
   | "pricing"
   | "edit"
@@ -60,6 +61,7 @@ export default function ProviderActions({
               <span className="quiet provider-waiting">等待超级管理员开通</span>
             )}
             {canReject && button("reject", "拒绝")}
+            {button("delete", "删除", true)}
           </>
         ) : (
           <span className="quiet provider-waiting">等待超级管理员开通</span>
@@ -82,6 +84,7 @@ export default function ProviderActions({
           <>
             {button("edit", "编辑", true)}
             {button("account", "登录账号", true)}
+            {button("delete", "删除", true)}
           </>
         )}
       </span>

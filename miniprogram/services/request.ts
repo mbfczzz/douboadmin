@@ -105,7 +105,7 @@ export function upload(
 ): Promise<Row<Asset>> {
   return login(avatar ? "profile" : "upload").then(
     () =>
-      new Promise((resolve, reject) => {
+      trialDebug(() => new Promise<Row<Asset>>((resolve, reject) => {
         const sentToken = sessionToken();
         if (expectedToken !== undefined && sentToken !== expectedToken) {
           reject(new AuthCancelledError());
@@ -153,6 +153,6 @@ export function upload(
             reject(new Error("上传失败，请检查网络"));
           },
         });
-      }),
+      })),
   );
 }

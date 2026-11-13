@@ -1,4 +1,4 @@
-import { clearLegacyDebug } from "./services/trial-debug";
+import { initializeDebug } from "./services/trial-debug";
 import { loadConfig } from "./utils/config-cache";
 import { captureInvite } from "./services/invitation";
 import { enforceAccess } from "./services/access";
@@ -12,7 +12,7 @@ App({
   },
   onHide: pauseVisit,
   onLaunch() {
-    clearLegacyDebug();
+    void initializeDebug().catch(() => undefined);
     // Warm the shared config so the first tab paints without waiting on it.
     void loadConfig().catch(() => undefined);
     wx.setBackgroundColor({

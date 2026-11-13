@@ -41,7 +41,7 @@ func (a *Server) providerTreePage(w http.ResponseWriter, r *http.Request) {
 		dbError(w, e)
 		return
 	}
-	query := core.RecordQuery{Namespace: "partners", Page: page, Size: 20, Search: search, NotFields: map[string]string{"status": "rejected"}}
+	query := core.RecordQuery{Namespace: "partners", Page: page, Size: 20, Search: search, FieldsIn: map[string][]string{"status": {"active", "pending", "disabled"}}}
 	if search != "" {
 		query.IDs = scope
 	} else if parent != "" {
@@ -61,7 +61,7 @@ func (a *Server) providerTreePage(w http.ResponseWriter, r *http.Request) {
 	}
 	items := make([]providerTreeItem, 0, len(out.Items))
 	for _, row := range out.Items {
-		children, e := a.Store.RecordPage(r.Context(), core.RecordQuery{Namespace: "partners", Owner: row.ID, Page: 1, Size: 1, NotFields: map[string]string{"status": "rejected"}})
+		children, e := a.Store.RecordPage(r.Context(), core.RecordQuery{Namespace: "partners", Owner: row.ID, Page: 1, Size: 1, FieldsIn: map[string][]string{"status": {"active", "pending", "disabled"}}})
 		if e != nil {
 			dbError(w, e)
 			return
@@ -80,7 +80,7 @@ func (a *Server) providerChildren(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	out, e := a.Store.RecordPage(r.Context(), core.RecordQuery{Namespace: "partners", Owner: id, Page: page, Size: 20, NotFields: map[string]string{"status": "rejected"}})
+	out, e := a.Store.RecordPage(r.Context(), core.RecordQuery{Namespace: "partners", Owner: id, Page: page, Size: 20, FieldsIn: map[string][]string{"status": {"active", "pending", "disabled"}}})
 	if e != nil {
 		dbError(w, e)
 		return

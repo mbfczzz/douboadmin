@@ -12,6 +12,8 @@ import (
 func partnerError(w http.ResponseWriter, e error) {
 	var rule *partners.RuleError
 	switch {
+	case errors.Is(e, partners.ErrDeleteAccess):
+		fail(w, 403, e.Error())
 	case errors.Is(e, partners.ErrRatioAccess), errors.Is(e, partners.ErrReviewDenied), errors.Is(e, partners.ErrApprovalDenied):
 		fail(w, 403, e.Error())
 	case errors.As(e, &rule):
@@ -53,6 +55,9 @@ func (a *Server) partnerList(ns string) http.HandlerFunc {
 				return
 			}
 			query.Fields = map[string]string{"codeId": code}
+		}
+		if ns == "partners" {
+			query.FieldsIn = map[string][]string{"status": {"active", "pending", "disabled"}}
 		}
 		scope, e := a.partnerScope(r)
 		if e != nil {

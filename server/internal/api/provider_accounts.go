@@ -3,6 +3,8 @@ package api
 import (
 	"context"
 	"doubo/server/internal/core"
+	"doubo/server/internal/partners"
+	"doubo/server/internal/store"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -64,7 +66,27 @@ func (a *Server) createProviderAccount(ctx context.Context, partnerID, name, has
 	if p.Phone != "" {
 		row, err = a.createBranchLogin(ctx, account)
 	} else {
-		row, err = a.Store.Put(ctx, "admin_accounts", core.Record{ID: adminID(account.Username), Data: core.Data(account)}, 0)
+		err = a.Store.Atomic(ctx, func(tx store.Transaction) error {
+			if e := lockIdentity(tx); e != nil {
+				return e
+			}
+			if e := partners.Lock(tx); e != nil {
+				return e
+			}
+			current, e := tx.Get("partners", partnerID)
+			if e != nil {
+				return e
+			}
+			var state core.Partner
+			if e = json.Unmarshal(current.Data, &state); e != nil {
+				return e
+			}
+			if state.Status == "deleted" {
+				return core.ErrPartnerDisabled
+			}
+			row, e = tx.Put("admin_accounts", core.Record{ID: adminID(account.Username), Data: core.Data(account)}, 0)
+			return e
+		})
 	}
 	if err == nil && in.Password != "" {
 		a.saveAdminPassword(ctx, partnerID, in.Password, account.PasswordChangedAt)

@@ -2,6 +2,8 @@ package api
 
 func (a *Server) partnerRoutes() {
 	m := a.Mux
+	m.HandleFunc("GET /api/admin/partners/{id}/delete-preview", a.superAdmin(a.previewPartnerDelete))
+	m.HandleFunc("DELETE /api/admin/partners/{id}", a.superAdmin(a.deletePartner))
 	m.HandleFunc("GET /api/admin/partners/{id}/activity", a.auth("admin", a.partnerActivity))
 	m.HandleFunc("GET /api/access", a.auth("user", a.myAccess))
 	m.HandleFunc("POST /api/access/sms", a.auth("user", a.sendSMSCode))
