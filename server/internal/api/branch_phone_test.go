@@ -9,7 +9,7 @@ import (
 
 func phoneBranch(t *testing.T, a *Server, super, phone, key string, account bool) core.Record {
 	t.Helper()
-	body := map[string]any{"name": "测试分公司", "role": "branch", "parentId": "root", "phone": phone}
+	body := map[string]any{"name": "测试分公司-" + key, "role": "branch", "parentId": "root", "phone": phone}
 	if account {
 		body["account"] = map[string]string{"username": key, "password": "Tester12", "role": "branch"}
 	}

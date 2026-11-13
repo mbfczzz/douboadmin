@@ -40,7 +40,6 @@ Page({
   watching: "",
   checkoutToken: "",
   stopWatching: undefined as (() => void) | undefined,
-  refreshTimer: undefined as ReturnType<typeof setTimeout> | undefined,
   onShow() {
     this.visible = true;
     this.setData({ paymentWaiting: false });
@@ -50,7 +49,6 @@ Page({
   onHide() {
     this.visible = false;
     this.revision++;
-    if (this.refreshTimer !== undefined) clearTimeout(this.refreshTimer);
     this.stopWatching?.();
     this.watching = "";
   },
@@ -72,7 +70,6 @@ Page({
   },
   async load() {
     if (this.destroyed) return;
-    if (this.refreshTimer !== undefined) clearTimeout(this.refreshTimer);
     const revision = ++this.revision;
     const owner = this.data.info?.wallet.userId;
     if (owner && owner !== sessionUserId()) {
@@ -93,7 +90,7 @@ Page({
           `/wallet/ledger?page=${this.data.ledgerPage}&size=20`,
         ).catch(() => undefined),
       ]);
-      if (revision !== this.revision) return;
+      if (revision !== this.revision || info.wallet.userId !== sessionUserId()) return;
       const ledger = result
         ? financePage(result, this.data.ledgerPage)
         : undefined;
@@ -134,12 +131,6 @@ Page({
     } finally {
       if (revision === this.revision) {
         this.setData({ loading: false });
-        if (
-          this.visible &&
-          hasSession() &&
-          this.data.info?.wallet.heldUnits > 0
-        )
-          this.refreshTimer = setTimeout(() => void this.load(), 3000);
       }
     }
   },

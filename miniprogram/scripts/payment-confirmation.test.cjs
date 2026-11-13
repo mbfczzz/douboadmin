@@ -186,24 +186,27 @@ test("cancelling a new payment clears the preceding order's success notice", asy
   f.page.onHide();
 });
 
-test("wallet refreshes a task release while visible and stops after the hold clears", async () => {
+test("held points never schedule wallet refresh; manual refresh reads settlement", async () => {
   const f = await fixture();
   f.info.wallet.availableUnits = 97500;
   f.info.wallet.heldUnits = 2500;
   await f.page.load();
   assert.equal(f.page.data.available, "975");
   assert.equal(f.page.data.held, "25");
-  assert.equal(f.timers.size, 1);
+  assert.equal(f.timers.size, 0);
   f.info.wallet.availableUnits = 100000;
   f.info.wallet.heldUnits = 0;
-  await f.tick();
+  await new Promise(setImmediate);
+  assert.equal(f.page.data.available, "975");
+  assert.equal(f.page.data.held, "25");
+  await f.page.load();
   assert.equal(f.page.data.available, "1,000");
   assert.equal(f.page.data.held, "0");
   assert.equal(f.timers.size, 0);
   f.page.onHide();
 });
 
-test("hiding a wallet with held points cancels refresh; returning reads settlement", async () => {
+test("reentering the wallet page refreshes settlement without starting a balance timer", async () => {
   const f = await fixture();
   f.info.wallet.availableUnits = 97500;
   f.info.wallet.heldUnits = 2500;
@@ -211,8 +214,9 @@ test("hiding a wallet with held points cancels refresh; returning reads settleme
   f.page.onHide();
   assert.equal(f.timers.size, 0);
   f.info.wallet.heldUnits = 0;
-  f.page.visible = true;
-  await f.page.load();
+  f.page.onShow();
+  await new Promise(setImmediate);
+  await new Promise(setImmediate);
   assert.equal(f.page.data.available, "975");
   assert.equal(f.page.data.held, "0");
   assert.equal(f.timers.size, 0);

@@ -4,12 +4,13 @@ import {
   clearInvite,
   scannedInvite,
 } from "../../services/invitation";
+import { signOutActivation } from "./sign-out";
 import { loadBrand } from "../../services/branding";
 import {
   request,
   signIn,
   hasSession,
-  logout,
+  sessionUserId,
   error,
   errorMessage,
   AuthCancelledError,
@@ -34,6 +35,7 @@ import {
   sendCode,
   register,
   stopCountdown,
+  registerRequest,
 } from "./register";
 import { codeState, enterCode, clearCode, pasteCode } from "./code-entry";
 
@@ -46,12 +48,14 @@ Page({
     busy: false,
     ...codeState,
     loadError: "",
+    accountDeleted: false,
     wechatReady: false,
     phoneReady: false,
     status: null as AccessStatus | null,
     ...registerState,
   },
   inviteAttempt: "",
+  owner: "",
   onLoad(options: Record<string, string>) {
     captureInvite(options);
   },
@@ -69,22 +73,26 @@ Page({
     this.revision++;
     stopCountdown(this);
   },
+  refresh() {
+    if (!this.data.loading && !this.data.busy) void this.load();
+  },
   async load() {
+    const owner = sessionUserId();
+    if (this.owner !== owner) {
+      this.owner = owner;
+      this.inviteAttempt = "";
+      stopCountdown(this);
+      this.setData({ ...registerState, ...codeState, status: null });
+    }
     void loadBrand(this, () =>
-      request<{ icon: string }>(
-        "/branding",
-        "GET",
-        undefined,
-        undefined,
-        false,
-      ),
+      request<{ icon: string }>("/branding", "GET", undefined, undefined, false),
     );
     const revision = ++this.revision;
     this.setData({
       invite: pendingInvite(),
       logged: hasSession(),
+      accountDeleted: wx.getStorageSync("account-deleted") === true,
       loading: true,
-      loadError: "",
     });
     try {
       if (!hasSession()) {
@@ -100,6 +108,9 @@ Page({
             wechatReady: c.wechatLogin,
             phoneReady: !!c.wechatPhoneLogin && supportsPhoneLogin(),
             status: null,
+            loadError: "",
+            ...registerState,
+            ...codeState,
           });
         return;
       }
@@ -109,14 +120,14 @@ Page({
         await this.load();
         return;
       }
-      this.setData({ status, logged: hasSession() });
+      this.setData({ status, logged: hasSession(), loadError: "" });
       prefill(this, status);
       if (status.active) {
         clearInvite();
         this.enter();
       }
     } catch (e) {
-      if (revision === this.revision)
+      if (revision === this.revision && !(e instanceof AuthCancelledError))
         this.setData({ loadError: (e as Error).message });
     } finally {
       if (revision === this.revision) {
@@ -181,7 +192,9 @@ Page({
     } catch (e) {
       if (!this.destroyed && !(e instanceof AuthCancelledError)) {
         const message = errorMessage(e, "微信登录未完成，请重试");
-        this.setData({ loadError: message });
+        this.setData(e instanceof RequestError && e.code === "ACCOUNT_DISABLED"
+          ? { status: { active: false, status: "account_disabled", message }, loadError: "" }
+          : { loadError: message });
         error(e);
       }
     } finally {
@@ -199,6 +212,7 @@ Page({
       this.destroyed ||
       this.data.busy ||
       this.data.loading ||
+      this.data.loadError ||
       !this.data.logged ||
       !status ||
       status.profileRequired ||
@@ -214,7 +228,7 @@ Page({
     void this.joinInvite();
   },
   async scan() {
-    if (this.data.busy || !this.data.logged) return;
+    if (this.data.busy || this.data.loading || !this.data.logged) return;
     try {
       const result = await wx.scanCode({});
       if (this.destroyed) return;
@@ -234,11 +248,11 @@ Page({
     if (this.data.busy || !this.data.logged) return;
     this.setData({ busy: true, code });
     try {
-      const status = await request<AccessStatus>("/access/join", "POST", {
+      const status = await registerRequest<AccessStatus>(this, "/access/join", {
         code,
         method,
       });
-      if (this.destroyed) return;
+      if (!status || this.destroyed) return;
       // Scanning registers; approval opens the account later.
       if (code === pendingInvite()) {
         clearInvite();
@@ -270,21 +284,8 @@ Page({
       },
     });
   },
-  async signOut() {
-    if (this.data.busy) return;
-    this.setData({ busy: true });
-    try {
-      await logout();
-      if (!this.destroyed) {
-        stopCountdown(this);
-        this.setData({ code: "", status: null, ...registerState });
-        await this.load();
-      }
-    } catch (e) {
-      if (!this.destroyed) error(e);
-    } finally {
-      if (!this.destroyed) this.setData({ busy: false });
-    }
+  signOut() {
+    return signOutActivation(this);
   },
   brandError() {
     this.setData({ brandIcon: "" });

@@ -88,11 +88,14 @@ func (a *Server) login(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	// A disabled account gets no new session (every API call would be refused).
-	if disabled, e := a.userDisabled(r.Context(), id); e != nil {
+	if flags, e := a.userState(r.Context(), id); e != nil {
 		dbError(w, e)
 		return
-	} else if disabled {
-		fail(w, 403, "账号已停用，请联系管理员")
+	} else if flags.Archived {
+		reply(w, 403, map[string]string{"code": "ACCOUNT_DELETED", "error": "账号已删除，请重新注册"})
+		return
+	} else if flags.Disabled {
+		reply(w, 403, map[string]string{"code": "ACCOUNT_DISABLED", "error": "账号已停用，请联系管理员"})
 		return
 	}
 	token, err := a.Sessions.create(r.Context(), Identity{ID: id, Account: id, Role: "user", WeChatOpenID: openID, WeChatAppID: a.Config.WeChatAppID, Expires: time.Now().Add(24 * time.Hour)})

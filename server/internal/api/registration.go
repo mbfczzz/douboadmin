@@ -12,6 +12,7 @@ import (
 // provider additionally requires proof that the user owns that phone.
 type userFlags struct {
 	Disabled, Registered bool
+	Archived             bool
 	PhoneVerified        bool
 	Name, Phone          string
 }
@@ -32,7 +33,7 @@ func (a *Server) userState(ctx context.Context, id string) (userFlags, error) {
 		return userFlags{}, fmt.Errorf("账号状态异常")
 	}
 	registered := strings.TrimSpace(p.Name) != "" && mainlandPhone.MatchString(p.Phone) && (!a.registrationRequired() || p.VerifiedPhone == p.Phone)
-	return userFlags{Disabled: p.Disabled || p.Archived, Registered: registered, Name: p.Name, Phone: p.Phone, PhoneVerified: mainlandPhone.MatchString(p.Phone) && p.VerifiedPhone == p.Phone}, nil
+	return userFlags{Archived: p.Archived, Disabled: p.Disabled || p.Archived, Registered: registered, Name: p.Name, Phone: p.Phone, PhoneVerified: mainlandPhone.MatchString(p.Phone) && p.VerifiedPhone == p.Phone}, nil
 }
 
 func (a *Server) userDisabled(ctx context.Context, id string) (bool, error) {

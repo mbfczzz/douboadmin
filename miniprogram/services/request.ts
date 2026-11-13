@@ -1,5 +1,5 @@
 import { API_BASE } from "../config";
-import { login, sessionToken, storedToken, clearSession } from "./session";
+import { login, sessionToken, storedToken, forgetDeletedAccount, clearSession } from "./session";
 import {
   AuthCancelledError,
   SessionExpiredError,
@@ -10,6 +10,13 @@ import type { Row, Asset, ResponseMeta } from "./types";
 import { requestPurpose } from "./login-context";
 import { activationRedirect } from "./access";
 import { trialDebug } from "./trial-debug";
+function accountFailure(meta: ResponseMeta, status: number) {
+  if (status !== 403 || !["ACCOUNT_DELETED", "ACCOUNT_DISABLED"].includes(meta?.code || "")) return;
+  if (meta.code === "ACCOUNT_DELETED") forgetDeletedAccount();
+  activationRedirect();
+  return new RequestError(status, meta.error || "账号不可用，请重新确认账号状态", meta.code);
+}
+
 export function request<T>(
   path: string,
   method: "GET" | "POST" | "PUT" | "DELETE" = "GET",
@@ -53,6 +60,8 @@ export function request<T>(
               reject(new AuthCancelledError());
               return;
             }
+            const blocked = accountFailure(meta, res.statusCode);
+            if (blocked) { reject(blocked); return; }
             if ((auth || sentToken) && res.statusCode === 401) {
               if (storedToken() === sentToken) clearSession();
               if (wx.getStorageSync("activation-required"))
@@ -133,6 +142,8 @@ export function upload(
                 throw new SessionExpiredError();
               }
               const d = JSON.parse(r.data);
+              const blocked = accountFailure(d, r.statusCode);
+              if (blocked) throw blocked;
               if (
                 r.statusCode === 403 &&
                 d.code === "ACTIVATION_REQUIRED" &&

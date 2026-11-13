@@ -1,5 +1,5 @@
 import { API_BASE } from "../config";
-import { sessionToken, storedToken, clearSession } from "./session";
+import { sessionToken, storedToken, forgetDeletedAccount, clearSession } from "./session";
 import { AuthCancelledError, RequestError } from "./errors";
 import { trialDebug } from "./trial-debug";
 
@@ -51,7 +51,16 @@ export function accessStatus(): Promise<AccessStatus> {
               resolve({ active: false, status: "login" });
               return;
             }
-            const data = r.data as AccessStatus & { error?: string };
+            const data = r.data as AccessStatus & { error?: string; code?: string };
+            if (r.statusCode === 403 && data.code === "ACCOUNT_DELETED") {
+              forgetDeletedAccount();
+              resolve({ active: false, status: "login" });
+              return;
+            }
+            if (r.statusCode === 403 && data.code === "ACCOUNT_DISABLED") {
+              resolve({ active: false, status: "account_disabled", message: data.error });
+              return;
+            }
             if (r.statusCode >= 400 || typeof data.active !== "boolean") {
               reject(
                 new RequestError(

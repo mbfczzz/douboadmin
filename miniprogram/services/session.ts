@@ -111,7 +111,10 @@ export async function signIn(mode: "wechat" | "demo" = "wechat", phoneCode?: str
       body = { demoId: id };
       endpoint = "/auth/login";
     }
-    const result = await publicRequest<LoginResponse>(endpoint, "POST", body);
+    const result = await publicRequest<LoginResponse>(endpoint, "POST", body).catch(e => {
+      if (generation !== authGeneration) throw new AuthCancelledError();
+      throw e;
+    });
     if (
       !result ||
       typeof result.token !== "string" ||
@@ -126,6 +129,7 @@ export async function signIn(mode: "wechat" | "demo" = "wechat", phoneCode?: str
     }
     if (generation !== authGeneration) throw new AuthCancelledError();
     wx.setStorageSync("activation-required", !!result.activationRequired);
+    wx.removeStorageSync("account-deleted");
     wx.setStorageSync("douboSession", {
       token: result.token,
       userId: result.userId,
@@ -176,12 +180,20 @@ export async function logout() {
     if (current && current !== old.token)
       throw new Error("登录状态已更新，请重新退出");
   }
+  clearLocalAccount();
+}
+
+export function forgetDeletedAccount() {
+  clearLocalAccount();
+  wx.setStorageSync("account-deleted", true);
+}
+
+function clearLocalAccount() {
   clearSession();
   cancelLogin();
-  wx.removeStorageSync("edit-draft");
-  wx.removeStorageSync("mix-draft");
-  wx.removeStorageSync("mix-add-asset");
-  wx.removeStorageSync("mix-source-text");
+  for (const key of ["edit-draft", "mix-draft", "mix-add-asset", "mix-source-text"]) {
+    wx.removeStorageSync(key);
+  }
   for (const key of wx.getStorageInfoSync?.().keys || []) {
     // Last-seen page data (profile, works, tasks) and the cached config.
     if (key.startsWith("pending-") || key.startsWith("retry-") || key.startsWith("view-cache:") || key === "config-cache")

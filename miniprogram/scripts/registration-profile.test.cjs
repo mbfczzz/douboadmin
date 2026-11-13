@@ -6,6 +6,8 @@ test("registration without SMS still submits a phone and preserves the invitatio
   const h = harness(),
     page = h.page("activate"),
     sent = [];
+  await h.api.signIn();
+  page.owner = h.api.sessionUserId();
   page.setData({
     logged: true,
     code: "KMNP2345",
@@ -49,6 +51,8 @@ test("name and valid phone remain required without SMS", async () => {
   const h = harness(),
     page = h.page("activate"),
     sent = [];
+  await h.api.signIn();
+  page.owner = h.api.sessionUserId();
   page.setData({
     logged: true,
     status: {
@@ -59,7 +63,7 @@ test("name and valid phone remain required without SMS", async () => {
     },
   });
   h.api.request = async (...args) => {
-    sent.push(args);
+    sent.push(args.slice(0, 3));
     return { active: false, status: "pending" };
   };
   await page.register();
@@ -81,6 +85,8 @@ for (const required of [true, undefined]) {
       page = h.page("activate"),
       requests = [],
       toasts = [];
+    await h.api.signIn();
+    page.owner = h.api.sessionUserId();
     page.setData({
       logged: true,
       name: "张三",
@@ -118,6 +124,7 @@ test("a stale scan step refreshes profile requirements and keeps the scanned cod
   const h = harness();
   await h.api.signIn();
   const page = h.page("activate");
+  page.owner = h.api.sessionUserId();
   page.setData({ logged: true, status: { active: false, status: "pending" } });
   h.api.request = async () => {
     throw new h.api.RequestError(403, "请先填写姓名");

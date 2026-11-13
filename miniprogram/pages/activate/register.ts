@@ -1,4 +1,4 @@
-import { request, error } from "../../utils/api";
+import { request, error, sessionToken, sessionUserId } from "../../utils/api";
 import type { AccessStatus } from "../../services/access";
 
 // Name and phone; verify only when SMS is configured.
@@ -13,6 +13,13 @@ export const registerState = {
 import type { Register } from "../../services/page-contracts";
 
 export const validPhone = (phone: string) => /^1[3-9][0-9]{9}$/.test(phone);
+
+// Never resume an old registration form under a replacement login.
+export async function registerRequest<T>(page: Register, path: string, data: object) {
+  const token = sessionToken();
+  if (!token || page.owner !== sessionUserId()) { await page.load(); return; }
+  return request<T>(path, "POST", data, undefined, false, token);
+}
 
 export function stopCountdown(page: Register) {
   if (page.timer) clearInterval(page.timer);
@@ -45,12 +52,12 @@ export async function sendCode(page: Register) {
   }
   page.setData({ sending: true });
   try {
-    const out = await request<{ resendIn: number; debugCode?: string }>(
+    const out = await registerRequest<{ resendIn: number; debugCode?: string }>(
+      page,
       "/access/sms",
-      "POST",
       { phone },
     );
-    if (page.destroyed) return;
+    if (!out || page.destroyed) return;
     startCountdown(page, out.resendIn || 60);
     if (out.debugCode) page.setData({ smsCode: out.debugCode });
     wx.showToast({ title: "验证码已发送", icon: "none" });
@@ -72,12 +79,12 @@ export async function register(page: Register) {
     return void error(new Error("请输入 6 位验证码"));
   page.setData({ busy: true });
   try {
-    const status = await request<AccessStatus>("/access/profile", "POST", {
+    const status = await registerRequest<AccessStatus>(page, "/access/profile", {
       name: name.trim(),
       phone: phone.trim(),
       ...(sms ? { code: smsCode } : {}),
     });
-    if (page.destroyed) return;
+    if (!status || page.destroyed) return;
     stopCountdown(page);
     page.setData({ status, smsCode: "", countdown: 0 });
     return status;

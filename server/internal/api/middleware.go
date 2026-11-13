@@ -118,7 +118,11 @@ func (a *Server) auth(role string, h http.HandlerFunc) http.HandlerFunc {
 				return
 			}
 			if flags.Disabled {
-				fail(w, 403, "账号已停用，请联系管理员")
+				if flags.Archived {
+					reply(w, 403, map[string]string{"code": "ACCOUNT_DELETED", "error": "账号已删除，请重新注册"})
+				} else {
+					reply(w, 403, map[string]string{"code": "ACCOUNT_DISABLED", "error": "账号已停用，请联系管理员"})
+				}
 				return
 			}
 			allowed, browsing := a.allowActivation(w, r, v.ID, flags.Registered)

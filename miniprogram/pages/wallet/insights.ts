@@ -44,6 +44,7 @@ export function ledgerRows(rows: Row<Ledger>[]) {
 
 type InsightPage = {
   destroyed?: boolean;
+  revision?: number;
   data: { info: { wallet: { availableUnits: number } } | null };
   setData(value: Record<string, unknown>): void;
 };
@@ -58,11 +59,11 @@ const defaults = (m: Model) => ({
 
 // "积分能做什么": quote one default image and one default video, then say how
 // many of each the current balance covers. Fails quietly.
-// Quotes rarely change; the wallet reloads every 3 s while a payment is
-// pending, so price the two examples at most every two minutes per account.
+// Quotes rarely change; price examples at most every two minutes per account.
 const quoted = new Map<string, number>();
 export async function loadInsights(page: InsightPage) {
   const owner = sessionToken();
+  const revision = page.revision;
   const shown = (page.data as { uses?: { units: number; count: number }[] }).uses || [];
   if (Date.now() - (quoted.get(owner) || 0) < 2 * 60 * 1000 && shown.length) {
     // Same prices, new balance: recount without asking the server.
@@ -76,7 +77,7 @@ export async function loadInsights(page: InsightPage) {
     const pick = (kind: string) => config.models.find((m) => m.kind === kind && !m.demo) || config.models.find((m) => m.kind === kind);
     const models = [pick("image"), pick("video")].filter(Boolean) as Model[];
     const quotes = await Promise.all(models.map((m) => estimateCost(defaults(m), owner).promise.then((q) => ({ m, q })).catch(() => null)));
-    if (page.destroyed || !page.data.info) return;
+    if (page.destroyed || !page.data.info || sessionToken() !== owner || page.revision !== revision) return;
     const available = page.data.info.wallet.availableUnits;
     const uses = quotes
       .filter((x): x is NonNullable<typeof x> => !!x && x.q.billingEnabled && x.q.units > 0)
@@ -98,6 +99,7 @@ export async function loadInsights(page: InsightPage) {
 
 type ArtPage = {
   destroyed?: boolean;
+  revision?: number;
   data: { products: ReturnType<typeof productCards>; uses: { kind: string }[] };
   setData(value: Record<string, unknown>): void;
 };
@@ -106,8 +108,9 @@ type ArtPage = {
 // bigger it is (1 → 3 covers), the balance card carries a small fan and each
 // "能做什么" tile shows a work of its kind. No covers, no decoration.
 export async function loadArt(page: ArtPage) {
+  const owner = sessionToken(), revision = page.revision;
   const covers = (await templateCovers()).map((c) => c.cover);
-  if (page.destroyed || !covers.length) return;
+  if (page.destroyed || !covers.length || sessionToken() !== owner || page.revision !== revision) return;
   const take = (start: number, count: number) =>
     Array.from({ length: Math.min(count, covers.length) }, (_, i) => covers[(start + i) % covers.length]);
   page.setData({

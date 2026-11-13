@@ -42,10 +42,12 @@ export type MenuPage = {
 };
 
 export interface Register {
+  owner: string;
   data: Fields & { busy: boolean; status: AccessStatus | null };
   setData(data: Partial<Fields> & Record<string, unknown>): void;
   destroyed: boolean;
   timer?: number;
+  load(): Promise<void>;
 }
 
 export interface MotionPage {

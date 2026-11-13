@@ -2,16 +2,18 @@
 <view class="subpage activation-page">
   <image wx:if="{{brandIcon}}" class="activation-logo brand-tile" src="{{brandIcon}}" mode="aspectFit" aria-label="豆播 AI" binderror="brandError" />
   <view wx:else class="activation-logo brand-tile brand-placeholder" bindtap="load" aria-role="button" aria-label="重新加载项目图标">豆播 AI</view>
-  <text class="activation-title">开通你的创作空间</text>
-  <text wx:if="{{invite}}" class="biz-note">已识别邀请码，完成登录和资料后自动登记，无需再次扫码。</text>
-  <text wx:if="{{!logged}}" class="biz-note activation-intro">登录后填写资料。</text>
+  <text class="activation-title">{{status.status==='account_disabled'?'账号已停用':accountDeleted?'重新注册':'开通你的创作空间'}}</text>
+  <text wx:if="{{invite&&status.status!=='account_disabled'}}" class="biz-note">已识别邀请码，完成登录和资料后自动登记，无需再次扫码。</text>
+  <text wx:if="{{status.status==='account_disabled'}}" class="biz-note activation-intro">账号已停用，请联系管理员处理。停用期间无法重新注册同一账号。</text>
+  <text wx:elif="{{accountDeleted&&!logged}}" class="biz-note activation-intro">原账号已删除，旧登录已退出。请重新授权手机号注册新账号。</text>
+  <text wx:elif="{{!logged}}" class="biz-note activation-intro">登录后填写资料。</text>
   <text wx:elif="{{status.profileRequired}}" class="biz-note activation-intro">第 1 步：填写资料。</text>
   <text wx:elif="{{status.status==='review'}}" class="biz-note activation-intro">已登记，超级管理员开通后即可使用。</text>
-  <text wx:elif="{{!status||status.status==='pending'||status.status==='unbound'||status.status==='rejected'}}" class="biz-note activation-intro">{{invite?'已识别邀请码，正在准备登记。':codeMode?'第 2 步：输入服务商或会员给你的邀请码。':'第 2 步：扫描服务商或会员给你的二维码登记。'}}</text>
+  <text wx:elif="{{status.status==='pending'||status.status==='unbound'||status.status==='rejected'}}" class="biz-note activation-intro">{{invite?'已识别邀请码，正在准备登记。':codeMode?'第 2 步：输入服务商或会员给你的邀请码。':'第 2 步：扫描服务商或会员给你的二维码登记。'}}</text>
   <view wx:if="{{loading}}" class="biz-note">正在确认授权状态…</view>
-  <view wx:if="{{loadError}}" class="biz-error" bindtap="load">{{loadError}} · 点击重试</view>
+  <view wx:if="{{loadError}}" class="biz-error" bindtap="refresh">{{loadError}} · {{loading?'正在检查…':'点击重试'}}</view>
   <block wx:if="{{!logged}}">
-    <button wx:if="{{phoneReady}}" class="biz-action" open-type="getPhoneNumber" bindgetphonenumber="phoneLogin" loading="{{busy}}" disabled="{{busy||loading||!wechatReady}}">手机号授权登录</button>
+    <button wx:if="{{phoneReady}}" class="biz-action" open-type="getPhoneNumber" bindgetphonenumber="phoneLogin" loading="{{busy}}" disabled="{{busy||loading||!wechatReady}}">{{accountDeleted?'手机号授权重新注册':'手机号授权登录'}}</button>
     <button wx:else class="biz-action" loading="{{busy}}" disabled="{{busy||loading||!wechatReady}}" bindtap="login">微信登录</button>
     <button wx:if="{{phoneReady}}" class="text-button phone-alternative" bindtap="login" disabled="{{busy||loading}}">使用其他手机号</button>
   </block>
@@ -37,7 +39,7 @@
         <text class="biz-list-title">{{status.status==='review'?'等待超级管理员开通':'授权状态'}}</text>
         <text class="biz-note">{{status.status==='review'&&status.partnerName?'已登记到「'+status.partnerName+'」，开通后会通知你，也可稍后刷新查看。':status.message}}</text>
       </view>
-      <view wx:if="{{!loadError&&(!status||status.status==='pending'||status.status==='unbound'||status.status==='rejected')}}" class="biz-card activation-options">
+      <view wx:if="{{!loadError&&(status.status==='pending'||status.status==='unbound'||status.status==='rejected')}}" class="biz-card activation-options">
         <view class="activation-path">
           <button wx:if="{{invite}}" class="biz-action" loading="{{busy}}" disabled="{{busy||loading}}" bindtap="retryInvite">继续登记</button>
           <block wx:elif="{{!codeMode}}">
@@ -56,7 +58,7 @@
                 <view wx:if="{{index===4}}" class="code-dash" />
                 <view class="code-cell {{item.char?'filled':''}} {{codeFocus&&!codeReady&&index===codeCursor?'current':''}}">{{item.char}}</view>
               </block>
-              <input class="code-native" value="{{codeRaw}}" focus="{{codeFocus}}" maxlength="24" bindinput="input" bindblur="blurCode" confirm-type="done" disabled="{{busy}}" />
+              <input class="code-native" value="{{codeRaw}}" focus="{{codeFocus}}" maxlength="24" bindinput="input" bindblur="blurCode" confirm-type="done" disabled="{{busy||loading}}" />
             </view>
             <view class="code-meta">
               <text class="code-hint {{busy?'is-busy':''}}">{{busy?'正在登记…':codeHint}}</text>
@@ -68,7 +70,7 @@
       </view>
     </block>
     <button wx:if="{{status.canBrowse&&!status.active}}" class="text-button browse-link" disabled="{{busy||loading}}" bindtap="enter">先浏览小程序</button>
-    <view class="activation-links"><text bindtap="load">刷新授权状态</text><text class="sign-out" bindtap="signOut">退出登录</text></view>
+    <view class="activation-links"><text bindtap="refresh">{{loading?'正在检查授权…':'刷新授权状态'}}</text><text class="sign-out" bindtap="signOut">退出登录</text></view>
   </block>
   <text class="activation-privacy" bindtap="privacy">隐私保护指引</text>
 </view>

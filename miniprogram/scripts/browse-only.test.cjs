@@ -35,6 +35,8 @@ test("pending users can choose browsing while the approval page remains availabl
 test("a newly scanned pending identity receives its browse permission immediately", async () => {
   const h = harness(),
     page = h.page("activate");
+  await h.api.signIn();
+  page.owner = h.api.sessionUserId();
   page.setData({ logged: true });
   h.api.request = async () => preview;
   await page.join("KMNP2345", "scan");

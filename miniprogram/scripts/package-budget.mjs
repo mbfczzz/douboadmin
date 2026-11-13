@@ -104,7 +104,10 @@ console.log(
 // Simulated user journey fixes (price kept while re-quoting, agent bubble
 // skeleton, neutral loading text): 720,555 B.
 // Dark page container on every page (no white frame on tab switch): 722,264 B.
-const budget = 707 * 1024;
+// Account lifecycle and owner-bound form submission: 725,322 bytes.
+// Final cross-session guards add 688 bytes, exceeding 708 KiB by 330 bytes.
+// Reviewed feature allowance and measurements: docs/account-lifecycle.md.
+const budget = 709 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

@@ -53,13 +53,13 @@ func createProvider(t *testing.T, a *Server, token, key, parent, name, role stri
 // createBranch adds a 分公司 under the platform; S1 and S2 go below it.
 func createBranch(t *testing.T, a *Server, token, key string) string {
 	t.Helper()
-	return createProvider(t, a, token, key+"-branch", core.RootPartner, "分公司", core.RoleBranch, nil)
+	return createProvider(t, a, token, key+"-branch", core.RootPartner, "分公司-"+key, core.RoleBranch, nil)
 }
 
 // newBranch adds a 分公司 through the service, without an admin session.
 func newBranch(t *testing.T, a *Server, key string) string {
 	t.Helper()
-	r, e := a.Partners.Create(t.Context(), core.RootPartner, "分公司", core.RoleBranch, "branch-"+key, "admin")
+	r, e := a.Partners.Create(t.Context(), core.RootPartner, "分公司-"+key, core.RoleBranch, "branch-"+key, "admin")
 	if e != nil {
 		t.Fatal(e)
 	}

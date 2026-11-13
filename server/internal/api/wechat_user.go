@@ -53,7 +53,12 @@ func (a *Server) wechatUser(ctx context.Context, subject, phone string) (id stri
 			if e = json.Unmarshal(row.Data, &profile); e != nil {
 				return e
 			}
-			if profile["disabled"] == true || profile["archived"] == true {
+			if profile["archived"] == true {
+				// Re-register with a new business identity. Old sessions, funds,
+				// provider ownership and orders stay attached to the archived ID.
+				id, fresh = core.NewID(), true
+				profile = map[string]any{}
+			} else if profile["disabled"] == true {
 				return core.ErrUserDisabled
 			}
 		}

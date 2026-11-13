@@ -43,6 +43,7 @@ func (s *Service) Create(ctx context.Context, parent, name, role, key, actor str
 // createChild adds a provider below parent, priced within the parent's own
 // price and margin. A provider made by scanning starts pending.
 func createChild(tx store.Transaction, id, parent string, n core.Partner, actor string) (core.Record, error) {
+	n.Name = strings.TrimSpace(n.Name)
 	if e := activeChain(tx, parent); e != nil {
 		return core.Record{}, e
 	}
@@ -52,6 +53,9 @@ func createChild(tx store.Transaction, id, parent string, n core.Partner, actor 
 	}
 	if !CanGrow(RoleOf(parent, p), n.Role) {
 		return core.Record{}, rulef("该服务商不能添加这一级的下级")
+	}
+	if e := uniqueSiblingName(tx, id, parent, n.Role, n.Name); e != nil {
+		return core.Record{}, e
 	}
 	price, e := prices(tx, parent)
 	if e != nil {
@@ -110,6 +114,11 @@ func (s *Service) Update(ctx context.Context, id string, v core.Partner, version
 		// one stays closed.
 		if frozen(old.Status) || frozen(v.Status) {
 			v.Status = old.Status
+		}
+		if v.Name != old.Name && v.Status != "deleted" && v.Status != "rejected" {
+			if e = uniqueSiblingName(tx, id, v.ParentID, v.Role, v.Name); e != nil {
+				return e
+			}
 		}
 		out, e = tx.Put("partners", core.Record{ID: id, Owner: row.Owner, Data: core.Data(v)}, version)
 		if e != nil {

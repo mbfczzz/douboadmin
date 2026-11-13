@@ -5,7 +5,9 @@ const { harness } = require("./harness.cjs");
 test("typed and scanned share codes join with their method", async () => {
   const h = harness(),
     page = h.page("activate");
-  page.setData({ logged: true, code: "abcd-2345" });
+  await h.api.signIn();
+  page.owner = h.api.sessionUserId();
+  page.setData({ logged: true, loading: false, code: "abcd-2345" });
   h.wx.reLaunch = () => {};
   const bodies = [];
   h.api.request = async (path, method, body) => {
@@ -28,6 +30,8 @@ test("a scan only registers: the page waits for the platform to open it", async 
     page = h.page("activate"),
     toasts = [];
   let enters = 0;
+  await h.api.signIn();
+  page.owner = h.api.sessionUserId();
   page.setData({ logged: true });
   h.wx.reLaunch = () => enters++;
   h.wx.showToast = (o) => toasts.push(o.title);
@@ -109,6 +113,8 @@ test("a replayed code for a disabled account does not enter the app", async () =
     page = h.page("activate");
   let enters = 0;
   h.wx.reLaunch = () => enters++;
+  await h.api.signIn();
+  page.owner = h.api.sessionUserId();
   page.setData({ logged: true });
   h.wx.showToast = () => {};
   h.api.request = async () => ({
@@ -125,6 +131,8 @@ test("registration sends an SMS code, then verifies name and phone before activa
   const h = harness(),
     page = h.page("activate"),
     requests = [];
+  await h.api.signIn();
+  page.owner = h.api.sessionUserId();
   page.setData({
     logged: true,
     status: { active: false, status: "pending", profileRequired: true },
@@ -185,6 +193,8 @@ test("the invite code fills eight cells, gains its dash and backspaces cleanly",
 test("a pasted or fully typed code registers by itself, once", async () => {
   const h = harness(),
     page = h.page("activate");
+  await h.api.signIn();
+  page.owner = h.api.sessionUserId();
   page.setData({ logged: true });
   const joins = [];
   h.api.request = async (path, method, body) => {

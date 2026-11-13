@@ -56,7 +56,7 @@ func dbError(w http.ResponseWriter, err error) {
 	case errors.Is(err, core.ErrInsufficient):
 		fail(w, 402, err.Error())
 	case errors.Is(err, core.ErrUserDisabled):
-		fail(w, 403, err.Error())
+		reply(w, 403, map[string]string{"code": "ACCOUNT_DISABLED", "error": err.Error()})
 	case errors.Is(err, core.ErrActivationRequired), errors.Is(err, core.ErrPartnerDisabled):
 		reply(w, 403, map[string]string{"code": "ACTIVATION_REQUIRED", "error": err.Error()})
 	case errors.As(err, &rule):

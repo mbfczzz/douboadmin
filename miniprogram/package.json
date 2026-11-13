@@ -8,7 +8,7 @@
     "test:flow": "node --test scripts/flow.test.cjs",
     "test:layout": "node --test scripts/layout-groups.test.cjs scripts/viewport-layout.test.cjs",
     "test:virtual-payment": "node --test scripts/virtual-payment.test.cjs scripts/virtual-failure.test.cjs scripts/custom-payment.test.cjs scripts/payment-owner.test.cjs scripts/payment-recovery.test.cjs",
-    "test:auth": "node --test scripts/auth.test.cjs scripts/profile.test.cjs scripts/activation.test.cjs scripts/registration-profile.test.cjs scripts/browse-only.test.cjs scripts/session-isolation.test.cjs",
+    "test:auth": "node --test scripts/auth.test.cjs scripts/profile.test.cjs scripts/activation.test.cjs scripts/registration-profile.test.cjs scripts/browse-only.test.cjs scripts/session-isolation.test.cjs scripts/account-lifecycle.test.cjs scripts/account-state-review.test.cjs scripts/activation-refresh.test.cjs scripts/registration-owner.test.cjs",
     "test:payment": "node --test scripts/billing-ux.test.cjs scripts/payment-review.test.cjs scripts/payment-confirmation.test.cjs scripts/payment-multiple.test.cjs scripts/points-balance.test.cjs",
     "test:runtime": "node --test scripts/runtime.test.cjs scripts/create.test.cjs scripts/navigation.test.cjs scripts/navigation-review.test.cjs scripts/navigation-continuity.test.cjs scripts/transition.test.cjs scripts/journey.test.cjs scripts/editing.test.cjs scripts/favorites-ux.test.cjs scripts/chat-ux.test.cjs scripts/mine-ux.test.cjs scripts/usability.test.cjs",
     "build": "node ../scripts/check-structure.mjs && node --test scripts/source-bytes.test.mjs && tsc --noEmit && node scripts/check.mjs && node scripts/compile.cjs && node scripts/package-budget.mjs"

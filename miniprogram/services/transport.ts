@@ -21,6 +21,7 @@ export function publicRequest<T>(
             new RequestError(
               r.statusCode,
               (r.data as { error?: string })?.error || "请求失败",
+              (r.data as { code?: string })?.code,
             ),
           );
           return;
