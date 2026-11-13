@@ -190,11 +190,11 @@ button.profile-submit {
   padding-top: 48px;
   text-align: center;
 }
-.profile-login .biz-action {
+.profile-login button.biz-action {
   margin-top: 24px;
 }
 .profile-pressed,
-.profile-avatar-row[disabled] {
+button.profile-avatar-row[disabled] {
   opacity: 0.65;
 }
 

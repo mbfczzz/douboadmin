@@ -22,25 +22,6 @@ export interface PosterContext {
   closePath(): void;
   fill(): void;
 }
-function box(
-  c: PosterContext,
-  x: number,
-  y: number,
-  w: number,
-  h: number,
-  r: number,
-  color: string,
-) {
-  c.fillStyle = color;
-  c.beginPath();
-  c.moveTo(x + r, y);
-  c.arcTo(x + w, y, x + w, y + h, r);
-  c.arcTo(x + w, y + h, x, y + h, r);
-  c.arcTo(x, y + h, x, y, r);
-  c.arcTo(x, y, x + w, y, r);
-  c.closePath();
-  c.fill();
-}
 function text(
   c: PosterContext,
   value: string,
@@ -54,12 +35,12 @@ function text(
   c.fillStyle = color;
   c.fillText(value, x, y);
 }
-function ownerLines(c: PosterContext, owner: string) {
-  c.font = "28px sans-serif";
+function ownerLines(c: PosterContext, owner: string, size: number, width: number) {
+  c.font = `600 ${size}px sans-serif`;
   const lines: string[] = [];
   let line = "";
   for (const char of Array.from(owner)) {
-    if (c.measureText(line + char).width > 610) {
+    if (c.measureText(line + char).width > width) {
       lines.push(line);
       line = "";
     }
@@ -68,40 +49,29 @@ function ownerLines(c: PosterContext, owner: string) {
   if (line) lines.push(line);
   return lines.length > 2 ? [lines[0], lines[1].slice(0, -1) + "…"] : lines;
 }
+// Presented exactly like WeChat's own mini-program code: a plain white
+// card, the official round code large and centred, the app name and
+// "微信扫一扫，使用小程序" under it. Only the inviter and the invite code are
+// added, in quiet grey type.
 export function drawInvitePoster(
   c: PosterContext,
   image: any,
   data: InvitePoster,
 ) {
-  c.textBaseline = "top";
-  c.textAlign = "left";
-  c.fillStyle = "#111317";
+  const ink = "#111111", grey = "#888888";
+  c.fillStyle = "#ffffff";
   c.fillRect(0, 0, POSTER_WIDTH, POSTER_HEIGHT);
-  box(c, 48, 52, 8, 34, 4, "#00c8dc");
-  text(c, "豆播 AI", 72, 48, 34, "#f4f5f7", true);
-  c.textAlign = "right";
-  text(c, data.title, 672, 58, 21, "#a6abb5");
-  c.textAlign = "left";
-  ownerLines(c, data.owner || "豆播 AI · 创作邀请").forEach((line, i) =>
-    text(c, line, 48, 130 + i * 38, 28, "#f4f5f7", true),
-  );
-  box(c, 48, 236, 624, 654, 24, "#ffffff");
-  // Keep the complete original code and at least 48 px of white quiet zone.
-  c.imageSmoothingEnabled = false;
-  c.drawImage(image, 145, 280, 430, 430);
+  c.textBaseline = "top";
   c.textAlign = "center";
-  text(c, "邀请码", 360, 742, 20, "#667085");
-  text(
-    c,
-    data.code.slice(0, 4) + "-" + data.code.slice(4),
-    360,
-    778,
-    36,
-    "#202632",
-    true,
-  );
-  text(c, "识别后自动带入邀请码", 360, 842, 21, "#667085");
-  box(c, 48, 922, 624, 64, 16, "#00c8dc");
-  text(c, "微信扫码进入豆播 AI", 360, 939, 26, "#082b30", true);
-  text(c, "完成登记后，由超级管理员开通", 360, 1010, 20, "#a6abb5");
+  const lines = ownerLines(c, data.owner || "豆播 AI", 30, 600);
+  lines.forEach((line, i) => text(c, line, 360, 96 + i * 40, 30, ink, true));
+  text(c, data.title, 360, 104 + lines.length * 40, 22, grey);
+  const top = 186 + lines.length * 40;
+  c.imageSmoothingEnabled = false;
+  c.drawImage(image, 120, top, 480, 480);
+  text(c, "豆播AI", 360, top + 512, 30, ink, true);
+  text(c, "微信扫一扫，使用小程序", 360, top + 558, 22, grey);
+  const code = data.code.slice(0, 4) + "-" + data.code.slice(4);
+  text(c, "邀请码 " + code, 360, POSTER_HEIGHT - 132, 24, ink);
+  text(c, "识别后自动带入邀请码，完成登记后由超级管理员开通", 360, POSTER_HEIGHT - 92, 19, grey);
 }

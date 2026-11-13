@@ -6,7 +6,7 @@
     <showcase />
     <text class="guest-title">欢迎来到你的创作空间</text>
     <text class="guest-copy">登录后，保存作品、收藏灵感，继续每一个未完成的好想法。</text>
-    <t-button theme="primary" block bind:tap="signIn">登录 / 注册</t-button>
+    <button class="guest-login" bindtap="signIn">登录 / 注册</button>
     <text class="guest-note">手机号仅在你同意后获取</text>
   </view>
   <view wx:elif="{{me}}">

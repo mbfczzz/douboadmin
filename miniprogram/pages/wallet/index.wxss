@@ -30,7 +30,7 @@
   font-weight: 600;
 }
 .purchase-tabs button[disabled],
-.virtual-product[disabled] {
+button.virtual-product[disabled] {
   opacity: 0.55;
 }
 .checkout-error {
@@ -58,11 +58,11 @@ button.virtual-product {
   font-size: 13px;
   overflow-wrap: anywhere;
 }
-.virtual-product.selected {
+button.virtual-product.selected {
   border-color: var(--ui-selected-line);
   background: var(--ui-selected);
 }
-.virtual-product > text {
+button.virtual-product > text {
   display: block;
   width: 100%;
 }
@@ -72,7 +72,7 @@ button.virtual-product {
   font-weight: 600;
   color: var(--ui-text);
 }
-.virtual-product.selected .product-price {
+button.virtual-product.selected .product-price {
   color: var(--ui-link);
 }
 .ledger-row {
@@ -137,7 +137,7 @@ button.virtual-product {
 .virtual-products.single {
   grid-template-columns: 1fr;
 }
-.single .virtual-product {
+.single button.virtual-product {
   display: grid;
   grid-template-columns: 1fr auto;
   text-align: left;

@@ -58,3 +58,39 @@ test("long-pressing a favorite confirms, switches it off and drops the card", as
   assert.deepEqual(calls, [["/favorites/t1", "GET", undefined], ["/favorites/t1", "PUT", false]]);
   assert.deepEqual([...page.data.templates].map((t) => t.id), ["t2"]);
 });
+
+test("unfinished tasks show their own first reference image, looked up once", async () => {
+  const h = harness();
+  await h.api.signIn();
+  const { loadRefs } = h.service("../pages/tasks/refs");
+  let calls = 0;
+  h.wx.request = (o) => {
+    calls++;
+    const id = o.url.split("/assets/")[1];
+    o.success({ statusCode: 200, data: { id, data: { url: "https://cdn.test/" + id + ".jpg", type: id === "v1" ? "video/mp4" : "image/png" } } });
+  };
+  const page = { data: { refs: {}, ongoing: [{ id: "j1", input: { assets: ["a1"] } }, { id: "j2", input: { assets: ["v1"] } }, { id: "j3", input: { assets: [] } }] }, setData(v) { Object.assign(this.data, v); } };
+  await loadRefs(page);
+  assert.equal(page.data.refs.j1, "https://cdn.test/a1.jpg");
+  assert.equal(page.data.refs.j2, ""); // a video reference keeps the status tile
+  assert.equal("j3" in page.data.refs, false);
+  await loadRefs(page); // polling again does not refetch
+  assert.equal(calls, 2);
+});
+
+test("task counters filter the list and unfinished tasks say how long they've run", () => {
+  const h = harness();
+  const { elapsed, nextFilter } = h.service("../pages/tasks/view");
+  const now = Date.parse("2026-11-13T10:00:00Z");
+  assert.equal(elapsed("2026-11-13T09:59:40Z", "running", now), "已进行 不到 1 分钟");
+  assert.equal(elapsed("2026-11-13T09:57:00Z", "queued", now), "已排队 3 分钟");
+  assert.equal(elapsed("2026-11-13T08:55:00Z", "running", now), "已进行 1 小时 5 分");
+  assert.equal(nextFilter("", "failed"), "failed");
+  assert.equal(nextFilter("failed", "failed"), "");
+  assert.equal(nextFilter("failed", "running"), "running");
+  const page = h.page("tasks");
+  page.pick({ currentTarget: { dataset: { filter: "running" } } });
+  assert.equal(page.data.filter, "running");
+  page.pick({ currentTarget: { dataset: { filter: "running" } } });
+  assert.equal(page.data.filter, "");
+});

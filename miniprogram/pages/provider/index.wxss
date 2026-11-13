@@ -37,8 +37,11 @@
 .provider-head .biz-error {
   margin: 10px 0 0;
 }
-.provider-share {
+/* The share card is its own surface: no panel around it. */
+.biz-card.provider-share {
+  padding: 0;
   text-align: center;
+  background: transparent;
 }
 .provider-tabs {
   display: flex;
@@ -92,8 +95,8 @@
   font-size: 13px;
   letter-spacing: 0;
 }
-.provider-share .biz-action,
-.provider-login .biz-action {
+.provider-share button.biz-action,
+.provider-login button.biz-action {
   margin-top: 12px;
 }
 .provider-section {

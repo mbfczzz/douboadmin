@@ -54,14 +54,14 @@ image {
 .row.section-title {
   display: flex;
 }
-.text-button {
+button.text-button {
   background: transparent;
   color: var(--ui-link);
   padding: 8px 0;
   line-height: 1.5;
   font-size: 13px;
 }
-.phone-alternative {
+button.phone-alternative {
   display: block;
   width: 100%;
   min-height: 44px;

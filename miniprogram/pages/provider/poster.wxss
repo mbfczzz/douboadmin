@@ -1,74 +1,55 @@
-.invite-card {
-  background: #111317;
-  border: 1px solid #3b3e46;
-  border-radius: 16px;
-  padding: 20px 16px 14px;
+/* On-page share card: WeChat's own plain white mini-program code card,
+   the same as the saved image. */
+.invite-paper {
+  padding: 26px 16px 20px;
+  border-radius: 12px;
+  background: #fff;
   text-align: center;
-}
-.invite-brand {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-  color: #f4f5f7;
-  font-size: 19px;
-  font-weight: 600;
-}
-.invite-brand > text:last-child {
-  color: #a6abb5;
-  font-size: 12px;
-  font-weight: 400;
 }
 .invite-owner {
   display: block;
-  text-align: left;
-  color: #f4f5f7;
   font-size: 16px;
-  line-height: 24px;
-  margin: 20px 0;
+  font-weight: 600;
+  line-height: 22px;
+  color: #111111;
   overflow-wrap: anywhere;
-}
-.invite-paper {
-  background: #fff;
-  border-radius: 12px;
-  padding: 20px 8px 16px;
-}
-.invite-paper .provider-qr {
-  width: 100%;
-  max-width: 215px;
-  height: 215px;
-  padding: 0;
-  margin: 0 auto 14px;
 }
 .invite-caption {
   display: block;
-  color: #667085;
+  margin-top: 4px;
   font-size: 12px;
-  line-height: 20px;
+  line-height: 18px;
+  color: #6f6f6f;
+}
+.invite-paper .provider-qr {
+  width: 220px;
+  height: 220px;
+  margin: 18px auto 14px;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+}
+.invite-app {
+  display: block;
+  font-size: 16px;
+  font-weight: 600;
+  color: #111111;
+}
+.invite-code {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 18px;
+  padding: 4px 0;
+  color: #6f6f6f;
 }
 .invite-number {
-  display: block;
-  color: #202632;
-  font-size: 24px;
-  font-weight: 600;
-  margin: 4px 0 14px;
-  letter-spacing: 2px;
+  font-size: 15px;
+  color: #111111;
+  font-variant-numeric: tabular-nums;
 }
-.invite-open {
-  display: block;
-  background: #00c8dc;
-  color: #082b30;
-  border-radius: 8px;
-  margin-top: 16px;
-  padding: 10px;
-  font-size: 14px;
-  font-weight: 600;
-}
-.invite-footer {
-  display: block;
-  color: #a6abb5;
-  font-size: 12px;
-  margin-top: 14px;
+.pill-pressed {
+  opacity: 0.6;
 }
 .poster-canvas {
   position: fixed;

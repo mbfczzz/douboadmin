@@ -87,7 +87,16 @@ console.log(
 // Explicit feature increment, see docs/miniprogram-invite-entry.md.
 // Share-card rendering and native PNG export reuse one renderer with the web.
 // Explicit feature allowance, see docs/invite-poster.md.
-const budget = 678 * 1024;
+// Device compatibility: button.<class> selectors over WeChat's default 184px
+// button and disabled colours, own login buttons, no inset/aspect-ratio for
+// older iOS WebViews: 685,278 bytes. Task queue cards with each task's own
+// reference image, a create tile and an inspiration strip: 689,235 bytes.
+// Counters that filter the queue, elapsed time, all-done line: 692,735 bytes.
+// Combined with the trial invite-code and share-card work above: 701,892 B.
+// Share card restyled after WeChat's own mini-program code material (white
+// sheet, round code, scan line, code pill), on the page and the saved
+// image; finally the plain white card WeChat itself uses: 701,488 B.
+const budget = 687 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

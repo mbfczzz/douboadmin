@@ -10,7 +10,8 @@
 }
 .cover-cell {
   position: relative;
-  aspect-ratio: 3 / 4;
+  /* 3 columns in 20px page margins with 6px gaps, 3:4 (no aspect-ratio: iOS < 15) */
+  height: calc((100vw - 52px) * 4 / 9);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -21,7 +22,10 @@
 }
 .cover-cell image {
   position: absolute;
-  inset: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
   width: 100%;
   height: 100%;
 }
@@ -47,7 +51,10 @@
 .running-cell::after {
   content: "";
   position: absolute;
-  inset: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
   background: linear-gradient(110deg, transparent 30%, #ffffff14 50%, transparent 70%);
   transform: translateX(-100%);
   animation: running-sheen 2.2s ease-in-out infinite;

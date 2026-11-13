@@ -237,7 +237,10 @@ button.retry-pill::after {
 .live-stage::after {
   content: "";
   position: absolute;
-  inset: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
   background: linear-gradient(110deg, transparent 30%, #ffffff12 50%, transparent 70%);
   transform: translateX(-100%);
   animation: live-sheen 2.4s ease-in-out infinite;

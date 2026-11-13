@@ -61,7 +61,10 @@
 .reference-remove::after {
   content: "";
   position: absolute;
-  inset: -12px;
+  top: -12px;
+  right: -12px;
+  bottom: -12px;
+  left: -12px;
 }
 .expand-editor {
   position: absolute;
@@ -170,7 +173,7 @@
   text-overflow: ellipsis;
 }
 /* The model yields width; estimated cost wraps instead of hiding digits. */
-.generate-button {
+button.generate-button {
   width: 80px;
   flex-shrink: 0;
   min-height: 48px;
@@ -183,7 +186,7 @@
   font-size: 15px;
   font-weight: 600;
 }
-.generate-button.is-disabled {
+button.generate-button.is-disabled {
   background-color: var(--ui-disabled);
   color: var(--ui-disabled-text);
 }
@@ -191,7 +194,7 @@
   .workspace-foot {
     gap: 6px;
   }
-  .generate-button {
+  button.generate-button {
     width: 68px;
   }
   .model-select {

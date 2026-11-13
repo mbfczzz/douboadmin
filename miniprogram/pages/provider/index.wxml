@@ -16,18 +16,17 @@
     <view wx:if="{{tabs.length>1}}" class="provider-tabs">
       <text wx:for="{{tabs}}" wx:key="key" class="{{tab===item.key?'on':''}}" data-tab="{{item.key}}" bindtap="switchTab" aria-label="{{item.label}}">{{item.short}}</text>
     </view>
-    <view class="invite-card">
-      <view class="invite-brand"><text>豆播 AI</text><text>{{posterTitle}}</text></view>
-      <text class="invite-owner">{{center.name||'豆播 AI · 创作邀请'}}</text>
-      <view class="invite-paper">
-        <image class="provider-qr" src="{{shown.qr}}" mode="aspectFit" show-menu-by-longpress />
-        <text class="invite-caption">邀请码</text><text class="invite-number">{{shown.code}}</text>
-        <text class="invite-caption">识别后自动带入邀请码</text>
-      </view>
-      <text class="invite-open">微信扫码进入豆播 AI</text>
-      <text class="invite-footer">完成登记后，由超级管理员开通</text>
+    <!-- Same as the saved card (utils/invite-poster.ts): WeChat's own plain
+         white mini-program code card. -->
+    <view class="invite-paper">
+      <text class="invite-owner">{{center.name||'豆播 AI'}}</text>
+      <text class="invite-caption">{{posterTitle}}</text>
+      <image class="provider-qr" src="{{shown.qr}}" mode="aspectFit" show-menu-by-longpress />
+      <text class="invite-app">豆播AI</text>
+      <text class="invite-caption">微信扫一扫，使用小程序</text>
+      <view class="invite-code" data-text="{{shown.raw}}" bindtap="copy" hover-class="pill-pressed" aria-role="button" aria-label="{{'复制邀请码 '+shown.code}}"><text class="invite-number">邀请码 {{shown.code}}</text><t-icon name="copy" size="14" /></view>
+      <text class="invite-caption">识别后自动带入邀请码，完成登记后由超级管理员开通</text>
     </view>
-    <view class="provider-code"><text class="biz-link" bindtap="copy" data-text="{{shown.raw}}">复制邀请码</text></view>
     <text class="biz-note">{{note}}</text>
     <button class="biz-action" bindtap="save" loading="{{busy}}" disabled="{{busy}}">保存分享卡片</button>
   </view>

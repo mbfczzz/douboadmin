@@ -1,113 +1,8 @@
 @import "../../styles/works.wxss";
+@import "../../styles/job-pagination.wxss";
+@import "./cards.wxss";
 .queue-page {
   padding: 24px 20px calc(30px + env(safe-area-inset-bottom));
-}
-.queue-summary {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 20px;
-  font-size: 15px;
-  font-weight: 500;
-}
-.failure-count {
-  font-size: 12px;
-  color: var(--ui-muted);
-  font-weight: 400;
-}
-.queue-item {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 16px 0;
-  border-bottom: 1px solid var(--ui-border);
-}
-.queue-thumb {
-  position: relative;
-  width: 64px;
-  height: 80px;
-  flex-shrink: 0;
-  overflow: hidden;
-  border-radius: 12px;
-  background: var(--ui-field);
-  color: var(--ui-muted);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-/* Work in progress: a cyan-tinted tile with a sweeping sheen. */
-.queue-thumb.running,
-.queue-thumb.queued {
-  color: var(--ui-brand);
-  background: linear-gradient(160deg, #00c8dc2e, var(--ui-field) 75%);
-}
-.queue-thumb.running::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(110deg, transparent 30%, #ffffff17 50%, transparent 70%);
-  transform: translateX(-100%);
-  animation: thumb-sheen 2s ease-in-out infinite;
-}
-@keyframes thumb-sheen {
-  to { transform: translateX(100%); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .queue-thumb.running::after { animation: none; }
-}
-.queue-thumb.failed {
-  color: #ff8a94;
-  background: #ff5c6c14;
-}
-.queue-copy {
-  flex: 1;
-  min-width: 0;
-}
-.queue-title-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.queue-title {
-  flex: 1;
-  font-size: 15px;
-  font-weight: 500;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.queue-state {
-  font-size: 13px;
-  white-space: nowrap;
-  color: var(--ui-muted);
-}
-.queue-state.running {
-  color: var(--ui-info);
-}
-.failure-count.failed,
-.queue-state.failed {
-  color: var(--ui-danger);
-}
-.queue-state.queued {
-  color: var(--ui-warning);
-}
-.queue-spec {
-  overflow-wrap: anywhere;
-  display: block;
-  font-size: 13px;
-  line-height: 1.5;
-  color: var(--ui-muted);
-  margin-top: 7px;
-}
-.queue-time {
-  flex-wrap: wrap;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  font-size: 12px;
-  color: var(--ui-muted);
-  margin-top: 16px;
 }
 .completed-heading {
   font-size: 15px;
@@ -122,7 +17,6 @@
   color: var(--ui-muted);
 }
 
-@import "../../styles/job-pagination.wxss";
 
 /* Three counters on top; a live bar under each running task. */
 .queue-stats {

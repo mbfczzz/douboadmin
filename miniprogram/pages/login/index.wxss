@@ -2,7 +2,7 @@
   padding: 40px 20px calc(24px + env(safe-area-inset-bottom));
   text-align: center;
 }
-.phone-login {
+button.phone-login {
   width: 100%;
   padding: 12px;
   min-height: 48px;
@@ -13,7 +13,7 @@
   font-size: 16px;
   font-weight: 600;
 }
-.phone-login[disabled] {
+button.phone-login[disabled] {
   background: var(--ui-disabled);
   color: var(--ui-disabled-text);
 }
@@ -53,7 +53,7 @@
   font-size: 13px;
   line-height: 1.6;
 }
-.login-page .demo-entry {
+.login-page button.demo-entry {
   width: auto;
   margin: 0 auto;
   background: transparent;
@@ -61,7 +61,7 @@
   font-size: 13px;
   padding: 8px;
 }
-.login-page .browse {
+.login-page button.browse {
   margin: 4px auto 0;
   padding: 12px 18px;
   font-size: 15px;

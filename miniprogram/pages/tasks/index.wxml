@@ -18,42 +18,26 @@
   <view wx:else class="content-reveal">
     <view wx:if="{{loadError}}" class="error-box" bindtap="load">刷新失败，已保留上次结果 · 点击重试</view>
     <view class="queue-stats">
-      <view class="stat running"><text class="stat-num">{{runningCount}}</text><text class="stat-label">处理中</text></view>
-      <view class="stat {{failedCount?'failed':''}}"><text class="stat-num">{{failedCount}}</text><text class="stat-label">失败</text></view>
-      <view class="stat" bindtap="works"><text class="stat-num">{{completed.length}}</text><text class="stat-label">最近完成 ›</text></view>
+      <view class="stat running {{filter==='running'?'on':''}}" data-filter="running" bindtap="pick" aria-role="button" aria-label="{{'只看处理中，'+runningCount+' 个'}}"><view class="stat-icon"><t-icon name="loading" size="16" /></view><text class="stat-num">{{runningCount}}</text><text class="stat-label">处理中</text></view>
+      <view class="stat failed {{failedCount?'has':''}} {{filter==='failed'?'on':''}}" data-filter="failed" bindtap="pick" aria-role="button" aria-label="{{'只看失败，'+failedCount+' 个'}}"><view class="stat-icon"><t-icon name="error-circle" size="16" /></view><text class="stat-num">{{failedCount}}</text><text class="stat-label">失败</text></view>
+      <view class="stat done" bindtap="works" aria-role="button"><view class="stat-icon"><t-icon name="check-circle" size="16" /></view><text class="stat-num">{{completed.length}}</text><text class="stat-label">最近完成 ›</text></view>
     </view>
-    <view
-      class="queue-item"
-      wx:for="{{ongoing}}"
-      wx:key="id"
-      data-id="{{item.id}}"
-      bindtap="detail"
-      hover-class="card-pressed"
-    >
-      <view class="queue-thumb {{item.status}}"
-        ><t-loading wx:if="{{item.status==='running'||item.status==='queued'}}" size="22px" /><t-icon
-          wx:else
-          name="{{item.status==='failed'?'error-circle':item.input.kind==='image'?'image':'video-camera'}}"
-          size="26"
-      /></view>
-      <view class="queue-copy">
-        <view class="queue-title-row"
-          ><text class="queue-title">{{item.shortTitle}}</text
-          ><text class="queue-state {{item.status}}"
-            >{{item.stateText}}</text
-          ></view
-        >
-        <text class="queue-spec" wx:if="{{item.status!=='failed'}}"
-          >{{item.modelName}} · {{item.input.ratio}} · {{item.input.resolution}}<text wx:if="{{item.input.duration}}"> · {{item.input.duration}}秒</text></text
-        >
-        <view wx:if="{{item.status==='running'}}" class="queue-progress"><view class="queue-bar"><view style="width:{{item.progress||4}}%" /></view><text>{{item.stage||'生成中'}}{{item.progress?' · '+item.progress+'%':''}}</text></view>
-        <text class="queue-spec" wx:else>{{item.error}}</text>
-        <view class="queue-time"
-          ><text>{{item.time}} 提交</text
-          ><text>{{item.status==='failed'?(item.retryable?'查看并重试 ›':'查看原因 ›'):'详情 ›'}}</text></view
-        >
+    <view wx:if="{{filter}}" class="filter-note"><text>{{filter==='failed'?'只看失败的任务':'只看处理中的任务'}}</text><text class="filter-clear" data-filter="{{filter}}" bindtap="pick">显示全部</text></view>
+    <view wx:if="{{!runningCount&&!failedCount}}" class="all-done"><t-icon name="check-circle-filled" size="18" /><text>没有进行中的任务，全部都完成了</text></view>
+    <block wx:for="{{ongoing}}" wx:key="id"><view wx:if="{{!filter||(filter==='failed'?item.status==='failed':item.status!=='failed')}}" class="task-card {{item.status}}" data-id="{{item.id}}" bindtap="detail" hover-class="card-pressed">
+      <view class="task-thumb {{item.status}} {{refs[item.id]?'has-ref':''}}">
+        <image wx:if="{{refs[item.id]}}" src="{{refs[item.id]}}" mode="aspectFill" />
+        <view class="thumb-state"><t-loading wx:if="{{item.status==='running'||item.status==='queued'}}" size="20px" /><t-icon wx:else name="{{item.status==='failed'?'error-circle':'time'}}" size="22" /></view>
+        <text class="thumb-kind">{{item.kindText}}</text>
       </view>
-    </view>
+      <view class="task-body">
+        <view class="task-top"><text class="task-title">{{item.shortTitle||'未命名任务'}}</text><text class="task-pill {{item.status}}">{{item.stateText}}</text></view>
+        <view class="task-chips"><text>{{item.modelName}}</text><text wx:if="{{item.input.ratio}}">{{item.input.ratio}}</text><text wx:if="{{item.input.resolution}}">{{item.input.resolution}}</text><text wx:if="{{item.input.duration}}">{{item.input.duration}} 秒</text></view>
+        <view wx:if="{{item.status==='running'}}" class="queue-progress"><view class="queue-bar"><view style="width:{{item.progress||4}}%" /></view><text>{{item.stage||'生成中'}}{{item.progress?' · '+item.progress+'%':''}}</text></view>
+        <view wx:elif="{{item.status==='failed'}}" class="task-error"><t-icon name="info-circle" size="14" /><text>{{item.error||'生成失败'}}</text></view>
+        <view class="task-foot"><text>{{item.elapsed||item.time+' 提交'}}</text><text class="task-go {{item.status}}">{{item.status==='failed'?(item.retryable?'重新生成 ›':'查看原因 ›'):'查看进度 ›'}}</text></view>
+      </view>
+    </view></block>
     <view class="row completed-heading" wx:if="{{completed.length}}">
       <text>最近完成</text>
       <text class="completed-more" bindtap="works">查看更多 ›</text>
@@ -77,13 +61,17 @@
             binderror="coverError"
           />
           <t-icon wx:else name="play-circle" size="32" />
-          <text wx:if="{{item.input.duration}}" class="completed-duration"
-            >{{item.input.duration}} 秒</text
-          >
+          <view class="cover-badge"><t-icon name="{{item.input.kind==='image'?'image':'play-circle-filled'}}" size="12" /><text wx:if="{{item.input.kind!=='image'&&item.input.duration}}">{{item.input.duration}}s</text></view>
         </view>
         <text class="completed-title">{{item.shortTitle}}</text>
       </view>
+      <view wx:if="{{completed.length<3}}" class="completed-item create-tile" bindtap="create" hover-class="card-pressed">
+        <view class="completed-cover"><view class="create-plus"><t-icon name="add" size="22" /></view><text class="create-label">去创作</text></view>
+        <text class="completed-title muted">新作品</text>
+      </view>
     </view>
+    <view class="inspire-head"><text>灵感 · 做同款</text><text class="completed-more" bindtap="templates">全部模板 ›</text></view>
+    <showcase mode="strip" />
   </view>
 <view wx:if="{{total>20}}" class="job-pagination">
   <button bindtap="previous" disabled="{{page<=1}}">上一页</button>

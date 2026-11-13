@@ -51,7 +51,10 @@
 .use-cover::after {
   content: "";
   position: absolute;
-  inset: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
   background: linear-gradient(transparent 40%, #00000080);
 }
 .use-cover .use-icon {
@@ -100,7 +103,7 @@ button.virtual-product {
   position: relative;
   overflow: hidden;
 }
-.virtual-product > text.product-badge {
+button.virtual-product > text.product-badge {
   width: auto;
 }
 .product-badge {

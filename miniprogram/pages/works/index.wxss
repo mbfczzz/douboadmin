@@ -45,14 +45,17 @@
   gap: 18px 10px;
 }
 .works-page .completed-cover {
-  height: auto;
-  aspect-ratio: 3 / 4;
+  /* 2 columns in 20px margins, 10px gap, 3:4 */
+  height: calc((100vw - 50px) * 2 / 3);
   overflow: hidden;
   border-radius: 14px;
 }
 .works-page .completed-cover image {
   position: absolute;
-  inset: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
   border-radius: 0;
 }
 .works-page .completed-duration {

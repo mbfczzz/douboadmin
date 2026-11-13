@@ -1,3 +1,5 @@
+import { elapsed, nextFilter } from "./view";
+import { loadRefs } from "./refs";
 import { movePage } from "../../services/list-page";
 import {
   jobView,
@@ -14,7 +16,7 @@ import { dropCover } from "../../services/cover";
 Page({
   data: {
     jobs: [] as ReturnType<typeof jobView>[],
-    ongoing: [] as ReturnType<typeof jobView>[],
+    ongoing: [] as (ReturnType<typeof jobView> & { elapsed: string })[],
     completed: [] as ReturnType<typeof jobView>[],
     runningCount: 0,
     failedCount: 0,
@@ -24,6 +26,8 @@ Page({
     signingIn: false,
     page: 1,
     total: 0,
+    refs: {} as Record<string, string>, // job id → its first reference image
+    filter: "", // "", "running" or "failed": the counters filter the list
   },
   timer: 0,
   fetching: false,
@@ -89,13 +93,16 @@ Page({
         loading: false,
         needsLogin: false,
         loadError: "",
-        ongoing: jobs.filter((j) => j.status !== "succeeded"),
+        ongoing: jobs
+          .filter((j) => j.status !== "succeeded")
+          .map((j) => ({ ...j, elapsed: /queued|running/.test(j.status) ? elapsed(j.createdAt, j.status) : "" })),
         completed: jobs.filter((j) => j.status === "succeeded"),
         runningCount: jobs.filter(
           (j) => j.status === "running" || j.status === "queued",
         ).length,
         failedCount: jobs.filter((j) => j.status === "failed").length,
       });
+      void loadRefs(this);
     } catch (e) {
       if (this.destroyed) return;
       if (!hasSession()) {
@@ -132,6 +139,13 @@ Page({
   },
   works() {
     openPage(this, { url: "/pages/works/index" });
+  },
+  pick(e: WechatMiniprogram.TouchEvent) {
+    wx.vibrateShort?.({ type: "light" });
+    this.setData({ filter: nextFilter(this.data.filter, e.currentTarget.dataset.filter) });
+  },
+  templates() {
+    openTab(this, "/pages/templates/index");
   },
   create() {
     openTab(this, "/pages/create/index");

@@ -17,14 +17,18 @@
 }
 .favorite-card {
   position: relative;
-  aspect-ratio: 3 / 4;
+  /* 2 columns in 20px margins, 10px gap, 3:4 */
+  height: calc((100vw - 50px) * 2 / 3);
   overflow: hidden;
   border-radius: 16px;
   background: var(--ui-surface);
 }
 .favorite-card image {
   position: absolute;
-  inset: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
   width: 100%;
   height: 100%;
 }

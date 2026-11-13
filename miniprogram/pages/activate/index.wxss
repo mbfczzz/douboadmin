@@ -53,7 +53,7 @@
   color: var(--ui-muted);
   margin-top: 18px;
 }
-.activation-path .biz-action + .biz-input,
+.activation-path button.biz-action + .biz-input,
 .activation-path .biz-input + .biz-input {
   margin-top: 12px;
 }
@@ -74,7 +74,7 @@
   font-size: 15px;
   white-space: nowrap;
 }
-.browse-link {
+button.browse-link {
   display: block;
   margin: 16px auto 0;
 }

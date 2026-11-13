@@ -51,7 +51,7 @@
   min-width: 0;
   font-size: 15px;
 }
-.clear-search {
+button.clear-search {
   flex: 0 0 44px;
   width: 44px;
   height: 44px;

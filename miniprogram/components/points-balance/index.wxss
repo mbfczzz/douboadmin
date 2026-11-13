@@ -47,7 +47,7 @@ button.action {
   font-size: var(--ui-font-body, 15px);
   font-weight: 600;
 }
-.action::after {
+button.action::after {
   border: 0;
 }
 .error {
@@ -68,7 +68,7 @@ button.action {
 .note {
   min-width: 0;
 }
-.action {
+button.action {
   flex-shrink: 0;
 }
 .inline-balance {

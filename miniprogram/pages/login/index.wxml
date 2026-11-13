@@ -13,17 +13,13 @@
       {{activationRequired?'微信登录暂不可用，请稍后重试。':'微信登录暂不可用，可以先逛逛，稍后再试。'}}
     </view>
     <button wx:if="{{phoneReady}}" class="phone-login" open-type="getPhoneNumber" bindgetphonenumber="phoneLogin" loading="{{busy}}" disabled="{{!wechatReady||busy||returning}}">手机号授权登录</button>
-    <t-button
+    <button
       wx:else
-      theme="primary"
-      size="large"
-      block
+      class="phone-login"
       loading="{{busy}}"
       disabled="{{!wechatReady||busy||returning}}"
-      bind:tap="wechat"
-    >
-      {{returning?'登录成功，正在返回':'微信登录并继续'}}
-    </t-button>
+      bindtap="wechat"
+    >{{returning?'登录成功，正在返回':'微信登录并继续'}}</button>
     <text class="login-explain">手机号仅在你同意后获取，用于登录及资料登记。头像和昵称可稍后填写。</text>
     <button
       wx:if="{{demoAllowed}}"

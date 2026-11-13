@@ -1,0 +1,262 @@
+/* Unfinished tasks: a card each, led by the task's own reference image
+   with its state on top, then specs as chips and one clear next step. */
+.task-card {
+  display: flex;
+  gap: 14px;
+  margin-top: 10px;
+  padding: 12px;
+  border-radius: 18px;
+  background: var(--ui-surface);
+}
+.task-card.failed {
+  background: linear-gradient(135deg, #ff5c6c12, var(--ui-surface) 45%);
+  box-shadow: inset 0 0 0 1px #ff5c6c26;
+}
+.task-card.running,
+.task-card.queued {
+  background: linear-gradient(135deg, #00c8dc14, var(--ui-surface) 45%);
+}
+.task-thumb {
+  position: relative;
+  width: 84px;
+  height: 112px;
+  flex-shrink: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  color: var(--ui-muted);
+  background: var(--ui-field);
+}
+.task-thumb image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+.task-thumb.failed image {
+  filter: grayscale(0.7) brightness(0.55);
+}
+.task-thumb.has-ref.running image,
+.task-thumb.has-ref.queued image {
+  filter: brightness(0.6);
+}
+.thumb-state {
+  position: relative;
+  z-index: 1;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #00000066;
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+.task-thumb.failed .thumb-state {
+  color: #ff8a94;
+}
+.task-thumb.running .thumb-state,
+.task-thumb.queued .thumb-state {
+  color: var(--ui-brand);
+}
+.thumb-kind {
+  position: absolute;
+  left: 6px;
+  bottom: 6px;
+  z-index: 1;
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-size: 10px;
+  color: #fff;
+  background: #00000080;
+}
+.task-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.task-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.task-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 22px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.task-pill {
+  flex-shrink: 0;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  line-height: 18px;
+  color: var(--ui-brand);
+  background: #00c8dc1a;
+}
+.task-pill.failed {
+  color: #ff8a94;
+  background: #ff5c6c1f;
+}
+.task-pill.queued {
+  color: var(--ui-warning);
+  background: #edc4771f;
+}
+.task-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+.task-chips text {
+  max-width: 100%;
+  overflow: hidden;
+  padding: 1px 7px;
+  border-radius: 6px;
+  font-size: 11px;
+  line-height: 18px;
+  color: var(--ui-muted);
+  background: var(--ui-field);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.task-error {
+  display: flex;
+  gap: 5px;
+  margin-top: 8px;
+  padding: 7px 9px;
+  border-radius: 10px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #ff8a94;
+  background: #ff5c6c14;
+}
+.task-error t-icon {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.task-error text {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.task-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 8px;
+  font-size: 12px;
+  color: var(--ui-muted);
+}
+.task-go {
+  color: var(--ui-text);
+}
+.task-go.failed {
+  color: #ff8a94;
+}
+/* Fewer than three recent works: a tile that leads back to creating. */
+.create-tile .completed-cover {
+  flex-direction: column;
+  gap: 6px;
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--ui-border);
+  color: var(--ui-muted);
+}
+.create-plus {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: var(--ui-text);
+  background: var(--ui-field);
+}
+.create-label {
+  font-size: 12px;
+}
+.inspire-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 28px 0 12px;
+  font-size: 16px;
+  font-weight: 600;
+}
+/* Counters: icon, number, label; tapping 处理中 / 失败 filters the list. */
+.stat {
+  position: relative;
+  transition: box-shadow 160ms ease;
+}
+.stat-icon {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  color: var(--ui-muted);
+}
+.stat.running .stat-icon {
+  color: var(--ui-brand);
+}
+.stat.failed.has .stat-icon,
+.stat.failed.has .stat-num {
+  color: var(--ui-danger);
+}
+.stat.failed:not(.has) .stat-num {
+  color: var(--ui-text);
+}
+.stat.done .stat-icon {
+  color: var(--ui-success);
+}
+.stat.on {
+  box-shadow: inset 0 0 0 1.5px var(--ui-brand);
+}
+.stat.failed.on {
+  box-shadow: inset 0 0 0 1.5px #ff5c6c99;
+}
+.filter-note {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--ui-muted);
+}
+.filter-clear {
+  color: var(--ui-brand);
+}
+.all-done {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  font-size: 13px;
+  color: var(--ui-success);
+  background: var(--ui-success-bg);
+}
+.completed-cover .cover-badge {
+  position: absolute;
+  left: 6px;
+  bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  font-size: 11px;
+  color: #fff;
+  background: #00000080;
+}

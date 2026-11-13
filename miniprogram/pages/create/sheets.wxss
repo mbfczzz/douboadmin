@@ -9,7 +9,8 @@
 }
 .mention-item {
   position: relative;
-  aspect-ratio: 1;
+  /* 4 square columns in 20px margins, 8px gaps */
+  height: calc((100vw - 64px) / 4);
   overflow: hidden;
   border-radius: 10px;
   background: var(--ui-field);
