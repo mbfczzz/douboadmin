@@ -15,7 +15,7 @@ test("profile edits are approved; password reset is its own action", async ({
       username,
       name: "确认测试账号",
       role: "operator",
-      password: "fixture-original-password",
+      password: "Tt75a6aa",
     },
   });
   expect(response.status()).toBe(201);
@@ -50,18 +50,18 @@ test("profile edits are approved; password reset is its own action", async ({
     const reset = page.getByRole("dialog", { name: "重置密码" });
     await reset.getByRole("button", { name: "随机生成" }).click();
     const generated = await reset.getByLabel("新密码").inputValue();
-    expect(generated).toMatch(/^[A-Za-z0-9]{20}$/);
-    await reset.getByLabel("新密码").fill("fixture-new-password-2026");
+    expect(generated).toMatch(/^(?=.*[a-z])(?=.*[A-Z])[A-Za-z0-9]{8}$/);
+    await reset.getByLabel("新密码").fill("Tt2aa24b");
     await reset.getByRole("button", { name: "保存新密码" }).click();
     await expect(reset).toHaveCount(0);
     // The reset dialog is the approval; no summary repeats the password.
     await expect(page.locator(".save-confirmation")).toHaveCount(0);
     expect(writes).toHaveLength(2);
     expect(writes[1].url).toContain("/password");
-    expect(writes[1].body.password).toBe("fixture-new-password-2026");
+    expect(writes[1].body.password).toBe("Tt2aa24b");
     // Separate cookie jar so the admin session in the page stays signed in.
     const login = await request.post("/api/admin/login", {
-      data: { username, password: "fixture-new-password-2026" },
+      data: { username, password: "Tt2aa24b" },
     });
     expect(login.status()).toBe(200);
   } finally {

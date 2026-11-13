@@ -17,7 +17,7 @@ func putPagingRecord(t *testing.T, a *Server, ns string, row core.Record) {
 
 func TestProviderPagesAndScopeReachPastLegacyLimit(t *testing.T) {
 	a, _, _ := setup(t)
-	token := adminLoginToken(t, a, "admin", "test-pass")
+	token := adminLoginToken(t, a, "admin", "Tt661ea2")
 	for i := 0; i < 521; i++ {
 		id := fmt.Sprintf("provider-%04d", i)
 		name := id
@@ -60,7 +60,7 @@ func TestProviderPagesAndScopeReachPastLegacyLimit(t *testing.T) {
 
 func TestUnifiedAccountPagesAndRoleCountsIncludeProviders(t *testing.T) {
 	a, _, _ := setup(t)
-	token := adminLoginToken(t, a, "admin", "test-pass")
+	token := adminLoginToken(t, a, "admin", "Tt661ea2")
 	for i := 0; i < 523; i++ {
 		id := fmt.Sprintf("account-%04d", i)
 		partner := "provider"
@@ -101,7 +101,7 @@ func TestUnifiedAccountPagesAndRoleCountsIncludeProviders(t *testing.T) {
 
 func TestRolePagesMergeBuiltinPrefixWithoutGaps(t *testing.T) {
 	a, _, _ := setup(t)
-	token := adminLoginToken(t, a, "admin", "test-pass")
+	token := adminLoginToken(t, a, "admin", "Tt661ea2")
 	for i := 0; i < 42; i++ {
 		id := fmt.Sprintf("role-%04d", i)
 		putPagingRecord(t, a, "admin_roles", core.Record{ID: id, Data: core.Data(core.AdminRole{Name: id, Scope: "platform", Menus: []string{"overview"}})})

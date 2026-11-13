@@ -22,8 +22,8 @@ func providerData(t *testing.T, a *Server, token, id string) (int64, map[string]
 
 func TestProviderCreateRetryAndChildPricing(t *testing.T) {
 	a, _, _ := setup(t)
-	admin := adminLoginToken(t, a, "admin", "test-pass")
-	login := map[string]string{"username": "rules-s1", "password": "rules-s1-password-2026"}
+	admin := adminLoginToken(t, a, "admin", "Tt661ea2")
+	login := map[string]string{"username": "rules-s1", "password": "Tte26d6f"}
 	branch := createBranch(t, a, admin, "rules")
 	s1 := createProvider(t, a, admin, "rules-s1", branch, "S1", "s1", login)
 	// A lost response retried with the same key succeeds instead of "账号已被使用".
@@ -35,7 +35,7 @@ func TestProviderCreateRetryAndChildPricing(t *testing.T) {
 	if w := call(a, "PUT", "/api/admin/partners/"+s1, admin, "", map[string]any{"version": version, "data": data}); w.Code != 200 {
 		t.Fatal(w.Code, w.Body.String())
 	}
-	provider := adminLoginToken(t, a, "rules-s1", "rules-s1-password-2026")
+	provider := adminLoginToken(t, a, "rules-s1", "Tte26d6f")
 	// A legacy child remains manageable under the same pricing rules.
 	child := createProvider(t, a, admin, "rules-child", s1, "S1-child", "s2", nil)
 	version, data = providerData(t, a, provider, child)
@@ -43,8 +43,13 @@ func TestProviderCreateRetryAndChildPricing(t *testing.T) {
 		t.Fatal("new child starts above its parent's margin", data)
 	}
 	data["name"] = "改名"
+	if w := call(a, "PUT", "/api/admin/partners/"+child, provider, "", map[string]any{"version": version, "data": data}); w.Code != 403 {
+		t.Fatal("provider edited account metadata", w.Code, w.Body.String())
+	}
+	data["name"] = "S1-child"
+	data["childMarginBps"] = 2500
 	if w := call(a, "PUT", "/api/admin/partners/"+child, provider, "", map[string]any{"version": version, "data": data}); w.Code != 200 {
-		t.Fatal("unchanged pricing blocked an edit", w.Code, w.Body.String())
+		t.Fatal("allowed commission change failed", w.Code, w.Body.String())
 	}
 	data["childMarginBps"] = 4000
 	if w := call(a, "PUT", "/api/admin/partners/"+child, provider, "", map[string]any{"version": version + 1, "data": data}); w.Code != 400 {
@@ -54,10 +59,10 @@ func TestProviderCreateRetryAndChildPricing(t *testing.T) {
 
 func TestDisabledProviderCannotUseAdmin(t *testing.T) {
 	a, _, _ := setup(t)
-	admin := adminLoginToken(t, a, "admin", "test-pass")
+	admin := adminLoginToken(t, a, "admin", "Tt661ea2")
 	s1 := createBranch(t, a, admin, "off")
-	child := createProvider(t, a, admin, "off-child", s1, "S1-child", "s1", map[string]string{"username": "off-child", "password": "off-child-password-2026"})
-	session := adminLoginToken(t, a, "off-child", "off-child-password-2026")
+	child := createProvider(t, a, admin, "off-child", s1, "S1-child", "s1", map[string]string{"username": "off-child", "password": "Tt360a09"})
+	session := adminLoginToken(t, a, "off-child", "Tt360a09")
 	version, data := providerData(t, a, admin, s1)
 	data["status"] = "disabled"
 	if w := call(a, "PUT", "/api/admin/partners/"+s1, admin, "", map[string]any{"version": version, "data": data}); w.Code != 200 {
@@ -66,7 +71,7 @@ func TestDisabledProviderCannotUseAdmin(t *testing.T) {
 	if w := call(a, "GET", "/api/admin/partners/"+child, session, "", nil); w.Code != 403 {
 		t.Fatal("session kept working under a disabled parent", w.Code)
 	}
-	w := call(a, "POST", "/api/admin/login", "", "", map[string]string{"username": "off-child", "password": "off-child-password-2026"})
+	w := call(a, "POST", "/api/admin/login", "", "", map[string]string{"username": "off-child", "password": "Tt360a09"})
 	if w.Code != 403 {
 		t.Fatal("login allowed under a disabled parent", w.Code, w.Body.String())
 	}

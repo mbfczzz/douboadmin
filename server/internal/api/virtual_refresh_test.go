@@ -27,7 +27,7 @@ func TestVirtualUnissuedOrderRefreshUsesLocalState(t *testing.T) {
 		actor := user
 		if admin {
 			var err error
-			actor, err = a.Sessions.Create(t.Context(), "admin", "admin")
+			actor, err = adminLoginToken(t, a, "admin", "Tt661ea2"), error(nil)
 			if err != nil {
 				t.Fatal(err)
 			}

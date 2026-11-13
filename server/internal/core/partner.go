@@ -21,6 +21,7 @@ const (
 )
 
 type Partner struct {
+	Phone           string   `json:"phone,omitempty"`
 	Name            string   `json:"name"`
 	Role            string   `json:"role"`
 	ParentID        string   `json:"parentId"`

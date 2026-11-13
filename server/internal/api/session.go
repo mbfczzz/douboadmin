@@ -13,6 +13,8 @@ import (
 )
 
 type Identity struct {
+	WeChatOpenID    string `json:"wechatOpenId,omitempty"`
+	WeChatAppID     string `json:"wechatAppId,omitempty"`
 	PasswordVersion string `json:"passwordVersion,omitempty"`
 	Account         string `json:"account,omitempty"`
 	AdminRole       string `json:"adminRole,omitempty"`

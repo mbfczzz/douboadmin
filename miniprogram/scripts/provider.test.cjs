@@ -83,28 +83,13 @@ test("a member's 推广码 uses the same page", async () => {
   assert.equal(page.data.center, null);
 });
 
-test("a scanned provider keeps its password visible; a reset asks first", async () => {
-  const h = harness(),
-    page = h.page("provider");
-  let resets = 0;
-  h.api.request = async (path) => {
-    if (path === "/provider/password") {
-      resets++;
-      return { account: "13800138000", password: "Nw".repeat(10) };
-    }
-    if (path.startsWith("/provider/children?")) return {items:branch.children,page:1,total:1,size:20};
-    return { ...branch, owner: true, password: "Kp".repeat(10) };
-  };
-  page.onLoad({});
+test("mini-program cannot open or reset backend login accounts", async () => {
+  const h = harness(), page = h.page("provider"), paths=[];
+  h.api.request=async path=>{paths.push(path);return path.startsWith("/provider/children?")?{items:[],page:1,total:0,size:20}:{...branch,owner:true,password:"Old12345"}};
   await page.load();
-  assert.equal(page.data.password, "Kp".repeat(10));
-  h.wx.showModal = async () => ({ confirm: false });
-  await page.password();
-  assert.equal(resets, 0);
-  h.wx.showModal = async () => ({ confirm: true });
-  await page.password();
-  assert.equal(resets, 1);
-  assert.equal(page.data.password, "Nw".repeat(10));
+  assert.equal(page.password,undefined);
+  assert.equal(page.data.password,undefined);
+  assert.ok(!paths.includes("/provider/password"));
 });
 
 test("provider children load the next server page and a failed page can be retried", async () => {

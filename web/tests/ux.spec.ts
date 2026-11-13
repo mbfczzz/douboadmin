@@ -151,7 +151,7 @@ test("a failed login can be corrected without losing the account field", async (
   await expect(page.getByLabel("账号", { exact: true })).toHaveValue("admin");
   await page
     .getByLabel("密码", { exact: true })
-    .fill(process.env.ADMIN_PASSWORD || "doubo-demo-2026");
+    .fill(process.env.ADMIN_PASSWORD || "Doubo123");
   await page.getByRole("button", { name: "登录管理台" }).click();
   await expect(page.getByRole("heading", { name: "工作概览" })).toBeVisible();
 });

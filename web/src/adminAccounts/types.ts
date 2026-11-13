@@ -4,6 +4,7 @@ export type AdminAccount = {
   username: string;
   name: string;
   phone?: string;
+  userId?: string;
   role: string;
   partnerId?: string;
   partnerName?: string;

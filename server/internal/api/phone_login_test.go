@@ -59,7 +59,7 @@ func TestPhoneLoginVerifiesPhoneWithoutSkippingNameOrActivation(t *testing.T) {
 	}
 }
 
-func TestPhoneLoginDoesNotMergeAccountsOrTrustClientPhone(t *testing.T) {
+func TestVerifiedPhoneReusesUserAndDoesNotTrustClientPhone(t *testing.T) {
 	a, openid := phoneLoginFixture(t)
 	body := map[string]string{"code": "wx-code", "phoneCode": "phone-code"}
 	w := call(a, "POST", "/api/auth/wechat", "", "", body)
@@ -68,8 +68,8 @@ func TestPhoneLoginDoesNotMergeAccountsOrTrustClientPhone(t *testing.T) {
 	}
 	*openid = "another-openid"
 	w = call(a, "POST", "/api/auth/wechat", "", "", body)
-	if w.Code != 409 || strings.Contains(w.Body.String(), `"token"`) {
-		t.Fatal("claimed phone logged in another account", w.Code, w.Body.String())
+	if w.Code != 200 || !strings.Contains(w.Body.String(), core.Digest("wx-testfirst-openid")[:32]) {
+		t.Fatal("verified phone did not reuse original user", w.Code, w.Body.String())
 	}
 	body["phone"] = "13900139001"
 	if w = call(a, "POST", "/api/auth/wechat", "", "", body); w.Code != 400 {

@@ -1,3 +1,4 @@
+import { passwordRules, PASSWORD_HINT } from "./password-policy";
 import { useState } from "react";
 import { guardedClose } from "../hooks/unsaved";
 import Modal from "./Modal";
@@ -60,8 +61,7 @@ export default function PasswordReset({
                 value={password}
                 spellCheck={false}
                 autoComplete="off"
-                minLength={16}
-                maxLength={128}
+                {...passwordRules}
                 required
                 autoFocus
                 disabled={busy}
@@ -78,7 +78,7 @@ export default function PasswordReset({
               </button>
             </span>
             <small id="password-reset-hint" className="quiet">
-              至少 16 位
+              {PASSWORD_HINT}
             </small>
           </div>
           {error && (

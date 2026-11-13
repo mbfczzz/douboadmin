@@ -24,7 +24,7 @@ func modelServer(t *testing.T) (*Server, string) {
 	t.Cleanup(up.Close)
 	a, _, _ := setup(t)
 	a.Relay = relay.New(up.URL, "secret-catalog")
-	token, _ := a.Sessions.Create(context.Background(), "admin", "admin")
+	token := adminLoginToken(t, a, "admin", "Tt661ea2")
 	return a, token
 }
 

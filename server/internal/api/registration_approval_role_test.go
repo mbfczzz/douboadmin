@@ -1,7 +1,6 @@
 package api
 
 import (
-	"encoding/json"
 	"strings"
 	"testing"
 
@@ -9,8 +8,9 @@ import (
 )
 
 func TestRegistrationOpeningRequiresActualSuperAdminRole(t *testing.T) {
-	a, user, legacy := activationFixture(t)
-	admin := adminLoginToken(t, a, "admin", "test-pass")
+	a, user, _ := activationFixture(t)
+	legacy, _ := a.Sessions.Create(t.Context(), "legacy-admin", "admin")
+	admin := adminLoginToken(t, a, "admin", "Tt661ea2")
 	branch := createBranch(t, a, admin, "role-opening")
 	code := providerCode(t, a, "GET", branch, "member", admin)
 	scan(t, a, "user-a", code.Code)
@@ -24,12 +24,12 @@ func TestRegistrationOpeningRequiresActualSuperAdminRole(t *testing.T) {
 	for _, role := range []string{"operator", "pretend-super"} {
 		name := "review-" + role
 		w := call(a, "POST", "/api/admin/accounts", admin, "", map[string]any{
-			"username": name, "password": "review-role-password-2026", "name": "超级管理员", "role": role,
+			"username": name, "password": "Tt30d8db", "name": "超级管理员", "role": role,
 		})
 		if w.Code != 201 {
 			t.Fatal(w.Code, w.Body.String())
 		}
-		tokens = append(tokens, adminLoginToken(t, a, name, "review-role-password-2026"))
+		tokens = append(tokens, adminLoginToken(t, a, name, "Tt30d8db"))
 	}
 	for _, token := range tokens {
 		if token != user {
@@ -60,7 +60,7 @@ func TestRegistrationOpeningRequiresActualSuperAdminRole(t *testing.T) {
 
 func TestSuperAdminDemotionRevokesOpeningOnExistingSession(t *testing.T) {
 	a, user, _ := activationFixture(t)
-	admin := adminLoginToken(t, a, "admin", "test-pass")
+	admin := adminLoginToken(t, a, "admin", "Tt661ea2")
 	id, formerSuper := secondaryAdmin(t, a, admin)
 	branch := createBranch(t, a, admin, "demoted-review")
 	code := providerCode(t, a, "GET", branch, "s1", admin)
@@ -72,10 +72,8 @@ func TestSuperAdminDemotionRevokesOpeningOnExistingSession(t *testing.T) {
 	if w.Code != 200 {
 		t.Fatal(w.Code, w.Body.String())
 	}
-	page := registrationPage(t, a, formerSuper, "?status=pending")
-	var capabilities struct{ CanReview, CanApprove bool }
-	if page.Total != 1 || json.Unmarshal(page.Items[0].Data, &capabilities) != nil || capabilities.CanReview || capabilities.CanApprove {
-		t.Fatal("demoted account still sees approval", page)
+	if w := call(a, "GET", "/api/admin/registrations?status=pending", formerSuper, "", nil); w.Code != 403 {
+		t.Fatal("demoted role still reads registrations", w.Code)
 	}
 	if status, body := decideHTTP(t, a, formerSuper, "user-a", true, ""); status != 403 {
 		t.Fatal("old session retained approval", status, body)

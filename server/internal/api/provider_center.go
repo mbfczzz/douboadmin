@@ -146,13 +146,7 @@ func (a *Server) providerCenter(w http.ResponseWriter, r *http.Request) {
 	}
 	if found {
 		out["account"] = account.Username
-		// The saved password is shown only while it is still the account's
-		// password; a change in the admin hides it until the next reset.
-		if password, ok := a.savedPassword(r, id, account); owner && ok {
-			out["password"] = password
-		} else if owner {
-			out["passwordChanged"] = true
-		}
+
 	}
 	reply(w, 200, out)
 }

@@ -11,12 +11,12 @@ func reviewLogin(t *testing.T, a *Server, admin, partner string) string {
 	t.Helper()
 	username := "review-" + partner[:12]
 	w := call(a, "PUT", "/api/admin/partners/"+partner+"/account", admin, "", map[string]any{
-		"version": 0, "username": username, "password": "review-parent-password-2026", "role": "partner",
+		"version": 0, "username": username, "password": "Ttd79fb7", "role": "partner",
 	})
 	if w.Code != 201 {
 		t.Fatal("create review login", w.Code, w.Body.String())
 	}
-	return adminLoginToken(t, a, username, "review-parent-password-2026")
+	return adminLoginToken(t, a, username, "Ttd79fb7")
 }
 
 func TestRegistrationApprovalIsOnlyForSuperAdmin(t *testing.T) {
@@ -31,7 +31,7 @@ func TestRegistrationApprovalIsOnlyForSuperAdmin(t *testing.T) {
 			name := tc.kind + "-" + tc.target + map[bool]string{true: "-approve", false: "-reject"}[approve]
 			t.Run(name, func(t *testing.T) {
 				a, user, _ := activationFixture(t)
-				admin := adminLoginToken(t, a, "admin", "test-pass")
+				admin := adminLoginToken(t, a, "admin", "Tt661ea2")
 				branch := createBranch(t, a, admin, "review-matrix")
 				s1 := createProvider(t, a, admin, "review-s1", branch, "S1", "s1", nil)
 				s2 := createProvider(t, a, admin, "review-s2", s1, "S2", "s2", nil)
@@ -63,13 +63,13 @@ func TestRegistrationApprovalIsOnlyForSuperAdmin(t *testing.T) {
 				before, _ := a.Store.Get(t.Context(), "registrations", "user-a")
 				for level, token := range tokens {
 					readStatus := 403
-					if level == "root" || level == tc.parent {
+					if level == "root" {
 						readStatus = 200
 					}
 					if w := call(a, "GET", path, token, "", nil); w.Code != readStatus {
 						t.Fatal("incorrect inspection scope", level, w.Code, w.Body.String())
 					}
-					if level == "root" || (!approve && level == tc.parent) {
+					if level == "root" {
 						continue
 					}
 					if status, body := decideHTTP(t, a, token, "user-a", approve, "资料不符"); status != 403 {
@@ -81,9 +81,6 @@ func TestRegistrationApprovalIsOnlyForSuperAdmin(t *testing.T) {
 					t.Fatal("unauthorized review changed registration")
 				}
 				parent := admin
-				if !approve {
-					parent = tokens[tc.parent]
-				}
 				if w := call(a, "GET", path, parent, "", nil); w.Code != 200 {
 					t.Fatal("parent cannot read selected registration", w.Code, w.Body.String())
 				}

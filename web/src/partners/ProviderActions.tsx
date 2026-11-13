@@ -3,6 +3,8 @@ import { useMe, canApproveRegistrations } from "../session";
 import type { Partner } from "./types";
 
 export type ProviderAction =
+  | "activity"
+  | "pricing"
   | "edit"
   | "account"
   | "profile"
@@ -14,7 +16,7 @@ export type ProviderAction =
 
 // Row buttons of one provider: every function opens its own dialog.
 // A provider login on its own node may run share codes and commissions but
-// its profile and login belong to its parent, so it only gets a read-only view.
+// account management belongs to the super administrator; others can only inspect it.
 export default function ProviderActions({
   item,
   open,
@@ -27,8 +29,7 @@ export default function ProviderActions({
   const me = useMe(),
     self = me?.partnerId === item.id,
     canApprove = canApproveRegistrations(me),
-    canReject =
-      canApprove || (!!me && (me.partnerId || "root") === item.data.parentId),
+    canReject = canApprove,
     pending = item.data.status === "pending",
     button = (kind: ProviderAction, label: string, subtle = false) => (
       <button
@@ -39,6 +40,14 @@ export default function ProviderActions({
       >
         {label}
       </button>
+    );
+  if (!canApprove)
+    return (
+      <div className="provider-tree-actions">
+        {!self && button("pricing", "分佣比例")}
+        {button("activity", "下级活动轨迹")}
+        {button("commissions", "查看分佣")}
+      </div>
     );
   if (pending)
     return (
@@ -63,9 +72,11 @@ export default function ProviderActions({
         {button("share", "分享码")}
         {(self || canApprove) && button("registrations", "会员登记")}
         {button("commissions", "分佣")}
+        {button("activity", "下级活动轨迹")}
       </span>
       <span className="provider-action-group">
-        {self ? (
+        {!self && button("pricing", "分佣比例", true)}
+        {!canApprove || self ? (
           button("profile", "资料", true)
         ) : (
           <>

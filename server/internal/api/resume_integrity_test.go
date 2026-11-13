@@ -13,7 +13,7 @@ func TestGenerationResumePreservesStateAndRollsBackOnBillingConflict(t *testing.
 		t.Run(map[bool]string{false: "reserved", true: "released"}[release], func(t *testing.T) {
 			a, _, _ := setup(t)
 			ctx := context.Background()
-			admin, _ := a.Sessions.Create(ctx, "admin", "admin")
+			admin := adminLoginToken(t, a, "admin", "Tt661ea2")
 			if _, e := a.Billing.Adjust(ctx, "user-a", "fund", "admin", "test credit", 1000); e != nil {
 				t.Fatal(e)
 			}

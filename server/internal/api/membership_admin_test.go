@@ -7,10 +7,10 @@ import (
 
 func TestMembershipDisableUnbindAndRegisterAgain(t *testing.T) {
 	a, user, _ := activationFixture(t)
-	admin := adminLoginToken(t, a, "admin", "test-pass")
+	admin := adminLoginToken(t, a, "admin", "Tt661ea2")
 	branch := createBranch(t, a, admin, "members")
-	s1 := createProvider(t, a, admin, "members-s1", branch, "S1", "s1", map[string]string{"username": "members-s1", "password": "members-s1-password-2026"})
-	other := createProvider(t, a, admin, "members-other", branch, "Other", "s1", map[string]string{"username": "members-other", "password": "members-other-password-2026"})
+	s1 := createProvider(t, a, admin, "members-s1", branch, "S1", "s1", map[string]string{"username": "members-s1", "password": "Ttea1a8a"})
+	other := createProvider(t, a, admin, "members-other", branch, "Other", "s1", map[string]string{"username": "members-other", "password": "Tt292a81"})
 	code := providerCode(t, a, "GET", s1, "member", admin)
 	scan(t, a, "user-a", code.Code)
 	change := func(token, status string) (int, string) {
@@ -23,11 +23,14 @@ func TestMembershipDisableUnbindAndRegisterAgain(t *testing.T) {
 		t.Fatal("pending member changed", status, body)
 	}
 	approve(t, a, "user-a")
-	if status, _ := change(adminLoginToken(t, a, "members-other", "members-other-password-2026"), "disabled"); status != 403 {
+	if status, _ := change(adminLoginToken(t, a, "members-other", "Tt292a81"), "disabled"); status != 403 {
 		t.Fatal("another provider changed the member", status)
 	}
-	provider := adminLoginToken(t, a, "members-s1", "members-s1-password-2026")
-	if status, body := change(provider, "disabled"); status != 200 {
+	provider := adminLoginToken(t, a, "members-s1", "Ttea1a8a")
+	if status, body := change(provider, "disabled"); status != 403 {
+		t.Fatal("provider managed account", status, body)
+	}
+	if status, body := change(admin, "disabled"); status != 200 {
 		t.Fatal(status, body)
 	}
 	if w := call(a, "GET", "/api/templates", user, "", nil); w.Code != 403 {

@@ -54,6 +54,12 @@ test("shared business roles are visible and member editing never requests admin 
       page.getByRole("cell", { name: label + " 内置", exact: true }),
     ).toBeVisible();
   }
+  const branch = page.getByRole("row").filter({has:page.getByRole("cell",{name:"分公司 内置",exact:true})});
+  await branch.getByRole("button",{name:"编辑",exact:true}).click();
+  const fixed = page.getByRole("dialog",{name:"编辑角色",exact:true});
+  await expect(fixed.getByRole("checkbox")).toHaveCount(0);
+  await expect(fixed).toContainText("给下级设置算力分佣、查看下级活动轨迹、查看分佣");
+  await fixed.getByRole("button",{name:"关闭",exact:true}).click();
   const member = page
     .getByRole("row")
     .filter({

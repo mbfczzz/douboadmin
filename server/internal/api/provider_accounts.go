@@ -61,7 +61,11 @@ func (a *Server) createProviderAccount(ctx context.Context, partnerID, name, has
 		return core.Record{}, errors.New("角色与当前服务商层级不匹配")
 	}
 	account := core.AdminAccount{Username: strings.TrimSpace(in.Username), Name: name, Role: in.Role, PartnerID: partnerID, PasswordHash: hash, PasswordChangedAt: time.Now().UTC(), CreatedBy: actor}
-	row, err = a.Store.Put(ctx, "admin_accounts", core.Record{ID: adminID(account.Username), Data: core.Data(account)}, 0)
+	if p.Phone != "" {
+		row, err = a.createBranchLogin(ctx, account)
+	} else {
+		row, err = a.Store.Put(ctx, "admin_accounts", core.Record{ID: adminID(account.Username), Data: core.Data(account)}, 0)
+	}
 	if err == nil && in.Password != "" {
 		a.saveAdminPassword(ctx, partnerID, in.Password, account.PasswordChangedAt)
 	}

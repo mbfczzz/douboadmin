@@ -49,6 +49,12 @@ func logWhere(q core.AuditQuery) (string, []any) {
 		where = append(where, clause)
 		args = append(args, values...)
 	}
+	if q.PartnerID != "" && q.MembersOnly {
+		add(`actor_type='user' AND EXISTS(SELECT 1 FROM memberships m WHERE m.id=audit_logs.actor_id AND m.partner_id=? AND m.status IN ('active','pending','disabled'))`, q.PartnerID)
+	} else if q.PartnerID != "" {
+		add(`((actor_type IN ('admin','provider') AND EXISTS(SELECT 1 FROM admin_accounts a WHERE a.id=audit_logs.actor_id AND a.partner_id=?)) OR
+   (actor_type='user' AND (EXISTS(SELECT 1 FROM partner_owners p WHERE p.id=audit_logs.actor_id AND p.partner_id=? AND p.status IN ('active','pending','disabled')) OR EXISTS(SELECT 1 FROM memberships m WHERE m.id=audit_logs.actor_id AND m.partner_id=? AND m.status IN ('active','pending','disabled')))))`, q.PartnerID, q.PartnerID, q.PartnerID)
+	}
 	if len(q.Categories) > 0 {
 		add(`category IN (`+placeholders(len(q.Categories))+`)`, anyStrings(q.Categories)...)
 	}

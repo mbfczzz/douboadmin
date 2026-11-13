@@ -8,8 +8,8 @@ import (
 
 func TestCodePosterImageKeepsAuthorizationAndCodeVersion(t *testing.T) {
 	a, _, _ := activationFixture(t)
-	admin := adminLoginToken(t, a, "admin", "test-pass")
-	id := createProvider(t, a, admin, "poster-s1", createBranch(t, a, admin, "poster"), "华东", "s1", map[string]string{"username": "poster-s1", "password": "poster-password-2026"})
+	admin := adminLoginToken(t, a, "admin", "Tt661ea2")
+	id := createProvider(t, a, admin, "poster-s1", createBranch(t, a, admin, "poster"), "华东", "s1", map[string]string{"username": "poster-s1", "password": "Tt443ba8"})
 	code := providerCode(t, a, "GET", id, "member", admin)
 	path := "/api/admin/partners/" + id + "/codes/member?image=1&code=" + code.Code
 	denied := call(a, "GET", path, "", "", nil)

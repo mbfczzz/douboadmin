@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { api } from "../api";
+import { api, invalidatesPrivateData } from "../api";
 import type { LogEntry, LogPage } from "../logs/types";
 
 // Cursor-paged log entries that accumulate: "加载更多" appends the next page.
@@ -25,7 +25,13 @@ export function useActivity(base: string, scope: string) {
         setItems((prev) => (before ? [...prev, ...page.items] : page.items));
         setNext(page.next || "");
       } catch (e) {
-        if (!c.signal.aborted) setError((e as Error).message);
+        if (!c.signal.aborted) {
+          if (invalidatesPrivateData(e)) {
+            setItems([]);
+            setNext("");
+          }
+          setError((e as Error).message);
+        }
       } finally {
         if (!c.signal.aborted) setLoading(false);
       }

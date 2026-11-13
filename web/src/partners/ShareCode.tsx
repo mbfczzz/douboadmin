@@ -4,7 +4,7 @@ import CodeUses from "./CodeUses";
 import CodeView from "./CodeCard";
 import OwnerBindCode from "./OwnerBindCode";
 import { useShareCode } from "./useShareCode";
-import { useMe } from "../session";
+import { useMe, canManageAccounts } from "../session";
 import { codeKindName } from "../business/types";
 import type { Scope } from "./types";
 import "./share-code.css";
@@ -30,6 +30,7 @@ type Kind = keyof typeof kinds;
 // invites S1 and S2, an S1 invites S2. Admin-made providers also get a
 // one-time bind code that links the owner's own mini-program account.
 export default function ShareCode({ id, view, changed, notify }: Scope) {
+  const manage = canManageAccounts(useMe());
   const self = useMe()?.partnerId === id;
   const { role, ownerUser, name } = view.record.data,
     has: Record<Kind, boolean> = {
@@ -80,7 +81,7 @@ export default function ShareCode({ id, view, changed, notify }: Scope) {
           />
         </div>
       </section>
-      {!ownerUser && !self && (
+      {manage && !ownerUser && !self && (
         <OwnerBindCode
           id={id}
           name={name}

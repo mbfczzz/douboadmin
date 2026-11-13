@@ -51,7 +51,7 @@ sudo systemctl enable --now nginx
 ```dotenv
 APP_ENV=production
 HTTP_ADDR=127.0.0.1:5173
-ADMIN_PASSWORD=自行设置至少16位的新密码
+ADMIN_PASSWORD=自行设置8位新密码（大小写英文必需，仅字母和数字）
 MYSQL_DSN="doubo:数据库密码@tcp(数据库地址:3306)/doubo_test?charset=utf8mb4&parseTime=true"
 REDIS_ADDR=Redis地址:6379
 REDIS_USERNAME=
@@ -68,7 +68,7 @@ OSS_ACCESS_KEY_SECRET=实际AccessKeySecret
 RELAY_API_KEY=实际中转站密钥
 ```
 
-请保留示例文件中的其他配置，尤其是 `RUN_WORKER=false`、`ALLOW_DEMO_LOGIN=false`和 `MEDIA_DIR`。测试服务器也使用 production 校验，MySQL、Redis 和至少16位的首次管理员密码必填。微信、OSS、中转等可以先留空，启动后在「系统设置 → 服务接入配置」填写并加密存入数据库，再统一重启 API / Worker。未配置 OSS 时禁止生产媒体上传及生成；没有中转凭证时不会返回假生成结果。具体生效、密钥备份规则见[后台接入配置](admin-integration-settings.md)。
+请保留示例文件中的其他配置，尤其是 `RUN_WORKER=false`、`ALLOW_DEMO_LOGIN=false`和 `MEDIA_DIR`。测试服务器也使用 production 校验，MySQL、Redis 和8位且包含大小写英文字母的首次管理员密码（仅字母和数字）必填。微信、OSS、中转等可以先留空，启动后在「系统设置 → 服务接入配置」填写并加密存入数据库，再统一重启 API / Worker。未配置 OSS 时禁止生产媒体上传及生成；没有中转凭证时不会返回假生成结果。具体生效、密钥备份规则见[后台接入配置](admin-integration-settings.md)。
 
 这是 systemd 的 `EnvironmentFile`，不是 Shell 脚本。不要写 `export` 或变量替换；包含空格、特殊字符的值用符合 systemd 规则的引号包围。Go 程序不会自动加载仓库中的 `.env`。支付证书单独放到服务账号可读的位置，在配置中填写绝对路径。
 

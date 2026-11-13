@@ -8,6 +8,7 @@ export interface Me {
   role: string;
   roleName?: string;
   canApproveRegistrations?: boolean;
+  canManageAccounts?: boolean;
   scope: "platform" | "partner";
   menus: string[];
   partnerId?: string;
@@ -23,3 +24,19 @@ export const useMe = () => useContext(MeContext);
 export const isProviderAccount = (me: Me | null) => me?.scope === "partner";
 export const canApproveRegistrations = (me: Me | null) =>
   me?.role === "super_admin" && me.canApproveRegistrations !== false;
+
+export const canManageAccounts = (me: Me | null) =>
+  me?.role === "super_admin" && me.canManageAccounts !== false;
+
+// A changed account or permission scope must unmount all page-local caches/dialogs.
+export const workspaceScopeKey = (me: Me) =>
+  JSON.stringify([
+    me.id,
+    me.role,
+    me.scope,
+    me.partnerId || "",
+    me.passwordChangedAt || "",
+    me.canManageAccounts !== false,
+    me.canApproveRegistrations !== false,
+    [...me.menus].sort(),
+  ]);

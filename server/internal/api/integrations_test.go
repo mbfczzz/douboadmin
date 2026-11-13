@@ -16,7 +16,7 @@ func integrationAdmin(t *testing.T) (*Server, string, string) {
 	if _, err := a.Integrations.LoadStartup(t.Context()); err != nil {
 		t.Fatal(err)
 	}
-	w := call(a, "POST", "/api/admin/login", "", "", map[string]string{"username": "admin", "password": "test-pass"})
+	w := call(a, "POST", "/api/admin/login", "", "", map[string]string{"username": "admin", "password": "Tt661ea2"})
 	if w.Code != 200 {
 		t.Fatal(w.Body.String())
 	}
@@ -29,14 +29,14 @@ func TestIntegrationAPIRejectsUsersAndOperators(t *testing.T) {
 		t.Fatal("user can read integration settings", w.Code)
 	}
 	created := call(a, "POST", "/api/admin/accounts", admin, "", map[string]any{
-		"username": "operator", "password": "operator-password-fixture", "name": "Operator", "role": "operator",
+		"username": "operator", "password": "Tted4180", "name": "Operator", "role": "operator",
 	})
 	if created.Code != 201 {
 		t.Fatal(created.Code, created.Body.String())
 	}
-	login := call(a, "POST", "/api/admin/login", "", "", map[string]string{"username": "operator", "password": "operator-password-fixture"})
+	login := call(a, "POST", "/api/admin/login", "", "", map[string]string{"username": "operator", "password": "Tted4180"})
 	operator := login.Result().Cookies()[0].Value
-	if w := call(a, "GET", "/api/admin/integrations", operator, "", nil); w.Code != 200 || strings.Contains(w.Body.String(), "fields") || !strings.Contains(w.Body.String(), `"canManage":false`) {
+	if w := call(a, "GET", "/api/admin/integrations", operator, "", nil); w.Code != 403 || strings.Contains(w.Body.String(), "fields") {
 		t.Fatal("operator sees protected configuration", w.Code, w.Body.String())
 	}
 	input := settings.Update{Values: settings.Values{"RELAY_API_KEY": "fixture-private-key"}}

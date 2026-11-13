@@ -19,7 +19,7 @@ test("provider login: open, role, password and status are separate actions", asy
 
   const username = "acct" + Date.now();
   await dialog.getByLabel("账号", { exact: true }).fill(username);
-  await dialog.getByLabel("初始密码").fill("fixture-provider-password");
+  await dialog.getByLabel("初始密码").fill("Tt31a029");
   await dialog.getByRole("button", { name: "开通账号" }).click();
   await expect(dialog).toContainText(username);
   await expect(dialog).toContainText("尚未登录");
@@ -31,12 +31,12 @@ test("provider login: open, role, password and status are separate actions", asy
 
   await dialog.getByRole("button", { name: "重置密码" }).click();
   const reset = page.getByRole("dialog", { name: "重置密码" });
-  await reset.getByLabel("新密码").fill("fixture-provider-password-2");
+  await reset.getByLabel("新密码").fill("Tt3e87e1");
   await reset.getByRole("button", { name: "保存新密码" }).click();
   await expect(reset).toHaveCount(0);
   await expect(page.locator(".save-confirmation")).toHaveCount(0);
   const signIn = await request.post("/api/admin/login", {
-    data: { username, password: "fixture-provider-password-2" },
+    data: { username, password: "Tt3e87e1" },
   });
   expect(signIn.status()).toBe(200);
 

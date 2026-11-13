@@ -38,10 +38,10 @@ test("provider logins appear with ownership and use their scoped account dialog"
   const providerRow = page.locator("tbody tr").filter({ hasText: "provider-demo" });
   await expect(providerRow).toContainText("山东分公司");
   await expect(providerRow).toContainText("分公司");
-  await expect(providerRow.getByRole("button")).toHaveText(["管理登录"]);
+  await expect(providerRow.getByRole("button")).toHaveText(["关联用户", "管理登录", "删除"]);
   const platformRow = page.locator("tbody tr").filter({ hasText: "platform-demo" });
   await expect(platformRow).toContainText("平台");
-  await expect(platformRow.getByRole("button")).toHaveText(["编辑", "重置密码", "停用", "归档"]);
+  await expect(platformRow.getByRole("button")).toHaveText(["关联用户", "编辑", "重置密码", "停用", "删除"]);
   await providerRow.getByRole("button", { name: "管理登录" }).click();
   const dialog = page.getByRole("dialog", { name: "登录账号", exact: true });
   await expect(dialog).toContainText("provider-demo");

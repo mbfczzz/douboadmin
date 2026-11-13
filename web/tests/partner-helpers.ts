@@ -8,11 +8,12 @@ export async function createProvider(page: Page, name: string) {
     exact: true,
   });
   await dialog.getByLabel("服务商名称").fill(name);
+  await dialog.getByLabel("负责人手机号").fill("139" + String(Math.floor(Math.random() * 1e8)).padStart(8,"0"));
   // The login account and password come prefilled; keep the defaults.
   await expect(dialog.getByLabel("账号", { exact: true })).toHaveValue(
     /^sp\d{6}$/,
   );
-  await expect(dialog.getByLabel("初始密码")).toHaveValue(/^[A-Za-z2-9]{20}$/);
+  await expect(dialog.getByLabel("初始密码")).toHaveValue(/^(?=.*[a-z])(?=.*[A-Z])[A-Za-z0-9]{8}$/);
   const response = page.waitForResponse(
     (r) =>
       new URL(r.url()).pathname === "/api/admin/partners" &&

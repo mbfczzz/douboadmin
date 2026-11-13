@@ -15,10 +15,7 @@ func activationFixture(t *testing.T) (*Server, string, string) {
 	a.Config.DemoLogin = true // SMS codes are shown instead of sent
 	a.Billing.RequireActivation = true
 	_, _ = a.Store.Put(context.Background(), "users", core.Record{ID: "user-a", Owner: "user-a", Data: core.Data(registeredProfile("test"))}, 0)
-	admin, e := a.Sessions.Create(context.Background(), "admin", "admin")
-	if e != nil {
-		t.Fatal(e)
-	}
+	admin := adminLoginToken(t, a, "admin", "Tt661ea2")
 	return a, user, admin
 }
 

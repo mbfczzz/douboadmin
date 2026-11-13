@@ -83,6 +83,10 @@ export interface Review {
   reviewedAt?: string;
 }
 export interface Profile {
+  source?: string;
+  sources?: string[];
+  lastLoginSource?: string;
+  authProvider?: string;
   access?: {
     active: boolean;
     status: string;

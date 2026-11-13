@@ -27,7 +27,7 @@ for (const width of [1440, 390, 320]) {
     ).toBeVisible();
     await expect(
       page.locator(".provider-tree-row .provider-tree-actions button"),
-    ).toHaveText(["分享码", "分佣", "编辑", "登录账号"]);
+    ).toHaveText(["分享码", "会员登记", "分佣", "下级活动轨迹", "分佣比例", "编辑", "登录账号"]);
     await page.screenshot({
       path: `../.runtime/provider-scan-only-${width}.png`,
       fullPage: true,
@@ -60,10 +60,11 @@ test("manual creation form sends a root branch and cannot select a child role", 
   const dialog = page.getByRole("dialog", { name: "新增分公司", exact: true });
   await expect(dialog.getByLabel("服务商级别")).toHaveCount(0);
   await dialog.getByLabel("服务商名称", { exact: true }).fill("新增测试分公司");
+  await dialog.getByLabel("负责人手机号").fill("13900139000");
   await dialog.getByLabel("账号", { exact: true }).fill("scan-only-branch");
   await dialog
     .getByLabel("初始密码", { exact: true })
-    .fill("scan-only-branch-password");
+    .fill("Tt0d5247");
   await dialog.getByRole("button", { name: "保存服务商", exact: true }).click();
   await expect(dialog).toHaveCount(0);
   expect(bodies).toEqual([
@@ -71,9 +72,10 @@ test("manual creation form sends a root branch and cannot select a child role", 
       parentId: "root",
       role: "branch",
       name: "新增测试分公司",
+      phone: "13900139000",
       account: {
         username: "scan-only-branch",
-        password: "scan-only-branch-password",
+        password: "Tt0d5247",
         role: "partner",
       },
     },

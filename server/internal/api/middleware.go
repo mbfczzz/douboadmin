@@ -101,6 +101,10 @@ func (a *Server) auth(role string, h http.HandlerFunc) http.HandlerFunc {
 				return
 			}
 		}
+		if v.Role == "admin" && v.AdminRole != core.SuperAdminRole && !limitedAdminRoute(r.Method, r.URL.Path) {
+			fail(w, 403, "当前账号仅可设置下级分佣、查看下级活动轨迹和分佣")
+			return
+		}
 		// A user must be able to revoke a session even after exhausting the API quota.
 		if r.URL.Path == "/api/auth/logout" {
 			h(w, r.WithContext(context.WithValue(r.Context(), identityKey, v)))

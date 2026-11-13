@@ -58,12 +58,6 @@ func (a *Server) replyRegistrations(w http.ResponseWriter, r *http.Request, quer
 			}
 			approve := canApproveRegistrations(r)
 			reject := approve
-			if !reject {
-				reject, e = a.Partners.CanReviewRegistration(r.Context(), reg, registrationReviewer(r))
-			}
-			if e != nil {
-				break
-			}
 			rows.Items[i].Data = core.Data(struct {
 				core.Registration
 				CanReview  bool `json:"canReview"` // Legacy clients also hide approval.

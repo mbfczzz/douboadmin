@@ -1,3 +1,4 @@
+import { useMe, canManageAccounts } from "../session";
 import { UserRound } from "lucide-react";
 import { api } from "../api";
 import { ask } from "../confirm/ask";
@@ -19,6 +20,7 @@ export default function BoundOwner({
   reload: () => Promise<void>;
   notify: Notify;
 }) {
+  const manage = canManageAccounts(useMe());
   const name = user.name || user.nickname || user.id;
   async function unbind() {
     const ok = await ask({
@@ -46,13 +48,15 @@ export default function BoundOwner({
           {user.phone ? ` · ${user.phone}` : ""}
         </p>
       </div>
-      <button
-        type="button"
-        className="text-button danger-text"
-        onClick={() => void unbind()}
-      >
-        解除绑定
-      </button>
+      {manage && (
+        <button
+          type="button"
+          className="text-button danger-text"
+          onClick={() => void unbind()}
+        >
+          解除绑定
+        </button>
+      )}
     </div>
   );
 }

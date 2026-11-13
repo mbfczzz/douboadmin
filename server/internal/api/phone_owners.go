@@ -9,8 +9,8 @@ import (
 	"fmt"
 )
 
-// A verified phone belongs to one account: "phone_owners" is keyed by the
-// phone and names the user; an empty user means the number is free again.
+// Every nonempty phone is reserved by one user, including profiles awaiting
+// verification. Reservation does not prove ownership; verifiedPhone does.
 type phoneOwner struct {
 	User string `json:"user"`
 }

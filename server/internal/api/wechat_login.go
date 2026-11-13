@@ -29,7 +29,8 @@ func (a *Server) login(w http.ResponseWriter, r *http.Request) {
 		fail(w, 400, "手机号授权参数无效")
 		return
 	}
-	id, provider := "", "wechat"
+	id, provider, openID := "", "wechat", ""
+	isNew := false
 	if v.DemoID != "" {
 		if !a.demoLoginEnabled() || r.URL.Path == "/api/auth/wechat" {
 			fail(w, 403, "演示登录未启用")
@@ -42,7 +43,8 @@ func (a *Server) login(w http.ResponseWriter, r *http.Request) {
 		id = "demo-" + core.Digest(v.DemoID)[:24]
 		provider = "demo"
 	} else {
-		openID, err := a.WeChat.Exchange(r.Context(), v.Code)
+		var err error
+		openID, err = a.WeChat.Exchange(r.Context(), v.Code)
 		if err != nil {
 			status := http.StatusBadGateway
 			switch {
@@ -58,23 +60,32 @@ func (a *Server) login(w http.ResponseWriter, r *http.Request) {
 			fail(w, status, err.Error())
 			return
 		}
-		id = "wx-" + core.Digest(a.Config.WeChatAppID + openID)[:32]
-		if e := a.saveWeChatIdentity(r.Context(), id, openID); e != nil {
-			dbError(w, e)
-			return
+		phone := ""
+		if v.PhoneCode != "" {
+			phone, err = a.WeChat.Phone(r.Context(), v.PhoneCode)
+			if err != nil || !mainlandPhone.MatchString(phone) {
+				fail(w, 400, "手机号授权失败，请重新授权或使用其他手机号登录")
+				return
+			}
 		}
-	}
-	isNew := false
-	if _, err := a.Store.Get(r.Context(), "users", id); errors.Is(err, core.ErrNotFound) {
-		_, err = a.Store.Put(r.Context(), "users", core.Record{ID: id, Owner: id, Data: core.Data(map[string]string{"nickname": "微信用户", "bio": "记录每一个闪光的创意", "authProvider": provider})}, 0)
-		if err != nil && !errors.Is(err, core.ErrConflict) {
+		id, isNew, err = a.wechatUser(r.Context(), openID, phone)
+		if err != nil {
 			dbError(w, err)
 			return
 		}
-		isNew = err == nil
-	} else if err != nil {
-		dbError(w, err)
-		return
+	}
+	if provider == "demo" {
+		if _, err := a.Store.Get(r.Context(), "users", id); errors.Is(err, core.ErrNotFound) {
+			_, err = a.Store.Put(r.Context(), "users", core.Record{ID: id, Owner: id, Data: core.Data(map[string]any{"nickname": "微信用户", "authProvider": provider, "source": "other", "sources": []string{"other"}})}, 0)
+			if err != nil && !errors.Is(err, core.ErrConflict) {
+				dbError(w, err)
+				return
+			}
+			isNew = err == nil
+		} else if err != nil {
+			dbError(w, err)
+			return
+		}
 	}
 	// A disabled account gets no new session (every API call would be refused).
 	if disabled, e := a.userDisabled(r.Context(), id); e != nil {
@@ -84,23 +95,7 @@ func (a *Server) login(w http.ResponseWriter, r *http.Request) {
 		fail(w, 403, "账号已停用，请联系管理员")
 		return
 	}
-	if v.PhoneCode != "" {
-		phone, err := a.WeChat.Phone(r.Context(), v.PhoneCode)
-		if err != nil || !mainlandPhone.MatchString(phone) {
-			fail(w, 400, "手机号授权失败，请重新授权或使用其他手机号登录")
-			return
-		}
-		problem, err := a.bindLoginPhone(r.Context(), id, phone)
-		if err != nil {
-			dbError(w, err)
-			return
-		}
-		if problem != "" {
-			fail(w, 409, problem)
-			return
-		}
-	}
-	token, err := a.Sessions.Create(r.Context(), id, "user")
+	token, err := a.Sessions.create(r.Context(), Identity{ID: id, Account: id, Role: "user", WeChatOpenID: openID, WeChatAppID: a.Config.WeChatAppID, Expires: time.Now().Add(24 * time.Hour)})
 	if err != nil {
 		dbError(w, err)
 		return

@@ -12,7 +12,7 @@ func TestSubprovidersStillJoinByScanAndWaitForApproval(t *testing.T) {
 	for _, c := range []struct{ parentRole, role string }{{"branch", "s1"}, {"branch", "s2"}, {"s1", "s2"}} {
 		t.Run(c.parentRole+"-"+c.role, func(t *testing.T) {
 			a, user, _ := activationFixture(t)
-			admin := adminLoginToken(t, a, "admin", "test-pass")
+			admin := adminLoginToken(t, a, "admin", "Tt661ea2")
 			parent := createBranch(t, a, admin, "scan-only")
 			if c.parentRole == "s1" {
 				parent = createProvider(t, a, admin, "scan-parent", parent, "已有S1", "s1", nil)
@@ -47,8 +47,8 @@ func TestSubprovidersStillJoinByScanAndWaitForApproval(t *testing.T) {
 
 func TestBranchCreationWithLoginStillRetriesIdempotently(t *testing.T) {
 	a, _, _ := setup(t)
-	admin := adminLoginToken(t, a, "admin", "test-pass")
-	account := map[string]string{"username": "branch-only", "password": "branch-only-password-2026"}
+	admin := adminLoginToken(t, a, "admin", "Tt661ea2")
+	account := map[string]string{"username": "branch-only", "password": "Tt5da345"}
 	first := createProvider(t, a, admin, "branch-only", "root", "分公司", "branch", account)
 	if again := createProvider(t, a, admin, "branch-only", "root", "分公司", "branch", account); again != first {
 		t.Fatal("branch retry created another provider")

@@ -58,8 +58,11 @@ func (a *Server) updateUser(w http.ResponseWriter, r *http.Request) {
 	profile["nickname"], profile["name"], profile["phone"], profile["bio"] = input.Nickname, input.Name, input.Phone, input.Bio
 	row.Data = core.Data(profile)
 	err = a.Store.Atomic(r.Context(), func(tx store.Transaction) error {
+		if e := lockIdentity(tx); e != nil {
+			return e
+		}
 		var e error
-		row, e = tx.Put("users", row, input.Version)
+		row, e = putUniqueUser(tx, row, input.Version)
 		if e != nil {
 			return e
 		}
@@ -83,7 +86,7 @@ func (a *Server) archiveUser(w http.ResponseWriter, r *http.Request) {
 	}
 	input.Reason = strings.TrimSpace(input.Reason)
 	if len([]rune(input.Reason)) < 3 || len([]rune(input.Reason)) > 200 {
-		fail(w, 400, "请填写 3–200 字的归档原因")
+		fail(w, 400, "请填写 3–200 字的删除原因")
 		return
 	}
 	row, err := a.Store.Get(r.Context(), "users", r.PathValue("id"))
@@ -99,11 +102,17 @@ func (a *Server) archiveUser(w http.ResponseWriter, r *http.Request) {
 	profile["disabled"], profile["archived"], profile["statusReason"] = true, true, input.Reason
 	row.Data = core.Data(profile)
 	err = a.Store.Atomic(r.Context(), func(tx store.Transaction) error {
+		if e := lockIdentity(tx); e != nil {
+			return e
+		}
+		if e := releasePhone(tx, inputPhone(profile), row.ID); e != nil {
+			return e
+		}
 		if _, _, e := store.LockWallet(tx, row.ID); e != nil {
 			return e
 		}
 		var e error
-		row, e = tx.Put("users", row, input.Version)
+		row, e = putUniqueUser(tx, row, input.Version)
 		if e != nil {
 			return e
 		}

@@ -11,13 +11,13 @@ import (
 func secondaryAdmin(t *testing.T, a *Server, admin string) (string, string) {
 	t.Helper()
 	w := call(a, "POST", "/api/admin/accounts", admin, "", map[string]any{
-		"username": "secondary", "password": "secondary-fixture-password", "name": "Secondary", "role": "super_admin",
+		"username": "secondary", "password": "Tt54a927", "name": "Secondary", "role": "super_admin",
 	})
 	var created core.Record
 	if w.Code != 201 || json.Unmarshal(w.Body.Bytes(), &created) != nil {
 		t.Fatal(w.Code, w.Body.String())
 	}
-	w = call(a, "POST", "/api/admin/login", "", "", map[string]string{"username": "secondary", "password": "secondary-fixture-password"})
+	w = call(a, "POST", "/api/admin/login", "", "", map[string]string{"username": "secondary", "password": "Tt54a927"})
 	if w.Code != 200 {
 		t.Fatal(w.Code, w.Body.String())
 	}
@@ -38,7 +38,7 @@ func TestAdminDemotionAppliesToExistingSessions(t *testing.T) {
 		t.Fatal(w.Code, w.Body.String())
 	}
 	w = call(a, "GET", "/api/admin/integrations", token, "", nil)
-	if w.Code != 200 || !strings.Contains(w.Body.String(), `"canManage":false`) || strings.Contains(w.Body.String(), "fields") {
+	if w.Code != 403 || strings.Contains(w.Body.String(), "fields") {
 		t.Fatal("demoted session can still read credentials", w.Code, w.Body.String())
 	}
 	w = call(a, "PUT", "/api/admin/integrations/relay", token, "", settings.Update{Values: settings.Values{"RELAY_API_KEY": "fixture"}})
@@ -59,7 +59,7 @@ func TestPasswordResetRevokesExistingAdminSessions(t *testing.T) {
 		t.Fatal(err)
 	}
 	w := call(a, "PUT", "/api/admin/accounts/"+id+"/password", admin, "", map[string]any{
-		"version": row.Version, "password": "replacement-fixture-password",
+		"version": row.Version, "password": "Tt708075",
 	})
 	if w.Code != 200 {
 		t.Fatal(w.Code, w.Body.String())
@@ -77,7 +77,7 @@ func TestPasswordResetRevokesExistingAdminSessions(t *testing.T) {
 	if w = call(a, "GET", "/api/admin/integrations", late, "", nil); w.Code != 401 {
 		t.Fatal("a late session using pre-reset credentials was accepted", w.Code)
 	}
-	w = call(a, "POST", "/api/admin/login", "", "", map[string]string{"username": "secondary", "password": "replacement-fixture-password"})
+	w = call(a, "POST", "/api/admin/login", "", "", map[string]string{"username": "secondary", "password": "Tt708075"})
 	if w.Code != 200 {
 		t.Fatal("new credentials cannot log in", w.Code, w.Body.String())
 	}

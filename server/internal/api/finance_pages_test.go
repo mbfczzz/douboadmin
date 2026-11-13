@@ -9,7 +9,7 @@ import (
 
 func TestFinanceListsReachRecordsBeyondLegacyLimit(t *testing.T) {
 	a, user, other := setup(t)
-	admin, e := a.Sessions.Create(t.Context(), "admin-fixture", "admin")
+	admin, e := adminLoginToken(t, a, "admin", "Tt661ea2"), error(nil)
 	if e != nil {
 		t.Fatal(e)
 	}
@@ -77,7 +77,7 @@ func TestFinanceListsReachRecordsBeyondLegacyLimit(t *testing.T) {
 
 func TestFinancePagesValidateAndFilterBeforePaging(t *testing.T) {
 	a, user, _ := setup(t)
-	admin, _ := a.Sessions.Create(t.Context(), "admin-fixture", "admin")
+	admin := adminLoginToken(t, a, "admin", "Tt661ea2")
 	for _, query := range []string{"page=0", "page=abc", "page=1000001", "page=1&size=0", "page=1&size=101"} {
 		if w := call(a, "GET", "/api/orders?"+query, user, "", nil); w.Code != 400 {
 			t.Fatal(query, w.Code)

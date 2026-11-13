@@ -8,8 +8,8 @@ import (
 
 func TestBindCodeLinksS1ToAMiniProgramAccount(t *testing.T) {
 	a, user, _ := activationFixture(t)
-	admin := adminLoginToken(t, a, "admin", "test-pass")
-	s1 := createProvider(t, a, admin, "bind-s1", createBranch(t, a, admin, "bind"), "华东", "s1", map[string]string{"username": "bind-s1", "password": "bind-s1-password-2026"})
+	admin := adminLoginToken(t, a, "admin", "Tt661ea2")
+	s1 := createProvider(t, a, admin, "bind-s1", createBranch(t, a, admin, "bind"), "华东", "s1", map[string]string{"username": "bind-s1", "password": "Tt707b14"})
 	path := "/api/admin/partners/" + s1 + "/codes/bind"
 	code := providerCode(t, a, "GET", s1, "bind", admin)
 	if status, body := joinHTTP(a, user, code.Code); status != 200 || !strings.Contains(body, `"status":"review"`) {
@@ -52,7 +52,7 @@ func TestBindCodeLinksS1ToAMiniProgramAccount(t *testing.T) {
 
 func TestRejectedBindFreesTheProviderWithANewCode(t *testing.T) {
 	a, user, _ := activationFixture(t)
-	admin := adminLoginToken(t, a, "admin", "test-pass")
+	admin := adminLoginToken(t, a, "admin", "Tt661ea2")
 	branch := createBranch(t, a, admin, "rebind")
 	code := providerCode(t, a, "GET", branch, "bind", admin)
 	if status, body := joinHTTP(a, user, code.Code); status != 200 {
@@ -101,7 +101,7 @@ func TestScannedProviderHasNoBindCode(t *testing.T) {
 // Unbinding a pending bind leaves nothing for a later approval to restore.
 func TestUnbindWhilePendingClosesTheRegistration(t *testing.T) {
 	a, user, _ := activationFixture(t)
-	admin := adminLoginToken(t, a, "admin", "test-pass")
+	admin := adminLoginToken(t, a, "admin", "Tt661ea2")
 	branch := newBranch(t, a, "unbind-pending")
 	code := providerCode(t, a, "GET", branch, "bind", admin)
 	if status, body := joinHTTP(a, user, code.Code); status != 200 {

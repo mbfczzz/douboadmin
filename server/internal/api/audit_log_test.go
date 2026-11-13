@@ -30,11 +30,11 @@ func waitLog(t *testing.T, a *Server, q core.AuditQuery, ok func(core.AuditEntry
 
 func TestOperationsAreLoggedWithWhoWhatAndRedactedBodies(t *testing.T) {
 	a, user, _ := activationFixture(t)
-	admin := adminLoginToken(t, a, "admin", "test-pass")
+	admin := adminLoginToken(t, a, "admin", "Tt661ea2")
 	if w := call(a, "POST", "/api/admin/users/user-a/wallet", admin, "adjust-1", map[string]any{"units": 5000, "note": "活动补偿"}); w.Code != 200 {
 		t.Fatal(w.Code, w.Body.String())
 	}
-	if w := call(a, "POST", "/api/admin/accounts", admin, "", map[string]any{"username": "logged-ops", "name": "运营", "role": "operator", "password": "a-very-secret-password"}); w.Code != 201 {
+	if w := call(a, "POST", "/api/admin/accounts", admin, "", map[string]any{"username": "logged-ops", "name": "运营", "role": "operator", "password": "Secret12"}); w.Code != 201 {
 		t.Fatal(w.Code, w.Body.String())
 	}
 	activate(t, a, "user-a")
@@ -45,7 +45,7 @@ func TestOperationsAreLoggedWithWhoWhatAndRedactedBodies(t *testing.T) {
 		t.Fatalf("points entry %+v", points)
 	}
 	created := waitLog(t, a, core.AuditQuery{}, func(e core.AuditEntry) bool { return e.Action == "创建管理账号" })
-	if strings.Contains(created.Request, "a-very-secret-password") || !strings.Contains(created.Request, `"password":"***"`) {
+	if strings.Contains(created.Request, "Secret12") || !strings.Contains(created.Request, `"password":"***"`) {
 		t.Fatal("password logged", created.Request)
 	}
 	read := waitLog(t, a, core.AuditQuery{Categories: []string{core.LogAPI}}, func(e core.AuditEntry) bool { return e.Path == "/api/me" })
@@ -54,7 +54,7 @@ func TestOperationsAreLoggedWithWhoWhatAndRedactedBodies(t *testing.T) {
 	}
 	login := waitLog(t, a, core.AuditQuery{Categories: []string{core.LogAuth}}, func(e core.AuditEntry) bool { return e.Action == "管理员登录" })
 	// Sign-ins name the account (and its id) whether they succeed or not.
-	if login.ActorID == "" || !strings.Contains(login.ActorName, "admin") || strings.Contains(login.Request, "test-pass") {
+	if login.ActorID == "" || !strings.Contains(login.ActorName, "admin") || strings.Contains(login.Request, "Tt661ea2") {
 		t.Fatalf("login entry %+v", login)
 	}
 

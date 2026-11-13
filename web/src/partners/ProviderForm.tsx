@@ -51,6 +51,7 @@ export default function ProviderForm({
               parentId: "root",
               name: String(data.get("name")),
               role: "branch",
+              phone: String(data.get("branchPhone") || "").trim(),
               account: {
                 username: String(data.get("accountUsername") || "").trim(),
                 password: String(data.get("accountPassword") || ""),
@@ -78,6 +79,12 @@ export default function ProviderForm({
           </label>
           {row ? (
             <>
+              {row.data.phone && (
+                <label>
+                  预留手机号
+                  <input value={row.data.phone} readOnly />
+                </label>
+              )}
               <label className="checkbox">
                 <input
                   name="enabled"

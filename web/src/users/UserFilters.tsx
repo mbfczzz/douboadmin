@@ -24,7 +24,7 @@ export default function UserFilters(p: {
         <option value="">全部状态</option>
         <option value="active">正常</option>
         <option value="disabled">已停用</option>
-        <option value="archived">已归档</option>
+        <option value="archived">已删除</option>
       </select>
       <select
         aria-label="开通状态"

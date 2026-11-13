@@ -1,3 +1,4 @@
+import { archive } from "../adminAccounts/actions";
 import { useState } from "react";
 import type { Row } from "../api";
 import { useResource } from "../hooks/useResource";
@@ -111,6 +112,22 @@ export default function ProviderAccount({
             </dl>
           </div>
           <div className="modal-actions">
+            <button
+              type="button"
+              className="text-button danger-text"
+              onClick={async () => {
+                try {
+                  if (await archive(account)) {
+                    notify("登录账号已删除");
+                    onClose();
+                  }
+                } catch (e) {
+                  notify((e as Error).message, "error");
+                }
+              }}
+            >
+              删除账号
+            </button>
             <button
               type="button"
               className={

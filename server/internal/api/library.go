@@ -96,6 +96,9 @@ func (a *Server) users(w http.ResponseWriter, r *http.Request) {
 		fail(w, 400, "查询条件无效")
 		return
 	}
+	if q.State == "" {
+		q.State = "current"
+	}
 	out, e := a.Store.UserPage(r.Context(), q)
 	if e != nil {
 		dbError(w, e)

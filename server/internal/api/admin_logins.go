@@ -35,6 +35,16 @@ func (a *Server) adminView(ctx context.Context, row core.Record) core.Record {
 		return row
 	}
 	account.PasswordHash = ""
+	if account.UserID != "" {
+		if user, e := a.Store.Get(ctx, "users", account.UserID); e == nil {
+			var p struct {
+				Phone string `json:"phone"`
+			}
+			if json.Unmarshal(user.Data, &p) == nil {
+				account.Phone = p.Phone
+			}
+		}
+	}
 	if login, e := a.Store.Get(ctx, "admin_logins", row.ID); e == nil {
 		var v struct {
 			At time.Time `json:"at"`

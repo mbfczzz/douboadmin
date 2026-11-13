@@ -97,6 +97,13 @@ func (a *Server) createOrder(w http.ResponseWriter, r *http.Request) {
 		OpenID string `json:"openid"`
 	}
 	_ = json.Unmarshal(profile.Data, &account)
+	if session := identity(r); session.WeChatOpenID != "" {
+		if session.WeChatAppID != a.Pay.Config.AppID {
+			fail(w, 401, "微信应用不一致，请重新登录")
+			return
+		}
+		account.OpenID = session.WeChatOpenID
+	}
 	if account.OpenID == "" {
 		fail(w, 401, "请使用微信账号登录后充值")
 		return

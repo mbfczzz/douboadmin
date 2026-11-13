@@ -54,7 +54,7 @@ func TestDefaultBillingQuotesAndRejectsInsufficientBalance(t *testing.T) {
 
 func TestRetiredPlatformWriteIsRejected(t *testing.T) {
 	a, _, _ := setup(t)
-	admin, err := a.Sessions.Create(t.Context(), "admin", "admin")
+	admin, err := adminLoginToken(t, a, "admin", "Tt661ea2"), error(nil)
 	if err != nil {
 		t.Fatal(err)
 	}

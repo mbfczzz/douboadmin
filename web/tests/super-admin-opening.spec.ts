@@ -29,6 +29,7 @@ for (const role of [
           scope: provider ? "partner" : "platform",
           partnerId: provider ? "parent" : undefined,
           canApproveRegistrations: role !== "legacy-super",
+          canManageAccounts: allowed,
           menus: ["partners", "users"],
         },
       }),
@@ -115,6 +116,21 @@ for (const role of [
     const own = page
       .locator(".provider-tree-row")
       .filter({ hasText: "分公司" });
+    if (!allowed) {
+      await expect(
+        own.getByRole("button", { name: "分享码", exact: true }),
+      ).toHaveCount(0);
+      await expect(
+        own.getByRole("button", { name: "下级活动轨迹", exact: true }),
+      ).toBeVisible();
+      await expect(
+        own.getByRole("button", { name: "查看分佣", exact: true }),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: "用户管理", exact: true }),
+      ).toHaveCount(0);
+      return;
+    }
     await own.getByRole("button", { name: "分享码", exact: true }).click();
     const share = page.getByRole("dialog", { name: "分享码", exact: true });
     await expect(share).toContainText("待开通用户");
@@ -130,9 +146,7 @@ for (const role of [
         inbox.getByRole("button", { name: "开通", exact: true }),
       ).toHaveCount(allowed ? 1 : 0);
     } else {
-      await page
-        .getByRole("button", { name: "用户管理", exact: true })
-        .click();
+      await page.getByRole("button", { name: "用户管理", exact: true }).click();
       await page.getByRole("tab", { name: "扫码登记", exact: true }).click();
       const registrations = page.getByRole("region", {
         name: "扫码登记列表",

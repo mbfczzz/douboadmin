@@ -1,3 +1,4 @@
+import { useMe, canManageAccounts } from "../session";
 import { useCodePoster } from "./useCodePoster";
 import type { ReactNode } from "react";
 import { Copy, Download, RotateCcw } from "lucide-react";
@@ -37,6 +38,7 @@ export default function CodeView({
     reload: () => Promise<void>,
   ) => ReactNode;
 }) {
+  const manage = canManageAccounts(useMe());
   const s = share.data;
   const poster = useCodePoster(
     path,
@@ -118,15 +120,17 @@ export default function CodeView({
             <Copy size={15} aria-hidden="true" />
             复制
           </button>
-          <button
-            type="button"
-            className="text-button danger-text"
-            disabled={!s}
-            onClick={() => void reset()}
-          >
-            <RotateCcw size={14} aria-hidden="true" />
-            重置
-          </button>
+          {manage && (
+            <button
+              type="button"
+              className="text-button danger-text"
+              disabled={!s}
+              onClick={() => void reset()}
+            >
+              <RotateCcw size={14} aria-hidden="true" />
+              重置
+            </button>
+          )}
         </div>
       </div>
     </div>

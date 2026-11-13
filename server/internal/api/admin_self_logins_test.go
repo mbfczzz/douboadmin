@@ -8,7 +8,7 @@ import (
 
 func TestOwnLoginsShowRecentAttempts(t *testing.T) {
 	a, _, _ := setup(t)
-	login := call(a, "POST", "/api/admin/login", "", "", map[string]string{"username": "admin", "password": "test-pass"})
+	login := call(a, "POST", "/api/admin/login", "", "", map[string]string{"username": "admin", "password": "Tt661ea2"})
 	if login.Code != 200 {
 		t.Fatal(login.Body.String())
 	}
@@ -42,7 +42,7 @@ func TestOwnLoginsShowRecentAttempts(t *testing.T) {
 // Another account whose name contains this one's must not crowd it out.
 func TestOwnLoginsIgnoreSimilarAccounts(t *testing.T) {
 	a, _, _ := setup(t)
-	login := call(a, "POST", "/api/admin/login", "", "", map[string]string{"username": "admin", "password": "test-pass"})
+	login := call(a, "POST", "/api/admin/login", "", "", map[string]string{"username": "admin", "password": "Tt661ea2"})
 	token := login.Result().Cookies()[0].Value
 	for range 60 {
 		a.Sessions.limits = map[string]bucket{}

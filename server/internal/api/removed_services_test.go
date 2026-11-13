@@ -46,7 +46,7 @@ func TestMixPageGetsUnavailableCapabilityAndNoRetiredSettings(t *testing.T) {
 	if w.Code != 200 || json.Unmarshal(w.Body.Bytes(), &config) != nil || config.MixAvailable || config.MixMessage == "" {
 		t.Fatal(w.Code, w.Body.String())
 	}
-	admin, _ := a.Sessions.Create(context.Background(), "admin", "admin")
+	admin := adminLoginToken(t, a, "admin", "Tt661ea2")
 	w = call(a, "GET", "/api/admin/platform", admin, "", nil)
 	if w.Code != 200 {
 		t.Fatal(w.Code, w.Body.String())
@@ -80,7 +80,7 @@ func TestRetiredMixJobCannotBeRetriedOrResumed(t *testing.T) {
 	if w.Code != 409 {
 		t.Fatal(w.Code, w.Body.String())
 	}
-	admin, _ := a.Sessions.Create(ctx, "admin", "admin")
+	admin := adminLoginToken(t, a, "admin", "Tt661ea2")
 	w = call(a, "POST", "/api/admin/jobs/"+j.ID+"/resume", admin, "", nil)
 	if w.Code != 409 {
 		t.Fatal(w.Code, w.Body.String())

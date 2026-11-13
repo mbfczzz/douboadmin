@@ -1,3 +1,4 @@
+import { useMe, canManageAccounts } from "../session";
 import { ask } from "../confirm/ask";
 import { date, type Row } from "../api";
 import Records, { useRecords } from "./Records";
@@ -49,6 +50,7 @@ export default function Memberships({
   notify: Notify;
   changed: () => Promise<void>;
 }) {
+  const manage = canManageAccounts(useMe());
   const resource = useRecords<Membership>(
       "/admin/memberships?" + new URLSearchParams({ provider: id, code }),
       15000,
@@ -122,7 +124,8 @@ export default function Memberships({
             title: "操作",
             action: true,
             render: (r) =>
-              r.data.status !== "active" && r.data.status !== "disabled" ? (
+              !manage ||
+              (r.data.status !== "active" && r.data.status !== "disabled") ? (
                 "—"
               ) : (
                 <div className="business-actions">

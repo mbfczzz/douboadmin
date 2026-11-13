@@ -1,7 +1,6 @@
 import { saveQR } from "./save-qr";
 import { pullRefresh } from "../../utils/refresh";
-import { ask } from "../../services/dialog";
-import { request, error, saveFailed } from "../../utils/api";
+import { request, saveFailed } from "../../utils/api";
 
 import type { Code, Child, Center } from "../../services/provider-types";
 import { prettyCode } from "../../services/access";
@@ -41,7 +40,6 @@ Page({
     childrenTotal: 0,
     childrenLoading: false,
     childrenError: "",
-    password: "",
     busy: false,
     loadError: "",
   },
@@ -72,7 +70,6 @@ Page({
         tabs: tabs
           .filter(([key]) => center.codes[key])
           .map(([key, label, , short]) => ({ key, label, short })),
-        password: center.password || "",
         loadError: "",
       });
       this.show(this.data.tab);
@@ -155,36 +152,6 @@ Page({
       wx.showToast({ title: "已保存到相册", icon: "success" });
     } catch (e) {
       saveFailed(e);
-    } finally {
-      this.setData({ busy: false });
-    }
-  },
-  async password() {
-    if (this.data.busy) return;
-    if (this.data.center?.account) {
-      const confirmed = await ask({
-        title: "重置后台密码？",
-        content: "原密码会立即失效，需要用新密码重新登录管理后台。",
-        confirmText: "重置",
-        tone: "danger",
-        icon: "lock-on",
-      });
-      if (!confirmed) return;
-    }
-    this.setData({ busy: true });
-    try {
-      const out = await request<{ account: string; password: string }>(
-        "/provider/password",
-        "POST",
-        {},
-      );
-      this.setData({
-        password: out.password,
-        "center.account": out.account,
-        "center.passwordChanged": false,
-      });
-    } catch (e) {
-      error(e);
     } finally {
       this.setData({ busy: false });
     }

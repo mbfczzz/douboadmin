@@ -1,7 +1,8 @@
+import { sourceLabel, initialSource } from "../users/source";
 import Badge from "../components/Badge";
 import { lazy, Suspense, useEffect, useState, type ReactNode } from "react";
 import type { Row } from "../api";
-import { useMe } from "../session";
+import { useMe, canManageAccounts } from "../session";
 import type { PageProps } from "../navigation";
 import { useResource } from "../hooks/useResource";
 import { useRememberedState } from "../hooks/useRememberedState";
@@ -23,7 +24,8 @@ const UserActivity = lazy(() => import("../users/UserActivity"));
 // Scan registrations awaiting the platform; provider logins never see them.
 const Registrations = lazy(() => import("../users/Registrations"));
 
-type Dialog = "detail" | "models" | "activity" | "points" | "edit" | "status";
+type Dialog =
+  "detail" | "models" | "activity" | "points" | "edit" | "status" | "delete";
 import type { Profile } from "../business/types";
 
 // The platform switches between the user list and scan registrations; each
@@ -64,6 +66,7 @@ function UserList({
   tabs,
 }: Pick<PageProps, "notify"> & { tabs: ReactNode }) {
   // A user's operation log keeps the 日志管理 menu.
+  const manage = canManageAccounts(useMe());
   const canLogs = !!useMe()?.menus.includes("logs");
   const [typed, setTyped] = useRememberedState("users.query", ""),
     [search, setSearch] = useState(typed.trim()),
@@ -123,7 +126,7 @@ function UserList({
         id={(r) => r.id}
         columns={[
           {
-            title: "小程序用户",
+            title: "用户",
             render: (r) => (
               <>
                 {r.data.nickname}
@@ -134,6 +137,10 @@ function UserList({
             ),
           },
           { title: "姓名 / 手机号", render: nameCell },
+          {
+            title: "注册来源",
+            render: (r) => sourceLabel(initialSource(r.data)),
+          },
           {
             title: "状态",
             render: (r) => (
@@ -147,7 +154,7 @@ function UserList({
                 }
                 label={
                   r.data.archived
-                    ? "已归档"
+                    ? "已删除"
                     : r.data.disabled
                       ? "已停用"
                       : "正常"
@@ -167,10 +174,16 @@ function UserList({
                 {canLogs && (
                   <button onClick={() => show("activity", r)}>行为日志</button>
                 )}
-                {!r.data.archived && (
+                {manage && !r.data.archived && (
                   <>
                     <button onClick={() => show("points", r)}>积分</button>
                     <button onClick={() => show("edit", r)}>编辑</button>
+                    <button
+                      className="danger-text"
+                      onClick={() => show("delete", r)}
+                    >
+                      删除
+                    </button>
                     <button
                       className={r.data.disabled ? "" : "danger-text"}
                       onClick={() => show("status", r)}
@@ -208,8 +221,9 @@ function UserList({
           notify={notify}
         />
       )}
-      {open?.kind === "status" && (
+      {(open?.kind === "status" || open?.kind === "delete") && (
         <UserStatus
+          remove={open.kind === "delete"}
           user={open.row}
           onClose={close}
           onSaved={resource.reload}

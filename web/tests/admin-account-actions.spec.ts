@@ -11,7 +11,7 @@ test("admin account row actions each do one thing", async ({ page }) => {
   const form = page.getByRole("dialog", { name: "添加管理账号" });
   await form.getByLabel("登录账号").fill(username);
   await form.getByLabel("姓名", { exact: true }).fill("行操作验收");
-  await form.getByLabel("初始密码").fill("fixture-actions-password");
+  await form.getByLabel("初始密码").fill("Tt9b763a");
   const created = page.waitForResponse(
     (r) =>
       new URL(r.url()).pathname === "/api/admin/accounts" &&

@@ -9,8 +9,8 @@ import (
 
 func TestUnifiedAccountsIncludeProviderLoginsAndPreserveScope(t *testing.T) {
 	a, _, _ := setup(t)
-	admin := adminLoginToken(t, a, "admin", "test-pass")
-	const password = "provider-login-test-password"
+	admin := adminLoginToken(t, a, "admin", "Tt661ea2")
+	const password = "Ttdefa97"
 	partnerID := createProvider(t, a, admin, "list-provider", "root", "列表服务商", "branch", map[string]string{"username": "list-provider", "password": password})
 	provider := adminLoginToken(t, a, "list-provider", password)
 	accountID := adminID("list-provider")

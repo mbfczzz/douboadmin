@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { api } from "../api";
+import { api, invalidatesPrivateData } from "../api";
 
 // Page-local query snapshots: never show another query's records, and discard
 // unfinished requests on navigation. A refresh invalidates other snapshots,
@@ -33,8 +33,10 @@ export function useCachedResource<T>(path: string | null, pollMs = 0) {
           setState({ path, loading: false, error: "" });
         }
       } catch (error) {
-        if (!controller.signal.aborted && current.current === path)
+        if (!controller.signal.aborted && current.current === path) {
+          if (invalidatesPrivateData(error)) cache.current.delete(path);
           setState({ path, loading: false, error: (error as Error).message });
+        }
       } finally {
         if (active.current === controller) active.current = null;
       }

@@ -1,3 +1,4 @@
+import { passwordRules, PASSWORD_HINT } from "../components/password-policy";
 import { useState } from "react";
 import { guardedClose } from "../hooks/unsaved";
 import { api, APIError, type Row } from "../api";
@@ -61,7 +62,12 @@ export default function AccountForm({
       onClose();
       notify(row ? "账号资料已更新" : "管理账号已创建");
     } catch (error) {
-      if (row && error instanceof APIError && error.status === 409) {
+      if (
+        row &&
+        error instanceof APIError &&
+        error.status === 409 &&
+        error.message === "数据已发生变化，请刷新后重试"
+      ) {
         // Someone else changed this account: load their version into the
         // form instead of letting a second click overwrite it.
         setError("账号资料已被其他人修改，已载入最新内容，请核对后重新保存");
@@ -117,10 +123,17 @@ export default function AccountForm({
             手机号
             <input
               name="phone"
+              aria-label="手机号"
+              readOnly={!!row?.data.userId}
               defaultValue={row?.data.phone}
               disabled={busy}
               inputMode="tel"
             />
+            {row?.data.userId && (
+              <small className="quiet">
+                已关联用户，手机号在用户管理中修改。
+              </small>
+            )}
           </label>
           <label>
             角色
@@ -136,12 +149,12 @@ export default function AccountForm({
               <input
                 name="password"
                 spellCheck={false}
-                minLength={16}
-                maxLength={128}
+                {...passwordRules}
                 required
                 disabled={busy}
                 autoComplete="off"
               />
+              <small className="quiet">{PASSWORD_HINT}</small>
             </label>
           )}
           {error && (

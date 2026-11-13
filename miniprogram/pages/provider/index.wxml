@@ -44,11 +44,7 @@
   <view wx:if="{{center}}" class="biz-card provider-login">
     <text class="biz-heading">管理后台登录</text>
     <view class="biz-row"><text class="biz-label">账号</text><text>{{center.account||'未开通'}}</text></view>
-    <block wx:if="{{center.owner}}">
-      <view wx:if="{{password}}" class="biz-row"><text class="biz-label">密码</text><view class="provider-secret"><text selectable>{{password}}</text><text class="biz-link" bindtap="copy" data-text="{{password}}">复制</text></view></view>
-      <text wx:elif="{{center.passwordChanged}}" class="biz-note">密码已在管理后台修改，可重置后在这里查看</text>
-      <button class="biz-action biz-secondary" loading="{{busy}}" disabled="{{busy}}" bindtap="password">{{center.account?'重置密码':'开通后台登录'}}</button>
-    </block>
+    <text class="biz-note">登录账号由超级管理员统一开通、启停和管理</text>
   </view>
 </view>
 <ui-dialog id="ui-dialog" />

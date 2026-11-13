@@ -3,7 +3,9 @@ package main
 import (
 	"context"
 	"doubo/server/internal/api"
+	"doubo/server/internal/core"
 	"doubo/server/internal/media"
+	"doubo/server/internal/passwordpolicy"
 	"doubo/server/internal/settings"
 	"doubo/server/internal/store"
 	"doubo/server/internal/worker"
@@ -34,9 +36,9 @@ func run() error {
 	if production && demoLogin {
 		return fmt.Errorf("ALLOW_DEMO_LOGIN must be false in production")
 	}
-	password := env("ADMIN_PASSWORD", "doubo-demo-2026")
-	if production && (storage != "mysql" || os.Getenv("REDIS_ADDR") == "" || len(password) < 16 || password == "doubo-demo-2026") {
-		return fmt.Errorf("production requires MySQL, Redis and an ADMIN_PASSWORD of at least 16 characters")
+	password := env("ADMIN_PASSWORD", "Doubo123")
+	if production && (storage != "mysql" || os.Getenv("REDIS_ADDR") == "" || password == "Doubo123") {
+		return fmt.Errorf("production requires MySQL, Redis and a non-default ADMIN_PASSWORD")
 	}
 	var s store.Store
 	var err error
@@ -75,6 +77,17 @@ func run() error {
 			return fmt.Errorf("migrate requires mysql")
 		}
 		return migrateDatabase(ctx, m)
+	}
+	// Bootstrap credentials are unused once database accounts exist. Do not lock
+	// existing installations out just because their old environment has a long password.
+	if production {
+		admins, e := s.RecordPage(check, core.RecordQuery{Namespace: "admin_accounts", Fields: map[string]string{"role": "super_admin"}, Page: 1, Size: 1})
+		if e != nil {
+			return fmt.Errorf("cannot check administrator bootstrap state")
+		}
+		if admins.Total == 0 && (!passwordpolicy.Valid(password) || password == "Doubo123") {
+			return fmt.Errorf("ADMIN_PASSWORD: %s（不可使用开发默认密码）", passwordpolicy.Message)
+		}
 	}
 	var rc *redis.Client
 	redisOptions, err := redisOptionsFromEnv()

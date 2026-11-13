@@ -2,13 +2,8 @@ import { useState } from "react";
 import { guardedClose } from "../hooks/unsaved";
 import { api } from "../api";
 import Modal from "../components/Modal";
-import { navGroups, pageInfo, type Notify, type PageId } from "../navigation";
-import {
-  partnerMenus,
-  roleScopeLabel,
-  type RoleRow,
-  type RoleScope,
-} from "./types";
+import { pageInfo, type Notify, type PageId } from "../navigation";
+import { roleScopeLabel, type RoleRow, type RoleScope } from "./types";
 
 // Create or edit a role: name, scope (fixed after creation) and visible menus.
 export default function RoleForm({
@@ -23,29 +18,12 @@ export default function RoleForm({
   onSaved: () => unknown;
 }) {
   const [scope, setScope] = useState<RoleScope>(row?.data.scope || "platform"),
-    [menus, setMenus] = useState<string[]>(
-      (row?.data.menus || []).filter((id) => id in pageInfo),
-    ),
     [busy, setBusy] = useState(false),
     [error, setError] = useState(""),
     [dirty, setDirty] = useState(false);
-  const groups =
-    scope === "user"
-      ? []
-      : scope === "partner"
-        ? [{ label: "服务商菜单", pages: partnerMenus as PageId[] }]
-        : navGroups;
-  const toggle = (id: string, on: boolean) =>
-    setMenus((current) =>
-      on ? [...current, id] : current.filter((m) => m !== id),
-    );
   async function save(form: HTMLFormElement) {
     const name = String(new FormData(form).get("name") || "").trim();
-    const chosen = menus.filter((m) =>
-      groups.some((g) => g.pages.includes(m as PageId)),
-    );
-    if (scope !== "user" && !chosen.length)
-      return setError("请至少选择一个菜单");
+    const chosen = scope === "user" ? [] : ["partners"];
     setBusy(true);
     setError("");
     try {
@@ -109,7 +87,6 @@ export default function RoleForm({
               disabled={busy || !!row}
               onChange={(e) => {
                 setScope(e.target.value as RoleScope);
-                setMenus([]);
               }}
             >
               {(row?.data.scope === "user"
@@ -127,24 +104,17 @@ export default function RoleForm({
               ? "此角色用于小程序用户展示，不授予管理后台登录或菜单权限。"
               : scope === "partner"
                 ? "服务商角色绑定到具体服务商，只能看到本服务商及其下级的数据。"
-                : "平台角色用于管理后台账号，可访问勾选的全部菜单。"}
+                : "非超管后台账号权限固定，未关联服务商时没有下级数据。"}
           </p>
-          {groups.map((group) => (
-            <fieldset key={group.label} className="role-menus">
-              <legend>{group.label}</legend>
-              {group.pages.map((id) => (
-                <label className="checkbox" key={id}>
-                  <input
-                    type="checkbox"
-                    checked={menus.includes(id)}
-                    disabled={busy}
-                    onChange={(e) => toggle(id, e.target.checked)}
-                  />
-                  {pageInfo[id][0]}
-                </label>
-              ))}
+          {scope !== "user" && (
+            <fieldset className="role-menus">
+              <legend>固定后台权限</legend>
+              <p>给下级设置算力分佣、查看下级活动轨迹、查看分佣。</p>
+              <p className="quiet">
+                除超级管理员外，不能通过角色配置扩大上述权限。
+              </p>
             </fieldset>
-          ))}
+          )}
           {error && (
             <div className="error" role="alert">
               {error}

@@ -10,6 +10,8 @@ import (
 )
 
 var ErrNotFound = errors.New("记录不存在")
+var ErrAdminPhoneTaken = errors.New("该手机号已被其他后台账号使用")
+var ErrUserPhoneTaken = errors.New("该手机号已被其他用户账号使用")
 var ErrConflict = errors.New("数据已发生变化，请刷新后重试")
 var ErrIdempotency = errors.New("重复请求标识已用于其他参数")
 

@@ -73,7 +73,7 @@ export async function mockLogin(page: Page) {
   });
   await page.goto("/");
   await page.getByLabel("账号", { exact: true }).fill("admin");
-  await page.getByLabel("密码", { exact: true }).fill("fixture-password");
+  await page.getByLabel("密码", { exact: true }).fill("Tt66c76b");
   await page.getByRole("button", { name: "登录管理台" }).click();
   await expect(
     page.getByRole("heading", { name: "工作概览", exact: true }),

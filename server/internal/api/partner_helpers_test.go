@@ -2,6 +2,8 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
+	"strconv"
 	"testing"
 
 	"doubo/server/internal/core"
@@ -32,7 +34,8 @@ func createProvider(t *testing.T, a *Server, token, key, parent, name, role stri
 		}
 		return row.ID
 	}
-	body := map[string]any{"parentId": parent, "name": name, "role": role}
+	number, _ := strconv.ParseUint(core.Digest(key)[:8], 16, 32)
+	body := map[string]any{"parentId": parent, "name": name, "role": role, "phone": fmt.Sprintf("139%08d", number%100000000)}
 	if account != nil {
 		body["account"] = account
 	}

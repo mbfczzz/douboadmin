@@ -29,12 +29,7 @@ var PartnerMenus = []string{"partners"}
 // BuiltinAdminRoles are always available. Stored records with the same id
 // override name and menus, except for super_admin which is fixed.
 func BuiltinAdminRoles() map[string]AdminRole {
-	operator := []string{}
-	for _, m := range AdminMenus {
-		if m != "roles" {
-			operator = append(operator, m)
-		}
-	}
+	operator := PartnerMenus
 	return map[string]AdminRole{
 		SuperAdminRole: {Name: "超级管理员", Scope: RoleScopePlatform, Menus: AdminMenus, System: true},
 		"operator":     {Name: "平台运营", Scope: RoleScopePlatform, Menus: operator, System: true},

@@ -31,7 +31,7 @@ export const submitCases: SubmitCase[] = [
     fields: {
       登录账号: "modal-check",
       姓名: "弹窗测试",
-      初始密码: "fixture-password-2026",
+      初始密码: "Tte7f732",
     },
   },
   {
@@ -58,8 +58,9 @@ export const submitCases: SubmitCase[] = [
     endpoint: "/partners",
     fields: {
       服务商名称: "保留的服务商草稿",
+      负责人手机号: "13900139000",
       账号: "draft-provider",
-      初始密码: "draft-provider-password",
+      初始密码: "Tteccad4",
     },
   },
   {

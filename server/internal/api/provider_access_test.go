@@ -7,12 +7,12 @@ import (
 
 func TestProviderAccountSeesOnlyItsSubtree(t *testing.T) {
 	a, _, _ := setup(t)
-	admin := adminLoginToken(t, a, "admin", "test-pass")
+	admin := adminLoginToken(t, a, "admin", "Tt661ea2")
 	branch := createBranch(t, a, admin, "p")
-	s1 := createProvider(t, a, admin, "p-s1", branch, "S1", "s1", map[string]string{"username": "s1-login", "password": "s1-login-password-2026"})
+	s1 := createProvider(t, a, admin, "p-s1", branch, "S1", "s1", map[string]string{"username": "s1-login", "password": "Ttdfa24c"})
 	other := createProvider(t, a, admin, "p-other", branch, "Other", "s1", nil)
 	child := createProvider(t, a, admin, "p-child", s1, "S1-child", "s2", nil)
-	provider := adminLoginToken(t, a, "s1-login", "s1-login-password-2026")
+	provider := adminLoginToken(t, a, "s1-login", "Ttdfa24c")
 
 	tree := call(a, "GET", "/api/admin/partners/tree", provider, "", nil)
 	if tree.Code != 200 || strings.Contains(tree.Body.String(), other) || !strings.Contains(tree.Body.String(), child) {
@@ -48,14 +48,14 @@ func TestProviderAccountSeesOnlyItsSubtree(t *testing.T) {
 			t.Fatal("cross-provider access allowed", c.method, c.path, w.Code, w.Body.String())
 		}
 	}
-	own := providerCode(t, a, "GET", s1, "member", provider)
-	if sub := providerCode(t, a, "GET", child, "member", provider); sub.Code == own.Code {
+	own := providerCode(t, a, "GET", s1, "member", admin)
+	if sub := providerCode(t, a, "GET", child, "member", admin); sub.Code == own.Code {
 		t.Fatal("child shares the provider's code")
 	}
 	if w := call(a, "GET", "/api/admin/partners/"+child, provider, "", nil); w.Code != 200 {
 		t.Fatal("own child overview denied", w.Code, w.Body.String())
 	}
-	if w := call(a, "PUT", "/api/admin/partners/"+child, provider, "", map[string]any{"version": 1, "data": map[string]any{"name": "S1-child", "status": "active", "retailPer100Fen": 99999, "childMarginBps": 5000}}); w.Code != 400 {
+	if w := call(a, "PUT", "/api/admin/partners/"+child, provider, "", map[string]any{"version": 1, "data": map[string]any{"name": "S1-child", "status": "active", "retailPer100Fen": 99999, "childMarginBps": 5000}}); w.Code != 403 {
 		t.Fatal("descendant priced above its provider", w.Code, w.Body.String())
 	}
 	accounts := call(a, "GET", "/api/admin/accounts", admin, "", nil)

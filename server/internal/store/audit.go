@@ -75,7 +75,7 @@ func (m *Memory) Logs(_ context.Context, q core.AuditQuery) (core.AuditPage, err
 	defer m.mu.Unlock()
 	limit, out := logLimit(q), core.AuditPage{Items: []core.AuditEntry{}}
 	for i := len(m.logs) - 1; i >= 0; i-- {
-		if !matchLog(m.logs[i], q) {
+		if !matchLog(m.logs[i], q) || (q.PartnerID != "" && !m.activityPartner(m.logs[i], q.PartnerID, q.MembersOnly)) {
 			continue
 		}
 		if len(out.Items) == limit {

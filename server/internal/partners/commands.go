@@ -15,12 +15,21 @@ func lockControl(tx store.Transaction) error {
 	return e
 }
 func (s *Service) command(ctx context.Context, actor, key string, input any, fn func(store.Transaction, string) (core.Record, error)) (result core.Record, err error) {
+	return s.commandBefore(ctx, actor, key, input, nil, fn)
+}
+
+func (s *Service) commandBefore(ctx context.Context, actor, key string, input any, before func(store.Transaction) error, fn func(store.Transaction, string) (core.Record, error)) (result core.Record, err error) {
 	if len(key) < 8 || len(key) > 128 {
 		return result, rulef("请提供有效的请求标识")
 	}
 	id := core.Digest(actor + ":" + key)[:32]
 	hash := core.Digest(string(core.Data(input)))
 	err = s.Store.Atomic(ctx, func(tx store.Transaction) error {
+		if before != nil {
+			if e := before(tx); e != nil {
+				return e
+			}
+		}
 		if e := Lock(tx); e != nil {
 			return e
 		}

@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/go-sql-driver/mysql"
+	"strings"
 	"sync"
 	"time"
 )
@@ -62,7 +63,10 @@ func (m *MySQL) Migrate(ctx context.Context) error {
 	if err := BackfillCodeUses(ctx, m); err != nil {
 		return fmt.Errorf("backfill QR usage records: %w", err)
 	}
-	return nil
+	if err := m.migrateUserIdentity(ctx); err != nil {
+		return err
+	}
+	return m.migrateAdminPhone(ctx)
 }
 func (m *MySQL) Get(ctx context.Context, ns, id string) (core.Record, error) {
 	return getRow(ctx, m.db, ns, id, "")
@@ -108,6 +112,12 @@ func putRow(ctx context.Context, q querier, ns string, r core.Record, version in
 	}
 	var me *mysql.MySQLError
 	if errors.As(err, &me) && me.Number == 1062 {
+		if ns == "users" && strings.Contains(me.Message, "unique_active_phone") {
+			return core.ErrUserPhoneTaken
+		}
+		if ns == "admin_accounts" && strings.Contains(me.Message, "unique_admin_phone") {
+			return core.ErrAdminPhoneTaken
+		}
 		return core.ErrConflict
 	}
 	if err != nil {

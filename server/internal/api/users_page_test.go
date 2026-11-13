@@ -20,7 +20,7 @@ func TestAdminUsersArePagedAndFilteredByTheServer(t *testing.T) {
 			t.Fatal(e)
 		}
 	}
-	admin, _ := a.Sessions.Create(t.Context(), "admin", "admin")
+	admin := adminLoginToken(t, a, "admin", "Tt661ea2")
 	var page struct {
 		Items []core.Record `json:"items"`
 		Total int           `json:"total"`

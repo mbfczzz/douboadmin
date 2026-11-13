@@ -193,3 +193,7 @@ export const date = (s?: string | null, seconds = false) => {
       .replace(/-/g, "\u2011")
   );
 };
+
+// A confirmed permission loss or removed record must not retain private snapshots.
+export const invalidatesPrivateData = (error: unknown) =>
+  error instanceof APIError && [401, 403, 404].includes(error.status);

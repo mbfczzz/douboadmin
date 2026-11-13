@@ -22,4 +22,10 @@ func TestAdminCanEditAndArchiveMiniUser(t *testing.T) {
 	if w = call(a, "GET", "/api/me", user, "", nil); w.Code != 403 {
 		t.Fatal("archived mini user retained access", w.Code)
 	}
+	if w = call(a, "GET", "/api/admin/users?q=user-a", admin, "", nil); w.Code != 200 || strings.Contains(w.Body.String(), `"id":"user-a"`) {
+		t.Fatal("deleted account in default list", w.Body.String())
+	}
+	if w = call(a, "GET", "/api/admin/users?q=user-a&state=archived", admin, "", nil); w.Code != 200 || !strings.Contains(w.Body.String(), `"id":"user-a"`) {
+		t.Fatal("deleted history inaccessible", w.Body.String())
+	}
 }

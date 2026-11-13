@@ -13,6 +13,7 @@ export type Partner = {
   childMarginBps: number;
   // The mini-program account that runs it (by invite or bind code).
   ownerUser?: string;
+  phone?: string;
 };
 export type BoundUser = {
   id: string;

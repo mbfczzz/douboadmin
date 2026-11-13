@@ -11,8 +11,11 @@ import (
 // node and all descendants). Platform accounts get nil, meaning unrestricted.
 func (a *Server) partnerScope(r *http.Request) ([]string, error) {
 	root := identity(r).PartnerID
-	if root == "" {
+	if identity(r).AdminRole == core.SuperAdminRole {
 		return nil, nil
+	}
+	if root == "" {
+		return []string{}, nil
 	}
 	return a.Partners.Subtree(r.Context(), root)
 }
@@ -34,7 +37,7 @@ func (a *Server) inPartnerScope(w http.ResponseWriter, r *http.Request, id strin
 // belowPartner accepts strict descendants only: a provider never edits itself.
 func (a *Server) belowPartner(w http.ResponseWriter, r *http.Request, id string) bool {
 	if self := identity(r).PartnerID; self != "" && id == self {
-		fail(w, 403, "本服务商资料由上级维护")
+		fail(w, 403, "本服务商资料由超级管理员维护")
 		return false
 	}
 	return a.inPartnerScope(w, r, id)
@@ -51,7 +54,7 @@ func platformOnly(w http.ResponseWriter, r *http.Request) bool {
 
 // ownerInScope checks a stored record whose owner is the provider id.
 func (a *Server) ownerInScope(w http.ResponseWriter, r *http.Request, ns, id string) bool {
-	if identity(r).PartnerID == "" {
+	if identity(r).AdminRole == core.SuperAdminRole {
 		return true
 	}
 	row, err := a.Store.Get(r.Context(), ns, id)
@@ -64,7 +67,7 @@ func (a *Server) ownerInScope(w http.ResponseWriter, r *http.Request, ns, id str
 
 // dataPartnerInScope checks a stored record carrying data.partnerId.
 func (a *Server) dataPartnerInScope(w http.ResponseWriter, r *http.Request, ns, id string) bool {
-	if identity(r).PartnerID == "" {
+	if identity(r).AdminRole == core.SuperAdminRole {
 		return true
 	}
 	row, err := a.Store.Get(r.Context(), ns, id)

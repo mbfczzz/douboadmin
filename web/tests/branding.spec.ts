@@ -32,7 +32,7 @@ for (const width of [1440, 390]) {
     await page.screenshot({ path: `../.runtime/brand-login-${width}.png` });
     // Auth and business APIs remain isolated from the real test database.
     await page.getByLabel("账号", { exact: true }).fill("admin");
-    await page.getByLabel("密码", { exact: true }).fill("fixture-password");
+    await page.getByLabel("密码", { exact: true }).fill("Tt66c76b");
     await page.getByRole("button", { name: "登录管理台" }).click();
     if (width < 640) await page.getByRole("button", { name: "切换菜单" }).click();
     await expect.poll(() => page.locator(".sidebar").evaluate((node) => node.getBoundingClientRect().left)).toBeGreaterThanOrEqual(0);

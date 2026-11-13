@@ -13,7 +13,7 @@ func TestProfileRegistrationWithoutSMSAllowsProviderScan(t *testing.T) {
 	for _, role := range []string{"s1", "s2"} {
 		t.Run(role, func(t *testing.T) {
 			a, _, _ := activationFixture(t)
-			admin := adminLoginToken(t, a, "admin", "test-pass")
+			admin := adminLoginToken(t, a, "admin", "Tt661ea2")
 			a.Config.DemoLogin = false // test deployment: no SMS sender or debug codes
 			user := newMiniUser(t, a, "name-user")
 			branch := createBranch(t, a, admin, "profile-phone")
@@ -57,18 +57,18 @@ func TestProfileRegistrationWithoutSMSAllowsProviderScan(t *testing.T) {
 				t.Fatal("test account cannot use the mini-program", w.Code)
 			}
 			login := call(a, "POST", "/api/provider/password", user, "", nil)
-			var credentials struct{ Account, Password string }
-			if login.Code != 200 || json.Unmarshal(login.Body.Bytes(), &credentials) != nil || credentials.Account != phone || len(credentials.Password) != 20 {
-				t.Fatal("provider could not open its login using the registered phone", login.Code)
+			if login.Code != 403 {
+				t.Fatal("mini-program opened backend login", login.Code)
 			}
+
 			row, _ := a.Store.Get(t.Context(), "users", "name-user")
 			var profile map[string]any
 			_ = json.Unmarshal(row.Data, &profile)
 			if profile["verifiedPhone"] != nil || profile["phoneVerifiedAt"] != nil {
 				t.Fatal("unverified phone gained verification")
 			}
-			if _, e := a.Store.Get(t.Context(), "phone_owners", phone); !errors.Is(e, core.ErrNotFound) {
-				t.Fatal("unverified phone reserved ownership", e)
+			if row, e := a.Store.Get(t.Context(), "phone_owners", phone); e != nil || !strings.Contains(string(row.Data), "name-user") {
+				t.Fatal("phone uniqueness reservation missing", e)
 			}
 			// Once real SMS is configured, the same account must verify its phone.
 			sender := &fakeSMS{}

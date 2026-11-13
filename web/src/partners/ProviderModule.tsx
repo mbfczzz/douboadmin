@@ -10,11 +10,13 @@ import { PartnerNames } from "./PartnerIdentity";
 import ProviderId from "./ProviderId";
 import "./editor.css";
 
+const PartnerActivity = lazy(() => import("./PartnerActivity"));
 const ShareCode = lazy(() => import("./ShareCode")),
   Commissions = lazy(() => import("./Commissions")),
   Registrations = lazy(() => import("../users/Registrations"));
 
 export const modules = {
+  activity: "下级活动轨迹",
   share: "分享码",
   commissions: "算力分佣",
   registrations: "会员登记",
@@ -75,6 +77,7 @@ export default function ProviderModule({
           />
           {scope && (
             <Suspense fallback={<LoadingState label="正在加载服务商功能" />}>
+              {kind === "activity" && <PartnerActivity id={row.id} />}
               {kind === "share" && <ShareCode {...scope} />}
               {kind === "commissions" && <Commissions {...scope} />}
               {kind === "registrations" && (

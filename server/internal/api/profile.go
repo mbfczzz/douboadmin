@@ -159,7 +159,15 @@ func (a *Server) updateMe(w http.ResponseWriter, r *http.Request) {
 		profile["avatarId"] = *v.AvatarID
 	}
 	delete(profile, "avatarUrl")
-	row, e := a.Store.Put(r.Context(), "users", core.Record{ID: id, Owner: id, Data: core.Data(profile)}, v.Version)
+	var row core.Record
+	e = a.Store.Atomic(r.Context(), func(tx store.Transaction) error {
+		if e := lockIdentity(tx); e != nil {
+			return e
+		}
+		var err error
+		row, err = putUniqueUser(tx, core.Record{ID: id, Owner: id, Data: core.Data(profile)}, v.Version)
+		return err
+	})
 	if e != nil {
 		dbError(w, e)
 		return

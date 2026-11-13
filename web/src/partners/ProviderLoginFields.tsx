@@ -1,3 +1,4 @@
+import { passwordRules, PASSWORD_HINT } from "../components/password-policy";
 import { useState } from "react";
 import RoleSelect from "../roles/RoleSelect";
 import { randomAccount, randomPassword } from "../components/credentials";
@@ -19,6 +20,20 @@ export default function ProviderLoginFields({
       </p>
       <div className="form-grid">
         <label>
+          负责人手机号
+          <input
+            name="branchPhone"
+            aria-label="负责人手机号"
+            inputMode="tel"
+            pattern="1[0-9]{10}"
+            maxLength={11}
+            required
+          />
+          <small className="quiet">
+            小程序验证此手机号后直接进入分公司，无需扫码。
+          </small>
+        </label>
+        <label>
           账号
           <input
             name="accountUsername"
@@ -33,13 +48,14 @@ export default function ProviderLoginFields({
           初始密码
           <input
             name="accountPassword"
+            aria-label="初始密码"
             defaultValue={password}
             spellCheck={false}
             autoComplete="off"
-            minLength={16}
-            maxLength={128}
+            {...passwordRules}
             required
           />
+          <small className="quiet">{PASSWORD_HINT}</small>
         </label>
       </div>
       <label>

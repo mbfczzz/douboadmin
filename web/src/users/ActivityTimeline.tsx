@@ -29,8 +29,10 @@ function dayLabel(day: string) {
 export default function ActivityTimeline({
   items,
   onOpen,
+  showActor = false,
 }: {
   items: LogEntry[];
+  showActor?: boolean;
   onOpen: (e: LogEntry) => void;
 }) {
   const days: [string, LogEntry[]][] = [];
@@ -69,11 +71,17 @@ export default function ActivityTimeline({
                       <span className="timeline-clock">
                         {local(e.at).slice(11)}
                       </span>
-                      <span className="mono">
-                        {e.method} {e.path}
-                      </span>
-                      {e.ip && <span>{e.ip}</span>}
-                      <span>{e.durationMs} ms</span>
+                      {showActor ? (
+                        <span>{e.actorName || e.actorId || "用户"}</span>
+                      ) : (
+                        <>
+                          <span className="mono">
+                            {e.method} {e.path}
+                          </span>
+                          {e.ip && <span>{e.ip}</span>}
+                          <span>{e.durationMs} ms</span>
+                        </>
+                      )}
                     </p>
                   </div>
                   <button

@@ -9,7 +9,7 @@ import (
 
 func TestPartnerTreeListsEveryRole(t *testing.T) {
 	a, _, _ := setup(t)
-	admin := adminLoginToken(t, a, "admin", "test-pass")
+	admin := adminLoginToken(t, a, "admin", "Tt661ea2")
 	branch := createBranch(t, a, admin, "tree")
 	s1 := createProvider(t, a, admin, "tree-s1", branch, "S1", "s1", nil)
 	s2 := createProvider(t, a, admin, "tree-s2", s1, "S2", "s2", nil)
@@ -30,7 +30,7 @@ func TestPartnerTreeListsEveryRole(t *testing.T) {
 
 func TestPlatformCannotManuallyCreateSubproviders(t *testing.T) {
 	a, _, _ := setup(t)
-	admin := adminLoginToken(t, a, "admin", "test-pass")
+	admin := adminLoginToken(t, a, "admin", "Tt661ea2")
 	branch := createBranch(t, a, admin, "grow")
 	s1 := createProvider(t, a, admin, "grow-s1", branch, "S1", "s1", nil)
 	s2 := createProvider(t, a, admin, "grow-s2", s1, "S2", "s2", nil)

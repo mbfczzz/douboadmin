@@ -2,6 +2,7 @@ package api
 
 import (
 	"doubo/server/internal/core"
+	"encoding/json"
 	"errors"
 	"net/http"
 	"strings"
@@ -57,6 +58,21 @@ func (a *Server) business(h http.HandlerFunc) http.HandlerFunc {
 	}
 }
 func (a *Server) fullConfig(r *http.Request) (bool, error) {
+	if actor, err := a.Sessions.Get(r.Context(), tokenFrom(r)); err == nil && actor.Role == "admin" {
+		row, e := a.Store.Get(r.Context(), "admin_accounts", actor.ID)
+		if errors.Is(e, core.ErrNotFound) {
+			return false, nil
+		}
+		if e != nil {
+			return false, e
+		}
+		var account core.AdminAccount
+		if json.Unmarshal(row.Data, &account) != nil {
+			return false, nil
+		}
+		return account.Role == core.SuperAdminRole && !account.Disabled && !account.Archived && actor.PasswordVersion == passwordVersion(account.PasswordChangedAt), nil
+	}
+
 	if !a.Config.RequireActivation {
 		return true, nil
 	}

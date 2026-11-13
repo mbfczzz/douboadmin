@@ -4,7 +4,7 @@ import { mockLogin } from "./mock-login";
 async function openAccount(page: Page, password?: string, exists = true) {
   await mockLogin(page);
   const partner = {
-    id: "password-provider",
+    id: "Tt75abc2",
     version: 1,
     children: 0,
     createdAt: "2026-11-10T00:00:00Z",
@@ -141,11 +141,11 @@ test("legacy account explains missing password and shows a successfully reset pa
   const reset = page.getByRole("dialog", { name: "重置密码", exact: true });
   await reset
     .getByLabel("新密码", { exact: true })
-    .fill("provider-new-password-2026");
+    .fill("Ttdf87ec");
   await reset.getByRole("button", { name: "保存新密码", exact: true }).click();
   await expect(reset).toHaveCount(0);
   await expect(dialog.locator(".account-password")).toHaveText(
-    "provider-new-password-2026",
+    "Ttdf87ec",
   );
   expect(writes).toEqual([
     {
@@ -153,14 +153,14 @@ test("legacy account explains missing password and shows a successfully reset pa
       version: 1,
       role: "partner",
       disabled: false,
-      password: "provider-new-password-2026",
+      password: "Ttdf87ec",
     },
   ]);
   await expect(page.locator(".save-confirmation")).toHaveCount(0);
   await dialog.getByRole("button", { name: "关闭", exact: true }).click();
   await button.click();
   await expect(dialog.locator(".account-password")).toHaveText(
-    "provider-new-password-2026",
+    "Ttdf87ec",
   );
 });
 
@@ -171,10 +171,10 @@ test("new provider account shows the submitted password after creation", async (
   await dialog.getByLabel("账号", { exact: true }).fill("provider-new");
   await dialog
     .getByLabel("初始密码", { exact: true })
-    .fill("provider-initial-password-2026");
+    .fill("Ttb7ce6e");
   await dialog.getByRole("button", { name: "开通账号", exact: true }).click();
   await expect(dialog.locator(".account-password")).toHaveText(
-    "provider-initial-password-2026",
+    "Ttb7ce6e",
   );
   await expect(dialog.locator(".account-facts")).toContainText("provider-new");
   expect(writes).toHaveLength(1);

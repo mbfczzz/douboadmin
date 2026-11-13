@@ -16,6 +16,7 @@ import (
 // chain), else none. partners' tests hold both drivers to partners.Access.
 
 var userStates = map[string]string{
+	"current":  "COALESCE(u.archived,0)=0",
 	"active":   "COALESCE(u.archived,0)=0 AND COALESCE(u.disabled,0)=0",
 	"disabled": "COALESCE(u.archived,0)=0 AND u.disabled=1",
 	"archived": "u.archived=1",
@@ -93,7 +94,7 @@ func (m *Memory) UserPage(_ context.Context, q core.UserQuery) (out core.RecordP
 		if u.Archived {
 			state = "archived"
 		}
-		if !strings.Contains(text, strings.ToLower(q.Search)) || (q.State != "" && q.State != state) ||
+		if !strings.Contains(text, strings.ToLower(q.Search)) || (q.State == "current" && state == "archived") || (q.State != "" && q.State != "current" && q.State != state) ||
 			(q.Access != "" && q.Access != m.accessOf(row.ID)) {
 			continue
 		}

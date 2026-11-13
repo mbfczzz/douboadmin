@@ -80,6 +80,9 @@ func (a *Server) registerWithoutSMS(ctx context.Context, user, name, phone strin
 		return "", e
 	}
 	err := a.Store.Atomic(ctx, func(tx store.Transaction) error {
+		if e := lockIdentity(tx); e != nil {
+			return e
+		}
 		row, e := tx.Get("users", user)
 		if e != nil {
 			return e
@@ -97,7 +100,7 @@ func (a *Server) registerWithoutSMS(ctx context.Context, user, name, phone strin
 		}
 		profile["name"], profile["phone"] = name, phone
 		row.Data = core.Data(profile)
-		_, e = tx.Put("users", row, row.Version)
+		_, e = putUniqueUser(tx, row, row.Version)
 		return e
 	})
 	return "", err
@@ -108,6 +111,9 @@ func (a *Server) registerWithoutSMS(ctx context.Context, user, name, phone strin
 // still commits its attempt; problem then explains the refusal.
 func (a *Server) verifyAndRegister(ctx context.Context, user, name, phone, code string) (problem string, err error) {
 	err = a.Store.Atomic(ctx, func(tx store.Transaction) error {
+		if e := lockIdentity(tx); e != nil {
+			return e
+		}
 		problem = ""
 		row, e := tx.Lock("sms_codes", core.Record{ID: user})
 		if errors.Is(e, core.ErrNotFound) {
@@ -171,6 +177,6 @@ func saveProfile(tx store.Transaction, user, name, phone string) error {
 	profile["name"], profile["phone"], profile["verifiedPhone"] = name, phone, phone
 	profile["phoneVerifiedAt"] = time.Now().UTC().Format(time.RFC3339)
 	row.Data = core.Data(profile)
-	_, e = tx.Put("users", row, row.Version)
+	_, e = putUniqueUser(tx, row, row.Version)
 	return e
 }

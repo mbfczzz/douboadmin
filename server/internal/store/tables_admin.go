@@ -4,7 +4,7 @@ package store
 func init() {
 	register(
 		Table{Name: "admin_accounts", Comment: "后台账号；id = 摘要(用户名)", Cols: []Col{
-			c("username", Short), c("name", Short), c("phone", Key), c("role", Key), c("partnerId", Key),
+			c("username", Short), c("name", Short), c("phone", Key), c("role", Key), c("partnerId", Key), c("userId", Key),
 			c("passwordHash", Short), c("disabled", Bool), c("archived", Bool), c("createdBy", Key),
 			c("lastLoginAt", Time), c("passwordChangedAt", Time),
 		}, Indexes: []string{"partner_id"}},

@@ -29,7 +29,7 @@ func invite(t *testing.T, a *Server, parent, kind, user string) {
 
 func TestIdentityLabelsEachKindOfUser(t *testing.T) {
 	a, _, _ := activationFixture(t)
-	admin := adminLoginToken(t, a, "admin", "test-pass")
+	admin := adminLoginToken(t, a, "admin", "Tt661ea2")
 	branch := createProvider(t, a, admin, "id-branch", "root", "江苏分公司", "branch", nil)
 	s1 := createProvider(t, a, admin, "id-s1", branch, "华东", "s1", nil)
 	user := func(id, name, phone string) string { return appUser(t, a, id, name, phone) }

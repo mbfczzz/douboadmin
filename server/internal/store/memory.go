@@ -84,6 +84,9 @@ func (m *Memory) Put(_ context.Context, ns string, r core.Record, version int64)
 	if err != nil {
 		return r, err
 	}
+	if err := checkAdminPhone(m.records, ns, r); err != nil {
+		return r, err
+	}
 	r.Data = data
 	m.records[ns+":"+r.ID] = copyRecord(r)
 	return r, nil

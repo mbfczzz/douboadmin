@@ -12,7 +12,7 @@ import (
 func TestResumeIsAdminOnlyAndRequiresKnownUpstreamState(t *testing.T) {
 	a, user, _ := setup(t)
 	ctx := context.Background()
-	admin, _ := a.Sessions.Create(ctx, "admin", "admin")
+	admin := adminLoginToken(t, a, "admin", "Tt661ea2")
 	for _, phase := range []string{"polling", "output", "succeeded", "uncertain", "submitting", "failed"} {
 		j := core.NewJob("user-a", phase, core.JobInput{Kind: "image", Model: "demo-image", Prompt: "test"})
 		_, _ = a.Store.CreateJob(ctx, j)

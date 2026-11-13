@@ -103,7 +103,7 @@ func (s *Service) Update(ctx context.Context, id string, v core.Partner, version
 		if e != nil {
 			return e
 		}
-		v.Role, v.ParentID, v.Path, v.OwnerUser = old.Role, old.ParentID, old.Path, old.OwnerUser
+		v.Role, v.ParentID, v.Path, v.OwnerUser, v.Phone = old.Role, old.ParentID, old.Path, old.OwnerUser, old.Phone
 		// Only registration approval opens a scanned provider; a rejected
 		// one stays closed.
 		if frozen(old.Status) || frozen(v.Status) {

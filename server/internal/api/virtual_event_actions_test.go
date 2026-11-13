@@ -18,7 +18,7 @@ func TestVirtualEventActionsRequireAdminAndVersion(t *testing.T) {
 			t.Fatal(w.Code)
 		}
 	}
-	admin, _ := a.Sessions.Create(t.Context(), "admin-test", "admin")
+	admin := adminLoginToken(t, a, "admin", "Tt661ea2")
 	path := "/api/admin/virtual-payments/events/" + row.ID + "/review"
 	if w := call(a, "POST", path, admin, "", map[string]any{"version": row.Version, "note": ""}); w.Code != 400 {
 		t.Fatal(w.Code)
@@ -32,7 +32,7 @@ func TestVirtualEventActionsRequireAdminAndVersion(t *testing.T) {
 	updated, _ := a.Store.Get(t.Context(), "virtual_payment_events", row.ID)
 	var record virtualpay.PaymentEvent
 	_ = json.Unmarshal(updated.Data, &record)
-	if record.Actor != "admin-test" || record.Status != "reviewed" {
+	if record.Actor != adminID("admin") || record.Status != "reviewed" {
 		t.Fatal(record)
 	}
 }

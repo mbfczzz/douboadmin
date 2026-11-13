@@ -15,7 +15,7 @@ func setup(t *testing.T) (*Server, string, string) {
 	t.Helper()
 	s := store.NewMemory()
 	ss := NewSessions(nil)
-	a := New(s, ss, Config{AdminUser: "admin", AdminPassword: "test-pass", MediaDir: t.TempDir(), WebOrigin: "http://localhost:5174", RelayURL: "https://relay.test", RelayKey: "test-key"})
+	a := New(s, ss, Config{AdminUser: "admin", AdminPassword: "Tt661ea2", MediaDir: t.TempDir(), WebOrigin: "http://localhost:5174", RelayURL: "https://relay.test", RelayKey: "test-key"})
 	m := core.Model{ID: "demo-image", Key: "fixture-image", Name: "Test model", Kind: "image", Published: true, Available: true, Resolutions: []string{"1K"}, Ratios: []string{"1:1"}, Modes: []string{"t2i", "i2i"}}
 	_, _ = s.Put(context.Background(), "models", core.Record{ID: m.ID, Data: core.Data(m)}, 0)
 	one, _ := ss.Create(context.Background(), "user-a", "user")
@@ -70,7 +70,7 @@ func TestSessionRevocationAndOrigin(t *testing.T) {
 	if call(a, "GET", "/api/jobs", token, "", nil).Code != 401 {
 		t.Fatal("revoked session accepted")
 	}
-	r := httptest.NewRequest(http.MethodPost, "/api/admin/login", bytes.NewBufferString(`{"username":"admin","password":"test-pass"}`))
+	r := httptest.NewRequest(http.MethodPost, "/api/admin/login", bytes.NewBufferString(`{"username":"admin","password":"Tt661ea2"}`))
 	r.Header.Set("Origin", "https://attacker.example")
 	w = httptest.NewRecorder()
 	a.Handler().ServeHTTP(w, r)
@@ -80,7 +80,7 @@ func TestSessionRevocationAndOrigin(t *testing.T) {
 }
 func TestAdminVersionConflict(t *testing.T) {
 	a, _, _ := setup(t)
-	token, _ := a.Sessions.Create(context.Background(), "admin", "admin")
+	token := adminLoginToken(t, a, "admin", "Tt661ea2")
 	model := templateVideoModel(t, a)
 	template := core.Template{Title: "Test template", Kind: "video", Prompt: "test", Cover: "https://example.test/cover.jpg", GenerationOptions: core.GenerationOptions{Model: model, Resolution: "720p", Ratio: "1:1", Duration: 5}}
 	body := map[string]any{"version": 0, "data": template}

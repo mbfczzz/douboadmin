@@ -1,3 +1,4 @@
+import { passwordRules, PASSWORD_HINT } from "./password-policy";
 import { useState } from "react";
 import { guardedClose } from "../hooks/unsaved";
 import { api } from "../api";
@@ -69,12 +70,11 @@ export default function ChangePassword({
             <PasswordInput
               name="next"
               autoComplete="new-password"
-              minLength={16}
-              maxLength={128}
+              {...passwordRules}
               required
             />
             <small className="quiet">
-              至少 16 个字符，修改后其他已登录的设备需要重新登录。
+              {PASSWORD_HINT}；修改后其他已登录的设备需要重新登录。
             </small>
           </label>
           <label>
@@ -82,8 +82,7 @@ export default function ChangePassword({
             <PasswordInput
               name="repeat"
               autoComplete="new-password"
-              minLength={16}
-              maxLength={128}
+              {...passwordRules}
               required
             />
           </label>

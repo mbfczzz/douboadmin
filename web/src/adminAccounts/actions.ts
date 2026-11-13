@@ -30,10 +30,10 @@ export function resetPassword(row: Account, password: string) {
 
 export async function archive(row: Account) {
   const ok = await ask({
-    title: "归档管理账号？",
+    title: "删除管理账号？",
     // Non-breaking hyphens keep a username like "ops-zhang-2026" on one line.
-    message: `「${row.data.name}」（${row.data.username.replace(/-/g, "\u2011")}）归档后将无法登录，操作记录保留。`,
-    confirmText: "归档账号",
+    message: `「${row.data.name}」（${row.data.username.replace(/-/g, "\u2011")}）删除后将无法登录，操作记录保留。`,
+    confirmText: "删除账号",
     danger: true,
     run: () =>
       api(path(row), {

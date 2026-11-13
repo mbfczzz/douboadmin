@@ -21,7 +21,7 @@ func templateVideoModel(t *testing.T, a *Server) string {
 
 func TestTemplatesAreVideoOnlyAcrossCatalogDetailsFavoritesAndGeneration(t *testing.T) {
 	a, user, _ := setup(t)
-	admin := adminLoginToken(t, a, "admin", "test-pass")
+	admin := adminLoginToken(t, a, "admin", "Tt661ea2")
 	videoModel := templateVideoModel(t, a)
 	for _, item := range []struct {
 		id, kind, category, model string
@@ -86,7 +86,7 @@ func TestTemplatesAreVideoOnlyAcrossCatalogDetailsFavoritesAndGeneration(t *test
 
 func TestAdminRejectsNonVideoTemplatesEvenAsDrafts(t *testing.T) {
 	a, _, _ := setup(t)
-	admin := adminLoginToken(t, a, "admin", "test-pass")
+	admin := adminLoginToken(t, a, "admin", "Tt661ea2")
 	model := templateVideoModel(t, a)
 	template := core.Template{Title: "Video only", Kind: "video", Prompt: "test", Cover: "https://example.test/cover.jpg", GenerationOptions: core.GenerationOptions{Model: model, Resolution: "720p", Ratio: "1:1", Duration: 5}}
 	for _, kind := range []string{"image", "", "audio"} {

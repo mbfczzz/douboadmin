@@ -29,7 +29,7 @@ type UserQuery struct {
 }
 
 func (q UserQuery) Valid() bool {
-	states := map[string]bool{"": true, "active": true, "disabled": true, "archived": true}
+	states := map[string]bool{"": true, "current": true, "active": true, "disabled": true, "archived": true}
 	access := map[string]bool{"": true, "member": true, "owner": true, "review": true, "none": true}
 	return states[q.State] && access[q.Access] && q.Page >= 1 && q.Page <= 1000000 && q.Size >= 1 && q.Size <= 100 && len([]rune(q.Search)) <= 100
 }

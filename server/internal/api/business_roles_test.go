@@ -9,7 +9,7 @@ import (
 
 func TestBusinessRolesShareCatalogWithoutChangingBusinessAccess(t *testing.T) {
 	a, _, _ := activationFixture(t)
-	admin := adminLoginToken(t, a, "admin", "test-pass")
+	admin := adminLoginToken(t, a, "admin", "Tt661ea2")
 	branch := createProvider(t, a, admin, "role-branch", "root", "公司", "branch", nil)
 	s1 := createProvider(t, a, admin, "role-s1", branch, "服务商", "s1", nil)
 	owner := appUser(t, a, "role-owner", "负责人", "13900001111")
@@ -54,7 +54,7 @@ func TestBusinessRolesShareCatalogWithoutChangingBusinessAccess(t *testing.T) {
 
 func TestCatalogContainsAllBusinessRolesAndPreventsMemberAdminAccess(t *testing.T) {
 	a, _, _ := setup(t)
-	admin := adminLoginToken(t, a, "admin", "test-pass")
+	admin := adminLoginToken(t, a, "admin", "Tt661ea2")
 	w := call(a, "GET", "/api/admin/roles?page=1", admin, "", nil)
 	var page struct {
 		Items []roleView `json:"items"`
@@ -78,7 +78,7 @@ func TestCatalogContainsAllBusinessRolesAndPreventsMemberAdminAccess(t *testing.
 	if w = call(a, "PUT", "/api/admin/roles/member", admin, "", map[string]any{"version": 0, "name": "会员", "scope": "user", "menus": []string{"users"}}); w.Code != 400 {
 		t.Fatal("member given backend menus", w.Body.String())
 	}
-	if w = call(a, "POST", "/api/admin/accounts", admin, "", map[string]any{"username": "member-login", "name": "会员", "password": "member-password-2026", "role": "member"}); w.Code != 400 {
+	if w = call(a, "POST", "/api/admin/accounts", admin, "", map[string]any{"username": "member-login", "name": "会员", "password": "Member12", "role": "member"}); w.Code != 400 {
 		t.Fatal("member assigned backend login", w.Body.String())
 	}
 	for _, id := range []string{"branch", "s1", "s2"} {

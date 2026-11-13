@@ -147,7 +147,7 @@ test("a new provider's login comes prefilled with a generated account", async ({
     account = dialog.getByLabel("账号", { exact: true }),
     password = dialog.getByLabel("初始密码");
   await expect(account).toHaveValue(/^sp\d{6}$/);
-  await expect(password).toHaveValue(/^[A-Za-z2-9]{20}$/);
+  await expect(password).toHaveValue(/^(?=.*[a-z])(?=.*[A-Z])[A-Za-z0-9]{8}$/);
   // Both stay editable.
   await account.fill("own-account");
   await expect(account).toHaveValue("own-account");

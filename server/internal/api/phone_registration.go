@@ -10,6 +10,9 @@ import (
 
 func (a *Server) bindLoginPhone(ctx context.Context, user, phone string) (problem string, err error) {
 	err = a.Store.Atomic(ctx, func(tx store.Transaction) error {
+		if e := lockIdentity(tx); e != nil {
+			return e
+		}
 		problem = ""
 		ok, e := claimPhone(tx, phone, user)
 		if e != nil {
@@ -38,6 +41,9 @@ func (a *Server) bindLoginPhone(ctx context.Context, user, phone string) (proble
 // the same row lock; client flags cannot bypass SMS for another number.
 func (a *Server) registerVerifiedPhone(ctx context.Context, user, name, phone string) (verified bool, err error) {
 	err = a.Store.Atomic(ctx, func(tx store.Transaction) error {
+		if e := lockIdentity(tx); e != nil {
+			return e
+		}
 		verified = false
 		row, e := tx.Lock("users", core.Record{ID: user})
 		if e != nil {
@@ -52,7 +58,7 @@ func (a *Server) registerVerifiedPhone(ctx context.Context, user, name, phone st
 		}
 		profile["name"] = name
 		row.Data = core.Data(profile)
-		if _, e = tx.Put("users", row, row.Version); e != nil {
+		if _, e = putUniqueUser(tx, row, row.Version); e != nil {
 			return e
 		}
 		verified = true

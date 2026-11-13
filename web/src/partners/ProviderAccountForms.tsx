@@ -1,3 +1,4 @@
+import { passwordRules, PASSWORD_HINT } from "../components/password-policy";
 import { useState } from "react";
 import type { Row } from "../api";
 import Modal from "../components/Modal";
@@ -89,10 +90,10 @@ export function AccountCreate({
               defaultValue={password}
               spellCheck={false}
               autoComplete="off"
-              minLength={16}
-              maxLength={128}
+              {...passwordRules}
               required
             />
+            <small className="quiet">{PASSWORD_HINT}</small>
           </label>
           <label>
             角色

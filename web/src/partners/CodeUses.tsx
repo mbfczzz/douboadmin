@@ -34,7 +34,6 @@ export default function CodeUses({
   id,
   kind,
   code,
-  reviewerId,
   notify,
   changed,
 }: {
@@ -47,7 +46,7 @@ export default function CodeUses({
 }) {
   const me = useMe(),
     canApprove = canApproveRegistrations(me),
-    canReject = canApprove || (!!me && (me.partnerId || "root") === reviewerId);
+    canReject = canApprove;
   const roleName = useBusinessRoleNames();
   const [query, setQuery] = useState(""),
     [status, setStatus] = useState("");

@@ -37,6 +37,9 @@ func (a *Server) adminRole(ctx context.Context, id string) (core.AdminRole, bool
 			role.Menus = []string{}
 		}
 	}
+	if role.Scope != core.RoleScopeUser {
+		role.Menus = core.PartnerMenus
+	}
 	return role, true, nil
 }
 
@@ -160,6 +163,9 @@ func (a *Server) saveAdminRole(w http.ResponseWriter, r *http.Request) {
 		id = core.NewID()
 	}
 	_, system := core.BuiltinAdminRoles()[id]
+	if input.Scope != core.RoleScopeUser {
+		input.Menus = core.PartnerMenus
+	}
 	role := core.AdminRole{Name: input.Name, Scope: input.Scope, Menus: input.Menus, System: system}
 	row, err := a.Store.Put(r.Context(), rolesNamespace, core.Record{ID: id, Data: core.Data(role)}, input.Version)
 	if err != nil {

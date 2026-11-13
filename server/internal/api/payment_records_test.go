@@ -13,7 +13,7 @@ import (
 func TestPaymentRecordsRequireAdminAndConfirmedReceipt(t *testing.T) {
 	a, user, _ := setup(t)
 	ctx := context.Background()
-	admin, _ := a.Sessions.Create(ctx, "admin", "admin")
+	admin := adminLoginToken(t, a, "admin", "Tt661ea2")
 	order, e := a.Billing.CreateOrder(ctx, "user-a", "payment-record", 200, core.DefaultPlatform(), "app", "merchant", "private-openid")
 	if e != nil {
 		t.Fatal(e)

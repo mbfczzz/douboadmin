@@ -6,10 +6,15 @@ func c(field string, k kind) Col { return Col{Field: field, Kind: k} }
 // Mini-program users: profile, identity, SMS and per-user records.
 func init() {
 	register(
-		Table{Name: "users", Comment: "小程序用户资料；id = 用户 id", Owner: "用户本人", Cols: []Col{
+		Table{Name: "identity_control", Comment: "Serializes identity and phone updates"},
+		Table{Name: "user_identities", Comment: "登录凭证到统一用户的映射", Owner: "User", Cols: []Col{c("userId", Key), c("provider", Key), c("subject", Key), c("appid", Key), c("phone", Key)}},
+		Table{Name: "admin_user_links", Comment: "用户与后台授权账号关联", Owner: "User", Cols: []Col{c("accountId", Key)}},
+		Table{Name: "phone_login_codes", Comment: "手机号登录验证码摘要", Cols: []Col{c("phone", Key), c("source", Key), c("challenge", Key), c("digest", Key), c("expiresAt", Time), c("attempts", Int)}},
+		Table{Name: "users", Comment: "统一用户资料；id = 用户 id", Owner: "用户本人", Cols: []Col{
 			c("nickname", Short), c("name", Short), c("phone", Key), c("verifiedPhone", Key),
 			c("phoneVerifiedAt", Time), c("bio", Short), c("avatarId", Key), c("authProvider", Key),
 			c("disabled", Bool), c("archived", Bool), c("statusReason", Text),
+			c("source", Key), c("sources", JSON), c("lastLoginSource", Key), c("preprovisioned", Bool),
 		}, Indexes: []string{"phone"}},
 		Table{Name: "preferences", Comment: "用户偏好设置；id = 用户 id", Owner: "用户", Cols: []Col{
 			c("inAppNotifications", Bool), c("completionSubscription", Bool), c("autoplay", Bool), c("analytics", Bool),

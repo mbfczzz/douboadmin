@@ -2,6 +2,7 @@ package api
 
 import (
 	"doubo/server/internal/core"
+	"doubo/server/internal/passwordpolicy"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -19,8 +20,8 @@ func adminID(username string) string {
 }
 
 func hashPassword(password string) (string, error) {
-	if len([]rune(password)) < 16 || len([]rune(password)) > 128 {
-		return "", errors.New("密码长度需为 16–128 个字符")
+	if err := passwordpolicy.Validate(password); err != nil {
+		return "", err
 	}
 	b, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	return string(b), err
@@ -30,11 +31,10 @@ func (a *Server) bootstrapAdmin(r *http.Request, username, password string) (cor
 	if username != a.Config.AdminUser || password != a.Config.AdminPassword {
 		return core.Record{}, core.AdminAccount{}, core.ErrNotFound
 	}
-	hashBytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	hash, err := hashPassword(password)
 	if err != nil {
 		return core.Record{}, core.AdminAccount{}, err
 	}
-	hash := string(hashBytes)
 	now := time.Now().UTC()
 	account := core.AdminAccount{Username: username, Name: "超级管理员", Role: "super_admin", PasswordHash: hash, PasswordChangedAt: now, CreatedBy: "bootstrap"}
 	row, err := a.Store.Put(r.Context(), "admin_accounts", core.Record{ID: adminID(username), Data: core.Data(account)}, 0)
@@ -74,7 +74,7 @@ func (a *Server) adminAccounts(w http.ResponseWriter, r *http.Request) {
 		items = append(items, view)
 	}
 	role := identity(r).AdminRole
-	reply(w, 200, map[string]any{"items": items, "page": page, "size": 20, "total": result.Total, "canManage": role == "" || role == "super_admin"})
+	reply(w, 200, map[string]any{"items": items, "page": page, "size": 20, "total": result.Total, "canManage": role == "super_admin"})
 }
 
 func (a *Server) createAdminAccount(w http.ResponseWriter, r *http.Request) {
@@ -100,7 +100,7 @@ func (a *Server) createAdminAccount(w http.ResponseWriter, r *http.Request) {
 	}
 	now := time.Now().UTC()
 	account := core.AdminAccount{Username: input.Username, Name: input.Name, Phone: input.Phone, Role: input.Role, PasswordHash: hash, PasswordChangedAt: now, CreatedBy: identity(r).ID}
-	row, err := a.Store.Put(r.Context(), "admin_accounts", core.Record{ID: adminID(input.Username), Data: core.Data(account)}, 0)
+	row, err := a.createLinkedAdmin(r.Context(), core.Record{ID: adminID(input.Username), Data: core.Data(account)})
 	if err != nil {
 		dbError(w, err)
 		return
@@ -140,6 +140,14 @@ func (a *Server) updateAdminAccount(w http.ResponseWriter, r *http.Request) {
 	}
 	if err = a.keepSuperAdmin(r.Context(), row.ID, account, input.Role, input.Disabled, false); err != nil {
 		fail(w, 409, err.Error())
+		return
+	}
+	if e := a.syncAdminPhone(r.Context(), &account); e != nil {
+		dbError(w, e)
+		return
+	}
+	if account.UserID != "" && input.Phone != account.Phone {
+		fail(w, 409, "已关联用户，手机号请在用户管理中修改")
 		return
 	}
 	account.Name, account.Phone, account.Role, account.Disabled = input.Name, input.Phone, input.Role, input.Disabled
@@ -187,7 +195,7 @@ func (a *Server) resetAdminPassword(w http.ResponseWriter, r *http.Request) {
 
 func (a *Server) archiveAdminAccount(w http.ResponseWriter, r *http.Request) {
 	if r.PathValue("id") == identity(r).ID {
-		fail(w, 409, "不能归档当前登录账号")
+		fail(w, 409, "不能删除当前登录账号")
 		return
 	}
 	var input struct {
@@ -221,7 +229,7 @@ func (a *Server) archiveAdminAccount(w http.ResponseWriter, r *http.Request) {
 
 func requireSuperAdmin(w http.ResponseWriter, r *http.Request) bool {
 	role := identity(r).AdminRole
-	if role == "" || role == "super_admin" {
+	if role == "super_admin" {
 		return true
 	}
 	fail(w, 403, "仅超级管理员可执行此操作")

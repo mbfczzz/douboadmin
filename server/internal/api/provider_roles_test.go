@@ -37,7 +37,7 @@ func codeKinds(v roleCenter) []string {
 // Each sees the providers right below it, never upward.
 func TestProviderCenterFollowsRole(t *testing.T) {
 	a, _, _ := activationFixture(t)
-	admin := adminLoginToken(t, a, "admin", "test-pass")
+	admin := adminLoginToken(t, a, "admin", "Tt661ea2")
 	branch := createProvider(t, a, admin, "center-branch", "root", "江苏分公司", "branch", nil)
 	chief, lead, boss := appUser(t, a, "chief", "老陈", "13900000021"), appUser(t, a, "lead", "小李", "13900000022"), appUser(t, a, "boss", "小王", "13900000023")
 	fan := appUser(t, a, "fan", "小张", "13900000024")

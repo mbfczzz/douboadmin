@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { api } from "../api";
+import { api, invalidatesPrivateData } from "../api";
 
 // Each page owns its requests. Aborting superseded work prevents stale results.
 export function useResource<T>(path: string, pollMs = 0) {
@@ -17,7 +17,10 @@ export function useResource<T>(path: string, pollMs = 0) {
       const value = await api<T>(path, { signal: controller.signal });
       if (!controller.signal.aborted) setResult({ path, data: value });
     } catch (e) {
-      if (!controller.signal.aborted) setError((e as Error).message);
+      if (!controller.signal.aborted) {
+        if (invalidatesPrivateData(e)) setResult(undefined);
+        setError((e as Error).message);
+      }
     } finally {
       if (active.current === controller) active.current = null;
       if (!controller.signal.aborted) setLoading(false);

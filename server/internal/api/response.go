@@ -41,6 +41,16 @@ func decode(w http.ResponseWriter, r *http.Request, v any) bool {
 func dbError(w http.ResponseWriter, err error) {
 	var rule *partners.RuleError
 	switch {
+	case errors.Is(err, errBranchPhoneTaken):
+		fail(w, 409, err.Error())
+	case errors.Is(err, core.ErrAdminPhoneTaken):
+		fail(w, 409, err.Error())
+	case errors.Is(err, core.ErrUserPhoneTaken):
+		fail(w, 409, err.Error())
+	case errors.Is(err, errPhoneUnverified), errors.Is(err, errIdentityMerge):
+		fail(w, 409, err.Error())
+	case errors.Is(err, errPhoneConflict), errors.Is(err, errPhoneRequired), errors.Is(err, errPhoneFormat):
+		fail(w, 400, err.Error())
 	case errors.Is(err, context.Canceled):
 		return
 	case errors.Is(err, core.ErrInsufficient):

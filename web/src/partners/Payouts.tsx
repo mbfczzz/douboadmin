@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { isProviderAccount, useMe } from "../session";
+import { canManageAccounts, useMe } from "../session";
 import { date, type Row } from "../api";
 import { money } from "../business/types";
 import Modal from "../components/Modal";
@@ -15,7 +15,7 @@ export default function Payouts({ id, view, changed, notify }: Scope) {
     [create, setCreate] = useState(false),
     command = useCommand(),
     // Confirming offline payouts is a platform task.
-    provider = isProviderAccount(useMe());
+    manage = canManageAccounts(useMe());
   // 确认打款 and 取消提现 are separate buttons, each asking for its own record.
   async function settle(row: Row<Payout>, status: "paid" | "cancelled") {
     const paid = status === "paid",
@@ -53,14 +53,16 @@ export default function Payouts({ id, view, changed, notify }: Scope) {
         footnote="已提现佣金遇到退款会形成负余额，后续佣金优先抵扣。"
         resource={resource}
         actions={
-          <button
-            type="button"
-            className="primary"
-            disabled={view.commission.balanceFen <= 0}
-            onClick={() => setCreate(true)}
-          >
-            申请提现
-          </button>
+          manage ? (
+            <button
+              type="button"
+              className="primary"
+              disabled={view.commission.balanceFen <= 0}
+              onClick={() => setCreate(true)}
+            >
+              申请提现
+            </button>
+          ) : undefined
         }
         columns={[
           {
@@ -88,7 +90,7 @@ export default function Payouts({ id, view, changed, notify }: Scope) {
             title: "操作",
             action: true,
             render: (r) =>
-              r.data.status === "pending" && !provider ? (
+              r.data.status === "pending" && manage ? (
                 <div className="business-actions">
                   <button
                     className="text-button"

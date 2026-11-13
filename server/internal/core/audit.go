@@ -41,9 +41,11 @@ type AuditEntry struct {
 // AuditQuery filters a newest-first page. Before is the last id of the
 // previous page (keyset paging, no OFFSET scans).
 type AuditQuery struct {
-	Categories []string
-	Actor      string // actor id or name fragment
-	Target     string // target id or name fragment
+	MembersOnly bool   // When viewing own node, inspect only subordinate members.
+	PartnerID   string // Exact business scope for subordinate activity; empty is unscoped.
+	Categories  []string
+	Actor       string // actor id or name fragment
+	Target      string // target id or name fragment
 	// Exact matches for per-user, per-job and per-account views; these use
 	// the actor/target indexes instead of scanning by category.
 	ActorID, TargetID, Route string

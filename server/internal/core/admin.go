@@ -3,6 +3,7 @@ package core
 import "time"
 
 type AdminAccount struct {
+	UserID            string    `json:"userId,omitempty"`
 	Username          string    `json:"username"`
 	Name              string    `json:"name"`
 	Phone             string    `json:"phone,omitempty"`

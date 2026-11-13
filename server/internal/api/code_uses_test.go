@@ -44,8 +44,8 @@ func TestCodeUsesExposeEveryPendingScanAtItsIssuer(t *testing.T) {
 
 func TestCodeUsesSearchPaginationAndProviderScope(t *testing.T) {
 	a, _, _ := setup(t)
-	admin := adminLoginToken(t, a, "admin", "test-pass")
-	branch := createProvider(t, a, admin, "uses-scope", "root", "分公司", "branch", map[string]string{"username": "uses-parent", "password": "uses-parent-password-2026"})
+	admin := adminLoginToken(t, a, "admin", "Tt661ea2")
+	branch := createProvider(t, a, admin, "uses-scope", "root", "分公司", "branch", map[string]string{"username": "uses-parent", "password": "Tt9ba6b3"})
 	other := createBranch(t, a, admin, "uses-other")
 	share := providerCode(t, a, "GET", branch, "member", admin)
 	for i := 0; i < 22; i++ {
@@ -58,23 +58,23 @@ func TestCodeUsesSearchPaginationAndProviderScope(t *testing.T) {
 			t.Fatal(e)
 		}
 	}
-	provider := adminLoginToken(t, a, "uses-parent", "uses-parent-password-2026")
-	first := codeUsesPage(t, a, branch, "member", share.Code, "&page=1", provider)
-	second := codeUsesPage(t, a, branch, "member", share.Code, "&page=2", provider)
+	provider := adminLoginToken(t, a, "uses-parent", "Tt9ba6b3")
+	first := codeUsesPage(t, a, branch, "member", share.Code, "&page=1", admin)
+	second := codeUsesPage(t, a, branch, "member", share.Code, "&page=2", admin)
 	if first.Total != 22 || len(first.Items) != 20 || len(second.Items) != 2 {
 		t.Fatal("incorrect usage pagination")
 	}
-	if page := codeUsesPage(t, a, branch, "member", share.Code, "&q="+url.QueryEscape("scan-user-04"), provider); page.Total != 1 {
+	if page := codeUsesPage(t, a, branch, "member", share.Code, "&q="+url.QueryEscape("scan-user-04"), admin); page.Total != 1 {
 		t.Fatal("user id search lost hyphens", page.Total)
 	}
-	if page := codeUsesPage(t, a, branch, "member", share.Code, "&q=13900139004", provider); page.Total != 1 {
+	if page := codeUsesPage(t, a, branch, "member", share.Code, "&q=13900139004", admin); page.Total != 1 {
 		t.Fatal("phone search failed")
 	}
 	pretty := share.Code[:4] + "-" + share.Code[4:]
-	if page := codeUsesPage(t, a, branch, "member", share.Code, "&q="+pretty, provider); page.Total != 22 {
+	if page := codeUsesPage(t, a, branch, "member", share.Code, "&q="+pretty, admin); page.Total != 22 {
 		t.Fatal("formatted code search failed")
 	}
-	if page := codeUsesPage(t, a, branch, "s1", share.Code, "", provider); page.Total != 0 {
+	if page := codeUsesPage(t, a, branch, "s1", share.Code, "", admin); page.Total != 0 {
 		t.Fatal("different code kinds were mixed")
 	}
 	if w := call(a, "GET", "/api/admin/partners/"+other+"/code-uses?kind=member", provider, "", nil); w.Code != 403 {

@@ -11,7 +11,7 @@ import AccountForm from "../adminAccounts/AccountForm";
 import PasswordReset from "../components/PasswordReset";
 import { archive, resetPassword, setDisabled } from "../adminAccounts/actions";
 import { useRoles } from "../roles/types";
-import { useMe } from "../session";
+import { useMe, canManageAccounts } from "../session";
 import { LoadingState } from "../components/RequestState";
 import {
   adminRoleLabel,
@@ -19,10 +19,12 @@ import {
   type AdminAccount,
 } from "../adminAccounts/types";
 
+const LinkUser = lazy(() => import("../adminAccounts/LinkUser"));
 const ProviderAccount = lazy(() => import("../partners/ProviderAccount"));
 
 export default function AdminAccounts({ notify }: PageProps) {
   const [page, setPage] = useState(1);
+  const [linking, setLinking] = useState<Row<AdminAccount>>();
   const resource = useResource<{
       items: Row<AdminAccount>[];
       canManage: boolean;
@@ -60,7 +62,7 @@ export default function AdminAccounts({ notify }: PageProps) {
       page="accounts"
       resource={resource}
       actions={
-        resource.data?.canManage ? (
+        resource.data?.canManage && canManageAccounts(me) ? (
           <button className="primary" onClick={() => setEditing(null)}>
             <Plus size={16} />
             添加管理账号
@@ -107,7 +109,23 @@ export default function AdminAccounts({ notify }: PageProps) {
               </Tag>
             ),
           },
-          { title: "手机号", render: (row) => row.data.phone || "未填写" },
+          {
+            title: "手机号 / 用户关联",
+            render: (row) => (
+              <>
+                {row.data.phone || "未填写"}
+                {row.data.userId ? (
+                  <small className="cell-note" title={row.data.userId}>
+                    已关联用户
+                  </small>
+                ) : resource.data?.canManage && canManageAccounts(me) ? (
+                  <div className="business-actions">
+                    <button onClick={() => setLinking(row)}>关联用户</button>
+                  </div>
+                ) : null}
+              </>
+            ),
+          },
           {
             title: "账号归属",
             render: (row) =>
@@ -137,9 +155,19 @@ export default function AdminAccounts({ notify }: PageProps) {
             title: "操作",
             action: true,
             render: (row) =>
-              resource.data?.canManage ? (
+              resource.data?.canManage && canManageAccounts(me) ? (
                 row.data.partnerId ? (
-                  <button onClick={() => setProvider(row)}>管理登录</button>
+                  <div className="business-actions">
+                    <button onClick={() => setProvider(row)}>管理登录</button>
+                    <button
+                      className="danger-text"
+                      onClick={() =>
+                        void run(() => archive(row), "登录账号已删除")
+                      }
+                    >
+                      删除
+                    </button>
+                  </div>
                 ) : (
                   <div className="business-actions">
                     <button onClick={() => setEditing(row)}>编辑</button>
@@ -161,10 +189,10 @@ export default function AdminAccounts({ notify }: PageProps) {
                         <button
                           className="danger-text"
                           onClick={() =>
-                            void run(() => archive(row), "管理账号已归档")
+                            void run(() => archive(row), "管理账号已删除")
                           }
                         >
-                          归档
+                          删除
                         </button>
                       </>
                     )}
@@ -176,6 +204,21 @@ export default function AdminAccounts({ notify }: PageProps) {
           },
         ]}
       />
+      {linking && (
+        <Suspense fallback={<LoadingState label="正在加载关联表单" />}>
+          <LinkUser
+            row={
+              resource.data?.items.find((r) => r.id === linking.id) || linking
+            }
+            onClose={() => setLinking(undefined)}
+            onReload={resource.reload}
+            onSaved={async () => {
+              await resource.reload();
+              notify("用户账号已关联");
+            }}
+          />
+        </Suspense>
+      )}
       {editing !== undefined && (
         <AccountForm
           // Latest copy of the row, so a retry after a refresh has its version.

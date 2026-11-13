@@ -12,7 +12,7 @@ import (
 func partnerError(w http.ResponseWriter, e error) {
 	var rule *partners.RuleError
 	switch {
-	case errors.Is(e, partners.ErrReviewDenied), errors.Is(e, partners.ErrApprovalDenied):
+	case errors.Is(e, partners.ErrRatioAccess), errors.Is(e, partners.ErrReviewDenied), errors.Is(e, partners.ErrApprovalDenied):
 		fail(w, 403, e.Error())
 	case errors.As(e, &rule):
 		fail(w, 400, e.Error())
@@ -102,58 +102,11 @@ func (a *Server) partnerOverview(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	out, e := a.Partners.Overview(r.Context(), r.PathValue("id"))
+	if identity(r).AdminRole != core.SuperAdminRole {
+		out.Price = partners.Price{}
+		out.PriceError = ""
+	}
 	partnerResult(w, out, e)
-}
-func (a *Server) createPartner(w http.ResponseWriter, r *http.Request) {
-	var v struct {
-		Name     string                `json:"name"`
-		ParentID string                `json:"parentId"`
-		Role     string                `json:"role"`
-		Account  *providerAccountInput `json:"account"`
-	}
-	// The platform can add branches by hand. All S1/S2 providers must enter
-	// through scan registration, even when the caller is a platform admin.
-	if !decode(w, r, &v) || !platformOnly(w, r) {
-		return
-	}
-	if v.ParentID != core.RootPartner || v.Role != core.RoleBranch {
-		fail(w, 400, "下级服务商只能通过扫码登记新增")
-		return
-	}
-	hash, key, actor := "", r.Header.Get("Idempotency-Key"), identity(r).ID
-	if v.Account != nil {
-		if core.IsBusinessRole(v.Account.Role) && v.Account.Role != v.Role {
-			fail(w, 400, "角色与当前服务商层级不匹配")
-			return
-		}
-		// A retried request whose provider and login were both created is a success.
-		if done, replayed, e := a.Partners.Replay(r.Context(), actor, key); e != nil {
-			dbError(w, e)
-			return
-		} else if replayed {
-			if _, _, exists, e := a.providerAccount(r.Context(), done.ID); e != nil || exists {
-				partnerResult(w, done, e)
-				return
-			}
-		}
-		var e error
-		if hash, e = a.prepareProviderAccount(r, *v.Account); e != nil {
-			fail(w, 400, e.Error())
-			return
-		}
-	}
-	out, e := a.Partners.Create(r.Context(), v.ParentID, v.Name, v.Role, key, actor)
-	if e != nil {
-		partnerError(w, e)
-		return
-	}
-	if v.Account != nil {
-		if _, e = a.createProviderAccount(r.Context(), out.ID, v.Name, hash, *v.Account, actor); e != nil {
-			fail(w, 409, "服务商已创建，但登录账号创建失败，请在服务商编辑中重新设置账号")
-			return
-		}
-	}
-	reply(w, 200, out)
 }
 func (a *Server) updatePartner(w http.ResponseWriter, r *http.Request) {
 	var v struct {
@@ -163,7 +116,12 @@ func (a *Server) updatePartner(w http.ResponseWriter, r *http.Request) {
 	if !decode(w, r, &v) {
 		return
 	}
-	if !a.belowPartner(w, r, r.PathValue("id")) || !a.withinOwnPricing(w, r, r.PathValue("id"), v.Data) {
+	if !a.belowPartner(w, r, r.PathValue("id")) || !a.accountOrPricingOnly(w, r, v.Data) || !a.withinOwnPricing(w, r, r.PathValue("id"), v.Data) {
+		return
+	}
+	if identity(r).AdminRole != core.SuperAdminRole {
+		out, e := a.Partners.UpdateRatio(r.Context(), r.PathValue("id"), v.Data.ChildMarginBps, v.Version, identity(r).ID, identity(r).PartnerID)
+		partnerResult(w, out, e)
 		return
 	}
 	out, e := a.Partners.Update(r.Context(), r.PathValue("id"), v.Data, v.Version, identity(r).ID)

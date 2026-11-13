@@ -1,3 +1,4 @@
+import ProviderPricing from "./ProviderPricing";
 import { lazy, Suspense, useState } from "react";
 import { Plus } from "lucide-react";
 import PageHeader from "../components/PageHeader";
@@ -7,7 +8,7 @@ import ProviderForm from "./ProviderForm";
 import PagedProviderTree from "./PagedProviderTree";
 import type { Row } from "../api";
 import type { Partner } from "./types";
-import { useMe } from "../session";
+import { useMe, canManageAccounts } from "../session";
 
 import ProviderAccount from "./ProviderAccount";
 import PlatformActions from "./PlatformActions";
@@ -36,17 +37,22 @@ export default function Providers({ notify }: { notify: Notify }) {
   );
   const rows = action ? [action.row] : [];
   // Only the platform adds branches by hand. S1/S2 join through invite codes.
-  const platform = !useMe()?.partnerId;
+  const me = useMe();
+  const manage = canManageAccounts(me);
+  const platform = manage;
   const close = () => setAction(undefined),
     kind = action?.kind,
     moduleKind =
-      kind === "share" || kind === "commissions" || kind === "registrations"
+      kind === "share" ||
+      kind === "commissions" ||
+      kind === "registrations" ||
+      kind === "activity"
         ? kind
         : undefined;
   return (
     <>
       <PageHeader page="partners" onRefresh={() => void reload()}>
-        {platform && (
+        {manage && (
           <button
             type="button"
             className="primary"
@@ -58,6 +64,11 @@ export default function Providers({ notify }: { notify: Notify }) {
         )}
       </PageHeader>
       <h2>服务商列表</h2>
+      {!manage && !me?.partnerId && (
+        <p className="quiet">
+          当前账号未关联服务商，暂无可查看的下级。请联系超级管理员。
+        </p>
+      )}
       {/* Not a <form>: the platform dialogs opened from here contain forms. */}
       <div className="business-filters provider-toolbar" role="search">
         <input
@@ -108,6 +119,14 @@ export default function Providers({ notify }: { notify: Notify }) {
             await reload();
             setCreating(false);
           }}
+        />
+      )}
+      {action?.kind === "pricing" && (
+        <ProviderPricing
+          row={action.row}
+          onClose={close}
+          onSaved={reload}
+          notify={notify}
         />
       )}
       {action?.kind === "edit" && (

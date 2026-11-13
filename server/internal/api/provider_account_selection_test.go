@@ -8,17 +8,19 @@ import (
 
 func TestSelectedProviderAccountReadsAndUpdatesOnlyTheRequestedLogin(t *testing.T) {
 	a, _, _ := setup(t)
-	admin := adminLoginToken(t, a, "admin", "test-pass")
-	partner := createProvider(t, a, admin, "multi-provider", "root", "多账号服务商", "branch", map[string]string{"username": "first-login", "password": "first-login-password-2026"})
+	admin := adminLoginToken(t, a, "admin", "Tt661ea2")
+	partner := createProvider(t, a, admin, "multi-provider", "root", "多账号服务商", "branch", map[string]string{"username": "first-login", "password": "Tta2a2cf"})
 	first, err := a.Store.Get(t.Context(), "admin_accounts", adminID("first-login"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	hash, err := hashPassword("second-login-password-2026")
+	hash, err := hashPassword("Tt52259f")
 	if err != nil {
 		t.Fatal(err)
 	}
-	second, err := a.createProviderAccount(t.Context(), partner, "备用账号", hash, providerAccountInput{Username: "second-login", Role: "branch"}, "fixture")
+	// Historical additional logins remain individually manageable; current
+	// phone-bound branch creation cannot create a second same-phone account.
+	second, err := a.Store.Put(t.Context(), "admin_accounts", core.Record{ID: adminID("second-login"), Data: core.Data(core.AdminAccount{Username: "second-login", Name: "历史备用账号", PasswordHash: hash, Role: "branch", PartnerID: partner})}, 0)
 	if err != nil {
 		t.Fatal(err)
 	}

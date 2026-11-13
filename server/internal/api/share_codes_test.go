@@ -10,7 +10,7 @@ import (
 // for providers made in the admin.
 func TestProviderCodesFollowRole(t *testing.T) {
 	a, _, _ := setup(t)
-	admin := adminLoginToken(t, a, "admin", "test-pass")
+	admin := adminLoginToken(t, a, "admin", "Tt661ea2")
 	branch := createBranch(t, a, admin, "kinds")
 	s1 := createProvider(t, a, admin, "kinds-s1", branch, "S1", "s1", nil)
 	s2 := createProvider(t, a, admin, "kinds-s2", s1, "S2", "s2", nil)

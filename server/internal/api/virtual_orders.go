@@ -116,7 +116,11 @@ func (a *Server) createVirtualOrder(w http.ResponseWriter, r *http.Request) {
 		OpenID string `json:"openid"`
 		AppID  string `json:"appid"`
 	}
-	if json.Unmarshal(row.Data, &account) != nil || account.OpenID == "" || (account.AppID != "" && account.AppID != cfg.AppID) {
+	parseErr := json.Unmarshal(row.Data, &account)
+	if session := identity(r); session.WeChatOpenID != "" {
+		account.OpenID, account.AppID = session.WeChatOpenID, session.WeChatAppID
+	}
+	if parseErr != nil || account.OpenID == "" || (account.AppID != "" && account.AppID != cfg.AppID) {
 		fail(w, 401, "请使用微信账号登录")
 		return
 	}

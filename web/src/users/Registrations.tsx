@@ -211,7 +211,7 @@ function List({
                 ) : (
                   <span className="quiet">等待超级管理员开通</span>
                 )}
-                {(r.data.canReject ?? r.data.canReview) && (
+                {canApprove && (r.data.canReject ?? r.data.canReview) && (
                   <button
                     className="danger-text"
                     onClick={() => void decide(r, false)}

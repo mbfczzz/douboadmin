@@ -12,8 +12,8 @@
 | GET | /me/identity | 已开通账号的身份 `{kind: branch/s1/s2/member, label, partner}` |
 | GET / POST | /admin/accounts | 管理平台账号列表与创建；小程序用户不能通过此接口创建 |
 | PUT | /admin/accounts/{id} | 编辑管理账号姓名、手机号、角色和启停状态 |
-| PUT | /admin/accounts/{id}/password | 重置管理账号密码，最少 16 位 |
-| DELETE | /admin/accounts/{id} | 归档管理账号并禁止登录 |
+| PUT | /admin/accounts/{id}/password | 重置管理账号密码，8 位，仅字母和数字且含大小写英文 |
+| DELETE | /admin/accounts/{id} | 删除登录账号并禁止登录，保留历史记录 |
 | GET | /admin/me | 当前登录账号、角色、可见菜单及所属服务商 |
 | GET | /admin/roles | 角色列表及账号数；服务商账号只返回服务商角色 |
 | POST / PUT / DELETE | /admin/roles、/admin/roles/{id} | 超级管理员维护角色 `{name,scope,menus}`；scope 为 platform/partner，创建后不可改 |

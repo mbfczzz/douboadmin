@@ -20,7 +20,7 @@ func registrationPage(t *testing.T, a *Server, token, query string) core.RecordP
 
 func TestRegistrationWaitsForSuperAdminApproval(t *testing.T) {
 	a, user, _ := activationFixture(t)
-	admin := adminLoginToken(t, a, "admin", "test-pass")
+	admin := adminLoginToken(t, a, "admin", "Tt661ea2")
 	branch := newBranch(t, a, "review")
 	parent := reviewLogin(t, a, admin, branch)
 	code, _ := a.Partners.ShareCode(t.Context(), branch, "admin")
@@ -60,7 +60,7 @@ func TestRegistrationWaitsForSuperAdminApproval(t *testing.T) {
 	if w := call(a, "GET", "/api/templates", user, "", nil); w.Code != 200 {
 		t.Fatal("approved member blocked", w.Code, w.Body.String())
 	}
-	if status, body := decideHTTP(t, a, parent, "user-a", false, "重复处理"); status != 400 || !strings.Contains(body, "已处理") {
+	if status, body := decideHTTP(t, a, parent, "user-a", false, "重复处理"); status != 403 {
 		t.Fatal("decided twice", status, body)
 	}
 	if p := registrationPage(t, a, admin, "?status=pending"); p.Total != 0 {
@@ -79,10 +79,10 @@ func TestRejectedUserCanScanAgain(t *testing.T) {
 	if status, body := joinHTTP(a, user, member); status != 200 {
 		t.Fatal(status, body)
 	}
-	if status, body := decideHTTP(t, a, parent, "user-a", false, ""); status != 400 {
+	if status, body := decideHTTP(t, a, parent, "user-a", false, ""); status != 403 {
 		t.Fatal("rejected without a reason", status, body)
 	}
-	if status, body := decideHTTP(t, a, parent, "user-a", false, "资料不完整"); status != 200 || !strings.Contains(body, "资料不完整") {
+	if status, body := decideHTTP(t, a, admin, "user-a", false, "资料不完整"); status != 200 || !strings.Contains(body, "资料不完整") {
 		t.Fatal(status, body)
 	}
 	if v := accessOf(t, a, user); v.Active || v.Status != "rejected" {
@@ -114,11 +114,11 @@ func TestRejectedUserCanScanAgain(t *testing.T) {
 
 func TestGlobalRegistrationsAndManualProviderCreationRemainPlatformOnly(t *testing.T) {
 	a, user, _ := activationFixture(t)
-	admin := adminLoginToken(t, a, "admin", "test-pass")
-	branch := createProvider(t, a, admin, "only-branch", "root", "分公司", "branch", map[string]string{"username": "only-branch", "password": "only-branch-password-2026"})
+	admin := adminLoginToken(t, a, "admin", "Tt661ea2")
+	branch := createProvider(t, a, admin, "only-branch", "root", "分公司", "branch", map[string]string{"username": "only-branch", "password": "Ttee74f5"})
 	code, _ := a.Partners.ShareCode(t.Context(), branch, "admin")
 	scan(t, a, "user-a", code)
-	provider := adminLoginToken(t, a, "only-branch", "only-branch-password-2026")
+	provider := adminLoginToken(t, a, "only-branch", "Ttee74f5")
 	for _, c := range []struct {
 		method, path string
 		body         any

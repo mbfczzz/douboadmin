@@ -1,3 +1,4 @@
+import { sourceLabel, initialSource } from "../users/source";
 import { date, type Row } from "../api";
 import { useState } from "react";
 import type { RecordPage } from "./recordPage";
@@ -70,6 +71,16 @@ export default function UserDetails({
               <dd>{date(user.data.phoneVerifiedAt)}</dd>
             </>
           )}
+          <dt>注册来源</dt>
+          <dd>{sourceLabel(initialSource(user.data))}</dd>
+          <dt>使用过的端</dt>
+          <dd>
+            {(user.data.sources || [initialSource(user.data)])
+              .map(sourceLabel)
+              .join("、")}
+          </dd>
+          <dt>最近登录端</dt>
+          <dd>{sourceLabel(user.data.lastLoginSource)}</dd>
           <dt>注册时间</dt>
           <dd>{date(user.createdAt)}</dd>
         </dl>

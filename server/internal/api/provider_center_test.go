@@ -11,15 +11,15 @@ import (
 func TestS2InviteMakesASubProviderWithItsOwnLogin(t *testing.T) {
 	a, user, _ := activationFixture(t)
 	a.Integrations = settings.New(a.Store, filepath.Join(t.TempDir(), "key"), nil)
-	admin := adminLoginToken(t, a, "admin", "test-pass")
-	s1 := createProvider(t, a, admin, "inv-s1", createBranch(t, a, admin, "inv"), "S1", "s1", map[string]string{"username": "inv-s1", "password": "inv-s1-password-2026"})
+	admin := adminLoginToken(t, a, "admin", "Tt661ea2")
+	s1 := createProvider(t, a, admin, "inv-s1", createBranch(t, a, admin, "inv"), "S1", "s1", map[string]string{"username": "inv-s1", "password": "Ttdfa630"})
 	path := "/api/admin/partners/" + s1 + "/codes/s2"
 	invite := providerCode(t, a, "GET", s1, "s2", admin)
 	if !strings.HasPrefix(invite.QR, "data:image/png;base64,") {
 		t.Fatal("invite QR missing")
 	}
-	s1Login := adminLoginToken(t, a, "inv-s1", "inv-s1-password-2026")
-	if w := call(a, "GET", path, s1Login, "", nil); w.Code != 200 || !strings.Contains(w.Body.String(), invite.Code) {
+	s1Login := adminLoginToken(t, a, "inv-s1", "Ttdfa630")
+	if w := call(a, "GET", path, s1Login, "", nil); w.Code != 403 {
 		t.Fatal("S1 cannot see its invite", w.Code, w.Body.String())
 	}
 	if status, body := joinHTTP(a, user, invite.Code); status != 200 || !strings.Contains(body, `"status":"review"`) {
@@ -42,53 +42,28 @@ func TestS2InviteMakesASubProviderWithItsOwnLogin(t *testing.T) {
 	if len(center.Codes) != 1 || center.Codes["member"].Code == "" || center.Codes["member"].Code == invite.Code || strings.Contains(w.Body.String(), `"children"`) {
 		t.Fatal("S2 center", w.Body.String())
 	}
-	var login struct{ Account, Password string }
-	w = call(a, "POST", "/api/provider/password", user, "", nil)
-	if w.Code != 200 || json.Unmarshal(w.Body.Bytes(), &login) != nil || login.Account != "13800138000" || len(login.Password) != 20 {
-		t.Fatal(w.Code, w.Body.String())
+	if w := call(a, "POST", "/api/provider/password", user, "", nil); w.Code != 403 {
+		t.Fatal("mini-program reset permitted", w.Code)
 	}
 	s2, _ := a.Partners.OwnedPartner(t.Context(), "user-a")
-	token := adminLoginToken(t, a, login.Account, login.Password)
-	if w = call(a, "GET", "/api/admin/partners/"+s2, token, "", nil); w.Code != 200 {
-		t.Fatal("S2 cannot open itself", w.Code, w.Body.String())
+	path = "/api/admin/partners/" + s2 + "/account"
+	if w := call(a, "PUT", path, s1Login, "", map[string]any{"version": 0, "username": "13800138000", "password": "Phone123", "role": "s2"}); w.Code != 403 {
+		t.Fatal("parent opened login", w.Code)
 	}
-	if w = call(a, "GET", path, token, "", nil); w.Code != 403 {
-		t.Fatal("S2 read its parent's invite", w.Code)
-	}
-	if w = call(a, "GET", "/api/admin/partners/"+s2+"/codes/s2", token, "", nil); w.Code != 400 {
-		t.Fatal("S2 got an invite code", w.Code, w.Body.String())
-	}
-	// The provider center keeps showing the current password.
-	if saved := centerPassword(t, a, user); saved != login.Password {
-		t.Fatal("saved password", saved)
-	}
-	if _, saved := providerPasswordView(t, a, s2, s1Login); saved != login.Password {
-		t.Fatal("mini-program password unavailable in the admin")
-	}
-	// Once S1 changes it in the admin, the old one is no longer shown.
-	acct := call(a, "GET", "/api/admin/partners/"+s2+"/account", s1Login, "", nil)
-	var current struct{ Account struct{ Version int64 } }
-	_ = json.Unmarshal(acct.Body.Bytes(), &current)
-	if w = call(a, "PUT", "/api/admin/partners/"+s2+"/account", s1Login, "", map[string]any{"version": current.Account.Version, "password": "changed-by-parent-2026"}); w.Code != 200 {
+	if w := call(a, "PUT", path, admin, "", map[string]any{"version": 0, "username": "13800138000", "password": "Phone123", "role": "s2"}); w.Code != 201 {
 		t.Fatal(w.Code, w.Body.String())
 	}
+	adminLoginToken(t, a, "13800138000", "Phone123")
 	if saved := centerPassword(t, a, user); saved != "" {
-		t.Fatal("stale password shown", saved)
+		t.Fatal("mini-program exposed managed password")
 	}
-	if _, saved := providerPasswordView(t, a, s2, s1Login); saved != "changed-by-parent-2026" {
-		t.Fatal("admin reset not shown in the admin")
+	if _, saved := providerPasswordView(t, a, s2, admin); saved != "Phone123" {
+		t.Fatal("super admin cannot retrieve initial password")
 	}
-	// A reset in the mini-program shows the new one again.
-	if w = call(a, "POST", "/api/provider/password", user, "", nil); w.Code != 200 || json.Unmarshal(w.Body.Bytes(), &login) != nil {
-		t.Fatal(w.Code, w.Body.String())
+	if w := call(a, "GET", path, s1Login, "", nil); w.Code != 403 {
+		t.Fatal("parent accessed account", w.Code)
 	}
-	adminLoginToken(t, a, login.Account, login.Password)
-	if saved := centerPassword(t, a, user); saved != login.Password {
-		t.Fatal("reset password not shown", saved)
-	}
-	if _, saved := providerPasswordView(t, a, s2, s1Login); saved != login.Password {
-		t.Fatal("mini-program reset left an old admin password visible")
-	}
+
 }
 
 func centerPassword(t *testing.T, a *Server, user string) string {
