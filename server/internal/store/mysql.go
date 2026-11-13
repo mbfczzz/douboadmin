@@ -64,9 +64,12 @@ func (m *MySQL) Migrate(ctx context.Context) error {
 		return fmt.Errorf("backfill QR usage records: %w", err)
 	}
 	if err := m.migrateUserIdentity(ctx); err != nil {
-		return err
+		return fmt.Errorf("migrate user identity: %w", err)
 	}
-	return m.migrateAdminPhone(ctx)
+	if err := m.migrateAdminPhone(ctx); err != nil {
+		return fmt.Errorf("migrate admin phone: %w", err)
+	}
+	return nil
 }
 func (m *MySQL) Get(ctx context.Context, ns, id string) (core.Record, error) {
 	return getRow(ctx, m.db, ns, id, "")

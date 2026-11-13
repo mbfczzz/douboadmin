@@ -5,6 +5,8 @@ import (
 	"fmt"
 )
 
+const userPhoneOwnersBackfill = "INSERT INTO phone_owners (id,owner_id,version,`user`) SELECT phone,'',1,id FROM users WHERE COALESCE(archived,0)=0 AND COALESCE(phone,'')<>'' ON DUPLICATE KEY UPDATE `user`=VALUES(`user`), version=phone_owners.version+1"
+
 // Run only through the explicit migrate command, with writers stopped.
 // Conflicting historical identities abort migration instead of choosing a winner.
 func (m *MySQL) migrateUserIdentity(ctx context.Context) error {
@@ -30,11 +32,11 @@ func (m *MySQL) migrateUserIdentity(ctx context.Context) error {
 	queries := []string{
 		`UPDATE users SET source=IF(auth_provider='wechat' OR id LIKE 'wx-%','miniprogram','other'), version=version+1 WHERE COALESCE(source,'')=''`,
 		`UPDATE users SET sources=JSON_ARRAY(source), version=version+1 WHERE sources IS NULL`,
-		"INSERT INTO phone_owners (id,owner_id,version,`user`) SELECT phone,'',1,id FROM users WHERE COALESCE(archived,0)=0 AND COALESCE(phone,'')<>'' ON DUPLICATE KEY UPDATE `user`=VALUES(`user`), version=version+1",
+		userPhoneOwnersBackfill,
 	}
-	for _, q := range queries {
+	for i, q := range queries {
 		if _, err = tx.ExecContext(ctx, q); err != nil {
-			return err
+			return fmt.Errorf("user identity backfill step %d: %w", i+1, err)
 		}
 	}
 	if err = tx.Commit(); err != nil {
