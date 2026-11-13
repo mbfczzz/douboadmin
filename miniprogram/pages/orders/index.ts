@@ -1,3 +1,6 @@
+import { templateCovers } from "../../services/covers";
+import { pullRefresh } from "../../utils/refresh";
+import { orderExtras } from "./details";
 import {
   request,
   error,
@@ -25,6 +28,13 @@ Page({
   wallet() {
     openPage(this, { url: "/pages/wallet/index" });
   },
+  toggle(e: WechatMiniprogram.TouchEvent) {
+    const id = e.currentTarget.dataset.id;
+    this.setData({ open: this.data.open === id ? "" : id });
+  },
+  copyText(e: WechatMiniprogram.TouchEvent) {
+    wx.setClipboardData({ data: String(e.currentTarget.dataset.text || ""), fail: error });
+  },
   copyId(e: WechatMiniprogram.TouchEvent) {
     const id = e.currentTarget.dataset.id;
     if (this.data.rows.some((row: Row<Order>) => row.id === id)) wx.setClipboardData({ data: id, fail: error });
@@ -38,8 +48,10 @@ Page({
         tone: string;
         time: string;
         canPay: boolean;
-      }
+      } & ReturnType<typeof orderExtras>
     >,
+    open: "", // the order whose details are showing
+    art: [] as string[], // real template covers, one per card
     loading: true,
     needsLogin: false,
     loadError: "",
@@ -54,6 +66,9 @@ Page({
   visible: false,
   watching: "",
   stopWatching: undefined as (() => void) | undefined,
+  onLoad() {
+    void templateCovers().then((c) => !this.destroyed && this.setData({ art: c.map((x) => x.cover) }));
+  },
   onShow() {
     this.visible = true;
     enterPage(this);
@@ -77,6 +92,9 @@ Page({
     } catch (e) {
       error(e);
     }
+  },
+  onPullDownRefresh() {
+    void pullRefresh(() => this.load());
   },
   async load() {
     if (this.destroyed) return;
@@ -142,6 +160,7 @@ Page({
               !expired &&
               !r.data.virtual?.issued,
             time: date(r.createdAt),
+            ...orderExtras(r),
           };
         }),
         needsLogin: false,

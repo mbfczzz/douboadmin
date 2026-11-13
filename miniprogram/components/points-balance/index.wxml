@@ -1,6 +1,11 @@
 <view wx:if="{{compact}}" class="inline-balance" bindtap="balanceTap" aria-role="button">
   <text class="points-mark">✦</text><text>{{loadError?'余额更新失败，重试':logged?'可用 '+available+' 积分':'登录后查看积分'}}</text><t-icon name="chevron-right" size="16" />
 </view>
+<view wx:elif="{{row}}" class="balance-row" bindtap="balanceTap" hover-class="row-pressed" aria-role="button" aria-label="{{'可用积分 '+available}}">
+  <view class="row-mark"><text>✦</text></view>
+  <view class="row-copy"><text class="row-amount">{{loadError?'更新失败':logged?available:'—'}}</text><text class="row-label">{{loadError?'点击重试':'可用积分 · 预留 '+held}}</text></view>
+  <text class="row-go">{{rechargeEnabled?'充值':'明细'}}</text><t-icon name="chevron-right" size="16" />
+</view>
 <view wx:else class="balance">
   <view class="balance-copy">
     <text class="label">可用积分</text>

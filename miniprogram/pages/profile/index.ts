@@ -1,3 +1,4 @@
+import { ask } from "../../services/dialog";
 import {
   request,
   error,
@@ -178,14 +179,14 @@ Page({
     this.confirming = true;
     try {
       if (this.data.dirty || this.data.uploadingAvatar) {
-        const result = await wx.showModal({
+        const leave = await ask({
           title: "放弃修改？",
-          content: "本次修改尚未保存，离开后将不会保留。",
-          confirmText: "放弃修改",
-          confirmColor: "#b42338",
+          content: "本次修改还没保存，离开后不会保留。",
+          confirmText: "放弃",
           cancelText: "继续编辑",
+          tone: "danger",
         });
-        if (!result.confirm || this.destroyed) return;
+        if (!leave || this.destroyed) return;
       }
       await this.leave();
     } catch (e) {

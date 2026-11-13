@@ -217,7 +217,31 @@ image {
 .mode-tab.active,
 .resolution-option.selected,
 .filter.active,
-.biz-tabs .selected,
-.purchase-tabs .selected {
+.biz-tabs .selected {
   box-shadow: inset 0 0 0 1px var(--ui-selected-line);
+}
+.biz-tabs.sort-tabs .selected {
+  box-shadow: none;
+}
+/* Empty, logged-out and error states: pages with content to point at show
+   real template covers (components/showcase); the rest a quiet theme icon.
+   The follow-up is a text link, not another button. */
+.empty-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 12px;
+  border-radius: 50%;
+  background: var(--ui-surface);
+  color: var(--ui-muted);
+}
+.empty-link {
+  display: inline-block;
+  margin-top: 14px;
+  padding: 10px 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ui-brand);
 }

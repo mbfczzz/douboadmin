@@ -1,0 +1,110 @@
+.dialog-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 13000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 32px;
+  background: #000000a6;
+  animation: dialog-fade 160ms ease-out;
+}
+.dialog {
+  width: 100%;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 28px 20px 20px;
+  border-radius: 20px;
+  background: var(--ui-surface, #24252b);
+  box-shadow: 0 16px 48px #00000080;
+  animation: dialog-pop 200ms cubic-bezier(0.2, 0.9, 0.3, 1.2);
+}
+@keyframes dialog-fade {
+  from { opacity: 0; }
+}
+@keyframes dialog-pop {
+  from { opacity: 0; transform: scale(0.92); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dialog-mask, .dialog { animation: none; }
+}
+.dialog-icon {
+  width: 52px;
+  height: 52px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: var(--ui-brand, #00c8dc);
+  background: #00c8dc1f;
+}
+.tone-danger .dialog-icon {
+  color: #ff5c6c;
+  background: #ff5c6c1f;
+}
+.dialog-title {
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 24px;
+  text-align: center;
+  color: var(--ui-text, #fff);
+}
+.dialog-amount {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-top: 12px;
+}
+.dialog-number {
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 40px;
+  color: var(--ui-text, #fff);
+  font-variant-numeric: tabular-nums;
+}
+.dialog-unit {
+  font-size: 14px;
+  color: var(--ui-muted, #a6a8ad);
+}
+.dialog-content {
+  margin-top: 10px;
+  font-size: 14px;
+  line-height: 1.6;
+  text-align: center;
+  color: var(--ui-muted, #a6a8ad);
+}
+.dialog-actions {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  margin-top: 24px;
+}
+.dialog-action {
+  flex: 1;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 500;
+}
+.dialog-cancel {
+  color: var(--ui-text, #fff);
+  background: var(--ui-field, #2f3238);
+}
+.dialog-confirm {
+  font-weight: 600;
+  color: var(--ui-on-brand, #15161a);
+  background: var(--ui-primary, #ebf8ff);
+}
+.tone-danger .dialog-confirm {
+  color: #fff;
+  background: #e5484d;
+}
+.dialog-pressed {
+  opacity: 0.75;
+}

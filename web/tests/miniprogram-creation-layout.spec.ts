@@ -34,15 +34,14 @@ for (const width of [320, 375, 430]) {
     await page.setContent(`<style>body{margin:0;font-family:sans-serif}t-icon{display:block;width:16px;height:16px}${styles}</style>
       <div style="padding:20px">
         <div class="workspace"><textarea class="prompt-input">第一行\n第二行\n第三行\n第四行</textarea><span class="count">500 / 500</span><div class="editor-meta"><div class="editor-balance"><div class="inline-balance"><span>可用 999999999.99 积分</span></div></div><div class="quote-note">预计 100 积分</div></div><div class="workspace-foot">
-          <div class="model-select"><img class="model-logo" alt="" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" /><div class="model-copy"><span class="model-name">${long}</span><span class="spec">4096×2160 · 120秒</span></div><t-icon></t-icon></div>
+          <div class="model-select"><img class="model-logo" alt="" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" /><div class="model-copy"><span class="model-name">${long}</span></div><t-icon></t-icon></div>
           <button class="generate-button">生成</button></div>
         </div>
         <div class="resolution-options">${["720p", "1080p", "2160p", "4096×2160", "8192×4320", long].map((v) => `<div class="resolution-option">${v}</div>`).join("")}</div>
         <div class="model-option"><t-icon></t-icon><div class="model-info">${long}<span class="model-description">${long}</span><div class="model-badges"><span>高清</span><span>推荐</span></div></div><span class="model-estimate">123456789 积分</span><t-icon></t-icon></div>
-        <div class="row title-row"><span class="detail-title">${long}</span><div class="favorite"></div></div>
-        <div class="required-upload"><div class="upload-icon"></div><div><span class="upload-name">${long}</span><span class="upload-hint">长文件说明</span><div class="upload-text">上传照片</div></div><span class="required">必填</span></div>
-        <div class="optional-grid"><div><t-icon></t-icon><span>${long}</span><t-icon></t-icon></div><div><t-icon></t-icon><span>参考照片</span><t-icon></t-icon></div></div>
-        <div class="uploaded"><image></image><div class="uploaded-copy"><span>${long}.png</span></div><div class="delete"><t-icon></t-icon></div></div>
+        <div class="hero"><div class="hero-fav"></div><div class="hero-meta"><div class="hero-chips"><span class="chip">${long}</span><span class="chip">5 秒</span></div><span class="detail-title">${long}</span></div></div>
+        <div class="slots" style="display:block;overflow-x:auto"><div class="slot-row"><div class="slot uploaded"><span class="slot-tag">主体图</span><div class="slot-remove"></div></div><div class="slot add required"><t-icon></t-icon><span class="slot-name">商品主体图</span><span class="slot-hint">正面清晰</span></div><div class="slot add optional"><t-icon></t-icon><span class="slot-name">宣传文案图</span><span class="slot-hint">选填</span></div></div></div>
+        <div class="submit-bar" style="position:static"><div class="submit-copy"><span class="submit-quote">预计 123456789 积分</span><span class="submit-status">还需 1 张照片</span></div><button class="submit-action">生成同款</button></div>
       </div>`);
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth),
@@ -51,9 +50,8 @@ for (const width of [320, 375, 430]) {
       ".workspace-foot",
       ".resolution-options",
       ".model-option",
-      ".required-upload",
-      ".optional-grid",
-      ".uploaded",
+      ".hero-meta",
+      ".submit-bar",
     ]) {
       expect(
         await page
@@ -62,7 +60,8 @@ for (const width of [320, 375, 430]) {
         selector,
       ).toBe(true);
     }
-    expect((await page.locator(".favorite").boundingBox())!.width).toBe(28);
+    expect((await page.locator(".hero-fav").boundingBox())!.width).toBe(40);
+    expect((await page.locator(".submit-action").boundingBox())!.width).toBe(148);
     expect((await page.locator(".model-select .model-logo").boundingBox())!.width).toBe(22);
     expect((await page.locator(".generate-button").boundingBox())!.width).toBe(
       width <= 350 ? 68 : 80,

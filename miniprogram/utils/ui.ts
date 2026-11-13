@@ -1,3 +1,4 @@
+import { ask } from "../services/dialog";
 import { AuthCancelledError, errorMessage } from "../services/errors";
 import { media } from "../services/media";
 import type { Job } from "../services/types";
@@ -10,12 +11,13 @@ export function saveFailed(e: unknown) {
   const msg = String((e as { errMsg?: string })?.errMsg || "");
   if (msg.includes("cancel")) return;
   if (msg.includes("auth"))
-    wx.showModal({
+    void ask({
       title: "需要相册权限",
-      content: "请在设置中允许保存到相册，返回后再次点击保存。",
-      success: (r) => {
-        if (r.confirm) wx.openSetting({});
-      },
+      content: "在设置中允许保存到相册，返回后再点一次保存。",
+      confirmText: "去设置",
+      icon: "image",
+    }).then((ok) => {
+      if (ok) wx.openSetting({});
     });
   else error(e instanceof Error ? e : new Error("保存失败，请重试"));
 }

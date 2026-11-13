@@ -1,0 +1,63 @@
+/* Shared bottom-sheet pieces: grab handle and upload source tiles. */
+.sheet-handle {
+  width: 36px;
+  height: 4px;
+  margin: 8px auto 4px;
+  border-radius: 2px;
+  background: #4a4d55;
+}
+.source-grid {
+  display: flex;
+  gap: 10px;
+}
+.source-tile {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 18px 6px 16px;
+  border-radius: 14px;
+  background: var(--ui-field);
+}
+.source-pressed {
+  opacity: 0.72;
+  transform: scale(0.98);
+}
+.source-glyph {
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+  color: #fff;
+}
+.glyph-image {
+  background: linear-gradient(135deg, #2bd4c8, #1a8fb8);
+}
+.glyph-video {
+  background: linear-gradient(135deg, #7b6cff, #4a47c9);
+}
+.glyph-audio {
+  background: linear-gradient(135deg, #ff9a62, #e05a6d);
+}
+.source-name {
+  margin-top: 12px;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--ui-text);
+}
+.source-hint {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--ui-muted);
+  white-space: nowrap;
+}
+.source-note {
+  display: block;
+  margin-top: 16px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--ui-muted);
+}

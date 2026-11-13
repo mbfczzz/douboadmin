@@ -42,3 +42,29 @@ test('video templates still submit video generation with required reference imag
   assert.equal(sent.mode, 'i2v');
   assert.deepEqual(Array.from(sent.assets), ['reference-image']);
 });
+
+test("template detail plays its preview inline only when autoplay is on", () => {
+  const h = harness();
+  h.storage.set("autoplay-preference", true);
+  const page = h.page("template-detail");
+  page.onLoad({ id: "t1" });
+  assert.equal(page.data.autoplay, true);
+  const quiet = harness().page("template-detail");
+  quiet.onLoad({ id: "t1" });
+  assert.equal(quiet.data.autoplay, false);
+});
+
+test("the bottom button uploads until the photos are in, then generates", () => {
+  const h = harness(),
+    page = h.page("template-detail");
+  let generated = 0;
+  page.generate = async () => void generated++;
+  page.setData({ template: { id: "t1", data: { kind: "video", requiredImages: 1 } }, assets: [] });
+  page.primary();
+  assert.equal(page.data.sourceOpen, true);
+  assert.equal(generated, 0);
+  page.setData({ sourceOpen: false, assets: [{ id: "a1", data: {} }] });
+  page.primary();
+  assert.equal(page.data.sourceOpen, false);
+  assert.equal(generated, 1);
+});

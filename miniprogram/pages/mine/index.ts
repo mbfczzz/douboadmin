@@ -1,3 +1,4 @@
+import { pullRefresh } from "../../utils/refresh";
 import {
   request,
   error,
@@ -26,10 +27,10 @@ const baseMenus = [
 ];
 // Providers manage their codes in 服务商中心; members share their 推广码.
 // The role entry gets its own row so the six common entries stay a 3 × 2 grid.
-const roleMenus: Record<string, typeof baseMenus[number]> =
+const roleMenus: Record<string, typeof baseMenus[number] & { hint: string }> =
   {
-    provider: { icon: "cooperate", label: "服务商中心", mode: "provider" },
-    member: { icon: "qrcode", label: "我的推广码", mode: "promo" },
+    provider: { icon: "cooperate", label: "服务商中心", mode: "provider", hint: "邀请码 · 会员 · 后台登录" },
+    member: { icon: "qrcode", label: "我的推广码", mode: "promo", hint: "分享推广码，邀请好友加入" },
   };
 Page({
   data: {
@@ -41,7 +42,9 @@ Page({
     loading: true,
     loadError: "",
     menus: baseMenus,
-    roleMenu: null as (typeof baseMenus)[number] | null,
+    roleMenu: null as ((typeof baseMenus)[number] & { hint: string }) | null,
+    avatarLetter: "",
+    unread: 0,
   },
   loadVersion: 0,
   visible: true,
@@ -68,6 +71,15 @@ Page({
       // keep the menu as it is
     }
   },
+  // Unread notices badge the 消息通知 tile; a failure leaves it as it was.
+  async loadUnread(version: number, owner: string) {
+    try {
+      const r = await request<{ unread: number }>("/notifications?page=1&size=1");
+      if (version === this.loadVersion && owner === sessionUserId()) this.setData({ unread: r.unread || 0 });
+    } catch {
+      // keep the badge as it is
+    }
+  },
   onHide() {
     this.visible = false;
     this.loadVersion++;
@@ -77,6 +89,9 @@ Page({
     this.visible = false;
     this.loadVersion++;
     if (this.refreshTimer !== undefined) clearTimeout(this.refreshTimer);
+  },
+  onPullDownRefresh() {
+    void pullRefresh(() => this.load());
   },
   async load() {
     const version = ++this.loadVersion;
@@ -91,17 +106,19 @@ Page({
       return;
     }
     this.setData({ worksLoading: true });
-    const recentRequest = jobPage(1, "&works=true", 2).catch(() => null);
+    // Three covers: one row of the 3-column grid.
+    const recentRequest = jobPage(1, "&works=true", 3).catch(() => null);
     try {
       const me = await request<Me>("/me");
       if (version !== this.loadVersion || owner !== sessionUserId()) return;
       if (me.profile.data.avatarUrl)
         me.profile.data.avatarUrl = media(me.profile.data.avatarUrl);
-      this.setData({ me, loading: false, loadError: "" });
+      this.setData({ me, loading: false, loadError: "", avatarLetter: Array.from(me.profile.data.nickname || "")[0] || "" });
+      void this.loadUnread(version, owner);
       const recent = await recentRequest;
       if (version !== this.loadVersion || owner !== sessionUserId()) return;
       this.setData({
-        jobs: recent ? recent.items.filter(j => j.status === "succeeded" && !j.deleted).slice(0, 2).map(jobView) : this.data.jobs,
+        jobs: recent ? recent.items.filter(j => j.status === "succeeded" && !j.deleted).slice(0, 3).map(jobView) : this.data.jobs,
         worksError: recent ? "" : "作品暂时无法加载，点击重试",
         worksLoading: false,
       });

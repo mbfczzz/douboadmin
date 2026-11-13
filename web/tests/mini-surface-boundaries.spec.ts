@@ -7,11 +7,13 @@ for(const width of [320,390,430]) {
     await page.setContent(styles(width,["pages/mine/index.wxss","components/points-balance/index.wxss","custom-tab-bar/index.wxss"])+header("我的")+`
       <div class="page mine-page"><div class="mine-balance"><div class="balance"><div class="balance-copy"><span class="label">可用积分</span><span class="amount">99999.50</span></div><div class="balance-bottom"><span class="note">预留 2 积分</span><button class="action">我的积分</button></div></div></div>
       <span class="section-title common-heading">常用功能</span><div class="menu-grid">${["服务商中心","充值订单","我的收藏","生成记录","消息通知","帮助与反馈"].map(label=>`<div class="menu">${glyph("image")}<span class="menu-label">${label}</span></div>`).join("")}</div></div>${tabs()}`);
-    for(const selector of [".balance",".menu-grid"]){
-      await expect(page.locator(selector)).toHaveCSS("background-color","rgb(36, 37, 43)");
-      await expect(page.locator(selector)).toHaveCSS("border-top-width","1px");
-      await expect(page.locator(selector)).toHaveCSS("border-top-color","rgba(0, 0, 0, 0)");
-    }
+    await expect(page.locator(".balance")).toHaveCSS("background-color","rgb(36, 37, 43)");
+    await expect(page.locator(".balance")).toHaveCSS("border-top-color","rgba(0, 0, 0, 0)");
+    // The menu is a bare 3 × 2 grid of icon tiles, not a boxed card.
+    await expect(page.locator(".menu-grid")).toHaveCSS("background-color","rgba(0, 0, 0, 0)");
+    const cells=await Promise.all((await page.locator(".menu").all()).map(m=>m.boundingBox()));
+    expect(new Set(cells.map(c=>Math.round(c!.x))).size).toBe(3);
+    expect(new Set(cells.map(c=>Math.round(c!.y))).size).toBe(2);
     const balance=await page.locator(".balance").boundingBox(), button=await page.locator(".balance .action").boundingBox();
     expect(button!.x+button!.width).toBeLessThan(balance!.x+balance!.width);
     await expect(page.locator(".tabbar")).toHaveCSS("background-color","rgb(25, 26, 31)");

@@ -11,12 +11,19 @@
   flex: 0 0 auto;
   margin: 0;
   min-height: 44px;
-  padding: 12px;
-  border-radius: 10px;
+  width: auto;
+  padding: 12px 18px;
+  border-radius: 999px;
   line-height: 20px;
   font-size: inherit;
   color: var(--ui-text);
   background: var(--ui-field);
+}
+.job-pagination button::after {
+  border: 0;
+}
+.job-pagination text {
+  font-variant-numeric: tabular-nums;
 }
 .job-pagination button[disabled] {
   color: var(--ui-disabled-text);

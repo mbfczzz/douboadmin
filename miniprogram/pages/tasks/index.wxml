@@ -2,27 +2,26 @@
 <view class="subpage queue-page">
   <view class="loading" wx:if="{{loading}}"><t-loading /></view>
   <view wx:elif="{{needsLogin}}" class="empty">
-    <t-icon name="task" size="40" />
+    <showcase />
     <text class="title">登录后查看任务</text>
     <text class="desc">生成进度和历史作品都会保存在这里。</text>
-    <t-button t-class="empty-action" theme="primary" loading="{{signingIn}}" bind:tap="signIn">去登录</t-button>
+    <text class="empty-link" bindtap="signIn">{{signingIn?'正在登录…':'去登录 ›'}}</text>
   </view>
   <view wx:elif="{{loadError&&!jobs.length}}" class="error-box" bindtap="load"
     >{{loadError}} · 点击重试</view
   >
   <view wx:elif="{{!jobs.length}}" class="empty">
-    <t-icon name="task" size="40" /><text class="title">这里还没有任务</text>
+    <showcase /><text class="title">这里还没有任务</text>
     <text class="desc">每个作品，都从一个想法开始。</text>
-    <t-button t-class="empty-action" theme="primary" bind:tap="create"
-      >去创作</t-button
-    >
+    <text class="empty-link" bindtap="create">去创作 ›</text>
   </view>
   <view wx:else class="content-reveal">
     <view wx:if="{{loadError}}" class="error-box" bindtap="load">刷新失败，已保留上次结果 · 点击重试</view>
-    <view class="queue-summary"
-      ><text>处理中 · {{runningCount}}</text
-      ><text class="failure-count {{failedCount?'failed':''}}">失败 · {{failedCount}}</text></view
-    >
+    <view class="queue-stats">
+      <view class="stat running"><text class="stat-num">{{runningCount}}</text><text class="stat-label">处理中</text></view>
+      <view class="stat {{failedCount?'failed':''}}"><text class="stat-num">{{failedCount}}</text><text class="stat-label">失败</text></view>
+      <view class="stat" bindtap="works"><text class="stat-num">{{completed.length}}</text><text class="stat-label">最近完成 ›</text></view>
+    </view>
     <view
       class="queue-item"
       wx:for="{{ongoing}}"
@@ -31,10 +30,11 @@
       bindtap="detail"
       hover-class="card-pressed"
     >
-      <view class="queue-thumb"
-        ><t-icon
-          name="{{item.input.kind==='image'?'image':'video-camera'}}"
-          size="32"
+      <view class="queue-thumb {{item.status}}"
+        ><t-loading wx:if="{{item.status==='running'||item.status==='queued'}}" size="22px" /><t-icon
+          wx:else
+          name="{{item.status==='failed'?'error-circle':item.input.kind==='image'?'image':'video-camera'}}"
+          size="26"
       /></view>
       <view class="queue-copy">
         <view class="queue-title-row"
@@ -44,8 +44,9 @@
           ></view
         >
         <text class="queue-spec" wx:if="{{item.status!=='failed'}}"
-          >{{item.kindText}} · {{item.input.ratio}} · {{item.input.resolution}}<text wx:if="{{item.input.duration}}"> · {{item.input.duration}}秒</text></text
+          >{{item.modelName}} · {{item.input.ratio}} · {{item.input.resolution}}<text wx:if="{{item.input.duration}}"> · {{item.input.duration}}秒</text></text
         >
+        <view wx:if="{{item.status==='running'}}" class="queue-progress"><view class="queue-bar"><view style="width:{{item.progress||4}}%" /></view><text>{{item.stage||'生成中'}}{{item.progress?' · '+item.progress+'%':''}}</text></view>
         <text class="queue-spec" wx:else>{{item.error}}</text>
         <view class="queue-time"
           ><text>{{item.time}} 提交</text

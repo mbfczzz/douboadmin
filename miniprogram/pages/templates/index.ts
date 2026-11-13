@@ -1,12 +1,21 @@
 import { request, tab, media, error, openPage, openTab } from "../../utils/api";
 import type { Row, Template, Config } from "../../services/types";
+import { layout } from "./masonry";
+import { navBottom } from "../../utils/nav-metrics";
+
+const PAGE_SIZE = 10;
+import type { Card } from "./masonry";
 Page({
   data: {
     items: [] as Row<Template>[],
     visibleCount: 4,
     page: 1,
     total: 0,
-    columns: [] as { id: number; items: Row<Template>[] }[],
+    hero: null as Card | null,
+    heroPlay: false, // the featured preview plays only while the page shows
+    stickyTop: 0,
+    hasMore: false,
+    columns: [] as ReturnType<typeof layout>["columns"],
     category: "推荐",
     categories: ["推荐"],
     search: "",
@@ -18,8 +27,12 @@ Page({
   loadedQuery: "",
   fetching: false,
   visible: true,
+  onLoad() {
+    this.setData({ stickyTop: navBottom() });
+  },
   onHide() {
     this.visible = false;
+    this.setData({ heroPlay: false });
     this.loadVersion++;
     this.fetching = false;
     this.setData({ loading: false });
@@ -31,6 +44,8 @@ Page({
   },
   onShow() {
     this.visible = true;
+    // The muted preview follows 作品预览自动播放 (off by default).
+    this.setData({ heroPlay: wx.getStorageSync("autoplay-preference") === true });
     tab(this, 0);
     void this.loadCategories();
     if (!this.loadedQuery) void this.load(true);
@@ -50,7 +65,7 @@ Page({
     this.setData({ loading: !preserve || append, loadError: "" });
     try {
       const result = await request<{items:Row<Template>[]; total:number}>(
-        query + "&page=" + page + "&size=4",
+        query + "&page=" + page + "&size=" + PAGE_SIZE,
         "GET",
         undefined,
         undefined,
@@ -67,16 +82,8 @@ Page({
         items,
         visibleCount,
         page, total: Array.isArray(result) ? result.length : result.total,
-        columns: [
-          {
-            id: 0,
-            items: items.slice(0, visibleCount).filter((_, i) => i % 2 === 0),
-          },
-          {
-            id: 1,
-            items: items.slice(0, visibleCount).filter((_, i) => i % 2 === 1),
-          },
-        ],
+        hasMore: !Array.isArray(result) && items.length < result.total,
+        ...layout(items.slice(0, visibleCount), this.data.category === this.data.categories[0] && !this.data.search),
       });
     } catch (e) {
       if (version !== this.loadVersion) return;
@@ -113,7 +120,11 @@ Page({
     void this.load(true);
   },
   more() {
-    if (this.data.page * 4 < this.data.total) void this.load(true,true);
+    if (this.data.items.length < this.data.total) void this.load(true,true);
+  },
+  // Scrolling to the bottom loads the next page; there is no "more" button.
+  onReachBottom() {
+    this.more();
   },
   choose(e: WechatMiniprogram.TouchEvent) {
     this.setData({ category: e.currentTarget.dataset.value });

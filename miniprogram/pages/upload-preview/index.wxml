@@ -1,22 +1,18 @@
 <nav-bar title="确认照片" back />
 <view class="subpage preview-page">
-  <view class="preview-frame">
-    <image class="preview" src="{{path}}" mode="aspectFit" bindtap="zoom" />
-    <view class="preview-zoom" bindtap="zoom" aria-label="放大检查照片">
-      <t-icon name="fullscreen" size="20" />
-    </view>
+  <view class="preview-frame" bindtap="zoom" aria-label="放大检查照片">
+    <image class="preview" src="{{path}}" mode="aspectFit" />
+    <view class="preview-zoom"><t-icon name="fullscreen" size="18" /></view>
   </view>
-  <view class="preview-name">{{name}}</view>
-  <view wx:if="{{uploaded}}" class="preview-hint"><t-icon name="check-circle" size="16" /> 已上传，返回后继续创作</view>
-  <text wx:else class="preview-hint">确认商品主体清晰、完整，没有被遮挡。</text>
-  <view class="foot-actions">
-    <view>
-      <t-button block bind:tap="back">重新选择</t-button>
-    </view>
-    <view>
-      <t-button block theme="primary" loading="{{busy}}" bind:tap="confirm">
-        {{uploaded?'返回继续':'使用这张照片'}}
-      </t-button>
-    </view>
+  <text class="preview-name">{{name}}</text>
+  <view wx:if="{{uploaded}}" class="preview-done"><t-icon name="check-circle-filled" size="16" /><text>已上传，返回后继续创作</text></view>
+  <view wx:else class="preview-checks">
+    <view class="preview-check"><t-icon name="check-circle" size="16" /><text>主体清晰</text></view>
+    <view class="preview-check"><t-icon name="check-circle" size="16" /><text>完整不裁切</text></view>
+    <view class="preview-check"><t-icon name="check-circle" size="16" /><text>无遮挡</text></view>
+  </view>
+  <view class="preview-bar">
+    <view wx:if="{{!uploaded}}" class="preview-again" bindtap="back" aria-role="button"><t-icon name="refresh" size="18" /><text>重新选择</text></view>
+    <button class="preview-use {{busy?'is-busy':''}}" loading="{{busy}}" disabled="{{busy}}" bindtap="confirm">{{uploaded?'返回继续':'使用这张照片'}}</button>
   </view>
 </view>

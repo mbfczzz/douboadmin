@@ -1,48 +1,59 @@
 <nav-bar title="模板" />
 <view class="page templates-page">
-  <view class="search-field">
-    <t-icon name="search" size="20" />
-    <input
-      placeholder="搜索你想要的画面"
-      placeholder-class="muted"
-      value="{{search}}"
-      bindinput="input"
-      confirm-type="search"
-      bindconfirm="search"
-    />
-    <button wx:if="{{search}}" class="clear-search" bindtap="clearSearch" aria-label="清空搜索"><t-icon name="close" size="16" /></button>
-    <text bindtap="search">搜索</text>
-  </view>
-  <scroll-view scroll-x class="filter-scroll">
-    <view
-      wx:for="{{categories}}"
-      wx:key="*this"
-      class="filter {{category===item?'active':''}}"
-      data-value="{{item}}"
-      bindtap="choose"
-    >
-      {{item}}
+  <view class="catalog-head" style="top:{{stickyTop}}px">
+    <view class="search-field">
+      <t-icon name="search" size="20" />
+      <input
+        placeholder="搜索你想要的画面"
+        placeholder-class="muted"
+        value="{{search}}"
+        bindinput="input"
+        confirm-type="search"
+        bindconfirm="search"
+      />
+      <button wx:if="{{search}}" class="clear-search" bindtap="clearSearch" aria-label="清空搜索"><t-icon name="close" size="16" /></button>
     </view>
-  </scroll-view>
-  <view wx:if="{{loading}}" class="waterfall" aria-label="正在加载模板">
+    <scroll-view scroll-x class="filter-scroll">
+      <view
+        wx:for="{{categories}}"
+        wx:key="*this"
+        class="filter {{category===item?'active':''}}"
+        data-value="{{item}}"
+        bindtap="choose"
+      >
+        {{item}}
+      </view>
+    </scroll-view>
+  </view>
+  <view wx:if="{{loading&&!items.length}}" class="waterfall" aria-label="正在加载模板">
     <view class="column" wx:for="{{[0,1]}}" wx:for-item="column" wx:key="*this">
       <view class="template" wx:for="{{[0,1]}}" wx:key="*this">
-        <view class="cover skeleton {{column===1?'alternate':''}}" />
+        <view class="cover skeleton" style="padding-top:{{column===item?'150%':'110%'}}" />
         <view class="skeleton skeleton-title" />
       </view>
     </view>
   </view>
   <view wx:elif="{{loadError}}" class="empty">
+    <view class="empty-icon"><t-icon name="wifi-off" size="30" /></view>
     <text>{{loadError}}</text>
-    <t-button t-class="empty-action" theme="primary" bind:tap="load">重试</t-button>
+    <text class="empty-link" bindtap="load">重试 ›</text>
   </view>
   <view wx:elif="{{!items.length}}" class="empty">
-    <t-icon name="video-camera" size="40" />
+    <view class="empty-icon"><t-icon name="{{search?'search':'video-camera'}}" size="30" /></view>
     <text class="title">{{search?'没有找到相关模板':category===categories[0]?'模板正在上新':'还没有这类模板'}}</text>
     <text class="desc">{{search?'换个关键词试试。':category===categories[0]?'可以先在创作页自由生成。':'换个分类，继续发现灵感。'}}</text>
-    <t-button wx:if="{{!search&&category===categories[0]}}" t-class="empty-action" theme="primary" bind:tap="create">去创作</t-button>
+    <text wx:if="{{!search&&category===categories[0]}}" class="empty-link" bindtap="create">去创作 ›</text>
   </view>
-  <view wx:else class="waterfall content-reveal">
+  <view wx:if="{{hero&&!loadError&&items.length}}" class="hero content-reveal" data-id="{{hero.id}}" bindtap="detail" hover-class="card-pressed">
+    <video wx:if="{{heroPlay&&hero.data.preview}}" class="hero-media" src="{{hero.data.preview}}" poster="{{hero.data.cover}}" autoplay muted loop object-fit="cover" controls="{{false}}" show-center-play-btn="{{false}}" show-play-btn="{{false}}" show-fullscreen-btn="{{false}}" enable-progress-gesture="{{false}}" />
+    <image wx:else class="hero-media" mode="aspectFill" src="{{hero.data.cover}}" />
+    <view class="hero-copy">
+      <text wx:if="{{hero.length}}" class="length">{{hero.length}}</text>
+      <text class="hero-title">{{hero.data.title}}</text>
+      <view class="hero-meta"><text>{{hero.needs}}</text><text class="hero-go">做同款 ›</text></view>
+    </view>
+  </view>
+  <view wx:if="{{items.length&&!loadError}}" class="waterfall content-reveal">
     <view
       class="column"
       wx:for="{{columns}}"
@@ -58,15 +69,14 @@
         bindtap="detail"
         hover-class="card-pressed"
       >
-        <view class="cover {{col===1?'alternate':''}}">
+        <view class="cover" style="padding-top:{{item.coverPct}}">
           <image mode="aspectFill" src="{{item.data.cover}}" lazy-load />
-          <view class="play">
-            <t-icon name="play" size="16" />
-          </view>
+          <text wx:if="{{item.length}}" class="length">{{item.length}}</text>
         </view>
         <text class="title">{{item.data.title}}</text>
+        <text class="needs">{{item.needs}}</text>
       </view>
     </view>
   </view>
-  <view class="end" wx:if="{{total>page*4}}" bindtap="more" aria-role="button">{{loading?'加载中…':'查看更多模板'}}</view>
+  <view class="end" wx:if="{{items.length&&!loadError}}">{{hasMore?(loading?'加载中…':'上滑加载更多'):'已经到底了'}}</view>
 </view>

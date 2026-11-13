@@ -1,3 +1,5 @@
+import { pullRefresh } from "../../utils/refresh";
+import { ask } from "../../services/dialog";
 import {
   request,
   error,
@@ -16,7 +18,7 @@ import {
   paymentMessage,
   watchPayment,
 } from "../../services/payment-status";
-import { ledgerView } from "../../services/wallet-ledger";
+import { productCards, ledgerRows, loadInsights, loadArt } from "./insights";
 import type { Ledger } from "../../services/wallet-ledger";
 import { financePage } from "../../services/finance-page";
 import type { FinancePage } from "../../services/finance-page";
@@ -28,7 +30,7 @@ import {
 } from "../../services/wallet-checkout";
 Page({
   explain() {
-    wx.showModal({ title: "积分说明", content: "提交创作时预留积分，生成成功后从预留中结算，明确失败后退回。预留中的积分暂时不可用，最终变动以积分明细为准。", showCancel: false, confirmText: "知道了" });
+    void ask({ title: "积分说明", content: "提交创作时先预留积分，生成成功后结算，失败自动退回。预留中的积分暂不可用，以积分明细为准。", showCancel: false, confirmText: "知道了", icon: "info-circle" });
   },
   data: walletData,
   revision: 0,
@@ -65,6 +67,9 @@ Page({
       error(e);
     }
   },
+  onPullDownRefresh() {
+    void pullRefresh(() => this.load());
+  },
   async load() {
     if (this.destroyed) return;
     if (this.refreshTimer !== undefined) clearTimeout(this.refreshTimer);
@@ -95,12 +100,8 @@ Page({
       if (ledger) this.loadedLedgerPage = ledger.page;
       this.setData({
         info,
-        products: (info.virtualProducts || []).map((p) => ({
-          id: p.id,
-          name: p.name,
-          amount: money(p.amountFen),
-          points: points(p.pointsUnits),
-        })),
+        products: productCards(info.virtualProducts || []),
+        price100: info.pricing?.retailPer100Fen ? money(info.pricing.retailPer100Fen) : "",
         productId: info.virtualProducts?.some(
           (p) => p.id === this.data.productId,
         )
@@ -111,7 +112,7 @@ Page({
         allowed: canRecharge(info),
         needsLogin: false,
         error: ledger ? "" : "余额已更新，积分流水暂时无法加载，点击重试",
-        ledger: ledger ? ledger.items.map(ledgerView) : this.data.ledger,
+        ledger: ledger ? ledgerRows(ledger.items) : this.data.ledger,
         ...(ledger
           ? {
               ledgerPage: ledger.page,
@@ -121,6 +122,8 @@ Page({
           : { ledgerPage: this.loadedLedgerPage }),
       });
       this.estimate();
+      void loadInsights(this);
+      void loadArt(this);
       this.trackPayment(pendingPayment(info.wallet.userId));
     } catch (e) {
       if (revision === this.revision) {

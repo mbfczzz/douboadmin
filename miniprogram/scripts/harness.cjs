@@ -104,6 +104,7 @@ function harness(timers = {}) {
     return {
       ...capturedComponent.methods,
       pageLifetimes: capturedComponent.pageLifetimes || {},
+      lifetimes: capturedComponent.lifetimes || {},
       data: JSON.parse(JSON.stringify(capturedComponent.data)),
       setData(v) {
         Object.assign(this.data, v);

@@ -39,7 +39,49 @@ console.log(
 // see docs/miniprogram-ui-review-fixes.md.
 // Jimeng UI alignment: typography, navigation, upload and payment states.
 // Closeout estimate: 579,421 bytes; see docs/miniprogram-ui-closeout.md.
-const budget = 566 * 1024;
+// Activation entry: segmented invite code (8 cells, auto dash, paste) and a
+// tappable scan viewfinder (+8,203 bytes); then illustrated empty, logged-out
+// and waiting states: real template covers (components/showcase) or a quiet
+// theme icon, with text links:
+// 590,294 bytes in total. The product owner chose visuals over package size;
+// see docs/miniprogram-invite-code-budget.md. Templates page masonry cards,
+// text category tabs, scroll loading, a featured (optionally playing) template
+// and a pinned search/category header: 597,729 bytes. Mix form always shown,
+// with choice tiles, sliders and a pinned start bar: 600,907 bytes. Create page
+// parameters in a sheet, an inspiration strip of
+// template covers and a task-queue link: 604,851 bytes. Create sub-sheets:
+// upload source tiles, an @ thumbnail picker and an in-page reference viewer
+// (components/media-viewer) replacing native action sheet/preview, shared source
+// tiles on the template upload sheet and a darkroom photo-confirm page: 615,495 bytes.
+// Themed confirm dialog (components/ui-dialog) replacing every native white
+// wx.showModal, with a native fallback: 622,389 bytes. Agent page: starter
+// cards, flowing replies with copy/use actions, typing dots and a pill
+// composer: 625,747 bytes. Then a centred empty state, shot-labelled script
+// replies, follow-up chips and a failed-reply state: 629,535 bytes. Mine page:
+// side-by-side header, slim points row, 3-column cover wall: 632,432 bytes.
+// Then a blurred latest-cover backdrop, letter avatar, unread badge and a
+// shimmering generating tile: 635,179 bytes. Role card under the points and a
+// single row of recent covers: 635,748 bytes. Template detail: immersive hero
+// with chips and favorite, square upload slots, a compact price/pill bar:
+// 637,199 bytes. Then a bottom button that uploads until ready, a 更多同款灵感
+// strip, a settling cover and a light haptic on favorite: 638,294 bytes.
+// Sub-pages: result icon actions, favorites cover wall, live queue tiles, text
+// sort tabs, notice tone icons, segmented purchase switch, quiet sign-out:
+// 645,050 bytes. 我的 sub-pages: centred-avatar profile list, compact order
+// cards, help accordion with inline feedback, wallet wash, provider glyph:
+// 649,160 bytes. QA pass: live progress stage for queued/running work, pending
+// payment card, consistent logged-out states: 651,457 bytes. Wallet and
+// orders detail: price per 100 points, what the balance buys (live quotes),
+// best-value packages, ledger days and balances, order steps, payment window
+// and expandable details: 663,974 bytes. More 我的 detail: task progress and
+// counters, notices by day, settings help/privacy/version, collection counts,
+// provider stat tiles: 669,493 bytes. Detail pass: grouped thousands in
+// points, pull-to-refresh, list skeletons, pill pager, long-press unfavorite,
+// time-only rows under day headings, settings icons: 674,740 bytes. Imagery
+// from real covers on finance pages (package fans, order thumbnails, balance
+// fan, "能做什么" tiles) and work thumbnails on notices: 680,985 bytes. Audit sweep: last old-style
+// buttons and bare empty states replaced: 681,519 bytes.
+const budget = 668 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

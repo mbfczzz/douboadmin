@@ -50,7 +50,7 @@ test("a roomy screen retains the designed downward dropdown", () => {
   f.page.showModels();
   f.measure();
   assert.equal(f.page.data.modelMenuUp, false);
-  assert.equal(f.page.data.modelMenuHeight, 316);
+  assert.equal(f.page.data.modelMenuHeight, 238);
 });
 
 test("model menus reserve the custom tab bar as well as the home indicator", () => {

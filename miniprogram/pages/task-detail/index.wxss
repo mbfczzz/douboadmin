@@ -41,10 +41,13 @@
 }
 .failure-reason {
   overflow-wrap: anywhere;
-  font-size: 13px;
-  color: var(--ui-muted);
-  line-height: 1.5;
   margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #ff8a94;
+  background: #ff5c6c14;
 }
 .waiting-note {
   margin-top: 16px;
@@ -63,8 +66,8 @@
 }
 .result {
   position: relative;
-  margin-top: 24px;
-  border-radius: 12px;
+  margin-top: 20px;
+  border-radius: 20px;
   overflow: hidden;
   background: var(--ui-field);
 }
@@ -73,19 +76,70 @@
   width: 100%;
 }
 .result video {
-  height: 320px;
+  height: 60vh;
+  max-height: 520px;
 }
-.task-detail-page .foot-actions {
-  gap: 10px;
-  margin: 12px 0 0;
-}
-.danger-link {
-  display: block;
-  margin: 32px auto 0;
-  color: var(--ui-danger);
-}
+/* Result actions: four round icons under the work, no stacked buttons. */
 .result-actions {
-  margin-top: 10px;
+  display: flex;
+  justify-content: space-around;
+  margin: 18px 0 8px;
+}
+.act {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 64px;
+  font-size: 12px;
+  color: var(--ui-muted);
+}
+.act-pressed {
+  opacity: 0.6;
+}
+.act-icon {
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: var(--ui-text);
+  background: var(--ui-surface);
+}
+.act-icon.primary {
+  color: var(--ui-on-brand);
+  background: var(--ui-primary);
+}
+.act-icon.danger {
+  color: #ff8a94;
+}
+.failed-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 16px;
+}
+button.retry-pill {
+  width: auto;
+  height: 44px;
+  margin: 0;
+  padding: 0 22px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ui-on-brand);
+  background: var(--ui-primary);
+}
+button.retry-pill::after {
+  border: 0;
+}
+.edit-link {
+  font-size: 14px;
+  color: var(--ui-text);
 }
 .stage-note {
   margin-top: 8px;
@@ -162,4 +216,58 @@
 }
 .task-detail-page .note {
   font-size: 13px;
+}
+
+/* Queued / running: a tall cyan-washed stage with a sheen and a progress bar,
+   holding the place the finished work will take. */
+.live-stage {
+  position: relative;
+  height: 44vh;
+  max-height: 380px;
+  margin-top: 20px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  border-radius: 20px;
+  background: linear-gradient(160deg, #00c8dc29, #6c63ff1f 55%, var(--ui-surface));
+}
+.live-stage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 30%, #ffffff12 50%, transparent 70%);
+  transform: translateX(-100%);
+  animation: live-sheen 2.4s ease-in-out infinite;
+}
+@keyframes live-sheen {
+  to { transform: translateX(100%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .live-stage::after { animation: none; }
+}
+.live-ring {
+  color: var(--ui-brand);
+}
+.live-title {
+  font-size: 16px;
+  font-weight: 600;
+}
+.live-bar {
+  width: 56%;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: #ffffff1f;
+}
+.live-bar view {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--ui-brand);
+  transition: width 400ms ease;
+}
+.live-stage .stage-note {
+  margin: 0;
 }

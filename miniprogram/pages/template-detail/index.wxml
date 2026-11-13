@@ -4,110 +4,79 @@
     <view class="hero skeleton" />
     <view class="skeleton skeleton-line" />
     <view class="skeleton skeleton-line short" />
-    <view class="required-upload skeleton" style="height:126px" />
+    <view class="slot-row loading-row"><view class="slot skeleton" /><view class="slot skeleton" /></view>
   </view>
   <view wx:elif="{{loadError}}" class="empty">
+    <view class="empty-icon"><t-icon name="{{loadError==='模板已下架'?'image-error':'wifi-off'}}" size="30" /></view>
     <text>{{loadError}}</text>
-    <t-button t-class="empty-action" theme="primary" wx:if="{{loadError!=='模板已下架'}}" bind:tap="load">重试</t-button>
+    <text wx:if="{{loadError!=='模板已下架'}}" class="empty-link" bindtap="load">重试</text>
   </view>
   <view wx:elif="{{template}}" class="content-reveal">
-    <view wx:if="{{template.data.preview}}" class="hero"><video src="{{template.data.preview}}" poster="{{template.data.cover}}" controls object-fit="contain" /></view>
-    <view wx:else class="hero" bindtap="preview">
-      <image src="{{template.data.cover}}" mode="aspectFill" />
-      <view class="hero-preview"><t-icon name="fullscreen" size="20" /></view>
-    </view>
-    <view class="row title-row">
-      <text class="detail-title">{{template.data.title}}</text>
-      <view class="favorite" bindtap="favorite">
-        <t-icon
-          name="{{favorite?'heart-filled':'heart'}}"
-          color="{{favorite?'#00c8dc':'#a6a8ad'}}"
-          size="24"
-        />
+    <view class="hero">
+      <video wx:if="{{template.data.preview}}" src="{{template.data.preview}}" poster="{{template.data.cover}}" controls="{{!autoplay}}" autoplay="{{autoplay}}" loop muted="{{autoplay}}" object-fit="cover" />
+      <image wx:else src="{{template.data.cover}}" mode="aspectFill" bindtap="preview" />
+      <view class="hero-shade" />
+      <view class="hero-fav {{favorite?'on':''}}" catchtap="favorite" aria-role="button" aria-label="{{favorite?'取消收藏':'收藏'}}"><t-icon name="{{favorite?'heart-filled':'heart'}}" size="22" /></view>
+      <view class="hero-meta">
+        <view class="hero-chips">
+          <text wx:if="{{template.data.category}}" class="chip">{{template.data.category}}</text>
+          <text wx:if="{{template.data.duration}}" class="chip">{{template.data.duration}} 秒</text>
+          <text wx:if="{{template.data.ratio}}" class="chip">{{template.data.ratio}}</text>
+          <text wx:if="{{template.data.resolution}}" class="chip">{{template.data.resolution}}</text>
+        </view>
+        <text class="detail-title">{{template.data.title}}</text>
       </view>
     </view>
     <text wx:if="{{template.data.description}}" class="template-description">{{template.data.description}}</text>
-    <view class="detail-divider" />
-    <view class="row">
-      <text class="section-title upload-title">上传商品照片</text>
-      <text class="small muted">{{template.data.requiredImages?'必填 ':'选填'}}<block wx:if="{{template.data.requiredImages}}">{{assets.length>=template.data.requiredImages?template.data.requiredImages:assets.length}} / {{template.data.requiredImages}}</block></text>
+    <view class="section-head">
+      <text class="section-name">上传商品照片</text>
+      <text class="section-count {{assets.length>=template.data.requiredImages?'done':''}}">{{template.data.requiredImages?(assets.length>=template.data.requiredImages?template.data.requiredImages:assets.length)+' / '+template.data.requiredImages:'选填'}}</text>
     </view>
-    <text class="upload-description"><block wx:if="{{template.data.requiredImages}}">只需 {{template.data.requiredImages}} 张照片，即可制作同款视频</block><block wx:else>可以直接生成，也可以添加参考照片。</block></text>
-    <view class="required-upload" wx:if="{{!assets.length||assets.length<template.data.requiredImages}}" bindtap="choose">
-      <view class="upload-icon"><t-icon name="image-add" size="24" /></view>
-      <view>
-        <text class="upload-name">商品主体图</text>
-        <text class="upload-hint">正面清晰，效果更好</text>
-        <text class="upload-text">{{assets.length?'＋ 继续添加':'＋ 上传照片'}}</text>
+    <text class="upload-description"><block wx:if="{{template.data.requiredImages}}">只需 {{template.data.requiredImages}} 张照片，即可制作同款视频</block><block wx:else>可以直接生成，也可以添加参考照片</block></text>
+    <scroll-view scroll-x class="slots" enhanced show-scrollbar="{{false}}">
+      <view class="slot-row">
+        <view wx:for="{{assets}}" wx:key="id" class="slot uploaded">
+          <image src="{{item.data.url}}" mode="aspectFill" />
+          <text class="slot-tag">{{index>=template.data.requiredImages?'补充':'主体图'}}</text>
+          <view class="slot-remove" data-id="{{item.id}}" catchtap="remove" aria-role="button" aria-label="删除这张照片"><t-icon name="close" size="14" /></view>
+        </view>
+        <view wx:if="{{assets.length<template.data.requiredImages}}" class="slot add required" bindtap="choose" hover-class="slot-pressed" aria-role="button" aria-label="上传商品主体图">
+          <t-icon name="{{uploading?'time':'add'}}" size="26" /><text class="slot-name">商品主体图</text><text class="slot-hint">正面清晰</text>
+        </view>
+        <block wx:elif="{{!fixedCount}}">
+          <view wx:for="{{optionalNames}}" wx:key="*this" class="slot add optional" bindtap="choose" hover-class="slot-pressed" aria-role="button" aria-label="{{'添加'+item}}">
+            <t-icon name="add" size="20" /><text class="slot-name">{{item}}</text><text class="slot-hint">选填</text>
+          </view>
+        </block>
       </view>
-    </view>
-    <view class="uploaded" wx:for="{{assets}}" wx:key="id">
-      <image src="{{item.data.url}}" mode="aspectFill" />
-      <view class="uploaded-copy">
-        <text>{{item.data.name}}</text>
+    </scroll-view>
+    <text class="format">JPG / PNG / WebP · 单张不超过 50 MB · 上传不扣费</text>
+    <view class="more-head"><text class="section-name">更多同款灵感</text></view>
+    <showcase mode="strip" />
+    <view class="submit-bar {{assets.length>=template.data.requiredImages?'is-ready':''}}">
+      <view class="submit-copy">
+        <text class="submit-quote">{{quoteText||'正在估算积分'}}</text>
+        <text class="submit-status">{{assets.length>=template.data.requiredImages?(template.data.requiredImages?'照片已就绪':'可以直接生成'):'还需 '+(template.data.requiredImages-assets.length)+' 张照片'}}</text>
       </view>
-      <view class="delete" data-id="{{item.id}}" bindtap="remove">
-        <t-icon name="close" size="20" />
-      </view>
-    </view>
-    <text class="format">JPG / PNG / WebP · 单张不超过 50 MB</text>
-    <block wx:if="{{!fixedCount}}">
-    <view class="row section-title">
-      <text>补充素材</text>
-      <text class="muted small">选填，可跳过</text>
-    </view>
-    <view class="optional-grid">
-      <view wx:for="{{optionalNames}}" wx:key="*this" bindtap="choose">
-        <t-icon name="image" size="20" />
-        <text>{{item}}</text>
-        <t-icon name="add" size="16" />
-      </view>
-    </view>
-    </block>
-    <view class="submit-area {{assets.length>=template.data.requiredImages?'is-ready':''}}">
-      <view class="row submit-caption">
-        <text class="submit-status">{{assets.length>=template.data.requiredImages?(template.data.requiredImages?'照片已就绪，可以生成':'可以直接生成'):'还需 '+(template.data.requiredImages-assets.length)+' 张照片'}}</text>
-        <text wx:if="{{quoteText}}" class="submit-quote">{{quoteText}}</text>
-      </view>
-      <t-button
-        t-class="submit-action"
-        theme="primary"
-        block
-        size="large"
-        disabled="{{busy||uploading||assets.length<template.data.requiredImages}}"
-        loading="{{busy}}"
-        bind:tap="generate"
-      >
-        生成同款
-      </t-button>
-      <text class="note muted">上传不扣费 · 确认生成后提交任务</text>
-
+      <button class="submit-action {{assets.length>=template.data.requiredImages?'':'to-upload'}}" disabled="{{busy||uploading}}" loading="{{busy}}" bindtap="primary">{{assets.length>=template.data.requiredImages?'生成同款':'上传照片'}}</button>
     </view>
   </view>
 </view>
-<t-popup
-  visible="{{sourceOpen}}"
-  placement="bottom"
-  bind:visible-change="closeSource"
->
+<t-popup visible="{{sourceOpen}}" placement="bottom" bind:visible-change="closeSource">
   <view class="photo-sources">
+    <view class="sheet-handle" />
     <view class="photo-source-heading">
       <text>上传商品照片</text>
-      <view class="photo-source-close" bindtap="closeSource"
-        ><t-icon name="close" size="20"
-      /></view>
+      <view class="photo-source-close" bindtap="closeSource"><t-icon name="close" size="20" /></view>
     </view>
-    <view
-      class="photo-source"
-      wx:for="{{sources}}"
-      wx:key="label"
-      data-index="{{index}}"
-      bindtap="chooseSource"
-    >
-      <t-icon name="{{item.icon}}" size="24" />
-      <text>{{item.label}}</text>
-      <t-icon name="chevron-right" size="20" />
+    <view class="source-grid">
+      <view wx:for="{{sources}}" wx:key="label" class="source-tile" data-index="{{index}}" bindtap="chooseSource" hover-class="source-pressed">
+        <view class="source-glyph glyph-{{item.tone}}"><t-icon name="{{item.icon}}" size="26" /></view>
+        <text class="source-name">{{item.label}}</text>
+        <text class="source-hint">{{item.hint}}</text>
+      </view>
     </view>
-    <text class="photo-source-note">JPG / PNG / WebP · 单张不超过 50 MB</text>
+    <text class="source-note">JPG / PNG / WebP · 单张不超过 50 MB</text>
   </view>
 </t-popup>
+<ui-dialog id="ui-dialog" />

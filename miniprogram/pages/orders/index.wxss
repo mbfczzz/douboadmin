@@ -1,107 +1,118 @@
 @import "../../styles/business.wxss";
-.order-state {
-  padding: 2px 8px;
-  line-height: 18px;
-}
-.order-meta {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding-top: 16px;
-  border-top: 1px solid var(--ui-border);
-  color: var(--ui-muted);
-  font-size: 12px;
-}
-.order-amount {
-  flex: 1;
-  min-width: 0;
-  display: block;
-  font-size: 24px;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  overflow-wrap: anywhere;
-}
+@import "../../styles/job-pagination.wxss";
+@import "./details.wxss";
+/* Orders: one compact card each — points as the title, amount and state on
+   the right, the order number on a quiet copyable line. */
 .order-card {
-  padding: 20px;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: var(--ui-surface);
 }
 .order-head {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 12px;
+}
+.order-head .icon-tile {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  color: var(--ui-brand);
+  background: #00c8dc1a;
+}
+.order-head .icon-tile.paid {
+  color: var(--ui-success);
+  background: var(--ui-success-bg);
+}
+.order-head .icon-tile.refunded {
+  color: var(--ui-muted);
+  background: var(--ui-field);
 }
 .order-title {
   flex: 1;
   min-width: 0;
-  font-size: 15px;
-  font-weight: 500;
-  overflow-wrap: anywhere;
 }
-.order-title text {
+.order-points {
   display: block;
+  font-size: 16px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
 .order-title .biz-small {
-  margin-top: 4px;
-  font-weight: 400;
+  display: block;
+  overflow: hidden;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.order-side {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+.order-amount {
+  font-size: 16px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
 .order-state {
-  max-width: 40%;
-  flex-shrink: 0;
-}
-.order-values {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin: 24px 0 20px;
-}
-.order-values > view {
-  min-width: 0;
-}
-.order-head .icon-tile {
-  color: var(--ui-points);
-  background: var(--ui-points-bg);
-}
-.order-values > view:first-child .order-amount {
-  font-size: 18px;
-}
-.order-values > view:last-child .order-amount {
-  color: var(--ui-points);
-}
-.order-values.long-values {
-  grid-template-columns: 1fr;
-}
-.order-unit {
-  font-size: 12px;
-  font-weight: 400;
-  margin-left: 6px;
-}
-.order-id,
-.order-result {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  color: var(--ui-muted);
+  padding: 2px 8px;
+  font-size: 11px;
+  line-height: 18px;
 }
 .order-id {
-  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--ui-border);
+  font-size: 12px;
+  color: var(--ui-muted);
 }
 .id-value {
   flex: 1;
   min-width: 0;
-  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-.order-result.paid {
-  color: var(--ui-success);
-}
-.order-card .biz-action {
-  min-height: 48px;
-  padding: 12px 6px;
-  font-size: 13px;
-}
-.order-card .button-content {
-  gap: 6px;
   white-space: nowrap;
+  font-family: monospace;
+}
+.order-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 18px;
+  margin-top: 12px;
+}
+.order-check {
+  padding: 12px 0;
+  font-size: 14px;
+  color: var(--ui-text);
+}
+.order-check.is-busy {
+  opacity: 0.5;
+}
+button.order-pay {
+  width: auto;
+  height: 44px;
+  margin: 0;
+  padding: 0 18px;
+  display: flex;
+  align-items: center;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ui-on-brand);
+  background: var(--ui-primary);
+}
+button.order-pay::after {
+  border: 0;
 }

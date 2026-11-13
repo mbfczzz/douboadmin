@@ -1,1 +1,54 @@
 @import "../../styles/business.wxss";
+
+/* Sign-out: a quiet red row at the end, not a big button. */
+.sign-out {
+  margin-top: 24px;
+  padding: 14px 0;
+  border-radius: 14px;
+  text-align: center;
+  font-size: 15px;
+  color: #ff8a94;
+  background: var(--ui-surface);
+}
+.sign-out-pressed {
+  opacity: 0.7;
+}
+
+/* 通用: help, privacy and the running version as plain rows. */
+.general {
+  padding: 4px 16px;
+}
+.general-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  font-size: 15px;
+}
+.general-row + .general-row {
+  border-top: 1px solid var(--ui-border);
+}
+.general-row > t-icon:first-child {
+  color: var(--ui-muted);
+}
+.general-row > text:first-of-type {
+  flex: 1;
+}
+.general-row > t-icon:last-child {
+  color: var(--ui-muted);
+}
+.general-value {
+  font-size: 13px;
+  color: var(--ui-muted);
+}
+.row-pressed {
+  opacity: 0.7;
+}
+.pref-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.pref-label t-icon {
+  color: var(--ui-muted);
+}

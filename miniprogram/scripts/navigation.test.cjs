@@ -104,17 +104,17 @@ test("returning to templates preserves rendered items during paged refresh", asy
     });
   const refresh = page.load(true);
   assert.equal(page.data.loading, false);
-  assert.equal(page.data.columns.flatMap((c) => c.items).length, 7);
+  assert.equal(page.data.columns.flatMap((c) => c.items).length + (page.data.hero ? 1 : 0), 7);
   complete(rows);
   await refresh;
-  assert.equal(page.data.columns.flatMap((c) => c.items).length, 7);
+  assert.equal(page.data.columns.flatMap((c) => c.items).length + (page.data.hero ? 1 : 0), 7);
   assert.equal(page.data.visibleCount, 7);
   h.api.request = async () => {
     throw new Error("offline");
   };
   await page.load(true);
   assert.equal(page.data.loadError, "");
-  assert.equal(page.data.columns.flatMap((c) => c.items).length, 7);
+  assert.equal(page.data.columns.flatMap((c) => c.items).length + (page.data.hero ? 1 : 0), 7);
 });
 
 test("route changes and foregrounding keep page content fully visible without restarting an animation", () => {

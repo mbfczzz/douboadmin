@@ -9,16 +9,10 @@
   <view wx:if="{{loading}}" class="loading"
     ><t-loading text="正在读取资料"
   /></view>
-  <view wx:elif="{{needsLogin}}" class="profile-login"
-    ><text class="profile-note">登录后编辑你的个人资料</text
-    ><button
-      class="biz-action"
-      bindtap="signIn"
-      loading="{{busy}}"
-      disabled="{{busy}}"
-    >
-      去登录
-    </button></view
+  <view wx:elif="{{needsLogin}}" class="empty"
+    ><view class="empty-icon"><t-icon name="user" size="30" /></view
+    ><text class="title">登录后编辑你的个人资料</text
+    ><text class="empty-link" bindtap="signIn">{{busy?'正在登录…':'去登录 ›'}}</text></view
   >
   <view wx:elif="{{loadError&&!me}}" class="biz-error" bindtap="load"
     >{{loadError}} · 点击重试</view
@@ -38,7 +32,7 @@
           src="{{avatarUrl}}"
           mode="aspectFill"
         /><t-icon wx:else name="user" size="32" />
-        <view class="profile-camera"><t-icon name="edit" size="16" /></view>
+        <view class="profile-camera"><t-icon name="camera" size="16" /></view>
       </view>
       <view class="profile-avatar-copy"
         ><text class="profile-avatar-label"
@@ -186,3 +180,4 @@
     >
   </form>
 </view>
+<ui-dialog id="ui-dialog" />

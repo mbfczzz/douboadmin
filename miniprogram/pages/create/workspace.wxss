@@ -111,6 +111,7 @@
   bottom: 124px;
   font-size: 12px;
   color: var(--ui-muted);
+  line-height: 16px; /* a fixed box: its top must clear the prompt's last line */
 }
 .quote-note {
   max-width: 45%;
@@ -125,6 +126,10 @@
   color: var(--ui-text);
   overflow-wrap: anywhere;
   word-break: keep-all;
+}
+.quote-note.quote-idle {
+  font-weight: 400;
+  color: var(--ui-muted);
 }
 .quote-note.quote-retry {
   color: var(--ui-warning);
@@ -165,16 +170,6 @@
   text-overflow: ellipsis;
 }
 /* The model yields width; estimated cost wraps instead of hiding digits. */
-.spec {
-  display: block;
-  margin-top: 2px;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: var(--ui-muted);
-  white-space: nowrap;
-  font-size: 12px;
-}
 .generate-button {
   width: 80px;
   flex-shrink: 0;

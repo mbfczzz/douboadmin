@@ -18,26 +18,29 @@ function css(file: string, width: number): string {
 for (const width of [320, 375, 430]) {
   test(`virtual-host icons leave room for source and favorite text at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
-    const styles = ["styles/theme.wxss", "styles/common.wxss", "pages/create/menus.wxss", "pages/library/index.wxss"]
+    const styles = ["styles/theme.wxss", "styles/common.wxss", "styles/sheets.wxss", "pages/create/menus.wxss", "pages/library/index.wxss"]
       .map((file) => css(file, width)).join("\n");
-    const source = readFileSync(path.join(root, "pages/create/index.wxml"), "utf8");
-    const sheet = source.slice(source.indexOf('<view wx:if="{{allowImage}}"'), source.lastIndexOf("</t-popup>"))
+    const source = readFileSync(path.join(root, "pages/create/parts/sheets.wxml"), "utf8");
+    const start = source.indexOf('<view class="source-grid">');
+    const sheet = source.slice(start, source.indexOf('<text class="source-note">', start))
       .replace(/<t-icon\b[^>]*size="(\d+)"[^>]*\/>/g, (_, size) => `<view class="icon-root" style="width:${size}px;height:${size}px"></view>`)
       .replace(/{{[^}]+}}/g, "")
       .replace(/<(\/?)(view|text)\b/g, (_, close, tag) => `<${close}${tag === "view" ? "div" : "span"}`);
     await page.setContent(`<style>body{margin:0;font-family:sans-serif}.icon-root{flex-shrink:0}${styles}scroll-view{display:block}</style>
       <div class="reference-sheet">${sheet}
-      <div class="favorite-card"><img alt="" /><div class="favorite-copy"><span>收藏的模板名称</span><span class="small">分类 · 制作同款</span></div><div class="icon-root" style="width:24px;height:24px"></div></div>
+      <div class="favorite-grid"><div class="favorite-card"><img alt="" /><div class="favorite-heart"></div><div class="favorite-copy"><span class="favorite-title">收藏的模板名称收藏的模板名称收藏的模板名称</span><span class="favorite-go">人物写真 · 做同款 ›</span></div></div><div class="favorite-card"></div></div>
       <scroll-view class="model-menu is-open" style="position:relative;left:0;height:248px"></scroll-view>`);
-    await expect(page.locator(".source-copy")).toHaveCount(3);
+    await expect(page.locator(".source-tile")).toHaveCount(3);
     for (const hint of await page.locator(".source-hint").all()) {
       expect((await hint.boundingBox())!.height).toBeLessThan(20);
     }
-    for (const arrow of await page.locator(".source-option > .icon-root:last-child").all()) {
-      expect((await arrow.boundingBox())!.width).toBe(20);
+    for (const glyph of await page.locator(".source-glyph > .icon-root").all()) {
+      expect((await glyph.boundingBox())!.width).toBe(26);
     }
-    expect((await page.locator(".favorite-card > .icon-root").boundingBox())!.width).toBe(24);
-    expect((await page.locator(".favorite-copy").boundingBox())!.width).toBeGreaterThan(100);
+    // Two cover cards per row; a long title clamps to two lines inside the card.
+    const cards = await Promise.all((await page.locator(".favorite-card").all()).map((c) => c.boundingBox()));
+    expect(Math.round(cards[0]!.y)).toBe(Math.round(cards[1]!.y));
+    expect((await page.locator(".favorite-title").boundingBox())!.height).toBeLessThanOrEqual(41);
     const menu = (await page.locator(".model-menu").boundingBox())!;
     expect(menu.width).toBe(248);
     expect(menu.height).toBe(248);
@@ -93,11 +96,14 @@ for (const width of [320, 375, 430]) {
         };
       }),
     );
+    // Inline rows: label left, value right, centred on one 56px line.
     for (let i = 0; i < fields.length; i++) {
-      expect(fields[i].inputTop - fields[i].labelBottom).toBeCloseTo(8, 0);
-      expect(fields[i].inputBottom - fields[i].inputTop).toBe(52);
-      if (i)
-        expect(fields[i].inputTop - fields[i - 1].inputBottom).toBeGreaterThanOrEqual(24);
+      const labelMid = (fields[i].top + fields[i].labelBottom) / 2,
+        inputMid = (fields[i].inputTop + fields[i].inputBottom) / 2;
+      expect(Math.abs(labelMid - inputMid)).toBeLessThan(2);
+      expect(fields[i].inputLeft).toBeGreaterThanOrEqual(fields[i].labelRight);
+      expect(fields[i].inputBottom - fields[i].inputTop).toBe(56);
+      if (i) expect(fields[i].inputTop - fields[i - 1].inputBottom).toBeLessThan(4);
     }
     await expect(page.locator(".profile-readonly-fields input")).toHaveCount(0);
     expect(
@@ -109,7 +115,7 @@ for (const width of [320, 375, 430]) {
     });
   });
 
-  test(`real optional-material labels stay on one line at ${width}px`, async ({
+  test(`upload slots keep labels on one line in a single row at ${width}px`, async ({
     page,
   }) => {
     await page.setViewportSize({ width, height: 700 });
@@ -120,26 +126,19 @@ for (const width of [320, 375, 430]) {
     ]
       .map((file) => css(file, width))
       .join("\n");
+    const names = ["商品主体图", "场景照片", "品牌标识", "商品特写", "宣传文案图"];
     await page.setContent(
-      `<style>body{margin:0;font-family:sans-serif}t-icon{display:block;flex-shrink:0}t-icon:first-child{width:18px;height:18px}t-icon:last-child{width:17px;height:17px}${styles}</style><div class="detail"><div class="optional-grid">${["场景照片", "品牌标识", "商品特写", "宣传文案图"].map((name) => `<div><t-icon></t-icon><span>${name}</span><t-icon></t-icon></div>`).join("")}</div></div>`,
+      `<style>body{margin:0;font-family:sans-serif}t-icon{display:block;flex-shrink:0;width:20px;height:20px}${styles}</style><div class="detail"><div class="slots" style="display:block;overflow-x:auto"><div class="slot-row">${names.map((name, i) => `<div class="slot add ${i ? "optional" : "required"}"><t-icon></t-icon><span class="slot-name">${name}</span><span class="slot-hint">选填</span></div>`).join("")}</div></div></div>`,
     );
     const labels = await page
-      .locator(".optional-grid span")
-      .evaluateAll((nodes) =>
-        nodes.map((node) => node.getBoundingClientRect().height),
-      );
-    labels.forEach((height) => expect(height).toBeLessThanOrEqual(23));
-    const cells = await page
-      .locator(".optional-grid > div")
-      .evaluateAll((nodes) =>
-        nodes.map((node) => node.getBoundingClientRect().top),
-      );
-    expect(cells[0] === cells[1]).toBe(width > 360);
-    expect(
-      await page.evaluate(() => document.documentElement.scrollWidth),
-    ).toBe(width);
-    await page.screenshot({
-      path: `../.runtime/mini-optional-groups-${width}.png`,
-    });
+      .locator(".slot-name")
+      .evaluateAll((nodes) => nodes.map((node) => node.getBoundingClientRect().height));
+    labels.forEach((height) => expect(height).toBeLessThanOrEqual(20));
+    const tops = await page
+      .locator(".slot")
+      .evaluateAll((nodes) => nodes.map((node) => Math.round(node.getBoundingClientRect().top)));
+    expect(new Set(tops).size).toBe(1);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(width);
+    await page.screenshot({ path: `../.runtime/mini-upload-slots-${width}.png` });
   });
 }

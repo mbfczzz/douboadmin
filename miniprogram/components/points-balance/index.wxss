@@ -89,3 +89,48 @@ button.action {
   margin-right: 4px;
   font-size: 1em;
 }
+.balance-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: linear-gradient(120deg, #00c8dc1f, #6c63ff1a 60%, var(--ui-surface));
+  color: var(--ui-muted);
+}
+.row-pressed {
+  opacity: 0.75;
+}
+.row-mark {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  font-size: 18px;
+  color: #fff;
+  background: linear-gradient(135deg, #00c8dc, #6c63ff);
+}
+.row-copy {
+  flex: 1;
+  min-width: 0;
+}
+.row-amount {
+  display: block;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 26px;
+  color: var(--ui-text);
+  font-variant-numeric: tabular-nums;
+}
+.row-label {
+  display: block;
+  font-size: 12px;
+  line-height: 18px;
+}
+.row-go {
+  font-size: 13px;
+  color: var(--ui-text);
+}

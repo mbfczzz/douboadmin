@@ -23,15 +23,41 @@
   border-bottom: 1px solid var(--ui-border);
 }
 .queue-thumb {
+  position: relative;
   width: 64px;
   height: 80px;
   flex-shrink: 0;
-  border-radius: 8px;
+  overflow: hidden;
+  border-radius: 12px;
   background: var(--ui-field);
   color: var(--ui-muted);
   display: flex;
   align-items: center;
   justify-content: center;
+}
+/* Work in progress: a cyan-tinted tile with a sweeping sheen. */
+.queue-thumb.running,
+.queue-thumb.queued {
+  color: var(--ui-brand);
+  background: linear-gradient(160deg, #00c8dc2e, var(--ui-field) 75%);
+}
+.queue-thumb.running::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 30%, #ffffff17 50%, transparent 70%);
+  transform: translateX(-100%);
+  animation: thumb-sheen 2s ease-in-out infinite;
+}
+@keyframes thumb-sheen {
+  to { transform: translateX(100%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .queue-thumb.running::after { animation: none; }
+}
+.queue-thumb.failed {
+  color: #ff8a94;
+  background: #ff5c6c14;
 }
 .queue-copy {
   flex: 1;
@@ -97,3 +123,53 @@
 }
 
 @import "../../styles/job-pagination.wxss";
+
+/* Three counters on top; a live bar under each running task. */
+.queue-stats {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.stat {
+  flex: 1;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--ui-surface);
+}
+.stat-num {
+  display: block;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 28px;
+  font-variant-numeric: tabular-nums;
+}
+.stat-label {
+  font-size: 12px;
+  color: var(--ui-muted);
+}
+.stat.running .stat-num {
+  color: var(--ui-brand);
+}
+.stat.failed .stat-num {
+  color: var(--ui-danger);
+}
+.queue-progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0 2px;
+  font-size: 11px;
+  color: var(--ui-brand);
+}
+.queue-bar {
+  flex: 1;
+  height: 3px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: #ffffff1a;
+}
+.queue-bar view {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--ui-brand);
+}

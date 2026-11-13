@@ -1,7 +1,7 @@
 {
   "enablePullDownRefresh": true,
   "usingComponents": {
-    "t-button": "tdesign-miniprogram/button/button",
-    "t-loading": "tdesign-miniprogram/loading/loading"
+    "t-loading": "tdesign-miniprogram/loading/loading",
+    "showcase": "/components/showcase/index"
   }
 }

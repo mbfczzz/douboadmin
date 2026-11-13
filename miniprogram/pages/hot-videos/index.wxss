@@ -22,7 +22,38 @@
 }
 .hot-search input.biz-input {
   background: transparent;
-  padding: 11px 18px;
+  padding: 11px 8px;
+}
+.hot-search > t-icon {
+  margin-left: 16px;
+  color: var(--ui-muted);
+}
+/* Sort: text tabs with a short cyan underline, as on the templates page. */
+.sort-tabs {
+  gap: 22px;
+  margin: 4px 0 14px;
+}
+.sort-tabs view {
+  position: relative;
+  padding: 8px 0;
+  border-radius: 0;
+  background: transparent;
+  font-size: 15px;
+}
+.sort-tabs .selected {
+  background: transparent;
+  font-weight: 600;
+}
+.sort-tabs .selected::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 14px;
+  height: 3px;
+  margin-left: -7px;
+  border-radius: 2px;
+  background: var(--ui-brand);
 }
 .hot-words {
   display: flex;
@@ -32,12 +63,35 @@
 .hot-words text {
   max-width: 100%;
   overflow-wrap: anywhere;
-  background: var(--ui-field);
-  padding: 6px 9px;
-  border-radius: 6px;
-  color: var(--ui-link);
+  padding: 6px 12px;
+  border-radius: 999px;
   font-size: 13px;
+  color: var(--ui-text);
+  background: var(--ui-field);
+}
+.hot-words text:nth-child(-n+3) {
+  color: var(--ui-brand);
+  background: #00c8dc1a;
 }
 .hot-title {
   margin-top: 11px;
+}
+
+.hot-stats {
+  display: flex;
+  gap: 16px;
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--ui-muted);
+}
+.hot-stats view {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.hot-more {
+  padding: 16px 0;
+  text-align: center;
+  font-size: 13px;
+  color: var(--ui-muted);
 }

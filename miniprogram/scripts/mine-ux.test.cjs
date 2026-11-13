@@ -78,3 +78,19 @@ test("returning from an avatar picker does not reload an edited profile", async 
   assert.equal(page.data.nickname, "我的新昵称");
   assert.equal(page.editVersion, 2);
 });
+
+test("Mine shows an initial for a photo-less avatar and badges unread notices", async () => {
+  const h = harness();
+  await h.api.signIn();
+  h.api.request = async (path) => {
+    if (path === "/me") return { profile: { data: { nickname: "豆播创作者" } }, works: 1, running: 0, favorites: 0 };
+    if (path.startsWith("/notifications")) return { items: [], unread: 3, total: 3 };
+    if (path === "/me/role") return { kind: "", label: "" };
+    return { items: [], total: 0 };
+  };
+  const page = h.page("mine");
+  await page.load();
+  await new Promise(setImmediate);
+  assert.equal(page.data.avatarLetter, "豆");
+  assert.equal(page.data.unread, 3);
+});

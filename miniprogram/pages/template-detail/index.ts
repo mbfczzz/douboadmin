@@ -30,10 +30,11 @@ Page({
     favoriteVersion: 0,
     favoriteBusy: false,
     sourceOpen: false,
+    autoplay: false, // follows the 自动播放 preference, as on the templates page
     sources: [
-      { label: "从相册选择", icon: "image" },
-      { label: "拍摄照片", icon: "camera" },
-      { label: "选择文件", icon: "folder-open" },
+      { label: "相册", icon: "image", hint: "已有的商品照", tone: "image" },
+      { label: "拍照", icon: "camera", hint: "现在就拍一张", tone: "video" },
+      { label: "聊天文件", icon: "folder-open", hint: "微信里收到的", tone: "audio" },
     ],
   },
   id: "",
@@ -51,6 +52,7 @@ Page({
   },
   onLoad(o: Record<string, string>) {
     this.id = o.id;
+    this.setData({ autoplay: wx.getStorageSync("autoplay-preference") === true });
   },
   onShow() {
     this.visible = true;
@@ -108,6 +110,12 @@ Page({
   choose() {
     if (!this.data.uploading) this.setData({ sourceOpen: true });
   },
+  // One bottom button: it uploads until the photos are in, then generates.
+  primary() {
+    const t = this.data.template;
+    if (t && this.data.assets.length < t.data.requiredImages) this.choose();
+    else void this.generate();
+  },
   closeSource() {
     this.setData({ sourceOpen: false });
   },
@@ -142,6 +150,7 @@ Page({
   async favorite() {
     if (this.data.favoriteBusy) return;
     const desired = !this.data.favorite;
+    wx.vibrateShort?.({ type: "light" });
     this.favoriteRevision++;
     this.setData({ favoriteBusy: true });
     try {

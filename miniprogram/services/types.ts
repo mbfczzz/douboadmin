@@ -10,6 +10,9 @@ export interface ChatMessage {
   role: string;
   text: string;
   pending?: boolean;
+  failed?: boolean;
+  prompt?: string; // the question a reply answers, for "重新编辑"
+  lines?: { label: string; text: string }[];
 }
 export interface JobPage {
   items: Job[];

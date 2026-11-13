@@ -149,3 +149,74 @@ test("registration sends an SMS code, then verifies name and phone before activa
   assert.equal(page.data.countdown, 0);
   page.onUnload();
 });
+test("the invite code fills eight cells, gains its dash and backspaces cleanly", () => {
+  const h = harness(),
+    { typedCode, prettyCode } = h.service("access"),
+    page = h.page("activate");
+  assert.equal(typedCode("kmnp2345").shown, "KMNP-2345");
+  assert.equal(typedCode("KMNP 2345").raw, "KMNP2345");
+  assert.equal(typedCode("DOUBO-SHARE:WXYZ6789").shown, "WXYZ-6789");
+  assert.equal(typedCode("ABCD23456789").raw, "ABCD2345");
+  assert.equal(typedCode("km0p").raw, "KMP");
+  assert.equal(typedCode("km0p").dropped, true);
+  assert.equal(prettyCode("ABC"), "ABC");
+  // Typing: the hidden input keeps the bare code; the display gains its
+  // dash after the fourth character and loses it again on backspace.
+  const chars = () => page.data.codeSlots.map((s) => s.char).join("");
+  assert.equal(page.input({ detail: { value: "kmn" } }), "KMN");
+  assert.equal(page.input({ detail: { value: "KMNp" } }), "KMNP");
+  assert.equal(page.data.code, "KMNP-");
+  assert.equal(page.input({ detail: { value: "KMNP2" } }), "KMNP2");
+  assert.equal(page.data.code, "KMNP-2");
+  assert.equal(page.data.codeCursor, 5);
+  page.input({ detail: { value: "KMNP" } });
+  assert.equal(page.data.code, "KMNP");
+  assert.equal(chars(), "KMNP");
+  assert.equal(page.data.codeReady, false);
+  page.input({ detail: { value: "KMNP-2345" } });
+  assert.equal(page.data.codeReady, true);
+  assert.equal(chars(), "KMNP2345");
+  assert.equal(page.data.codeCursor, 7);
+  assert.equal(page.data.codeHint, "");
+  page.input({ detail: { value: "abcd0" } });
+  assert.match(page.data.codeHint, /不含 I、O、0、1/);
+});
+
+test("a pasted or fully typed code registers by itself, once", async () => {
+  const h = harness(),
+    page = h.page("activate");
+  page.setData({ logged: true });
+  const joins = [];
+  h.api.request = async (path, method, body) => {
+    joins.push(body.code);
+    return { active: false, status: "review" };
+  };
+  h.wx.showToast = () => {};
+  // The scan view is the default; the link switches to typing a code.
+  assert.equal(page.data.codeMode, false);
+  page.useCode();
+  assert.equal(page.data.codeMode, true);
+  assert.equal(page.data.codeFocus, true);
+  h.wx.getClipboardData = ({ success }) => success({ data: "DOUBO-SHARE:wxyz6789" });
+  page.pasteCode();
+  await new Promise((r) => setTimeout(r, 0));
+  assert.deepEqual(joins, ["WXYZ6789"]);
+  // After registering, the code empties and the scan view returns.
+  assert.equal(page.data.code, "");
+  assert.equal(page.data.codeRaw, "");
+  assert.equal(page.data.codeMode, false);
+  // Typing: nothing is sent until the eighth character.
+  page.setData({ status: null });
+  page.useCode();
+  page.input({ detail: { value: "KMNP234" } });
+  assert.equal(joins.length, 1);
+  page.input({ detail: { value: "KMNP2345" } });
+  await new Promise((r) => setTimeout(r, 0));
+  assert.deepEqual(joins, ["WXYZ6789", "KMNP2345"]);
+  // Switching back to scanning clears a half-typed code.
+  page.useCode();
+  page.input({ detail: { value: "AB" } });
+  page.useScan();
+  assert.equal(page.data.codeMode, false);
+  assert.equal(page.data.codeRaw, "");
+});

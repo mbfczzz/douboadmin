@@ -8,3 +8,24 @@
 .biz-image {
   margin-bottom: 16px;
 }
+
+.hot-stats {
+  display: flex;
+  gap: 18px;
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--ui-muted);
+}
+.hot-stats view,
+.copy-chip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.copy-chip {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  color: var(--ui-text);
+  background: var(--ui-field);
+}

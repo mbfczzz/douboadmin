@@ -1,82 +1,57 @@
 import type { VisibleEditor } from "./editor-types";
 
-const choosing = new WeakMap<object, object>();
+// Typing "@" opens a thumbnail sheet of the uploaded images; picking one
+// inserts "@图片N " at the cursor. A snapshot guards against stale picks.
+type Snapshot = { text: string; cursor: number; ids: string[] };
+const choosing = new WeakMap<object, Snapshot>();
+const imagesOf = (page: VisibleEditor) => page.data.assets.filter((a) => a.isImage);
 
-export function cancelMention(page: object) {
+export function cancelMention(page: VisibleEditor) {
   choosing.delete(page);
+  if (page.data.mentionOpen) page.setData({ mentionOpen: false });
 }
 
 export function chooseMention(page: VisibleEditor, cursor: number) {
   const text = page.data.prompt;
   if (text[cursor - 1] !== "@" || choosing.has(page) || page.data.busy) return;
-  const images = page.data.assets.filter((asset) => asset.isImage);
+  const images = imagesOf(page);
   if (!images.length) {
     wx.showToast({ title: "请先添加参考图片", icon: "none" });
     return;
   }
-  const ticket = {};
-  choosing.set(page, ticket);
-  const finish = () => {
-    if (choosing.get(page) === ticket) choosing.delete(page);
-  };
-  const current = () =>
-    choosing.get(page) === ticket &&
-    page.visible &&
-    !page.destroyed &&
-    page.data.prompt === text;
-  function show(offset: number) {
-    const batch = images.slice(offset, offset + 5);
-    const more = images.length > 5;
-    try {
-      wx.showActionSheet({
-        itemList: [
-          ...batch.map(
-            (asset, i) =>
-              `图片${offset + i + 1} · ${asset.data.name || "参考图"}`,
-          ),
-          ...(more ? ["更多图片…"] : []),
-        ],
-        success(result) {
-          if (!current()) {
-            finish();
-            return;
-          }
-          if (more && result.tapIndex === batch.length) {
-            show(offset + 5 >= images.length ? 0 : offset + 5);
-            return;
-          }
-          const asset = batch[result.tapIndex];
-          const now = page.data.assets.filter((row) => row.isImage);
-          finish();
-          if (
-            !asset ||
-            now.length !== images.length ||
-            now.some((row, i) => row.id !== images[i].id)
-          )
-            return;
-          const token = `图片${offset + result.tapIndex + 1} `;
-          const prompt = text.slice(0, cursor) + token + text.slice(cursor);
-          if (Array.from(prompt).length > page.data.maxPromptChars) {
-            wx.showToast({ title: "引用后超出字数限制", icon: "none" });
-            return;
-          }
-          page.setData({
-            prompt,
-            hasPrompt: true,
-            promptCursor: cursor + token.length,
-          });
-        },
-        fail() {
-          finish();
-        },
-      });
-    } catch {
-      finish();
-      if (page.visible && !page.destroyed)
-        wx.showToast({ title: "暂时无法选择参考图，请重试", icon: "none" });
-    }
+  choosing.set(page, { text, cursor, ids: images.map((a) => a.id) });
+  page.setData({
+    mentionOpen: true,
+    mentionItems: images.map((a, i) => ({ id: a.id, url: a.data.url, label: `图片${i + 1}` })),
+  });
+}
+
+export function pickMention(page: VisibleEditor, index: number) {
+  const snap = choosing.get(page);
+  cancelMention(page);
+  if (!snap || !page.visible || page.destroyed || page.data.prompt !== snap.text) return;
+  const ids = imagesOf(page).map((a) => a.id);
+  if (ids.join() !== snap.ids.join() || index < 0 || index >= ids.length) return;
+  insertMention(page, snap.text, snap.cursor, index + 1);
+}
+
+// Inserts "图片N " right after an "@" that already sits before `cursor`.
+export function insertMention(page: VisibleEditor, text: string, cursor: number, number: number) {
+  const token = `图片${number} `;
+  const prompt = text.slice(0, cursor) + token + text.slice(cursor);
+  if (Array.from(prompt).length > page.data.maxPromptChars) {
+    wx.showToast({ title: "引用后超出字数限制", icon: "none" });
+    return false;
   }
-  show(0);
+  page.setData({ prompt, hasPrompt: true, promptCursor: cursor + token.length });
+  return true;
+}
+
+// Appends a mention at the end of the prompt (used from the image viewer).
+export function appendMention(page: VisibleEditor, number: number) {
+  const base = page.data.prompt;
+  const text = base + (base && !/\s$/.test(base) ? " @" : "@");
+  return insertMention(page, text, text.length, number);
 }
 
 export function clearMentions(text: string) {

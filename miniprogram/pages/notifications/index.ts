@@ -1,3 +1,5 @@
+import { loadThumbs } from "./thumbs";
+import { pullRefresh } from "../../utils/refresh";
 import {
   request,
   error,
@@ -9,10 +11,18 @@ import {
 } from "../../utils/api";
 import type { Row } from "../../services/types";
 import type { Notice } from "../../services/business";
+import { withDays } from "../../utils/day";
+// Orders get a wallet, failures a red mark, finished work a green check.
+function noticeIcon(n: Notice) {
+  if (n.kind === "order") return { icon: "wallet", tone: "info" };
+  if (/失败|退回/.test(n.title)) return { icon: "error-circle", tone: "danger" };
+  return { icon: "check-circle", tone: "ok" };
+}
 Page({
   data: {
     items: [] as Array<Row<Notice> & { time: string }>,
     unread: 0,
+    thumbs: {} as Record<string, string>,
     loading: true,
     needsLogin: false,
     loadError: "",
@@ -46,6 +56,9 @@ Page({
       error(e);
     }
   },
+  onPullDownRefresh() {
+    void pullRefresh(() => this.load());
+  },
   async load(append = false) {
     if (this.destroyed || !this.visible) return;
     append = append === true;
@@ -62,7 +75,7 @@ Page({
         "/notifications?page=" + page + "&size=20",
       );
       if (revision !== this.revision) return;
-      const rows=[...(append ? this.data.items : []), ...result.items.map((r) => ({ ...r, time: date(r.createdAt) }))];
+      const rows=withDays([...(append ? this.data.items : []), ...result.items.map((r) => ({ ...r, time: date(r.createdAt), ...noticeIcon(r.data) }))]);
       this.setData({
         items: [...new Map(rows.map(row=>[row.id,row])).values()],
         page, total: result.total ?? result.items.length,
@@ -70,6 +83,7 @@ Page({
         needsLogin: false,
         loadError: "",
       });
+      void loadThumbs(this);
     } catch (e) {
       if (revision === this.revision) {
         if (!hasSession())

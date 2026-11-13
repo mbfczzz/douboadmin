@@ -1,0 +1,89 @@
+/* Upload slots: square tiles in one scrolling row. Filled slots show the
+   photo; the required slot is outlined in cyan, optional ones in grey. */
+.slots {
+  margin: 14px -16px 0;
+  white-space: nowrap;
+}
+.slot-row {
+  display: inline-flex;
+  gap: 10px;
+  padding: 0 16px;
+}
+.slot {
+  position: relative;
+  width: 104px;
+  height: 128px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  overflow: hidden;
+  border-radius: 14px;
+  background: var(--ui-surface);
+}
+.slot-pressed {
+  opacity: 0.72;
+}
+.slot.required {
+  color: var(--ui-brand);
+  background: #00c8dc12;
+  box-shadow: inset 0 0 0 1.5px #00c8dc80;
+}
+.slot.optional {
+  width: 88px;
+  color: var(--ui-muted);
+  box-shadow: inset 0 0 0 1px var(--ui-border);
+  background: transparent;
+}
+.slot-name {
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ui-text);
+}
+.slot-hint {
+  font-size: 11px;
+  color: var(--ui-muted);
+}
+.slot.uploaded image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.slot-tag {
+  position: absolute;
+  left: 6px;
+  bottom: 6px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-size: 11px;
+  color: #fff;
+  background: #00000080;
+}
+.slot-remove {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: #fff;
+  background: #00000099;
+}
+.slot-remove::after {
+  content: "";
+  position: absolute;
+  inset: -8px;
+}
+.slot.skeleton {
+  margin-top: 14px;
+}
+.loading-row {
+  padding: 0;
+}

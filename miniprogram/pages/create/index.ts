@@ -1,4 +1,4 @@
-import { request, tab, openPage, sessionToken } from "../../utils/api";
+import { request, tab, openPage, openTab, sessionToken } from "../../utils/api";
 import type { Config, Row, Asset, Input } from "../../services/types";
 import { creationData } from "./state";
 import { generate } from "./submit";
@@ -8,13 +8,15 @@ import { modelChoices, modelSettings, resolutionSettings } from "./models";
 import type { ModelChoice } from "./editor-types";
 import { addReference, selectedModel } from "./references";
 import { chooseMention, removeMention, clearMentions, cancelMention } from "./mentions";
-import { openReferencePreview, cancelPreview } from "./reference-preview";
+import { cancelPreview } from "./reference-preview";
+import { referenceHandlers } from "./reference-ui";
 import {
   restoreEditorAssets,
   clearEditorAssets,
 } from "../../utils/editor-assets";
 Page({
   data: creationData,
+  ...referenceHandlers,
   assetRevision: 0,
   restoreIds: [] as string[],
   modelVersion: 0,
@@ -82,9 +84,6 @@ Page({
     this.setData({ prompt, hasPrompt: !!prompt.trim(), promptCursor: -1 });
     clearEditorAssets(this);
     this.refreshParameters();
-  },
-  previewReference(e: WechatMiniprogram.TouchEvent) {
-    void openReferencePreview(this, e.currentTarget.dataset.id);
   },
   refreshParameters() {
     const model = selectedModel(this);
@@ -249,13 +248,15 @@ Page({
     await addReference(this, e?.currentTarget.dataset.kind || "image");
   },
   remove(e: WechatMiniprogram.TouchEvent) {
-    const index = this.data.assets.filter((a: Row<Asset> & {isImage:boolean})=>a.isImage).findIndex((a: Row<Asset>)=>a.id===e.currentTarget.dataset.id);
-    const prompt = index < 0 ? this.data.prompt : removeMention(this.data.prompt,index+1);
+    this.removeAsset(e.currentTarget.dataset.id);
+  },
+  removeAsset(id: string) {
+    const index = this.data.assets.filter((a: Row<Asset> & { isImage: boolean }) => a.isImage).findIndex((a: Row<Asset>) => a.id === id);
+    const prompt = index < 0 ? this.data.prompt : removeMention(this.data.prompt, index + 1);
     this.setData({
-      prompt, hasPrompt: !!prompt.trim(),
-      assets: this.data.assets.filter(
-        (a: Row<Asset>) => a.id !== e.currentTarget.dataset.id,
-      ),
+      prompt,
+      hasPrompt: !!prompt.trim(),
+      assets: this.data.assets.filter((a: Row<Asset>) => a.id !== id),
     });
     this.refreshParameters();
   },
@@ -264,5 +265,15 @@ Page({
   },
   queue() {
     openPage(this, { url: "/pages/tasks/index" });
+  },
+  // Resolution, duration, aspect ratio and quality live in a sheet.
+  openParams() {
+    if (!this.data.modelsLoading) this.setData({ paramsOpen: true });
+  },
+  closeParams() {
+    this.setData({ paramsOpen: false });
+  },
+  templates() {
+    openTab(this, "/pages/templates/index");
   },
 });

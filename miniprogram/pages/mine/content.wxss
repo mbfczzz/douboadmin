@@ -1,94 +1,134 @@
-.role-label {
-  display: inline-block;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: var(--ui-info);
-  background: var(--ui-info-bg);
-  border-radius: 6px;
-  padding: 3px 8px;
-  font-size: 12px;
-}
-.statistics {
-  display: flex;
-  margin-top: 24px;
-}
-.statistics > view {
-  flex: 1;
-  min-width: 0;
-  text-align: center;
-  min-height: 64px;
-}
-.statistics text {
-  display: block;
-  font-size: 24px;
-  font-weight: 600;
-  overflow-wrap: anywhere;
-  font-variant-numeric: tabular-nums;
-}
-.statistics text:last-child {
-  font-size: 13px;
-  font-weight: 400;
-  color: var(--ui-muted);
-  margin-top: 8px;
-}
-.works-heading .section-title {
-  margin: 0;
-  font-size: 16px;
-}
-.works-heading {
-  margin-bottom: 12px;
+/* Recent works: a 3-column wall of covers; a running tile leads it. */
+.cover-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
 }
 .mine-page .completed-grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
 }
-.mine-page .completed-cover {
-  height: 136px;
+.cover-cell {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   overflow: hidden;
-  border-radius: 12px;
-}
-.mine-page .completed-title {
-  font-size: 15px;
-  line-height: 22px;
-  margin-top: 10px;
-}
-.work-meta {
-  display: block;
+  border-radius: 10px;
   color: var(--ui-muted);
-  font-size: 12px;
-  line-height: 20px;
-  margin-top: 4px;
+  background: var(--ui-surface);
 }
-.running-link,
-.role-link,
-.empty-work {
+.cover-cell image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.cover-badge {
+  position: absolute;
+  left: 6px;
+  bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  font-size: 11px;
+  color: #fff;
+  background: #00000080;
+}
+.running-cell {
+  flex-direction: column;
+  gap: 2px;
+  background: linear-gradient(160deg, #00c8dc29, var(--ui-surface) 70%);
+  box-shadow: inset 0 0 0 1px #00c8dc40;
+}
+.running-cell::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 30%, #ffffff14 50%, transparent 70%);
+  transform: translateX(-100%);
+  animation: running-sheen 2.2s ease-in-out infinite;
+}
+@keyframes running-sheen {
+  to { transform: translateX(100%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .running-cell::after { animation: none; }
+}
+.running-ring {
+  margin-bottom: 6px;
+  color: var(--ui-brand);
+}
+.running-count {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--ui-text);
+}
+.running-text {
+  font-size: 12px;
+}
+.empty-work,
+.role-link {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 14px 16px;
-  margin-top: 16px;
-  min-height: 48px;
-  border-radius: 12px;
-  font-size: 13px;
-}
-.running-link {
-  color: var(--ui-text);
+  padding: 12px 14px;
+  border-radius: 14px;
   background: var(--ui-surface);
-}
-.role-link {
-  color: var(--ui-link);
-  background: var(--ui-selected);
-}
-.empty-work {
   color: var(--ui-muted);
-  border: 1px solid transparent;
-  background: var(--ui-surface);
 }
-.running-link > text:first-of-type,
-.role-link > text,
-.empty-work > text:first-of-type {
+.empty-plus,
+.role-glyph {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  color: var(--ui-text);
+  background: var(--ui-field);
+}
+.empty-copy {
   flex: 1;
   min-width: 0;
+}
+.empty-title {
+  display: block;
+  font-size: 15px;
+  color: var(--ui-text);
+}
+.empty-hint {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+}
+/* The role entry (服务商中心 / 推广码) sits right under the points. */
+.role-link {
+  margin-top: 10px;
+  color: var(--ui-muted);
+  background: var(--ui-surface);
+  box-shadow: inset 0 0 0 1px #00c8dc2e;
+}
+.role-glyph {
+  color: var(--ui-brand);
+  background: #00c8dc1f;
+}
+.role-copy {
+  flex: 1;
+  min-width: 0;
+}
+.role-title {
+  display: block;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--ui-text);
+}
+.role-hint {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
 }

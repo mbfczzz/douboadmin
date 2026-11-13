@@ -7,7 +7,7 @@ const root = path.resolve("../miniprogram");
 const read = (file: string) => readFileSync(path.join(root, file), "utf8");
 function loop(page: string, variable: string) {
   const source = read(`pages/${page}/index.wxml`);
-  const tags = /<(\/?)view\b[^>]*>/g;
+  const tags = /<(\/?)(?:view|block)\b[^>]*>/g;
   let start = -1,
     depth = 0;
   for (const tag of source.matchAll(tags)) {
@@ -15,6 +15,7 @@ function loop(page: string, variable: string) {
       if (!tag[0].includes(`wx:for="{{${variable}}}"`)) continue;
       start = tag.index;
     }
+    if (tag[0].endsWith("/>")) continue; // self-closing: no depth change
     depth += tag[1] ? -1 : 1;
     if (!depth) return source.slice(start, tag.index + tag[0].length);
   }
@@ -23,6 +24,7 @@ function loop(page: string, variable: string) {
 function html(source: string, values: Record<string, string>) {
   return source
     .replace(/{{([^}]+)}}/g, (_, key) => values[key] || "")
+    .replace(/<(view|text)\b([^>]*)\/>/g, "<$1$2></$1>") // HTML has no self-closing div
     .replace(
       /<(\/?)(view|text)\b/g,
       (_, close, tag) => `<${close}${tag === "view" ? "div" : "span"}`,
@@ -73,13 +75,11 @@ for (const width of [320, 375, 430]) {
     const copy = await page.locator(".ledger-copy").boundingBox();
     expect(amount!.x).toBeGreaterThanOrEqual(copy!.x + copy!.width);
     expect(Math.abs(amount!.y - copy!.y)).toBeLessThan(1);
-    const head = await page
-      .locator(".order-values > div")
-      .evaluateAll((nodes) =>
-        nodes.map((node) => node.getBoundingClientRect().top),
-      );
-    expect(head[1]).toBeGreaterThan(head[0]);
-    for (const button of await page.locator(".biz-pair button").all()) {
+    // Points title on the left, amount and state on the right, no overlap.
+    const title = (await page.locator(".order-title").boundingBox())!;
+    const side = (await page.locator(".order-side").boundingBox())!;
+    expect(side.x).toBeGreaterThanOrEqual(title.x + title.width);
+    for (const button of await page.locator(".order-actions button").all()) {
       expect(
         await button.evaluate(
           (el) =>

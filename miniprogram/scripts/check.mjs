@@ -14,6 +14,23 @@ function readWxml(file, seen = new Set()) {
       readWxml(path.resolve(path.dirname(full), ref), next),
     );
 }
+// Handlers may live in a sibling module as `export const x = {...}` and be
+// spread into Page({ ...x }); collect their names too.
+function spreadMembers(page, source, name) {
+  const spec = source.statements
+    .filter(ts.isImportDeclaration)
+    .find((d) => d.importClause?.namedBindings?.elements?.some((e) => e.name.text === name));
+  if (!spec) return [];
+  const file = path.resolve(path.dirname(page), spec.moduleSpecifier.text + ".ts");
+  if (!fs.existsSync(file)) return [];
+  const mod = ts.createSourceFile(file, fs.readFileSync(file, "utf8"), ts.ScriptTarget.Latest, true);
+  const names = [];
+  for (const statement of mod.statements.filter(ts.isVariableStatement))
+    for (const d of statement.declarationList.declarations)
+      if (d.name.getText(mod) === name && d.initializer && ts.isObjectLiteralExpression(d.initializer))
+        for (const m of d.initializer.properties) if (m.name) names.push(m.name.getText(mod));
+  return names;
+}
 for (const p of app.pages) {
   for (const ext of [".ts", ".json", ".wxml", ".wxss"])
     if (!fs.existsSync(p + ext)) errors.push(`Missing ${p + ext}`);
@@ -34,6 +51,8 @@ for (const p of app.pages) {
     ) {
       for (const member of node.arguments[0].properties) {
         if (member.name) methods.add(member.name.getText(source));
+        else if (ts.isSpreadAssignment(member))
+          spreadMembers(p, source, member.expression.getText(source)).forEach((m) => methods.add(m));
       }
     }
     ts.forEachChild(node, visit);

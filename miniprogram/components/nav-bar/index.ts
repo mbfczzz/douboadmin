@@ -1,3 +1,4 @@
+import { navMetrics } from "../../utils/nav-metrics";
 Component({
   options: { multipleSlots: true },
   properties: {
@@ -23,20 +24,7 @@ Component({
   },
   methods: {
     measure() {
-      const info = wx.getWindowInfo();
-      const capsule = wx.getMenuButtonBoundingClientRect();
-      const top = Math.max(0, info.statusBarHeight ?? 24);
-      const valid =
-        capsule.height > 0 && capsule.top >= top && capsule.left > 0;
-      this.setData({
-        top,
-        height: valid
-          ? Math.max(44, capsule.height + (capsule.top - top) * 2)
-          : 44,
-        actionsRight: valid
-          ? Math.max(0, info.windowWidth - capsule.left + 8)
-          : 88,
-      });
+      this.setData(navMetrics());
     },
     goBack() {
       if (this.data.disabled || this.data.backing) return;

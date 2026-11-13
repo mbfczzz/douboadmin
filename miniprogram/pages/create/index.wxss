@@ -1,47 +1,48 @@
 @import "./workspace.wxss";
 @import "./settings.wxss";
 @import "./menus.wxss";
+@import "./sheets.wxss";
 .create-page {
   padding: 10px 20px calc(90px + env(safe-area-inset-bottom));
 }
+/* 生成视频 / 生成图片 are text tabs (as on 模板): bold white with a short cyan bar. */
 .mode-tabs {
   display: flex;
   height: 44px;
-  gap: 6px;
-  border-radius: 12px;
-  background: transparent;
-  margin-bottom: 16px;
+  gap: 26px;
+  margin-bottom: 10px;
+  background: none;
 }
 .mode-tab {
-  gap: 8px;
   position: relative;
-  flex: 1;
   display: flex;
   align-items: center;
-  justify-content: center;
-  font-size: 15px;
-  line-height: 18px;
+  gap: 6px;
+  font-size: 16px;
+  line-height: 22px;
   font-weight: 500;
-  border-radius: 10px;
-  background: var(--ui-surface);
+  background: none;
   color: var(--ui-muted);
 }
 .mode-tab.active {
   color: var(--ui-text);
-  background: var(--ui-selected);
+  font-weight: 600;
+  background: none;
+  box-shadow: none;
+}
+.mode-tab.active::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 3px;
+  width: 14px;
+  height: 3px;
+  margin-left: -7px;
+  border-radius: 2px;
+  background: var(--ui-brand);
 }
 .mode-tab-pressed {
   opacity: 0.7;
-}
-.create-page .queue-link {
-  height: 58px;
-  padding: 0 16px;
-  gap: 12px;
-  margin-top: 16px;
-  font-size: 15px;
-}
-.create-page .queue-link .copy .muted {
-  margin-top: 3px;
 }
 .create-page .note {
   margin: 14px 0 0;
@@ -54,4 +55,61 @@
   font-size: 13px;
   line-height: 18px;
   color: var(--ui-muted);
+}
+.queue-text {
+  margin-left: auto;
+  padding: 8px 0;
+  color: var(--ui-link);
+}
+/* Parameters: one row on the page, the controls in a sheet. */
+.params-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  height: 48px;
+  padding: 0 14px;
+  border-radius: var(--ui-radius-card);
+  background: var(--ui-surface);
+  color: var(--ui-muted);
+}
+.params-icon {
+  display: flex;
+  color: var(--ui-text);
+}
+.params-copy {
+  flex: 1;
+  min-width: 0;
+  color: var(--ui-text);
+  font-size: 15px;
+}
+.params-spec {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.params-go {
+  flex-shrink: 0;
+  font-size: 13px;
+  color: var(--ui-muted);
+}
+.params-sheet {
+  padding: 0 20px 20px;
+}
+.params-sheet .settings {
+  margin-top: 0;
+}
+.inspire-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 26px 0 12px;
+  font-size: 16px;
+  font-weight: 600;
+}
+.inspire-more {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--ui-link);
 }

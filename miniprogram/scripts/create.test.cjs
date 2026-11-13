@@ -127,9 +127,12 @@ test("template more action appends remaining templates to the two columns", asyn
     const page = Number(new URL(path,"https://fixture").searchParams.get("page"));
     return {items:rows.slice((page-1)*4,page*4),total:6};
   };
+  // Under the first category the first template is featured above the columns.
+  const shown = () => page.data.columns.flatMap((c) => c.items).length + (page.data.hero ? 1 : 0);
   await page.load();
-  assert.equal(page.data.columns.flatMap((c) => c.items).length, 4);
+  assert.equal(page.data.hero.id, "0");
+  assert.equal(shown(), 4);
   page.more();
   await new Promise(resolve=>setImmediate(resolve));
-  assert.equal(page.data.columns.flatMap((c) => c.items).length, 6);
+  assert.equal(shown(), 6);
 });

@@ -6,7 +6,8 @@ import type { WalletInfo } from "../../services/business";
 import { openPage, resetNavigation } from "../../utils/navigation";
 
 Component({
-  properties: { compact: { type: Boolean, value: false } },
+  // compact: one inline link; row: a slim tappable strip; default: the card.
+  properties: { compact: { type: Boolean, value: false }, row: { type: Boolean, value: false } },
   data: {
     logged: false,
     loaded: false,

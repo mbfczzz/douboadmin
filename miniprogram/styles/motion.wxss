@@ -79,3 +79,44 @@
     transform: none;
   }
 }
+
+/* List skeletons shaped like the rows they stand in for. */
+.skel-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.skel-card {
+  height: 132px;
+  border-radius: 16px;
+}
+.skel-hero {
+  height: 150px;
+  border-radius: 16px;
+}
+.skel-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 0;
+}
+.skel-dot {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 50%;
+}
+.skel-lines {
+  flex: 1;
+}
+.skel-a {
+  width: 60%;
+  height: 14px;
+  border-radius: 4px;
+}
+.skel-b {
+  width: 85%;
+  height: 12px;
+  margin-top: 8px;
+  border-radius: 4px;
+}

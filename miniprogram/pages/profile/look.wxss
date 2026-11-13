@@ -1,0 +1,80 @@
+/* 即梦-style profile editor: a centred avatar, then one grouped list where
+   each label sits left and its value right. Scoped to .profile-page so these
+   win over the base rules in index.wxss. */
+.profile-page button.profile-avatar-row {
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 0 4px;
+  text-align: center;
+  background: transparent;
+}
+.profile-page .profile-avatar {
+  width: 88px;
+  height: 88px;
+  box-shadow: 0 0 0 3px var(--ui-bg), 0 0 0 4px #ffffff24;
+}
+.profile-page .profile-camera {
+  right: 0;
+  bottom: 0;
+  width: 28px;
+  height: 28px;
+}
+.profile-page .profile-avatar-label {
+  margin-bottom: 2px;
+  font-size: 14px;
+  color: var(--ui-brand);
+}
+.profile-page .profile-note {
+  font-size: 12px;
+}
+.profile-page .profile-chevron {
+  display: none;
+}
+.profile-page .profile-input-fields {
+  overflow: hidden;
+  border-radius: 16px;
+  background: var(--ui-surface);
+}
+.profile-page .profile-input-fields .profile-field {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  min-height: 56px;
+  padding: 0 16px;
+  margin: 0;
+  transition: background 120ms;
+}
+.profile-page .profile-input-fields .profile-field + .profile-field {
+  border-top: 1px solid var(--ui-border);
+}
+.profile-page .profile-input-fields .profile-field.focused {
+  background: #ffffff08;
+}
+.profile-page .profile-input-fields .profile-label {
+  width: 64px;
+  margin: 0;
+  font-size: 15px;
+  color: var(--ui-text);
+}
+.profile-page .profile-input-fields input {
+  height: 56px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: right;
+}
+.profile-page .profile-input-fields .profile-field-error {
+  margin: -8px 0 10px;
+  text-align: right;
+}
+.profile-page .profile-field.invalid .profile-label {
+  color: var(--ui-danger);
+}
+.profile-page .profile-readonly-fields {
+  margin-top: 12px;
+  border-radius: 16px;
+}
+.profile-page .profile-bio {
+  border-radius: 16px;
+  background: var(--ui-surface);
+}

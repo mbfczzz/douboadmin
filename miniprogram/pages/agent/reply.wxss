@@ -1,0 +1,64 @@
+/* Agent replies: script lines, failures and follow-up chips. */
+.bubble text {
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+.reply {
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--ui-text);
+  word-break: break-all;
+}
+.line.gap {
+  height: 8px;
+}
+/* A shot: cyan label on its own line, the description under it. */
+.line.shot {
+  margin-top: 10px;
+  padding-left: 12px;
+  border-left: 2px solid #00c8dc66;
+}
+.line.shot:first-child {
+  margin-top: 0;
+}
+.shot-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 20px;
+  color: var(--ui-brand);
+}
+.reply-failed {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  font-size: 14px;
+  color: #ff8a94;
+  background: #ff5c6c14;
+}
+.retry {
+  margin-left: auto;
+  color: var(--ui-text);
+}
+.follow-ups {
+  margin: 12px -20px 0;
+  white-space: nowrap;
+}
+.follow-row {
+  display: inline-flex;
+  gap: 8px;
+  padding: 0 20px;
+}
+.follow {
+  padding: 7px 14px;
+  border-radius: var(--ui-radius-pill);
+  font-size: 13px;
+  color: var(--ui-text);
+  box-shadow: inset 0 0 0 1px var(--ui-border);
+}
+.icon-pressed {
+  opacity: 0.6;
+}

@@ -84,6 +84,7 @@ Page({
         rewrite: false,
         narration: false,
         captions: false,
+        on: { transcribe: false, rewrite: false, narration: false, captions: false },
         loadError: "",
       });
       void restoreMusic(this, version);
@@ -114,14 +115,25 @@ Page({
       [e.currentTarget.dataset.field]: e.currentTarget.dataset.value,
     });
   },
+  // Settings are local and always adjustable; only actions that need the
+  // mix service (adding files, uploading music, starting) say it is not open.
   toggle(e: WechatMiniprogram.CustomEvent<{ value: boolean }>) {
-    if (!this.data.config?.enabled) return;
-    const field = e.currentTarget.dataset.field;
-    this.setData({ [field]: e.detail.value });
-    if (field === "narration" && e.detail.value)
-      this.setData({ keepOriginalAudio: false });
+    this.setFeature(e.currentTarget.dataset.field, e.detail.value);
   },
-  duration(e: WechatMiniprogram.Input) {
+  flip(e: WechatMiniprogram.TouchEvent) {
+    const field = e.currentTarget.dataset.field as string;
+    this.setFeature(field, !(this.data as Record<string, unknown>)[field]);
+  },
+  setFeature(field: string, on: boolean) {
+    this.setData({ [field]: on, on: { ...this.data.on, [field]: on } });
+    if (field === "narration" && on) this.setData({ keepOriginalAudio: false });
+  },
+  closed() {
+    if (this.data.config?.enabled) return false;
+    error(new Error(this.data.config?.message || "混剪功能暂未开放"));
+    return true;
+  },
+  duration(e: { detail: { value: number | string } }) {
     this.setData({ duration: Number(e.detail.value) });
   },
   volume(e: WechatMiniprogram.SliderChange) {
@@ -137,7 +149,7 @@ Page({
     this.setData({ musicIndex: 0, musicId: "", musicLabel: "不使用背景音乐" });
   },
   async add() {
-    await addAssets(this);
+    if (!this.closed()) await addAssets(this);
   },
   remove(e: WechatMiniprogram.TouchEvent) {
     if (this.data.uploading) return;
@@ -148,7 +160,7 @@ Page({
     });
   },
   async uploadMusic() {
-    await uploadMusic(this);
+    if (!this.closed()) await uploadMusic(this);
   },
   hot() {
     openPage(this, { url: "/pages/hot-videos/index" });

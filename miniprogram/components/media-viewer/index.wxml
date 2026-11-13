@@ -1,0 +1,23 @@
+<view wx:if="{{show}}" class="viewer" catchtouchmove="hold">
+  <view class="viewer-top" catchtap="hold">
+    <view class="viewer-icon" catchtap="close" aria-role="button" aria-label="关闭预览"><t-icon name="close" size="24" /></view>
+    <text class="viewer-count">{{items[index].label}}<text class="viewer-total">  {{index+1}} / {{items.length}}</text></text>
+    <view class="viewer-icon" />
+  </view>
+  <swiper class="viewer-swiper" current="{{index}}" bindchange="swipe">
+    <swiper-item wx:for="{{items}}" wx:key="id" bindtap="close">
+      <image class="viewer-image" src="{{item.url}}" mode="aspectFit" show-menu-by-longpress />
+    </swiper-item>
+  </swiper>
+  <view wx:if="{{items.length>1}}" class="viewer-dots">
+    <view wx:for="{{items}}" wx:for-index="i" wx:key="id" class="viewer-dot {{i===index?'on':''}}" />
+  </view>
+  <view class="viewer-actions" catchtap="hold">
+    <view class="viewer-action" catchtap="mention" aria-role="button" aria-label="在描述中引用">
+      <view class="viewer-action-icon"><t-icon name="mentioned" size="22" /></view><text>引用</text>
+    </view>
+    <view class="viewer-action" catchtap="remove" aria-role="button" aria-label="删除这张参考图">
+      <view class="viewer-action-icon"><t-icon name="delete" size="22" /></view><text>删除</text>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,149 @@
+/* Room for the start bar pinned above the tab bar. */
+.mix-page {
+  padding-bottom: calc(168px + env(safe-area-inset-bottom));
+}
+.mix-label {
+  display: block;
+  margin: 18px 0 10px;
+  font-size: 13px;
+  color: var(--ui-muted);
+}
+.biz-card > .mix-label:first-child {
+  margin-top: 0;
+}
+.row.mix-label {
+  display: flex;
+  justify-content: space-between;
+}
+.mix-value {
+  color: var(--ui-text);
+  font-weight: 600;
+}
+/* Choices as tiles: an icon or shape over the label; the chosen one is lit. */
+.mix-tiles {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.mix-tile {
+  height: 76px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 12px;
+  background: var(--ui-field);
+  color: var(--ui-muted);
+  font-size: 13px;
+  transition: background 160ms ease, box-shadow 160ms ease;
+}
+.mix-tile.on {
+  color: var(--ui-text);
+  font-weight: 600;
+  background: var(--ui-selected);
+  box-shadow: inset 0 0 0 1.5px var(--ui-brand);
+}
+.mix-shape {
+  border: 2px solid currentColor;
+  border-radius: 4px;
+}
+.shape-portrait {
+  width: 16px;
+  height: 26px;
+}
+.shape-wide {
+  width: 30px;
+  height: 17px;
+}
+.shape-square {
+  width: 22px;
+  height: 22px;
+}
+.mix-switch-row {
+  margin-top: 8px;
+}
+.mix-slider {
+  margin: 4px 6px 0;
+}
+/* Optional AI steps as a 2 × 2 set of switches you tap directly. */
+.mix-features {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+.mix-feature {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 52px;
+  padding: 0 12px;
+  border-radius: 12px;
+  background: var(--ui-field);
+  color: var(--ui-muted);
+  font-size: 14px;
+}
+.mix-feature.on {
+  color: var(--ui-text);
+  background: var(--ui-selected);
+  box-shadow: inset 0 0 0 1.5px var(--ui-brand);
+}
+.mix-check {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  color: var(--ui-brand);
+}
+.mix-music {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--ui-field);
+}
+.mix-music-icon {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: #00c8dc24;
+  color: var(--ui-brand);
+}
+.mix-music-copy {
+  flex: 1;
+  min-width: 0;
+}
+.mix-music-copy text {
+  display: block;
+}
+/* Start: pinned above the tab bar with a one-line summary of the job. */
+.mix-submit {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(58px + env(safe-area-inset-bottom));
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 20px;
+  background: var(--ui-bg);
+  border-top: 1px solid var(--ui-border);
+}
+.mix-summary {
+  flex: 1;
+  min-width: 0;
+  font-size: 12px;
+  color: var(--ui-muted);
+}
+.mix-submit button.biz-action {
+  flex: 0 0 auto;
+  width: 132px;
+  margin: 0;
+}

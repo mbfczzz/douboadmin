@@ -1,5 +1,5 @@
 .photo-sources {
-  padding: 20px 20px calc(32px + env(safe-area-inset-bottom));
+  padding: 0 20px 20px;
 }
 .photo-source-heading {
   display: flex;
@@ -7,37 +7,13 @@
   justify-content: space-between;
   font-size: 16px;
   font-weight: 500;
-  margin-bottom: 10px;
+  margin-bottom: 16px;
 }
 .photo-source-close {
   flex-shrink: 0;
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
-}
-.photo-source {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  min-height: 52px;
-  padding: 12px 4px;
-  border-bottom: 1px solid var(--ui-border);
-  font-size: 15px;
-}
-.photo-source text {
-  flex: 1;
-  min-width: 0;
-  overflow-wrap: anywhere;
-}
-.photo-source t-icon {
-  flex-shrink: 0;
-  color: var(--ui-muted);
-}
-.photo-source-note {
-  display: block;
-  font-size: 13px;
-  color: var(--ui-muted);
-  margin-top: 20px;
 }

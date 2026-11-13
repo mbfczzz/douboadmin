@@ -26,7 +26,12 @@ for (const width of [320, 390, 430]) {
       overlay.innerHTML=`<div class="reference-sheet" style="width:100%;background:var(--ui-surface);border-radius:14px 14px 0 0"><div class="reference-heading"><span>添加参考素材</span><div class="close-sheet">×</div></div>${content}</div>`;
       body.append(overlay);
     },materialSheet());
-    expect((await page.locator(".source-copy").first().boundingBox())!.width).toBeGreaterThan(170);
+    // Three equal source tiles share one row; nothing wraps or overflows.
+    const tiles=await Promise.all((await page.locator(".source-tile").all()).map(t=>t.boundingBox()));
+    expect(tiles).toHaveLength(3);
+    expect(new Set(tiles.map(t=>Math.round(t!.y))).size).toBe(1);
+    expect(Math.abs(tiles[0]!.width-tiles[2]!.width)).toBeLessThan(1);
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBe(width);
     await page.screenshot({path:`../.runtime/reference-theme/mini-materials-${width}.png`});
   });
 }

@@ -1,0 +1,94 @@
+<t-popup visible="{{paramsOpen}}" placement="bottom" bind:visible-change="closeParams">
+  <view class="params-sheet">
+    <view class="sheet-handle" />
+    <view class="reference-heading"><text>参数设置</text><view class="close-sheet" bindtap="closeParams"><t-icon name="close" size="20" /></view></view>
+    <view class="settings {{modelsLoading||busy?'controls-busy':''}}">
+    <text wx:if="{{resolutions.length}}" class="setting-title first-setting">分辨率</text>
+    <view class="resolution-options">
+      <view
+        class="resolution-option {{resolution===item?'selected':''}}"
+        wx:for="{{resolutions}}"
+        wx:key="*this"
+        data-value="{{item}}"
+        bindtap="chooseResolution"
+        aria-role="button"
+        aria-label="{{item+(resolution===item?'，已选中':'')}}"
+      >
+        {{item}}
+      </view>
+    </view>
+    <block wx:if="{{kind==='video'&&durations.length}}">
+      <view class="setting-row"><text class="setting-title">视频时长</text><text class="setting-value">{{duration}} 秒</text></view>
+      <slider
+        wx:if="{{durations.length>1}}"
+        class="duration-slider"
+        min="0"
+        max="{{durations.length-1}}"
+        step="1"
+        value="{{durationIndex}}"
+        activeColor="#00c8dc"
+        backgroundColor="#474b54"
+        block-color="#ffffff"
+        block-size="20"
+        bindchange="duration"
+        bindchanging="duration"
+      />
+      <view wx:if="{{durations.length>1}}" class="duration-limits">
+        <text>{{durations[0]}} 秒</text>
+        <text>{{durations[durations.length-1]}} 秒</text>
+      </view>
+    </block>
+    <block wx:if="{{qualities.length}}"><text class="setting-title">画面质量</text><view class="resolution-options"><view wx:for="{{qualities}}" wx:key="*this" class="resolution-option {{quality===item?'selected':''}}" data-value="{{item}}" bindtap="chooseQuality">{{item==='low'?'标准':item==='medium'?'精细':item==='high'?'高清':item}}</view></view></block>
+    <text wx:if="{{ratios.length}}" class="setting-title">选择画幅</text>
+    <view class="ratio-grid">
+      <view
+        wx:for="{{ratios}}"
+        wx:key="*this"
+        class="ratio {{ratio===item?'selected':''}}"
+        data-value="{{item}}"
+        bindtap="chooseRatio"
+        aria-role="button"
+        aria-label="{{item+(ratio===item?'，已选中':'')}}"
+        hover-class="ratio-pressed"
+      >
+        <view class="ratio-visual">
+          <t-icon wx:if="{{item==='auto'}}" name="scan" size="20" />
+          <view
+            wx:else
+            class="ratio-shape shape-{{item==='16:9'?'wide':item==='9:16'?'portrait':item==='1:1'?'square':item==='4:3'?'landscape':item==='3:4'?'photo':'cinema'}}"
+          />
+        </view>
+        <text class="ratio-label">{{item==='auto'?'自适应':item}}</text>
+      </view>
+    </view>
+  </view>
+  </view>
+</t-popup>
+<t-popup visible="{{assetsOpen}}" placement="bottom" bind:visible-change="closeAssets">
+  <view class="reference-sheet">
+    <view class="sheet-handle" />
+    <view class="reference-heading"><text>添加参考</text><view class="close-sheet" bindtap="closeAssets"><t-icon name="close" size="20" /></view></view>
+    <view class="source-grid">
+      <view wx:if="{{allowImage}}" class="source-tile" data-kind="image" bindtap="addAsset" hover-class="source-pressed"><view class="source-glyph glyph-image"><t-icon name="image" size="26" /></view><text class="source-name">图片</text><text class="source-hint">人物 · 商品 · 场景</text></view>
+      <view wx:if="{{allowVideo}}" class="source-tile" data-kind="video" bindtap="addAsset" hover-class="source-pressed"><view class="source-glyph glyph-video"><t-icon name="video-camera" size="26" /></view><text class="source-name">视频</text><text class="source-hint">动作 · 运镜参考</text></view>
+      <view wx:if="{{allowAudio}}" class="source-tile" data-kind="audio" bindtap="addAsset" hover-class="source-pressed"><view class="source-glyph glyph-audio"><t-icon name="sound" size="26" /></view><text class="source-name">音频</text><text class="source-hint">配乐 · 人声</text></view>
+    </view>
+    <text class="source-note">已添加 {{assets.length}} / {{maxReferences}}</text>
+  </view>
+</t-popup>
+<t-popup visible="{{mentionOpen}}" placement="bottom" bind:visible-change="closeMention">
+  <view class="reference-sheet">
+    <view class="sheet-handle" />
+    <view class="reference-heading"><text>引用参考图</text><view class="close-sheet" bindtap="closeMention"><t-icon name="close" size="20" /></view></view>
+    <scroll-view scroll-y class="mention-scroll">
+      <view class="mention-grid">
+        <view wx:for="{{mentionItems}}" wx:key="id" class="mention-item" data-index="{{index}}" bindtap="pickMention" hover-class="source-pressed" aria-role="button" aria-label="{{'引用'+item.label}}">
+          <image src="{{item.url}}" mode="aspectFill" />
+          <text class="mention-tag">@{{item.label}}</text>
+        </view>
+      </view>
+    </scroll-view>
+    <text class="source-note">选择后插入到光标位置，生成时按编号对应图片</text>
+  </view>
+</t-popup>
+<media-viewer show="{{viewerOpen}}" items="{{viewerItems}}" current="{{viewerIndex}}" bind:close="closeViewer" bind:mention="viewerMention" bind:remove="viewerRemove" />

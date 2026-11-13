@@ -2,10 +2,9 @@
 <view class="subpage task-detail-page">
   <view class="loading" wx:if="{{loading}}"><t-loading /></view>
   <view wx:elif="{{needsLogin}}" class="empty">
+    <view class="empty-icon"><t-icon name="user" size="30" /></view>
     <text class="title">登录后查看这份作品</text>
-    <t-button t-class="empty-action" theme="primary" loading="{{signingIn}}" bind:tap="signIn"
-      >去登录</t-button
-    >
+    <text class="empty-link" bindtap="signIn">{{signingIn?'正在登录…':'去登录 ›'}}</text>
   </view>
   <view wx:elif="{{loadError&&!job}}" class="error-box" bindtap="load">
     {{loadError}}
@@ -28,7 +27,12 @@
       </view>
       <text class="small muted">{{job.time}} 提交</text>
     </view>
-    <view wx:if="{{job.stage&&(job.status==='running'||job.status==='queued')}}" class="stage-note">{{job.stage}} · {{job.progress}}%</view>
+    <view wx:if="{{job.status==='running'||job.status==='queued'}}" class="live-stage {{job.status}}">
+      <view class="live-ring"><t-loading size="28px" /></view>
+      <text class="live-title">{{job.status==='queued'?'排队中，马上开始':'正在生成'+job.kindText}}</text>
+      <view wx:if="{{job.status==='running'&&job.progress}}" class="live-bar"><view style="width:{{job.progress}}%" /></view>
+      <text wx:if="{{job.stage}}" class="stage-note">{{job.stage}} · {{job.progress}}%</text>
+    </view>
     <view
       wx:if="{{job.status==='queued'||job.status==='running'}}"
       class="waiting-note"
@@ -61,37 +65,16 @@
         object-fit="contain"
       />
     </view>
-    <view
-      class="foot-actions"
-      wx:if="{{!job.deleted&&(job.status==='failed'||job.status==='succeeded')}}"
-    >
-      <view>
-        <t-button block bind:tap="edit">重新编辑</t-button>
-      </view>
-      <view wx:if="{{job.retryable||job.status==='succeeded'}}">
-        <t-button
-          wx:if="{{job.status==='failed'&&job.retryable}}"
-          block
-          theme="primary"
-          loading="{{busy}}"
-          bind:tap="retry"
-        >
-          重试
-        </t-button>
-        <t-button
-          wx:elif="{{job.status==='succeeded'}}"
-          block
-          theme="primary"
-          loading="{{busy}}"
-          bind:tap="save"
-        >
-          保存{{job.kindText==='图片'?'图片':'视频'}}
-        </t-button>
-      </view>
+    <view wx:if="{{job.status==='succeeded'&&!job.deleted}}" class="result-actions">
+      <view class="act" bindtap="save" hover-class="act-pressed" aria-role="button"><view class="act-icon primary"><t-loading wx:if="{{busy}}" size="20px" /><t-icon wx:else name="download" size="22" /></view><text>保存</text></view>
+      <view class="act" bindtap="share" hover-class="act-pressed" aria-role="button"><view class="act-icon"><t-icon name="share" size="22" /></view><text>分享</text></view>
+      <view class="act" bindtap="edit" hover-class="act-pressed" aria-role="button"><view class="act-icon"><t-icon name="edit-1" size="22" /></view><text>再编辑</text></view>
+      <view class="act" bindtap="remove" hover-class="act-pressed" aria-role="button"><view class="act-icon danger"><t-icon name="delete" size="22" /></view><text>删除</text></view>
     </view>
-    <view wx:if="{{job.status==='succeeded'&&!job.deleted}}" class="result-actions"
-      ><t-button block bind:tap="share">分享作品</t-button></view
-    >
+    <view wx:elif="{{job.status==='failed'&&!job.deleted}}" class="failed-actions">
+      <button wx:if="{{job.retryable}}" class="retry-pill" loading="{{busy}}" disabled="{{busy}}" bindtap="retry"><t-icon wx:if="{{!busy}}" name="refresh" size="18" />重新生成</button>
+      <text class="edit-link" bindtap="edit">修改后再试 ›</text>
+    </view>
     <text class="section-title">提示词</text>
     <text class="full-prompt" selectable>{{job.input.prompt}}</text>
     <view class="row section-title">
@@ -121,6 +104,6 @@
       <text wx:if="{{job.costUnits}}" class="billing-summary">本次积分 {{job.costUnits/100}} · {{job.billingState==='reserved'?'已预留':job.billingState==='charged'?'已扣除':job.billingState==='released'?'已退回':''}}</text>
     </view>
     <view class="task-balance"><points-balance compact /></view>
-    <button wx:if="{{job.status==='succeeded'&&!job.deleted}}" class="text-button danger-link" bindtap="remove">删除作品</button>
   </view>
 </view>
+<ui-dialog id="ui-dialog" />

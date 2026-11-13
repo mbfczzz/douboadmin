@@ -5,6 +5,7 @@ import {
   hasSession,
   login,
   logout,
+  openPage,
 } from "../../utils/api";
 import type { Row, Config } from "../../services/types";
 import type { Preferences } from "../../services/business";
@@ -15,11 +16,24 @@ Page({
     loadError: "",
     busy: false,
     completionTemplateId: "",
+    version: "",
   },
   revision: 0,
   actionRevision: 0,
   destroyed: false,
   signingOut: false,
+  onLoad() {
+    // The released version, or the environment while in development/trial.
+    const info = wx.getAccountInfoSync?.().miniProgram;
+    const env: Record<string, string> = { develop: "开发版", trial: "体验版" };
+    this.setData({ version: info?.version ? "v" + info.version : env[info?.envVersion || ""] || "" });
+  },
+  privacy() {
+    wx.openPrivacyContract({ fail: () => error(new Error("隐私保护指引暂时无法打开")) });
+  },
+  help() {
+    openPage(this, { url: "/pages/library/index?mode=help" });
+  },
   onShow() {
     enterPage(this);
     void this.load();

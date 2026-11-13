@@ -2,31 +2,67 @@
 .works-page {
   padding: 20px 20px calc(32px + env(safe-area-inset-bottom));
 }
+.works-head {
+  margin: -4px 2px 8px;
+}
+.works-total {
+  font-size: 26px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.works-label {
+  font-size: 13px;
+  color: var(--ui-muted);
+}
 .work-filters {
   display: flex;
   gap: 26px;
   margin-bottom: 20px;
 }
 .work-filter {
-  padding: 10px 0;
+  position: relative;
+  padding: 8px 0;
   font-size: 15px;
   color: var(--ui-muted);
 }
 .work-filter.active {
   color: var(--ui-text);
-  font-weight: 500;
-  box-shadow: inset 0 -2px 0 var(--ui-text);
+  font-weight: 600;
+}
+.work-filter.active::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 14px;
+  height: 3px;
+  margin-left: -7px;
+  border-radius: 2px;
+  background: var(--ui-brand);
 }
 .works-page .completed-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 24px 12px;
+  gap: 18px 10px;
 }
 .works-page .completed-cover {
-  height: 144px;
-  border-radius: 8px;
+  height: auto;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  border-radius: 14px;
 }
 .works-page .completed-cover image {
-  border-radius: 8px;
+  position: absolute;
+  inset: 0;
+  border-radius: 0;
+}
+.works-page .completed-duration {
+  left: 8px;
+  right: auto;
+  bottom: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  background: #00000080;
 }
 .works-page .completed-title {
   font-size: 15px;
@@ -34,9 +70,8 @@
 }
 .work-meta {
   display: flex;
-  flex-direction: column;
-  gap: 3px;
-  margin-top: 5px;
+  gap: 6px;
+  margin-top: 3px;
   font-size: 12px;
   line-height: 1.5;
   color: var(--ui-muted);

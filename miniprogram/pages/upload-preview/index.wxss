@@ -1,52 +1,100 @@
 .preview-page {
-  padding: 24px 20px calc(130px + env(safe-area-inset-bottom));
+  padding: 12px 20px calc(110px + env(safe-area-inset-bottom));
+}
+/* The photo sits on a black stage, edge to edge, like a darkroom proof. */
+.preview-frame {
+  position: relative;
+  height: 62vh;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #000;
 }
 .preview {
   width: 100%;
-  height: 438px;
-  max-height: 55vh;
-  background: var(--ui-surface);
-  border-radius: 8px;
-}
-.preview-frame {
-  position: relative;
+  height: 100%;
 }
 .preview-zoom {
   position: absolute;
-  top: 12px;
   right: 12px;
-  width: 36px;
-  height: 36px;
+  bottom: 12px;
+  width: 34px;
+  height: 34px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 10px;
-  background: #0f0f11bb;
-  color: #ffffff;
-}
-.preview-zoom::after {
-  content: "";
-  position: absolute;
-  inset: -3px;
+  border-radius: 50%;
+  background: #00000080;
+  color: #fff;
 }
 .preview-name {
-  word-break: break-all;
-  font-size: 16px;
-  font-weight: 500;
-  margin: 24px 0 10px;
-}
-.preview-hint {
+  display: block;
+  margin: 16px 0 10px;
+  overflow: hidden;
   font-size: 13px;
-  line-height: 1.5;
   color: var(--ui-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
-.preview-page .foot-actions {
+.preview-checks,
+.preview-done {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.preview-check,
+.preview-done {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  color: var(--ui-text);
+}
+.preview-check {
+  padding: 6px 10px;
+  border-radius: var(--ui-radius-pill);
+  background: var(--ui-surface);
+}
+.preview-check t-icon,
+.preview-done t-icon {
+  color: var(--ui-brand);
+}
+.preview-bar {
   position: fixed;
   left: 0;
   right: 0;
   bottom: 0;
-  padding: 12px 20px calc(26px + env(safe-area-inset-bottom));
-  gap: 10px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 20px calc(16px + env(safe-area-inset-bottom));
+  background: linear-gradient(transparent, var(--ui-bg) 30%);
+}
+.preview-again {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 4px;
+  font-size: 15px;
+  color: var(--ui-text);
+}
+button.preview-use {
+  flex: 1;
+  width: auto;
+  height: 48px;
   margin: 0;
-  background: var(--ui-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--ui-radius-pill);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ui-on-brand);
+  background: var(--ui-primary);
+}
+button.preview-use::after {
+  border: 0;
+}
+button.preview-use.is-busy {
+  opacity: 0.7;
 }

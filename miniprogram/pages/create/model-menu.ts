@@ -2,7 +2,8 @@ import type { MenuPage } from "../../services/page-contracts";
 
 // Preserve the designed downward menu when space permits; flip only to fit.
 export function openModelMenu(page: MenuPage) {
-  const desired = Math.min(320, page.data.availableModels.length * 76 + 12);
+  // Rows render at about 56px (name + one-line note); the menu hugs them.
+  const desired = Math.min(320, page.data.availableModels.length * 56 + 14);
   page.setData({
     showModels: true,
     modelMenuHeight: desired,

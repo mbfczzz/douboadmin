@@ -26,6 +26,7 @@ import {
   register,
   stopCountdown,
 } from "./register";
+import { codeState, enterCode, clearCode, pasteCode } from "./code-entry";
 
 Page({
   data: {
@@ -33,7 +34,7 @@ Page({
     logged: false,
     loading: true,
     busy: false,
-    code: "",
+    ...codeState,
     loadError: "",
     wechatReady: false,
     phoneReady: false,
@@ -90,8 +91,30 @@ Page({
       if (revision === this.revision) this.setData({ loading: false });
     }
   },
+  // The code formats as it is typed: "kmnp2345" shows as "KMNP-2345".
+  // Reaching eight characters registers at once; no confirm button.
   input(e: WechatMiniprogram.Input) {
-    this.setData({ code: e.detail.value });
+    const before = this.data.codeRaw.length;
+    const raw = enterCode(this, e.detail.value);
+    if (raw.length === 8 && before !== 8) this.confirm();
+    return raw;
+  },
+  useCode() {
+    if (!this.data.busy) this.setData({ codeMode: true, codeFocus: true });
+  },
+  useScan() {
+    if (this.data.busy) return;
+    clearCode(this);
+    this.setData({ codeMode: false });
+  },
+  focusCode() {
+    if (!this.data.busy) this.setData({ codeFocus: true });
+  },
+  blurCode() {
+    this.setData({ codeFocus: false });
+  },
+  pasteCode() {
+    if (!this.data.busy) pasteCode(this, () => this.confirm());
   },
   field(e: WechatMiniprogram.Input) {
     const key = e.currentTarget.dataset.field as string;
@@ -157,7 +180,9 @@ Page({
       });
       if (this.destroyed) return;
       // Scanning registers; approval opens the account later.
-      this.setData({ status, code: "" });
+      this.setData({ status });
+      clearCode(this);
+      this.setData({ codeMode: false });
       if (status.active) this.enter();
       else wx.showToast({ title: "已登记，等待超级管理员开通", icon: "none" });
     } catch (e) {

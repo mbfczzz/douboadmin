@@ -1,28 +1,17 @@
-<view class="biz-card"
-  ><text class="biz-heading">声音</text
-  ><view class="biz-row"
-    ><text>保留素材原声</text
-    ><switch
-      checked="{{keepOriginalAudio}}"
-      disabled="{{!config.enabled}}"
-      color="#00c8dc"
-      data-field="keepOriginalAudio"
-      bindchange="toggle" /></view
-  ><picker
-    range="{{musicNames}}"
-    value="{{musicIndex}}"
-    bindchange="chooseMusic"
-    ><view class="biz-row biz-picker-row"
-      ><text>背景音乐</text><text class="accent">{{musicLabel}} ›</text></view
-    ></picker
-  ><view class="biz-link mix-upload-music" bindtap="uploadMusic">上传自己的音乐</view
-  ><text class="biz-label">背景音乐音量 {{musicVolume}}%</text
-  ><slider
-    min="0"
-    max="100"
-    value="{{musicVolume}}"
-    activeColor="#00c8dc"
-    backgroundColor="#474b54"
-    block-color="#00c8dc"
-    bindchange="volume"
-/></view>
+<view class="biz-card">
+  <text class="mix-label">声音</text>
+  <view class="biz-row mix-switch-row">
+    <text>保留素材原声</text>
+    <switch checked="{{keepOriginalAudio}}" color="#00c8dc" data-field="keepOriginalAudio" bindchange="toggle" />
+  </view>
+  <picker range="{{musicNames}}" value="{{musicIndex}}" bindchange="chooseMusic">
+    <view class="mix-music">
+      <view class="mix-music-icon"><t-icon name="music" size="20" /></view>
+      <view class="mix-music-copy"><text>背景音乐</text><text class="biz-small">{{musicLabel}}</text></view>
+      <t-icon name="chevron-right" size="18" />
+    </view>
+  </picker>
+  <text class="mix-upload-music" bindtap="uploadMusic">上传自己的音乐 ›</text>
+  <view class="row mix-label"><text>背景音乐音量</text><text class="mix-value">{{musicVolume}}%</text></view>
+  <slider class="mix-slider" min="0" max="100" value="{{musicVolume}}" activeColor="#00c8dc" backgroundColor="#474b54" block-color="#ffffff" block-size="20" bindchanging="volume" bindchange="volume" />
+</view>

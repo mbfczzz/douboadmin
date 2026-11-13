@@ -1,29 +1,41 @@
 <nav-bar title="我的积分" back />
 <view class="subpage">
   <view wx:if="{{needsLogin}}" class="biz-empty"
-    ><text>登录后查看积分与充值记录</text
-    ><button class="biz-action" bindtap="signIn">去登录</button></view
+    ><view class="empty-icon"><t-icon name="wallet" size="30" /></view><text>登录后查看积分与充值记录</text><text class="empty-link" bindtap="signIn">去登录 ›</text></view
   >
   <block wx:else>
     <view wx:if="{{error}}" class="biz-error" bindtap="load"
       >{{error}} · 点击重试</view
     >
-    <view wx:if="{{loading&&!info}}" class="biz-note">正在读取积分余额…</view>
+    <view wx:if="{{loading&&!info}}" class="skel-list" aria-label="正在读取积分余额"><view class="skeleton skel-hero" /><view class="skeleton skel-card" /></view>
     <view wx:if="{{pendingOrderId}}" class="biz-card payment-status">
-      <view class="biz-heading"><t-loading wx:if="{{!paymentWaiting}}" size="16px" /> {{paymentWaiting?'到账待确认':'正在确认到账'}}</view>
+      <view class="payment-head"><view class="payment-ring"><t-loading wx:if="{{!paymentWaiting}}" size="20px" /><t-icon wx:else name="time" size="20" /></view><text class="biz-heading">{{paymentWaiting?'到账待确认':'正在确认到账'}}</text></view>
       <text class="biz-note" aria-role="status">{{paymentNotice}}</text>
       <button class="biz-action" bindtap="orders">查看订单</button>
       <button wx:if="{{paymentWaiting}}" class="text-button phone-alternative" disabled="{{busy}}" bindtap="additionalPurchase">另购积分</button>
     </view>
     <view wx:elif="{{paymentNotice}}" class="biz-note" aria-role="status">{{paymentNotice}}</view>
     <view wx:if="{{info}}" class="biz-card wallet-summary">
+      <view wx:if="{{heroArt.length}}" class="hero-art" aria-hidden="true"><image wx:for="{{heroArt}}" wx:key="*this" src="{{item}}" mode="aspectFill" class="fan-{{index}}" /></view>
       <view class="summary-label"><text class="points-mark">✦</text><text>可用积分</text></view>
       <view class="row"><text class="biz-value">{{available}}</text><button class="wallet-refresh" bindtap="load" disabled="{{loading}}"><t-icon name="refresh" size="16" /><text>刷新</text></button></view>
       <view class="summary-held"><t-icon name="lock-on" size="16" /><text>预留 {{held}} 积分</text><text class="biz-small">处理中暂时冻结</text></view>
+      <view wx:if="{{price100}}" class="summary-price"><text>当前价格</text><text class="price-value">¥{{price100}} / 100 积分</text></view>
+    </view>
+    <view wx:if="{{uses.length}}" class="uses">
+      <text class="uses-head">当前积分大约可以</text>
+      <view class="uses-row">
+        <view wx:for="{{uses}}" wx:key="kind" class="use use-{{item.kind}}">
+          <view class="use-cover"><image wx:if="{{useArt[item.kind]}}" src="{{useArt[item.kind]}}" mode="aspectFill" /><view class="use-icon"><t-icon name="{{item.icon}}" size="18" /></view></view>
+          <text class="use-count">{{item.count}}<text class="use-unit"> {{item.unit}}</text></text>
+          <text class="use-title">{{item.title}}</text>
+          <text class="use-cost">约 {{item.cost}} 积分 / {{item.unit}}</text>
+        </view>
+      </view>
     </view>
     <view wx:if="{{info}}" class="wallet-shortcuts">
-      <view bindtap="orders" aria-role="button"><t-icon name="order" size="20" /><text>充值订单</text><t-icon name="chevron-right" size="20" /></view>
-      <view bindtap="explain" aria-role="button"><t-icon name="help-circle" size="20" /><text>积分说明</text><t-icon name="chevron-right" size="20" /></view>
+      <view bindtap="orders" aria-role="button" hover-class="row-pressed"><t-icon name="order" size="20" /><text>充值订单</text><t-icon name="chevron-right" size="20" /></view>
+      <view bindtap="explain" aria-role="button" hover-class="row-pressed"><t-icon name="help-circle" size="20" /><text>积分说明</text><t-icon name="chevron-right" size="20" /></view>
     </view>
     <view class="wallet-purchase" wx:if="{{info&&!pendingOrderId}}"
       ><text class="biz-heading">购买积分</text
@@ -41,7 +53,10 @@
         <view wx:else class="virtual-products {{products.length===1?'single':products.length===2||products.length===4?'pair':''}}">
           <button wx:for="{{products}}" wx:key="id" class="virtual-product {{productId===item.id?'selected':''}}" aria-label="{{item.name}}，{{item.amount}}元，{{item.points}}积分，{{productId===item.id?'已选择':'未选择'}}" data-id="{{item.id}}" bindtap="chooseProduct" disabled="{{busy||pendingOrderId}}">
             <view class="row product-icons"><t-icon wx:if="{{productId===item.id}}" name="check-circle" size="16" /></view>
+            <text wx:if="{{item.best}}" class="product-badge">最划算</text>
+            <view wx:if="{{item.art.length}}" class="product-art art-{{item.art.length}}" aria-hidden="true"><image wx:for="{{item.art}}" wx:for-item="src" wx:key="*this" src="{{src}}" mode="aspectFill" /></view>
             <text class="product-points">{{item.points}}<text class="product-unit">积分</text></text><text class="product-name">{{item.name}}</text><text class="product-price">¥{{item.amount}}</text>
+            <text wx:if="{{item.bonus||item.per100}}" class="product-rate">{{item.bonus||'¥'+item.per100+'/百积分'}}</text>
           </button>
         </view>
         <text wx:if="{{purchaseMode==='package'&&!products.length}}" class="biz-note">暂无可用积分商品，请稍后再试。</text>
@@ -68,20 +83,23 @@
     >
     <view class="biz-card"
       ><text class="biz-heading">积分明细</text
-      ><view wx:if="{{loading&&!ledger.length}}" class="biz-empty">正在读取积分明细…</view>
-      <view wx:elif="{{!error&&!ledger.length}}" class="biz-empty">暂无积分变动</view
-      ><view wx:for="{{ledger}}" wx:key="id" class="biz-row ledger-row"
+      ><view wx:if="{{loading&&!ledger.length}}" class="skel-list" aria-label="正在读取积分明细"><view wx:for="{{[1,2,3]}}" wx:key="*this" class="skel-row"><view class="skeleton skel-dot" /><view class="skel-lines"><view class="skeleton skel-a" /><view class="skeleton skel-b" /></view></view></view>
+      <view wx:elif="{{!error&&!ledger.length}}" class="biz-empty"><view class="empty-icon"><t-icon name="chart-bar" size="26" /></view><text>暂无积分变动，充值或创作后会记录在这里</text></view
+      ><block wx:for="{{ledger}}" wx:key="id"
+        ><text wx:if="{{item.showDay}}" class="ledger-day">{{item.day}}</text
+        ><view class="biz-row ledger-row"
         ><view class="icon-tile {{item.tone}}"><t-icon name="{{item.icon}}" size="20" /></view><view class="ledger-copy"
           ><text class="biz-list-title">{{item.title}}</text
           ><text wx:if="{{item.note}}" class="biz-small ledger-note">{{item.note}}</text
           ><text class="biz-small ledger-time">{{item.time}}</text></view
-        ><text class="ledger-change {{item.tone}}">{{item.change}}</text></view>
-      <view wx:if="{{ledgerPages>1}}" class="biz-pair">
-        <view><button class="biz-action biz-secondary" disabled="{{loading||ledgerPage<=1}}" data-step="-1" bindtap="changeLedgerPage">上一页</button></view>
-        <view><button class="biz-action biz-secondary" disabled="{{loading||ledgerPage>=ledgerPages}}" data-step="1" bindtap="changeLedgerPage">下一页</button></view>
+        ><view class="ledger-side"><text class="ledger-change {{item.tone}}">{{item.change}}</text><text class="ledger-after">余额 {{item.after}}</text></view></view></block>
+      <view wx:if="{{ledgerPages>1}}" class="job-pagination">
+        <button disabled="{{loading||ledgerPage<=1}}" data-step="-1" bindtap="changeLedgerPage">‹ 上一页</button>
+        <text>{{ledgerPage}} / {{ledgerPages}}</text>
+        <button disabled="{{loading||ledgerPage>=ledgerPages}}" data-step="1" bindtap="changeLedgerPage">下一页 ›</button>
       </view>
-      <text wx:if="{{ledgerTotal>0}}" class="biz-note">第 {{ledgerPage}} / {{ledgerPages}} 页 · 共 {{ledgerTotal}} 条</text>
       </view
     >
   </block>
 </view>
+<ui-dialog id="ui-dialog" />

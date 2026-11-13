@@ -32,7 +32,7 @@ async function fixture() {
 test("balance shows server credit, reservation and successful settlement without subtracting twice", async () => {
   const f = await fixture();
   await f.balance.reload();
-  assert.equal(f.balance.data.available, "1000");
+  assert.equal(f.balance.data.available, "1,000");
   assert.equal(f.balance.data.rechargeEnabled, true);
   f.info.wallet.availableUnits = 97500;
   f.info.wallet.heldUnits = 2500;
@@ -45,7 +45,7 @@ test("balance shows server credit, reservation and successful settlement without
   assert.equal(f.balance.data.held, "0");
   f.info.wallet.availableUnits = 100000;
   await f.balance.reload();
-  assert.equal(f.balance.data.available, "1000");
+  assert.equal(f.balance.data.available, "1,000");
   f.balance.stop();
   assert.equal(f.timers.size, 0);
 });
@@ -70,7 +70,7 @@ test("a refresh failure preserves the last balance and logout clears displayed a
   await f.balance.reload();
   f.h.wx.request = (options) => options.fail();
   await f.balance.reload();
-  assert.equal(f.balance.data.available, "1000");
+  assert.equal(f.balance.data.available, "1,000");
   assert.match(f.balance.data.loadError, /刷新/);
   f.h.api.clearSession();
   await f.balance.reload();
@@ -99,7 +99,7 @@ test("editor balance retries a failed refresh instead of navigating with stale c
   f.balance.balanceTap();
   await new Promise(setImmediate);
   assert.equal(f.h.nav.length, 0);
-  assert.equal(f.balance.data.available, "1000");
+  assert.equal(f.balance.data.available, "1,000");
   assert.equal(f.balance.data.loadError, "");
   f.balance.balanceTap();
   assert.equal(f.h.nav.at(-1).url, "/pages/wallet/index");

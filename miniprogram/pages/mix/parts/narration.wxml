@@ -1,72 +1,20 @@
-<view class="biz-card"
-  ><text class="biz-heading">文案与配音</text
-  ><textarea
-    class="biz-input textarea"
-    value="{{script}}"
-    maxlength="500"
-    placeholder="输入旁白或字幕文案，也可以从原声识别…"
-    bindinput="input"
-  /><view class="biz-row"
-    ><view
-      ><text>语音转文字</text
-      ><text wx:if="{{!config.enabled}}" class="biz-note"
-        >混剪服务暂未开放</text
-      ></view
-    ><switch
-      checked="{{transcribe}}"
-      disabled="{{!config.enabled}}"
-      data-field="transcribe"
-      bindchange="toggle"
-      color="#00c8dc" /></view
-  ><view class="biz-row"
-    ><view
-      ><text>AI 改写文案</text
-      ><text wx:if="{{!config.enabled}}" class="biz-note"
-        >混剪服务暂未开放</text
-      ></view
-    ><switch
-      checked="{{rewrite}}"
-      disabled="{{!config.enabled}}"
-      data-field="rewrite"
-      bindchange="toggle"
-      color="#00c8dc" /></view
-  ><view class="biz-row"
-    ><view
-      ><text>AI 配音</text
-      ><text wx:if="{{!config.enabled}}" class="biz-note"
-        >混剪服务暂未开放</text
-      ></view
-    ><switch
-      checked="{{narration}}"
-      disabled="{{!config.enabled}}"
-      data-field="narration"
-      bindchange="toggle"
-      color="#00c8dc" /></view
-  ><block wx:if="{{narration}}"
-    ><picker range="{{modelNames}}" value="{{modelIndex}}" bindchange="model"
-      ><view class="biz-row biz-picker-row"
-        ><text>配音模型</text
-        ><text class="accent">{{modelNames[modelIndex]}} ›</text></view
-      ></picker
-    ><picker
-      wx:if="{{voices.length}}"
-      range="{{voices}}"
-      value="{{voiceIndex}}"
-      bindchange="voice"
-      ><view class="biz-row biz-picker-row"
-        ><text>音色</text
-        ><text class="accent">{{voices[voiceIndex]}} ›</text></view
-      ></picker
-    ></block
-  ><view class="biz-row"
-    ><text>自动字幕</text
-    ><switch
-      checked="{{captions}}"
-      disabled="{{!config.enabled}}"
-      data-field="captions"
-      bindchange="toggle"
-      color="#00c8dc" /></view
-  ><text wx:if="{{captions}}" class="biz-note"
-    >有识别时间轴时沿用时间轴；手动或改写文案按时长分句生成字幕。</text
-  ></view
->
+<view class="biz-card">
+  <text class="mix-label">文案与配音</text>
+  <textarea class="biz-input textarea" value="{{script}}" maxlength="500" placeholder="输入旁白或字幕文案，也可以从原声识别…" bindinput="input" />
+  <view class="mix-features">
+    <view wx:for="{{features}}" wx:key="field" class="mix-feature {{on[item.field]?'on':''}}" data-field="{{item.field}}" bindtap="flip" aria-role="switch" aria-label="{{item.label}}">
+      <t-icon name="{{item.icon}}" size="22" />
+      <text>{{item.label}}</text>
+      <t-icon wx:if="{{on[item.field]}}" class="mix-check" name="check-circle-filled" size="16" />
+    </view>
+  </view>
+  <block wx:if="{{narration}}">
+    <picker range="{{modelNames}}" value="{{modelIndex}}" bindchange="model">
+      <view class="biz-row biz-picker-row"><text>配音模型</text><text class="accent">{{modelNames[modelIndex]||'默认'}} ›</text></view>
+    </picker>
+    <picker wx:if="{{voices.length}}" range="{{voices}}" value="{{voiceIndex}}" bindchange="voice">
+      <view class="biz-row biz-picker-row"><text>音色</text><text class="accent">{{voices[voiceIndex]}} ›</text></view>
+    </picker>
+  </block>
+  <text wx:if="{{captions}}" class="biz-note">有识别时间轴时沿用时间轴；手动或改写文案按时长分句生成字幕。</text>
+</view>

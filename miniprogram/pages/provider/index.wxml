@@ -2,9 +2,15 @@
 <view class="subpage">
   <view wx:if="{{loadError}}" class="biz-error" bindtap="load">{{loadError}} · 点击重试</view>
   <view wx:if="{{center}}" class="provider-head">
+    <view class="provider-glyph"><t-icon name="{{promo?'qrcode':'cooperate'}}" size="24" /></view>
     <view class="provider-title"><text class="provider-name">{{center.name}}</text><text class="provider-level {{center.role}}">{{roleName}}</text></view>
-    <text class="biz-note">会员 {{center.members}} 人</text>
+    <text class="biz-note">{{promo?'推广码':'服务商'}} · {{center.status==='active'?'正常':'已停用'}}</text>
     <text wx:if="{{center.status!=='active'}}" class="biz-error">服务商已停用，请联系总部</text>
+  </view>
+  <view wx:if="{{center}}" class="provider-stats">
+    <view><text class="stat-num">{{center.members}}</text><text class="stat-label">会员</text></view>
+    <view wx:if="{{center.role!=='s2'&&!promo}}"><text class="stat-num">{{childrenTotal}}</text><text class="stat-label">下级服务商</text></view>
+    <view wx:if="{{!promo}}"><text class="stat-num small {{center.account?'on':''}}">{{center.account?'已开通':'未开通'}}</text><text class="stat-label">后台登录</text></view>
   </view>
   <view wx:if="{{shown.qr}}" class="biz-card provider-share">
     <view wx:if="{{tabs.length>1}}" class="provider-tabs">
@@ -22,13 +28,10 @@
     <view wx:if="{{!children.length&&!childrenLoading&&!childrenError}}" class="biz-card biz-note">还没有下级服务商</view>
     <view wx:for="{{children}}" wx:key="id" class="biz-card provider-child">
       <view class="provider-title"><text class="biz-list-title">{{item.name}}</text><text class="provider-level {{item.role}}">{{item.roleName}}</text><text wx:if="{{item.status!=='active'}}" class="provider-off pill {{item.status==='pending'?'warning':''}}">{{item.status==='pending'?'待开通':'已停用'}}</text></view>
-      <view class="provider-facts">
-        <view><text class="biz-label">会员</text><text>{{item.members}}</text></view>
-        <view><text class="biz-label">加入</text><text>{{item.date}}</text></view>
-      </view>
+      <view class="child-meta"><text class="child-num">{{item.members}}</text><text> 位会员 · {{item.date}} 加入</text></view>
       <text class="biz-note">后台账号 {{item.account||'未开通'}}{{item.scanned?' · 扫码登记':''}}</text>
     </view>
-    <button wx:if="{{children.length<childrenTotal||childrenLoading}}" class="biz-action biz-secondary" loading="{{childrenLoading}}" disabled="{{childrenLoading}}" bindtap="moreChildren">加载更多下级</button>
+    <view wx:if="{{children.length<childrenTotal||childrenLoading}}" class="provider-more" bindtap="moreChildren">{{childrenLoading?'正在加载…':'加载更多下级'}}</view>
   </block>
   <view wx:if="{{center}}" class="biz-card provider-login">
     <text class="biz-heading">管理后台登录</text>
@@ -40,3 +43,4 @@
     </block>
   </view>
 </view>
+<ui-dialog id="ui-dialog" />

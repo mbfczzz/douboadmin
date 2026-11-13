@@ -2,7 +2,7 @@
   class="subpage"
   ><view wx:if="{{loadError}}" class="biz-error" bindtap="load"
     >{{loadError}} · 点击重试</view
-  ><view wx:if="{{loading&&!video}}" class="biz-empty">正在加载视频…</view
+  ><view wx:if="{{loading&&!video}}" class="skel-list" aria-label="正在加载视频"><view class="skeleton skel-hero" /><view class="skeleton skel-card" /></view
   ><block wx:if="{{video}}"
     ><view class="biz-card"
       ><video
@@ -18,21 +18,22 @@
         mode="aspectFill"
       /><text class="biz-heading">{{video.title}}</text
       ><text class="biz-small">{{video.author}} · {{video.dateText}}</text
-      ><view class="biz-row"
-        ><text>点赞 {{video.likesText}}</text
-        ><text>播放 {{video.viewsText}}</text></view
+      ><view class="hot-stats"
+        ><view><t-icon name="heart" size="16" /><text>{{video.likesText}}</text></view
+        ><view><t-icon name="play-circle" size="16" /><text>{{video.viewsText}}</text></view></view
       ></view
     ><view class="biz-card"
       ><view class="row biz-title-row"
         ><text class="biz-heading">视频文案</text
-        ><text class="biz-link" bindtap="copy">复制</text></view
+        ><view class="copy-chip" bindtap="copy"><t-icon name="copy" size="14" /><text>复制</text></view></view
       ><text selectable="true" class="video-copy">{{video.text}}</text></view
     ><text wx:if="{{busy}}" class="biz-note">{{progress}}</text
     ><text wx:elif="{{!video.url}}" class="biz-note">该视频暂不支持导入混剪。</text
     ><button
+      wx:if="{{video.url}}"
       class="biz-action"
       loading="{{busy}}"
-      disabled="{{busy||!video.url}}"
+      disabled="{{busy}}"
       bindtap="use"
     >
       导入素材并混剪

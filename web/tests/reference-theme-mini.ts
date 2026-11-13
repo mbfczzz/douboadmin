@@ -19,7 +19,7 @@ function css(file: string, width: number): string {
     .replace(/([\d.]+)rpx/g, (_, n) => `${Number(n) * width / 750}px`);
 }
 export function styles(width: number, files: string[]) {
-  return `<style>body{margin:0}button,input,textarea{font:inherit}input,textarea{background:transparent;border:0;outline:0}button{border:0}svg{flex-shrink:0}scroll-view{display:block;overflow:auto}img{object-fit:contain}${["styles/theme.wxss", "styles/common.wxss", "components/nav-bar/index.wxss", ...files].map(f => css(f,width)).join("\n")}</style>`;
+  return `<style>body{margin:0}button,input,textarea{font:inherit}input,textarea{background:transparent;border:0;outline:0}button{border:0}svg{flex-shrink:0}scroll-view{display:block;overflow:auto}img{object-fit:contain}${["styles/theme.wxss", "styles/common.wxss", "styles/sheets.wxss", "components/nav-bar/index.wxss", ...files].map(f => css(f,width)).join("\n")}</style>`;
 }
 export const header = (title: string) => `<div class="nav"><div class="nav-inner" style="height:76px;font-size:23px">${title}</div></div>`;
 export function tabs() {
@@ -42,8 +42,8 @@ export function creator() {
   </div>${tabs()}`;
 }
 export function materialSheet() {
-  const wxml = source("pages/create/index.wxml"), start = wxml.indexOf('<view wx:if="{{allowImage}}"');
-  return wxml.slice(start,wxml.indexOf("\n  </view>\n</t-popup>",start))
+  const wxml = source("pages/create/parts/sheets.wxml"), start = wxml.indexOf('<view class="source-grid">');
+  return wxml.slice(start,wxml.indexOf('<text class="source-note">',start))
     .replace(/<t-icon\b[^>]*name="([\w-]+)"[^>]*size="(\d+)"[^>]*\/>/g,(_,name,size)=>glyph(name,Number(size)))
     .replace(/{{[^}]+}}/g, "")
     .replace(/<(\/?)(view|text)\b/g,(_,close,tag)=>`<${close}${tag==="view"?"div":"span"}`);

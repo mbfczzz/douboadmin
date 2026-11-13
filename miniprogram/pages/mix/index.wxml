@@ -1,28 +1,16 @@
-<nav-bar title="混剪" /><view class="page">
-  <view wx:if="{{config.enabled}}" class="row biz-title-row mix-heading"
+<nav-bar title="混剪" /><view class="page mix-page">
+  <view class="row biz-title-row mix-heading"
     ><text class="biz-heading">素材与灵感</text
     ><text class="biz-link" bindtap="hot">热门视频 ›</text></view
   ><view wx:if="{{loadError}}" class="biz-error" bindtap="load"
     >{{loadError}} · 重试</view
   >
-  <view wx:if="{{loading&&!config}}" class="biz-note">正在读取功能状态…</view>
-  <view wx:if="{{config&&!config.enabled}}" class="empty">
-    <t-icon name="cut" size="40" />
-    <text class="title">{{config.message}}</text>
-    <button class="biz-action" bindtap="create">去创作</button>
-  </view>
-  <block wx:if="{{config.enabled}}">
   <include src="./parts/materials.wxml" />
   <include src="./parts/settings.wxml" />
   <include src="./parts/narration.wxml" />
   <include src="./parts/sound.wxml" />
-  <button
-    class="biz-action"
-    loading="{{busy}}"
-    disabled="{{busy||uploading||restoring||!config.enabled}}"
-    bindtap="generate"
-  >
-    开始混剪
-  </button>
-  </block>
+  <view class="mix-submit">
+    <text class="mix-summary">{{assets.length}} 个素材 · {{duration}} 秒 · {{ratio}}</text>
+    <button class="biz-action" loading="{{busy}}" disabled="{{busy||uploading||restoring}}" bindtap="generate">开始混剪</button>
+  </view>
 </view>

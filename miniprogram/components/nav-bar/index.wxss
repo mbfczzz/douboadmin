@@ -1,3 +1,11 @@
+/* The bar stays at the top while the page scrolls; sticky has to sit on the
+   component itself, since the inner view's containing block is the host. */
+:host {
+  display: block;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
 .nav {
   background: var(--ui-bg, #0f0f11);
   color: var(--ui-text);

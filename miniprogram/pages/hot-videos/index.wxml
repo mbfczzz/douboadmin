@@ -1,12 +1,12 @@
 <nav-bar title="热门视频灵感" back /><view
   class="subpage"
   ><view wx:if="{{ready&&!enabled}}" class="biz-empty"
-    ><view class="biz-empty-icon"><t-icon name="video" size="40" /></view
+    ><view class="empty-icon"><t-icon name="video" size="30" /></view
     ><text>热门视频暂不可用，先去创作吧。</text
-    ><button class="biz-action" bindtap="upload">去创作</button></view
+    ><text class="empty-link" bindtap="upload">去创作 ›</text></view
   ><block wx:else
   ><view class="hot-search"
-    ><input
+    ><t-icon name="search" size="18" /><input
       class="biz-input"
       value="{{query}}"
       bindinput="input"
@@ -18,7 +18,7 @@
       搜索
     </button></view
   ><view wx:if="{{loadError}}" class="biz-error">{{loadError}}</view
-  ><view wx:if="{{searched}}" class="biz-tabs"
+  ><view wx:if="{{searched}}" class="biz-tabs sort-tabs"
     ><view
       class="{{sort==='relevance'?'selected':''}}"
       data-value="relevance"
@@ -81,21 +81,14 @@
       lazy-load
     /><text class="biz-list-title hot-title">{{item.title}}</text
     ><text class="biz-small">{{item.author}} · {{item.dateText}}</text
-    ><view class="row biz-note"
-      ><text>点赞 {{item.likesText}}</text
-      ><text>播放 {{item.viewsText}}</text></view
+    ><view class="hot-stats"
+      ><view><t-icon name="heart" size="14" /><text>{{item.likesText}}</text></view
+      ><view><t-icon name="play-circle" size="14" /><text>{{item.viewsText}}</text></view></view
     ></view
   ><view
     wx:if="{{searched&&!loading&&!items.length&&!loadError}}"
     class="biz-empty"
-    >没有找到相关视频</view
-  ><button
-    wx:if="{{hasMore}}"
-    class="biz-action biz-secondary"
-    bindtap="more"
-    loading="{{loading}}"
-  >
-    加载更多
-  </button></block
+    ><view class="empty-icon"><t-icon name="search" size="26" /></view><text>没有找到相关视频，换个关键词试试</text></view
+  ><view wx:if="{{hasMore}}" class="hot-more" bindtap="more">{{loading?'正在加载…':'加载更多'}}</view></block
 ></view
 >

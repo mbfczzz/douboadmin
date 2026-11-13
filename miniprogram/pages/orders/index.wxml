@@ -1,31 +1,38 @@
 <nav-bar title="充值订单" back />
 <view class="subpage orders-page">
-  <view wx:if="{{needsLogin}}" class="biz-empty">登录后查看充值订单<button class="biz-action" bindtap="signIn">去登录</button></view>
+  <view wx:if="{{needsLogin}}" class="biz-empty"><view class="empty-icon"><t-icon name="user" size="30" /></view><text>登录后查看充值订单</text><text class="empty-link" bindtap="signIn">去登录 ›</text></view>
   <view wx:if="{{loadError}}" class="biz-error" bindtap="load">{{loadError}} · 重试</view>
-  <view wx:if="{{loading&&!needsLogin&&!rows.length}}" class="biz-empty">正在加载充值订单…</view>
-  <view wx:elif="{{!needsLogin&&!loadError&&!rows.length}}" class="biz-empty"><view class="biz-empty-icon"><t-icon name="order" size="40" /></view><text>暂无充值订单</text><button class="biz-action" bindtap="wallet">去充值</button></view>
-  <view wx:for="{{rows}}" wx:key="id" class="biz-card order-card">
-    <view class="order-head">
-      <view class="icon-tile"><t-icon name="{{item.data.status==='refunded'?'rollback':'wallet'}}" size="20" /></view>
-      <view class="order-title"><text>{{item.data.virtual.productName||'积分充值'}}</text><text class="biz-small">{{item.data.channel==='wechat_virtual'?'虚拟支付':'微信支付'}}</text></view>
-      <text class="order-state pill {{item.tone}}">{{item.state}}</text>
+  <view wx:if="{{loading&&!needsLogin&&!rows.length}}" class="skel-list" aria-label="正在加载充值订单"><view wx:for="{{[1,2]}}" wx:key="*this" class="skeleton skel-card" /></view>
+  <view wx:elif="{{!needsLogin&&!loadError&&!rows.length}}" class="biz-empty"><view class="empty-icon"><t-icon name="order" size="30" /></view><text>暂无充值订单</text><text class="empty-link" bindtap="wallet">去充值 ›</text></view>
+  <view wx:if="{{rows.length}}" class="orders-top">
+    <view><text class="orders-total">{{total}}</text><text class="orders-label"> 笔充值订单</text></view>
+    <text class="orders-buy" bindtap="wallet">继续充值 ›</text>
+  </view>
+  <view wx:for="{{rows}}" wx:key="id" class="order-card {{open===item.id?'open':''}}">
+    <view class="order-head" data-id="{{item.id}}" bindtap="toggle" aria-role="button" aria-label="{{open===item.id?'收起订单详情':'展开订单详情'}}">
+      <view class="order-art {{item.data.status}}"><image wx:if="{{art.length}}" src="{{art[index%art.length]}}" mode="aspectFill" /><view class="order-badge"><t-icon name="{{item.data.status==='refunded'?'rollback':item.data.status==='paid'?'check':'time'}}" size="12" /></view></view>
+      <view class="order-title"><text class="order-points">{{item.points}} 积分</text><text class="biz-small">{{item.data.virtual.productName||'积分充值'}} · {{item.time}}</text></view>
+      <view class="order-side"><text class="order-amount">¥{{item.amount}}</text><text class="order-state pill {{item.tone}}">{{item.state}}</text></view>
     </view>
-    <view class="order-values {{item.amount.length>7||item.points.length>8?'long-values':''}}">
-      <view><text class="biz-small">订单金额</text><text class="order-amount">¥{{item.amount}}</text></view>
-      <view><text class="biz-small">购买积分</text><text class="order-amount">{{item.points}}<text class="order-unit">积分</text></text></view>
+    <view class="order-steps">
+      <block wx:for="{{item.steps}}" wx:for-item="step" wx:for-index="n" wx:key="label"><view wx:if="{{n}}" class="step-line {{step.on?'on':''}}" /><view class="step {{step.on?'on':''}}"><view class="step-dot" /><text>{{step.label}}</text></view></block>
+      <text wx:if="{{item.window}}" class="order-window">{{item.window}}</text>
     </view>
-    <view class="order-meta"><t-icon name="time" size="16" /><text>{{item.time}}</text></view>
-    <view class="order-id" data-id="{{item.id}}" bindtap="copyId" aria-role="button" aria-label="{{'复制订单号'+item.id}}"><text>订单号</text><text class="id-value">{{item.id}}</text><t-icon name="copy" size="16" /></view>
-    <view wx:if="{{item.data.status==='paid'||item.data.status==='refunded'}}" class="order-result {{item.data.status}}"><t-icon name="{{item.data.status==='paid'?'check-circle':'rollback'}}" size="16" /><text>{{item.data.status==='paid'?'积分已到账':'退款已完成'}}</text></view>
+    <view class="order-id" data-id="{{item.id}}" bindtap="copyId" aria-role="button" aria-label="{{'复制订单号'+item.id}}"><text>订单号</text><text class="id-value">{{item.id}}</text><t-icon name="copy" size="14" /></view>
+    <view wx:if="{{open===item.id}}" class="order-lines">
+      <view wx:for="{{item.lines}}" wx:for-item="line" wx:key="label" class="order-line" data-text="{{line.value}}" bindlongpress="copyText"><text>{{line.label}}</text><text class="line-value">{{line.value}}</text></view>
+      <text class="lines-hint">长按任意一行可复制</text>
+    </view>
+    <view class="order-more" data-id="{{item.id}}" bindtap="toggle"><text>{{open===item.id?'收起':'订单详情'}}</text><t-icon name="{{open===item.id?'chevron-up':'chevron-down'}}" size="14" /></view>
     <text wx:if="{{item.data.status==='created'&&item.data.virtual.issued}}" class="biz-note">此支付单不能再次拉起支付。若已取消，可返回积分页重新购买；已付款请先查支付结果。</text>
-    <view wx:if="{{item.data.status==='created'}}" class="biz-pair">
-      <view><button class="biz-action biz-secondary" disabled="{{busy}}" data-id="{{item.id}}" bindtap="refresh"><view class="button-content"><t-icon name="refresh" size="16" /><text>查支付结果</text></view></button></view>
-      <view wx:if="{{item.canPay}}"><button class="biz-action" loading="{{busy===item.id}}" disabled="{{busy}}" data-id="{{item.id}}" bindtap="pay"><view class="button-content"><t-icon name="arrow-right" size="16" /><text>继续支付</text></view></button></view>
+    <view wx:if="{{item.data.status==='created'}}" class="order-actions">
+      <text class="order-check {{busy?'is-busy':''}}" data-id="{{item.id}}" bindtap="refresh">查支付结果</text>
+      <button wx:if="{{item.canPay}}" class="order-pay" loading="{{busy===item.id}}" disabled="{{busy}}" data-id="{{item.id}}" bindtap="pay">继续支付</button>
     </view>
   </view>
-  <view wx:if="{{!needsLogin&&pages>1}}" class="biz-pair">
-    <view><button class="biz-action biz-secondary" disabled="{{loading||busy||page<=1}}" data-step="-1" bindtap="changePage">上一页</button></view>
-    <view><button class="biz-action biz-secondary" disabled="{{loading||busy||page>=pages}}" data-step="1" bindtap="changePage">下一页</button></view>
+  <view wx:if="{{!needsLogin&&pages>1}}" class="job-pagination">
+    <button disabled="{{loading||busy||page<=1}}" data-step="-1" bindtap="changePage">‹ 上一页</button>
+    <text>{{page}} / {{pages}}</text>
+    <button disabled="{{loading||busy||page>=pages}}" data-step="1" bindtap="changePage">下一页 ›</button>
   </view>
-  <text wx:if="{{!needsLogin&&total>0}}" class="biz-note">第 {{page}} / {{pages}} 页 · 共 {{total}} 条</text>
 </view>

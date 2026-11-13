@@ -1,3 +1,4 @@
+import { ask } from "../../services/dialog";
 import {
   request,
   error,
@@ -237,13 +238,14 @@ Page({
   },
   async remove() {
     if (this.data.busy) return;
-    const answer = await wx.showModal({
-      title: "删除作品",
-      content: "删除后作品不再展示，分享链接会失效，订单和积分记录会保留。",
+    const confirmed = await ask({
+      title: "删除这个作品？",
+      content: "删除后不再展示，分享链接会失效；订单和积分记录会保留。",
       confirmText: "删除",
-      confirmColor: "#b42338",
+      tone: "danger",
+      icon: "delete",
     });
-    if (!answer.confirm) return;
+    if (!confirmed) return;
     this.setData({ busy: true });
     try {
       await request("/works/" + this.id, "DELETE");

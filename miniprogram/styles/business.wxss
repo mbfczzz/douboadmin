@@ -234,3 +234,9 @@ button.biz-secondary {
     padding: 10px 10px;
   }
 }
+.biz-empty .empty-icon {
+  margin-bottom: 10px;
+}
+.biz-empty > text {
+  display: block;
+}

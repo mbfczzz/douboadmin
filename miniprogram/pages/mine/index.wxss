@@ -3,127 +3,216 @@
 .mine-page {
   padding: 12px 20px calc(94px + env(safe-area-inset-bottom));
 }
+/* A blurred, dimmed copy of the latest cover tints the top of the page. */
+.mine-page {
+  position: relative;
+  z-index: 0; /* own stacking context: the backdrop sits under content only */
+}
+.mine-hero {
+  position: absolute;
+  top: -12px;
+  left: 0;
+  right: 0;
+  height: 300px;
+  overflow: hidden;
+  z-index: -1;
+  /* Fade in under the nav bar and out before the works. */
+  -webkit-mask-image: linear-gradient(180deg, transparent 6%, #000 40%, #000 50%, transparent 95%);
+  mask-image: linear-gradient(180deg, transparent 6%, #000 40%, #000 50%, transparent 95%);
+  background: radial-gradient(120% 80% at 20% 0%, #00c8dc26, transparent 60%), radial-gradient(90% 70% at 90% 10%, #6c63ff26, transparent 60%);
+}
+.mine-hero image {
+  width: 100%;
+  height: 100%;
+  opacity: 0.45;
+  filter: blur(40px) saturate(1.3);
+  transform: scale(1.3);
+}
+/* Header: avatar beside name and bio, the whole row opens the editor. */
 .profile {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 12px;
-  padding-top: 8px;
-  text-align: center;
+  gap: 14px;
+  padding: 8px 0;
+  color: var(--ui-muted);
 }
 .avatar {
-  position: relative;
-  width: 72px;
-  height: 72px;
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
   border-radius: 50%;
-  background: var(--ui-field);
   color: var(--ui-text);
-  flex-shrink: 0;
+  background: var(--ui-field);
+  box-shadow: 0 0 0 2px var(--ui-bg), 0 0 0 3px #ffffff1f;
+}
+.avatar-letter {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #00c8dc, #6c63ff);
 }
 .avatar image {
   width: 100%;
   height: 100%;
-  border-radius: 50%;
 }
 .profile-copy {
-  max-width: 100%;
+  flex: 1;
+  min-width: 0;
 }
-.avatar-edit {
-  position: absolute;
-  right: -2px;
-  bottom: -2px;
-  width: 24px;
-  height: 24px;
+.name-row {
   display: flex;
   align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  border: 2px solid var(--ui-bg);
-  background: var(--ui-selected);
-}
-.nickname,
-.profile-bio {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  display: block;
+  gap: 8px;
+  min-width: 0;
 }
 .nickname {
+  overflow: hidden;
   font-size: 20px;
-  line-height: 28px;
   font-weight: 600;
-  margin-bottom: 4px;
+  line-height: 28px;
+  color: var(--ui-text);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.role-label {
+  flex-shrink: 0;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  color: var(--ui-info);
+  background: var(--ui-info-bg);
 }
 .profile-bio {
+  display: block;
+  margin-top: 4px;
+  overflow: hidden;
   font-size: 13px;
-  color: var(--ui-muted);
-  text-align: center;
-  margin-top: 8px;
   line-height: 20px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* Stats: three numbers in a row, left aligned under the header. */
+.statistics {
+  display: flex;
+  gap: 28px;
+  margin-top: 18px;
+}
+.statistics > view {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  min-height: 32px;
+}
+.statistics text {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ui-text);
+  font-variant-numeric: tabular-nums;
+}
+.statistics text.accent {
+  color: var(--ui-brand);
+}
+.statistics text:last-child {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--ui-muted);
 }
 .mine-balance {
-  margin: 28px 0;
+  margin-top: 16px;
+}
+.works-heading {
+  margin: 28px 0 12px;
+}
+.works-heading .section-title {
+  margin: 0;
+  font-size: 16px;
 }
 .profile-edit {
   min-height: 44px;
   flex-shrink: 0;
 }
 .common-heading {
+  display: block;
+  margin: 28px 0 8px;
   font-size: 16px;
   line-height: 24px;
-  margin: 28px 0 14px;
 }
+/* Menu: icon tiles, no outer card. */
 .menu-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  border: 1px solid transparent;
-  padding: 8px 16px;
-  border-radius: var(--ui-radius-card);
-  background: var(--ui-surface);
+  row-gap: 4px;
 }
 .menu {
   display: flex;
-  align-items: center;
   flex-direction: column;
-  justify-content: center;
-  gap: 10px;
-  min-height: 80px;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 0;
   color: var(--ui-text);
+}
+.menu-badge {
+  position: absolute;
+  top: -4px;
+  right: -6px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  box-sizing: border-box;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 16px;
+  text-align: center;
+  color: #fff;
+  background: #e5484d;
+  box-shadow: 0 0 0 2px var(--ui-bg);
+}
+.menu-glyph {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  background: var(--ui-surface);
 }
 .menu-label {
-  min-width: 0;
-  color: var(--ui-text);
-  font-size: 13px;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--ui-muted);
   text-align: center;
-  line-height: 22px;
 }
 .guest-profile {
-  padding: 32px 8px;
+  padding: 20px 8px 32px;
   text-align: center;
-}
-.guest-profile .avatar {
-  margin: 0 auto 20px;
-}
-.guest-note {
-  display: block;
-  margin-top: 16px;
-  color: var(--ui-muted);
-  font-size: var(--ui-font-note);
-  line-height: 1.6;
 }
 .guest-title {
   display: block;
+  margin: 24px 0 10px;
   font-size: 20px;
   font-weight: 600;
-  margin-bottom: 12px;
 }
 .guest-copy {
   display: block;
-  font-size: 15px;
-  color: var(--ui-muted);
-  line-height: 1.8;
   margin-bottom: 28px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--ui-muted);
+}
+.guest-note {
+  display: block;
+  margin-top: 14px;
+  font-size: var(--ui-font-note);
+  color: var(--ui-muted);
 }

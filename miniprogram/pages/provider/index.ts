@@ -1,6 +1,9 @@
+import { pullRefresh } from "../../utils/refresh";
+import { ask } from "../../services/dialog";
 import { request, error, saveFailed } from "../../utils/api";
 
 import type { Code, Child, Center } from "../../services/provider-types";
+import { prettyCode } from "../../services/access";
 export type { Code, Child, Center } from "../../services/provider-types";
 
 const roles: Record<string, string> = {
@@ -18,7 +21,6 @@ const tabs = [
     "子账号",
   ],
 ] as const;
-const pretty = (code: string) => code.slice(0, 4) + "-" + code.slice(4);
 
 // A provider's own page (服务商中心): its codes, the providers right below it
 // and its admin login. With ?mode=promo it is a member's 推广码 instead.
@@ -47,13 +49,16 @@ Page({
   onShow() {
     void this.load();
   },
+  onPullDownRefresh() {
+    void pullRefresh(() => this.load());
+  },
   async load() {
     try {
       if (this.data.promo) {
         const c = await request<Code>("/promo");
         this.setData({
           note: "好友扫码登记为会员，推荐人记为你",
-          shown: { code: pretty(c.code), raw: c.code, qr: c.qr },
+          shown: { code: prettyCode(c.code), raw: c.code, qr: c.qr },
           loadError: "",
         });
         return;
@@ -132,7 +137,7 @@ Page({
     this.setData({
       tab: found[0],
       note: found[2] + "，超级管理员开通后生效",
-      shown: { code: pretty(code.code), raw: code.code, qr: code.qr },
+      shown: { code: prettyCode(code.code), raw: code.code, qr: code.qr },
     });
   },
   copy(e: WechatMiniprogram.TouchEvent) {
@@ -160,13 +165,14 @@ Page({
   async password() {
     if (this.data.busy) return;
     if (this.data.center?.account) {
-      const { confirm } = await wx.showModal({
+      const confirmed = await ask({
         title: "重置后台密码？",
         content: "原密码会立即失效，需要用新密码重新登录管理后台。",
         confirmText: "重置",
-        confirmColor: "#b42338",
+        tone: "danger",
+        icon: "lock-on",
       });
-      if (!confirm) return;
+      if (!confirmed) return;
     }
     this.setData({ busy: true });
     try {

@@ -1,0 +1,15 @@
+<view wx:if="{{mode==='strip'}}" class="strip">
+  <scroll-view scroll-x class="strip-scroll">
+    <view class="strip-items">
+      <view wx:for="{{covers.length?covers:placeholders}}" wx:key="index" class="strip-card" data-id="{{item.id}}" bindtap="open" hover-class="card-pressed">
+        <view class="strip-cover"><image wx:if="{{item.cover}}" src="{{item.cover}}" mode="aspectFill" lazy-load /><text wx:if="{{item.length}}" class="strip-length">{{item.length}}</text></view>
+        <text class="strip-title">{{item.title||' '}}</text>
+      </view>
+    </view>
+  </scroll-view>
+</view>
+<view wx:else class="stack" aria-label="热门模板">
+  <view wx:for="{{[1,2,0]}}" wx:key="*this" class="card card-{{item}}" data-id="{{covers[item].id}}" bindtap="open" hover-class="card-pressed">
+    <image wx:if="{{covers[item].cover}}" src="{{covers[item].cover}}" mode="aspectFill" lazy-load />
+  </view>
+</view>

@@ -1,6 +1,8 @@
 {
   "usingComponents": {
     "points-balance": "/components/points-balance/index",
-    "t-popup": "tdesign-miniprogram/popup/popup"
+    "t-popup": "tdesign-miniprogram/popup/popup",
+    "showcase": "/components/showcase/index",
+    "media-viewer": "/components/media-viewer/index"
   }
 }

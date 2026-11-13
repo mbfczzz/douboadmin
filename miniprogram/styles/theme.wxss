@@ -78,7 +78,7 @@ page {
   --td-button-primary-outline-disabled-color: var(--ui-muted);
   --td-button-primary-text-disabled-color: var(--ui-muted);
   --td-popup-bg-color: var(--ui-sheet);
-  --td-popup-border-radius: 16px;
+  --td-popup-border-radius: 20px;
   min-height: 100vh;
   --td-button-primary-outline-color: var(--ui-link);
   --td-button-primary-outline-border-color: var(--ui-field);

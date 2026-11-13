@@ -1,9 +1,7 @@
 <nav-bar title="分享作品" back /><view
   class="subpage"
   ><view wx:if="{{needsLogin}}" class="biz-empty"
-    >登录后分享自己的作品<button class="biz-action" bindtap="signIn">
-      去登录
-    </button></view
+    ><view class="empty-icon"><t-icon name="share" size="30" /></view><text>登录后分享自己的作品</text><text class="empty-link" bindtap="signIn">去登录 ›</text></view
   ><view wx:if="{{loadError}}" class="biz-error">{{loadError}}</view
   ><block wx:if="{{job}}"
     ><view class="biz-card"
@@ -43,12 +41,7 @@
         生成分享链接</button
       ><block wx:else
         ><button class="biz-action" open-type="share">发给微信好友</button
-        ><button
-          class="biz-action biz-secondary"
-          bindtap="copy"
-          disabled="{{!share.publicDomainConfigured}}"
-        >
-          复制短链</button
+        ><view wx:if="{{share.publicDomainConfigured}}" class="copy-link" bindtap="copy"><t-icon name="link" size="16" /><text>复制短链</text></view
         ><text class="biz-note"
           >{{share.publicDomainConfigured?'链接有效期 30 天，删除作品后失效。':'分享链接暂未开放，可以先保存作品后分享。'}}</text
         ></block

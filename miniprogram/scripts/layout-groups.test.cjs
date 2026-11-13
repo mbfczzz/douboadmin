@@ -29,7 +29,7 @@ test("generation stays inside the editor and profile balance precedes the menu g
     create.indexOf("<points-balance") < create.indexOf('class="workspace-foot"'),
   );
   assert.ok(
-    create.indexOf("<points-balance") < create.indexOf('class="queue-link"'),
+    create.indexOf("<points-balance") < create.indexOf('class="queue-text"'),
   );
   assert.ok(!create.includes('class="creation-action"'));
   assert.ok(create.indexOf('is="generate-action"') < create.indexOf('class="model-menu'));
@@ -60,6 +60,9 @@ test("the profile exposes recent media and icon-text navigation", () => {
   const mine = source("mine");
   assert.match(mine, /class="menu-grid"[\s\S]*?name="{{item.icon}}"/);
   assert.ok(mine.includes('class="menu-label"'));
-  assert.ok(mine.includes('class="completed-grid"'));
+  assert.ok(mine.includes('class="completed-grid cover-grid"'));
+  // A running tile leads the cover wall; the sixth cover yields to it.
+  assert.ok(mine.indexOf('class="cover-cell running-cell"') < mine.indexOf('<block wx:for="{{jobs}}"'));
+  assert.ok(mine.includes("<points-balance row />"));
   assert.ok(mine.includes('item.thumbnailUrl||item.result'));
 });

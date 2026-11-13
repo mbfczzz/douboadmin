@@ -2,21 +2,35 @@
   padding: 20px 20px calc(94px + env(safe-area-inset-bottom));
 }
 .templates-page .filter-scroll {
-  margin: 16px 0 20px;
+  margin: 10px 0 14px;
 }
+/* Categories are text tabs, not pills: the chosen one is larger, bold and white. */
 .templates-page .filter.active {
-  font-weight: 500;
+  position: relative;
+  font-size: 17px;
+  font-weight: 600;
   color: var(--ui-text);
-  background: var(--ui-selected);
+  box-shadow: none;
+}
+.templates-page .filter.active::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 2px;
+  width: 14px;
+  height: 3px;
+  margin-left: -7px;
+  border-radius: 2px;
+  background: var(--ui-brand);
 }
 .templates-page .filter {
-  line-height: 22px;
-  padding: 11px 18px;
-  min-width: 70px;
-  text-align: center;
-  margin-right: 6px;
-  border-radius: var(--ui-radius-pill);
-  background: var(--ui-surface);
+  line-height: 24px;
+  padding: 10px 0;
+  margin-right: 22px;
+  font-size: 15px;
+  color: var(--ui-muted);
+  background: none;
+  vertical-align: bottom;
 }
 .templates-page .filter:last-child {
   margin-right: 0;
@@ -28,7 +42,7 @@
   gap: 4px;
   border-radius: var(--ui-radius-pill);
   margin: 0;
-  height: 52px;
+  height: 44px;
   color: var(--ui-muted);
   align-items: center;
 }
@@ -36,12 +50,6 @@
   flex: 1;
   min-width: 0;
   font-size: 15px;
-}
-.search-field text {
-  margin: 0 -12px 0 0;
-  padding: 12px;
-  font-size: 15px;
-  color: var(--ui-link);
 }
 .clear-search {
   flex: 0 0 44px;
@@ -66,28 +74,29 @@
   margin-bottom: 18px;
 }
 .cover {
-  height: 212px;
+  height: 0;
   position: relative;
   border-radius: 12px;
   overflow: hidden;
   background: var(--ui-field);
 }
 .cover image {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
 }
-.play {
+.length {
   position: absolute;
-  right: 8px;
-  background: #0f0f11bb;
-  color: #fff;
-  border-radius: 50%;
-  width: 22px;
-  height: 22px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  left: 8px;
   bottom: 8px;
+  padding: 1px 7px;
+  border-radius: 6px;
+  background: #0f0f11a6;
+  color: #ffffff;
+  font-size: 11px;
+  line-height: 18px;
 }
 .title {
   display: block;
@@ -100,13 +109,79 @@
   margin: 8px 0 0;
   color: var(--ui-text);
 }
+.needs {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--ui-muted);
+}
 .end {
+  padding: 8px 0 4px;
   text-align: center;
   color: var(--ui-muted);
+  font-size: 12px;
+}
+/* The featured template: full width, its copy laid over the cover. */
+.hero {
+  position: relative;
+  height: 0;
+  padding-top: 66%;
+  margin-bottom: 16px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--ui-field);
+}
+.hero-media {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+.hero-copy {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 40px 14px 12px;
+  background: linear-gradient(180deg, transparent, #0f0f11d9);
+}
+.hero-copy .length {
+  position: static;
+  display: inline-block;
+  margin-bottom: 6px;
+}
+.hero-title {
+  display: block;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 25px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.hero-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 2px;
+  font-size: 12px;
+  color: #ffffffb3;
+}
+.hero-go {
   font-size: 13px;
-  border: 1px solid transparent;
-  border-radius: 12px;
-  background: var(--ui-surface);
-  padding: 14px;
-  min-height: 48px;
+  font-weight: 600;
+  color: var(--ui-brand);
+}
+.template {
+  transition: transform 140ms ease;
+}
+/* Search and categories stay pinned under the nav bar while scrolling. */
+.catalog-head {
+  position: sticky;
+  z-index: 20;
+  margin: 0 -20px;
+  padding: 0 20px;
+  background: var(--ui-bg);
 }

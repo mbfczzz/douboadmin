@@ -2,8 +2,9 @@
 <view class="subpage">
   <view wx:if="{{loading}}" class="loading"><t-loading /></view>
   <view wx:elif="{{needsLogin}}" class="empty">
+    <showcase />
     <text class="title">登录后查看{{title}}</text>
-    <t-button t-class="empty-action" theme="primary" loading="{{signingIn}}" bind:tap="signIn">去登录</t-button>
+    <text class="empty-link" bindtap="signIn">{{signingIn?'正在登录…':'去登录 ›'}}</text>
   </view>
   <view wx:elif="{{loadError&&!templates.length&&!unavailableFavorites.length&&!notifications.length}}" class="error-box" bindtap="load">
     {{loadError}} · 点击重试
@@ -12,33 +13,30 @@
     <view wx:if="{{loadError}}" class="error-box" bindtap="load">刷新失败，已保留上次内容 · 点击重试</view>
     <block wx:if="{{mode==='favorites'}}">
       <view wx:if="{{!templates.length&&!unavailableFavorites.length}}" class="empty">
-        <t-icon name="heart" size="40" />
+        <showcase />
         <text class="title">把喜欢的灵感收藏起来</text>
         <text class="desc">在模板详情点击爱心，就能在这里找到它。</text>
-        <t-button t-class="empty-action" theme="primary" bind:tap="browse">去逛模板</t-button>
+        <text class="empty-link" bindtap="browse">去逛模板 ›</text>
       </view>
       <view class="unavailable-favorite" wx:for="{{unavailableFavorites}}" wx:key="id">
         <view><text>模板暂不可用</text><text class="muted small">可能已下架，可取消收藏</text></view>
         <t-button t-class="unfavorite-action" size="small" variant="text" data-id="{{item.id}}" disabled="{{!!removingFavorite}}" loading="{{removingFavorite===item.id}}" bind:tap="removeFavorite">取消收藏</t-button>
       </view>
-      <view
-        class="favorite-card"
-        wx:for="{{templates}}"
-        wx:key="id"
-        data-id="{{item.id}}"
-        bindtap="detail"
-      >
-        <image src="{{item.data.cover}}" mode="aspectFill" />
-        <view class="favorite-copy">
-          <text>{{item.data.title}}</text>
-          <text class="muted small">{{item.data.category}} · 制作同款</text>
+      <view wx:if="{{templates.length}}" class="favorite-head"><text class="favorite-total">{{templates.length}}</text><text class="favorite-label"> 个收藏的模板 · 长按可取消收藏</text></view>
+      <view wx:if="{{templates.length}}" class="favorite-grid">
+        <view class="favorite-card" wx:for="{{templates}}" wx:key="id" data-id="{{item.id}}" bindtap="detail" bindlongpress="unfavorite" hover-class="card-pressed" aria-label="{{item.data.title}}">
+          <image src="{{item.data.cover}}" mode="aspectFill" lazy-load />
+          <view class="favorite-heart"><t-icon name="heart-filled" size="14" /></view>
+          <view class="favorite-copy">
+            <text class="favorite-title">{{item.data.title}}</text>
+            <text class="favorite-go">{{item.data.category?item.data.category+' · ':''}}做同款 ›</text>
+          </view>
         </view>
-        <t-icon name="chevron-right" size="20" />
       </view>
     </block>
     <block wx:elif="{{mode==='notifications'}}">
       <view wx:if="{{!notifications.length}}" class="empty">
-        <t-icon name="notification" size="40" />
+        <view class="empty-icon"><t-icon name="notification" size="30" /></view>
         <text class="title">暂时没有新消息</text>
         <text class="desc">作品完成或生成失败后，可以在这里查看。</text>
       </view>
@@ -59,33 +57,16 @@
     </block>
     <block wx:elif="{{mode==='help'}}">
       <text class="section-title">常见问题</text>
-      <view class="help-card surface">
-        <text class="help-title">生成需要多久？</text>
-        <text>图片、视频与创作助手通过服务端连接真实模型。生成耗时取决于模型和排队情况。</text>
-        <text class="help-title">生成失败怎么办？</text>
-        <text>可以在任务详情重试，或重新编辑提示词后提交。</text>
-        <text class="help-title">如何保存作品？</text>
-        <text>打开已完成的任务，点击保存，并允许访问相册。</text>
+      <view class="faq-list">
+        <view wx:for="{{faqs}}" wx:key="q" class="faq {{faqOpen===index?'open':''}}" data-index="{{index}}" bindtap="faq" aria-role="button" aria-label="{{item.q}}">
+          <view class="faq-q"><text>{{item.q}}</text><t-icon name="chevron-down" size="18" /></view>
+          <text wx:if="{{faqOpen===index}}" class="faq-a">{{item.a}}</text>
+        </view>
       </view>
       <text class="section-title">告诉我们你的想法</text>
-      <textarea
-        class="form-input feedback"
-        maxlength="1000"
-        value="{{content}}"
-        placeholder="遇到的问题，或你希望增加的功能…"
-        placeholder-style="color:#868a93"
-        bindinput="input"
-      />
-      <view class="send">
-        <t-button
-          theme="primary"
-          block
-          disabled="{{!canSend||busy}}"
-          loading="{{busy}}"
-          bind:tap="send"
-        >
-          提交反馈
-        </t-button>
+      <view class="feedback-box">
+        <textarea class="feedback" maxlength="1000" value="{{content}}" placeholder="遇到的问题，或你希望增加的功能…" placeholder-class="feedback-placeholder" bindinput="input" />
+        <view class="feedback-foot"><text class="feedback-count">{{content.length}} / 1000</text><button class="feedback-send" disabled="{{!canSend||busy}}" loading="{{busy}}" bindtap="send">提交</button></view>
       </view>
     </block>
   </block>
@@ -93,3 +74,4 @@
 <button bindtap="previous" disabled="{{page<=1}}">上一页</button><text>第 {{page}} 页 · 共 {{total}} 条</text><button bindtap="next" disabled="{{page*20>=total}}">下一页</button>
 </view>
 </view>
+<ui-dialog id="ui-dialog" />

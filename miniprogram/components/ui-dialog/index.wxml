@@ -1,0 +1,12 @@
+<view wx:if="{{visible}}" class="dialog-mask" bindtap="mask" catchtouchmove="hold">
+  <view class="dialog tone-{{tone}}" catchtap="hold" aria-role="dialog" aria-label="{{title}}">
+    <view wx:if="{{icon}}" class="dialog-icon"><t-icon name="{{icon}}" size="26" /></view>
+    <text class="dialog-title">{{title}}</text>
+    <view wx:if="{{amount}}" class="dialog-amount"><text class="dialog-number">{{amount}}</text><text class="dialog-unit">{{unit}}</text></view>
+    <text wx:if="{{content}}" class="dialog-content">{{content}}</text>
+    <view class="dialog-actions">
+      <view wx:if="{{showCancel}}" class="dialog-action dialog-cancel" hover-class="dialog-pressed" bindtap="cancel" aria-role="button">{{cancelText}}</view>
+      <view class="dialog-action dialog-confirm" hover-class="dialog-pressed" bindtap="confirm" aria-role="button">{{confirmText}}</view>
+    </view>
+  </view>
+</view>

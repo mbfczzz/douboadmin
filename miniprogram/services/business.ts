@@ -1,3 +1,4 @@
+import { ask } from "./dialog";
 import { request } from "./request";
 import { AuthCancelledError } from "./errors";
 import type { Input } from "./types";
@@ -12,8 +13,13 @@ export type {
   Preferences,
 } from "./business-types";
 
-export const points = (n: number) =>
-  ((n || 0) / 100).toFixed(2).replace(/\.00$/, "");
+// Points read like money: thousands grouped, cents only when present
+// ("12,480", "1,234.5" → "1,234.50").
+export const points = (n: number) => {
+  const [whole, cents] = ((n || 0) / 100).toFixed(2).split(".");
+  const grouped = whole.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return cents === "00" ? grouped : grouped + "." + cents;
+};
 export const money = (n: number) => ((n || 0) / 100).toFixed(2);
 export const orderStates: Record<string, string> = {
   created: "待支付",
@@ -36,11 +42,14 @@ export async function confirmBudget(input: Input): Promise<Input> {
       `可用积分不足，需 ${points(q.units)}，当前 ${points(q.availableUnits)}`,
     );
   }
-  const choice = await wx.showModal({
-    title: "确认使用积分",
-    content: `本次将预留 ${points(q.units)} 积分，生成成功后扣除，明确失败后退回。`,
+  const approved = await ask({
+    title: "本次将使用",
+    amount: points(q.units),
+    unit: "积分",
+    content: `生成成功后扣除，失败自动退回\n当前可用 ${points(q.availableUnits)} 积分`,
     confirmText: "确认生成",
+    icon: "star",
   });
-  if (!choice.confirm) throw new AuthCancelledError();
+  if (!approved) throw new AuthCancelledError();
   return { ...input, expectedCostUnits: q.units };
 }

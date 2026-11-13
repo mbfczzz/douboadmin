@@ -1,3 +1,4 @@
+import { ask } from "./dialog";
 import type { WalletInfo } from "./business";
 import { money, points } from "./business";
 import { amountFen, devicePlatform } from "./payment";
@@ -53,17 +54,13 @@ export async function confirmAdditionalPurchase(
   owner: string,
 ): Promise<boolean> {
   const token = sessionToken();
-  const confirmed = await new Promise<boolean>((resolve) =>
-    wx.showModal({
-      title: "另购一笔积分？",
-      content:
-        "原订单支付结果仍未确认，之后仍可能到账。另购会创建新的付费订单；原订单可在充值订单中继续查询。",
-      confirmText: "另购一笔",
-      cancelText: "继续等待",
-      success: (result) => resolve(result.confirm),
-      fail: () => resolve(false),
-    }),
-  );
+  const confirmed = await ask({
+    title: "另购一笔积分？",
+    content: "原订单仍可能到账。另购会新建一笔付费订单，原订单可在充值订单中继续查询。",
+    confirmText: "另购一笔",
+    cancelText: "继续等待",
+    icon: "time",
+  });
   if (!confirmed || !token || sessionToken() !== token) return false;
   deferPayment(id, owner);
   return true;

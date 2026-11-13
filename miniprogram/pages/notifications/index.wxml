@@ -1,31 +1,26 @@
 <nav-bar title="消息通知" back /><view
   class="subpage"
   ><view wx:if="{{needsLogin}}" class="biz-empty"
-    >登录后查看消息<button class="biz-action" bindtap="signIn">
-      去登录
-    </button></view
+    ><view class="empty-icon"><t-icon name="user" size="30" /></view><text>登录后查看消息</text><text class="empty-link" bindtap="signIn">去登录 ›</text></view
   ><block wx:else
     ><view wx:if="{{items.length}}" class="row notice-head"
       ><text class="biz-small">未读 {{unread}}</text
-      ><text wx:if="{{unread}}" class="biz-link" bindtap="readAll">全部已读</text></view
+      ><view wx:if="{{unread}}" class="read-all" bindtap="readAll" hover-class="row-pressed"><t-icon name="check-double" size="14" /><text>全部已读</text></view></view
     ><view wx:if="{{loadError}}" class="biz-error" bindtap="load"
       >{{loadError}} · 重试</view
-    ><view wx:if="{{loading&&!items.length}}" class="biz-empty"
-      >正在加载消息…</view
+    ><view wx:if="{{loading&&!items.length}}" class="skel-list" aria-label="正在加载消息"><view wx:for="{{[1,2,3]}}" wx:key="*this" class="skel-row"><view class="skeleton skel-dot" /><view class="skel-lines"><view class="skeleton skel-a" /><view class="skeleton skel-b" /></view></view></view
     ><view wx:elif="{{!loadError&&!items.length}}" class="biz-empty"
-      ><view class="biz-empty-icon"><t-icon name="notification" size="40" /></view
-      ><text>暂时没有新消息</text></view
-    ><view
-      wx:for="{{items}}"
-      wx:key="id"
-      class="biz-card"
+      ><view class="empty-icon"><t-icon name="notification" size="30" /></view><text>暂时没有新消息</text></view
+    ><block wx:for="{{items}}" wx:key="id"><text wx:if="{{item.showDay}}" class="notice-day">{{item.day}}</text><view
+      class="notice {{item.data.read?'':'unread'}}"
       data-id="{{item.id}}"
       bindtap="open"
-      ><view class="row biz-card-head"
-        ><text class="biz-list-title {{item.data.read?'':'unread'}}"
-          >{{item.data.title}}</text
-        ><text class="biz-small">{{item.time}}</text></view
-      ><text class="biz-note">{{item.data.content}}</text></view
-    ><button wx:if="{{total>page*20}}" class="biz-action biz-secondary" bindtap="more" disabled="{{loading}}" loading="{{loading}}">加载更多</button></block
+      hover-class="notice-pressed"
+      ><view class="notice-icon tone-{{item.tone}}"><t-icon name="{{item.icon}}" size="20" /></view
+      ><view class="notice-body"
+        ><view class="notice-line"><text class="notice-title">{{item.data.title}}</text><text class="notice-time">{{item.clock||item.time}}</text></view
+        ><text class="notice-text">{{item.data.content}}</text></view
+      ><image wx:if="{{thumbs[item.data.targetId]}}" class="notice-thumb" src="{{thumbs[item.data.targetId]}}" mode="aspectFill" lazy-load /></view></block
+    ><view wx:if="{{total>page*20}}" class="notice-more" bindtap="more">{{loading?'正在加载…':'加载更多'}}</view></block
   ></view
 >

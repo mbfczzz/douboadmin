@@ -1,0 +1,32 @@
+/* The @ picker: a scrolling grid of numbered reference thumbnails. */
+.mention-scroll {
+  max-height: 50vh;
+}
+.mention-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+.mention-item {
+  position: relative;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 10px;
+  background: var(--ui-field);
+}
+.mention-item image {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.mention-tag {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 14px 6px 5px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #fff;
+  background: linear-gradient(transparent, #000000b3);
+}

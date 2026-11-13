@@ -12,11 +12,11 @@ const image = (n) => ({
 });
 const event = (value, cursor = value.length) => ({ detail: { value, cursor } });
 
-test("typing @ selects an uploaded image at the cursor without losing following text", () => {
+const pick = (page, index) => page.pickMention({ currentTarget: { dataset: { index } } });
+
+test("typing @ opens a thumbnail sheet and inserts the picked image at the cursor", () => {
   const h = harness(),
     page = h.page("create");
-  let sheet;
-  h.wx.showActionSheet = (o) => (sheet = o);
   page.setData({
     assets: [
       image(1),
@@ -27,57 +27,61 @@ test("typing @ selects an uploaded image at the cursor without losing following 
     maxPromptChars: 500,
   });
   page.input(event("参考@保持人物", 3));
-  assert.equal(sheet.itemList.length, 2);
-  sheet.success({ tapIndex: 1 });
+  assert.equal(page.data.mentionOpen, true);
+  assert.deepEqual(
+    page.data.mentionItems.map((m) => [m.id, m.label, m.url]),
+    [
+      ["image-1", "图片1", "https://fixture.test/1"],
+      ["image-2", "图片2", "https://fixture.test/2"],
+    ],
+  );
+  pick(page, 1);
+  assert.equal(page.data.mentionOpen, false);
   assert.equal(page.data.prompt, "参考@图片2 保持人物");
   assert.equal(page.data.promptCursor, 7);
   assert.equal(page.data.assets.length, 3);
 });
 
-test("all uploaded images are reachable through the native list and stale choice is discarded", () => {
+test("every uploaded image is in the grid and a stale pick is discarded", () => {
   const h = harness(),
-    page = h.page("create"),
-    sheets = [];
-  h.wx.showActionSheet = (o) => sheets.push(o);
+    page = h.page("create");
   page.setData({
     assets: Array.from({ length: 12 }, (_, i) => image(i)),
     maxPromptChars: 500,
   });
   page.input(event("@"));
-  assert.equal(sheets[0].itemList.length, 6);
-  sheets[0].success({ tapIndex: 5 });
-  sheets[1].success({ tapIndex: 5 });
-  assert.match(sheets[2].itemList[0], /图片11/);
-  sheets[2].success({ tapIndex: 1 });
+  assert.equal(page.data.mentionItems.length, 12);
+  pick(page, 11);
   assert.equal(page.data.prompt, "@图片12 ");
   page.input(event("@"));
   page.setData({ prompt: "已修改" });
-  sheets.at(-1).success({ tapIndex: 0 });
+  pick(page, 0);
   assert.equal(page.data.prompt, "已修改");
 });
 
 test("cancel, missing images, prompt limits and page hide preserve the draft", () => {
   const h = harness(),
     page = h.page("create");
-  let sheet,
-    toasts = 0;
-  h.wx.showActionSheet = (o) => (sheet = o);
+  let toasts = 0;
   h.wx.showToast = () => toasts++;
   page.input(event("@"));
   assert.equal(toasts, 1);
-  assert.equal(sheet, undefined);
+  assert.equal(page.data.mentionOpen, false);
   page.setData({ assets: [image(1)], maxPromptChars: 2 });
   page.input(event("@"));
-  sheet.success({ tapIndex: 0 });
+  pick(page, 0);
   assert.equal(page.data.prompt, "@");
   assert.equal(toasts, 2);
   page.setData({ maxPromptChars: 500 });
   page.input(event("@"));
-  sheet.fail({ errMsg: "cancel" });
+  page.closeMention();
+  assert.equal(page.data.mentionOpen, false);
+  pick(page, 0);
   assert.equal(page.data.prompt, "@");
   page.input(event("@"));
-  page.visible = false;
-  sheet.success({ tapIndex: 0 });
+  page.onHide();
+  assert.equal(page.data.mentionOpen, false);
+  pick(page, 0);
   assert.equal(page.data.prompt, "@");
 });
 
@@ -105,18 +109,20 @@ test("clearing references removes every image mention but keeps ordinary text",(
   assert.equal(page.data.promptCursor,-1);
 });
 
-test("a cancelled old mention sheet cannot change the draft or unlock a new sheet",()=>{
-  const h=harness(),page=h.page("create"),sheets=[];
-  h.wx.showActionSheet=o=>sheets.push(o);
-  page.setData({assets:[image(1)],maxPromptChars:500});
-  page.input(event("@"));
-  page.onHide();page.visible=true;
-  page.input(event("@"));
-  assert.equal(sheets.length,2);
-  sheets[0].success({tapIndex:0});
-  sheets[0].fail({errMsg:"old failure"});
-  page.input(event("@"));
-  assert.equal(sheets.length,2);
-  sheets[1].success({tapIndex:0});
-  assert.equal(page.data.prompt,"@图片1 ");
+test("the viewer quotes or deletes the image it shows", () => {
+  const h = harness(),
+    page = h.page("create"),
+    toasts = [];
+  h.wx.showToast = (o) => toasts.push(o.title);
+  page.refreshParameters = () => {};
+  page.setData({ assets: [image(1), image(2)], prompt: "海边", maxPromptChars: 500, viewerOpen: true });
+  page.viewerMention({ detail: { id: "image-2" } });
+  assert.equal(page.data.prompt, "海边 @图片2 ");
+  assert.equal(page.data.viewerOpen, false);
+  assert.deepEqual(toasts, ["已引用图片2"]);
+  page.setData({ viewerOpen: true });
+  page.viewerRemove({ detail: { id: "image-2" } });
+  assert.equal(page.data.prompt, "海边  ");
+  assert.equal(page.data.assets.length, 1);
+  assert.equal(page.data.viewerOpen, false);
 });

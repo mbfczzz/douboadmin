@@ -22,7 +22,7 @@ test("clearing a template search reloads page one and ignores the old response",
   const previous = page.load();
   page.clearSearch();
   assert.equal(page.data.search, "");
-  assert.match(calls[1].path, /&q=&page=1&size=4$/);
+  assert.match(calls[1].path, /&q=&page=1&size=10$/);
   calls[1].resolve({ items: [row("all")], total: 20 });
   await new Promise(setImmediate);
   calls[0].resolve({ items: [row("old-search")], total: 1 });

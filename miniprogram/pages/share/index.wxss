@@ -2,5 +2,17 @@
 /* Keeps the title and share action on the first screen. */
 .share-preview {
   display: block;
-  height: 240px;
+  height: 320px;
+  border-radius: 14px;
+  background: #000;
+}
+
+.copy-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 14px 0 4px;
+  font-size: 14px;
+  color: var(--ui-text);
 }

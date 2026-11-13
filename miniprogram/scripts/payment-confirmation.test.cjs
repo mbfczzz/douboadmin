@@ -104,7 +104,7 @@ test("native success waits for server credit then automatically refreshes the vi
   f.order.data.status = "paid";
   f.info.wallet.availableUnits = 100000;
   await f.tick();
-  assert.equal(f.page.data.available, "1000");
+  assert.equal(f.page.data.available, "1,000");
   assert.equal(f.page.data.pendingOrderId, "");
   assert.equal(f.h.storage.has("pending-payment"), false);
   assert.equal(f.h.storage.has("pending-payments"), false);
@@ -149,7 +149,7 @@ test("leaving a pending payment stops polling and returning resumes the same ord
   f.order.data.status = "paid";
   f.info.wallet.availableUnits = 100000;
   await f.tick();
-  assert.equal(f.page.data.available, "1000");
+  assert.equal(f.page.data.available, "1,000");
   assert.deepEqual(f.counts(), { payments: 1, creates: 1 });
   f.page.onHide();
 });
@@ -197,7 +197,7 @@ test("wallet refreshes a task release while visible and stops after the hold cle
   f.info.wallet.availableUnits = 100000;
   f.info.wallet.heldUnits = 0;
   await f.tick();
-  assert.equal(f.page.data.available, "1000");
+  assert.equal(f.page.data.available, "1,000");
   assert.equal(f.page.data.held, "0");
   assert.equal(f.timers.size, 0);
   f.page.onHide();

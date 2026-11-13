@@ -3,12 +3,11 @@ import type { PurchaseMode } from "../../services/virtual-amount";
 
 export const walletData = {
   productId: "",
-  products: [] as Array<{
-    id: string;
-    name: string;
-    amount: string;
-    points: string;
-  }>,
+  products: [] as ReturnType<typeof import("./insights").productCards>,
+  price100: "",
+  heroArt: [] as string[],
+  useArt: { image: "", video: "" } as Record<string, string>,
+  uses: [] as Array<{ kind: string; icon: string; title: string; cost: string; count: number; unit: string; model: string }>,
   purchaseMode: "package" as PurchaseMode,
   customAmount: "",
   customStep: "",
@@ -30,14 +29,7 @@ export const walletData = {
   ledgerPage: 1,
   ledgerPages: 1,
   ledgerTotal: 0,
-  ledger: [] as Array<{
-    id: string;
-    title: string;
-    note: string;
-    change: string;
-    tone: string;
-    time: string;
-  }>,
+  ledger: [] as ReturnType<typeof import("./insights").ledgerRows>,
 };
 
 export const loggedOut = {

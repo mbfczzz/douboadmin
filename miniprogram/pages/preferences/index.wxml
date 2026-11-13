@@ -1,14 +1,12 @@
 <nav-bar title="设置" back /><view class="subpage"
   ><view wx:if="{{needsLogin}}" class="biz-empty"
-    >登录后设置个人偏好<button class="biz-action" bindtap="signIn">
-      去登录
-    </button></view
+    ><view class="empty-icon"><t-icon name="setting" size="30" /></view><text>登录后设置个人偏好</text><text class="empty-link" bindtap="signIn">去登录 ›</text></view
   ><view wx:if="{{loadError}}" class="biz-error" bindtap="load"
     >{{loadError}} · 重试</view
   ><block wx:if="{{row}}"
     ><view class="biz-card"
       ><view class="biz-row"
-        ><text>作品完成站内通知</text
+        ><view class="pref-label"><t-icon name="notification" size="20" /><text>作品完成站内通知</text></view
         ><switch
           checked="{{row.data.inAppNotifications}}"
           disabled="{{busy}}"
@@ -16,7 +14,7 @@
           data-field="inAppNotifications"
           bindchange="change" /></view
       ><view class="biz-row"
-        ><text>作品预览自动播放</text
+        ><view class="pref-label"><t-icon name="play-circle" size="20" /><text>作品预览自动播放</text></view
         ><switch
           checked="{{row.data.autoplay}}"
           disabled="{{busy}}"
@@ -24,7 +22,7 @@
           data-field="autoplay"
           bindchange="change" /></view
       ><view class="biz-row"
-        ><text>详细使用统计</text
+        ><view class="pref-label"><t-icon name="chart-bar" size="20" /><text>详细使用统计</text></view
         ><switch
           checked="{{row.data.analytics}}"
           disabled="{{busy}}"
@@ -45,8 +43,11 @@
       >
         授权订阅通知
       </button></view
-    ><button class="biz-action biz-secondary" bindtap="signOut">
-      退出登录
-    </button></block
+    ><view class="biz-card general"
+      ><view class="general-row" bindtap="help" hover-class="row-pressed"><t-icon name="help-circle" size="20" /><text>帮助与反馈</text><t-icon name="chevron-right" size="18" /></view
+      ><view class="general-row" bindtap="privacy" hover-class="row-pressed"><t-icon name="secured" size="20" /><text>隐私保护指引</text><t-icon name="chevron-right" size="18" /></view
+      ><view wx:if="{{version}}" class="general-row static"><t-icon name="info-circle" size="20" /><text>当前版本</text><text class="general-value">{{version}}</text></view
+    ></view
+    ><view class="sign-out" bindtap="signOut" hover-class="sign-out-pressed" aria-role="button">退出登录</view></block
   ></view
 >

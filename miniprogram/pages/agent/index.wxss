@@ -1,3 +1,4 @@
+@import "./reply.wxss";
 .agent-page {
   height: calc(100vh - 110px - env(safe-area-inset-bottom));
   display: flex;
@@ -10,109 +11,237 @@
   min-height: 0;
 }
 .conversation {
-  padding: 12px 20px 18px;
+  padding: 8px 20px 20px;
 }
-.agent-intro {
-  padding: 9px 0 13px;
+/* Empty conversation: the greeting centred, starters docked above input. */
+.agent-empty {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0 20px;
+}
+.agent-hello {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 .agent-mark {
-  width: 48px;
-  height: 48px;
+  width: 64px;
+  height: 64px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 16px;
-  background: var(--ui-field);
-  color: var(--ui-text);
-  margin-bottom: 16px;
+  border-radius: 22px;
+  color: #fff;
+  background: linear-gradient(135deg, #00c8dc, #6c63ff);
+  box-shadow: 0 10px 32px #00c8dc40;
+  animation: mark-float 4s ease-in-out infinite;
+}
+@keyframes mark-float {
+  50% { transform: translateY(-4px); }
 }
 .headline {
   display: block;
-  font-size: 20px;
-  margin-bottom: 10px;
+  margin-top: 22px;
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 30px;
 }
-.agent-intro .muted {
+.intro-sub {
   display: block;
-  line-height: 1.8;
+  margin-top: 6px;
+  font-size: 14px;
+  color: var(--ui-muted);
 }
-.suggestions {
-  margin: 4px 0 22px;
-}
-.suggestions > view {
-  border-bottom: 1px solid var(--ui-border);
+.starters {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: 8px;
+  padding-bottom: 6px;
+}
+.starter {
+  display: flex;
   align-items: center;
-  padding: 12px 0;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: var(--ui-surface);
+  color: var(--ui-muted);
+}
+.starter-pressed {
+  opacity: 0.72;
+}
+.starter-glyph {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 12px;
+}
+.starter-copy {
+  flex: 1;
+  min-width: 0;
+}
+.starter-title {
+  display: block;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--ui-text);
+}
+.starter-hint {
+  display: block;
+  margin-top: 3px;
+  font-size: 12px;
+  color: var(--ui-muted);
+}
+.older {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 44px;
   font-size: 13px;
   color: var(--ui-muted);
 }
+/* Conversation: your words in a bubble on the right; replies flow as text. */
 .message {
-  margin-top: 15px;
+  margin-top: 20px;
 }
-.message-label {
-  font-size: var(--ui-font-note);
-  color: var(--ui-muted);
-  margin-bottom: 6px;
-}
-.bubble {
-  padding: 12px 13px;
-  border-radius: var(--ui-radius-card);
-  background: var(--ui-surface);
-  font-size: 15px;
-  line-height: 1.9;
-  white-space: pre-wrap;
+.user {
   display: flex;
-  gap: 6px;
-}
-.bubble text {
-  min-width: 0;
-  word-break: break-all;
-}
-.user .message-label {
-  text-align: right;
+  justify-content: flex-end;
 }
 .user .bubble {
+  max-width: 80%;
+  padding: 10px 14px;
+  border-radius: 18px 18px 4px 18px;
   background: var(--ui-selected);
-  margin-left: 25px;
-  color: var(--ui-text);
+  font-size: 15px;
+  line-height: 1.6;
 }
-.assistant .bubble {
-  border: 1px solid transparent;
-  margin-right: 10px;
+.agent-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 13px;
+  color: var(--ui-muted);
 }
-.assistant .message-label {
+.agent-avatar {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  color: #fff;
+  background: linear-gradient(135deg, #00c8dc, #6c63ff);
+}
+.typing {
+  display: flex;
+  gap: 5px;
+  padding: 8px 0;
+}
+.typing view {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ui-brand);
+  animation: typing 1.2s infinite ease-in-out;
+}
+.typing view:nth-child(2) {
+  animation-delay: 0.15s;
+}
+.typing view:nth-child(3) {
+  animation-delay: 0.3s;
+}
+@keyframes typing {
+  0%, 60%, 100% { opacity: 0.3; transform: none; }
+  30% { opacity: 1; transform: translateY(-3px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .typing view, .agent-mark { animation: none; }
+}
+.reply-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+.reply-icon {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
   color: var(--ui-muted);
 }
 .use-script {
   display: flex;
-  gap: 6px;
   align-items: center;
-  /* Touch target: 44px tall without moving the text. */
-  min-height: 44px;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: var(--ui-radius-pill);
   font-size: 13px;
-  color: var(--ui-link);
-  margin: 0;
+  color: var(--ui-text);
+  background: var(--ui-surface);
 }
+/* Composer: one rounded field that grows, with the send key inside. */
 .composer {
-  border: 1px solid transparent;
-  margin: 6px 20px 12px;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  margin: 6px 16px 12px;
+  padding: 6px 6px 6px 16px;
+  border-radius: 24px;
   background: var(--ui-surface);
-  border-radius: var(--ui-radius-card);
-  padding: 11px 12px;
+  box-shadow: inset 0 0 0 1px transparent;
+  transition: box-shadow 160ms ease;
 }
-.secondary {
-  background: var(--ui-surface);
-  color: var(--ui-link);
-  border: 1px solid transparent;
-  border-radius: 12px;
-  font-size: 15px;
+.composer.is-focus {
+  box-shadow: inset 0 0 0 1px #ffffff2e;
 }
 .composer textarea {
-  width: 100%;
+  flex: 1;
+  width: 0; /* native textarea defaults to 300px; let flex size it */
+  min-height: 24px;
+  max-height: 120px;
+  padding: 8px 0;
   font-size: 15px;
-  line-height: 1.6;
-  min-height: 32px;
-  max-height: 80px;
-  margin-bottom: 8px;
+  line-height: 24px;
+}
+.composer-placeholder {
+  color: #868a93;
+}
+.composer-count.full {
+  color: #ff8a94;
+}
+.composer-count {
+  position: absolute;
+  right: 60px;
+  top: -20px;
+  font-size: 11px;
+  color: var(--ui-muted);
+}
+.send {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: var(--ui-muted);
+  background: var(--ui-field);
+  transition: background 160ms ease;
+}
+.send.ready {
+  color: var(--ui-on-brand);
+  background: var(--ui-primary);
 }

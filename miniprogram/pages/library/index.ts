@@ -1,3 +1,5 @@
+import { unfavorite } from "./unfavorite";
+import { pullRefresh } from "../../utils/refresh";
 import { movePage } from "../../services/list-page";
 import {
   request,
@@ -27,6 +29,12 @@ Page({
     signingIn: false,
     content: "",
     canSend: false,
+    faqOpen: 0, // the first answer starts open; tapping a question toggles it
+    faqs: [
+      { q: "生成需要多久？", a: "图片、视频与创作助手通过服务端连接真实模型。生成耗时取决于模型和排队情况。" },
+      { q: "生成失败怎么办？", a: "可以在任务详情重试，或重新编辑提示词后提交。失败的积分会自动退回。" },
+      { q: "如何保存作品？", a: "打开已完成的任务，点击保存，并允许访问相册。" },
+    ],
     busy: false,
     page: 1,
     total: 0,
@@ -49,6 +57,9 @@ Page({
   onShow() {
     enterPage(this);
     void this.load();
+  },
+  onPullDownRefresh() {
+    void pullRefresh(() => this.load());
   },
   async load() {
     const version = ++this.loadVersion;
@@ -161,6 +172,9 @@ Page({
       if (!this.destroyed) this.setData({ removingFavorite: "" });
     }
   },
+  unfavorite(e: WechatMiniprogram.TouchEvent) {
+    return unfavorite(this, e.currentTarget.dataset.id);
+  },
   task(e: WechatMiniprogram.TouchEvent) {
     openTask(e.currentTarget.dataset.id, this);
   },
@@ -190,5 +204,9 @@ Page({
     } finally {
       if (!this.destroyed) this.setData({ busy: false });
     }
+  },
+  faq(e: WechatMiniprogram.TouchEvent) {
+    const index = Number(e.currentTarget.dataset.index);
+    this.setData({ faqOpen: this.data.faqOpen === index ? -1 : index });
   },
 });

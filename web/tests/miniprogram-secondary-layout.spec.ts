@@ -32,7 +32,7 @@ for (const width of [320, 375, 430]) {
     await page.setContent(`<style>body{margin:0;font-family:sans-serif}${styles}</style><div class="subpage">
       <div class="hot-search"><input class="biz-input" placeholder="搜索抖音视频关键词"><button class="biz-action">搜索</button></div>
       <div class="biz-card"><div class="row biz-title-row"><span class="biz-heading">最近搜索</span><span class="biz-link">清空</span></div><div class="row biz-note"><span>点赞 123.4万</span><span>播放 999.9万</span></div></div>
-      <div class="favorite-card"><img style="object-fit:cover" alt=""><div><span>这是一个比较长的收藏模板标题，需要保持图片和箭头位置稳定</span><span class="small">作品分类</span></div><t-icon>›</t-icon></div>
+      <div class="favorite-grid"><div class="favorite-card"><img style="object-fit:cover" alt=""><div class="favorite-copy"><span class="favorite-title">这是一个比较长的收藏模板标题，需要保持封面和文字位置稳定</span><span class="favorite-go">作品分类 · 做同款 ›</span></div></div><div class="favorite-card"></div></div>
       <div class="biz-card activation-options"><div class="activation-path"><span class="biz-heading">扫码登记</span><span class="biz-note">扫码登记对应角色，上级开通后生效</span><button class="biz-action">扫码登记</button><div class="activation-sms"><input class="biz-input" placeholder="或输入 8 位码"><button class="biz-action biz-secondary">确认登记</button></div></div></div>
     </div>`);
     const input = await page.locator(".hot-search input").boundingBox();
@@ -53,9 +53,9 @@ for (const width of [320, 375, 430]) {
       action!.y + action!.height / 2,
       0,
     );
-    expect(
-      (await page.locator(".favorite-card img").boundingBox())!.width,
-    ).toBeCloseTo(75, 0);
+    // The favorite cover fills its card.
+    const card = (await page.locator(".favorite-card").first().boundingBox())!;
+    expect((await page.locator(".favorite-card img").boundingBox())!.width).toBeCloseTo(card.width, 0);
     // The typed code and its confirm button share one row.
     const code = await page.locator(".activation-sms input").boundingBox(),
       confirm = await page.locator(".activation-sms button").boundingBox();
@@ -87,14 +87,14 @@ for (const width of [320, 375, 430]) {
       `<style>body{margin:0;font-family:sans-serif}${styles}</style><div class="create-page"><div class="mode-tabs"><div class="mode-tab active">生成视频</div><div class="mode-tab">生成图片</div></div></div><div class="tabbar">${["模板", "混剪", "创作", "Agent", "我的"].map((name, i) => `<div class="item ${i === 2 ? "active" : ""}"><div class="glyph"><t-icon>◇</t-icon></div><span class="label">${name}</span></div>`).join("")}</div>`,
     );
     expect((await page.locator(".mode-tabs").boundingBox())!.height).toBe(44);
-    // Selected controls are a lighter grey with white text, as in Jimeng.
+    // The selected mode is a white text tab (no fill); the selected tab white.
     const look = (selector: string) =>
       page.locator(selector).first().evaluate((el) => ({
         background: getComputedStyle(el).backgroundColor,
         color: getComputedStyle(el).color,
       }));
     expect(await look(".mode-tab.active")).toEqual({
-      background: "rgb(71, 75, 84)",
+      background: "rgba(0, 0, 0, 0)",
       color: "rgb(255, 255, 255)",
     });
     expect((await look(".item.active")).color).toBe("rgb(255, 255, 255)");

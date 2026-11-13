@@ -75,7 +75,7 @@
   color: var(--ui-text);
 }
 .reference-sheet {
-  padding: 16px 20px calc(24px + env(safe-area-inset-bottom));
+  padding: 0 20px 20px;
 }
 .reference-heading {
   display: flex;
@@ -92,28 +92,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-}
-.source-option {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  min-height: 72px;
-  padding: 12px;
-  margin-top: 8px;
-  border-radius: 10px;
-  background: var(--ui-field);
-  font-size: 16px;
-}
-.source-copy {
-  flex: 1;
-  min-width: 0;
-  overflow-wrap: anywhere;
-}
-.source-hint {
-  display: block;
-  margin-top: 5px;
-  font-size: 13px;
-  color: var(--ui-muted);
 }
 .model-logo {
   width: 22px;

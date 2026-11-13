@@ -19,10 +19,14 @@ Page({
     bottom: "",
     hasOlder: false,
     loadingOlder: false,
+    focus: false,
+    // Follow-ups under the latest reply; they fill the composer like starters.
+    followUps: ["再精简到 10 秒", "加一个结尾镜头", "改成口播文案"],
+    // Starter cards: the prompt fills the composer for editing before send.
     quick: [
-      "帮我写一段产品短视频脚本",
-      "为我的照片写创意提示词",
-      "策划一个咖啡品牌宣传片",
+      { prompt: "帮我写一段产品短视频脚本", hint: "卖点 · 分镜 · 口播", icon: "video-camera", tone: "video" },
+      { prompt: "为我的照片写创意提示词", hint: "把照片变成画面", icon: "image", tone: "image" },
+      { prompt: "策划一个咖啡品牌宣传片", hint: "门店 · 品牌 · 节日", icon: "lightbulb", tone: "audio" },
     ],
   },
   timer: 0,
@@ -135,7 +139,17 @@ Page({
     }
   },
   quick(e: WechatMiniprogram.TouchEvent) {
-    this.setData({ prompt: e.currentTarget.dataset.value });
+    this.setData({ prompt: e.currentTarget.dataset.value, focus: true });
+  },
+  // A failed reply puts its question back in the composer to edit and resend.
+  retry(e: WechatMiniprogram.TouchEvent) {
+    this.setData({ prompt: e.currentTarget.dataset.prompt || "", focus: true });
+  },
+  blur() {
+    this.setData({ focus: false });
+  },
+  copy(e: WechatMiniprogram.TouchEvent) {
+    wx.setClipboardData({ data: e.currentTarget.dataset.text });
   },
   async send() {
     if (this.data.busy) return;

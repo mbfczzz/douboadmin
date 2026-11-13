@@ -28,12 +28,12 @@ test("work kind filters reset the remote page and keep video-mix matching",async
  assert.equal(calls.at(-1).searchParams.get("works"),"true");
 });
 
-test("Mine requests only two recent completed works and preserves the full library link",async()=>{
+test("Mine requests three recent completed works (one row of covers) and preserves the full library link",async()=>{
  const h=harness();await h.api.signIn();let requested;
  h.api.request=async()=>({profile:{data:{nickname:"user"}},running:0});
  h.wx.request=o=>{requested=new URL(o.url);o.success({statusCode:200,data:{items:[],total:900,page:1,size:3}});};
  const page=h.page("mine");await page.load();
- assert.equal(requested.searchParams.get('size'),'2');
+ assert.equal(requested.searchParams.get('size'),'3');
  assert.equal(requested.searchParams.get('works'),'true');
  page.menu({currentTarget:{dataset:{mode:'works'}}});
  assert.equal(h.nav.at(-1).url,'/pages/works/index');

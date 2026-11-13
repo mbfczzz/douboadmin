@@ -1,20 +1,45 @@
+/* Favorites: a two-column wall of template covers, title over the image. */
+.favorite-head {
+  margin: 0 2px 12px;
+}
+.favorite-total {
+  font-size: 26px;
+  font-weight: 700;
+}
+.favorite-label {
+  font-size: 13px;
+  color: var(--ui-muted);
+}
+.favorite-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
 .favorite-card {
-  display: flex;
-  align-items: center;
-  gap: 11px;
-  padding: 11px;
+  position: relative;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  border-radius: 16px;
   background: var(--ui-surface);
-  border-radius: var(--ui-radius-card);
-  margin-bottom: 10px;
 }
 .favorite-card image {
-  flex-shrink: 0;
-  width: 75px;
-  height: 85px;
-  border-radius: 10px;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
 }
-.favorite-card > t-icon {
-  flex-shrink: 0;
+.favorite-heart {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: #ff5c7a;
+  background: #00000066;
 }
 /* Small text button: keep its own width next to the message. */
 .unfavorite-action {
@@ -27,40 +52,110 @@
   overflow-wrap: anywhere;
 }
 .favorite-copy {
-  flex: 1;
-  min-width: 0;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 28px 10px 10px;
+  background: linear-gradient(transparent, #000000b3);
+}
+.favorite-title {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  color: #fff;
   word-break: break-all;
 }
-.favorite-copy text {
+.favorite-go {
   display: block;
-  margin: 8px 0;
-  font-size: 15px;
+  margin-top: 4px;
+  overflow: hidden;
+  font-size: 11px;
+  color: #ffffffb3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
-.favorite-copy .small {
-  font-size: 13px;
+/* Help: questions that open in place, and one feedback box with its send. */
+.faq-list {
+  overflow: hidden;
+  border-radius: 16px;
+  background: var(--ui-surface);
 }
-.help-card {
-  padding: 14px;
+.faq {
+  padding: 0 16px;
 }
-.help-card text {
-  display: block;
-  font-size: 13px;
-  color: var(--ui-muted);
-  line-height: 1.9;
+.faq + .faq {
+  border-top: 1px solid var(--ui-border);
 }
-.help-card .help-title {
+.faq-q {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 52px;
   font-size: 15px;
   color: var(--ui-text);
-  margin: 14px 0 7px;
 }
-.help-card .help-title:first-child {
-  margin-top: 0;
+.faq-q t-icon {
+  color: var(--ui-muted);
+  transition: transform 160ms ease;
+}
+.faq.open .faq-q t-icon {
+  transform: rotate(180deg);
+}
+.faq-a {
+  display: block;
+  padding-bottom: 14px;
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--ui-muted);
+}
+.feedback-box {
+  padding: 14px 16px 12px;
+  border-radius: 16px;
+  background: var(--ui-surface);
 }
 .feedback {
-  height: 150px;
+  width: 100%;
+  height: 120px;
+  font-size: 15px;
+  line-height: 1.6;
 }
-.send {
-  margin-top: 15px;
+.feedback-placeholder {
+  color: #868a93;
+}
+.feedback-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+}
+.feedback-count {
+  font-size: 12px;
+  color: var(--ui-muted);
+}
+button.feedback-send {
+  width: auto;
+  height: 36px;
+  margin: 0;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ui-on-brand);
+  background: var(--ui-primary);
+}
+button.feedback-send::after {
+  border: 0;
+}
+button.feedback-send[disabled] {
+  color: var(--ui-muted) !important;
+  background: var(--ui-field) !important;
 }
 .unavailable-favorite {
   display: flex;
