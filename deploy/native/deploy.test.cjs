@@ -59,6 +59,7 @@ systemctl() {
     return 1
   fi
   [[ ! ( "$SCENARIO" == migrate-fail && "$*" == 'start doubo-migrate' ) ]] || return 1
+  [[ ! ( "$SCENARIO" == art-fail && "$*" == 'start doubo-sync-ui-art' ) ]] || return 1
   [[ ! ( "$SCENARIO" == startup-fail && "$*" == 'restart doubo@serve doubo@worker' ) ]]
 }
 `;
@@ -72,6 +73,7 @@ for (const name of [
   "broken-current",
   "missing-env",
   "migrate-fail",
+  "art-fail",
   "startup-fail",
   "health-fail",
   "locked",
@@ -104,6 +106,7 @@ for (const name of [
       "media/ui-art/mine-bg.jpg",
       "deploy/native/doubo@.service",
       "deploy/native/doubo-migrate.service",
+      "deploy/native/doubo-sync-ui-art.service",
       "deploy/native/doubo.env.example",
     ])
       write(`releases/new/${file}`);
@@ -171,20 +174,26 @@ for (const name of [
         fs.existsSync(path.join(local, icons, "brand/doubo.png")),
         "project logo copied to " + icons,
       );
+      assert.ok(fs.existsSync(path.join(local, icons, "ui-art/mine-bg.jpg")));
       assert.equal(fs.readFileSync(targetFile, "utf8"), release);
       assert.ok(
         calls.indexOf("start doubo-migrate") <
-          calls.indexOf("restart doubo@serve"),
+          calls.indexOf("start doubo-sync-ui-art"),
       );
+      assert.ok(calls.indexOf("start doubo-sync-ui-art") < calls.indexOf("restart doubo@serve"));
     } else {
       assert.notEqual(run.status, 0);
-      if (["migrate-fail", "startup-fail", "health-fail"].includes(name)) {
+      if (["migrate-fail", "art-fail", "startup-fail", "health-fail"].includes(name)) {
         assert.equal(
           fs.readFileSync(targetFile, "utf8"),
           previous,
           run.stdout + run.stderr,
         );
         assert.ok(calls.endsWith("restart doubo@serve doubo@worker\n"));
+        if (name === "art-fail") {
+          assert.equal((calls.match(/restart doubo@serve doubo@worker/g) || []).length, 1,
+            "failed OSS sync must only restart the previous release");
+        }
       }
       if (["missing-env", "locked"].includes(name)) assert.equal(calls, "");
       if (name === "first-fail") {

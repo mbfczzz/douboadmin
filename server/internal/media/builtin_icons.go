@@ -6,7 +6,9 @@ import (
 	"crypto/sha256"
 	"errors"
 	"fmt"
-	"image/png"
+	"image"
+	_ "image/jpeg"
+	_ "image/png"
 	"io"
 	"os"
 	"path/filepath"
@@ -19,11 +21,13 @@ type IconObjects interface {
 	IconURL(context.Context, string) (string, error)
 }
 
-// BuiltinIcons publishes built-in PNGs, independently of user uploads.
+// BuiltinIcons publishes built-in images, independently of user uploads.
 // Entries become available to /config only after OSS confirms the object exists.
 type BuiltinIcons struct {
 	dir       string
 	namespace string
+	ext       string
+	format    string
 	maxBytes  int
 	objects   IconObjects
 	mu        sync.RWMutex
@@ -38,8 +42,14 @@ func NewBrandIcons(dir string, objects IconObjects) *BuiltinIcons {
 	return newBuiltinIcons(dir, "brand", 2*1024*1024, objects)
 }
 
+func NewUIArt(dir string, objects IconObjects) *BuiltinIcons {
+	m := newBuiltinIcons(dir, "ui-art", 160*1024, objects)
+	m.ext, m.format = ".jpg", "jpeg"
+	return m
+}
+
 func newBuiltinIcons(dir, namespace string, maxBytes int, objects IconObjects) *BuiltinIcons {
-	return &BuiltinIcons{dir: dir, namespace: namespace, maxBytes: maxBytes, objects: objects, keys: make(map[string]string)}
+	return &BuiltinIcons{dir: dir, namespace: namespace, ext: ".png", format: "png", maxBytes: maxBytes, objects: objects, keys: make(map[string]string)}
 }
 
 func (m *BuiltinIcons) Sync(ctx context.Context) (int, error) {
@@ -50,7 +60,7 @@ func (m *BuiltinIcons) Sync(ctx context.Context) (int, error) {
 	count := 0
 	var failures []error
 	for _, entry := range entries {
-		if !entry.Type().IsRegular() || filepath.Ext(entry.Name()) != ".png" {
+		if !entry.Type().IsRegular() || filepath.Ext(entry.Name()) != m.ext {
 			continue
 		}
 		if err := ctx.Err(); err != nil {
@@ -76,8 +86,8 @@ func (m *BuiltinIcons) syncIcon(ctx context.Context, name string) error {
 	if len(data) > m.maxBytes {
 		return fmt.Errorf("built-in icon too large: %s", name)
 	}
-	config, err := png.DecodeConfig(bytes.NewReader(data))
-	if err != nil || config.Width == 0 || config.Height == 0 {
+	config, format, err := image.DecodeConfig(bytes.NewReader(data))
+	if err != nil || format != m.format || config.Width == 0 || config.Height == 0 {
 		return fmt.Errorf("invalid built-in icon: %s", name)
 	}
 	key := fmt.Sprintf("system/%s/%x/%s", m.namespace, sha256.Sum256(data), name)

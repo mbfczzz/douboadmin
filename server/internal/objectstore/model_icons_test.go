@@ -14,6 +14,15 @@ import (
 )
 
 func TestEnsureModelIconDoesNotOverwriteOrIgnoreDeniedAccess(t *testing.T) {
+	testBuiltinUploads(t, "system/model-icons/hash/openai.png", "image/png")
+}
+
+func TestEnsureUIArtUsesPrivateJPEGAndDoesNotOverwrite(t *testing.T) {
+	testBuiltinUploads(t, "system/ui-art/hash/mine-bg.jpg", "image/jpeg")
+}
+
+func testBuiltinUploads(t *testing.T, key, contentType string) {
+	t.Helper()
 	for _, tc := range []struct {
 		name    string
 		head    int
@@ -35,7 +44,7 @@ func TestEnsureModelIconDoesNotOverwriteOrIgnoreDeniedAccess(t *testing.T) {
 					return
 				}
 				puts++
-				if r.Method != "PUT" || r.Header.Get("x-oss-object-acl") != "private" || r.Header.Get("x-oss-forbid-overwrite") != "true" || r.Header.Get("Content-Type") != "image/png" {
+				if r.Method != "PUT" || r.Header.Get("x-oss-object-acl") != "private" || r.Header.Get("x-oss-forbid-overwrite") != "true" || r.Header.Get("Content-Type") != contentType {
 					t.Error("icon upload changed media protection")
 				}
 				w.Header().Set("Content-Type", "application/xml")
@@ -50,7 +59,7 @@ func TestEnsureModelIconDoesNotOverwriteOrIgnoreDeniedAccess(t *testing.T) {
 			cfg := oss.LoadDefaultConfig().WithRegion("cn-shanghai").WithEndpoint(server.URL).WithUsePathStyle(true).
 				WithCredentialsProvider(credentials.NewStaticCredentialsProvider("fixture-key", "fixture-secret"))
 			objects := &OSS{client: oss.NewClient(cfg), bucket: "fixture-bucket"}
-			err := objects.EnsureIcon(context.Background(), "system/model-icons/hash/openai.png", strings.NewReader("fixture"))
+			err := objects.EnsureIcon(context.Background(), key, strings.NewReader("fixture"))
 			if (err != nil) != tc.wantErr || (puts > 0) != tc.wantPut {
 				t.Fatal("unexpected synchronization", puts, err)
 			}

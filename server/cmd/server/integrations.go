@@ -33,6 +33,7 @@ func integrations(ctx context.Context, app *api.Server, values settings.Values) 
 		app.Media.Objects = objects
 		app.Media.ModelIcons = media.NewModelIcons(filepath.Join(app.Media.Dir, "model-icons"), objects)
 		app.Media.BrandIcons = media.NewBrandIcons(filepath.Join(app.Media.Dir, "brand"), objects)
+		app.Media.UIArt = media.NewUIArt(filepath.Join(app.Media.Dir, "ui-art"), objects)
 	}
 	app.SMS = &sms.Aliyun{KeyID: values["SMS_ACCESS_KEY_ID"], Secret: values["SMS_ACCESS_KEY_SECRET"], SignName: values["SMS_SIGN_NAME"], Template: values["SMS_TEMPLATE_CODE"]}
 	smsEnabled := values["SMS_VERIFICATION_ENABLED"] == "true"

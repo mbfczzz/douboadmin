@@ -29,6 +29,7 @@ type Service struct {
 	HTTP       *http.Client
 	ModelIcons *BuiltinIcons
 	BrandIcons *BuiltinIcons
+	UIArt      *BuiltinIcons
 }
 
 func (s *Service) Inputs(ctx context.Context, j core.Job) ([]core.Reference, error) {

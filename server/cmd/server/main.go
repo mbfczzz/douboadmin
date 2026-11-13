@@ -64,7 +64,7 @@ func run() error {
 		command = os.Args[1]
 	}
 	switch command {
-	case "serve", "migrate", "worker":
+	case "serve", "migrate", "worker", "sync-ui-art":
 	default:
 		return fmt.Errorf("unknown command %q", command)
 	}
@@ -110,6 +110,9 @@ func run() error {
 	values, err := connections.LoadStartup(ctx)
 	if err != nil {
 		return err
+	}
+	if command == "sync-ui-art" {
+		return syncUIArt(ctx, mediaDir, values)
 	}
 	cfg := api.Config{Production: production, DemoLogin: demoLogin, Storage: storage,
 		AdminUser: env("ADMIN_USER", "admin"), AdminPassword: password, MediaDir: mediaDir,

@@ -12,7 +12,7 @@ import (
 
 // EnsureIcon only writes content-addressed, built-in assets.
 func (o *OSS) EnsureIcon(ctx context.Context, key string, body io.Reader) error {
-	if !strings.HasPrefix(key, "system/model-icons/") && !strings.HasPrefix(key, "system/brand/") {
+	if !strings.HasPrefix(key, "system/model-icons/") && !strings.HasPrefix(key, "system/brand/") && !strings.HasPrefix(key, "system/ui-art/") {
 		return errors.New("invalid model icon key")
 	}
 	_, err := o.client.HeadObject(ctx, &oss.HeadObjectRequest{Bucket: oss.Ptr(o.bucket), Key: oss.Ptr(key)})
@@ -23,7 +23,11 @@ func (o *OSS) EnsureIcon(ctx context.Context, key string, body io.Reader) error 
 	if !errors.As(err, &service) || service.StatusCode != 404 {
 		return err
 	}
-	err = o.Put(ctx, key, body, "image/png")
+	contentType := "image/png"
+	if strings.HasPrefix(key, "system/ui-art/") {
+		contentType = "image/jpeg"
+	}
+	err = o.Put(ctx, key, body, contentType)
 	// Multiple API instances may synchronize the same immutable icon concurrently.
 	if errors.As(err, &service) && service.StatusCode == 409 && service.Code == "FileAlreadyExists" {
 		return nil

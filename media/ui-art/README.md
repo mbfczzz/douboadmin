@@ -24,13 +24,18 @@ Codex 生成的实拍风格深色图片，用于小程序界面装饰。所有�
 
 ## 目前的加载方式
 
-服务端接口 `GET /api/ui-art/{name}` 读取 `MEDIA_DIR/ui-art/{name}.jpg`，缓存 7 天。部署脚本（`deploy/native/build.sh`、`deploy.sh`）会把本目录随版本发布。
+部署脚本（`deploy/native/build.sh`、`deploy.sh`）会把本目录随版本发布。数据库迁移完成后，部署执行 `doubo-sync-ui-art.service`，读取与 API 相同的 OSS 配置，将图片同步到私有 OSS，再启动 API 和 Worker。
 
-## 改放 OSS / CDN
+## 自动同步 OSS
 
-1. 把本目录下 15 个 `.jpg` **原样上传**到 OSS 同一个文件夹，文件名不要改，设置为公共读。
-2. 在 `miniprogram/utils/ui-art.ts` 中把 `ART_BASE` 设为该文件夹的 https 地址，不带结尾斜杠，例如 `https://cdn.example.com/doubo/ui-art`。同时把 `scripts/ui-art.test.cjs` 中对 `ART_BASE` 为空的断言改为该地址。
-3. 在微信公众平台「开发管理 → 服务器域名 → downloadFile 合法域名」中加入该域名，否则真机上不显示图片。
-4. 之后替换图片时，文件名保持不变，把 `ART_VERSION` 加 1，让缓存失效。
+1. 在后台配置 OSS，并正常发布新版本。配置优先读取数据库中已加密保存的值；没有数据库记录时沿用环境变量。配置密钥文件与 API/Worker 共用。
+2. 15 张 `.jpg` 原样上传到 `system/ui-art/<内容 SHA-256>/<文件名>.jpg`。相同内容重复部署只检查对象是否存在，不重复上传；更换图片会产生新对象，不覆盖旧版本。
+3. **保持桶和对象私有**。小程序继续请求 `GET /api/ui-art/{name}`，API 对已同步的图片返回 OSS HTTPS 签名重定向，不把桶名或过期签名写死进小程序。重定向响应使用 `no-store`，避免缓存的签名过期。
+4. API 启动后也会在后台确认 OSS 对象并在失败时重试；未完成同步或签名失败时使用本地图片。未配置 OSS 时部署跳过同步，保留本地读取；部分配置缺失、JPEG 不合法或 OSS 上传失败会让部署失败并触发已有回滚流程。
+5. 微信公众平台需允许 API 和实际 OSS/CDN 域名；涉及下载保存的资源还需加入 `downloadFile` 合法域名。客户端默认 `ART_BASE` 保持空，替换图片时仍递增 `ART_VERSION` 以刷新客户端缓存。
+
+部署日志：`journalctl -u doubo-sync-ui-art --no-pager`。需要单独重试时运行 `systemctl start doubo-sync-ui-art`。手动运行二进制的命令是 `doubo-api sync-ui-art`，必须先加载相同的环境和配置密钥。
+
+同步不会启动生成 Worker，也不会调用模型生成服务。RAM 账号需要目标前缀上的对象读取/查询和写入权限；不需要修改整个桶的 ACL。
 
 本目录的文件仍需保留：测试会检查每个名称都有对应文件，接口方式也依赖它们。

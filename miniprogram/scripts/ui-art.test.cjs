@@ -22,9 +22,9 @@ test("every UI art name is a shipped, small JPEG", () => {
   }
 });
 
-test("pictures load from the API and are deployed with the release", () => {
+test("pictures use the stable API entry and are deployed with the release", () => {
   assert.match(source, /media\(`\/api\/ui-art\/\$\{name\}\?v=\$\{ART_VERSION\}`\)/);
-  assert.match(source, /const ART_BASE = "";/, "switch to OSS only with the domain allowlisted");
+  assert.match(source, /const ART_BASE = "";/, "private OSS signatures must not be hardcoded in the client");
   for (const file of ["deploy/native/build.sh", "deploy/native/deploy.sh"])
     assert.match(fs.readFileSync(path.join(root, "..", file), "utf8"), /ui-art/, file);
 });

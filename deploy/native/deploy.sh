@@ -45,6 +45,7 @@ chmod -R a+rX "$release/web"
 chmod 755 "$release/bin/doubo-api"
 install -m 644 "$release/deploy/native/doubo@.service" /etc/systemd/system/
 install -m 644 "$release/deploy/native/doubo-migrate.service" /etc/systemd/system/
+install -m 644 "$release/deploy/native/doubo-sync-ui-art.service" /etc/systemd/system/
 systemctl daemon-reload
 
 # A missing or looped current link is not a previous release.
@@ -57,8 +58,8 @@ switch_to() {
 rollback() {
   result=$?
   trap - ERR
-  echo "Deployment failed. Check journalctl -u doubo-migrate -u doubo@serve -u doubo@worker." >&2
-  systemctl --no-pager --lines=20 status doubo-migrate doubo@serve doubo@worker || true
+  echo "Deployment failed. Check journalctl -u doubo-migrate -u doubo-sync-ui-art -u doubo@serve -u doubo@worker." >&2
+  systemctl --no-pager --lines=20 status doubo-migrate doubo-sync-ui-art doubo@serve doubo@worker || true
   if [[ "$switched" == true ]]; then
     systemctl stop doubo@serve doubo@worker || true
   fi
@@ -78,8 +79,9 @@ switch_to "$release"
 switched=true
 # Freshly installed inactive units may already be unloaded. Resetting their
 # counters is optional; migration and startup errors below remain fatal.
-systemctl reset-failed doubo-migrate doubo@serve doubo@worker 2>/dev/null || true
+systemctl reset-failed doubo-migrate doubo-sync-ui-art doubo@serve doubo@worker 2>/dev/null || true
 systemctl start doubo-migrate
+systemctl start doubo-sync-ui-art
 systemctl enable doubo@serve doubo@worker
 systemctl restart doubo@serve doubo@worker
 for ((attempt = 0; attempt < 30; attempt++)); do

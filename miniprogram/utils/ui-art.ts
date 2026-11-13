@@ -4,18 +4,16 @@ import { media } from "../services/media";
 // media/ui-art (see media/ui-art/README.md for what each one is for).
 //
 // Where they load from:
-// - ART_BASE empty: the API serves them at /api/ui-art/<name> with a long
-//   cache (needs the server redeployed with media/ui-art).
-// - After uploading media/ui-art/*.jpg to OSS/CDN unchanged, set ART_BASE to
-//   that folder's public https address (no trailing slash), e.g.
-//   "https://cdn.example.com/doubo/ui-art", and add the domain to the
-//   mini-program's downloadFile allowlist.
+// - ART_BASE empty: /api/ui-art/<name> redirects to private OSS after the
+//   deployment sync, with a local fallback when OSS is not configured.
+// - ART_BASE is only needed for a separately managed public HTTPS CDN.
+//   Allowlist the API and destination OSS/CDN domains in WeChat settings.
 //
 // Every spot keeps its flat colour or icon underneath, so a picture that
 // fails to load leaves the plain design rather than a hole. Bump ART_VERSION
 // after replacing a picture so caches fetch the new one.
 const ART_BASE = "";
-const ART_VERSION = 1;
+const ART_VERSION = 2;
 const art = (name: string) =>
   ART_BASE
     ? `${ART_BASE}/${name}.jpg?v=${ART_VERSION}`

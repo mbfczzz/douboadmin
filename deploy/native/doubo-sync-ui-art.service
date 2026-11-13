@@ -1,0 +1,21 @@
+[Unit]
+Description=Doubo built-in UI art synchronization to OSS
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=doubo
+Group=doubo
+WorkingDirectory=/opt/doubo/current
+EnvironmentFile=/etc/doubo/doubo.env
+ExecStart=/opt/doubo/current/bin/doubo-api sync-ui-art
+# Includes connection checks and the application's five-minute sync budget.
+TimeoutStartSec=6min
+UMask=0027
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+StandardOutput=journal
+StandardError=journal
