@@ -55,9 +55,10 @@ for (const width of [320,390]) {
 for (const width of [1440,390]) {
   test(`reference admin entry at ${width}px`, async ({page}) => {
     await page.setViewportSize({width,height:1000});
+    await page.route("https://brand.fixture.test/logo.png", route => route.fulfill({contentType:"image/png",body:Buffer.from(image("brand/doubo.png").split(",")[1],"base64")}));
     await page.route("**/api/**", route => {
       const endpoint=new URL(route.request().url()).pathname;
-      if(endpoint==="/api/brand-icon") return route.fulfill({contentType:"image/png",body:Buffer.from(image("brand/doubo.png").split(",")[1],"base64")});
+      if(endpoint==="/api/branding") return route.fulfill({json:{icon:"https://brand.fixture.test/logo.png"}});
       return route.fulfill({status:endpoint==="/api/admin/me"?401:200,json:endpoint==="/api/config"?{models:[],categories:[],demo:false}:{}});
     });
     await page.goto("/");

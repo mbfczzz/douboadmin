@@ -1,18 +1,15 @@
 import { useEffect, useState } from "react";
+import { useBrandAssets } from "../hooks/useBrandAssets";
 
 export default function BrandLogo() {
-  const [icon, setIcon] = useState("/api/brand-icon");
+  const { icon } = useBrandAssets();
+  const [failed, setFailed] = useState("");
   useEffect(() => {
-    const controller = new AbortController();
-    void fetch("/api/branding", { signal: controller.signal })
-      .then(async (response) => {
-        if (!response.ok) return;
-        const data = (await response.json()) as { icon?: string };
-        if (!controller.signal.aborted && data.icon) setIcon(data.icon);
-      })
-      .catch(() => {});
-    return () => controller.abort();
-  }, []);
+    const favicon = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
+    if (favicon && icon) favicon.href = icon;
+  }, [icon]);
+  if (!icon || failed === icon)
+    return <span className="project-logo">豆播 AI</span>;
   return (
     <img
       key={icon}
@@ -21,11 +18,7 @@ export default function BrandLogo() {
       alt="豆播 AI"
       width="160"
       height="78"
-      onError={(event) => {
-        const image = event.currentTarget;
-        if (new URL(image.src).pathname !== "/media/brand/doubo.png")
-          image.src = "/media/brand/doubo.png";
-      }}
+      onError={() => setFailed(icon)}
     />
   );
 }

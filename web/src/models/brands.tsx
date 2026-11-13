@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { Model } from "../api";
+import { useBrandAssets } from "../hooks/useBrandAssets";
 
 export const brands = [
   ["openai", "OpenAI / GPT"],
@@ -47,10 +48,14 @@ export function iconFor(m: Model) {
   );
 }
 export function ModelIcon({ model }: { model: Model }) {
-  const icon = iconFor(model),
+  const { modelIcons } = useBrandAssets();
+  const source = iconFor(model);
+  const icon = source.startsWith("/media/model-icons/")
+      ? modelIcons[source] || ""
+      : source,
     [failed, setFailed] = useState("");
   if (icon && !icon.endsWith("/.png") && failed !== icon) {
-    if (icon.startsWith("/") || icon.startsWith("https://"))
+    if (icon.startsWith("https://"))
       return (
         <img
           className="model-brand-image"
@@ -59,7 +64,7 @@ export function ModelIcon({ model }: { model: Model }) {
           onError={() => setFailed(icon)}
         />
       );
-    return <span>{icon}</span>;
+    if (!/^(https?:|\/)/i.test(icon)) return <span>{icon}</span>;
   }
   return <span>{Array.from(model.name)[0]}</span>;
 }

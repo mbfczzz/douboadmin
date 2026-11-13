@@ -1,30 +1,23 @@
 package api
 
 import (
-	"encoding/base64"
 	"net/http"
 
 	"doubo/server/internal/core"
 	"doubo/server/internal/partners"
-	qrcode "github.com/skip2/go-qrcode"
 )
 
 type shareView struct {
 	Code string `json:"code"`
-	QR   string `json:"qr"` // PNG data URL; users scan it in the mini-program
+	QR   string `json:"qr"` // Signed OSS HTTPS URL; development may return an inline PNG
 }
 
-func shareQR(code string) (string, error) {
-	png, e := qrcode.Encode(partners.SharePrefix+code, qrcode.Medium, 320)
-	return "data:image/png;base64," + base64.StdEncoding.EncodeToString(png), e
-}
-
-func replyShare(w http.ResponseWriter, v core.PartnerShare, e error) {
+func (a *Server) replyShare(w http.ResponseWriter, r *http.Request, v core.PartnerShare, e error) {
 	if e != nil {
 		partnerError(w, e)
 		return
 	}
-	qr, e := shareQR(v.Code)
+	qr, e := a.shareQR(r.Context(), v.Code)
 	if e != nil {
 		fail(w, 503, "二维码生成失败")
 		return
@@ -62,7 +55,7 @@ func (a *Server) showCode(w http.ResponseWriter, r *http.Request) {
 		a.replyBind(w, r, v, e)
 		return
 	}
-	replyShare(w, v, e)
+	a.replyShare(w, r, v, e)
 }
 
 // resetCode retires the current code of a kind and issues a new one.
@@ -76,5 +69,5 @@ func (a *Server) resetCode(w http.ResponseWriter, r *http.Request) {
 		a.replyBind(w, r, v, e)
 		return
 	}
-	replyShare(w, v, e)
+	a.replyShare(w, r, v, e)
 }

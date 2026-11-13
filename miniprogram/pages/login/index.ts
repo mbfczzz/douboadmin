@@ -1,6 +1,6 @@
+import { loadBrand } from "../../services/branding";
 import {
   request,
-  media,
   signIn,
   captureLoginFlow,
   hasSession,
@@ -16,7 +16,7 @@ import { canEnter, activationRedirect } from "../../services/access";
 import { supportsPhoneLogin, authorizedPhoneCode } from "../../services/phone-login";
 Page({
   data: {
-    brandIcon: media("/api/brand-icon"),
+    brandIcon: "",
     ...loginContext(),
     loading: true,
     busy: false,
@@ -65,6 +65,7 @@ Page({
     if (!this.completed) this.flow?.cancel();
   },
   async load() {
+    void loadBrand(this, () => request<{ icon: string }>("/branding", "GET", undefined, undefined, false));
     this.setData({ loading: true, loadError: "" });
     try {
       const c = await request<Config>(
@@ -76,7 +77,6 @@ Page({
       );
       if (this.destroyed) return;
       this.setData({
-        brandIcon: media(c.brandIcon || "/api/brand-icon"),
         wechatReady: c.wechatLogin,
         phoneReady: !!c.wechatPhoneLogin && supportsPhoneLogin(),
         demoAllowed: c.demoLogin,
@@ -146,6 +146,9 @@ Page({
     wx.navigateBack({
       fail: () => wx.switchTab({ url: "/pages/templates/index" }),
     });
+  },
+  brandError() {
+    this.setData({ brandIcon: "" });
   },
   privacy() {
     wx.openPrivacyContract({

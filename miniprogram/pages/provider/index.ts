@@ -1,3 +1,4 @@
+import { saveQR } from "./save-qr";
 import { pullRefresh } from "../../utils/refresh";
 import { ask } from "../../services/dialog";
 import { request, error, saveFailed } from "../../utils/api";
@@ -146,15 +147,9 @@ Page({
   async save() {
     const { qr, raw } = this.data.shown;
     if (!qr || this.data.busy) return;
-    const path = `${wx.env.USER_DATA_PATH}/share-${raw}.png`;
     this.setData({ busy: true });
     try {
-      wx.getFileSystemManager().writeFileSync(
-        path,
-        qr.replace(/^data:image\/png;base64,/, ""),
-        "base64",
-      );
-      await wx.saveImageToPhotosAlbum({ filePath: path });
+      await saveQR(qr, raw);
       wx.showToast({ title: "已保存到相册", icon: "success" });
     } catch (e) {
       saveFailed(e);

@@ -39,12 +39,14 @@ func TestBrandingIsPublicAndUsesOSSWithoutDatabaseAccess(t *testing.T) {
 		t.Fatal(count, err)
 	}
 	response := call(a, "GET", "/api/branding", "", "", nil)
-	var body map[string]string
-	if response.Code != 200 || json.Unmarshal(response.Body.Bytes(), &body) != nil || !strings.HasPrefix(body["icon"], "https://icons.test/system/brand/") {
+	var body struct {
+		Icon string `json:"icon"`
+	}
+	if response.Code != 200 || json.Unmarshal(response.Body.Bytes(), &body) != nil || !strings.HasPrefix(body.Icon, "https://icons.test/system/brand/") {
 		t.Fatal("anonymous branding did not return OSS logo", response.Code)
 	}
 	redirect := call(a, "GET", "/api/brand-icon", "", "", nil)
-	if redirect.Code != 302 || redirect.Header().Get("Location") != body["icon"] || redirect.Header().Get("Cache-Control") != "no-store" {
+	if redirect.Code != 302 || redirect.Header().Get("Location") != body.Icon || redirect.Header().Get("Cache-Control") != "no-store" {
 		t.Fatal("favicon did not redirect to a fresh OSS URL")
 	}
 	a.Config.RequireActivation = true
@@ -53,7 +55,7 @@ func TestBrandingIsPublicAndUsesOSSWithoutDatabaseAccess(t *testing.T) {
 		BrandIcon string `json:"brandIcon"`
 		Models    []any  `json:"models"`
 	}
-	if config.Code != 200 || json.Unmarshal(config.Body.Bytes(), &restricted) != nil || restricted.BrandIcon != body["icon"] || len(restricted.Models) != 0 {
+	if config.Code != 200 || json.Unmarshal(config.Body.Bytes(), &restricted) != nil || restricted.BrandIcon != body.Icon || len(restricted.Models) != 0 {
 		t.Fatal("branding must be visible without revealing restricted models")
 	}
 }

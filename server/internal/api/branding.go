@@ -18,7 +18,12 @@ func (a *Server) brandIcon(ctx context.Context) string {
 
 // Branding must remain available before login and without database access.
 func (a *Server) branding(w http.ResponseWriter, r *http.Request) {
-	reply(w, http.StatusOK, map[string]string{"icon": a.brandIcon(r.Context())})
+	icons := map[string]string{}
+	if a.Media != nil && a.Media.ModelIcons != nil {
+		icons = a.Media.ModelIcons.URLs(r.Context())
+	}
+	w.Header().Set("Cache-Control", "no-store")
+	reply(w, http.StatusOK, map[string]any{"icon": a.brandIcon(r.Context()), "modelIcons": icons})
 }
 
 func (a *Server) brandIconFile(w http.ResponseWriter, r *http.Request) {

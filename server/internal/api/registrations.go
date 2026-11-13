@@ -125,7 +125,7 @@ func (a *Server) myPromo(w http.ResponseWriter, r *http.Request) {
 		partnerError(w, e)
 		return
 	}
-	qr, e := shareQR(code)
+	qr, e := a.shareQR(r.Context(), code)
 	if e != nil {
 		fail(w, 503, "二维码生成失败")
 		return

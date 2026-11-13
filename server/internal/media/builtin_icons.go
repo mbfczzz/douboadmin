@@ -104,3 +104,24 @@ func (m *BuiltinIcons) URL(ctx context.Context, icon string) string {
 	}
 	return icon
 }
+
+// URLs snapshots confirmed uploads without holding the lock while signing.
+// Failed signatures are omitted; this never uploads or exposes local fallbacks.
+func (m *BuiltinIcons) URLs(ctx context.Context) map[string]string {
+	m.mu.RLock()
+	keys := make(map[string]string, len(m.keys))
+	for path, key := range m.keys {
+		keys[path] = key
+	}
+	m.mu.RUnlock()
+	urls := make(map[string]string, len(keys))
+	for path, key := range keys {
+		if ctx.Err() != nil {
+			break
+		}
+		if url, err := m.objects.IconURL(ctx, key); err == nil && strings.HasPrefix(url, "https://") {
+			urls[path] = url
+		}
+	}
+	return urls
+}

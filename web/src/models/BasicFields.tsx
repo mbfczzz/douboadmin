@@ -2,6 +2,7 @@ import { Plus, Trash2 } from "lucide-react";
 import { Card, Field, NumberField, Section } from "./fields";
 import { brands, brandURL } from "./brands";
 import { modelKinds, type ModelDraft } from "./settings";
+import { useBrandAssets } from "../hooks/useBrandAssets";
 
 export default function BasicFields({
   model: m,
@@ -10,6 +11,7 @@ export default function BasicFields({
   model: ModelDraft;
   onChange: (m: ModelDraft) => void;
 }) {
+  const { modelIcons } = useBrandAssets();
   const s = m.settings,
     badges = s.badges || [];
   const patch = (v: Partial<typeof s>) =>
@@ -75,7 +77,15 @@ export default function BasicFields({
                     })
                   }
                 >
-                  <img src={brandURL(slug)} alt="" loading="lazy" />
+                  {modelIcons[brandURL(slug)] ? (
+                    <img
+                      src={modelIcons[brandURL(slug)]}
+                      alt=""
+                      loading="lazy"
+                    />
+                  ) : (
+                    <span aria-hidden="true">{name.slice(0, 1)}</span>
+                  )}
                 </button>
               ))}
             </div>

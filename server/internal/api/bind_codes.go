@@ -21,7 +21,7 @@ func (a *Server) replyBind(w http.ResponseWriter, r *http.Request, v core.Partne
 		return
 	}
 	if v.User == "" {
-		replyShare(w, v, nil)
+		a.replyShare(w, r, v, nil)
 		return
 	}
 	u := boundUser{ID: v.User}

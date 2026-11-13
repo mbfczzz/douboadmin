@@ -245,3 +245,12 @@ image {
   font-weight: 500;
   color: var(--ui-brand);
 }
+
+.brand-tile.brand-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ui-muted);
+  font-size: 24px;
+  font-weight: 600;
+}

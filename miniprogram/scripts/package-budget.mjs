@@ -81,7 +81,9 @@ console.log(
 // from real covers on finance pages (package fans, order thumbnails, balance
 // fan, "能做什么" tiles) and work thumbnails on notices: 680,985 bytes. Audit sweep: last old-style
 // buttons and bare empty states replaced: 681,519 bytes.
-const budget = 668 * 1024;
+// HTTPS brand loading and OSS QR downloads: measured 684,191 B, no new SDK.
+// Explicit 1 KiB feature allowance; see docs/oss-image-delivery.md.
+const budget = 669 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

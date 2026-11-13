@@ -1,6 +1,6 @@
+import { loadBrand } from "../../services/branding";
 import {
   request,
-  media,
   signIn,
   hasSession,
   logout,
@@ -30,7 +30,7 @@ import { codeState, enterCode, clearCode, pasteCode } from "./code-entry";
 
 Page({
   data: {
-    brandIcon: media("/api/brand-icon"),
+    brandIcon: "",
     logged: false,
     loading: true,
     busy: false,
@@ -56,6 +56,7 @@ Page({
     stopCountdown(this);
   },
   async load() {
+    void loadBrand(this, () => request<{ icon: string }>("/branding", "GET", undefined, undefined, false));
     const revision = ++this.revision;
     this.setData({
       logged: hasSession(),
@@ -72,7 +73,7 @@ Page({
           false,
         );
         if (revision === this.revision)
-          this.setData({ brandIcon: media(c.brandIcon || "/api/brand-icon"), wechatReady: c.wechatLogin, phoneReady: !!c.wechatPhoneLogin && supportsPhoneLogin(), status: null });
+          this.setData({ wechatReady: c.wechatLogin, phoneReady: !!c.wechatPhoneLogin && supportsPhoneLogin(), status: null });
         return;
       }
       const status = await accessStatus();
@@ -221,6 +222,9 @@ Page({
     } finally {
       if (!this.destroyed) this.setData({ busy: false });
     }
+  },
+  brandError() {
+    this.setData({ brandIcon: "" });
   },
   privacy() {
     wx.openPrivacyContract({

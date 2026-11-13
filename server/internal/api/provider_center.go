@@ -95,7 +95,7 @@ func (a *Server) codeView(ctx context.Context, id, kind, actor string) (shareVie
 	if e != nil {
 		return shareView{}, e
 	}
-	qr, e := shareQR(v.Code)
+	qr, e := a.shareQR(ctx, v.Code)
 	return shareView{Code: v.Code, QR: qr}, e
 }
 
