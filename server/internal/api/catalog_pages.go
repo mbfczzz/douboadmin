@@ -89,6 +89,13 @@ func (a *Server) modelPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	q.Fields["deleted"] = "false"
+	if deleted := r.URL.Query().Get("deleted"); deleted != "" {
+		if deleted != "true" && deleted != "false" {
+			fail(w, 400, "模型删除状态无效")
+			return
+		}
+		q.Fields["deleted"] = deleted
+	}
 	if kind := r.URL.Query().Get("kind"); kind != "" {
 		q.Fields["kind"] = kind
 	}

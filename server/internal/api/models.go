@@ -118,7 +118,7 @@ func (a *Server) syncModels(w http.ResponseWriter, r *http.Request) {
 		fail(w, 502, err.Error())
 		return
 	}
-	var added, updated, conflicts int
+	var added, updated, hidden, conflicts int
 	seen := map[string]bool{}
 	for _, m := range models {
 		seen[m.ID] = true
@@ -151,6 +151,9 @@ func (a *Server) syncModels(w http.ResponseWriter, r *http.Request) {
 			added++
 		} else {
 			updated++
+			if m.Deleted {
+				hidden++
+			}
 		}
 	}
 	rows, err := store.AllRecords(ctx, a.Store, "models", "")
@@ -171,7 +174,7 @@ func (a *Server) syncModels(w http.ResponseWriter, r *http.Request) {
 			conflicts++
 		}
 	}
-	reply(w, 200, map[string]int{"total": len(models), "created": added, "updated": updated, "conflicts": conflicts})
+	reply(w, 200, map[string]int{"total": len(models), "created": added, "updated": updated, "hidden": hidden, "conflicts": conflicts})
 }
 
 func (a *Server) deleteRecord(ns string) http.HandlerFunc {

@@ -61,6 +61,7 @@ export interface Job {
   updatedAt: string;
 }
 export interface Model {
+  deleted?: boolean;
   settings?: ModelSettings;
   referenceTypes: string[];
   recentJobs: number;

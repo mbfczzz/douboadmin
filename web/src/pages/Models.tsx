@@ -15,13 +15,15 @@ import ModelEditor, {
 import ModelTable from "../models/ModelTable";
 import { modelSections, type ModelSection } from "../models/sections";
 import { ask } from "../confirm/ask";
+import { restoreModel } from "../models/restore";
 
 export default function Models({ notify }: PageProps) {
   const [kind, setKind] = useRememberedState("models.kind", ""),
     [q, setQ] = useRememberedState("models.query", ""),
-    [page, setPage] = useState(1);
+    [page, setPage] = useState(1),
+    [deleted, setDeleted] = useState(false);
   const resource = useCachedRecordPage<Model>(
-    `/admin/models?kind=${encodeURIComponent(kind)}&q=${encodeURIComponent(q)}`,
+    `/admin/models?kind=${encodeURIComponent(kind)}&q=${encodeURIComponent(q)}${deleted ? "&deleted=true" : ""}`,
     page,
   );
   const [busy, setBusy] = useState(""),
@@ -44,13 +46,26 @@ export default function Models({ notify }: PageProps) {
         created: number;
         updated: number;
         conflicts: number;
+        hidden?: number;
       }>("/admin/models/sync", { method: "POST" });
       notify(
-        `同步完成：新增 ${r.created}，更新 ${r.updated}${r.conflicts ? `，${r.conflicts} 项发生冲突，请刷新后重试` : ""}`,
+        `同步完成：新增 ${r.created}，更新 ${r.updated}${r.hidden ? `（其中 ${r.hidden} 个已删除模型保持隐藏，可在“已删除模型”中恢复）` : ""}${r.conflicts ? `，${r.conflicts} 项发生冲突，请刷新后重试` : ""}`,
       );
       await resource.reload();
     } catch (e) {
       notify((e as Error).message, "error");
+    } finally {
+      setBusy("");
+    }
+  }
+  async function restore(row: Row<Model>) {
+    if (busy) return;
+    setBusy(row.id);
+    try {
+      if ((await restoreModel(row)) !== false) {
+        await resource.reload();
+        notify("模型已恢复，可切换到当前模型查看");
+      }
     } finally {
       setBusy("");
     }
@@ -100,15 +115,21 @@ export default function Models({ notify }: PageProps) {
       <section className="panel catalog-panel">
         <div className="catalog-head">
           <div>
-            <h2>模型目录</h2>
+            <h2>{deleted ? "已删除模型" : "模型目录"}</h2>
             <p>
               {resource.data ? (
                 <>
-                  共 {resource.data.total} 个 · 本页已上架{" "}
-                  {
-                    rows.filter((r) => r.data.published && r.data.available)
-                      .length
-                  }
+                  共 {resource.data.total} 个
+                  {!deleted && (
+                    <>
+                      {" "}
+                      · 本页已上架{" "}
+                      {
+                        rows.filter((r) => r.data.published && r.data.available)
+                          .length
+                      }
+                    </>
+                  )}
                 </>
               ) : resource.loading ? (
                 "正在加载模型…"
@@ -129,6 +150,17 @@ export default function Models({ notify }: PageProps) {
           </div>
         </div>
         <div className="catalog-toolbar">
+          <select
+            aria-label="模型范围"
+            value={deleted ? "deleted" : "current"}
+            onChange={(e) => {
+              setDeleted(e.target.value === "deleted");
+              setPage(1);
+            }}
+          >
+            <option value="current">当前模型</option>
+            <option value="deleted">已删除模型</option>
+          </select>
           <div className="catalog-tabs" role="tablist" aria-label="模型类型">
             {[["", "全部"], ...Object.entries(modelKinds)].map(
               ([id, label]) => (
@@ -175,15 +207,24 @@ export default function Models({ notify }: PageProps) {
               onEdit={(row, section) => setEdit({ row, section })}
               onToggle={(r) => void mutate(r)}
               onDelete={(r) => void mutate(r, true)}
+              onRestore={(r) => void restore(r)}
             />
           )}
           {!filtered.length && !resource.loading && !resource.error && (
             <Empty
-              text={q || kind ? "没有匹配的模型" : "还没有模型"}
+              text={
+                deleted
+                  ? "没有匹配的已删除模型"
+                  : q || kind
+                    ? "没有匹配的模型"
+                    : "还没有模型"
+              }
               help={
-                q || kind
-                  ? "请调整搜索词或模型类型。"
-                  : "点击同步上游，导入当前密钥可用的模型与参数。"
+                deleted
+                  ? "恢复后会回到当前模型列表，同步上游不会自动恢复删除记录。"
+                  : q || kind
+                    ? "请调整搜索词或模型类型；此前删除的模型请切换范围查看。"
+                    : "可同步上游导入模型；若之前删除过，请切换到已删除模型恢复。"
               }
             />
           )}

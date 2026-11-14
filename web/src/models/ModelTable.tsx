@@ -10,12 +10,14 @@ export default function ModelTable({
   onEdit,
   onToggle,
   onDelete,
+  onRestore,
 }: {
   rows: Row<Model>[];
   busy: boolean;
   onEdit: (row: Row<Model>, section: ModelSection) => void;
   onToggle: (row: Row<Model>) => void;
   onDelete: (row: Row<Model>) => void;
+  onRestore: (row: Row<Model>) => void;
 }) {
   return (
     <div className="table-scroll">
@@ -66,26 +68,41 @@ export default function ModelTable({
               </td>
               <td className="wide-only xl-only">{r.data.recentJobs}</td>
               <td>
-                <ModelState
-                  model={r.data}
-                  busy={busy}
-                  onToggle={() => onToggle(r)}
-                />
+                {r.data.deleted ? (
+                  <span className="quiet">已删除</span>
+                ) : (
+                  <ModelState
+                    model={r.data}
+                    busy={busy}
+                    onToggle={() => onToggle(r)}
+                  />
+                )}
               </td>
               <td className="table-actions">
                 <div className="catalog-actions model-row-actions">
-                  {sectionsFor(r.data).map((section) => (
-                    <button key={section} onClick={() => onEdit(r, section)}>
-                      {modelSections[section].button}
+                  {r.data.deleted ? (
+                    <button disabled={busy} onClick={() => onRestore(r)}>
+                      恢复模型
                     </button>
-                  ))}
-                  <button
-                    className="danger-text model-delete"
-                    disabled={busy}
-                    onClick={() => onDelete(r)}
-                  >
-                    删除
-                  </button>
+                  ) : (
+                    <>
+                      {sectionsFor(r.data).map((section) => (
+                        <button
+                          key={section}
+                          onClick={() => onEdit(r, section)}
+                        >
+                          {modelSections[section].button}
+                        </button>
+                      ))}
+                      <button
+                        className="danger-text model-delete"
+                        disabled={busy}
+                        onClick={() => onDelete(r)}
+                      >
+                        删除
+                      </button>
+                    </>
+                  )}
                 </div>
               </td>
             </tr>

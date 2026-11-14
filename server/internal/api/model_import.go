@@ -10,7 +10,8 @@ import (
 
 func (a *Server) importModel(w http.ResponseWriter, r *http.Request) {
 	var in struct {
-		Key string `json:"key"`
+		Key     string `json:"key"`
+		Version *int64 `json:"version,omitempty"`
 	}
 	if !decode(w, r, &in) {
 		return
@@ -28,15 +29,26 @@ func (a *Server) importModel(w http.ResponseWriter, r *http.Request) {
 		}
 		version := int64(0)
 		if row, e := a.Store.Get(ctx, "models", m.ID); e == nil {
+			if in.Version != nil && *in.Version != row.Version {
+				dbError(w, core.ErrConflict)
+				return
+			}
 			var prev core.Model
-			_ = json.Unmarshal(row.Data, &prev)
+			if json.Unmarshal(row.Data, &prev) != nil {
+				fail(w, 500, "模型数据无效")
+				return
+			}
 			if !prev.Deleted {
 				fail(w, 409, "模型已在目录中，请直接配置")
 				return
 			}
 			version = row.Version
+			m.Name, m.Points, m.Sort, m.Settings = prev.Name, prev.Points, prev.Sort, prev.Settings
 		} else if e != core.ErrNotFound {
 			dbError(w, e)
+			return
+		} else if in.Version != nil {
+			dbError(w, core.ErrConflict)
 			return
 		}
 		m.Published = m.Supported()
