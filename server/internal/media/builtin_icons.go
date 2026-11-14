@@ -10,6 +10,7 @@ import (
 	_ "image/jpeg"
 	_ "image/png"
 	"io"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -19,6 +20,11 @@ import (
 type IconObjects interface {
 	EnsureIcon(context.Context, string, io.Reader) error
 	IconURL(context.Context, string) (string, error)
+}
+
+// artPruner removes replaced UI art from OSS (objectstore.OSS implements it).
+type artPruner interface {
+	PruneUIArt(context.Context, map[string]bool) (int, error)
 }
 
 // BuiltinIcons publishes built-in images, independently of user uploads.
@@ -75,7 +81,34 @@ func (m *BuiltinIcons) Sync(ctx context.Context) (int, error) {
 	if count == 0 && len(failures) == 0 {
 		return 0, fmt.Errorf("no built-in icons found")
 	}
+	if len(failures) == 0 {
+		m.pruneReplaced(ctx)
+	}
 	return count, errors.Join(failures...)
+}
+
+// pruneReplaced deletes UI art from earlier releases once every current
+// picture is confirmed, so OSS holds only the pictures in use. Failure only
+// leaves old objects behind; it never fails the sync.
+func (m *BuiltinIcons) pruneReplaced(ctx context.Context) {
+	pruner, ok := m.objects.(artPruner)
+	if m.namespace != "ui-art" || !ok {
+		return
+	}
+	m.mu.RLock()
+	keep := make(map[string]bool, len(m.keys))
+	for _, key := range m.keys {
+		keep[key] = true
+	}
+	m.mu.RUnlock()
+	removed, err := pruner.PruneUIArt(ctx, keep)
+	if err != nil {
+		slog.Warn("old UI art not removed from OSS; check RAM list/delete permission on system/ui-art/", "removed", removed)
+		return
+	}
+	if removed > 0 {
+		slog.Info("old UI art removed from OSS", "count", removed)
+	}
 }
 
 func (m *BuiltinIcons) syncIcon(ctx context.Context, name string) error {

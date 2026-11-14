@@ -50,3 +50,29 @@ func (o *OSS) IconURL(ctx context.Context, key string) (string, error) {
 	}
 	return result.URL, nil
 }
+
+// PruneUIArt deletes UI art objects that are no longer part of the current
+// set. Only keys under system/ui-art/ are ever listed or removed; user media
+// and the other built-in assets are untouched.
+func (o *OSS) PruneUIArt(ctx context.Context, keep map[string]bool) (int, error) {
+	const prefix = "system/ui-art/"
+	pages := o.client.NewListObjectsV2Paginator(&oss.ListObjectsV2Request{Bucket: oss.Ptr(o.bucket), Prefix: oss.Ptr(prefix)})
+	removed := 0
+	for pages.HasNext() {
+		page, err := pages.NextPage(ctx)
+		if err != nil {
+			return removed, err
+		}
+		for _, object := range page.Contents {
+			key := oss.ToString(object.Key)
+			if !strings.HasPrefix(key, prefix) || keep[key] {
+				continue
+			}
+			if _, err := o.client.DeleteObject(ctx, &oss.DeleteObjectRequest{Bucket: oss.Ptr(o.bucket), Key: oss.Ptr(key)}); err != nil {
+				return removed, err
+			}
+			removed++
+		}
+	}
+	return removed, nil
+}

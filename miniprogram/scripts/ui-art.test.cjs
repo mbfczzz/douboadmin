@@ -43,6 +43,13 @@ test("phones get signed HTTPS addresses from /config; the API path is only a fal
   showArt({ setData: (d) => seen.push(d) }, (art) => ({ a: art.mixNatural }));
   await new Promise(setImmediate);
   assert.equal(seen.at(-1).a, signed);
+  // A replaced picture (new content, new OSS path) is used at once.
+  const replaced = "https://bucket.test/system/ui-art/k2/mix-natural.jpg?sig=3";
+  h.api.request = async (p) => (p === "/config" ? { uiArt: { "mix-natural": replaced } } : {});
+  await loadConfig(true);
+  showArt({ setData: (d) => seen.push(d) }, (art) => ({ a: art.mixNatural }));
+  await new Promise(setImmediate);
+  assert.equal(seen.at(-1).a, replaced);
   for (const file of ["pages/mix/state.ts", "pages/wallet/state.ts", "pages/create/state.ts"]) assert.doesNotMatch(read(file), /\/api\/ui-art/, file);
 });
 
@@ -88,4 +95,33 @@ test("我的 subpages place a named backdrop inside a stacking layer", () => {
   }
   assert.ok(pages >= 8);
   for (const key of ["bgFavorites", "bgNotice", "bgHelp"]) assert.match(read("pages/library/index.ts"), new RegExp(key));
+});
+
+test("page backdrop: signed picture, soft appearance, nothing after the page closes", async () => {
+  const h = require("./harness.cjs").harness();
+  const signed = "https://bucket.test/system/ui-art/k/bg-orders.jpg?sig=1";
+  let configs = 0;
+  h.api.request = async (p) => (p === "/config" ? (configs++, { uiArt: { "bg-orders": signed } }) : {});
+  const first = h.component("components/page-backdrop");
+  // Fresh instances share the methods (the module loads once per harness).
+  const make = () => ({ ...first, data: { src: "", ready: false, name: "bgOrders" } });
+  const b = make();
+  b.lifetimes.attached.call(b);
+  await new Promise(setImmediate);
+  assert.equal(b.data.src, signed);
+  assert.equal(b.data.ready, false, "invisible until the picture has loaded");
+  b.loaded();
+  assert.equal(b.data.ready, true);
+  // A second backdrop reuses the stored config: no new /config for pictures.
+  const c = make();
+  c.lifetimes.attached.call(c);
+  await new Promise(setImmediate);
+  assert.equal(c.data.src, signed);
+  assert.equal(configs, 1);
+  // Closed before the answer: no update.
+  const d = make();
+  d.lifetimes.detached.call(d);
+  d.lifetimes.attached.call(d);
+  await new Promise(setImmediate);
+  assert.equal(d.data.src, "");
 });

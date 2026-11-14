@@ -45,11 +45,14 @@ const NAMES = {
 export type Art = Record<keyof typeof NAMES, string>;
 
 // Every /config signs afresh, so a new address would reload (and flash) a
-// picture already on screen. Keep the first signed address for 12 h.
+// picture already on screen. The OSS path carries the content hash: the same
+// path with a new signature keeps the address in use (for 12 h), a new path
+// means a replaced picture and is used at once.
 const kept: Record<string, { url: string; at: number }> = {};
+const objectPath = (url: string) => url.split("?")[0];
 function signedUrl(name: string, url: string | undefined) {
   const old = kept[name];
-  if (old && Date.now() - old.at < SIGNED_MS) return old.url;
+  if (old && Date.now() - old.at < SIGNED_MS && (!url || objectPath(url) === objectPath(old.url))) return old.url;
   if (url) kept[name] = { url, at: Date.now() };
   return url;
 }
@@ -63,11 +66,16 @@ function resolve(signed: Record<string, string> | undefined): Art {
   return art;
 }
 
-// Fill a page's picture fields: at once from a recent config, then from the
-// current one. Pages start with "" so nothing unloadable is requested.
+// Fill a page's picture fields. Pages start with "" so nothing unloadable
+// is requested. A config from the last 12 h holds valid signed addresses and
+// paints at once; /config is heavy, so it is fetched again for pictures only
+// when the stored copy is over 30 min old (replaced pictures then show up),
+// or when there is none.
+const RECHECK_MS = 30 * 60 * 1000;
 export function showArt(page: { setData(data: Record<string, unknown>): void }, pick: (art: Art) => Record<string, unknown>) {
   const seen = peekConfig(SIGNED_MS)?.uiArt;
   if (seen) page.setData(pick(resolve(seen)));
+  if (seen && peekConfig(RECHECK_MS)) return;
   loadConfig().then(
     (config) => page.setData(pick(resolve(config.uiArt))),
     () => !seen && page.setData(pick(resolve(undefined))),
