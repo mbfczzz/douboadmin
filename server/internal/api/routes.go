@@ -80,6 +80,7 @@ func (a *Server) routes() {
 	m.HandleFunc("POST /api/admin/models/sync", a.auth("admin", a.syncModels))
 	m.HandleFunc("PUT /api/admin/models/{id}", a.auth("admin", a.saveModel))
 	m.HandleFunc("DELETE /api/admin/models/{id}", a.auth("admin", a.deleteRecord("models")))
+	m.HandleFunc("DELETE /api/admin/models/{id}/permanent", a.superAdmin(a.purgeModel))
 	m.HandleFunc("DELETE /api/admin/templates/{id}", a.auth("admin", a.deleteRecord("templates")))
 	m.HandleFunc("PUT /api/admin/templates/{id}", a.auth("admin", a.saveTemplate))
 	m.HandleFunc("GET /api/admin/jobs", a.auth("admin", a.jobs))

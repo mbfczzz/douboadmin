@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"doubo/server/internal/core"
+	"time"
 )
 
 // Versions protect admin writes; lease tokens fence obsolete workers after recovery.
@@ -16,6 +17,7 @@ type Store interface {
 	PaymentRecords(context.Context, core.PaymentQuery) (core.PaymentPage, error)
 	PendingSubscriptions(context.Context, string, int) ([]core.Record, error)
 	Put(context.Context, string, core.Record, int64) (core.Record, error)
+	PurgeModel(context.Context, string, int64, time.Time) (core.Record, error)
 	CreateJob(context.Context, core.Job) (core.Job, error)
 	Jobs(context.Context, string) ([]core.Job, error)
 	JobPage(context.Context, core.JobQuery) (core.JobPage, error)

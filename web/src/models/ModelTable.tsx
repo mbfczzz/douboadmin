@@ -11,6 +11,7 @@ export default function ModelTable({
   onToggle,
   onDelete,
   onRestore,
+  onPurge,
 }: {
   rows: Row<Model>[];
   busy: boolean;
@@ -18,6 +19,7 @@ export default function ModelTable({
   onToggle: (row: Row<Model>) => void;
   onDelete: (row: Row<Model>) => void;
   onRestore: (row: Row<Model>) => void;
+  onPurge: (row: Row<Model>) => void;
 }) {
   return (
     <div className="table-scroll">
@@ -81,9 +83,18 @@ export default function ModelTable({
               <td className="table-actions">
                 <div className="catalog-actions model-row-actions">
                   {r.data.deleted ? (
-                    <button disabled={busy} onClick={() => onRestore(r)}>
-                      恢复模型
-                    </button>
+                    <>
+                      <button disabled={busy} onClick={() => onRestore(r)}>
+                        恢复模型
+                      </button>
+                      <button
+                        className="danger-text model-delete"
+                        disabled={busy}
+                        onClick={() => onPurge(r)}
+                      >
+                        彻底删除
+                      </button>
+                    </>
                   ) : (
                     <>
                       {sectionsFor(r.data).map((section) => (

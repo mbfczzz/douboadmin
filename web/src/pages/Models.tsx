@@ -15,7 +15,7 @@ import ModelEditor, {
 import ModelTable from "../models/ModelTable";
 import { modelSections, type ModelSection } from "../models/sections";
 import { ask } from "../confirm/ask";
-import { restoreModel } from "../models/restore";
+import { restoreModel, purgeModel } from "../models/restore";
 
 export default function Models({ notify }: PageProps) {
   const [kind, setKind] = useRememberedState("models.kind", ""),
@@ -58,13 +58,17 @@ export default function Models({ notify }: PageProps) {
       setBusy("");
     }
   }
-  async function restore(row: Row<Model>) {
+  async function changeDeleted(row: Row<Model>, permanent = false) {
     if (busy) return;
     setBusy(row.id);
     try {
-      if ((await restoreModel(row)) !== false) {
+      if ((await (permanent ? purgeModel(row) : restoreModel(row))) !== false) {
         await resource.reload();
-        notify("模型已恢复，可切换到当前模型查看");
+        notify(
+          permanent
+            ? "模型已彻底删除，原配置不可恢复"
+            : "模型已恢复，可切换到当前模型查看",
+        );
       }
     } finally {
       setBusy("");
@@ -207,7 +211,8 @@ export default function Models({ notify }: PageProps) {
               onEdit={(row, section) => setEdit({ row, section })}
               onToggle={(r) => void mutate(r)}
               onDelete={(r) => void mutate(r, true)}
-              onRestore={(r) => void restore(r)}
+              onRestore={(r) => void changeDeleted(r)}
+              onPurge={(r) => void changeDeleted(r, true)}
             />
           )}
           {!filtered.length && !resource.loading && !resource.error && (
