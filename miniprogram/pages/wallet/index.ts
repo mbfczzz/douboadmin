@@ -1,3 +1,4 @@
+import { showArt } from "../../utils/ui-art";
 import { pullRefresh } from "../../utils/refresh";
 import { ask } from "../../services/dialog";
 import {
@@ -18,7 +19,7 @@ import {
   paymentMessage,
   watchPayment,
 } from "../../services/payment-status";
-import { productCards, ledgerRows, loadInsights, loadArt } from "./insights";
+import { productCards, ledgerRows, loadInsights } from "./insights";
 import type { Ledger } from "../../services/wallet-ledger";
 import { financePage } from "../../services/finance-page";
 import type { FinancePage } from "../../services/finance-page";
@@ -42,6 +43,7 @@ Page({
   stopWatching: undefined as (() => void) | undefined,
   onShow() {
     this.visible = true;
+    showArt(this, (art) => ({ backdrop: art.walletBackdrop }));
     this.setData({ paymentWaiting: false });
     enterPage(this);
     void this.load();
@@ -120,7 +122,6 @@ Page({
       });
       this.estimate();
       void loadInsights(this);
-      void loadArt(this);
       this.trackPayment(pendingPayment(info.wallet.userId));
     } catch (e) {
       if (revision === this.revision) {

@@ -1,4 +1,4 @@
-import { UI_ART, ICON } from "../../utils/ui-art";
+import { ICON, showArt } from "../../utils/ui-art";
 import { readView, writeView, keepImages, rememberRows, VIEW_MAX_AGE, freshUrl, noteIssued } from "../../utils/view-cache";
 import { pullRefresh } from "../../utils/refresh";
 import {
@@ -40,13 +40,16 @@ Page({
     jobs: [] as ReturnType<typeof jobView>[],
     worksError: "",
     worksLoading: false,
+    // The list has answered once for this account: later refreshes on return
+    // keep the current cards (or the empty card) instead of a skeleton flash.
+    worksKnown: false,
     roleLabel: "",
     loading: true,
     loadError: "",
     menus: baseMenus,
     roleMenu: null as ((typeof baseMenus)[number] & { hint: string }) | null,
     icons: { avatar: ICON.avatar, create: ICON.create },
-    backdrop: UI_ART.mineBackdrop, // shown until the user has a work cover
+    backdrop: "", // shown until the user has a work cover (showArt)
     unread: 0,
   },
   loadVersion: 0,
@@ -55,6 +58,7 @@ Page({
   refreshTimer: undefined as ReturnType<typeof setTimeout> | undefined,
   onShow() {
     this.visible = true;
+    showArt(this, (art) => ({ backdrop: art.mineBackdrop }));
     tab(this, 4);
     void this.load();
     void this.loadIdentity();
@@ -103,7 +107,7 @@ Page({
       this.owner = owner;
       // Show this account's last profile at once instead of a spinner.
       const seen = owner ? readView<{ me: Me; jobs: ReturnType<typeof jobView>[] }>("mine", VIEW_MAX_AGE) : undefined;
-      this.setData({ me: seen?.me || null, jobs: seen?.jobs || [], worksError: "", roleLabel: "", roleMenu: null, loading: !seen });
+      this.setData({ me: seen?.me || null, jobs: seen?.jobs || [], worksKnown: !!seen, worksError: "", roleLabel: "", roleMenu: null, loading: !seen });
     }
     if (this.refreshTimer !== undefined) clearTimeout(this.refreshTimer);
     if (!hasSession()) {
@@ -131,6 +135,7 @@ Page({
         jobs,
         worksError: recent ? "" : "作品暂时无法加载，点击重试",
         worksLoading: false,
+        worksKnown: true,
       });
       if (recent) writeView("mine", { me, jobs }); // never re-save an old list as new
       rememberRows(jobs);

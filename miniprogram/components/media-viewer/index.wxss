@@ -1,3 +1,4 @@
+@import "../../styles/glyphs.wxss";
 .viewer {
   position: fixed;
   top: 0;

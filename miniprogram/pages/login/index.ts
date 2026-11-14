@@ -14,11 +14,11 @@ import type { Config } from "../../services/types";
 import { loginContext } from "../../services/login-context";
 import { canEnter, activationRedirect } from "../../services/access";
 import { supportsPhoneLogin, authorizedPhoneCode } from "../../services/phone-login";
-import { UI_ART } from "../../utils/ui-art";
+import { showArt } from "../../utils/ui-art";
 Page({
   data: {
     brandIcon: "",
-    backdrop: UI_ART.loginBackdrop,
+    backdrop: "",
     ...loginContext(),
     loading: true,
     busy: false,
@@ -39,6 +39,7 @@ Page({
   },
   onLoad(query: Record<string, string | undefined> = {}) {
     this.setData(loginContext(query.purpose));
+    showArt(this, (art) => ({ backdrop: art.loginBackdrop }));
     this.flow = captureLoginFlow();
     if (hasSession()) {
       this.autoReturn = true;

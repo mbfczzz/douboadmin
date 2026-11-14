@@ -59,3 +59,11 @@ test("mix feature glyphs exist in both states", () => {
   assert.equal(glyphs.length, 4);
   for (const g of glyphs) for (const f of [`${g}.png`, `${g}-muted.png`]) assert.ok(files.includes(`glyphs/${f}`), f);
 });
+
+test("components that use glyph classes import them (app.wxss does not reach inside)", () => {
+  for (const dir of [...fs.readdirSync(path.join(root, "components")).map((d) => `components/${d}`), "custom-tab-bar"]) {
+    const wxml = path.join(root, dir, "index.wxml");
+    if (!fs.existsSync(wxml) || !/class="[^"]*\bgl\b/.test(fs.readFileSync(wxml, "utf8"))) continue;
+    assert.match(fs.readFileSync(path.join(root, dir, "index.wxss"), "utf8"), /@import "\.\.\/\.\.\/styles\/glyphs\.wxss";/, dir);
+  }
+});

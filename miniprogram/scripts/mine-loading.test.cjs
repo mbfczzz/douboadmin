@@ -72,3 +72,23 @@ test("late previews from a previous account cannot replace the current account",
   assert.equal(page.data.worksError, "");
   page.onUnload();
 });
+
+test("returning to 我的 refreshes works without flashing the skeleton", async () => {
+  const h = harness();
+  await h.api.signIn();
+  h.api.request = async () => ({ ...profile(), works: 0 });
+  h.wx.request = (o) => o.success({ statusCode: 200, data: { items: [], total: 0, page: 1, size: 3 } });
+  const page = h.page("mine");
+  await page.load();
+  assert.equal(page.data.worksKnown, true);
+  let recent;
+  h.wx.request = (o) => { recent = o; };
+  const again = page.load();
+  await new Promise(setImmediate);
+  // Still loading, but the list is known: the empty card stays, no skeleton.
+  assert.equal(page.data.worksLoading, true);
+  assert.equal(page.data.worksKnown, true);
+  recent.success({ statusCode: 200, data: { items: [], total: 0, page: 1, size: 3 } });
+  await again;
+  page.onUnload();
+});

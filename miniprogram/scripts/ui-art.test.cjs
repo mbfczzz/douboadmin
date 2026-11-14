@@ -1,4 +1,4 @@
-// Decorative photographs: every name in UI_ART must ship in media/ui-art, and
+// Decorative photographs: every name in utils/ui-art must ship in media/ui-art, and
 // every page that shows one must keep a plain fallback when it is missing.
 const test = require("node:test");
 const assert = require("node:assert/strict");
@@ -8,7 +8,7 @@ const path = require("node:path");
 const root = path.join(__dirname, "..");
 const read = (file) => fs.readFileSync(path.join(root, file), "utf8");
 const source = read("utils/ui-art.ts");
-const names = [...source.matchAll(/art\("([a-z0-9-]+)"\)/g)].map((m) => m[1]);
+const names = [...source.slice(source.indexOf("const NAMES"), source.indexOf("export type Art")).matchAll(/: "([a-z0-9-]+)",/g)].map((m) => m[1]);
 
 test("every UI art name is a shipped, small JPEG", () => {
   assert.ok(names.length >= 15);
@@ -22,11 +22,28 @@ test("every UI art name is a shipped, small JPEG", () => {
   }
 });
 
-test("pictures use the stable API entry and are deployed with the release", () => {
-  assert.match(source, /media\(`\/api\/ui-art\/\$\{name\}\?v=\$\{ART_VERSION\}`\)/);
-  assert.match(source, /const ART_BASE = "";/, "private OSS signatures must not be hardcoded in the client");
+test("phones get signed HTTPS addresses from /config; the API path is only a fallback", async () => {
+  assert.match(source, /signedUrl\(name, signed\?\.\[name\]\) \|\| media\(`\/api\/ui-art\/\$\{name\}\?v=\$\{ART_VERSION\}`\)/);
   for (const file of ["deploy/native/build.sh", "deploy/native/deploy.sh"])
     assert.match(fs.readFileSync(path.join(root, "..", file), "utf8"), /ui-art/, file);
+  // Pages start empty and fill in from the config, so nothing unloadable is requested.
+  const h = require("./harness.cjs").harness();
+  const signed = "https://bucket.test/system/ui-art/k/mix-natural.jpg?sig=1";
+  h.api.request = async (p) => (p === "/config" ? { uiArt: { "mix-natural": signed } } : {});
+  const { showArt } = h.service("../utils/ui-art");
+  const seen = [];
+  showArt({ setData: (d) => seen.push(d) }, (art) => ({ a: art.mixNatural, b: art.mixFast }));
+  await new Promise(setImmediate);
+  assert.equal(seen.at(-1).a, signed);
+  assert.match(seen.at(-1).b, /\/api\/ui-art\/mix-fast\?v=\d+$/);
+  // A re-signed address for the same picture does not replace the one on screen.
+  h.api.request = async (p) => (p === "/config" ? { uiArt: { "mix-natural": signed.replace("sig=1", "sig=2") } } : {});
+  const { loadConfig } = h.service("../utils/config-cache");
+  await loadConfig(true);
+  showArt({ setData: (d) => seen.push(d) }, (art) => ({ a: art.mixNatural }));
+  await new Promise(setImmediate);
+  assert.equal(seen.at(-1).a, signed);
+  for (const file of ["pages/mix/state.ts", "pages/wallet/state.ts", "pages/create/state.ts"]) assert.doesNotMatch(read(file), /\/api\/ui-art/, file);
 });
 
 test("each photo slot keeps a flat fallback", () => {

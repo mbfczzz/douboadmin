@@ -52,11 +52,12 @@
         </block>
         <view wx:else class="virtual-products {{products.length===1?'single':products.length===2||products.length===4?'pair':''}}">
           <button wx:for="{{products}}" wx:key="id" class="virtual-product {{productId===item.id?'selected':''}}" aria-label="{{item.name}}，{{item.amount}}元，{{item.points}}积分，{{productId===item.id?'已选择':'未选择'}}" data-id="{{item.id}}" bindtap="chooseProduct" disabled="{{busy||pendingOrderId}}">
-            <view class="row product-icons"><t-icon wx:if="{{productId===item.id}}" name="check-circle" size="16" /></view>
-            <text wx:if="{{item.best}}" class="product-badge">最划算</text>
-            <image class="product-photo" src="{{item.photo}}" mode="aspectFill" aria-hidden="true" />
-            <text class="product-points">{{item.points}}<text class="product-unit">积分</text></text><text class="product-name">{{item.name}}</text><text class="product-price">¥{{item.amount}}</text>
-            <text wx:if="{{item.bonus||item.per100}}" class="product-rate">{{item.bonus||'¥'+item.per100+'/百积分'}}</text>
+            <view class="product-top"><text wx:if="{{item.best}}" class="product-badge">最划算</text><text wx:elif="{{item.bonus}}" class="product-badge soft">{{item.bonus}}</text></view>
+            <view class="product-body">
+              <view class="product-figure"><image class="gl gl-16" src="/assets/glyphs/points-star.png" /><text class="product-points">{{item.points}}</text></view>
+              <text class="product-price">¥{{item.amount}}</text>
+              <text wx:if="{{item.per100}}" class="product-rate">约 ¥{{item.per100}}/百积分</text>
+            </view>
           </button>
         </view>
         <text wx:if="{{purchaseMode==='package'&&!products.length}}" class="biz-note">暂无可用积分商品，请稍后再试。</text>
@@ -76,7 +77,7 @@
         disabled="{{busy||!allowed||pendingOrderId||(info.paymentChannel==='wechat_virtual'&&purchaseMode==='package'&&!productId)}}"
         bindtap="pay"
       >
-        <view class="button-content"><text>{{pendingOrderId?'正在确认到账':allowed?(info.paymentChannel==='wechat_virtual'?'购买积分':'微信支付'):'充值暂未开放'}}</text></view></button
+        <view class="button-content"><text>{{pendingOrderId?'正在确认到账':allowed?(info.paymentChannel==='wechat_virtual'?'立即购买'+(amount?' ¥'+amount:''):'微信支付'):'充值暂未开放'}}</text></view></button
       ><text wx:if="{{!allowed}}" class="biz-note"
         >{{info.pricing.message||'支付服务或当前设备尚未开放充值。'}}</text
       ></view

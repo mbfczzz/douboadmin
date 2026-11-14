@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -37,4 +38,22 @@ func (a *Server) uiArtFile(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "image/jpeg")
 	http.ServeFile(w, r, file)
+}
+
+// uiArtURLs lists the signed HTTPS address of every synced picture by name,
+// for /config. Phones load <image> only from HTTPS, so they cannot use the
+// HTTP API path above with its redirect; pictures not yet on OSS are left out
+// and the client keeps its flat fallback.
+func (a *Server) uiArtURLs(ctx context.Context) map[string]string {
+	urls := map[string]string{}
+	if a.Media == nil || a.Media.UIArt == nil {
+		return urls
+	}
+	for path, url := range a.Media.UIArt.URLs(ctx) {
+		name := strings.TrimSuffix(strings.TrimPrefix(path, "/media/ui-art/"), ".jpg")
+		if uiArtName.MatchString(name) {
+			urls[name] = url
+		}
+	}
+	return urls
 }

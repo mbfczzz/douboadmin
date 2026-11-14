@@ -99,31 +99,6 @@
   font-size: 11px;
   color: var(--ui-muted);
 }
-button.virtual-product {
-  position: relative;
-  overflow: hidden;
-}
-button.virtual-product > text.product-badge {
-  width: auto;
-}
-.product-badge {
-  position: absolute;
-  top: 0;
-  left: 0;
-  padding: 2px 8px;
-  border-radius: 12px 0 10px 0;
-  font-size: 11px;
-  font-weight: 600;
-  line-height: 18px;
-  color: var(--ui-on-brand);
-  background: var(--ui-text);
-}
-.product-rate {
-  display: block;
-  font-size: 11px;
-  line-height: 16px;
-  color: var(--ui-brand);
-}
 .ledger-day {
   display: block;
   margin: 14px 0 2px;
@@ -171,15 +146,6 @@ button.virtual-product > text.product-badge {
   -webkit-mask-image: linear-gradient(to right, transparent, #000 60%);
   mask-image: linear-gradient(to right, transparent, #000 60%);
   pointer-events: none;
-}
-/* Packages: one product photo, more stars for bigger packs. */
-.product-photo {
-  display: block;
-  width: 76px;
-  height: 76px;
-  margin: 2px auto 10px;
-  border-radius: 18px;
-  box-shadow: 0 6px 16px #00000066;
 }
 /* Custom amount: what the typed sum buys, as large as a package figure. */
 .custom-estimate {

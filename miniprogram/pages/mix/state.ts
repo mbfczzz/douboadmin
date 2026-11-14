@@ -1,5 +1,4 @@
 import type { Row, Asset } from "../../services/types";
-import { UI_ART } from "../../utils/ui-art";
 export interface MixConfig {
   enabled: boolean;
   message?: string;
@@ -7,9 +6,9 @@ export interface MixConfig {
 // Choices shown as tiles; values are what a mix job would send.
 const choices = {
   styles: [
-    { value: "clean", label: "自然剪辑", icon: "film", image: UI_ART.mixNatural },
-    { value: "rhythm", label: "快节奏", icon: "chart-bar", image: UI_ART.mixFast },
-    { value: "cinematic", label: "电影色调", icon: "movie-clapper", image: UI_ART.mixCinema },
+    { value: "clean", label: "自然剪辑", icon: "film", image: "" },
+    { value: "rhythm", label: "快节奏", icon: "chart-bar", image: "" },
+    { value: "cinematic", label: "电影色调", icon: "movie-clapper", image: "" },
   ],
   ratios: [
     { value: "9:16", shape: "portrait" },

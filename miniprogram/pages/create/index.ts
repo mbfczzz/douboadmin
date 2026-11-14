@@ -1,3 +1,4 @@
+import { showArt } from "../../utils/ui-art";
 import { loadConfig, peekConfig } from "../../utils/config-cache";
 import { request, tab, openPage, openTab, sessionToken } from "../../utils/api";
 import type { Config, Row, Asset, Input } from "../../services/types";
@@ -63,6 +64,8 @@ Page({
       void this.restoreAssets(draft.assets || []);
     }
     void this.loadModels();
+    // After loadModels so it shares that /config request.
+    showArt(this, (art) => ({ sourceArt: { image: art.srcImage, video: art.srcVideo, audio: art.srcAudio } }));
   },
   onUnload() {
     this.destroyed = true;

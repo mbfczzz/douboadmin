@@ -1,45 +1,72 @@
 import { media } from "../services/media";
+import { loadConfig, peekConfig } from "./config-cache";
 
 // Decorative photographs generated with Codex. Originals live in
-// media/ui-art (see media/ui-art/README.md for what each one is for).
+// media/ui-art (see media/ui-art/README.md for what each one is for); the
+// deployment syncs them to private Aliyun OSS.
 //
-// Where they load from:
-// - ART_BASE empty: /api/ui-art/<name> redirects to private OSS after the
-//   deployment sync, with a local fallback when OSS is not configured.
-// - ART_BASE is only needed for a separately managed public HTTPS CDN.
-//   Allowlist the API and destination OSS/CDN domains in WeChat settings.
-//
-// Every spot keeps its flat colour or icon underneath, so a picture that
-// fails to load leaves the plain design rather than a hole. Bump ART_VERSION
-// after replacing a picture so caches fetch the new one.
-const ART_BASE = "";
+// Phones only load <image> from HTTPS, so pages use the signed OSS address
+// that /config returns (`uiArt`, name -> URL). Signatures live 24 h, so a
+// stored config older than 12 h is not trusted for first paint. Without a
+// signed address the API path is used, which only the developer tools (and
+// a local server) can load. Every spot keeps its flat colour or icon
+// underneath, so a missing picture leaves the plain design, not a hole.
+// Bump ART_VERSION after replacing a picture (only matters for the API path;
+// OSS keys change with the content).
 const ART_VERSION = 4;
-const art = (name: string) =>
-  ART_BASE
-    ? `${ART_BASE}/${name}.jpg?v=${ART_VERSION}`
-    : media(`/api/ui-art/${name}?v=${ART_VERSION}`);
-
-export const UI_ART = {
-  mineBackdrop: art("mine-bg"), // 我的: backdrop before the user has a work
-  agentScript: art("agent-script"), // Agent starters
-  agentPrompt: art("agent-prompt"),
-  agentCoffee: art("agent-coffee"),
-  uploadExample: art("upload-example"), // 模板详情: how to shoot a product
-  srcImage: art("src-image"), // upload sources: 图片 / 相册
-  srcVideo: art("src-video"),
-  srcAudio: art("src-audio"),
-  srcCamera: art("src-camera"), // 拍照
-  srcChat: art("src-chat"), // 聊天文件
-  mixNatural: art("mix-natural"), // 混剪 styles
-  mixFast: art("mix-fast"),
-  mixCinema: art("mix-cinema"),
-  loginBackdrop: art("login-bg"), // 登录 / 授权开通
-  walletBackdrop: art("wallet-bg"), // 我的积分 balance card
+const SIGNED_MS = 12 * 60 * 60 * 1000;
+const NAMES = {
+  mineBackdrop: "mine-bg", // 我的: backdrop before the user has a work
+  agentScript: "agent-script", // Agent starters
+  agentPrompt: "agent-prompt",
+  agentCoffee: "agent-coffee",
+  uploadExample: "upload-example", // 模板详情: how to shoot a product
+  srcImage: "src-image", // upload sources: 图片 / 相册
+  srcVideo: "src-video",
+  srcAudio: "src-audio",
+  srcCamera: "src-camera", // 拍照
+  srcChat: "src-chat", // 聊天文件
+  mixNatural: "mix-natural", // 混剪 styles
+  mixFast: "mix-fast",
+  mixCinema: "mix-cinema",
+  loginBackdrop: "login-bg", // 登录 / 授权开通
+  walletBackdrop: "wallet-bg", // 我的积分 balance card
 };
+export type Art = Record<keyof typeof NAMES, string>;
+
+// Every /config signs afresh, so a new address would reload (and flash) a
+// picture already on screen. Keep the first signed address for 12 h.
+const kept: Record<string, { url: string; at: number }> = {};
+function signedUrl(name: string, url: string | undefined) {
+  const old = kept[name];
+  if (old && Date.now() - old.at < SIGNED_MS) return old.url;
+  if (url) kept[name] = { url, at: Date.now() };
+  return url;
+}
+
+function resolve(signed: Record<string, string> | undefined): Art {
+  const art = {} as Art;
+  for (const key of Object.keys(NAMES) as (keyof Art)[]) {
+    const name = NAMES[key];
+    art[key] = signedUrl(name, signed?.[name]) || media(`/api/ui-art/${name}?v=${ART_VERSION}`);
+  }
+  return art;
+}
+
+// Fill a page's picture fields: at once from a recent config, then from the
+// current one. Pages start with "" so nothing unloadable is requested.
+export function showArt(page: { setData(data: Record<string, unknown>): void }, pick: (art: Art) => Record<string, unknown>) {
+  const seen = peekConfig(SIGNED_MS)?.uiArt;
+  if (seen) page.setData(pick(resolve(seen)));
+  loadConfig().then(
+    (config) => page.setData(pick(resolve(config.uiArt))),
+    () => !seen && page.setData(pick(resolve(undefined))),
+  );
+}
 
 // Small art bundled in the package so it paints with the page instead of
 // popping in (assets/photos and assets/glyphs, generated with Codex). Thumbnails are photos in
-// the same style as UI_ART; the common entries are one bold white glyph set
+// the same style as the ui-art photos; the common entries are one bold white glyph set
 // (PNG with alpha) drawn on the theme tile, matching the tab bar.
 const photo = (name: string) => `/assets/photos/${name}.jpg`;
 const glyph = (name: string) => `/assets/glyphs/${name}.png`;

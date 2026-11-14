@@ -37,9 +37,9 @@ Codex 生成的实拍风格深色图片，用于小程序界面装饰。所有�
 
 1. 在后台配置 OSS，并正常发布新版本。配置优先读取数据库中已加密保存的值；没有数据库记录时沿用环境变量。配置密钥文件与 API/Worker 共用。
 2. 15 张 `.jpg` 原样上传到 `system/ui-art/<内容 SHA-256>/<文件名>.jpg`。相同内容重复部署只检查对象是否存在，不重复上传；更换图片会产生新对象，不覆盖旧版本。
-3. **保持桶和对象私有**。小程序继续请求 `GET /api/ui-art/{name}`，API 对已同步的图片返回 OSS HTTPS 签名重定向，不把桶名或过期签名写死进小程序。重定向响应使用 `no-store`，避免缓存的签名过期。
+3. **保持桶和对象私有**。`/config` 返回 `uiArt`（图片名 → OSS HTTPS 签名地址，有效 24 小时），小程序页面在显示时用它填图（`utils/ui-art.ts` 的 `showArt`，只信任 12 小时内的缓存）。真机 `<image>` 只能加载 HTTPS 地址，测试环境的 `http://IP:端口/api/ui-art/{name}` 跳转在真机上不显示，只作为开发者工具与未配置 OSS 时的兜底。`GET /api/ui-art/{name}` 仍保留：已同步时返回 `no-store` 的签名重定向，否则返回本地文件。
 4. API 启动后也会在后台确认 OSS 对象并在失败时重试；未完成同步或签名失败时使用本地图片。未配置 OSS 时部署跳过同步，保留本地读取；部分配置缺失、JPEG 不合法或 OSS 上传失败会让部署失败并触发已有回滚流程。
-5. 微信公众平台需允许 API 和实际 OSS/CDN 域名；涉及下载保存的资源还需加入 `downloadFile` 合法域名。客户端默认 `ART_BASE` 保持空，替换图片时仍递增 `ART_VERSION` 以刷新客户端缓存。
+5. 微信公众平台需允许 API 和实际 OSS/CDN 域名；涉及下载保存的资源还需加入 `downloadFile` 合法域名。替换图片后 OSS 对象键随内容变化，签名地址自动更新；`ART_VERSION` 只影响兜底的 API 地址。
 
 部署日志：`journalctl -u doubo-sync-ui-art --no-pager`。需要单独重试时运行 `systemctl start doubo-sync-ui-art`。手动运行二进制的命令是 `doubo-api sync-ui-art`，必须先加载相同的环境和配置密钥。
 

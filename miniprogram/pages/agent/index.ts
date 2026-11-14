@@ -1,4 +1,4 @@
-import { UI_ART } from "../../utils/ui-art";
+import { showArt } from "../../utils/ui-art";
 import { readView, writeView } from "../../utils/view-cache";
 import { loadConfig } from "../../utils/config-cache";
 import {
@@ -30,9 +30,9 @@ Page({
     followUps: ["再精简到 10 秒", "加一个结尾镜头", "改成口播文案"],
     // Starter cards: the prompt fills the composer for editing before send.
     quick: [
-      { prompt: "帮我写一段产品短视频脚本", hint: "卖点 · 分镜 · 口播", icon: "video-camera", tone: "video", image: UI_ART.agentScript },
-      { prompt: "为我的照片写创意提示词", hint: "把照片变成画面", icon: "image", tone: "image", image: UI_ART.agentPrompt },
-      { prompt: "策划一个咖啡品牌宣传片", hint: "门店 · 品牌 · 节日", icon: "lightbulb", tone: "audio", image: UI_ART.agentCoffee },
+      { prompt: "帮我写一段产品短视频脚本", hint: "卖点 · 分镜 · 口播", icon: "video-camera", tone: "video", image: "" },
+      { prompt: "为我的照片写创意提示词", hint: "把照片变成画面", icon: "image", tone: "image", image: "" },
+      { prompt: "策划一个咖啡品牌宣传片", hint: "门店 · 品牌 · 节日", icon: "lightbulb", tone: "audio", image: "" },
     ],
   },
   timer: 0,
@@ -45,6 +45,7 @@ Page({
   historyToken: "",
   onShow() {
     this.onResize();
+    showArt(this, (art) => ({ "quick[0].image": art.agentScript, "quick[1].image": art.agentPrompt, "quick[2].image": art.agentCoffee }));
     tab(this, 3);
     void this.load();
     this.poll();

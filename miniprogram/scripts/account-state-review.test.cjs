@@ -27,30 +27,28 @@ test("late login refusal from a cancelled generation cannot overwrite a new sess
   assert.equal(h.api.sessionToken(), "new-session");
 });
 
-test("old wallet quote and artwork responses do not redraw a replaced account or hidden page", async () => {
-  for (const kind of ["quote", "art"]) {
-    for (const change of ["account", "hide", "unchanged"]) {
-      const h = harness(); await h.api.signIn();
-      const page = h.page("wallet");
-      page.setData({ info: { wallet: { userId: "wx-user", availableUnits: 10000, heldUnits: 0 } }, uses: [], products: [] });
-      let pending;
-      h.wx.request = o => {
-        if (o.url.endsWith("/config")) o.success({ statusCode: 200, data: { models: [{ id: "m", kind: "image" }] } });
-        else pending = o;
-      };
-      const insight = h.service("../pages/wallet/insights");
-      const call = kind === "quote" ? insight.loadInsights(page) : insight.loadArt(page);
-      await new Promise(setImmediate);
-      assert.ok(pending);
-      const updates = [];
-      page.setData = value => updates.push(value);
-      if (change === "account") h.storage.set("douboSession", { token: "next-session", userId: "next-user", expiresAt: Date.now() + 60000 });
-      else if (change === "hide") page.revision++;
-      pending.success({ statusCode: 200, data: kind === "quote" ? { billingEnabled: true, units: 100 } : { items: [{ id: "t", data: { cover: "https://example.test/old.jpg" } }], total: 1 } });
-      await call;
-      if (change === "unchanged") assert.ok(updates.length > 0, "valid current responses must still render");
-      else assert.deepEqual(updates, []);
-    }
+test("old wallet quote responses do not redraw a replaced account or hidden page", async () => {
+  for (const change of ["account", "hide", "unchanged"]) {
+    const h = harness(); await h.api.signIn();
+    const page = h.page("wallet");
+    page.setData({ info: { wallet: { userId: "wx-user", availableUnits: 10000, heldUnits: 0 } }, uses: [], products: [] });
+    let pending;
+    h.wx.request = o => {
+      if (o.url.endsWith("/config")) o.success({ statusCode: 200, data: { models: [{ id: "m", kind: "image" }] } });
+      else pending = o;
+    };
+    const insight = h.service("../pages/wallet/insights");
+    const call = insight.loadInsights(page);
+    await new Promise(setImmediate);
+    assert.ok(pending);
+    const updates = [];
+    page.setData = value => updates.push(value);
+    if (change === "account") h.storage.set("douboSession", { token: "next-session", userId: "next-user", expiresAt: Date.now() + 60000 });
+    else if (change === "hide") page.revision++;
+    pending.success({ statusCode: 200, data: { billingEnabled: true, units: 100 } });
+    await call;
+    if (change === "unchanged") assert.ok(updates.length > 0, "valid current responses must still render");
+    else assert.deepEqual(updates, []);
   }
 });
 

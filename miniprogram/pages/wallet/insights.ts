@@ -8,8 +8,6 @@ import type { Config, Model, Row } from "../../services/types";
 import type { Ledger } from "../../services/wallet-ledger";
 import { ledgerView } from "../../services/wallet-ledger";
 import { withDays } from "../../utils/day";
-import { templateCovers } from "../../services/covers";
-import { tierByRank } from "../../services/points-art";
 
 // Everything here is derived from real data: product prices, live quotes
 // for each kind's default model, and ledger rows. Nothing is invented.
@@ -17,7 +15,6 @@ import { tierByRank } from "../../services/points-art";
 const per100 = (fen: number, units: number) => money(Math.round((fen * 10000) / units)); // ¥ per 100 points
 
 export function productCards(products: VirtualProduct[]) {
-  const sizes = products.map((p) => p.pointsUnits).sort((a, b) => a - b);
   const rate = (p: VirtualProduct) => p.pointsUnits / p.amountFen;
   const valid = products.filter((p) => p.amountFen > 0 && p.pointsUnits > 0);
   const worst = Math.min(...valid.map(rate)),
@@ -34,7 +31,6 @@ export function productCards(products: VirtualProduct[]) {
       per100: r ? per100(p.amountFen, p.pointsUnits) : "",
       bonus: bonus >= 1 ? `多得 ${bonus}%` : "",
       best: valid.length > 1 && r === best && best > worst,
-      photo: tierByRank(sizes.indexOf(p.pointsUnits), products.length),
     };
   });
 }
@@ -96,22 +92,4 @@ export async function loadInsights(page: InsightPage) {
   } catch {
     // keep the card hidden
   }
-}
-
-type ArtPage = {
-  destroyed?: boolean;
-  revision?: number;
-  data: { uses: { kind: string }[] };
-  setData(value: Record<string, unknown>): void;
-};
-
-// Each "能做什么" tile shows a real template cover of its kind. Packages use
-// product photos (services/points-art) and need no covers.
-export async function loadArt(page: ArtPage) {
-  const owner = sessionToken(), revision = page.revision;
-  const covers = (await templateCovers()).map((c) => c.cover);
-  if (page.destroyed || !covers.length || sessionToken() !== owner || page.revision !== revision) return;
-  page.setData({
-    useArt: { image: covers[1 % covers.length], video: covers[2 % covers.length] },
-  });
 }

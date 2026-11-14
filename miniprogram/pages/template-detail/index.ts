@@ -1,4 +1,4 @@
-import { UI_ART } from "../../utils/ui-art";
+import { showArt } from "../../utils/ui-art";
 import { recallRow, freshUrl } from "../../utils/view-cache";
 import {
   request,
@@ -32,12 +32,12 @@ Page({
     favoriteVersion: 0,
     favoriteBusy: false,
     sourceOpen: false,
-    uploadExample: UI_ART.uploadExample, // how a product photo should look
+    uploadExample: "", // how a product photo should look (showArt)
     autoplay: false, // follows the 自动播放 preference, as on the templates page
     sources: [
-      { label: "相册", icon: "image", hint: "已有的商品照", tone: "image", image: UI_ART.srcImage },
-      { label: "拍照", icon: "camera", hint: "现在就拍一张", tone: "video", image: UI_ART.srcCamera },
-      { label: "聊天文件", icon: "folder-open", hint: "微信里收到的", tone: "audio", image: UI_ART.srcChat },
+      { label: "相册", icon: "image", hint: "已有的商品照", tone: "image", image: "" },
+      { label: "拍照", icon: "camera", hint: "现在就拍一张", tone: "video", image: "" },
+      { label: "聊天文件", icon: "folder-open", hint: "微信里收到的", tone: "audio", image: "" },
     ],
   },
   id: "",
@@ -55,6 +55,7 @@ Page({
   },
   onLoad(o: Record<string, string>) {
     this.id = o.id;
+    showArt(this, (art) => ({ uploadExample: art.uploadExample, "sources[0].image": art.srcImage, "sources[1].image": art.srcCamera, "sources[2].image": art.srcChat }));
     // Opened from a list that already holds this template: show it now.
     const known = recallRow<Row<Template>>(o.id);
     if (known?.data.kind === "video")

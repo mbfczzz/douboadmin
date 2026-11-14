@@ -12,6 +12,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"doubo/server/internal/media"
@@ -108,10 +109,17 @@ func TestUIArtRedirectsOnlyConfirmedObjectsAndDoesNotCacheSignedURLs(t *testing.
 	if objects.puts != 1 {
 		t.Fatal("image requests must not upload")
 	}
+	// /config hands phones the HTTPS address directly (no HTTP redirect).
+	if urls := a.uiArtURLs(t.Context()); len(urls) != 1 || !strings.HasPrefix(urls["mine-bg"], "https://bucket.test/") {
+		t.Fatal("config art map", urls)
+	}
 	if w = get("missing"); w.Code != 404 || w.Header().Get("Location") != "" {
 		t.Fatal("missing art was signed")
 	}
 	objects.fail = true
+	if urls := a.uiArtURLs(t.Context()); len(urls) != 0 {
+		t.Fatal("failed signatures must be left out", urls)
+	}
 	w = get("mine-bg")
 	if w.Code != 200 || !bytes.Equal(w.Body.Bytes(), data.Bytes()) || w.Header().Get("Cache-Control") != "no-store" {
 		t.Fatal("signing failure must retain local image")

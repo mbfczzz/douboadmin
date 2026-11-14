@@ -1,0 +1,119 @@
+/* Points packages: compact cards, left-aligned. An offer pill on top (the
+   row keeps its height without one, so figures line up); ✦ and the figure
+   lead, then the price and what 100 points cost. The chosen card is
+   outlined in the brand cyan. Two or four packages pair up; one is a row. */
+.virtual-products {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+.virtual-products.pair {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.virtual-products.single {
+  grid-template-columns: 1fr;
+}
+button.virtual-product {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  width: 100%;
+  margin: 0;
+  padding: 12px;
+  border-radius: 16px;
+  line-height: 1.3;
+  text-align: left;
+  color: var(--ui-text);
+  background: var(--ui-surface);
+  box-shadow: inset 0 0 0 1px #ffffff10;
+}
+button.virtual-product::after {
+  border: none;
+}
+button.virtual-product.selected {
+  background: #00c8dc14;
+  box-shadow: inset 0 0 0 1.5px var(--ui-brand);
+}
+button.virtual-product[disabled] {
+  color: var(--ui-text);
+  background: var(--ui-surface);
+  opacity: 0.55;
+}
+.product-top {
+  display: flex;
+  min-height: 18px;
+}
+.product-badge {
+  padding: 0 6px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 18px;
+  white-space: nowrap;
+  color: var(--ui-on-brand);
+  background: var(--ui-brand);
+}
+.product-badge.soft {
+  color: var(--ui-brand);
+  background: transparent;
+  box-shadow: inset 0 0 0 1px #00c8dc80;
+}
+.product-figure {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.product-points {
+  font-size: 19px;
+  font-weight: 700;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.product-price {
+  display: block;
+  margin-top: 4px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.product-rate {
+  display: block;
+  margin-top: 2px;
+  font-size: 11px;
+  color: var(--ui-muted);
+}
+.pair .product-points {
+  font-size: 22px;
+}
+.single button.virtual-product {
+  padding: 14px 16px;
+}
+.single .product-points {
+  font-size: 24px;
+}
+.single .product-top {
+  display: none;
+}
+.single .product-body {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  column-gap: 12px;
+}
+.single .product-figure {
+  grid-row: 1 / 3;
+}
+.single .product-price,
+.single .product-rate {
+  grid-column: 2;
+  margin-top: 0;
+  text-align: right;
+}
+.single .product-price {
+  font-size: 16px;
+}
+@media (max-width: 350px) {
+  .virtual-products {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

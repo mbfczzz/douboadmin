@@ -146,6 +146,7 @@ export interface Model {
 export interface Config {
   wechatPhoneLogin?: boolean;
   brandIcon?: string;
+  uiArt?: Record<string, string>; // signed HTTPS addresses of media/ui-art pictures
   activationRequired?: boolean;
   completionTemplateId?: string;
   relayConfigured: boolean;

@@ -38,12 +38,11 @@ import {
   registerRequest,
 } from "./register";
 import { codeState, enterCode, clearCode, pasteCode } from "./code-entry";
-import { UI_ART } from "../../utils/ui-art";
+import { showArt } from "../../utils/ui-art";
 
 Page({
   data: {
     brandIcon: "",
-    backdrop: UI_ART.loginBackdrop,
     invite: "",
     logged: false,
     loading: true,
@@ -60,6 +59,7 @@ Page({
   owner: "",
   onLoad(options: Record<string, string>) {
     captureInvite(options);
+    showArt(this, (art) => ({ backdrop: art.loginBackdrop }));
   },
   revision: 0,
   destroyed: false,

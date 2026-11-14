@@ -1,13 +1,13 @@
 import type { WalletInfo } from "../../services/business";
 import type { PurchaseMode } from "../../services/virtual-amount";
-import { UI_ART } from "../../utils/ui-art";
 
 export const walletData = {
   productId: "",
   products: [] as ReturnType<typeof import("./insights").productCards>,
   price100: "",
-  backdrop: UI_ART.walletBackdrop, // glass stars fading in from the right
-  useArt: { image: "", video: "" } as Record<string, string>,
+  backdrop: "", // glass stars fading in from the right (showArt)
+  // "能做什么" covers: bundled photos of a photo print and a cinema camera.
+  useArt: { image: "/assets/photos/use-image.jpg", video: "/assets/photos/use-video.jpg" } as Record<string, string>,
   uses: [] as Array<{ kind: string; title: string; cost: string; units: number; count: number; unit: string; model: string }>,
   purchaseMode: "package" as PurchaseMode,
   customAmount: "",
