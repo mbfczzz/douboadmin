@@ -102,7 +102,7 @@ func (a *Server) createVirtualOrder(w http.ResponseWriter, r *http.Request) {
 		fail(w, 409, "套餐积分已更新，请刷新后确认")
 		return
 	}
-	if platform == "ios" && (!cfg.IOSAllowed || cfg.Env != 0 || p.AmountFen < 100) {
+	if platform == "ios" && (!cfg.IOSAllowed || cfg.Env != 0 || p.AmountFen < virtualpay.MinIOSAmountFen) {
 		fail(w, 403, "当前商品暂不支持此设备充值")
 		return
 	}
@@ -158,12 +158,12 @@ func (a *Server) payVirtualOrder(w http.ResponseWriter, r *http.Request, row cor
 		fail(w, 503, "微信登录与虚拟支付应用不一致")
 		return
 	}
-	if strings.EqualFold(platform, "ios") && (!cfg.IOSAllowed || o.Virtual.Env != 0 || o.AmountFen < 100) {
+	if strings.EqualFold(platform, "ios") && (!cfg.IOSAllowed || o.Virtual.Env != 0 || o.AmountFen < virtualpay.MinIOSAmountFen) {
 		fail(w, 403, "当前设备暂未开放充值")
 		return
 	}
 	p, ok := cfg.Product(o.Virtual.ProductID)
-	if ok && strings.EqualFold(platform, "ios") && p.AmountFen < 100 {
+	if ok && strings.EqualFold(platform, "ios") && p.AmountFen < virtualpay.MinIOSAmountFen {
 		fail(w, 403, "当前设备暂不支持此充值档位")
 		return
 	}

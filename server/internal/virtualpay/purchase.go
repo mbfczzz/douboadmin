@@ -7,6 +7,9 @@ import (
 
 const MaxAmountFen = core.MaxOrderAmountFen
 
+// Application-level iOS floor: 0.10 CNY, independent of provider acceptance.
+const MinIOSAmountFen int64 = 10
+
 // Only explicit new-format drafts can be skipped before signing. Legacy orders
 // and authenticated payment notifications must retain their reconciliation path.
 func UnissuedPurchase(o core.Order) bool {

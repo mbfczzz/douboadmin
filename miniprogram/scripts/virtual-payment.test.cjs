@@ -2,6 +2,21 @@ const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const { fixture } = require("./virtual-payment-fixture.cjs");
 
+test("iOS can request payment for a 0.10 yuan package", async () => {
+  const f = await fixture();
+  f.info.iosPayment = true;
+  f.info.virtualProducts[0].amountFen = f.row.data.amountFen = 10;
+  f.h.wx.getDeviceInfo = () => ({ platform: "ios", system: "iOS 16.0" });
+  f.h.wx.getAppBaseInfo = () => ({ version: "8.0.68" });
+  await f.page.load();
+  await f.page.pay();
+  const created = f.calls.find(c => c.path === "/orders");
+  assert.equal(created.data.amountFen, 10);
+  assert.equal(created.data.platform, "ios");
+  assert.equal(f.native.length, 1);
+  assert.equal(f.native[0].signData, f.signed);
+});
+
 test("a 0.1 yuan SKU uses its own credit despite retired recharge limits and switches", async () => {
   const f = await fixture();
   f.info.settings = { rechargeEnabled: false, pointsPerYuan: 0, minRechargeFen: 100000, maxRechargeFen: 1 };

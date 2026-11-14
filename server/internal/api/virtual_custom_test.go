@@ -101,8 +101,8 @@ func TestVirtualCustomCanUseUnitBelowRechargeMinimum(t *testing.T) {
 	input["platform"] = "ios"
 	a.Virtual.Client.Config.Env, a.Virtual.Client.Config.IOSAllowed = 0, true
 	a.Virtual.Client.Config.AppKey = "live-key"
-	if w = call(a, "POST", "/api/orders", user, "ios-small-unit-order", input); w.Code != 403 {
-		t.Fatal("unsupported iOS unit price was allowed", w.Code)
+	if w = call(a, "POST", "/api/orders", user, "ios-small-unit-order", input); w.Code != 201 {
+		t.Fatal("0.10 yuan iOS unit price was rejected", w.Code, w.Body.String())
 	}
 }
 

@@ -15,7 +15,7 @@ export function customError(info: WalletInfo, fen: number, platform: string) {
     return `请输入 ${money(c.minAmountFen)}–${money(c.maxAmountFen)} 元`;
   if (fen % c.unitAmountFen !== 0)
     return `金额须为 ${money(c.unitAmountFen)} 元的整数倍`;
-  if (platform === "ios" && (c.unitAmountFen < 100 || fen < 100))
+  if (platform === "ios" && (c.unitAmountFen < 10 || fen < 10))
     return "当前设备不支持此充值档位，请选择其他积分套餐";
   const units = (fen / c.unitAmountFen) * c.unitPointsUnits;
   if (!Number.isSafeInteger(units) || units < 1)

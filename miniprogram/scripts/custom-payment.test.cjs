@@ -106,8 +106,9 @@ test("removed custom configuration keeps the entered amount and requires an expl
   assert.equal(f.page.data.estimated, "10");
 });
 
-test("unsupported iOS unit prices are rejected even when total order money is above one yuan", async () => {
+test("iOS unit prices below 0.10 yuan are rejected even when the total exceeds the floor", async () => {
   const f = await customFixture();
+  f.info.virtualCustom.unitAmountFen = 5;
   f.info.iosPayment = true;
   f.h.wx.getDeviceInfo = () => ({ platform: "ios", system: "iOS 16.0" });
   f.h.wx.getAppBaseInfo = () => ({ version: "8.0.68" });
@@ -116,6 +117,24 @@ test("unsupported iOS unit prices are rejected even when total order money is ab
   await f.page.pay();
   assert.match(f.messages.at(-1), /当前设备/);
   assert.equal(f.calls.filter((c) => c.path === "/orders").length, 0);
+});
+
+test("iOS accepts a 0.10 yuan unit and total for custom checkout", async () => {
+  const f = await customFixture();
+  f.row.data.amountFen = 10;
+  f.row.data.pointsUnits = 1000;
+  f.info.virtualCustom.minAmountFen = 10;
+  f.info.iosPayment = true;
+  f.h.wx.getDeviceInfo = () => ({ platform: "ios", system: "iOS 16.0" });
+  f.h.wx.getAppBaseInfo = () => ({ version: "8.0.68" });
+  await f.page.load();
+  input(f.page, "0.10");
+  assert.equal(f.page.data.checkoutError, "");
+  await f.page.pay();
+  const order = f.calls.find((c) => c.path === "/orders");
+  assert.equal(order.data.amountFen, 10);
+  assert.equal(order.data.platform, "ios");
+  assert.equal(f.native.length, 1);
 });
 
 test("a price-version conflict refreshes the quote without automatically charging again", async () => {
