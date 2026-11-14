@@ -4,6 +4,7 @@
   "enablePullDownRefresh": true,
   "usingComponents": {
     "t-button": "tdesign-miniprogram/button/button",
-    "showcase": "/components/showcase/index"
+    "showcase": "/components/showcase/index",
+    "page-backdrop": "/components/page-backdrop/index"
   }
 }

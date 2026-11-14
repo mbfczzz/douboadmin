@@ -1,0 +1,1 @@
+<image wx:if="{{src}}" class="backdrop {{ready?'ready':''}}" src="{{src}}" mode="aspectFill" bindload="loaded" aria-hidden="true" />

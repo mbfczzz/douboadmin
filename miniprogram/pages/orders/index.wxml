@@ -1,5 +1,6 @@
 <nav-bar title="充值订单" back />
-<view class="subpage orders-page">
+<view class="subpage has-backdrop orders-page">
+  <page-backdrop name="bgOrders" />
   <view wx:if="{{needsLogin}}" class="biz-empty"><image class="empty-photo" src="/assets/photos/empty-login.jpg" mode="aspectFill" aria-hidden="true" /><text>登录后查看充值订单</text><text class="empty-link" bindtap="signIn">去登录 ›</text></view>
   <view wx:if="{{loadError}}" class="biz-error" bindtap="load">{{loadError}} · 重试</view>
   <view wx:if="{{loading&&!needsLogin&&!rows.length}}" class="skel-list" aria-label="正在加载充值订单"><view wx:for="{{[1,2]}}" wx:key="*this" class="skeleton skel-card" /></view>

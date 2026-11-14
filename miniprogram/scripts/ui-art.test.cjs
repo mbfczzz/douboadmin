@@ -73,3 +73,19 @@ test("generated icon art is bundled and every tab glyph has both states", () => 
   assert.match(read("custom-tab-bar/index.wxml"), /wx:if="\{\{item\.art\}\}"[^]*<t-icon wx:else/);
   assert.match(read("pages/mine/index.wxml"), /wx:if="\{\{item\.art\}\}" class="menu-icon"[^]*<t-icon wx:else/);
 });
+
+test("我的 subpages place a named backdrop inside a stacking layer", () => {
+  const keys = new Set([...source.matchAll(/^  (\w+): "[a-z0-9-]+",/gm)].map((m) => m[1]));
+  let pages = 0;
+  for (const dir of fs.readdirSync(path.join(root, "pages"))) {
+    const wxml = read(`pages/${dir}/index.wxml`);
+    const use = wxml.match(/<page-backdrop name="([^"]+)"/);
+    if (!use) continue;
+    pages++;
+    assert.match(wxml, /class="subpage has-backdrop/, dir);
+    assert.ok(JSON.parse(read(`pages/${dir}/index.json`)).usingComponents["page-backdrop"], dir);
+    if (!use[1].includes("{{")) assert.ok(keys.has(use[1]), `${dir}: ${use[1]}`);
+  }
+  assert.ok(pages >= 8);
+  for (const key of ["bgFavorites", "bgNotice", "bgHelp"]) assert.match(read("pages/library/index.ts"), new RegExp(key));
+});

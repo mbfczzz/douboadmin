@@ -53,10 +53,10 @@ test("authored UI has no stale light-theme surfaces or indigo controls", () => {
   for (const file of ["app.ts",...walk("pages"),...walk("components"),...walk("styles"),...walk("custom-tab-bar")]) {
     let source = read(file);
     if (file.replaceAll("\\", "/") === "pages/provider/poster.wxss") {
-      // The scanner's white paper intentionally uses dark, high-contrast text.
-      assert.match(source, /\.invite-paper\s*\{[^}]*background: #fff;/);
-      assert.ok(contrast("#667085", "#ffffff") >= 4.5);
-      source = source.replace(/\.invite-(?:caption|number)\s*\{[^}]*\}/g, "");
+      // The on-page card follows the dark theme; only the code keeps a
+      // white disc behind it so it scans reliably.
+      assert.match(source, /\.invite-paper\s*\{[^}]*background: var\(--ui-surface\);/);
+      assert.match(source, /\.qr-disc\s*\{[^}]*background: #fff;/);
     }
     assert.doesNotMatch(source, /#(?:f4f6f8|f1f4f8|d7dee6|202632|667085|4255c7|3445aa|eef0ff|f2f4ff|dde2fb|e8f1fc|fff0f2|eaf7ef|fff5d9|e9edf2)\b/i, file);
   }

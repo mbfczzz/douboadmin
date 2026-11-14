@@ -3,6 +3,7 @@
   "backgroundColor": "#0f0f11",
   "disableSwipeBack": true,
   "usingComponents": {
-    "t-loading": "tdesign-miniprogram/loading/loading"
+    "t-loading": "tdesign-miniprogram/loading/loading",
+    "page-backdrop": "/components/page-backdrop/index"
   }
 }

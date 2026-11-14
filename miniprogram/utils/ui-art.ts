@@ -31,6 +31,16 @@ const NAMES = {
   mixCinema: "mix-cinema",
   loginBackdrop: "login-bg", // 登录 / 授权开通
   walletBackdrop: "wallet-bg", // 我的积分 balance card
+  // 我的 subpages (components/page-backdrop)
+  bgOrders: "bg-orders", // 充值订单
+  bgFavorites: "bg-favorites", // 我的收藏
+  bgTasks: "bg-tasks", // 生成记录 / 任务队列
+  bgNotice: "bg-notice", // 消息
+  bgHelp: "bg-help", // 帮助与反馈
+  bgSettings: "bg-settings", // 设置
+  bgProfile: "bg-profile", // 编辑资料
+  bgProvider: "bg-provider", // 服务商中心
+  bgWorks: "bg-works", // 我的作品
 };
 export type Art = Record<keyof typeof NAMES, string>;
 

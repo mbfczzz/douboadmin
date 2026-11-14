@@ -1,5 +1,6 @@
 <nav-bar title="任务队列" back />
-<view class="subpage queue-page">
+<view class="subpage has-backdrop queue-page">
+  <page-backdrop name="bgTasks" />
   <view wx:if="{{loading}}" class="skel-page" aria-label="正在加载任务">
     <view class="skel-row"><view class="skeleton" /><view class="skeleton" /><view class="skeleton" /></view>
     <view class="skeleton skel-card" /><view class="skeleton skel-card" />

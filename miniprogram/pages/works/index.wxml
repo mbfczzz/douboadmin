@@ -1,5 +1,6 @@
 <nav-bar title="我的作品" back />
-<view class="subpage works-page">
+<view class="subpage has-backdrop works-page">
+  <page-backdrop name="bgWorks" />
   <view wx:if="{{loading}}" class="skel-grid" aria-label="正在加载作品"><view class="skeleton" /><view class="skeleton" /><view class="skeleton" /><view class="skeleton" /></view>
   <view wx:elif="{{needsLogin}}" class="empty">
     <showcase />
@@ -14,7 +15,7 @@
       <view wx:for="{{filters}}" wx:key="key" class="work-filter {{filter===item.key?'active':''}}" data-value="{{item.key}}" bindtap="choose">{{item.text}}</view>
     </view>
     <view wx:if="{{loadError}}" class="error-box" bindtap="load">刷新失败，已保留作品 · 点击重试</view>
-    <view wx:if="{{!filtered.length}}" class="empty">
+    <view wx:if="{{!filtered.length}}" class="empty works-empty">
       <showcase />
       <text class="title">{{filter==='image'?'还没有图片作品':filter==='video'?'还没有视频作品':'还没有完成的作品'}}</text>
       <text class="desc">{{filter==='all'?'从一个想法开始第一次创作。':'可以换个分类看看。'}}</text>

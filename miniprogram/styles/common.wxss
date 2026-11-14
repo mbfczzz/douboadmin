@@ -23,6 +23,21 @@ image {
 .subpage {
   padding: 24px 20px calc(25px + env(safe-area-inset-bottom));
 }
+/* Opens a stacking layer so a backdrop photo (z-index -1) sits under the
+   content; dialogs and canvases live outside this container. */
+.has-backdrop {
+  position: relative;
+  z-index: 0;
+}
+/* There the backdrop photo is the empty state's picture: no second photo
+   on top of it, and the message settles just below its subject. */
+.has-backdrop .empty-photo {
+  display: none;
+}
+.has-backdrop .biz-empty,
+.has-backdrop .empty {
+  padding-top: 176px;
+}
 .muted {
   color: var(--ui-muted);
 }

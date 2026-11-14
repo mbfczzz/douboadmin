@@ -121,7 +121,10 @@ console.log(
 // photos, content icons (actions, rows, mix features, upload slots, Agent)
 // use the generated glyph set; system controls stay TDesign. Dead t-icon
 // styles removed: 738,465 B. Limit 720 -> 724 KiB.
-const budget = 724 * 1024;
+// 我的 subpages get a themed backdrop photo (components/page-backdrop,
+// pictures in media/ui-art via /config): 741,585 B, over the 724 KiB line.
+// Limit 724 -> 728 KiB for this reviewed increment.
+const budget = 728 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

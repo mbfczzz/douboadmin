@@ -2,5 +2,7 @@
   "backgroundColorContent": "#0f0f11ff",
   "backgroundColor": "#0f0f11",
   "enablePullDownRefresh": true,
-  "usingComponents": {}
+  "usingComponents": {
+    "page-backdrop": "/components/page-backdrop/index"
+  }
 }

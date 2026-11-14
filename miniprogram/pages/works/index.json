@@ -3,6 +3,7 @@
   "backgroundColor": "#0f0f11",
   "enablePullDownRefresh": true,
   "usingComponents": {
-    "showcase": "/components/showcase/index"
+    "showcase": "/components/showcase/index",
+    "page-backdrop": "/components/page-backdrop/index"
   }
 }

@@ -4,6 +4,7 @@
   "enablePullDownRefresh": true,
   "usingComponents": {
     "t-loading": "tdesign-miniprogram/loading/loading",
-    "showcase": "/components/showcase/index"
+    "showcase": "/components/showcase/index",
+    "page-backdrop": "/components/page-backdrop/index"
   }
 }

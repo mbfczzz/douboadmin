@@ -1,5 +1,5 @@
-<nav-bar title="设置" back /><view class="subpage"
-  ><view wx:if="{{needsLogin}}" class="biz-empty"
+<nav-bar title="设置" back /><view class="subpage has-backdrop"
+  ><page-backdrop name="bgSettings" /><view wx:if="{{needsLogin}}" class="biz-empty"
     ><image class="empty-photo" src="/assets/photos/empty-login.jpg" mode="aspectFill" aria-hidden="true" /><text>登录后设置个人偏好</text><text class="empty-link" bindtap="signIn">去登录 ›</text></view
   ><view wx:if="{{loadError}}" class="biz-error" bindtap="load"
     >{{loadError}} · 重试</view

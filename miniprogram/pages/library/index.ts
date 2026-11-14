@@ -53,7 +53,7 @@ Page({
       help: "帮助与反馈",
     };
     const mode = names[o.mode] ? o.mode : "help";
-    this.setData({ mode, title: names[mode] });
+    this.setData({ mode, title: names[mode], backdrop: mode === "favorites" ? "bgFavorites" : mode === "notifications" ? "bgNotice" : "bgHelp" });
   },
   onShow() {
     enterPage(this);

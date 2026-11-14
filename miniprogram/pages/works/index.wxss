@@ -88,3 +88,7 @@
 }
 
 @import "../../styles/job-pagination.wxss";
+/* The count and filter tabs already sit over the backdrop. */
+.works-page.has-backdrop .works-empty {
+  padding-top: 64px;
+}

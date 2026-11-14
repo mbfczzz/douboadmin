@@ -5,7 +5,8 @@
   bind:back="back"
   disabled="{{busy}}"
 />
-<view class="subpage profile-page">
+<view class="subpage has-backdrop profile-page">
+  <page-backdrop name="bgProfile" />
   <view wx:if="{{loading}}" class="loading"
     ><t-loading text="正在读取资料"
   /></view>

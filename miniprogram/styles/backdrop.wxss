@@ -1,10 +1,6 @@
 /* A photograph behind the top of a page that fades into the page colour.
-   The page container opens its own stacking layer so the photo sits under
-   every in-flow child without touching their styles. */
-.has-backdrop {
-  position: relative;
-  z-index: 0;
-}
+   The container opens its own stacking layer (.has-backdrop, common.wxss)
+   so the photo sits under every in-flow child. */
 .page-backdrop {
   position: absolute;
   z-index: -1;

@@ -1,6 +1,6 @@
 <nav-bar title="消息通知" back /><view
-  class="subpage"
-  ><view wx:if="{{needsLogin}}" class="biz-empty"
+  class="subpage has-backdrop"
+  ><page-backdrop name="bgNotice" /><view wx:if="{{needsLogin}}" class="biz-empty"
     ><image class="empty-photo" src="/assets/photos/empty-login.jpg" mode="aspectFill" aria-hidden="true" /><text>登录后查看消息</text><text class="empty-link" bindtap="signIn">去登录 ›</text></view
   ><block wx:else
     ><view wx:if="{{items.length}}" class="row notice-head"
