@@ -121,7 +121,7 @@
       <text bindtap="clearReferences">清空重选</text>
     </view>
   </view>
-  <view class="params-row {{modelsLoading||busy?'controls-busy':''}}" bindtap="openParams" aria-role="button" aria-label="{{'调整参数，当前'+resolution}}">
+  <view wx:if="{{resolutions.length||qualities.length||ratios.length||(kind==='video'&&durations.length)}}" class="params-row {{modelsLoading||busy?'controls-busy':''}}" bindtap="openParams" aria-role="button" aria-label="{{'调整参数，当前'+resolution}}">
     <view class="params-icon"><image class="gl gl-20" src="/assets/glyphs/adjust.png" /></view>
     <view class="params-copy">
       <text class="params-spec"><block wx:if="{{resolutions.length}}">{{resolution}}</block><block wx:if="{{kind==='video'&&durations.length}}">{{resolutions.length?' · ':''}}{{duration}} 秒</block><block wx:if="{{ratios.length}}">{{resolutions.length||(kind==='video'&&durations.length)?' · ':''}}{{ratio==='auto'?'自适应':ratio}}</block><block wx:if="{{qualities.length}}">{{resolutions.length||ratios.length||(kind==='video'&&durations.length)?' · ':''}}{{qualityNames[quality]||quality}}</block></text>

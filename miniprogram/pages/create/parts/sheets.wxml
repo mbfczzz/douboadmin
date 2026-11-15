@@ -1,9 +1,10 @@
-<t-popup visible="{{paramsOpen}}" placement="bottom" bind:visible-change="closeParams">
+<t-popup visible="{{paramsOpen&&!!(resolutions.length||qualities.length||ratios.length||(kind==='video'&&durations.length))}}" placement="bottom" bind:visible-change="closeParams">
   <view class="params-sheet">
     <view class="sheet-handle" />
     <view class="reference-heading"><text>参数设置</text><view class="close-sheet" bindtap="closeParams"><t-icon name="close" size="20" /></view></view>
     <view class="settings {{modelsLoading||busy?'controls-busy':''}}">
-    <text wx:if="{{resolutions.length}}" class="setting-title first-setting">分辨率</text>
+    <block wx:if="{{resolutions.length}}">
+    <text class="setting-title">分辨率</text>
     <view class="resolution-options">
       <view
         class="resolution-option {{resolution===item?'selected':''}}"
@@ -17,6 +18,7 @@
         {{item}}
       </view>
     </view>
+    </block>
     <block wx:if="{{kind==='video'&&durations.length}}">
       <view class="setting-row"><text class="setting-title">视频时长</text><text class="setting-value">{{duration}} 秒</text></view>
       <slider
@@ -39,7 +41,8 @@
       </view>
     </block>
     <block wx:if="{{qualities.length}}"><text class="setting-title">画面质量</text><view class="resolution-options"><view wx:for="{{qualities}}" wx:key="*this" class="resolution-option {{quality===item?'selected':''}}" data-value="{{item}}" bindtap="chooseQuality">{{qualityNames[item]||item}}</view></view></block>
-    <text wx:if="{{ratios.length}}" class="setting-title">选择画幅</text>
+    <block wx:if="{{ratios.length}}">
+    <text class="setting-title">选择画幅</text>
     <view class="ratio-grid">
       <view
         wx:for="{{ratios}}"
@@ -61,6 +64,7 @@
         <text class="ratio-label">{{item==='auto'?'自适应':item}}</text>
       </view>
     </view>
+    </block>
   </view>
   </view>
 </t-popup>

@@ -24,7 +24,8 @@
   color: var(--ui-brand);
   font-variant-numeric: tabular-nums;
 }
-.setting-title.first-setting {
+.settings > .setting-title:first-child,
+.settings > .setting-row:first-child {
   margin-top: 0;
 }
 .resolution-options {
