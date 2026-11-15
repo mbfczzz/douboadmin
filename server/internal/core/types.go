@@ -64,6 +64,8 @@ type Job struct {
 	HoldOnFailure       bool      `json:"-"`
 	Stage               string    `json:"stage,omitempty"`
 	Deleted             bool      `json:"deleted,omitempty"`
+	Featured            bool      `json:"featured,omitempty"`
+	WorkMetaVersion     int64     `json:"workMetaVersion"`
 	ReviewStatus        string    `json:"reviewStatus,omitempty"`
 	ModelName           string    `json:"modelName,omitempty"`
 	Retryable           bool      `json:"retryable"`

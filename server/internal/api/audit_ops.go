@@ -77,6 +77,7 @@ var ops = map[string]op{
 	"DELETE /api/admin/templates/{id}":                    {label: "删除模板", target: "template"},
 	"POST /api/admin/assets":                              {label: "上传素材"},
 	"DELETE /api/admin/works/{id}":                        {label: "删除作品", target: "job"},
+	"PUT /api/admin/works/{id}/featured":                  {label: "设置优秀作品", target: "job"},
 	"POST /api/admin/jobs":                                {creates: "job", label: "后台提交生成任务"},
 	"POST /api/admin/jobs/{id}/release":                   {label: "核实后退回积分", target: "job", summary: func(q, _ map[string]any) string { return reason(q, "reason") }},
 	"POST /api/admin/jobs/{id}/resume":                    {label: "恢复任务查询", target: "job"},

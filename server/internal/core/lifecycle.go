@@ -10,9 +10,11 @@ type Notification struct {
 	Read     bool   `json:"read"`
 }
 type WorkMeta struct {
-	Deleted   bool       `json:"deleted"`
-	DeletedAt *time.Time `json:"deletedAt,omitempty"`
-	Title     string     `json:"title,omitempty"`
+	Featured   bool       `json:"featured"`
+	FeaturedAt *time.Time `json:"featuredAt,omitempty"`
+	Deleted    bool       `json:"deleted"`
+	DeletedAt  *time.Time `json:"deletedAt,omitempty"`
+	Title      string     `json:"title,omitempty"`
 }
 type Review struct {
 	JobID      string     `json:"jobId"`

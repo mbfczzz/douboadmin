@@ -16,10 +16,40 @@ export default function Works({ notify }: PageProps) {
     [query, setQuery] = useRememberedState("works.query", ""),
     [state, setState] = useRememberedState("works.state", "");
   const [page, setPage] = useState(1);
+  const [busy, setBusy] = useState("");
   const resource = useResource<{ items: Job[]; total: number }>(
     `/admin/works?page=${page}&q=${encodeURIComponent(query)}&deleted=${state}`,
   );
   const rows = resource.data?.items || [];
+  async function feature(j: Job) {
+    if (busy) return;
+    setBusy(j.id);
+    try {
+      const approved = await ask({
+        title: j.featured ? "取消优秀作品？" : "设为优秀作品？",
+        message: j.featured
+          ? "取消后，小程序优秀作品展示页将不再显示这份作品。"
+          : "作品的图片或视频将公开展示在小程序优秀作品页，请确认适合公开展示。用户编号、提示词和参考素材不会公开。",
+        confirmText: j.featured ? "取消优秀" : "确认展示",
+      });
+      if (approved === false) return;
+      await api(`/admin/works/${encodeURIComponent(j.id)}/featured`, {
+        method: "PUT",
+        confirmation: false,
+        body: JSON.stringify({
+          featured: !j.featured,
+          version: j.workMetaVersion || 0,
+        }),
+      });
+      await resource.reload();
+      notify(j.featured ? "已取消优秀作品" : "已设为优秀作品");
+    } catch (e) {
+      notify((e as Error).message, "error");
+      void resource.reload();
+    } finally {
+      setBusy("");
+    }
+  }
   async function remove(j: Job) {
     const ok = await ask({
       title: "删除作品？",
@@ -81,6 +111,7 @@ export default function Works({ notify }: PageProps) {
                 <small className="cell-note">
                   {j.modelName || j.input.kind}
                 </small>
+                {j.featured && <Badge state="succeeded" label="优秀作品" />}
               </>
             ),
           },
@@ -101,6 +132,12 @@ export default function Works({ notify }: PageProps) {
             render: (j) => (
               <div className="business-actions">
                 <button onClick={() => setDetail(j)}>预览</button>
+                <button
+                  disabled={!!busy || j.deleted || (!j.featured && !j.result)}
+                  onClick={() => void feature(j)}
+                >
+                  {j.featured ? "取消优秀" : "设为优秀"}
+                </button>
                 <button
                   disabled={j.deleted}
                   className="danger-text"

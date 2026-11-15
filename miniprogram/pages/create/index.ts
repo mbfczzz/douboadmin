@@ -1,4 +1,5 @@
 import { showArt } from "../../utils/ui-art";
+import { startTaskCount, stopTaskCount } from "./task-count";
 import { loadConfig, peekConfig } from "../../utils/config-cache";
 import { request, tab, openPage, openTab, sessionToken } from "../../utils/api";
 import type { Config, Row, Asset, Input } from "../../services/types";
@@ -26,6 +27,7 @@ Page({
   visible: true,
   destroyed: false,
   onHide() {
+    stopTaskCount(this);
     this.visible = false;
     cancelMention(this);
     cancelPreview(this);
@@ -42,6 +44,7 @@ Page({
 
   onShow() {
     this.visible = true;
+    startTaskCount(this);
     const owner = sessionToken();
     if (owner !== this.quoteOwner) cancelEstimate(this, true);
     this.quoteOwner = owner;
@@ -72,6 +75,7 @@ Page({
     showArt(this, (art) => ({ sourceArt: { image: art.srcImage, video: art.srcVideo, audio: art.srcAudio } }));
   },
   onUnload() {
+    stopTaskCount(this);
     this.destroyed = true;
     this.visible = false;
     cancelMention(this);

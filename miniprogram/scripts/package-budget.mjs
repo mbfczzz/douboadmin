@@ -127,7 +127,11 @@ console.log(
 // Multi-image results: shared native gallery, per-image/all-image saving and
 // shared-work previews and cache/lifecycle guards, +7,557 source bytes without new vendors.
 // Intentional feature allowance 728 -> 736 KiB; see docs/multi-image-results.md.
-const budget = 736 * 1024;
+// Visible-page running-task counter: +2,493 source bytes, no new dependencies.
+// Reviewed 736 -> 740 KiB feature allowance; see docs/create-task-count.md.
+// Featured works: a native mixed-media gallery and safe preview, +9,016 bytes.
+// Explicit 740 -> 752 KiB feature allowance; see docs/featured-works.md.
+const budget = 752 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

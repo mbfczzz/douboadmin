@@ -5,6 +5,7 @@ export const creationData = {
   maxPromptChars: 20000,
   maxReferences: 0,
   kind: "video",
+  runningTasks: 0,
   prompt: "",
   promptCursor: -1,
   hasPrompt: false,

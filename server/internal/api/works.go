@@ -63,6 +63,7 @@ func (a *Server) deleteWork(w http.ResponseWriter, r *http.Request) {
 		}
 		now := time.Now().UTC()
 		meta.Deleted = true
+		meta.Featured = false
 		meta.DeletedAt = &now
 		row.Data = core.Data(meta)
 		_, e = tx.Put("work_meta", row, row.Version)

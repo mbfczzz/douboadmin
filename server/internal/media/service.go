@@ -82,7 +82,7 @@ func (s *Service) Save(ctx context.Context, j core.Job, u string) (string, error
 	}
 	res, err := client.Do(req)
 	if err != nil {
-		return "", fmt.Errorf("下载生成结果失败")
+		return "", resultDownloadError(err, 0)
 	}
 	defer res.Body.Close()
 	if res.StatusCode != 200 {
@@ -98,9 +98,9 @@ func (s *Service) Save(ctx context.Context, j core.Job, u string) (string, error
 	if j.Input.Kind == "image" {
 		limit = 30 << 20
 	}
-	size, err := io.Copy(tmp, io.LimitReader(res.Body, limit+1))
-	if err != nil || size > limit {
-		return "", fmt.Errorf("生成结果不完整或超过大小限制")
+	size, err := copyGeneratedResult(tmp, res.Body, res.ContentLength, limit)
+	if err != nil {
+		return "", err
 	}
 	return s.storeResult(ctx, j, tmp, size)
 }

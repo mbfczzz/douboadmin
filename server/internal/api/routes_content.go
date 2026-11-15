@@ -11,5 +11,8 @@ func (a *Server) contentRoutes() {
 	m.HandleFunc("GET /api/works", a.auth("user", a.works))
 	m.HandleFunc("DELETE /api/works/{id}", a.auth("user", a.deleteWork))
 	m.HandleFunc("GET /api/admin/works", a.auth("admin", a.works))
+	m.HandleFunc("PUT /api/admin/works/{id}/featured", a.superAdmin(a.setFeaturedWork))
+	m.HandleFunc("GET /api/featured-works", a.featuredWorks)
+	m.HandleFunc("GET /api/featured-works/{id}", a.featuredWork)
 	m.HandleFunc("DELETE /api/admin/works/{id}", a.auth("admin", a.deleteWork))
 }

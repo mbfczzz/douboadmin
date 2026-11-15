@@ -32,6 +32,7 @@ func init() {
 			c("units", Int), c("state", Key), c("estimatedCostMicros", Int),
 		}},
 		Table{Name: "work_meta", Comment: "作品标题与删除标记；id = 任务 id", Owner: "用户", Cols: []Col{
+			c("featured", Bool), c("featuredAt", Time),
 			c("title", Short), c("deleted", Bool), c("deletedAt", Time),
 		}},
 		Table{Name: "shares", Comment: "作品分享链接；id = 分享令牌", Owner: "用户", Cols: []Col{

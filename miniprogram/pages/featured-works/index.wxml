@@ -1,0 +1,28 @@
+<nav-bar title="优秀作品" back />
+<view class="subpage featured-page">
+  <view class="featured-filters"><view wx:for="{{filters}}" wx:key="key" class="featured-tab {{kind===item.key?'active':''}}" data-kind="{{item.key}}" bindtap="choose">{{item.text}}</view></view>
+  <view wx:if="{{loadError}}" class="error-box" bindtap="load">{{loadError}} · 点击重试</view>
+  <view wx:elif="{{loading&&!works.length}}" class="note">正在加载优秀作品…</view>
+  <view wx:elif="{{!works.length}}" class="empty"><t-icon name="star" size="32" /><text>暂无优秀作品</text></view>
+  <view class="featured-grid">
+    <view class="featured-card" wx:for="{{works}}" wx:key="id" data-id="{{item.id}}" bindtap="open" hover-class="card-pressed" aria-role="button" aria-label="{{'查看'+item.title}}">
+      <view class="featured-cover">
+        <image wx:if="{{item.thumbnailUrl||item.kind==='image'}}" src="{{item.thumbnailUrl||item.result}}" mode="aspectFill" lazy-load />
+        <view wx:else class="featured-video"><t-icon name="play-circle" size="40" /><text>点击播放视频</text></view>
+        <text class="featured-badge">{{item.kind==='video'?'视频':item.results.length>1?item.results.length+' 张图片':'图片'}}</text>
+      </view>
+      <text class="featured-title">{{opening===item.id?'正在打开…':item.title}}</text>
+    </view>
+  </view>
+  <view wx:if="{{total>20}}" class="job-pagination"><button bindtap="previous" disabled="{{loading||page<=1}}">上一页</button><text>第 {{page}} 页 · 共 {{total}} 个</text><button bindtap="next" disabled="{{loading||page*20>=total}}">下一页</button></view>
+</view>
+<t-popup visible="{{!!detail}}" placement="bottom" bind:visible-change="popupChange">
+  <view wx:if="{{detail}}" class="featured-preview">
+    <view class="featured-preview-head"><text>{{detail.title}}</text><view bindtap="close" aria-role="button" aria-label="关闭作品预览"><t-icon name="close" size="24" /></view></view>
+    <view wx:if="{{previewError}}" class="error-box">{{previewError}}</view>
+    <scroll-view scroll-y class="featured-preview-body">
+      <result-gallery wx:if="{{detail.kind==='image'}}" images="{{detail.results}}" bind:preview="preview" />
+      <video wx:else src="{{detail.result}}" poster="{{detail.thumbnailUrl}}" controls object-fit="contain" binderror="mediaError" />
+    </scroll-view>
+  </view>
+</t-popup>

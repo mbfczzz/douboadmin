@@ -32,6 +32,9 @@ export interface Template {
   requiredImages: number;
 }
 export interface Job {
+  featured?: boolean;
+  workMetaVersion?: number;
+  results?: string[];
   deleted?: boolean;
   costUnits?: number;
   billingState?: string;

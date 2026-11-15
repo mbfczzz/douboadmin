@@ -1,0 +1,8 @@
+{
+  "enablePullDownRefresh": true,
+  "backgroundColor": "#0f0f11",
+  "usingComponents": {
+    "t-popup": "tdesign-miniprogram/popup/popup",
+    "result-gallery": "/components/result-gallery/index"
+  }
+}

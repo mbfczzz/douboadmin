@@ -4,7 +4,13 @@ export default function MediaPreview({ job }: { job: Job }) {
     <div className="business-preview">
       {job.result ? (
         job.input.kind === "image" ? (
-          <img src={job.result} alt="作品预览" />
+          <div>
+            {(job.results?.length ? job.results : [job.result]).map(
+              (url, i) => (
+                <img key={url} src={url} alt={`作品预览 ${i + 1}`} />
+              ),
+            )}
+          </div>
         ) : (
           <video src={job.result} controls preload="metadata" />
         )

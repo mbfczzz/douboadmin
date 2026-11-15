@@ -13,6 +13,7 @@
     "pages/upload-preview/index",
     "pages/login/index",
     "pages/works/index",
+    "pages/featured-works/index",
     "pages/wallet/index",
     "pages/orders/index",
     "pages/notifications/index",

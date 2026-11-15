@@ -20,6 +20,7 @@ import { jobPage } from "../../services/job-pages";
 import { dropCover } from "../../services/cover";
 
 const baseMenus = [
+  { icon: "star", art: "", label: "优秀作品", mode: "featured-works" },
   { icon: "order", art: ICON.orders, label: "充值订单", mode: "orders" },
   { icon: "heart", art: ICON.favorites, label: "我的收藏", mode: "favorites" },
   { icon: "history", art: ICON.history, label: "生成记录", mode: "tasks" },
@@ -28,7 +29,7 @@ const baseMenus = [
   { icon: "setting", art: ICON.settings, label: "设置", mode: "settings" },
 ];
 // Providers manage their codes in 服务商中心; members share their 推广码.
-// The role entry gets its own row so the six common entries stay a 3 × 2 grid.
+// The role entry has its own row; shared discovery lives in the common grid.
 const roleMenus: Record<string, { icon: string; art?: string; glyph?: string; label: string; mode: string; hint: string }> =
   {
     provider: { icon: "cooperate", art: ICON.provider, label: "服务商中心", mode: "provider", hint: "邀请码 · 会员 · 后台登录" },
@@ -167,7 +168,7 @@ Page({
     if (m === "tasks") openPage(this, { url: "/pages/tasks/index" });
     else if (m === "promo")
       openPage(this, { url: "/pages/provider/index?mode=promo" });
-    else if (["wallet", "orders", "notifications", "provider", "works"].includes(m))
+    else if (["wallet", "orders", "notifications", "provider", "works", "featured-works"].includes(m))
       openPage(this, { url: "/pages/" + m + "/index" });
     else if (m === "settings")
       openPage(this, { url: "/pages/preferences/index" });

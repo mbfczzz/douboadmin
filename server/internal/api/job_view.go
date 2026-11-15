@@ -13,6 +13,7 @@ var uncertainPrefix = strings.SplitN(provider.ErrUncertain.Error(), "，", 2)[0]
 
 func (a *Server) presentJob(ctx context.Context, j *core.Job) {
 	resultRef := j.Result
+	j.Featured, j.WorkMetaVersion = false, 0
 	j.Results = nil
 	if j.Input.Kind == "image" {
 		refs, err := core.ResultRefs(resultRef)
@@ -46,6 +47,8 @@ func (a *Server) presentJob(ctx context.Context, j *core.Job) {
 		var meta core.WorkMeta
 		if json.Unmarshal(row.Data, &meta) == nil {
 			j.Deleted = meta.Deleted
+			j.Featured = meta.Featured && !meta.Deleted
+			j.WorkMetaVersion = row.Version
 		}
 	}
 	if core.IsWork(j.Input.Kind) {

@@ -9,6 +9,7 @@ import (
 func jobQuery(w http.ResponseWriter, r *http.Request) (core.JobQuery, bool) {
 	v := r.URL.Query()
 	q := core.JobQuery{Page: 1, Size: 20, Search: v.Get("q"), Status: v.Get("status"), Kind: v.Get("kind"), Deleted: v.Get("deleted"), Works: v.Get("works") == "true", ExcludeChat: v.Get("excludeChat") == "true", Ended: v.Get("ended") == "true"}
+	q.ExcludeImport = v.Get("excludeImport") == "true"
 	if v.Has("page") {
 		q.Page, _ = strconv.Atoi(v.Get("page"))
 	}

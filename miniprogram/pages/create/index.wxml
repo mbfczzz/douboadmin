@@ -103,7 +103,7 @@
   </view>
   <view class="creation-hint">
     <block wx:if="{{assets.length}}"><image class="gl gl-16" src="/assets/glyphs/at-muted.png" /><text>输入 @ 可引用已上传的图片</text></block>
-    <text class="queue-text" bindtap="queue">任务队列 ›</text>
+    <view class="queue-text" bindtap="queue"><text wx:if="{{runningTasks>0}}" class="queue-count">当前 {{runningTasks}} 个任务在生成</text><text>任务队列 ›</text></view>
   </view>
   <view wx:if="{{restoring}}" class="note">正在恢复参考素材…</view>
   <view wx:if="{{restoreError}}" class="error-box">
