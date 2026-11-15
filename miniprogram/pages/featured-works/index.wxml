@@ -26,3 +26,4 @@
     </scroll-view>
   </view>
 </t-popup>
+<app-tab-bar />

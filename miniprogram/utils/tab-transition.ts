@@ -1,4 +1,6 @@
-import { switchPageTab } from "./navigation";
+import { openPage, switchPageTab } from "./navigation";
+
+export const FEATURED_TAB_PATH = "/pages/featured-works/index";
 
 // Tab glyphs were generated with Codex as one bold set (assets/tab, 72px PNG
 // with alpha): "-off" in grey, "-on" in white. t-icon names stay as fallback.
@@ -27,6 +29,7 @@ export const TAB_ITEMS = [
     ...art("agent"),
     path: "/pages/agent/index",
   },
+  { text: "优秀", icon: "star", on: "star-filled", art: "", artOn: "", path: FEATURED_TAB_PATH },
   { text: "我的", icon: "user", on: "user-filled", ...art("mine"), path: "/pages/mine/index" },
 ];
 
@@ -36,5 +39,6 @@ export function tabDestination(path: string) {
 
 export function openTab(page: object, path: string, onFail?: () => void) {
   if (!tabDestination(path)) return false;
+  if (path === FEATURED_TAB_PATH) return openPage(page, { url: path, fail: onFail });
   return switchPageTab(page, path, onFail);
 }

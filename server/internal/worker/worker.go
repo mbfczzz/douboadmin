@@ -11,6 +11,10 @@ import (
 )
 
 func Run(ctx context.Context, s store.Store, p provider.Provider) {
+	expireCtx, stopExpiry := context.WithCancel(ctx)
+	expiryDone := make(chan struct{})
+	go func() { defer close(expiryDone); expireLoop(expireCtx, s) }()
+	defer func() { stopExpiry(); <-expiryDone }()
 	ticker := time.NewTicker(time.Second)
 	defer ticker.Stop()
 	for {
@@ -29,10 +33,11 @@ func Run(ctx context.Context, s store.Store, p provider.Provider) {
 			if s.Hold(ctx, j, 180, false) != nil {
 				continue
 			}
-			limit := 130 * time.Second
-			if j.Input.Kind == "mix" {
-				limit = 10 * time.Minute
+			if core.JobExpired(j, time.Now()) {
+				_, _ = s.ExpireJobs(ctx, time.Now(), 100)
+				continue
 			}
+			limit := roundLimit(j, time.Now())
 			taskCtx, cancel := context.WithTimeout(ctx, limit)
 			stopLease := keepLease(taskCtx, s, j, cancel)
 			result, err := p.Generate(taskCtx, j)
@@ -40,6 +45,10 @@ func Run(ctx context.Context, s store.Store, p provider.Provider) {
 			cancel()
 			if ctx.Err() != nil {
 				return
+			}
+			if core.JobExpired(j, time.Now()) {
+				_, _ = s.ExpireJobs(ctx, time.Now(), 100)
+				continue
 			}
 			if errors.Is(err, provider.ErrRetryLater) {
 				_ = s.Hold(ctx, j, 60, true) // the last step failed; give it a minute

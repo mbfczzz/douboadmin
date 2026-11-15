@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"time"
 )
 
 func createFundedJob(ctx context.Context, s Store, j core.Job) (out core.Job, err error) {
@@ -60,40 +61,14 @@ func finishFundedJob(ctx context.Context, s Store, j core.Job, result, failure s
 		if _, _, e = LockWallet(tx, stored.UserID); e != nil {
 			return e
 		}
+		if core.JobExpired(stored, time.Now()) {
+			return core.ErrConflict
+		}
 		if e = tx.CompleteJob(j, result, failure); e != nil {
 			return e
 		}
-		if e = completeLifecycle(tx, stored, failure); e != nil {
-			return e
-		}
-		row, e := tx.Get("job_billing", j.ID)
-		if errors.Is(e, core.ErrNotFound) {
-			return nil
-		}
-		if e != nil {
-			return e
-		}
-		var bill core.JobBilling
-		if e = json.Unmarshal(row.Data, &bill); e != nil {
-			return e
-		}
-		if bill.State != "reserved" || (failure != "" && j.HoldOnFailure) {
-			return nil
-		}
-		entry := core.LedgerEntry{UserID: stored.UserID, Reference: "job:" + j.ID + ":settle", Kind: "job_charge", HeldDelta: -bill.Units, Note: "生成成功扣除积分"}
-		bill.State = "charged"
-		if failure != "" {
-			entry.Kind = "job_release"
-			entry.AvailableDelta = bill.Units
-			entry.Note = "生成失败退回积分"
-			bill.State = "released"
-		}
-		if _, e = ApplyFunds(tx, entry); e != nil {
-			return e
-		}
-		row.Data = core.Data(bill)
-		_, e = tx.Put("job_billing", row, row.Version)
-		return e
+		stored.HoldOnFailure = j.HoldOnFailure
+		return completeJobAccounting(tx, stored, failure)
 	})
 }
 
@@ -105,6 +80,9 @@ func resumeFundedJob(ctx context.Context, s Store, id string) error {
 		}
 		if _, _, e = LockWallet(tx, j.UserID); e != nil {
 			return e
+		}
+		if core.JobExpired(j, time.Now()) {
+			return fmt.Errorf("%w：任务已超过处理时限，请重新创作", core.ErrConflict)
 		}
 		row, e := tx.Get("job_billing", id)
 		if e == nil {

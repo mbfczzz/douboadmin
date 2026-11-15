@@ -1,4 +1,4 @@
-import { TAB_ITEMS } from "../utils/tab-transition";
+import { FEATURED_TAB_PATH, TAB_ITEMS } from "../utils/tab-transition";
 
 Component({
   data: {
@@ -38,11 +38,13 @@ Component({
         wx.showToast({ title: "切换失败，请重试", icon: "none" });
       };
       try {
-        wx.switchTab({
+        const options = {
           url: this.data.items[i].path,
           fail,
           complete: () => this.setData({ switching: false }),
-        });
+        };
+        if (options.url === FEATURED_TAB_PATH) wx.navigateTo(options);
+        else wx.switchTab(options);
       } catch {
         fail();
       }

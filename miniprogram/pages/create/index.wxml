@@ -1,5 +1,5 @@
 <nav-bar title="创作" />
-<view class="page create-page">
+<view class="page create-page" bindtap="closeMention">
   <view class="mode-tabs {{busy||uploading||restoring?'controls-busy':''}}">
     <view
       class="mode-tab {{kind==='video'?'active':''}}"
@@ -68,10 +68,18 @@
         placeholder="{{kind==='video'?videoPlaceholder:imagePlaceholder}}"
         placeholder-class="prompt-placeholder"
         bindinput="input"
-        cursor-spacing="120"
+        cursor-spacing="{{mentionOpen?180:120}}"
+        focus="{{promptFocus}}"
+        hold-keyboard="{{mentionOpen}}"
+        disable-default-padding
+        show-confirm-bar="{{false}}"
+        bindfocus="focusPrompt"
+        bindblur="blurPrompt"
+        bindkeyboardheightchange="promptKeyboard"
         fixed="{{expanded}}"
       />
       <text class="count">{{prompt.length}} / {{maxPromptChars}}</text>
+      <include src="./parts/mention.wxml" />
       <view class="editor-meta">
         <view class="editor-balance"><points-balance compact /></view>
         <view class="quote-note {{quoteError?'quote-retry':hasPrompt?'':'quote-idle'}}" bindtap="retryEstimate" aria-role="{{quoteError?'button':'text'}}" aria-label="{{quoteText}}">{{quoteError?'估价失败 · 重试':quoteText}}</view>

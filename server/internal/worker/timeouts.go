@@ -1,0 +1,38 @@
+package worker
+
+import (
+	"context"
+	"doubo/server/internal/core"
+	"doubo/server/internal/store"
+	"log/slog"
+	"time"
+)
+
+func expireLoop(ctx context.Context, s store.Store) {
+	ticker := time.NewTicker(time.Second)
+	defer ticker.Stop()
+	for {
+		check, cancel := context.WithTimeout(ctx, 10*time.Second)
+		_, err := s.ExpireJobs(check, time.Now().UTC(), 100)
+		cancel()
+		if err != nil && ctx.Err() == nil {
+			slog.Warn("expire generation tasks", "error", err)
+		}
+		select {
+		case <-ctx.Done():
+			return
+		case <-ticker.C:
+		}
+	}
+}
+
+func roundLimit(j core.Job, now time.Time) time.Duration {
+	limit := 130 * time.Second
+	if j.Input.Kind == "mix" {
+		limit = 10 * time.Minute
+	}
+	if deadline := core.JobDeadline(j); !deadline.IsZero() {
+		return min(limit, max(0, deadline.Sub(now)))
+	}
+	return limit
+}

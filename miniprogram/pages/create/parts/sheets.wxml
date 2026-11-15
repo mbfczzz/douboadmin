@@ -76,19 +76,4 @@
     <text class="source-note">已添加 {{assets.length}} / {{maxReferences}}</text>
   </view>
 </t-popup>
-<t-popup visible="{{mentionOpen}}" placement="bottom" bind:visible-change="closeMention">
-  <view class="reference-sheet">
-    <view class="sheet-handle" />
-    <view class="reference-heading"><text>引用参考图</text><view class="close-sheet" bindtap="closeMention"><t-icon name="close" size="20" /></view></view>
-    <scroll-view scroll-y class="mention-scroll">
-      <view class="mention-grid">
-        <view wx:for="{{mentionItems}}" wx:key="id" class="mention-item" data-index="{{index}}" bindtap="pickMention" hover-class="source-pressed" aria-role="button" aria-label="{{'引用'+item.label}}">
-          <image src="{{item.url}}" mode="aspectFill" />
-          <text class="mention-tag">@{{item.label}}</text>
-        </view>
-      </view>
-    </scroll-view>
-    <text class="source-note">选择后插入到光标位置，生成时按编号对应图片</text>
-  </view>
-</t-popup>
 <media-viewer show="{{viewerOpen}}" items="{{viewerItems}}" current="{{viewerIndex}}" bind:close="closeViewer" bind:mention="viewerMention" bind:remove="viewerRemove" />

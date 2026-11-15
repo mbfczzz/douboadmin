@@ -6,6 +6,7 @@ import { enterPage } from "./motion";
 import { openPage } from "./navigation";
 import { track } from "../services/analytics";
 import { resultImages } from "../services/result-images";
+import { TAB_ITEMS } from "./tab-transition";
 // Saving to the album failed. Once permission is denied WeChat never asks
 // again, so offer the settings page; a cancelled picker says nothing.
 export function saveFailed(e: unknown) {
@@ -31,11 +32,13 @@ export function error(e: unknown) {
   });
 }
 export function tab(page: any, index: number) {
-  track("page_view", ["templates", "mix", "create", "agent", "mine"][index]);
+  const name = ["templates", "mix", "create", "agent", "mine"][index];
+  track("page_view", name);
+  const selected = TAB_ITEMS.findIndex((item) => item.path === `/pages/${name}/index`);
   enterPage(page);
   const select = (bar: any) => {
-    if (bar && (bar.data?.selected !== index || bar.data?.switching))
-      bar.setData({ selected: index, switching: false });
+    if (bar && (bar.data?.selected !== selected || bar.data?.switching))
+      bar.setData({ selected, switching: false });
   };
   select(page.getTabBar?.(select));
 }

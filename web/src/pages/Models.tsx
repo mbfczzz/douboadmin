@@ -3,6 +3,7 @@ import { Plus, RefreshCw, Search } from "lucide-react";
 import { api, type Row, type Model } from "../api";
 import type { PageProps } from "../navigation";
 import { useCachedRecordPage } from "../hooks/useRecordPage";
+import { useResource } from "../hooks/useResource";
 import { useRememberedState } from "../hooks/useRememberedState";
 import PageHeader from "../components/PageHeader";
 import CatalogResults from "../components/CatalogResults";
@@ -14,6 +15,7 @@ import ModelEditor, {
 } from "../components/ModelEditor";
 import ModelTable from "../models/ModelTable";
 import ModelOrder from "../models/ModelOrder";
+import RelayBalance, { type ManagedBalance } from "../models/RelayBalance";
 import { modelSections, type ModelSection } from "../models/sections";
 import { ask } from "../confirm/ask";
 import { restoreModel, purgeModel } from "../models/restore";
@@ -27,6 +29,10 @@ export default function Models({ notify }: PageProps) {
     `/admin/models?kind=${encodeURIComponent(kind)}&q=${encodeURIComponent(q)}${deleted ? "&deleted=true" : ""}`,
     page,
   );
+  const balance = useResource<ManagedBalance>("/admin/models/balance");
+  async function refresh() {
+    await Promise.all([resource.reload(), balance.reload()]);
+  }
   const [busy, setBusy] = useState(""),
     [edit, setEdit] = useState<{ row: Row<Model>; section: ModelSection }>(),
     [adding, setAdding] = useState(false);
@@ -114,8 +120,8 @@ export default function Models({ notify }: PageProps) {
     <div className="catalog-page">
       <PageHeader
         page="models"
-        loading={resource.loading}
-        onRefresh={resource.reload}
+        loading={resource.loading || balance.loading}
+        onRefresh={refresh}
       />
       <section className="panel catalog-panel">
         <div className="catalog-head">
@@ -143,7 +149,8 @@ export default function Models({ notify }: PageProps) {
               )}
             </p>
           </div>
-          <div className="catalog-actions">
+          <div className="catalog-actions model-catalog-actions">
+            <RelayBalance resource={balance} />
             {!deleted && (
               <ModelOrder
                 kind={kind}

@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"doubo/server/internal/core"
+	"time"
 )
 
 // Every financial update locks the user's wallet before other mutable records/jobs.
@@ -16,6 +17,7 @@ type Transaction interface {
 	Job(string) (core.Job, error)
 	InsertJob(core.Job) error
 	CompleteJob(core.Job, string, string) error
+	ExpireJob(core.Job, time.Time) error
 	ResumeJob(string) error
 	ProgressJob(core.Job, int) error
 }

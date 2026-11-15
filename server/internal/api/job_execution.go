@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"strings"
+	"time"
 )
 
 func (a *Server) releaseJob(w http.ResponseWriter, r *http.Request) {
@@ -51,6 +52,10 @@ func (a *Server) resumeJob(w http.ResponseWriter, r *http.Request) {
 	}
 	if job.Status != "failed" {
 		fail(w, 409, "此任务正在处理或已经完成")
+		return
+	}
+	if core.JobExpired(job, time.Now()) {
+		fail(w, 409, "任务已超过处理时限，请重新创作")
 		return
 	}
 	if !core.IsGeneration(job.Input.Kind) && job.Input.Kind != "import" {

@@ -66,6 +66,7 @@ export const phaseNames: Record<string, string> = {
   uncertain: "提交结果待核实",
   polling: "查询上游结果",
   output: "保存生成结果",
+  timed_out: "已超时失败",
   succeeded: "已完成",
   failed: "上游失败",
 };

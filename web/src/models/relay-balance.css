@@ -1,0 +1,42 @@
+.model-catalog-actions {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  max-width: 100%;
+  min-width: 0;
+}
+@media (max-width: 720px) {
+  .model-catalog-actions {
+    justify-content: flex-start;
+  }
+}
+.relay-balance {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  max-width: 100%;
+  padding: 0 4px 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-size: 12px;
+}
+.relay-balance-label {
+  color: var(--muted);
+  white-space: nowrap;
+}
+.relay-balance-value {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: var(--ink);
+}
+.relay-balance.has-error .relay-balance-value {
+  color: var(--danger);
+}
+.relay-balance .icon {
+  min-width: 30px;
+  min-height: 30px;
+}
+.relay-balance .icon svg {
+  width: 14px;
+  height: 14px;
+}

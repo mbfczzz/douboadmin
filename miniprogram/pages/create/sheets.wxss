@@ -1,33 +1,9 @@
-/* The @ picker: a scrolling grid of numbered reference thumbnails. */
-.mention-scroll {
-  max-height: 50vh;
-}
-.mention-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
-}
-.mention-item {
-  position: relative;
-  /* 4 square columns in 20px margins, 8px gaps */
-  height: calc((100vw - 64px) / 4);
-  overflow: hidden;
-  border-radius: 10px;
-  background: var(--ui-field);
-}
-.mention-item image {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-.mention-tag {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  padding: 14px 6px 5px;
-  font-size: 12px;
-  font-weight: 500;
-  color: #fff;
-  background: linear-gradient(transparent, #000000b3);
-}
+/* A native cover layer stays visible above the focused textarea on iOS. */
+.mention-measure { position: absolute; top: 90px; left: 16px; width: calc(100% - 32px); font-size: 15px; line-height: 22px; white-space: pre-wrap; word-break: break-all; opacity: 0; pointer-events: none; }
+.mention-caret { display: inline-block; }
+.mention-popover { position: fixed; z-index: 1200; background: #303239; border-radius: 12px; color: #f5f5f5; overflow: hidden; }
+.mention-heading { display: flex; align-items: center; justify-content: space-between; height: 36px; padding: 0 10px; font-size: 12px; }
+.mention-close { width: 32px; height: 32px; text-align: center; line-height: 32px; font-size: 22px; }
+.mention-options { max-height: 120px; overflow-y: scroll; }
+.mention-option { display: flex; align-items: center; min-height: 52px; padding: 6px 10px; font-size: 13px; }
+.mention-thumb { width: 40px; height: 40px; border-radius: 6px; margin-right: 10px; }

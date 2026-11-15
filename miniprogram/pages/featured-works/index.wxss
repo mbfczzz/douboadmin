@@ -1,4 +1,4 @@
-.featured-page { padding: 20px 20px calc(32px + env(safe-area-inset-bottom)); }
+.featured-page { padding: 20px 20px calc(32px + var(--ui-tabbar-height, 70px) + env(safe-area-inset-bottom)); }
 .featured-filters { display: flex; gap: 24px; margin-bottom: 20px; }
 .featured-tab { padding: 8px 0; color: var(--ui-muted); font-size: 15px; }
 .featured-tab.active { color: var(--ui-text); border-bottom: 2px solid var(--ui-brand); }

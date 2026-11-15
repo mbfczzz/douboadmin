@@ -1,6 +1,7 @@
 import type { VisibleEditor } from "./editor-types";
+import { positionMention } from "./mention-position";
 
-// Typing "@" opens a thumbnail sheet of the uploaded images; picking one
+// Typing "@" opens a caret-adjacent picker of the uploaded images; picking one
 // inserts "@图片N " at the cursor. A snapshot guards against stale picks.
 type Snapshot = { text: string; cursor: number; ids: string[] };
 const choosing = new WeakMap<object, Snapshot>();
@@ -8,12 +9,17 @@ const imagesOf = (page: VisibleEditor) => page.data.assets.filter((a) => a.isIma
 
 export function cancelMention(page: VisibleEditor) {
   choosing.delete(page);
-  if (page.data.mentionOpen) page.setData({ mentionOpen: false });
+  if (!page.visible || page.destroyed) page.setData({ promptFocus: false, keyboardHeight: 0 });
+  if (page.data.mentionOpen) page.setData({ mentionOpen: false, mentionReady: false, mentionPrefix: "" });
 }
 
 export function chooseMention(page: VisibleEditor, cursor: number) {
   const text = page.data.prompt;
-  if (text[cursor - 1] !== "@" || choosing.has(page) || page.data.busy) return;
+  if (!page.visible || page.destroyed) { cancelMention(page); return; }
+  const previous = choosing.get(page);
+  if (previous?.text === text && previous.cursor === cursor) return;
+  cancelMention(page);
+  if (text[cursor - 1] !== "@" || page.data.busy) return;
   const images = imagesOf(page);
   if (!images.length) {
     wx.showToast({ title: "请先添加参考图片", icon: "none" });
@@ -22,8 +28,11 @@ export function chooseMention(page: VisibleEditor, cursor: number) {
   choosing.set(page, { text, cursor, ids: images.map((a) => a.id) });
   page.setData({
     mentionOpen: true,
+    mentionReady: false,
+    mentionPrefix: text.slice(0, cursor - 1),
     mentionItems: images.map((a, i) => ({ id: a.id, url: a.data.url, label: `图片${i + 1}` })),
   });
+  positionMention(page);
 }
 
 export function pickMention(page: VisibleEditor, index: number) {
@@ -43,7 +52,7 @@ export function insertMention(page: VisibleEditor, text: string, cursor: number,
     wx.showToast({ title: "引用后超出字数限制", icon: "none" });
     return false;
   }
-  page.setData({ prompt, hasPrompt: true, promptCursor: cursor + token.length });
+  page.setData({ prompt, hasPrompt: true, promptCursor: cursor + token.length, promptFocus: true });
   return true;
 }
 

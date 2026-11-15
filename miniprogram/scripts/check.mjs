@@ -63,6 +63,8 @@ for (const p of app.pages) {
     JSON.parse(fs.readFileSync(p + ".json", "utf8")).usingComponents || {};
   const tags = new Set([
     "view",
+    "cover-view",
+    "cover-image",
     "canvas",
     "text",
     "image",

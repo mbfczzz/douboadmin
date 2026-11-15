@@ -76,6 +76,7 @@ func (a *Server) routes() {
 	m.HandleFunc("GET /api/admin/templates/categories", a.auth("admin", a.templateCategories))
 	m.HandleFunc("POST /api/admin/assets", a.auth("admin", a.upload))
 	m.HandleFunc("GET /api/admin/models", a.auth("admin", a.models))
+	m.HandleFunc("GET /api/admin/models/balance", a.superAdmin(a.relayBalance))
 	m.HandleFunc("POST /api/admin/models", a.auth("admin", a.importModel))
 	m.HandleFunc("POST /api/admin/models/sync", a.auth("admin", a.syncModels))
 	m.HandleFunc("PUT /api/admin/models/order", a.auth("admin", a.orderModels))

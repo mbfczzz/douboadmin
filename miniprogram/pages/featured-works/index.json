@@ -2,6 +2,7 @@
   "enablePullDownRefresh": true,
   "backgroundColor": "#0f0f11",
   "usingComponents": {
+    "app-tab-bar": "/custom-tab-bar/index",
     "t-popup": "tdesign-miniprogram/popup/popup",
     "result-gallery": "/components/result-gallery/index"
   }

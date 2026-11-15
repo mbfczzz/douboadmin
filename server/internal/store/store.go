@@ -28,6 +28,7 @@ type Store interface {
 	Hold(context.Context, core.Job, int, bool) error
 	Progress(context.Context, core.Job, int, string) error
 	Finish(context.Context, core.Job, string, string) error
+	ExpireJobs(context.Context, time.Time, int) (int, error)
 	Resume(context.Context, string) error
 	Dashboard(context.Context, int) (core.Dashboard, error)
 	QueueHealth(context.Context) (core.QueueHealth, error)

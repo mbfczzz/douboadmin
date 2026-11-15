@@ -97,7 +97,7 @@ func (a *Server) presentJob(ctx context.Context, j *core.Job) {
 		if err == nil && json.Unmarshal(r.Data, &e) == nil {
 			j.Retryable = e.Phase == "failed"
 			// An error hint must not hide the refund outcome shown above.
-			if e.ErrorCause != "" && !verifiedRefund {
+			if e.ErrorCause != "" && !verifiedRefund && j.Error != (&core.JobTimeout{Kind: j.Input.Kind}).Error() {
 				if m, lookup := a.model(ctx, j.Input.Model); lookup == nil {
 					j.Error = m.Settings.ErrorMessage(e.ErrorCause, j.Error)
 				}

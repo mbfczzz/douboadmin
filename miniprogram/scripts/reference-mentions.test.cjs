@@ -14,7 +14,7 @@ const event = (value, cursor = value.length) => ({ detail: { value, cursor } });
 
 const pick = (page, index) => page.pickMention({ currentTarget: { dataset: { index } } });
 
-test("typing @ opens a thumbnail sheet and inserts the picked image at the cursor", () => {
+test("typing @ opens an inline thumbnail picker and inserts the picked image at the cursor", () => {
   const h = harness(),
     page = h.page("create");
   page.setData({

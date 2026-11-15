@@ -54,6 +54,9 @@ func (p *Relay) checkpoint(ctx context.Context, row *core.Record, e Execution) e
 }
 
 func (p *Relay) Generate(ctx context.Context, j core.Job) (string, error) {
+	if core.JobExpired(j, time.Now()) {
+		return "", &core.JobTimeout{Kind: j.Input.Kind}
+	}
 	// Upstream calls made for this job are attributed to it in the model log.
 	ctx = relay.WithJob(ctx, relay.Job{ID: j.ID, User: j.UserID, Model: j.Input.Model, Kind: j.Input.Kind})
 	row, err := p.Store.Get(ctx, "executions", j.ID)
@@ -134,7 +137,7 @@ func (p *Relay) Generate(ctx context.Context, j core.Job) (string, error) {
 		if e.TaskID == "" {
 			return "", ErrUncertain
 		}
-		if time.Since(e.StartedAt) > time.Hour {
+		if core.JobTimeLimit(j.Input.Kind) == 0 && time.Since(e.StartedAt) > time.Hour {
 			return "", fmt.Errorf("上游任务超过一小时，请联系管理员核实后继续查询")
 		}
 		raw, err = p.Client.Poll(ctx, e.TaskID)
@@ -205,10 +208,13 @@ func (p *Relay) Generate(ctx context.Context, j core.Job) (string, error) {
 }
 
 func (p *Relay) save(ctx context.Context, j core.Job, row *core.Record, e Execution) (string, error) {
+	if core.JobExpired(j, time.Now()) {
+		return "", &core.JobTimeout{Kind: j.Input.Kind}
+	}
 	if j.Input.Kind != "chat" {
 		result, err := p.SaveResult(ctx, j, e.Result)
 		if err != nil {
-			if time.Since(e.StartedAt) > time.Hour {
+			if core.JobTimeLimit(j.Input.Kind) == 0 && time.Since(e.StartedAt) > time.Hour {
 				return "", fmt.Errorf("生成已完成，但结果保存失败，请联系管理员恢复任务")
 			}
 			p.waiting(ctx, row, e, "结果保存失败，将自动重试："+p.redact(err))

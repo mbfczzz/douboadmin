@@ -1,0 +1,10 @@
+<view wx:if="{{mentionOpen}}" class="mention-measure" aria-hidden="true"><text>{{mentionPrefix}}</text><text class="mention-caret">@</text></view>
+<cover-view wx:if="{{mentionOpen&&mentionReady}}" class="mention-popover" style="{{mentionStyle}}" catchtap="holdMentionTap">
+  <cover-view class="mention-heading">引用图片<cover-view class="mention-close" bindtap="closeMention" aria-role="button" aria-label="关闭引用图片">×</cover-view></cover-view>
+  <cover-view class="mention-options">
+    <cover-view wx:for="{{mentionItems}}" wx:key="id" class="mention-option" data-index="{{index}}" bindtap="pickMention" aria-role="button" aria-label="{{'引用'+item.label}}">
+      <cover-image class="mention-thumb" src="{{item.url}}" />
+      <cover-view>@{{item.label}}</cover-view>
+    </cover-view>
+  </cover-view>
+</cover-view>
