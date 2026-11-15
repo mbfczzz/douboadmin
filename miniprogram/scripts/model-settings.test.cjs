@@ -18,6 +18,20 @@ const model = {
   },
 };
 
+test("creation model choices preserve the backend order within each type", async () => {
+  const h = harness(), page = h.page("create");
+  const models = [
+    { ...model, id: "second-page-first", name: "排在前面" },
+    { ...model, id: "video", kind: "video" },
+    { ...model, id: "formerly-first", name: "排在后面" },
+  ];
+  h.api.request = async () => ({ models });
+  page.setData({ kind: "image" });
+  await page.loadModels();
+  assert.equal(page.data.model, "second-page-first");
+  assert.deepEqual(Array.from(page.data.availableModels, (item) => item.id), ["second-page-first", "formerly-first"]);
+});
+
 test("backend model settings initialize the editor without overwriting an existing draft", async () => {
   const h = harness(),
     page = h.page("create");

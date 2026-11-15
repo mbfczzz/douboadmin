@@ -117,6 +117,9 @@ func (m *MySQL) RecordPage(ctx context.Context, q core.RecordQuery) (out core.Re
 		order = ` ORDER BY id ASC`
 	} else if q.SortField != "" {
 		order = " ORDER BY COALESCE(`" + column(q.SortField) + "`,0) ASC,id DESC"
+		if q.Namespace == "models" {
+			order = " ORDER BY COALESCE(`" + column(q.SortField) + "`,0) ASC,id ASC"
+		}
 	}
 	items, e := listRows(ctx, tx, "SELECT "+t.selectList()+where+order+` LIMIT ? OFFSET ?`, t, append(args, q.Size, (q.Page-1)*q.Size)...)
 	if e != nil {
@@ -182,6 +185,9 @@ func (m *Memory) RecordPage(_ context.Context, q core.RecordQuery) (out core.Rec
 			sort.Slice(items, func(i, j int) bool {
 				a, b := recordNumber(items[i], q.SortField), recordNumber(items[j], q.SortField)
 				if a == b {
+					if q.Namespace == "models" {
+						return items[i].ID < items[j].ID
+					}
 					return items[i].ID > items[j].ID
 				}
 				return a < b

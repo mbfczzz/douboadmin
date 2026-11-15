@@ -13,6 +13,9 @@ func TestPurgeModelGuardsAndPreservesOtherRecords(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	// Make this generation distinct even on platforms with coarse wall clocks.
+	row.CreatedAt = row.CreatedAt.Add(-time.Second)
+	m.records["models:"+row.ID] = copyRecord(row)
 	if _, err = m.PurgeModel(t.Context(), row.ID, row.Version, row.CreatedAt); !errors.Is(err, core.ErrConflict) {
 		t.Fatal("active model removed", err)
 	}

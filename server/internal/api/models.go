@@ -54,7 +54,7 @@ func (a *Server) models(w http.ResponseWriter, r *http.Request) {
 		_ = json.Unmarshal(out[i].Data, &x)
 		_ = json.Unmarshal(out[j].Data, &y)
 		if x.Sort == y.Sort {
-			return x.Name < y.Name
+			return out[i].ID < out[j].ID
 		}
 		return x.Sort < y.Sort
 	})

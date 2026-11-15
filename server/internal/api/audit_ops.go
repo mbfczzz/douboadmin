@@ -71,6 +71,7 @@ var ops = map[string]op{
 	"PUT /api/admin/models/{id}":                          {label: "修改模型配置", target: "model"},
 	"POST /api/admin/models":                              {creates: "model", label: "添加模型", summary: func(q, _ map[string]any) string { return str(q, "key") }},
 	"POST /api/admin/models/sync":                         {label: "同步上游模型"},
+	"PUT /api/admin/models/order":                         {label: "调整模型排序"},
 	"DELETE /api/admin/models/{id}":                       {label: "删除模型", target: "model"},
 	"PUT /api/admin/templates/{id}":                       {label: "保存模板", target: "template"},
 	"DELETE /api/admin/templates/{id}":                    {label: "删除模板", target: "template"},

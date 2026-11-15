@@ -13,6 +13,7 @@ import ModelEditor, {
   modelKinds,
 } from "../components/ModelEditor";
 import ModelTable from "../models/ModelTable";
+import ModelOrder from "../models/ModelOrder";
 import { modelSections, type ModelSection } from "../models/sections";
 import { ask } from "../confirm/ask";
 import { restoreModel, purgeModel } from "../models/restore";
@@ -143,6 +144,16 @@ export default function Models({ notify }: PageProps) {
             </p>
           </div>
           <div className="catalog-actions">
+            {!deleted && (
+              <ModelOrder
+                kind={kind}
+                disabled={!!busy}
+                onSaved={() => {
+                  notify("排序已保存，小程序将按新顺序展示模型");
+                  void resource.reload();
+                }}
+              />
+            )}
             <button className="secondary" onClick={sync} disabled={!!busy}>
               <RefreshCw size={15} className={busy === "sync" ? "spin" : ""} />
               {busy === "sync" ? "同步中…" : "同步上游"}

@@ -1,0 +1,76 @@
+.model-order {
+  width: min(680px, calc(100vw - 24px));
+}
+.model-order > footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 24px;
+  border-top: 1px solid var(--line);
+}
+.model-order-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 16px 24px;
+}
+.model-order-toolbar select {
+  width: 160px;
+}
+.model-order-list {
+  overflow-y: auto;
+  min-height: 160px;
+  max-height: 50vh;
+  padding: 0 24px 16px;
+}
+.model-order-list ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.model-order-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+.model-order-list li.drop-target {
+  box-shadow: inset 0 2px var(--accent);
+}
+.model-order-grip {
+  cursor: grab;
+  flex-shrink: 0;
+}
+.model-order-grip:active {
+  cursor: grabbing;
+}
+.model-order-name {
+  flex: 1;
+  min-width: 0;
+}
+.model-order-name b {
+  display: block;
+  overflow-wrap: anywhere;
+}
+.model-order-name small {
+  display: block;
+  margin-top: 4px;
+}
+.model-order-error {
+  margin: 0;
+  padding: 12px 24px;
+  color: var(--danger);
+}
+@media (max-width: 600px) {
+  .model-order-toolbar {
+    padding: 12px;
+  }
+  .model-order-list {
+    padding: 0 12px 12px;
+  }
+  .model-order-list li {
+    gap: 6px;
+  }
+}
