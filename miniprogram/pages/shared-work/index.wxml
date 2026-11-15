@@ -3,12 +3,10 @@
     >{{loadError}}</view
   ><view wx:if="{{work}}" class="biz-card"
     ><text class="biz-heading">{{work.title}}</text
-    ><image
+    ><result-gallery
       wx:if="{{work.kind==='image'}}"
-      class="biz-preview"
-      src="{{work.result}}"
-      mode="widthFix"
-      bindtap="preview"
+      images="{{work.results}}"
+      bind:preview="preview"
     /><video wx:else class="biz-preview" src="{{work.result}}" controls /><text
       wx:if="{{work.prompt}}"
       class="biz-note"

@@ -7,6 +7,19 @@ export default function PricingFields({ model: m, onChange }: SettingsProps) {
     video = m.kind === "video";
   if (m.kind !== "image" && !video) return null;
   const perRequest = video && s.videoBillingMode === "per_request";
+  if (!e.resolutions.length || (video && !perRequest && !e.durations.length)) {
+    return (
+      <Card title="基础积分计费">
+        <p>当前模型没有可配置的定价档位，按「基础信息 → 消耗积分」计费。</p>
+        <p>
+          <strong>每次生成消耗 {m.points} 积分</strong>
+        </p>
+        <p className="config-hint">
+          需要调整价格时，请在基础信息中修改消耗积分。
+        </p>
+      </Card>
+    );
+  }
   const rows = video
     ? e.durations.map((d) => [d + "s", d + "s"])
     : e.qualities.length
@@ -25,6 +38,10 @@ export default function PricingFields({ model: m, onChange }: SettingsProps) {
       : "积分定价（画质 × 清晰度）";
   return (
     <Card title={title}>
+      <p className="config-hint">
+        对应档位填写了价格时优先使用该价格；留空则每次生成消耗 {m.points}{" "}
+        积分（基础信息中的消耗积分）。填写 0 表示免费。
+      </p>
       <div
         className="config-matrix"
         role="region"
@@ -61,7 +78,7 @@ export default function PricingFields({ model: m, onChange }: SettingsProps) {
                         max={1e9}
                         step="any"
                         value={s.pricePerRequestByResolution?.[r] ?? ""}
-                        placeholder="—"
+                        placeholder={`基础 ${m.points}`}
                         onChange={(event) => {
                           const values = { ...s.pricePerRequestByResolution };
                           if (event.target.value === "") delete values[r];
@@ -83,7 +100,7 @@ export default function PricingFields({ model: m, onChange }: SettingsProps) {
                           min={0}
                           max={1e9}
                           step="any"
-                          placeholder="—"
+                          placeholder={`基础 ${m.points}`}
                           value={s.priceMatrix?.[key]?.[r] ?? ""}
                           onChange={(event) => cell(key, r, event.target.value)}
                         />
@@ -95,8 +112,7 @@ export default function PricingFields({ model: m, onChange }: SettingsProps) {
         </table>
       </div>
       <p className="config-hint">
-        不同档位可设置不同积分；留空使用基础积分，填写 0
-        表示免费。开启系统设置中的生成扣费后生效。
+        清空已填价格并保存后，该档位恢复使用基础信息中的消耗积分。
       </p>
     </Card>
   );

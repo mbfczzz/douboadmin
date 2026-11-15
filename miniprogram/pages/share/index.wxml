@@ -5,11 +5,10 @@
   ><view wx:if="{{loadError}}" class="biz-error">{{loadError}}</view
   ><block wx:if="{{job}}"
     ><view class="biz-card"
-      ><image
+      ><result-gallery
         wx:if="{{job.input.kind==='image'}}"
-        class="biz-preview share-preview"
-        src="{{job.result}}"
-        mode="aspectFit" /><video
+        images="{{job.results}}"
+        bind:preview="preview" /><video
         wx:else
         class="biz-preview share-preview"
         src="{{job.result}}"

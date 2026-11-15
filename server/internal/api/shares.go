@@ -14,6 +14,7 @@ type sharedWork struct {
 	Title     string    `json:"title"`
 	Kind      string    `json:"kind"`
 	Result    string    `json:"result"`
+	Results   []string  `json:"results,omitempty"`
 	Prompt    string    `json:"prompt,omitempty"`
 	ExpiresAt time.Time `json:"expiresAt"`
 }
@@ -86,7 +87,18 @@ func (a *Server) shared(r *http.Request) (sharedWork, error) {
 	if e = a.checkShareAccess(r.Context(), j); e != nil {
 		return out, e
 	}
-	if a.Media != nil && j.Result != "" {
+	if j.Input.Kind == "image" {
+		j.Results, e = core.ResultRefs(j.Result)
+		if e == nil && a.Media != nil {
+			j.Results, e = a.Media.ResultURLs(r.Context(), j.Result)
+		}
+		if e != nil {
+			return out, e
+		}
+		if len(j.Results) > 0 {
+			j.Result = j.Results[0]
+		}
+	} else if a.Media != nil && j.Result != "" {
 		j.Result, e = a.Media.URL(r.Context(), j.Result)
 		if e != nil {
 			return out, e
@@ -95,7 +107,7 @@ func (a *Server) shared(r *http.Request) (sharedWork, error) {
 	if j.Result == "" {
 		return out, fmt.Errorf("作品结果暂不可用")
 	}
-	out = sharedWork{Title: share.Title, Kind: j.Input.Kind, Result: j.Result, ExpiresAt: share.ExpiresAt}
+	out = sharedWork{Title: share.Title, Kind: j.Input.Kind, Result: j.Result, Results: j.Results, ExpiresAt: share.ExpiresAt}
 	if share.ShowPrompt {
 		out.Prompt = j.Input.Prompt
 	}

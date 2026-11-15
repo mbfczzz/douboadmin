@@ -106,6 +106,7 @@ export interface Job {
   status: string;
   progress: number;
   result?: string;
+  results?: string[];
   error?: string;
   demo: boolean;
   attempts: number;
@@ -121,6 +122,8 @@ export interface Model {
   >;
   icon?: string;
   settings?: {
+    hideQuality?: boolean;
+    hideResolution?: boolean;
     defaultPrompt?: string;
     ideas?: string[];
     maxPromptChars?: number;

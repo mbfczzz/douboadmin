@@ -24,13 +24,10 @@ func Parse(raw []byte, kind string) (Response, error) {
 		ErrorMessage string          `json:"error_message"`
 		OutputURL    string          `json:"output_url"`
 		OutputURLs   []string        `json:"output_urls"`
+		Data         json.RawMessage `json:"data"`
 		Audio        *struct {
 			URL string `json:"url"`
 		} `json:"audio"`
-		Data []struct {
-			URL    string `json:"url"`
-			Base64 string `json:"b64_json"`
-		} `json:"data"`
 		Choices []struct {
 			Message struct {
 				Content string `json:"content"`
@@ -54,6 +51,12 @@ func Parse(raw []byte, kind string) (Response, error) {
 		if len(v.Choices) > 0 {
 			r.Result = strings.TrimSpace(v.Choices[0].Message.Content)
 		}
+	} else if kind == "image" {
+		var err error
+		r.Result, err = imageResults(raw)
+		if err != nil {
+			return r, err
+		}
 	} else {
 		r.Result = v.OutputURL
 		if r.Result == "" && v.Audio != nil {
@@ -62,8 +65,11 @@ func Parse(raw []byte, kind string) (Response, error) {
 		if len(v.OutputURLs) > 0 {
 			r.Result = v.OutputURLs[0]
 		}
-		if len(v.Data) > 0 && v.Data[0].URL != "" {
-			r.Result = v.Data[0].URL
+		var data []struct {
+			URL string `json:"url"`
+		}
+		if json.Unmarshal(v.Data, &data) == nil && len(data) > 0 && data[0].URL != "" {
+			r.Result = data[0].URL
 		}
 		if r.Result == "" {
 			r.Result = nestedResult(raw)

@@ -188,6 +188,7 @@ test("leaving photo confirmation prevents a late upload from attaching itself", 
 test("saving a work twice while downloading starts only one download", async () => {
   const h = harness(),
     page = h.page("task-detail");
+  await h.api.signIn();
   let calls = 0,
     download;
   page.setData({ job: job() });

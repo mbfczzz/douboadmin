@@ -1,8 +1,10 @@
 import { request, error, enterPage, media } from "../../utils/api";
+import { resultImages } from "../../services/result-images";
 interface Work {
   title: string;
   kind: string;
   result: string;
+  results?: string[];
   prompt?: string;
 }
 Page({
@@ -19,6 +21,7 @@ Page({
   onUnload() {
     this.revision++;
   },
+  onHide() { this.revision++; },
   async load() {
     const version = ++this.revision;
     try {
@@ -31,6 +34,7 @@ Page({
       );
       if (version !== this.revision) return;
       work.result = media(work.result);
+      if (work.kind === "image") work.results = resultImages(work);
       this.setData({ work, loadError: "" });
     } catch (e) {
       if (version === this.revision)
@@ -39,9 +43,15 @@ Page({
       if (version === this.revision) this.setData({ loading: false });
     }
   },
-  preview() {
-    if (this.data.work?.kind === "image")
-      wx.previewImage({ urls: [this.data.work.result] });
+  async preview(e?: WechatMiniprogram.CustomEvent<{ index?: number }>) {
+    const index = e?.detail?.index || 0;
+    const revision = this.revision + 1;
+    await this.load();
+    if (this.revision !== revision || this.data.loadError) return;
+    if (this.data.work?.kind === "image") {
+      const urls = resultImages(this.data.work);
+      if (urls[index]) wx.previewImage({ current: urls[index], urls });
+    }
   },
   home() {
     wx.switchTab({ url: "/pages/templates/index" });

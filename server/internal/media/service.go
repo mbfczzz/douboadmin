@@ -62,6 +62,9 @@ func (s *Service) Inputs(ctx context.Context, j core.Job) ([]core.Reference, err
 
 // Save transfers relay results to owned storage. Deterministic IDs make retries safe.
 func (s *Service) Save(ctx context.Context, j core.Job, u string) (string, error) {
+	if j.Input.Kind == "image" && strings.HasPrefix(u, "[") {
+		return s.saveImages(ctx, j, u)
+	}
 	id := core.Digest(j.ID + ":result")[:32]
 	if _, err := s.Store.Get(ctx, "assets", id); err == nil {
 		return "asset:" + id, nil

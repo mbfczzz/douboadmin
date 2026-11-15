@@ -29,6 +29,8 @@ export const modelFieldLabels: Record<string, string> = {
   resolutions: "支持清晰度",
   ratios: "支持比例",
   qualities: "支持画质",
+  hideQuality: "隐藏小程序画质选择",
+  hideResolution: "隐藏小程序清晰度选择",
   durations: "支持时长",
   maxRefImages: "最大参考图数量",
   maxRefImageSizeMB: "参考图大小上限（MB）",

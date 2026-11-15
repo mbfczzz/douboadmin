@@ -1,4 +1,5 @@
-import { keepImages, recallRow, freshUrl, noteIssued } from "../../utils/view-cache";
+import { keepImages, recallRow } from "../../utils/view-cache";
+import { saveResults, previewResults } from "./results";
 import { ask } from "../../services/dialog";
 import {
   request,
@@ -10,13 +11,10 @@ import {
   openTab,
   hasSession,
   login,
-  cancelled,
-  saveFailed,
   openPage,
 } from "../../utils/api";
 import type { Job, Row, Asset } from "../../services/types";
 import { confirmBudget } from "../../services/business";
-import { track } from "../../services/analytics";
 Page({
   data: {
     job: null as ReturnType<typeof jobView> | null,
@@ -36,11 +34,12 @@ Page({
   retryKey: "",
   retryApproval: undefined as number | undefined,
   destroyed: false,
+  visible: true,
   onLoad(o: Record<string, string>) {
     this.id = o.id;
     // Opened from the queue or works list: show that row now, then refresh.
     const known = recallRow<ReturnType<typeof jobView>>(o.id);
-    if (known) this.setData({ job: known, loading: false });
+    if (known) this.setData({ job: jobView(known), loading: false });
     // The key is only stored once a retry is attempted, so opening task
     // details does not leave storage entries behind.
     this.retryKey = wx.getStorageSync("retry-" + this.id) || uid();
@@ -48,6 +47,7 @@ Page({
     if (typeof approval === "number") this.retryApproval = approval;
   },
   onShow() {
+    this.visible = true;
     this.setData({ autoplay: !!wx.getStorageSync("autoplay-preference") });
     enterPage(this);
     void this.load();
@@ -75,9 +75,11 @@ Page({
     }
   },
   onHide() {
+    this.visible = false;
     clearInterval(this.timer);
   },
   onUnload() {
+    this.visible = false;
     this.destroyed = true;
     clearInterval(this.timer);
   },
@@ -214,39 +216,11 @@ Page({
         : "/pages/create/index",
     );
   },
-  async save() {
-    if (this.data.busy || !this.data.job?.result) return;
-    this.setData({ busy: true });
-    try {
-      // A finished task stops refreshing; get a newly signed URL if the one
-      // on screen may be close to expiring.
-      if (!freshUrl(this.data.job.result)) {
-        const fresh = jobView(await request<Job>("/jobs/" + this.id));
-        noteIssued(fresh.result, fresh.thumbnailUrl);
-        if (!this.destroyed) this.setData({ job: fresh });
-      }
-      const j = this.data.job!;
-      if (!j.result) throw new Error("作品暂时无法下载");
-      const f =
-        await new Promise<WechatMiniprogram.DownloadFileSuccessCallbackResult>(
-          (resolve, reject) =>
-            wx.downloadFile({ url: j.result!, success: resolve, fail: reject }),
-        );
-      if (f.statusCode !== 200) throw new Error("下载失败");
-      if (j.input.kind === "image")
-        await wx.saveImageToPhotosAlbum({ filePath: f.tempFilePath });
-      else await wx.saveVideoToPhotosAlbum({ filePath: f.tempFilePath });
-      wx.showToast({ title: "已保存到相册", icon: "success" });
-      track("work_saved", "task-detail", j.id);
-    } catch (e) {
-      if (!cancelled(e)) saveFailed(e);
-    } finally {
-      this.setData({ busy: false });
-    }
+  save(e?: WechatMiniprogram.CustomEvent<{ index?: number }>) {
+    return saveResults(this, e?.detail?.index);
   },
-  preview() {
-    if (this.data.job?.result)
-      wx.previewImage({ urls: [this.data.job.result] });
+  preview(e?: WechatMiniprogram.CustomEvent<{ index?: number }>) {
+    return previewResults(this, e?.detail?.index || 0);
   },
   share() {
     if (!this.data.job || this.data.job.deleted) return;

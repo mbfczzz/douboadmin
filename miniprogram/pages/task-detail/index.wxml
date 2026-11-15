@@ -50,11 +50,13 @@
       wx:if="{{job.status==='succeeded'&&!job.deleted}}"
       class="result content-reveal"
     >
-      <image
+      <result-gallery
         wx:if="{{job.input.kind==='image'}}"
-        src="{{job.result}}"
-        mode="widthFix"
-        bindtap="preview"
+        images="{{job.results}}"
+        allow-save
+        busy="{{busy}}"
+        bind:preview="preview"
+        bind:save="save"
       />
       <video
         wx:else
@@ -66,7 +68,7 @@
       />
     </view>
     <view wx:if="{{job.status==='succeeded'&&!job.deleted}}" class="result-actions">
-      <view class="act" bindtap="save" hover-class="act-pressed" aria-role="button"><view class="act-icon primary"><t-loading wx:if="{{busy}}" size="20px" /><image wx:else class="gl gl-22" src="/assets/glyphs/download-dark.png" /></view><text>保存</text></view>
+      <view class="act" bindtap="save" hover-class="act-pressed" aria-role="button"><view class="act-icon primary"><t-loading wx:if="{{busy}}" size="20px" /><image wx:else class="gl gl-22" src="/assets/glyphs/download-dark.png" /></view><text>{{job.results.length>1?'保存全部':'保存'}}</text></view>
       <view class="act" bindtap="share" hover-class="act-pressed" aria-role="button"><view class="act-icon"><image class="gl gl-22" src="/assets/glyphs/share.png" /></view><text>分享</text></view>
       <view class="act" bindtap="edit" hover-class="act-pressed" aria-role="button"><view class="act-icon"><image class="gl gl-22" src="/assets/glyphs/edit.png" /></view><text>再编辑</text></view>
       <view class="act" bindtap="remove" hover-class="act-pressed" aria-role="button"><view class="act-icon"><image class="gl gl-22" src="/assets/glyphs/delete-danger.png" /></view><text>删除</text></view>

@@ -13,9 +13,26 @@ var uncertainPrefix = strings.SplitN(provider.ErrUncertain.Error(), "，", 2)[0]
 
 func (a *Server) presentJob(ctx context.Context, j *core.Job) {
 	resultRef := j.Result
+	j.Results = nil
+	if j.Input.Kind == "image" {
+		refs, err := core.ResultRefs(resultRef)
+		j.Result = ""
+		if err == nil && len(refs) > 0 {
+			resultRef, j.Result = refs[0], refs[0]
+			j.Results = refs
+			if a.Media != nil {
+				j.Results, _ = a.Media.ResultURLs(ctx, core.PackResults(refs))
+			}
+			if len(j.Results) > 0 {
+				j.Result = j.Results[0]
+			} else {
+				j.Result = ""
+			}
+		}
+	}
 	j.ThumbnailURL = ""
-	if strings.HasPrefix(j.Result, "asset:") {
-		j.ResultAssetID = strings.TrimPrefix(j.Result, "asset:")
+	if strings.HasPrefix(resultRef, "asset:") {
+		j.ResultAssetID = strings.TrimPrefix(resultRef, "asset:")
 	}
 	if row, e := a.Store.Get(ctx, "job_progress", j.ID); e == nil {
 		var progress struct {
@@ -56,6 +73,7 @@ func (a *Server) presentJob(ctx context.Context, j *core.Job) {
 			j.Result = u
 		} else {
 			j.Result = ""
+			j.Results = nil
 		}
 	}
 	if actor, ok := ctx.Value(identityKey).(Identity); ok && (actor.Role == "admin" || actor.Role == "user" && actor.ID == j.UserID) && j.Status == "succeeded" && !j.Deleted && j.Result != "" && a.Media != nil {
@@ -86,6 +104,7 @@ func (a *Server) presentJob(ctx context.Context, j *core.Job) {
 	if j.Deleted {
 		if actor, ok := ctx.Value(identityKey).(Identity); !ok || actor.Role != "admin" {
 			j.Result = ""
+			j.Results = nil
 		}
 	}
 }

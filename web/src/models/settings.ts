@@ -58,9 +58,9 @@ export function modelDraft(m: Model): ModelDraft {
     settings: {
       ...m.settings,
       modes: e.modes,
-      resolutions: e.resolutions,
+      resolutions: m.settings?.hideResolution ? [] : e.resolutions,
       ratios: e.ratios,
-      qualities: e.qualities,
+      qualities: m.settings?.hideQuality ? [] : e.qualities,
       durations: e.durations,
     },
   };

@@ -2,6 +2,7 @@
   "backgroundColorContent": "#0f0f11ff",
   "backgroundColor": "#0f0f11",
   "usingComponents": {
+    "result-gallery": "/components/result-gallery/index",
     "points-balance": "/components/points-balance/index",
     "t-loading": "tdesign-miniprogram/loading/loading"
   }

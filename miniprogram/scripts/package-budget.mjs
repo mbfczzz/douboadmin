@@ -124,7 +124,10 @@ console.log(
 // 我的 subpages get a themed backdrop photo (components/page-backdrop,
 // pictures in media/ui-art via /config): 741,585 B, over the 724 KiB line.
 // Limit 724 -> 728 KiB for this reviewed increment.
-const budget = 728 * 1024;
+// Multi-image results: shared native gallery, per-image/all-image saving and
+// shared-work previews and cache/lifecycle guards, +7,557 source bytes without new vendors.
+// Intentional feature allowance 728 -> 736 KiB; see docs/multi-image-results.md.
+const budget = 736 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

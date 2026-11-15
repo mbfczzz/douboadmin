@@ -54,8 +54,8 @@ export function modelSettings(
     durations,
     duration,
     durationIndex: Math.max(0, durations.indexOf(duration)),
-    qualities,
-    quality: qualities.includes(current.quality || "")
+    qualities: model.settings?.hideQuality ? [] : qualities,
+    quality: !model.settings?.hideQuality && qualities.includes(current.quality || "")
       ? current.quality || ""
       : qualities[0] || "",
     model: model.id,
@@ -81,8 +81,8 @@ export function resolutionSettings(
           (v) => !model.resolutions.length || model.resolutions.includes(v),
         );
   return {
-    resolutions,
-    resolution: resolutions.includes(current.resolution)
+    resolutions: model.settings?.hideResolution ? [] : resolutions,
+    resolution: !model.settings?.hideResolution && resolutions.includes(current.resolution)
       ? current.resolution
       : resolutions[0] || "",
     parameterError:

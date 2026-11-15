@@ -23,6 +23,8 @@ type ModelSettings struct {
 	Resolutions                 []string                      `json:"resolutions,omitempty"`
 	Ratios                      []string                      `json:"ratios,omitempty"`
 	Qualities                   []string                      `json:"qualities,omitempty"`
+	HideQuality                 bool                          `json:"hideQuality,omitempty"`
+	HideResolution              bool                          `json:"hideResolution,omitempty"`
 	Durations                   []int                         `json:"durations,omitempty"`
 	MaxRefImages                int                           `json:"maxRefImages,omitempty"`
 	MaxRefImageSizeMB           float64                       `json:"maxRefImageSizeMB,omitempty"`

@@ -28,12 +28,12 @@ test("last-seen views belong to one account, expire, and keep shown image URLs",
   const other = harness(); // another launch, signed out: nothing leaks
   other.storage.set("view-cache:mine", h.storage.get("view-cache:mine"));
   assert.equal(other.service("../utils/view-cache").readView("mine", 60000), undefined);
-  const shown = view.keepImages([], [{ id: "a", thumbnailUrl: "https://x/a?sig=1" }]); // arrives now
+  const shown = view.keepImages([], [{ id: "a", thumbnailUrl: "https://x/a?Signature=1" }]); // arrives now
   const kept = view.keepImages(
     shown,
-    [{ id: "a", thumbnailUrl: "https://x/a?sig=2" }, { id: "b", thumbnailUrl: "https://x/b?sig=2" }],
+    [{ id: "a", thumbnailUrl: "https://x/a?Signature=2" }, { id: "b", thumbnailUrl: "https://x/b?Signature=2" }],
   );
-  assert.deepEqual([...kept].map((r) => r.thumbnailUrl), ["https://x/a?sig=1", "https://x/b?sig=2"]);
+  assert.deepEqual([...kept].map((r) => r.thumbnailUrl), ["https://x/a?Signature=1", "https://x/b?Signature=2"]);
   view.rememberRows([{ id: "t1", data: { title: "海边" } }]);
   assert.equal(view.recallRow("t1").data.title, "海边");
 });
@@ -59,14 +59,14 @@ test("only young signed URLs are kept; unknown or old ones are replaced", async 
   try {
     let now = 1_000_000;
     Date.now = () => now;
-    const first = view.keepImages([], [{ id: "a", thumbnailUrl: "u1", result: "r1" }]);
+    const first = view.keepImages([], [{ id: "a", thumbnailUrl: "https://x/u?Signature=1", result: "https://x/r?Signature=1" }]);
     now += 60 * 1000; // a minute later the poll re-signs
-    const second = view.keepImages(first, [{ id: "a", thumbnailUrl: "u2", result: "r2" }]);
-    assert.equal(second[0].thumbnailUrl, "u1"); // young: kept, no reload
+    const second = view.keepImages(first, [{ id: "a", thumbnailUrl: "https://x/u?Signature=2", result: "https://x/r?Signature=2" }]);
+    assert.equal(second[0].thumbnailUrl, "https://x/u?Signature=1"); // young: kept, no reload
     now += 9 * 60 * 1000; // u1 is now 10 minutes old
-    const third = view.keepImages(second, [{ id: "a", thumbnailUrl: "u3", result: "r3" }]);
-    assert.equal(third[0].thumbnailUrl, "u3"); // old: replaced before it expires
-    assert.equal(third[0].result, "r3");
+    const third = view.keepImages(second, [{ id: "a", thumbnailUrl: "https://x/u?Signature=3", result: "https://x/r?Signature=3" }]);
+    assert.equal(third[0].thumbnailUrl, "https://x/u?Signature=3"); // old: replaced before it expires
+    assert.equal(third[0].result, "https://x/r?Signature=3");
     // A URL restored from storage was never seen arriving: treated as old.
     const restored = view.keepImages([{ id: "b", thumbnailUrl: "cached" }], [{ id: "b", thumbnailUrl: "new" }]);
     assert.equal(restored[0].thumbnailUrl, "new");
@@ -137,6 +137,7 @@ test("the URL issue-time table stays bounded during long polling", () => {
 
 test("saving re-fetches a result URL that may be close to expiring", async () => {
   const h = harness();
+  await h.api.signIn();
   const page = h.page("task-detail");
   page.onLoad({ id: "j1" });
   page.setData({ job: { id: "j1", status: "succeeded", result: "https://x/old", input: { kind: "image", assets: [] } } });

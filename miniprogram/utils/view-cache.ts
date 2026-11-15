@@ -35,12 +35,14 @@ export function writeView<T>(key: string, value: T, persist = true) {
 
 // Rows a list just showed, by id (this session only): a detail page opened
 // from that list paints from it at once, then refreshes.
-const rows = new Map<string, unknown>();
+const rows = new Map<string, { owner: string; value: unknown }>();
 export function rememberRows(list: { id: string }[]) {
-  for (const row of list) rows.set(row.id, row);
+  const owner = sessionUserId();
+  for (const row of list) rows.set(row.id, { owner, value: row });
 }
 export function recallRow<T>(id: string): T | undefined {
-  return rows.get(id) as T | undefined;
+  const row = rows.get(id);
+  return row?.owner === sessionUserId() ? row.value as T : undefined;
 }
 
 // Signed image URLs (results, thumbnails, avatars: 15 min; covers: at least
@@ -63,19 +65,33 @@ export function freshUrl(url: string | undefined) {
   return !!url && Date.now() - (issued.get(url) ?? 0) < URL_KEEP_MS;
 }
 
+function sameImage(a: string, b: string) {
+  const key = (url: string) => {
+    const [base, query = ""] = url.split("?");
+    const params = query.split("&").filter((part) =>
+      !/^(OSSAccessKeyId|Expires|Signature|x-oss-(security-token|signature(-version)?|credential|date|expires))=/i.test(part));
+    return base + "?" + params.sort().join("&");
+  };
+  return key(a) === key(b);
+}
+
 // Polling re-signs image URLs on every response; a changed src blanks and
 // re-downloads the image. Keep the URL already shown for the same row while
 // it is still young; otherwise take the new one.
-export function keepImages<T extends { id: string; thumbnailUrl?: string; result?: string }>(shown: T[], fresh: T[]): T[] {
+export function keepImages<T extends { id: string; thumbnailUrl?: string; result?: string; results?: string[] }>(shown: T[], fresh: T[]): T[] {
   const before = new Map(shown.map((row) => [row.id, row]));
   return fresh.map((row) => {
-    noteIssued(row.thumbnailUrl, row.result);
+    noteIssued(row.thumbnailUrl, row.result, ...(row.results || []));
     const old = before.get(row.id);
     if (!old) return row;
     return {
       ...row,
-      ...(row.thumbnailUrl && freshUrl(old.thumbnailUrl) ? { thumbnailUrl: old.thumbnailUrl } : {}),
-      ...(row.result && freshUrl(old.result) ? { result: old.result } : {}),
+      ...(row.thumbnailUrl && old.thumbnailUrl && freshUrl(old.thumbnailUrl) && sameImage(old.thumbnailUrl, row.thumbnailUrl) ? { thumbnailUrl: old.thumbnailUrl } : {}),
+      ...(row.result && old.result && freshUrl(old.result) && sameImage(old.result, row.result) ? { result: old.result } : {}),
+      ...(row.results ? { results: row.results.map((url, i) => {
+        const previous = old.results?.[i];
+        return previous && sameImage(previous, url) && freshUrl(previous) ? previous : url;
+      }) } : {}),
     };
   });
 }

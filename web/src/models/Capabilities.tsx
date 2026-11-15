@@ -187,7 +187,9 @@ export default function Capabilities({ model: m, onChange }: SettingsProps) {
         <Section
           label="支持画质"
           hint={
-            !m.qualities.length ? "该模型由上游固定画质，无需选择" : undefined
+            !m.qualities.length
+              ? "该模型由上游固定画质，无需选择"
+              : "全部取消后，小程序隐藏画质选择，生成使用首个可用档位。"
           }
         >
           <Chips
@@ -195,7 +197,9 @@ export default function Capabilities({ model: m, onChange }: SettingsProps) {
             allowed={m.qualities}
             selected={s.qualities || m.qualities}
             labels={qualityLabels}
-            onChange={(qualities) => onChange({ qualities })}
+            onChange={(qualities) =>
+              onChange({ qualities, hideQuality: qualities.length === 0 })
+            }
           />
         </Section>
       )}
@@ -208,7 +212,10 @@ export default function Capabilities({ model: m, onChange }: SettingsProps) {
           />
         </Section>
       )}
-      <Section label="支持清晰度">
+      <Section
+        label="支持清晰度"
+        hint="全部取消后，小程序隐藏清晰度选择，生成使用当前生成方式的首个可用档位。"
+      >
         <Chips
           options={resolutionOptions}
           allowed={m.resolutions}
@@ -219,7 +226,9 @@ export default function Capabilities({ model: m, onChange }: SettingsProps) {
               r === "auto" ? "自动" : r.toUpperCase(),
             ]),
           )}
-          onChange={(resolutions) => onChange({ resolutions })}
+          onChange={(resolutions) =>
+            onChange({ resolutions, hideResolution: resolutions.length === 0 })
+          }
         />
       </Section>
       <Section

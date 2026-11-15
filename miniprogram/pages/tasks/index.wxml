@@ -65,7 +65,7 @@
             binderror="coverError"
           />
           <image wx:else class="gl gl-32" src="/assets/glyphs/play-muted-lg.png" />
-          <view class="cover-badge"><t-icon name="{{item.input.kind==='image'?'image':'play-circle-filled'}}" size="12" /><text wx:if="{{item.input.kind!=='image'&&item.input.duration}}">{{item.input.duration}}s</text></view>
+          <view class="cover-badge"><t-icon name="{{item.input.kind==='image'?'image':'play-circle-filled'}}" size="12" /><text wx:if="{{item.results.length>1}}">{{item.results.length}} 张</text><text wx:elif="{{item.input.kind!=='image'&&item.input.duration}}">{{item.input.duration}}s</text></view>
         </view>
         <text class="completed-title">{{item.shortTitle}}</text>
       </view>

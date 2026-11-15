@@ -34,10 +34,10 @@ export default function BasicFields({
           </select>
         </Field>
         <NumberField
-          label={m.kind === "video" ? "兜底积分" : "消耗积分"}
+          label="消耗积分"
           value={m.points}
           onChange={(points) => onChange({ ...m, points })}
-          hint="按次积分配置，支持小数"
+          hint="未设置对应档位定价时，每次生成按此积分扣费；支持小数，0 表示免费。"
         />
         <Field label="成本价（USD）" hint="仅后台参考，不向小程序展示">
           <input

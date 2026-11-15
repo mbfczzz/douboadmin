@@ -62,3 +62,44 @@ test("model-specific prompt limit stops generation before submitting a task", as
   assert.equal(submissions, 0);
   assert.equal(page.data.prompt.length, 101);
 });
+
+test("hidden selectors use valid defaults for both pricing and submission and can be restored", async () => {
+  const h = harness(), page = h.page("create");
+  let hidden = true, submitted;
+  h.api.request = async () => ({ models: [{ ...model,
+    resolutions: ["1k", "2k"], qualities: ["1", "4"],
+    settings: { ...model.settings, hideQuality: hidden, hideResolution: hidden },
+  }] });
+  h.api.submitInput = async (input) => { submitted = input; return { id: "hidden-test" }; };
+  page.setData({ kind: "image", quality: "4", resolution: "2k" });
+  await page.loadModels();
+  assert.equal(page.data.qualities.length, 0);
+  assert.equal(page.data.resolutions.length, 0);
+  assert.equal(page.data.quality, "1");
+  assert.equal(page.data.resolution, "1k");
+  assert.equal(page.data.parameterError, "");
+  await page.generate();
+  assert.equal(submitted.quality, "1");
+  assert.equal(submitted.resolution, "1k");
+  hidden = false;
+  await page.loadModels();
+  assert.deepEqual(Array.from(page.data.qualities), ["1", "4"]);
+  assert.deepEqual(Array.from(page.data.resolutions), ["1k", "2k"]);
+});
+
+test("hidden resolution follows the current generation mode instead of an unsupported default", async () => {
+  const h = harness(), page = h.page("create");
+  h.api.request = async () => ({ models: [{ ...model,
+    modes: ["t2i", "i2i"], resolutions: ["1k", "2k"],
+    resolutionByMode: { t2i: ["1k"], i2i: ["2k"] },
+    settings: { ...model.settings, hideResolution: true },
+  }] });
+  page.setData({ kind: "image" });
+  await page.loadModels();
+  assert.equal(page.data.resolution, "1k");
+  page.setData({ assets: [{ id: "reference", data: { type: "image/png" } }] });
+  page.refreshParameters();
+  assert.equal(page.data.resolution, "2k");
+  assert.equal(page.data.resolutions.length, 0);
+  assert.equal(page.data.parameterError, "");
+});

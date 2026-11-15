@@ -8,6 +8,7 @@ import {
 } from "../../utils/api";
 import type { Job } from "../../services/types";
 import { track } from "../../services/analytics";
+import { resultImages } from "../../services/result-images";
 interface Share {
   token: string;
   path: string;
@@ -41,6 +42,7 @@ Page({
     this.shareRevision++;
     this.destroyed = true;
   },
+  onHide() { this.revision++; },
   async signIn() {
     try {
       await login();
@@ -60,6 +62,7 @@ Page({
       const job = await request<Job>("/jobs/" + this.id);
       if (revision !== this.revision) return;
       if (job.result) job.result = media(job.result);
+      if (job.input.kind === "image") job.results = resultImages(job);
       if (job.deleted) {
         this.shareRevision++;
         this.setData({ share: null });
@@ -77,6 +80,14 @@ Page({
   input(e: WechatMiniprogram.Input) {
     this.shareRevision++;
     this.setData({ title: e.detail.value, share: null });
+  },
+  async preview(e: WechatMiniprogram.CustomEvent<{ index: number }>) {
+    const revision = this.revision + 1;
+    await this.load();
+    if (this.destroyed || this.revision !== revision || this.data.loadError) return;
+    if (!this.data.job || this.data.job.deleted || this.data.needsLogin) return;
+    const urls = resultImages(this.data.job);
+    if (urls[e.detail.index]) wx.previewImage({ urls, current: urls[e.detail.index] });
   },
   prompt(e: WechatMiniprogram.CustomEvent<{ value: boolean }>) {
     this.shareRevision++;

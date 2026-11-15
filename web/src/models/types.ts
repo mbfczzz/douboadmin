@@ -8,6 +8,8 @@ export interface ModelSettings {
   resolutions?: string[];
   ratios?: string[];
   qualities?: string[];
+  hideQuality?: boolean;
+  hideResolution?: boolean;
   durations?: number[];
   maxRefImages?: number;
   maxRefImageSizeMB?: number;

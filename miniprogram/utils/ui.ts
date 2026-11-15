@@ -5,6 +5,7 @@ import type { Job } from "../services/types";
 import { enterPage } from "./motion";
 import { openPage } from "./navigation";
 import { track } from "../services/analytics";
+import { resultImages } from "../services/result-images";
 // Saving to the album failed. Once permission is denied WeChat never asks
 // again, so offer the settings page; a cancelled picker says nothing.
 export function saveFailed(e: unknown) {
@@ -66,6 +67,7 @@ export function jobView(j: Job) {
     modelName: j.modelName || "模型信息暂缺",
     time: date(j.createdAt),
     result: j.result && j.input.kind !== "chat" ? media(j.result) : j.result,
+    results: j.input.kind === "image" ? resultImages(j) : [],
     shortTitle: j.input.prompt.slice(0, 24),
   };
 }
