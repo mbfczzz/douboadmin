@@ -147,7 +147,15 @@ export default function ModelEditor({
           >
             取消
           </button>
-          <button className="primary" disabled={busy}>
+          <button
+            className="primary"
+            disabled={
+              busy ||
+              (section === "capabilities" &&
+                model.kind === "video" &&
+                !model.settings.durations?.length)
+            }
+          >
             {busy ? "保存中…" : "保存"}
           </button>
         </footer>

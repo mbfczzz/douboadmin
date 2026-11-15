@@ -67,23 +67,23 @@ test("hidden selectors use valid defaults for both pricing and submission and ca
   const h = harness(), page = h.page("create");
   let hidden = true, submitted;
   h.api.request = async () => ({ models: [{ ...model,
-    resolutions: ["1k", "2k"], qualities: ["1", "4"],
+    resolutions: ["1k", "2k"], qualities: ["low", "high"],
     settings: { ...model.settings, hideQuality: hidden, hideResolution: hidden },
   }] });
   h.api.submitInput = async (input) => { submitted = input; return { id: "hidden-test" }; };
-  page.setData({ kind: "image", quality: "4", resolution: "2k" });
+  page.setData({ kind: "image", quality: "high", resolution: "2k" });
   await page.loadModels();
   assert.equal(page.data.qualities.length, 0);
   assert.equal(page.data.resolutions.length, 0);
-  assert.equal(page.data.quality, "1");
+  assert.equal(page.data.quality, "low");
   assert.equal(page.data.resolution, "1k");
   assert.equal(page.data.parameterError, "");
   await page.generate();
-  assert.equal(submitted.quality, "1");
+  assert.equal(submitted.quality, "low");
   assert.equal(submitted.resolution, "1k");
   hidden = false;
   await page.loadModels();
-  assert.deepEqual(Array.from(page.data.qualities), ["1", "4"]);
+  assert.deepEqual(Array.from(page.data.qualities), ["low", "high"]);
   assert.deepEqual(Array.from(page.data.resolutions), ["1k", "2k"]);
 });
 
@@ -102,4 +102,32 @@ test("hidden resolution follows the current generation mode instead of an unsupp
   assert.equal(page.data.resolution, "2k");
   assert.equal(page.data.resolutions.length, 0);
   assert.equal(page.data.parameterError, "");
+});
+
+test("expanded video parameters submit the user's selection, never the configured maximum", async () => {
+  const h = harness(), page = h.page("create");
+  let submitted;
+  h.api.request = async () => ({ models: [{ ...model, kind: "video", modes: ["t2v"], qualities: [],
+    resolutions: ["720p", "4k"], ratios: ["16:9", "21:9"], durations: Array.from({ length: 30 }, (_, i) => i + 1),
+  }] });
+  h.api.submitInput = async (input) => { submitted = input; return { id: "expanded" }; };
+  await page.loadModels();
+  page.duration({ detail: { value: 5 } });
+  page.chooseResolution({ currentTarget: { dataset: { value: "4k" } } });
+  page.chooseRatio({ currentTarget: { dataset: { value: "21:9" } } });
+  await page.generate();
+  assert.equal(submitted.duration, 6);
+  assert.equal(submitted.resolution, "4k");
+  assert.equal(submitted.ratio, "21:9");
+});
+
+test("quality labels tolerate legacy casing without rewriting the submitted price key", async () => {
+  const h = harness(), page = h.page("create");
+  h.api.request = async () => ({ models: [{ ...model, qualities: ["LOW", "MEDIUM", "HIGH"] }] });
+  page.setData({ kind: "image", quality: "MEDIUM" });
+  await page.loadModels();
+  assert.equal(page.data.qualityNames?.LOW, "低");
+  assert.equal(page.data.qualityNames?.MEDIUM, "中");
+  assert.equal(page.data.qualityNames?.HIGH, "高");
+  assert.equal(page.data.quality, "MEDIUM");
 });

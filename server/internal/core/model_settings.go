@@ -40,7 +40,7 @@ type ModelSettings struct {
 	AvailabilityStatus          string                        `json:"availabilityStatus,omitempty"`
 }
 
-// The upstream catalog remains authoritative. Operator choices only restrict it.
+// Modes retain their protocol restrictions; parameter overrides are authoritative.
 func selection[T comparable](upstream, configured []T) []T {
 	if len(configured) == 0 {
 		return upstream
@@ -54,18 +54,24 @@ func selection[T comparable](upstream, configured []T) []T {
 	return out
 }
 
+func parameterSelection[T comparable](upstream, configured []T) []T {
+	if len(configured) > 0 {
+		return slices.Clone(configured)
+	}
+	return upstream
+}
+
 func (m Model) Effective() Model {
 	s := m.Settings
-	before := []int{len(m.Modes), len(m.Resolutions), len(m.Ratios), len(m.Qualities), len(m.Durations)}
+	beforeModes := len(m.Modes)
 	m.Modes = selection(m.Modes, s.Modes)
-	m.Resolutions = selection(m.Resolutions, s.Resolutions)
-	m.Ratios = selection(m.Ratios, s.Ratios)
-	m.Qualities = selection(m.Qualities, s.Qualities)
-	m.Durations = selection(m.Durations, s.Durations)
-	for i, n := range []int{len(m.Modes), len(m.Resolutions), len(m.Ratios), len(m.Qualities), len(m.Durations)} {
-		if before[i] > 0 && n == 0 {
-			m.Available = false
-		}
+	m.Resolutions = parameterSelection(m.Resolutions, s.Resolutions)
+	m.Ratios = parameterSelection(m.Ratios, s.Ratios)
+	m.Qualities = parameterSelection(m.Qualities, s.Qualities)
+	m.Durations = parameterSelection(m.Durations, s.Durations)
+	m = m.fixedParameters()
+	if beforeModes > 0 && len(m.Modes) == 0 {
+		m.Available = false
 	}
 	refs := []string{}
 	for _, typ := range m.ReferenceTypes {

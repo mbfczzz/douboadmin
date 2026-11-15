@@ -68,6 +68,10 @@ func publicReferenceRules(m core.Model) map[string]map[string]core.ReferenceRule
 }
 
 func publicModeResolutions(m core.Model) map[string][]string {
+	// Explicit admin options override the relay's narrower per-mode declaration.
+	if m.Kind == "image" || m.Kind == "video" || len(m.Settings.Resolutions) > 0 {
+		return nil
+	}
 	var schema relay.Schema
 	_ = json.Unmarshal(m.ParamsSchema, &schema)
 	out := map[string][]string{}

@@ -58,6 +58,9 @@ func (a *Server) validateTemplate(r *http.Request, t *core.Template) error {
 	if t.Published && !m.Usable() {
 		return fmt.Errorf("发布前请先上架关联模型")
 	}
+	if !core.ParameterValuesAllowed(t.Kind, t.Resolution, t.Ratio, t.Quality, t.Duration) {
+		return fmt.Errorf("模板参数超出已开放选项，视频时长需为 1–30 秒")
+	}
 	if (len(m.Resolutions) > 0 && !slices.Contains(m.Resolutions, t.Resolution)) || (len(m.Ratios) > 0 && !slices.Contains(m.Ratios, t.Ratio)) || (len(m.Qualities) > 0 && !slices.Contains(m.Qualities, t.Quality)) {
 		return fmt.Errorf("模板参数与模型不匹配")
 	}

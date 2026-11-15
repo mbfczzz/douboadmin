@@ -40,7 +40,7 @@ export function modelSettings(
     assets?: Row<Asset>[];
   },
 ) {
-  const durations = model.durations || [];
+  const durations = [...new Set(model.durations || [])].filter((n) => Number.isInteger(n) && n >= 1 && n <= 30).sort((a, b) => a - b);
   const duration = durations.includes(current.duration || 0)
     ? current.duration || 0
     : durations[0] || 0;
@@ -55,6 +55,10 @@ export function modelSettings(
     duration,
     durationIndex: Math.max(0, durations.indexOf(duration)),
     qualities: model.settings?.hideQuality ? [] : qualities,
+    qualityNames: qualities.reduce<Record<string, string>>((names, value) => {
+      names[value] = ({ low: "低", medium: "中", high: "高" } as Record<string, string>)[value.toLowerCase()] || value;
+      return names;
+    }, {}),
     quality: !model.settings?.hideQuality && qualities.includes(current.quality || "")
       ? current.quality || ""
       : qualities[0] || "",

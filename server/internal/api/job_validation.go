@@ -27,6 +27,9 @@ func (a *Server) validateJob(ctx context.Context, user string, in *core.JobInput
 	if strings.TrimSpace(in.Prompt) == "" {
 		return fmt.Errorf("请输入创作描述")
 	}
+	if !core.ParameterValuesAllowed(in.Kind, in.Resolution, in.Ratio, in.Quality, in.Duration) {
+		return fmt.Errorf("请选择已开放的参数，视频时长需为 1–30 秒")
+	}
 	if limit := m.Settings.PromptLimit(m.Kind); len([]rune(in.Prompt)) > limit {
 		return fmt.Errorf("此模型的提示词最多 %d 字", limit)
 	}
@@ -99,7 +102,7 @@ func (a *Server) validateJob(ctx context.Context, user string, in *core.JobInput
 	if in.Kind == "image" && schema.EditImages.Max > 0 && len(in.Assets) > schema.EditImages.Max {
 		return fmt.Errorf("参考图片超过模型数量限制")
 	}
-	if supported := schema.ResolutionByMode[mode]; len(supported) > 0 && !slices.Contains(supported, in.Resolution) {
+	if supported := schema.ResolutionByMode[mode]; m.Kind != "image" && m.Kind != "video" && len(m.Settings.Resolutions) == 0 && len(supported) > 0 && !slices.Contains(supported, in.Resolution) {
 		return fmt.Errorf("此生成方式不支持所选分辨率")
 	}
 	for typ, count := range counts {

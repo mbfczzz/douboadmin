@@ -42,9 +42,10 @@ func (s *Service) Adjust(ctx context.Context, user, key, actor, note string, uni
 func Quote(model core.Model, input core.JobInput) (int64, error) {
 	price := model.Points
 	s := model.Settings
-	if input.Kind == "image" || input.Kind == "video" {
+	visibleGrid := len(model.Resolutions) > 0 && (input.Kind != "video" || s.VideoBillingMode == "per_request" || len(model.Durations) > 0)
+	if !s.HideResolution && visibleGrid && (input.Kind == "image" || input.Kind == "video") {
 		row := input.Quality
-		if row == "" {
+		if row == "" || s.HideQuality || len(model.Qualities) == 0 {
 			row = "default"
 		}
 		if input.Kind == "video" {

@@ -66,17 +66,18 @@ func TestJobEstimateTracksDurationAndPerRequestVideoPricing(t *testing.T) {
 	a, user, m := estimateFixture(t)
 	m.ID, m.Key, m.Kind, m.Modes = "video-priced", "video-test", "video", []string{"t2v"}
 	m.Qualities, m.Durations = nil, []int{5, 10}
-	m.Settings.PriceMatrix = map[string]map[string]float64{"5s": {"1k": 8}, "10s": {"1k": 20}}
+	m.Resolutions = []string{"720p", "2k"}
+	m.Settings.PriceMatrix = map[string]map[string]float64{"5s": {"720p": 8}, "10s": {"720p": 20}}
 	row, err := a.Store.Put(context.Background(), "models", core.Record{ID: m.ID, Data: core.Data(m)}, 0)
 	if err != nil {
 		t.Fatal(err)
 	}
-	in := core.JobInput{Kind: "video", Model: m.ID, Resolution: "1k", Ratio: "1:1", Duration: 5}
+	in := core.JobInput{Kind: "video", Model: m.ID, Resolution: "720p", Ratio: "1:1", Duration: 5}
 	assertEstimate(t, a, user, in, 800, true)
 	in.Duration = 10
 	assertEstimate(t, a, user, in, 2000, true)
 	m.Settings.VideoBillingMode = "per_request"
-	m.Settings.PricePerRequestByResolution = map[string]float64{"1k": 9}
+	m.Settings.PricePerRequestByResolution = map[string]float64{"720p": 9}
 	if _, err = a.Store.Put(context.Background(), "models", core.Record{ID: m.ID, Data: core.Data(m)}, row.Version); err != nil {
 		t.Fatal(err)
 	}

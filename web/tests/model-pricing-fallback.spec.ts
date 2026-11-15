@@ -24,10 +24,11 @@ for (const kind of ["image", "video"]) {
     page,
   }) => {
     let row = modelPage(kind).items[0] as Row<Model>;
+    const resolution = kind === "video" ? "720p" : "1k";
     row.data = {
       ...row.data,
       points: 7.5,
-      resolutions: ["1k"],
+      resolutions: [resolution],
       qualities: [],
       durations: kind === "video" ? [5] : [],
     };
@@ -60,7 +61,7 @@ for (const kind of ["image", "video"]) {
       await confirmSubmission(page);
       await expect(dialog).toHaveCount(0);
       expect(row.data.points).toBe(7.5);
-      expect(row.data.settings?.priceMatrix?.[key]?.["1k"]).toBe(
+      expect(row.data.settings?.priceMatrix?.[key]?.[resolution]).toBe(
         value === "" ? undefined : Number(value),
       );
     }

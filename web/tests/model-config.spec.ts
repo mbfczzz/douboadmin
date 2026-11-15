@@ -112,7 +112,7 @@ test("capability chips, prompts, pricing and metadata persist and survive upstre
     dialog = await openModel(page, m.key, "生成能力");
     await dialog.getByLabel("最大参考图数量", { exact: true }).fill("2");
     const group = dialog.getByRole("group", { name: "支持画质", exact: true });
-    for (const label of ["低画质", "标准画质"]) {
+    for (const label of ["低画质", "中画质"]) {
       const button = group.getByRole("button", { name: label, exact: true });
       if ((await button.getAttribute("aria-pressed")) === "true")
         await button.click();

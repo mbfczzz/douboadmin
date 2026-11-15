@@ -59,12 +59,14 @@ export function Chips({
   onChange,
   labels = {},
   allowed = options,
+  minimum = 0,
 }: {
   options: string[];
   selected: string[];
   onChange: (v: string[]) => void;
   labels?: Record<string, string>;
   allowed?: string[];
+  minimum?: number;
 }) {
   return (
     <div className="config-chips">
@@ -72,7 +74,10 @@ export function Chips({
         <button
           type="button"
           key={v}
-          disabled={!allowed.includes(v)}
+          disabled={
+            !allowed.includes(v) ||
+            (selected.includes(v) && selected.length <= minimum)
+          }
           aria-pressed={selected.includes(v)}
           onClick={() =>
             onChange(

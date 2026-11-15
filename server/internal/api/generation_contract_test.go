@@ -55,12 +55,12 @@ func TestMinimumReferencesAndModeResolutionContract(t *testing.T) {
 		Models []core.Model `json:"models"`
 	}
 	_ = json.Unmarshal(w.Body.Bytes(), &c)
-	if c.Models[0].ReferenceRules["i2i"]["image"].MinCount != 2 || len(c.Models[0].ResolutionByMode["i2i"]) != 1 {
+	if c.Models[0].ReferenceRules["i2i"]["image"].MinCount != 2 || len(c.Models[0].ResolutionByMode) != 0 {
 		t.Fatal(c.Models[0])
 	}
 	m.Settings.Resolutions = []string{"2K"}
 	limited := publicModeResolutions(m.Effective())
-	if list, exists := limited["i2i"]; !exists || len(list) != 0 {
-		t.Fatal("impossible resolution combination not exposed", limited)
+	if len(limited) != 0 || m.Effective().Resolutions[0] != "2K" {
+		t.Fatal("explicit admin override still constrained by upstream mode", limited)
 	}
 }

@@ -15,6 +15,7 @@ func TestHiddenModelParametersSurviveSaveAndSyncWithoutBreakingGeneration(t *tes
 	row, _ := a.Store.Get(t.Context(), "models", id)
 	var model core.Model
 	_ = json.Unmarshal(row.Data, &model)
+	model.Points = 1
 	model.Settings = core.ModelSettings{
 		HideQuality: true, HideResolution: true,
 		Qualities: []string{}, Resolutions: []string{},
@@ -46,8 +47,8 @@ func TestHiddenModelParametersSurviveSaveAndSyncWithoutBreakingGeneration(t *tes
 	var quote struct {
 		Units int64 `json:"units"`
 	}
-	if json.Unmarshal(w.Body.Bytes(), &quote) != nil || w.Code != 200 || quote.Units != 400 {
-		t.Fatal("hidden parameter pricing changed", w.Code, w.Body.String())
+	if json.Unmarshal(w.Body.Bytes(), &quote) != nil || w.Code != 200 || quote.Units != 100 {
+		t.Fatal("hidden tier still overrode base points", w.Code, w.Body.String())
 	}
 	if _, err := a.Billing.Adjust(t.Context(), "hidden-parameters-user", "hidden-params-credit", "admin", "测试隐藏参数", 400); err != nil {
 		t.Fatal(err)
@@ -55,6 +56,17 @@ func TestHiddenModelParametersSurviveSaveAndSyncWithoutBreakingGeneration(t *tes
 	input := core.JobInput{Kind: "image", Model: id, Prompt: "test", Resolution: "1k", Quality: "low", Ratio: "1:1", ExpectedCostUnits: &quote.Units}
 	if w = call(a, "POST", "/api/jobs", user, "hidden-params-job", input); w.Code != 202 {
 		t.Fatal(w.Body.String())
+	}
+	claimed, err := a.Store.Claim(t.Context())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = a.Store.Finish(t.Context(), claimed, "https://example.test/result.png", ""); err != nil {
+		t.Fatal(err)
+	}
+	wallet, err := a.Billing.Wallet(t.Context(), "hidden-parameters-user")
+	if err != nil || wallet.Available != 300 || wallet.Held != 0 {
+		t.Fatal("final charge did not use base points", wallet, err)
 	}
 	row, _ = a.Store.Get(t.Context(), "models", id)
 	_ = json.Unmarshal(row.Data, &model)

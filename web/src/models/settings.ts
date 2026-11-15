@@ -1,4 +1,12 @@
 import type { Model } from "../api";
+import {
+  filterOptions,
+  imageQualities,
+  imageResolutions,
+  parameterRatios,
+  videoResolutions,
+  videoDurations,
+} from "./parameter-options";
 
 import type { ModelSettings } from "./types";
 export type { ModelSettings } from "./types";
@@ -33,21 +41,37 @@ export const modeLabels: Record<string, string> = {
 };
 export const qualityLabels: Record<string, string> = {
   low: "低画质",
-  medium: "标准画质",
+  medium: "中画质",
   high: "高画质",
 };
 
 export function effectiveModel(m: Model): Model {
   const s = m.settings || {};
-  const choose = <T>(all: T[], selection?: T[]) =>
-    selection?.length ? all.filter((v) => selection.includes(v)) : all;
+  const choose = <T>(all: T[] | null | undefined, selection?: T[]) =>
+    selection?.length ? [...selection] : all || [];
+  const resolutions = choose(m.resolutions, s.resolutions),
+    qualities = choose(m.qualities, s.qualities),
+    ratios = choose(m.ratios, s.ratios),
+    durations = choose(m.durations, s.durations),
+    visual = m.kind === "image" || m.kind === "video";
   return {
     ...m,
-    modes: choose(m.modes, s.modes),
-    resolutions: choose(m.resolutions, s.resolutions),
-    ratios: choose(m.ratios, s.ratios),
-    qualities: choose(m.qualities, s.qualities),
-    durations: choose(m.durations || [], s.durations),
+    modes: s.modes?.length
+      ? (m.modes || []).filter((v) => s.modes!.includes(v))
+      : m.modes || [],
+    resolutions: visual
+      ? filterOptions(
+          resolutions,
+          m.kind === "video" ? videoResolutions : imageResolutions,
+        )
+      : resolutions,
+    ratios: visual ? filterOptions(ratios, parameterRatios) : ratios,
+    qualities:
+      m.kind === "image" ? filterOptions(qualities, imageQualities) : qualities,
+    durations:
+      m.kind === "video"
+        ? videoDurations.filter((v) => durations.includes(v))
+        : durations,
   };
 }
 
@@ -55,6 +79,12 @@ export function modelDraft(m: Model): ModelDraft {
   const e = effectiveModel(m);
   return {
     ...m,
+    modes: m.modes || [],
+    resolutions: m.resolutions || [],
+    ratios: m.ratios || [],
+    qualities: m.qualities || [],
+    durations: m.durations || [],
+    referenceTypes: m.referenceTypes || [],
     settings: {
       ...m.settings,
       modes: e.modes,
@@ -83,6 +113,33 @@ export function rebaseDraft(
       top[key] = value;
   for (const [key, value] of Object.entries(edited.settings))
     if (!same(value, base.settings[key as keyof ModelSettings]))
-      settings[key] = value;
+      settings[key] =
+        key === "priceMatrix" || key === "pricePerRequestByResolution"
+          ? mergePriceChanges(base.settings[key], value, latest.settings[key])
+          : value;
+  return out;
+}
+
+// Rebase only changed price cells, including explicit zero and cleared cells.
+// Other editors' prices and newly added tiers must survive a conflict retry.
+function mergePriceChanges(
+  base: unknown,
+  edited: unknown,
+  latest: unknown,
+): Record<string, unknown> {
+  const object = (v: unknown): Record<string, unknown> =>
+    v && typeof v === "object" && !Array.isArray(v)
+      ? (v as Record<string, unknown>)
+      : {};
+  const b = object(base),
+    e = object(edited),
+    out = { ...object(latest) };
+  for (const key of new Set([...Object.keys(b), ...Object.keys(e)])) {
+    if (JSON.stringify(b[key]) === JSON.stringify(e[key])) continue;
+    if (typeof b[key] === "object" || typeof e[key] === "object")
+      out[key] = mergePriceChanges(b[key], e[key], out[key]);
+    else if (e[key] === undefined) delete out[key];
+    else out[key] = e[key];
+  }
   return out;
 }

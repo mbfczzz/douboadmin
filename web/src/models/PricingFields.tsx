@@ -4,10 +4,12 @@ import { effectiveModel, qualityLabels, type SettingsProps } from "./settings";
 export default function PricingFields({ model: m, onChange }: SettingsProps) {
   const s = m.settings,
     e = effectiveModel(m),
+    resolutions = s.hideResolution ? [] : e.resolutions,
+    qualities = s.hideQuality ? [] : e.qualities,
     video = m.kind === "video";
   if (m.kind !== "image" && !video) return null;
   const perRequest = video && s.videoBillingMode === "per_request";
-  if (!e.resolutions.length || (video && !perRequest && !e.durations.length)) {
+  if (!resolutions.length || (video && !perRequest && !e.durations.length)) {
     return (
       <Card title="基础积分计费">
         <p>当前模型没有可配置的定价档位，按「基础信息 → 消耗积分」计费。</p>
@@ -22,8 +24,8 @@ export default function PricingFields({ model: m, onChange }: SettingsProps) {
   }
   const rows = video
     ? e.durations.map((d) => [d + "s", d + "s"])
-    : e.qualities.length
-      ? e.qualities.map((q) => [q, qualityLabels[q] || q])
+    : qualities.length
+      ? qualities.map((q) => [q, qualityLabels[q.toLowerCase()] || q])
       : [["default", "默认（不分画质）"]];
   function cell(row: string, col: string, value: string) {
     const values = { ...s.priceMatrix?.[row] };
@@ -61,13 +63,13 @@ export default function PricingFields({ model: m, onChange }: SettingsProps) {
               {perRequest ? (
                 <th>积分 / 次</th>
               ) : (
-                e.resolutions.map((r) => <th key={r}>{r.toUpperCase()}</th>)
+                resolutions.map((r) => <th key={r}>{r.toUpperCase()}</th>)
               )}
             </tr>
           </thead>
           <tbody>
             {perRequest
-              ? e.resolutions.map((r) => (
+              ? resolutions.map((r) => (
                   <tr key={r}>
                     <td>{r.toUpperCase()}</td>
                     <td>
@@ -92,7 +94,7 @@ export default function PricingFields({ model: m, onChange }: SettingsProps) {
               : rows.map(([key, label]) => (
                   <tr key={key}>
                     <td>{label}</td>
-                    {e.resolutions.map((r) => (
+                    {resolutions.map((r) => (
                       <td key={r}>
                         <input
                           aria-label={`${label} ${r.toUpperCase()} 积分`}

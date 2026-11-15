@@ -38,7 +38,7 @@
         <text>{{durations[durations.length-1]}} 秒</text>
       </view>
     </block>
-    <block wx:if="{{qualities.length}}"><text class="setting-title">画面质量</text><view class="resolution-options"><view wx:for="{{qualities}}" wx:key="*this" class="resolution-option {{quality===item?'selected':''}}" data-value="{{item}}" bindtap="chooseQuality">{{item==='low'?'标准':item==='medium'?'精细':item==='high'?'高清':item}}</view></view></block>
+    <block wx:if="{{qualities.length}}"><text class="setting-title">画面质量</text><view class="resolution-options"><view wx:for="{{qualities}}" wx:key="*this" class="resolution-option {{quality===item?'selected':''}}" data-value="{{item}}" bindtap="chooseQuality">{{qualityNames[item]||item}}</view></view></block>
     <text wx:if="{{ratios.length}}" class="setting-title">选择画幅</text>
     <view class="ratio-grid">
       <view

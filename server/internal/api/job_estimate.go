@@ -29,7 +29,7 @@ func (a *Server) estimateJob(w http.ResponseWriter, r *http.Request) {
 		dbError(w, err)
 		return
 	}
-	if !m.Usable() || m.Kind != in.Kind ||
+	if !m.Usable() || m.Kind != in.Kind || !core.ParameterValuesAllowed(in.Kind, in.Resolution, in.Ratio, in.Quality, in.Duration) ||
 		(len(m.Resolutions) > 0 && !slices.Contains(m.Resolutions, in.Resolution)) ||
 		(len(m.Ratios) > 0 && !slices.Contains(m.Ratios, in.Ratio)) ||
 		(len(m.Qualities) > 0 && !slices.Contains(m.Qualities, in.Quality)) ||

@@ -2,19 +2,23 @@ package core
 
 import "testing"
 
-func TestUnavailableSelectedCapabilityDoesNotTurnIntoUnrestrictedModel(t *testing.T) {
-	m := Model{Kind: "image", Published: true, Available: true, Resolutions: []string{"1k"}, Settings: ModelSettings{Resolutions: []string{"removed-4k"}}}
-	if m.Effective().Usable() {
-		t.Fatal("removed upstream capability became unrestricted")
+func TestConfiguredParametersMayExtendUpstreamButModesKeepProtocolGuards(t *testing.T) {
+	m := Model{Kind: "image", Published: true, Available: true, Modes: []string{"t2i"}, Resolutions: []string{"1k"}, Settings: ModelSettings{Resolutions: []string{"4k"}}}
+	if !m.Effective().Usable() || m.Effective().Resolutions[0] != "4k" {
+		t.Fatal("explicit parameter override was discarded")
 	}
-	if err := m.Settings.Validate(m); err == nil {
-		t.Fatal("invented capability accepted")
+	if err := m.Settings.Validate(m); err != nil {
+		t.Fatal("valid parameter override rejected", err)
+	}
+	m.Settings.Modes = []string{"unsupported-mode"}
+	if m.Effective().Usable() || m.Settings.Validate(m) == nil {
+		t.Fatal("protocol mode guard lost")
 	}
 }
 
 func TestModelSettingsRejectInvalidValues(t *testing.T) {
 	m := Model{Ratios: []string{"1:1"}}
-	for _, s := range []ModelSettings{{Ratios: []string{"unsupported"}}, {CostUSD: "NaN"}, {Icon: "javascript:alert(1)"}, {MaxRefImages: 21}, {RefLimits: map[string]float64{"bad": 2}}, {ErrorHints: []ErrorHint{{Contains: "", Message: "missing"}}}, {AvailabilityStatus: "fake"}} {
+	for _, s := range []ModelSettings{{Ratios: []string{""}}, {Resolutions: []string{"4k", "4k"}}, {Durations: []int{0}}, {Durations: []int{601}}, {CostUSD: "NaN"}, {Icon: "javascript:alert(1)"}, {MaxRefImages: 21}, {RefLimits: map[string]float64{"bad": 2}}, {ErrorHints: []ErrorHint{{Contains: "", Message: "missing"}}}, {AvailabilityStatus: "fake"}} {
 		if s.Validate(m) == nil {
 			t.Fatalf("invalid configuration accepted: %#v", s)
 		}

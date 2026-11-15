@@ -27,6 +27,7 @@ export const creationData = {
   durationIndex: 0,
   quality: "",
   qualities: [] as string[],
+  qualityNames: {} as Record<string, string>,
   assets: [] as (Row<Asset> & { isImage: boolean })[],
   busy: false,
   uploading: false,

@@ -7,7 +7,7 @@ import (
 )
 
 func TestModelPricingPriorityMatchesEstimateReservationAndCharge(t *testing.T) {
-	for _, name := range []string{"no-tiers", "quality-only", "missing-tier", "image-price", "fixed-quality-price", "free-tier", "video-request", "video-missing", "video-duration"} {
+	for _, name := range []string{"no-tiers", "legacy-case", "retired-resolution", "retired-quality", "quality-only", "missing-tier", "image-price", "fixed-quality-price", "free-tier", "video-request", "video-missing", "video-duration"} {
 		t.Run(name, func(t *testing.T) {
 			a, user, _ := setup(t)
 			m := core.Model{ID: "price-fallback", Key: "price-test", Name: "定价测试", Kind: "image",
@@ -15,17 +15,28 @@ func TestModelPricingPriorityMatchesEstimateReservationAndCharge(t *testing.T) {
 			in := core.JobInput{Kind: "image", Model: m.ID, Prompt: "test"}
 			want := int64(750)
 			switch name {
+			case "legacy-case":
+				m.Resolutions, m.Qualities, in.Resolution, in.Quality = []string{"1K"}, []string{"HIGH"}, "1K", "HIGH"
+				m.Settings.PriceMatrix = map[string]map[string]float64{"HIGH": {"1K": 2.25}}
+				want = 225
+			case "retired-resolution":
+				in.Resolution = "1k" // A stale client still submits the retired tier.
+				m.Settings.PriceMatrix = map[string]map[string]float64{"default": {"1k": 0}}
+			case "retired-quality":
+				m.Resolutions, in.Resolution, in.Quality = []string{"1k"}, "1k", "high"
+				m.Settings.PriceMatrix = map[string]map[string]float64{"high": {"1k": 0}, "default": {"1k": 3.25}}
+				want = 325
 			case "quality-only":
-				m.Qualities, in.Quality = []string{"1", "4"}, "4"
+				m.Qualities, in.Quality = []string{"low", "high"}, "high"
 			case "missing-tier", "image-price", "free-tier":
-				m.Resolutions, m.Qualities = []string{"1k", "2k"}, []string{"1", "4"}
-				m.Settings.PriceMatrix = map[string]map[string]float64{"1": {"1k": 2.25, "2k": 0}}
-				in.Resolution, in.Quality = "1k", "4"
+				m.Resolutions, m.Qualities = []string{"1k", "2k"}, []string{"low", "high"}
+				m.Settings.PriceMatrix = map[string]map[string]float64{"low": {"1k": 2.25, "2k": 0}}
+				in.Resolution, in.Quality = "1k", "high"
 				if name == "image-price" {
-					in.Quality, want = "1", 225
+					in.Quality, want = "low", 225
 				}
 				if name == "free-tier" {
-					in.Quality, in.Resolution, want = "1", "2k", 0
+					in.Quality, in.Resolution, want = "low", "2k", 0
 				}
 			case "fixed-quality-price":
 				m.Resolutions, in.Resolution = []string{"1k"}, "1k"

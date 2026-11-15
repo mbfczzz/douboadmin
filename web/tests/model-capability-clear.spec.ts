@@ -12,7 +12,7 @@ for (const width of [1440, 390]) {
     row.data = {
       ...row.data,
       name: "Midjourney V8.2",
-      qualities: ["1", "4"],
+      qualities: ["low", "high"],
       resolutions: ["1k", "2k"],
     };
     let writes = 0;
@@ -40,7 +40,7 @@ for (const width of [1440, 390]) {
     let dialog = await open();
     const group = (label: string) =>
       dialog.getByRole("group", { name: label, exact: true });
-    for (const label of ["1", "4"]) {
+    for (const label of ["低画质", "高画质"]) {
       await group("支持画质")
         .getByRole("button", { name: label, exact: true })
         .click();
@@ -66,6 +66,15 @@ for (const width of [1440, 390]) {
     expect(writes).toBe(1);
     expect(row.data.settings?.hideQuality).toBe(true);
     expect(row.data.settings?.hideResolution).toBe(true);
+    await page.getByRole("button", { name: "定价", exact: true }).click();
+    const pricing = page.getByRole("dialog", { name: /^积分定价 ·/ });
+    await expect(pricing).toContainText("按「基础信息 → 消耗积分」计费");
+    await expect(pricing.locator("table")).toHaveCount(0);
+    await expect(pricing.getByRole("spinbutton")).toHaveCount(0);
+    await page.screenshot({
+      path: `../.runtime/hidden-pricing-fixed-${width}.png`,
+    });
+    await pricing.getByRole("button", { name: "取消", exact: true }).click();
     dialog = await open();
     await expect(
       group("支持画质").locator('[aria-pressed="true"]'),
@@ -74,7 +83,7 @@ for (const width of [1440, 390]) {
       group("支持清晰度").locator('[aria-pressed="true"]'),
     ).toHaveCount(0);
     await group("支持画质")
-      .getByRole("button", { name: "4", exact: true })
+      .getByRole("button", { name: "高画质", exact: true })
       .click();
     await group("支持清晰度")
       .getByRole("button", { name: "2K", exact: true })
@@ -84,14 +93,25 @@ for (const width of [1440, 390]) {
     await expect(dialog).toHaveCount(0);
     expect(row.data.settings?.hideQuality).toBe(false);
     expect(row.data.settings?.hideResolution).toBe(false);
-    expect(row.data.settings?.qualities).toEqual(["4"]);
+    expect(row.data.settings?.qualities).toEqual(["high"]);
     expect(row.data.settings?.resolutions).toEqual(["2k"]);
+    await page.getByRole("button", { name: "定价", exact: true }).click();
+    await expect(
+      pricing.getByRole("columnheader", { name: "2K", exact: true }),
+    ).toBeVisible();
+    await expect(
+      pricing.getByRole("columnheader", { name: "1K", exact: true }),
+    ).toHaveCount(0);
+    await expect(
+      pricing.getByRole("spinbutton", { name: "高画质 2K 积分", exact: true }),
+    ).toBeVisible();
+    await pricing.getByRole("button", { name: "取消", exact: true }).click();
     dialog = await open();
     await expect(
-      group("支持画质").getByRole("button", { name: "4", exact: true }),
+      group("支持画质").getByRole("button", { name: "高画质", exact: true }),
     ).toHaveAttribute("aria-pressed", "true");
     await expect(
-      group("支持画质").getByRole("button", { name: "1", exact: true }),
+      group("支持画质").getByRole("button", { name: "低画质", exact: true }),
     ).toHaveAttribute("aria-pressed", "false");
     await expect(
       group("支持清晰度").getByRole("button", { name: "2K", exact: true }),

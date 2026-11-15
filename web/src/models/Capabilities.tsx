@@ -1,4 +1,12 @@
 import { Card, Chips, NumberField, Section } from "./fields";
+import DurationChoices from "./DurationChoices";
+import {
+  imageQualities,
+  imageResolutions,
+  videoResolutions,
+  parameterRatios,
+  parameterOptions,
+} from "./parameter-options";
 import {
   effectiveModel,
   modeLabels,
@@ -78,27 +86,15 @@ export default function Capabilities({ model: m, onChange }: SettingsProps) {
     image = m.kind === "image",
     video = m.kind === "video";
   if (!image && !video) return null;
-  const resolutionOptions = [
-    ...new Set([
-      ...(image
-        ? ["auto", "1k", "2k", "4k"]
-        : ["480p", "720p", "1080p", "2k", "4k"]),
-      ...m.resolutions,
-    ]),
-  ];
-  const ratios = [
-    ...new Set([
-      "1:1",
-      "3:2",
-      "2:3",
-      "16:9",
-      "9:16",
-      "4:3",
-      "3:4",
-      "21:9",
-      ...m.ratios,
-    ]),
-  ];
+  const resolutionOptions = parameterOptions(
+    image ? imageResolutions : videoResolutions,
+    [...(s.resolutions || []), ...m.resolutions],
+  );
+  const ratios = parameterRatios;
+  const qualities = parameterOptions(imageQualities, [
+    ...(s.qualities || []),
+    ...m.qualities,
+  ]);
   return (
     <Card title="生成能力">
       <Section
@@ -187,38 +183,28 @@ export default function Capabilities({ model: m, onChange }: SettingsProps) {
         <Section
           label="支持画质"
           hint={
-            !m.qualities.length
-              ? "该模型由上游固定画质，无需选择"
-              : "全部取消后，小程序隐藏画质选择，生成使用首个可用档位。"
+            "可自由配置，由中转站校验；全部取消后，小程序隐藏画质选择，生成使用首个可用档位。"
           }
         >
           <Chips
-            options={[...new Set(["low", "medium", "high", ...m.qualities])]}
-            allowed={m.qualities}
+            options={qualities}
             selected={s.qualities || m.qualities}
-            labels={qualityLabels}
+            labels={Object.fromEntries(
+              qualities.map((v) => [v, qualityLabels[v.toLowerCase()] || v]),
+            )}
             onChange={(qualities) =>
               onChange({ qualities, hideQuality: qualities.length === 0 })
             }
           />
         </Section>
       )}
-      {video && (
-        <Section label="支持时长">
-          <Chips
-            options={m.durations.map((d) => d + "s")}
-            selected={(s.durations || m.durations).map((d) => d + "s")}
-            onChange={(d) => onChange({ durations: d.map((x) => parseInt(x)) })}
-          />
-        </Section>
-      )}
+      {video && <DurationChoices model={m} onChange={onChange} />}
       <Section
         label="支持清晰度"
-        hint="全部取消后，小程序隐藏清晰度选择，生成使用当前生成方式的首个可用档位。"
+        hint="可自由配置，由中转站校验；全部取消后，小程序隐藏清晰度选择，生成使用默认档位。"
       >
         <Chips
           options={resolutionOptions}
-          allowed={m.resolutions}
           selected={s.resolutions || m.resolutions}
           labels={Object.fromEntries(
             resolutionOptions.map((r) => [
@@ -233,11 +219,11 @@ export default function Capabilities({ model: m, onChange }: SettingsProps) {
       </Section>
       <Section
         label="支持比例"
-        hint="灰色项为上游未开放的能力，已选项会同步到小程序。"
+        hint="至少保留一个比例；已选项会同步到小程序，由中转站校验实际支持的比例。"
       >
         <Chips
           options={ratios}
-          allowed={m.ratios}
+          minimum={1}
           selected={s.ratios || m.ratios}
           onChange={(ratios) => onChange({ ratios })}
         />

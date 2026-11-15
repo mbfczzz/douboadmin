@@ -51,8 +51,11 @@ func (s ModelSettings) Validate(m Model) error {
 			return fmt.Errorf("第 %d 个模型标签样式无效", i+1)
 		}
 	}
-	if !validSelection(s.Modes, m.Modes) || !validSelection(s.Resolutions, m.Resolutions) || !validSelection(s.Ratios, m.Ratios) || !validSelection(s.Qualities, m.Qualities) || !validSelection(s.Durations, m.Durations) {
-		return fmt.Errorf("选择的能力不在上游支持范围内，请重新同步模型")
+	if !validSelection(s.Modes, m.Modes) {
+		return fmt.Errorf("生成方式不在上游支持范围内，请重新同步模型")
+	}
+	if !validModelParameterOptions(s, m.Kind) {
+		return fmt.Errorf("请选择界面提供的参数选项，视频时长为 1–30 秒，选项不能重复")
 	}
 	if s.MaxRefImages < 0 || s.MaxRefImages > 20 || s.MaxRefImageSizeMB < 0 || s.MaxRefImageSizeMB > 50 || !validRate(s.MaxRefImageSizeMB) {
 		return fmt.Errorf("参考图数量或大小限制无效")
