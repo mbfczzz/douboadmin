@@ -1,0 +1,31 @@
+.per-second-fill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 112px;
+  padding: 6px 0;
+}
+.per-second-fill input {
+  width: 112px;
+}
+.per-second-fill button {
+  min-height: 30px;
+  padding: 5px 10px;
+  font-size: 12px;
+}
+.per-second-fill small {
+  max-width: 160px;
+  white-space: normal;
+}
+.per-second-fill .per-second-error {
+  color: var(--danger);
+}
+.per-second-title {
+  white-space: normal;
+  min-width: 90px;
+}
+.per-second-title small {
+  display: block;
+  margin-top: 4px;
+}

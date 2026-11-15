@@ -85,5 +85,12 @@ func PointUnits(points float64) (int64, error) {
 	if math.IsNaN(points) || math.IsInf(points, 0) || points < 0 || points > 1e9 {
 		return 0, fmt.Errorf("积分价格无效")
 	}
-	return int64(math.Ceil(points*float64(PointScale) - 1e-8)), nil
+	scaled := points * float64(PointScale)
+	rounded := math.Round(scaled)
+	// Decimal hundredths can multiply to slightly above an integer at large
+	// magnitudes. Recognize their exact float round-trip before rounding up.
+	if points == rounded/float64(PointScale) {
+		return int64(rounded), nil
+	}
+	return int64(math.Ceil(scaled - 1e-8)), nil
 }

@@ -1,4 +1,5 @@
 import { Card } from "./fields";
+import PerSecondFill from "./PerSecondFill";
 import { effectiveModel, qualityLabels, type SettingsProps } from "./settings";
 
 export default function PricingFields({ model: m, onChange }: SettingsProps) {
@@ -44,6 +45,12 @@ export default function PricingFields({ model: m, onChange }: SettingsProps) {
         对应档位填写了价格时优先使用该价格；留空则每次生成消耗 {m.points}{" "}
         积分（基础信息中的消耗积分）。填写 0 表示免费。
       </p>
+      {video && !perRequest && (
+        <p className="config-hint">
+          按秒填充：每项积分 = 秒数 ×
+          每秒积分。填充本列会覆盖该清晰度已选时长的现有价格，之后仍可单独修改。
+        </p>
+      )}
       <div
         className="config-matrix"
         role="region"
@@ -66,6 +73,23 @@ export default function PricingFields({ model: m, onChange }: SettingsProps) {
                 resolutions.map((r) => <th key={r}>{r.toUpperCase()}</th>)
               )}
             </tr>
+            {video && !perRequest && (
+              <tr>
+                <th className="per-second-title">
+                  按秒填充<small>积分 / 秒</small>
+                </th>
+                {resolutions.map((r) => (
+                  <th key={r}>
+                    <PerSecondFill
+                      resolution={r}
+                      durations={e.durations}
+                      matrix={s.priceMatrix}
+                      onChange={(priceMatrix) => onChange({ priceMatrix })}
+                    />
+                  </th>
+                ))}
+              </tr>
+            )}
           </thead>
           <tbody>
             {perRequest

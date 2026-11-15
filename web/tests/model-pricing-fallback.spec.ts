@@ -54,7 +54,7 @@ for (const kind of ["image", "video"]) {
       await page.getByRole("button", { name: "定价", exact: true }).click();
       dialog = page.getByRole("dialog", { name: /^积分定价 ·/ });
       await expect(dialog).toContainText("留空则每次生成消耗 7.5 积分");
-      const price = dialog.getByRole("spinbutton");
+      const price = dialog.locator("tbody").getByRole("spinbutton");
       await expect(price).toHaveAttribute("placeholder", "基础 7.5");
       await price.fill(value);
       await dialog.getByRole("button", { name: "保存", exact: true }).click();
@@ -66,8 +66,8 @@ for (const kind of ["image", "video"]) {
       );
     }
     await page.getByRole("button", { name: "定价", exact: true }).click();
-    await expect(page.getByRole("dialog").getByRole("spinbutton")).toHaveValue(
-      "",
-    );
+    await expect(
+      page.getByRole("dialog").locator("tbody").getByRole("spinbutton"),
+    ).toHaveValue("");
   });
 }
