@@ -28,10 +28,15 @@ export function modelChoices(models: Model[], kind: string): ModelChoice[] {
 }
 
 export const defaultPromptChars = (kind: string) => kind === "image" ? 2000 : 20000;
+const matching = (values: string[], value = "") => values.find((v) => v.toLowerCase() === value.toLowerCase());
+const highest = (values: string[], order: string[]) => order.map((key) => matching(values, key)).find(Boolean) || values[0] || "";
 
 export function modelSettings(
   model: ModelChoice,
   current: {
+    model?: string;
+    resolutionChosen?: boolean;
+    qualityChosen?: boolean;
     resolution: string;
     ratio: string;
     duration?: number;
@@ -45,6 +50,9 @@ export function modelSettings(
     ? current.duration || 0
     : durations[0] || 0;
   const qualities = model.qualities || [];
+  const chosenQuality = matching(qualities, current.quality);
+  const keepQuality = !model.settings?.hideQuality && !!chosenQuality &&
+    (model.kind !== "image" || (current.model === model.id && current.qualityChosen));
   const prompt = current.prompt || model.settings?.defaultPrompt || "";
   return {
     prompt,
@@ -59,9 +67,10 @@ export function modelSettings(
       names[value] = ({ low: "低", medium: "中", high: "高" } as Record<string, string>)[value.toLowerCase()] || value;
       return names;
     }, {}),
-    quality: !model.settings?.hideQuality && qualities.includes(current.quality || "")
-      ? current.quality || ""
-      : qualities[0] || "",
+    qualityChosen: !!keepQuality && model.kind === "image",
+    quality: keepQuality
+      ? chosenQuality || ""
+      : model.kind === "image" ? highest(qualities, ["high", "medium", "low"]) : qualities[0] || "",
     model: model.id,
     modelName: model.label,
     ...resolutionSettings(model, current),
@@ -74,7 +83,7 @@ export function modelSettings(
 
 export function resolutionSettings(
   model: Model,
-  current: { resolution: string; assets?: Row<Asset>[] },
+  current: { model?: string; resolutionChosen?: boolean; resolution: string; assets?: Row<Asset>[] },
 ) {
   const restricted =
     model.resolutionByMode?.[creationMode(model, current.assets || [])];
@@ -84,11 +93,15 @@ export function resolutionSettings(
       : restricted.filter(
           (v) => !model.resolutions.length || model.resolutions.includes(v),
         );
+  const chosen = matching(resolutions, current.resolution);
+  const keep = !model.settings?.hideResolution && !!chosen &&
+    (model.kind !== "image" || (current.model === model.id && current.resolutionChosen));
   return {
+    resolutionChosen: !!keep && model.kind === "image",
     resolutions: model.settings?.hideResolution ? [] : resolutions,
-    resolution: !model.settings?.hideResolution && resolutions.includes(current.resolution)
-      ? current.resolution
-      : resolutions[0] || "",
+    resolution: keep
+      ? chosen || ""
+      : model.kind === "image" ? highest(resolutions, ["4k", "2k", "1k"]) : resolutions[0] || "",
     parameterError:
       restricted !== undefined && !resolutions.length
         ? "当前素材对应的生成方式没有可用分辨率，请调整素材或更换模型"

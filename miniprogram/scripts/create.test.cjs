@@ -34,7 +34,7 @@ test("creation uses available models and valid parameters when switching modes",
   page.mode(event({ kind: "image" }));
   await page.loadModels();
   assert.equal(page.data.model, "demo-image");
-  assert.equal(page.data.resolution, "1K");
+  assert.equal(page.data.resolution, "2K");
   assert.equal(page.data.ratio, "1:1");
   assert.equal(page.data.prompt, "窗边的光");
   assert.ok(page.data.imagePlaceholder.includes("\n"));

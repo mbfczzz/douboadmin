@@ -75,12 +75,12 @@ test("hidden selectors use valid defaults for both pricing and submission and ca
   await page.loadModels();
   assert.equal(page.data.qualities.length, 0);
   assert.equal(page.data.resolutions.length, 0);
-  assert.equal(page.data.quality, "low");
-  assert.equal(page.data.resolution, "1k");
+  assert.equal(page.data.quality, "high");
+  assert.equal(page.data.resolution, "2k");
   assert.equal(page.data.parameterError, "");
   await page.generate();
-  assert.equal(submitted.quality, "low");
-  assert.equal(submitted.resolution, "1k");
+  assert.equal(submitted.quality, "high");
+  assert.equal(submitted.resolution, "2k");
   hidden = false;
   await page.loadModels();
   assert.deepEqual(Array.from(page.data.qualities), ["low", "high"]);
@@ -129,5 +129,5 @@ test("quality labels tolerate legacy casing without rewriting the submitted pric
   assert.equal(page.data.qualityNames?.LOW, "低");
   assert.equal(page.data.qualityNames?.MEDIUM, "中");
   assert.equal(page.data.qualityNames?.HIGH, "高");
-  assert.equal(page.data.quality, "MEDIUM");
+  assert.equal(page.data.quality, "HIGH");
 });

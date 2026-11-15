@@ -183,7 +183,7 @@ export default function Capabilities({ model: m, onChange }: SettingsProps) {
         <Section
           label="支持画质"
           hint={
-            "可自由配置，由中转站校验；全部取消后，小程序隐藏画质选择，生成使用首个可用档位。"
+            "可自由配置，由中转站校验；全部取消后，小程序隐藏画质选择，默认使用最高可用档位。"
           }
         >
           <Chips
@@ -201,7 +201,7 @@ export default function Capabilities({ model: m, onChange }: SettingsProps) {
       {video && <DurationChoices model={m} onChange={onChange} />}
       <Section
         label="支持清晰度"
-        hint="可自由配置，由中转站校验；全部取消后，小程序隐藏清晰度选择，生成使用默认档位。"
+        hint={image ? "可自由配置，由中转站校验；全部取消后，小程序隐藏清晰度选择，默认使用最高可用档位。" : "可自由配置，由中转站校验；全部取消后，小程序隐藏清晰度选择，生成使用默认档位。"}
       >
         <Chips
           options={resolutionOptions}

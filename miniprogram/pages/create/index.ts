@@ -56,10 +56,14 @@ Page({
         hasPrompt: !!draft.prompt?.trim(),
         model: draft.model || "",
         quality: draft.quality || "",
+        qualityChosen: !!draft.quality,
         ratio: draft.ratio,
         resolution: draft.resolution,
+        resolutionChosen: !!draft.resolution,
         duration: draft.duration || 5,
         assets: [],
+        availableModels: [],
+        modelsLoading: true,
       });
       void this.restoreAssets(draft.assets || []);
     }
@@ -104,7 +108,7 @@ Page({
   async loadModels() {
     const version = ++this.modelVersion;
     // Cold start: paint the last known models at once, then refresh.
-    const known = !this.data.availableModels.length && peekConfig(10 * 60 * 1000);
+    const known = !this.data.availableModels.length && !this.data.resolutionChosen && !this.data.qualityChosen && peekConfig(10 * 60 * 1000);
     if (known) {
       const first = modelChoices(known.models, this.data.kind);
       const m = first.find((item) => item.id === this.data.model) || first[0];
@@ -178,7 +182,7 @@ Page({
   },
   chooseResolution(e: WechatMiniprogram.TouchEvent) {
     if (this.data.modelsLoading || this.data.busy) return;
-    this.setData({ resolution: e.currentTarget.dataset.value });
+    this.setData({ resolution: e.currentTarget.dataset.value, resolutionChosen: true });
     updateEstimate(this);
   },
   chooseRatio(e: WechatMiniprogram.TouchEvent) {
@@ -197,7 +201,7 @@ Page({
   },
   chooseQuality(e: WechatMiniprogram.TouchEvent) {
     if (this.data.modelsLoading || this.data.busy) return;
-    this.setData({ quality: e.currentTarget.dataset.value });
+    this.setData({ quality: e.currentTarget.dataset.value, qualityChosen: true });
     updateEstimate(this);
   },
   showModels() {

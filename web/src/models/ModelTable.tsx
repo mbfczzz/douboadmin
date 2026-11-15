@@ -28,8 +28,6 @@ export default function ModelTable({
           <tr>
             <th>模型</th>
             <th className="wide-only">类型</th>
-            <th className="wide-only xl-only">上游基础消耗</th>
-            <th className="wide-only">生成积分配置</th>
             <th
               className="wide-only xl-only"
               title="最近 200 条生成任务中的使用次数"
@@ -62,11 +60,6 @@ export default function ModelTable({
               </td>
               <td className="wide-only">
                 {modelKinds[r.data.kind] || r.data.kind}
-              </td>
-              <td className="wide-only xl-only">{r.data.creditCost} 点起</td>
-              <td className="wide-only">
-                {r.data.points}
-                <small className="cell-note">尚未扣费</small>
               </td>
               <td className="wide-only xl-only">{r.data.recentJobs}</td>
               <td>
