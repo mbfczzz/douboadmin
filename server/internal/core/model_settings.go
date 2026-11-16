@@ -63,6 +63,9 @@ func parameterSelection[T comparable](upstream, configured []T) []T {
 
 func (m Model) Effective() Model {
 	s := m.Settings
+	m.Modes = NormalizeGenerationModes(m.Modes)
+	s.Modes = NormalizeGenerationModes(s.Modes)
+	m.Settings.Modes = s.Modes
 	beforeModes := len(m.Modes)
 	m.Modes = selection(m.Modes, s.Modes)
 	m.Resolutions = parameterSelection(m.Resolutions, s.Resolutions)

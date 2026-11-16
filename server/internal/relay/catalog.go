@@ -34,6 +34,24 @@ type Schema struct {
 	ResolutionByMode map[string][]string        `json:"resolution_by_mode"`
 }
 
+func (s *Schema) UnmarshalJSON(data []byte) error {
+	type schema Schema
+	var decoded schema
+	if err := json.Unmarshal(data, &decoded); err != nil {
+		return err
+	}
+	decoded.Modes = core.NormalizeGenerationModes(decoded.Modes)
+	if len(decoded.ResolutionByMode) > 0 {
+		normalized := make(map[string][]string, len(decoded.ResolutionByMode))
+		for raw, values := range decoded.ResolutionByMode {
+			normalized[core.NormalizeGenerationMode(raw)] = values
+		}
+		decoded.ResolutionByMode = normalized
+	}
+	*s = Schema(decoded)
+	return nil
+}
+
 func (c *Client) Catalog(ctx context.Context) ([]core.Model, error) {
 	raw, err := c.Do(ctx, "GET", "/v1/models", nil)
 	if err != nil {

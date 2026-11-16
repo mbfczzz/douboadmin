@@ -127,7 +127,7 @@ func TestResponseOnlyReleasesTerminalMedia(t *testing.T) {
 
 func TestRequestParameters(t *testing.T) {
 	path, b, e := Request(core.JobInput{Kind: "video", Prompt: "p", Resolution: "720p", Ratio: "9:16", Duration: 5}, "upstream", []core.Reference{{URL: "https://cdn/ref.jpg", Type: "image"}})
-	if e != nil || path != "/openapi/v1/generations" || b["mode"] != "i2v" || b["image_url"] != "https://cdn/ref.jpg" {
+	if e != nil || path != "/openapi/v1/generations" || b["mode"] != "image_to_video" || b["image_url"] != "https://cdn/ref.jpg" {
 		t.Fatal(path, b, e)
 	}
 	path, b, e = Request(core.JobInput{Kind: "image", Prompt: "p", Quality: "high"}, "upstream", []core.Reference{{URL: "https://cdn/ref.jpg", Type: "image"}})
@@ -138,5 +138,38 @@ func TestRequestParameters(t *testing.T) {
 	raw, _ := json.Marshal(b)
 	if e != nil || len(raw) == 0 || b["stream"] != false {
 		t.Fatal(b, e)
+	}
+}
+
+func TestManagedVideoModesAndReferenceFields(t *testing.T) {
+	image := core.Reference{URL: "https://cdn/first.jpg", Type: "image"}
+	tests := []struct {
+		mode, managed string
+		assets        []core.Reference
+		field         string
+	}{
+		{"t2v", "text_to_video", nil, ""},
+		{"image_to_video", "image_to_video", []core.Reference{image}, "image_url"},
+		{"keyframe", "first_last_frame", []core.Reference{image, {URL: "https://cdn/last.jpg", Type: "image"}}, "image_urls"},
+		{"omni_ref", "multi_ref", []core.Reference{image, {URL: "https://cdn/ref.mp4", Type: "video"}, {URL: "https://cdn/ref.mp3", Type: "audio"}}, "image_urls"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.mode, func(t *testing.T) {
+			_, body, err := Request(core.JobInput{Kind: "video", Mode: tt.mode}, "video", tt.assets)
+			if err != nil || body["mode"] != tt.managed {
+				t.Fatal(body, err)
+			}
+			if tt.field != "" {
+				if _, ok := body[tt.field]; !ok {
+					t.Fatal("missing", tt.field, body)
+				}
+			}
+			if tt.mode == "omni_ref" && (body["video_urls"] == nil || body["audio_urls"] == nil) {
+				t.Fatal("missing multi-reference fields", body)
+			}
+		})
+	}
+	if _, _, err := Request(core.JobInput{Kind: "video", Mode: "unsupported"}, "video", nil); err == nil {
+		t.Fatal("unsupported mode reached Managed")
 	}
 }

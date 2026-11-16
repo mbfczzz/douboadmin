@@ -10,6 +10,7 @@ import (
 )
 
 func TestInferredModesAreCompatibleAndReachProvider(t *testing.T) {
+	managed := map[string]string{"omni_ref": "multi_ref", "keyframe": "first_last_frame"}
 	for _, mode := range []string{"omni_ref", "keyframe"} {
 		a, _, _ := setup(t)
 		ctx := context.Background()
@@ -20,6 +21,7 @@ func TestInferredModesAreCompatibleAndReachProvider(t *testing.T) {
 		input := core.JobInput{Kind: "video", Model: m.ID, Prompt: "test", Resolution: "720p", Ratio: "9:16", Duration: 5, Assets: []string{"photo"}}
 		if mode == "keyframe" {
 			input.Assets = append(input.Assets, "photo")
+			input.Mode = "first_last_frame" // accept persisted/client aliases, store the internal mode
 		}
 		if e := a.validateJob(ctx, "user-a", &input); e != nil {
 			t.Fatal(mode, e)
@@ -28,7 +30,7 @@ func TestInferredModesAreCompatibleAndReachProvider(t *testing.T) {
 			t.Fatal("inferred mode not persisted", mode, input.Mode)
 		}
 		_, body, e := provider.Request(input, m.Key, nil)
-		if e != nil || body["mode"] != mode {
+		if e != nil || body["mode"] != managed[mode] {
 			t.Fatal(body, e)
 		}
 	}

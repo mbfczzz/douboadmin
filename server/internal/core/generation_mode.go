@@ -1,8 +1,41 @@
 package core
 
-import "slices"
+import (
+	"slices"
+	"strings"
+)
+
+// NormalizeGenerationMode keeps provider aliases out of the shared editor.
+func NormalizeGenerationMode(mode string) string {
+	mode = strings.NewReplacer("-", "_", " ", "_", "/", "_").Replace(strings.ToLower(strings.TrimSpace(mode)))
+	switch mode {
+	case "t2v", "text2video", "text_video", "text_to_video":
+		return "t2v"
+	case "i2v", "image2video", "image_video", "image_to_video", "first_frame":
+		return "i2v"
+	case "keyframe", "key_frame", "first_last", "first_last_frame", "start_end", "start_end_to_video":
+		return "keyframe"
+	case "omni_ref", "omni_reference", "multi_ref", "multi_reference", "reference_image", "reference_to_video", "subject_reference":
+		return "omni_ref"
+	default:
+		return mode
+	}
+}
+
+func NormalizeGenerationModes(modes []string) []string {
+	out, seen := make([]string, 0, len(modes)), map[string]bool{}
+	for _, raw := range modes {
+		mode := NormalizeGenerationMode(raw)
+		if mode != "" && !seen[mode] {
+			seen[mode] = true
+			out = append(out, mode)
+		}
+	}
+	return out
+}
 
 func GenerationMode(kind string, modes []string, counts map[string]int, total int) string {
+	modes = NormalizeGenerationModes(modes)
 	if kind == "chat" {
 		return ""
 	}

@@ -51,7 +51,7 @@ func Request(in core.JobInput, key string, assets []core.Reference) (string, map
 		}
 		return "/v1/images/generations", body, nil
 	case "video":
-		mode := in.Mode
+		mode := core.NormalizeGenerationMode(in.Mode)
 		if mode == "" {
 			mode = "t2v"
 			if len(images) == 1 && len(videos) == 0 && len(audios) == 0 {
@@ -61,7 +61,11 @@ func Request(in core.JobInput, key string, assets []core.Reference) (string, map
 				mode = "omni_ref"
 			}
 		}
-		body["mode"] = mode
+		managedMode, ok := managedVideoMode(mode)
+		if !ok {
+			return "", nil, fmt.Errorf("视频生成方式不受支持")
+		}
+		body["mode"] = managedMode
 		put("resolution", in.Resolution)
 		put("ratio", in.Ratio)
 		if in.Duration > 0 {
@@ -81,5 +85,20 @@ func Request(in core.JobInput, key string, assets []core.Reference) (string, map
 		return "/openapi/v1/generations", body, nil
 	default:
 		return "", nil, fmt.Errorf("此生成类型尚未接入")
+	}
+}
+
+func managedVideoMode(mode string) (string, bool) {
+	switch mode {
+	case "t2v":
+		return "text_to_video", true
+	case "i2v":
+		return "image_to_video", true
+	case "keyframe":
+		return "first_last_frame", true
+	case "omni_ref":
+		return "multi_ref", true
+	default:
+		return "", false
 	}
 }

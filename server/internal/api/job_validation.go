@@ -78,7 +78,7 @@ func (a *Server) validateJob(ctx context.Context, user string, in *core.JobInput
 			return fmt.Errorf("此模型不支持该类型参考素材")
 		}
 	}
-	mode := in.Mode
+	mode := core.NormalizeGenerationMode(in.Mode)
 	if mode == "" {
 		mode = core.GenerationMode(in.Kind, m.Modes, counts, len(in.Assets))
 	}

@@ -2,6 +2,7 @@ package relay
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -31,6 +32,30 @@ func TestCatalogRejectsEmptyOrInvalidPayload(t *testing.T) {
 			t.Errorf("accepted %s", body)
 		}
 		s.Close()
+	}
+}
+
+func TestCatalogNormalizesManagedVideoModeAliases(t *testing.T) {
+	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write([]byte(`{"data":[{"id":"aliases","modality":"video","params_schema":{"modes":["text_to_video","image_to_video","first_last_frame","multi_ref"],"resolution_by_mode":{"image_to_video":["720p"]}}}]}`))
+	}))
+	defer s.Close()
+	rows, err := New(s.URL, "test").Catalog(context.Background())
+	if err != nil || len(rows) != 1 {
+		t.Fatal(rows, err)
+	}
+	want := []string{"t2v", "i2v", "keyframe", "omni_ref"}
+	if len(rows[0].Modes) != len(want) {
+		t.Fatal(rows[0].Modes)
+	}
+	for i := range want {
+		if rows[0].Modes[i] != want[i] {
+			t.Fatal(rows[0].Modes)
+		}
+	}
+	var schema Schema
+	if err = json.Unmarshal(rows[0].ParamsSchema, &schema); err != nil || len(schema.ResolutionByMode["i2v"]) != 1 {
+		t.Fatal(schema, err)
 	}
 }
 
