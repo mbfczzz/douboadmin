@@ -18,6 +18,7 @@ func (p *Relay) failure(ctx context.Context, j core.Job, err error) (message, ca
 	}
 	if p.Client.Key != "" {
 		cause = strings.ReplaceAll(cause, p.Client.Key, "[redacted]")
+		message = strings.ReplaceAll(message, p.Client.Key, "[redacted]")
 	}
 	runes := []rune(cause)
 	if len(runes) > 2000 {
@@ -28,7 +29,10 @@ func (p *Relay) failure(ctx context.Context, j core.Job, err error) (message, ca
 	// upstream's own text; users get a plain message, admins keep the cause.
 	var httpErr *relay.HTTPError
 	if errors.As(err, &httpErr) {
-		message = UserFailure
+		message = httpErr.Managed.UserMessage
+		if message == "" {
+			message = UserFailure
+		}
 	}
 	if row, e := p.Store.Get(ctx, "models", j.Input.Model); e == nil {
 		var m core.Model

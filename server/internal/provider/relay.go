@@ -35,6 +35,13 @@ type Relay struct {
 type Execution struct {
 	EstimatedCostMicros *int64 `json:"estimatedCostMicros,omitempty"`
 	ErrorCause          string `json:"errorCause,omitempty"`
+	ErrorCode           int    `json:"errorCode,omitempty"`
+	ErrorType           string `json:"errorType,omitempty"`
+	ErrorAction         string `json:"errorAction,omitempty"`
+	UpstreamCode        string `json:"upstreamCode,omitempty"`
+	UpstreamType        string `json:"upstreamType,omitempty"`
+	ErrorRetryable      bool   `json:"errorRetryable,omitempty"`
+	ErrorEditable       bool   `json:"errorEditable,omitempty"`
 	Phase               string `json:"phase"`
 	TaskID              string `json:"taskId,omitempty"`
 	ModelKey            string `json:"modelKey"`
@@ -105,13 +112,19 @@ func (p *Relay) Generate(ctx context.Context, j core.Job) (string, error) {
 			var httpErr *relay.HTTPError
 			// 4xx (except timeouts) and 503 mean the request was not accepted, so the
 			// hold can be released; 500/502/504 may have reached the upstream.
-			if errors.As(err, &httpErr) && ((httpErr.Status >= 400 && httpErr.Status < 500 && httpErr.Status != 408) || httpErr.Status == 503) {
+			if errors.As(err, &httpErr) && managedSubmitDefinitive(err, httpErr.Status) {
 				e.Phase = "failed"
 				e.Error, e.ErrorCause = p.failure(ctx, j, err)
+				recordManagedFailure(&e, err, e.Error)
 			} else {
 				e.Phase = "uncertain"
 				e.Error = ErrUncertain.Error()
-				_, e.ErrorCause = p.failure(ctx, j, err)
+				managedMessage, cause := p.failure(ctx, j, err)
+				e.ErrorCause = cause
+				if _, ok := managedFailure(err); ok {
+					e.Error = managedMessage
+				}
+				recordManagedFailure(&e, err, e.Error)
 			}
 			if save := p.checkpoint(ctx, &row, e); save != nil {
 				return "", ErrPending
@@ -142,6 +155,15 @@ func (p *Relay) Generate(ctx context.Context, j core.Job) (string, error) {
 		}
 		raw, err = p.Client.Poll(ctx, e.TaskID)
 		if err != nil {
+			if managedPollTerminal(err) {
+				e.Phase = "failed"
+				e.Error, e.ErrorCause = p.failure(ctx, j, err)
+				recordManagedFailure(&e, err, e.Error)
+				if save := p.checkpoint(ctx, &row, e); save != nil {
+					return "", ErrPending
+				}
+				return "", errors.New(e.Error)
+			}
 			p.waiting(ctx, &row, e, "查询上游任务失败："+p.redact(err))
 			return "", ErrRetryLater
 		}
@@ -170,6 +192,7 @@ func (p *Relay) Generate(ctx context.Context, j core.Job) (string, error) {
 	if err != nil {
 		e.Phase = "failed"
 		e.Error, e.ErrorCause = p.failure(ctx, j, err)
+		recordManagedFailure(&e, err, e.Error)
 		var rejected *Rejected
 		if !errors.As(err, &rejected) {
 			if e.TaskID != "" {

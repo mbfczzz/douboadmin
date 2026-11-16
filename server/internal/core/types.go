@@ -78,6 +78,10 @@ type Job struct {
 	Results             []string  `json:"results,omitempty"`
 	ThumbnailURL        string    `json:"thumbnailUrl,omitempty"`
 	Error               string    `json:"error,omitempty"`
+	ErrorCode           int       `json:"errorCode,omitempty"`
+	ErrorType           string    `json:"errorType,omitempty"`
+	ErrorAction         string    `json:"errorAction,omitempty"`
+	ErrorEditable       bool      `json:"editable,omitempty"`
 	Demo                bool      `json:"demo"`
 	Attempts            int       `json:"attempts"`
 	CreatedAt           time.Time `json:"createdAt"`

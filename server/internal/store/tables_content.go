@@ -24,6 +24,7 @@ func init() {
 		Table{Name: "executions", Comment: "生成任务在上游的执行状态；id = 任务 id", Cols: []Col{
 			c("phase", Key), c("modelKey", Short), c("taskId", Short), c("startedAt", Time),
 			c("estimatedCostMicros", Int), c("result", Long), c("error", Text), c("errorCause", Text), c("note", Text),
+			c("errorCode", Int), c("errorType", Key), c("errorAction", Text), c("upstreamCode", Short), c("upstreamType", Short), c("errorRetryable", Bool), c("errorEditable", Bool),
 		}},
 		Table{Name: "job_progress", Comment: "生成任务当前阶段说明；id = 任务 id", Owner: "用户", Cols: []Col{
 			c("stage", Short),

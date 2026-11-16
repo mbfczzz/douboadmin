@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"doubo/server/internal/relay"
 	"encoding/json"
 	"fmt"
 	"slices"
@@ -12,7 +13,10 @@ type Response struct {
 	Pending                bool
 }
 
-type Rejected struct{ Message, Details string }
+type Rejected struct {
+	Message, Details string
+	Managed          relay.ManagedError
+}
 
 func (e *Rejected) Error() string { return e.Message }
 
@@ -41,7 +45,12 @@ func Parse(raw []byte, kind string) (Response, error) {
 	state := strings.ToLower(v.Status)
 	if (len(v.Error) > 0 && string(v.Error) != "null") || slices.Contains([]string{"failed", "error", "cancelled", "canceled"}, state) {
 		// Keep upstream payloads and possible credentials out of user-visible messages.
-		return r, &Rejected{Message: fmt.Sprintf("上游生成失败，请检查素材和模型参数；任务编号 %s", v.ID), Details: string(v.Error) + " " + v.ErrorMessage}
+		managed := relay.ParseManagedError(v.Error)
+		message := managed.UserMessage
+		if message == "" {
+			message = fmt.Sprintf("上游生成失败，请检查素材和模型参数；任务编号 %s", v.ID)
+		}
+		return r, &Rejected{Message: message, Details: string(v.Error) + " " + v.ErrorMessage, Managed: managed}
 	}
 	if state != "" && !slices.Contains([]string{"succeeded", "succeed", "completed", "complete", "success", "finished", "done"}, state) {
 		r.Pending = true

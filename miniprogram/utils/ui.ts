@@ -61,6 +61,9 @@ export const kinds: Record<string, string> = {
   import: "素材导入",
 };
 export function jobView(j: Job) {
+  const failure = j.errorCode
+    ? `${j.error || "生成失败"}（错误码 ${j.errorCode}）`
+    : j.error;
   return {
     ...j,
     // Import jobs come without reference assets (null from older servers).
@@ -72,6 +75,8 @@ export function jobView(j: Job) {
     result: j.result && j.input.kind !== "chat" ? media(j.result) : j.result,
     results: j.input.kind === "image" ? resultImages(j) : [],
     shortTitle: j.input.prompt.slice(0, 24),
+    error: failure,
+    editable: j.errorCode ? !!j.editable : true,
   };
 }
 export function openTask(id: string, page?: object) {

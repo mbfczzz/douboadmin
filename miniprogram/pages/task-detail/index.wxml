@@ -40,9 +40,10 @@
       <text>可以先离开，完成后到「我的作品」查看。</text>
       <view class="continue-create" bindtap="continueCreate">继续创作 ›</view>
     </view>
-    <view wx:if="{{job.status==='failed'}}" class="failure-reason"
-      >{{job.error}}</view
-    >
+    <view wx:if="{{job.status==='failed'}}" class="failure-reason">
+      <text>{{job.error}}</text>
+      <view wx:if="{{job.errorAction}}" class="muted small">{{job.errorAction}}</view>
+    </view>
     <view wx:if="{{job.deleted}}" class="error-box"
       >作品已删除，历史任务与积分记录保留。</view
     >
@@ -75,7 +76,7 @@
     </view>
     <view wx:elif="{{job.status==='failed'&&!job.deleted}}" class="failed-actions">
       <button wx:if="{{job.retryable}}" class="retry-pill" loading="{{busy}}" disabled="{{busy}}" bindtap="retry"><image wx:if="{{!busy}}" class="gl gl-18" src="/assets/glyphs/refresh-dark.png" />重新生成</button>
-      <text class="edit-link" bindtap="edit">修改后再试 ›</text>
+      <text wx:if="{{job.editable}}" class="edit-link" bindtap="edit">修改后再试 ›</text>
     </view>
     <text class="section-title">提示词</text>
     <text class="full-prompt" selectable>{{job.input.prompt}}</text>

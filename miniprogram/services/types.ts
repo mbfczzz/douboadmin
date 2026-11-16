@@ -108,6 +108,9 @@ export interface Job {
   result?: string;
   results?: string[];
   error?: string;
+  errorCode?: number;
+  errorAction?: string;
+  editable?: boolean;
   demo: boolean;
   attempts: number;
   createdAt: string;

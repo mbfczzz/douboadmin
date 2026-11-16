@@ -34,9 +34,17 @@ func (c *Client) Ready() bool { return c != nil && c.Key != "" && c.Base != "" }
 type HTTPError struct {
 	Status  int
 	Message string
+	Managed ManagedError
 }
 
 func (e *HTTPError) Error() string {
+	if e.Managed.Code != 0 {
+		typ := e.Managed.Type
+		if typ == "" {
+			typ = "unknown"
+		}
+		return fmt.Sprintf("中转服务 HTTP %d（业务码 %d，%s）：%s", e.Status, e.Managed.Code, typ, e.Message)
+	}
 	return fmt.Sprintf("中转服务 HTTP %d：%s", e.Status, e.Message)
 }
 
@@ -98,7 +106,14 @@ func (c *Client) send(ctx context.Context, method, path string, body any) ([]byt
 		if len(runes) > 200 {
 			msg = string(runes[:200])
 		}
-		return nil, &HTTPError{resp.StatusCode, msg}
+		managed := ParseManagedError(raw)
+		if c.Key != "" {
+			managed.Message = strings.ReplaceAll(managed.Message, c.Key, "[redacted]")
+			managed.UserMessage = strings.ReplaceAll(managed.UserMessage, c.Key, "[redacted]")
+			managed.UpstreamCode = strings.ReplaceAll(managed.UpstreamCode, c.Key, "[redacted]")
+			managed.UpstreamType = strings.ReplaceAll(managed.UpstreamType, c.Key, "[redacted]")
+		}
+		return nil, &HTTPError{Status: resp.StatusCode, Message: msg, Managed: managed}
 	}
 	return raw, nil
 }

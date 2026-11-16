@@ -14,6 +14,7 @@ var uncertainPrefix = strings.SplitN(provider.ErrUncertain.Error(), "，", 2)[0]
 func (a *Server) presentJob(ctx context.Context, j *core.Job) {
 	resultRef := j.Result
 	j.Featured, j.WorkMetaVersion = false, 0
+	j.ErrorCode, j.ErrorType, j.ErrorAction, j.ErrorEditable = 0, "", "", false
 	j.Results = nil
 	if j.Input.Kind == "image" {
 		refs, err := core.ResultRefs(resultRef)
@@ -96,6 +97,11 @@ func (a *Server) presentJob(ctx context.Context, j *core.Job) {
 		var e provider.Execution
 		if err == nil && json.Unmarshal(r.Data, &e) == nil {
 			j.Retryable = e.Phase == "failed"
+			j.ErrorCode, j.ErrorType, j.ErrorAction = e.ErrorCode, e.ErrorType, e.ErrorAction
+			j.ErrorEditable = e.ErrorEditable
+			if e.ErrorCode != 0 {
+				j.Retryable = e.ErrorRetryable
+			}
 			// An error hint must not hide the refund outcome shown above.
 			if e.ErrorCause != "" && !verifiedRefund && j.Error != (&core.JobTimeout{Kind: j.Input.Kind}).Error() {
 				if m, lookup := a.model(ctx, j.Input.Model); lookup == nil {
