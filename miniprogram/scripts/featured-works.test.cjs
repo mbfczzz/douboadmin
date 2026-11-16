@@ -1,11 +1,14 @@
 const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const { harness } = require("./harness.cjs");
+// 优秀作品 lives in a component shown inside the 模板 tab page; `visible`
+// stands for the host's active flag.
+const featured = (h) => { const c = h.component("components/featured-works"); c.self().visible = true; return c; };
 const work = (id = "image") => ({ id, title: "优秀作品", kind: id === "video" ? "video" : "image", result: "https://fixture.test/1.png",
   results: id === "video" ? [] : [1, 2, 3, 4].map((n) => `https://fixture.test/${n}.png`), createdAt: "2026-11-15T00:00:00Z" });
 
-test("featured page displays mixed media, filters and paginates without login", async () => {
-  const h = harness(), service = h.service("featured-works"), page = h.page("featured-works");
+test("featured works display mixed media, filters and paginates without login", async () => {
+  const h = harness(), service = h.service("featured-works"), page = featured(h);
   const calls = [];
   service.featuredPage = async (number, kind) => { calls.push([number, kind]); return { items: [work(), work("video")], total: 25 }; };
   await page.load();
@@ -21,7 +24,7 @@ test("featured page displays mixed media, filters and paginates without login", 
 });
 
 test("late featured lists cannot overwrite a newer filter or a hidden page", async () => {
-  const h = harness(), service = h.service("featured-works"), page = h.page("featured-works");
+  const h = harness(), service = h.service("featured-works"), page = featured(h);
   let release;
   service.featuredPage = () => new Promise((resolve) => { release = resolve; });
   const first = page.load();
@@ -33,14 +36,14 @@ test("late featured lists cannot overwrite a newer filter or a hidden page", asy
   assert.equal(page.data.works[0].kind, "video");
   service.featuredPage = () => new Promise((resolve) => { release = resolve; });
   const pending = page.load();
-  page.onHide();
+  page.hide();
   release({ items: [], total: 0 });
   await pending;
   assert.equal(page.data.works[0].kind, "video");
 });
 
 test("public image previews retain all four results and close on withdrawal", async () => {
-  const h = harness(), service = h.service("featured-works"), page = h.page("featured-works");
+  const h = harness(), service = h.service("featured-works"), page = featured(h);
   service.featuredDetail = async () => work();
   service.featuredPage = async () => ({ items: [], total: 0 });
   await page.open({ currentTarget: { dataset: { id: "image" } } });
@@ -56,26 +59,29 @@ test("public image previews retain all four results and close on withdrawal", as
 });
 
 test("late detail responses cannot open a popup after leaving", async () => {
-  const h = harness(), service = h.service("featured-works"), page = h.page("featured-works");
+  const h = harness(), service = h.service("featured-works"), page = featured(h);
   let release;
   service.featuredDetail = () => new Promise((resolve) => { release = resolve; });
   const pending = page.open({ currentTarget: { dataset: { id: "video" } } });
-  page.onHide();
+  page.hide();
   release(work("video"));
   await pending;
   assert.equal(page.data.detail, null);
   assert.equal(page.data.opening, "");
 });
 
-test("my common functions link to the featured works page", () => {
-  const h = harness(), page = h.page("mine");
+test("my common functions open the 优秀 tab, not a new page", () => {
+  const h = harness(), page = h.page("mine"), switches = [];
+  h.wx.switchTab = (options) => switches.push(options);
   assert.ok(page.data.menus.some((item) => item.mode === "featured-works" && item.label === "优秀作品"));
   page.menu({ currentTarget: { dataset: { mode: "featured-works" } } });
-  assert.equal(h.nav[0].url, "/pages/featured-works/index");
+  assert.equal(h.nav.length, 0);
+  assert.equal(switches[0].url, "/pages/templates/index");
+  assert.equal(h.service("../utils/featured-mode").featuredOn(), true);
 });
 
 test("page changes clear the previous page cards while the next page is loading", async () => {
-  const h = harness(), service = h.service("featured-works"), page = h.page("featured-works");
+  const h = harness(), service = h.service("featured-works"), page = featured(h);
   service.featuredPage = async () => ({ items: [work()], total: 25 });
   await page.load();
   let release;

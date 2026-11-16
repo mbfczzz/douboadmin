@@ -1,4 +1,4 @@
-import { FEATURED_TAB_PATH, TAB_ITEMS } from "../utils/tab-transition";
+import { TAB_ITEMS, tabTarget, tabIndexOf, switchInPlace } from "../utils/tab-transition";
 
 Component({
   data: {
@@ -20,7 +20,7 @@ Component({
     syncSelected() {
       const pages = getCurrentPages();
       const route = pages[pages.length - 1]?.route;
-      const index = this.data.items.findIndex((item: { path: string }) => item.path === "/" + route);
+      const index = route ? tabIndexOf(route) : -1;
       if (index >= 0) this.setData({ selected: index, switching: false });
       else this.setData({ switching: false });
     },
@@ -38,13 +38,13 @@ Component({
         wx.showToast({ title: "切换失败，请重试", icon: "none" });
       };
       try {
-        const options = {
-          url: this.data.items[i].path,
-          fail,
-          complete: () => this.setData({ switching: false }),
-        };
-        if (options.url === FEATURED_TAB_PATH) wx.navigateTo(options);
-        else wx.switchTab(options);
+        // 模板 and 优秀 share one tab page: on it, only its view changes.
+        const url = tabTarget(this.data.items[i].path);
+        if (switchInPlace(url)) {
+          this.setData({ selected: i, switching: false });
+          return;
+        }
+        wx.switchTab({ url, fail, complete: () => this.setData({ switching: false }) });
       } catch {
         fail();
       }

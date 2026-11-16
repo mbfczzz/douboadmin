@@ -6,7 +6,7 @@ import { enterPage } from "./motion";
 import { openPage } from "./navigation";
 import { track } from "../services/analytics";
 import { resultImages } from "../services/result-images";
-import { TAB_ITEMS } from "./tab-transition";
+import { TAB_ITEMS, FEATURED_TAB_PATH, tabIndexOf } from "./tab-transition";
 // Saving to the album failed. Once permission is denied WeChat never asks
 // again, so offer the settings page; a cancelled picker says nothing.
 export function saveFailed(e: unknown) {
@@ -33,8 +33,9 @@ export function error(e: unknown) {
 }
 export function tab(page: any, index: number) {
   const name = ["templates", "mix", "create", "agent", "mine"][index];
-  track("page_view", name);
-  const selected = TAB_ITEMS.findIndex((item) => item.path === `/pages/${name}/index`);
+  // The 模板 page in its 优秀 view selects the 优秀 tab.
+  const selected = tabIndexOf(`pages/${name}/index`);
+  track("page_view", TAB_ITEMS[selected]?.path === FEATURED_TAB_PATH ? "featured" : name);
   enterPage(page);
   const select = (bar: any) => {
     if (bar && (bar.data?.selected !== selected || bar.data?.switching))

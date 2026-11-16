@@ -13,6 +13,7 @@ import {
   jobView,
   openTask,
   openTab,
+  FEATURED_TAB_PATH,
   sessionUserId,
 } from "../../utils/api";
 import type { Me } from "../../services/types";
@@ -168,7 +169,8 @@ Page({
     if (m === "tasks") openPage(this, { url: "/pages/tasks/index" });
     else if (m === "promo")
       openPage(this, { url: "/pages/provider/index?mode=promo" });
-    else if (["wallet", "orders", "notifications", "provider", "works", "featured-works"].includes(m))
+    else if (m === "featured-works") openTab(this, FEATURED_TAB_PATH);
+    else if (["wallet", "orders", "notifications", "provider", "works"].includes(m))
       openPage(this, { url: "/pages/" + m + "/index" });
     else if (m === "settings")
       openPage(this, { url: "/pages/preferences/index" });

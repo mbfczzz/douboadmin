@@ -3,57 +3,76 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const { harness } = require("./harness.cjs");
 
-test("bottom navigation exposes featured works without exceeding native tab limits", () => {
+// 优秀 is a sixth tab, but the native tab bar holds five pages: it is the 模板
+// tab page's featured view, so selecting it is a tab switch, not a new page.
+test("bottom navigation shows 优秀 as a view of the 模板 tab page", () => {
   const h = harness(), bar = h.component("custom-tab-bar");
   assert.deepEqual(Array.from(bar.data.items, (item) => item.text), ["模板", "混剪", "创作", "Agent", "优秀", "我的"]);
   const app = JSON.parse(fs.readFileSync("app.json", "utf8"));
   assert.equal(app.tabBar.list.length, 5);
-  assert.ok(app.pages.includes("pages/featured-works/index"));
   assert.ok(!app.tabBar.list.some((item) => item.pagePath === "pages/featured-works/index"));
-  const config = JSON.parse(fs.readFileSync("pages/featured-works/index.json", "utf8"));
-  assert.equal(config.usingComponents["app-tab-bar"], "/custom-tab-bar/index");
-  assert.match(fs.readFileSync("pages/featured-works/index.wxml", "utf8"), /<app-tab-bar\s*\/>/);
+  const templates = fs.readFileSync("pages/templates/index.wxml", "utf8");
+  assert.match(templates, /<view class="\{\{featured\?'':'view-off'\}\}"><featured-works id="featured" active="\{\{featured&&shown\}\}" \/><\/view>/);
+  assert.match(templates, /class="page templates-page \{\{featured\?'view-off':''\}\}"/);
+  assert.equal(JSON.parse(fs.readFileSync("pages/templates/index.json", "utf8")).usingComponents["featured-works"], "/components/featured-works/index");
 });
 
-test("featured tab navigates as a regular page, guards duplicate taps and restores selection", () => {
+test("tapping 优秀 switches tabs (no new page), guards repeats and selects 优秀", () => {
   const h = harness(), bar = h.component("custom-tab-bar"), switches = [];
+  const mode = h.service("../utils/featured-mode");
   h.wx.switchTab = (options) => switches.push(options);
   const tap = (index) => bar.switchTab({ currentTarget: { dataset: { index } } });
+  h.pages.push({ route: "pages/mine/index" });
+  bar.setData({ selected: 5 });
   tap(4); tap(4);
-  assert.equal(h.nav.length, 1);
-  assert.equal(switches.length, 0);
-  assert.equal(h.nav[0].url, "/pages/featured-works/index");
-  h.nav[0].complete();
-  h.pages.push({ route: "pages/featured-works/index" });
+  assert.equal(h.nav.length, 0, "never opens a new page");
+  assert.equal(switches.length, 1);
+  assert.equal(switches[0].url, "/pages/templates/index");
+  assert.equal(mode.featuredOn(), true);
+  switches[0].complete();
+  h.pages[0].route = "pages/templates/index";
   bar.pageLifetimes.show.call(bar);
   assert.equal(bar.data.selected, 4);
-  tap(4);
-  assert.equal(h.nav.length, 1);
-  tap(5);
-  assert.equal(switches[0].url, "/pages/mine/index");
-  switches[0].complete();
-  h.pages[0].route = "pages/mine/index";
-  bar.pageLifetimes.show.call(bar);
-  assert.equal(bar.data.selected, 5);
 });
 
-test("mine lifecycle selects my tab instead of the newly inserted featured tab", () => {
+test("on the 模板 page, 模板 and 优秀 swap its view in place", () => {
+  const h = harness(), bar = h.component("custom-tab-bar"), switches = [], views = [];
+  const mode = h.service("../utils/featured-mode");
+  h.wx.switchTab = (options) => switches.push(options);
+  h.pages.push({ route: "pages/templates/index", applyTabView: () => views.push(mode.featuredOn()) });
+  const tap = (index) => bar.switchTab({ currentTarget: { dataset: { index } } });
+  tap(4);
+  assert.deepEqual(views, [true]);
+  assert.equal(bar.data.selected, 4);
+  tap(0);
+  assert.deepEqual(views, [true, false]);
+  assert.equal(bar.data.selected, 0);
+  assert.equal(switches.length, 0, "no reload of the page it is already on");
+});
+
+test("tab lifecycles select the right tab, including the featured view", () => {
   const h = harness(), bar = { data: { selected: 4 }, setData(value) { Object.assign(this.data, value); } };
+  const mode = h.service("../utils/featured-mode");
   h.api.tab({ getTabBar: () => bar }, 4);
   assert.equal(bar.data.selected, 5);
   h.api.tab({ getTabBar: () => bar }, 2);
   assert.equal(bar.data.selected, 2);
+  mode.setFeatured(true);
+  h.api.tab({ getTabBar: () => bar }, 0);
+  assert.equal(bar.data.selected, 4);
+  mode.setFeatured(false);
+  h.api.tab({ getTabBar: () => bar }, 0);
+  assert.equal(bar.data.selected, 0);
 });
 
-test("failed featured navigation unlocks and shared openTab uses the same destination", () => {
-  const h = harness(), bar = h.component("custom-tab-bar");
+test("a failed switch unlocks, and openTab takes 优秀 to the same tab page", () => {
+  const h = harness(), bar = h.component("custom-tab-bar"), switches = [];
+  h.wx.switchTab = (options) => switches.push(options);
+  h.pages.push({ route: "pages/agent/index" });
   bar.switchTab({ currentTarget: { dataset: { index: 4 } } });
-  h.nav[0].fail();
+  switches[0].fail();
+  switches[0].complete();
   assert.equal(bar.data.switching, false);
-  bar.switchTab({ currentTarget: { dataset: { index: 4 } } });
-  assert.equal(h.nav.length, 2);
-  const page = {};
-  assert.equal(h.api.openTab(page, "/pages/featured-works/index"), true);
-  assert.equal(h.api.openTab(page, "/pages/featured-works/index"), false);
-  assert.equal(h.nav[2].url, "/pages/featured-works/index");
+  assert.equal(h.api.openTab({}, "/pages/featured-works/index"), true);
+  assert.equal(switches.at(-1).url, "/pages/templates/index");
 });

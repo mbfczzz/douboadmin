@@ -137,7 +137,10 @@ console.log(
 // 773,461 B (+2,157). 任务详情 as cards (参考素材 named 图片N like the
 // prompt's @图片N with tap-to-preview, 生成信息 rows with billing state):
 // 775,505 B (+2,044). Explicit 752 -> 758 KiB allowance for the three.
-const budget = 758 * 1024;
+// 优秀 as a view of the 模板 tab page (components/featured-works, tab
+// routing in utils/tab-transition, redirect at the old page) so it opens
+// like the other tabs: 779,853 B (+3,669). 758 -> 762 KiB.
+const budget = 762 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

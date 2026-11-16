@@ -4,11 +4,14 @@ import { request, tab, media, error, openPage, openTab } from "../../utils/api";
 import type { Row, Template, Config } from "../../services/types";
 import { layout } from "./masonry";
 import { navBottom } from "../../utils/nav-metrics";
+import { featuredOn } from "../../utils/featured-mode";
 
 const PAGE_SIZE = 10;
 import type { Card } from "./masonry";
 Page({
   data: {
+    featured: false, // the 优秀 tab's view of this page (utils/featured-mode)
+    shown: false,
     items: [] as Row<Template>[],
     visibleCount: 4,
     page: 1,
@@ -34,7 +37,7 @@ Page({
   },
   onHide() {
     this.visible = false;
-    this.setData({ heroPlay: false });
+    this.setData({ heroPlay: false, shown: false });
     this.loadVersion++;
     this.fetching = false;
     this.setData({ loading: false });
@@ -47,8 +50,18 @@ Page({
   onShow() {
     this.visible = true;
     // The muted preview follows 作品预览自动播放 (off by default).
-    this.setData({ heroPlay: wx.getStorageSync("autoplay-preference") === true });
+    this.setData({ heroPlay: wx.getStorageSync("autoplay-preference") === true, shown: true });
+    this.applyTabView();
+  },
+  // 模板 or 优秀: the tab bar sets the view, this page shows it in place.
+  applyTabView() {
+    const featured = featuredOn();
+    if (featured !== this.data.featured) {
+      this.setData({ featured });
+      wx.pageScrollTo({ scrollTop: 0, duration: 0 });
+    }
     tab(this, 0);
+    if (featured) return; // the 优秀 view loads its own list
     void this.loadCategories();
     if (!this.loadedQuery) void this.load(true);
   },
@@ -126,14 +139,15 @@ Page({
     }
   },
   onPullDownRefresh() {
-    void this.load(true);
+    if (this.data.featured) void this.selectComponent("#featured")?.refresh();
+    else void this.load(true);
   },
   more() {
     if (this.data.items.length < this.data.total) void this.load(true,true);
   },
   // Scrolling to the bottom loads the next page; there is no "more" button.
   onReachBottom() {
-    this.more();
+    if (!this.data.featured) this.more();
   },
   choose(e: WechatMiniprogram.TouchEvent) {
     this.setData({ category: e.currentTarget.dataset.value });

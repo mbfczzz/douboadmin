@@ -185,3 +185,8 @@ button.clear-search {
   padding: 0 20px;
   background: var(--ui-bg);
 }
+/* 模板 and 优秀 share this page; a class (not `hidden`, which loses to
+   display rules) keeps the other view mounted but out of sight. */
+.view-off {
+  display: none !important;
+}

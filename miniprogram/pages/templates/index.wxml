@@ -1,5 +1,6 @@
-<nav-bar title="模板" />
-<view class="page templates-page">
+<nav-bar title="{{featured?'优秀作品':'模板'}}" />
+<view class="{{featured?'':'view-off'}}"><featured-works id="featured" active="{{featured&&shown}}" /></view>
+<view class="page templates-page {{featured?'view-off':''}}">
   <view class="catalog-head" style="top:{{stickyTop}}px">
     <view class="search-field">
       <image class="gl gl-20" src="/assets/glyphs/search-muted.png" />
