@@ -78,33 +78,34 @@
       <button wx:if="{{job.retryable}}" class="retry-pill" loading="{{busy}}" disabled="{{busy}}" bindtap="retry"><image wx:if="{{!busy}}" class="gl gl-18" src="/assets/glyphs/refresh-dark.png" />重新生成</button>
       <text wx:if="{{job.editable}}" class="edit-link" bindtap="edit">修改后再试 ›</text>
     </view>
-    <text class="section-title">提示词</text>
-    <text class="full-prompt" selectable>{{job.input.prompt}}</text>
-    <view class="row section-title">
-      <text>参考文件</text>
-      <text wx:if="{{job.input.assets.length}}" class="muted small">{{job.input.assets.length}} 个附件</text>
+    <view class="prompt-card">
+      <view class="prompt-head">
+        <text>提示词<text wx:if="{{job.input.prompt}}" class="prompt-size"> · {{job.input.prompt.length}} 字</text></text>
+        <view wx:if="{{job.input.prompt}}" class="prompt-copy" bindtap="copyPrompt" hover-class="act-pressed" aria-role="button" aria-label="复制提示词"><image class="gl gl-14" src="/assets/glyphs/copy-muted.png" /><text>复制</text></view>
+      </view>
+      <text class="full-prompt {{job.input.prompt.length>100&&!promptOpen?'folded':''}}" selectable>{{job.input.prompt||'未填写提示词'}}</text>
+      <view wx:if="{{job.input.prompt.length>100}}" class="prompt-more" bindtap="togglePrompt" aria-role="button">{{promptOpen?'收起':'展开全文'}}<image class="gl gl-14 {{promptOpen?'up':''}}" src="/assets/glyphs/open-muted.png" /></view>
     </view>
-    <view wx:if="{{loadingAssets}}" class="muted small">正在加载参考素材…</view>
-    <view wx:elif="{{assetError}}" class="error-box" bindtap="loadAssets"
-      >{{assetError}}</view
-    >
-    <view wx:elif="{{!assets.length}}" class="muted small">未添加参考素材</view>
-    <view class="asset-grid">
-      <view class="asset-row" wx:for="{{assets}}" wx:key="id">
-        <image
-          wx:if="{{item.isImage}}"
-          src="{{item.data.url}}"
-          mode="aspectFill"
-        />
-        <view wx:else class="asset-file"><image class="gl gl-24" src="/assets/glyphs/file-muted.png" /></view>
-        <text>{{item.data.name}}</text>
-        <text class="muted tiny">{{item.isImage?'图片':'文件'}}</text>
+    <view class="detail-card">
+      <view class="detail-head">
+        <text>参考素材</text>
+        <text wx:if="{{job.input.assets.length}}">{{job.input.assets.length}} 个</text>
+      </view>
+      <view wx:if="{{loadingAssets}}" class="detail-empty">正在加载参考素材…</view>
+      <view wx:elif="{{assetError}}" class="error-box" bindtap="loadAssets">{{assetError}}</view>
+      <view wx:elif="{{!assets.length}}" class="detail-empty">未添加参考素材</view>
+      <view class="asset-grid">
+        <view class="asset-row" wx:for="{{assets}}" wx:key="id" data-url="{{item.data.url}}" bindtap="previewAsset" aria-role="button" aria-label="{{item.label}}">
+          <image wx:if="{{item.isImage}}" src="{{item.data.url}}" mode="aspectFill" lazy-load />
+          <view wx:else class="asset-file"><image class="gl gl-24" src="/assets/glyphs/{{item.kind==='video'?'video-muted':'file-muted'}}.png" /></view>
+          <text>{{item.label}}</text>
+        </view>
       </view>
     </view>
-    <view class="specs">
-      {{job.modelName}} · {{job.input.resolution}} · {{job.input.ratio}}
-      <text wx:if="{{job.input.duration}}">· {{job.input.duration}}秒</text>
-      <text wx:if="{{job.costUnits}}" class="billing-summary">本次积分 {{job.costUnits/100}} · {{job.billingState==='reserved'?'已预留':job.billingState==='charged'?'已扣除':job.billingState==='released'?'已退回':''}}</text>
+    <view class="detail-card specs">
+      <view wx:if="{{job.modelName}}" class="spec-row"><text>模型</text><text class="spec-value">{{job.modelName}}</text></view>
+      <view wx:if="{{job.input.resolution||job.input.ratio||job.input.duration}}" class="spec-row"><text>规格</text><text class="spec-value">{{job.input.resolution||''}}{{job.input.resolution&&job.input.ratio?' · ':''}}{{job.input.ratio||''}}{{(job.input.resolution||job.input.ratio)&&job.input.duration?' · ':''}}{{job.input.duration?job.input.duration+' 秒':''}}</text></view>
+      <view wx:if="{{job.costUnits}}" class="spec-row billing-summary"><text>积分</text><text class="spec-value">{{job.costUnits/100}}<text wx:if="{{job.billingState==='reserved'||job.billingState==='charged'||job.billingState==='released'}}" class="spec-state {{job.billingState}}">{{job.billingState==='reserved'?'已预留':job.billingState==='charged'?'已扣除':'已退回'}}</text></text></view>
     </view>
     <view class="task-balance"><points-balance compact /></view>
   </view>

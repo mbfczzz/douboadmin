@@ -4,7 +4,8 @@ type Rect = { left: number; top: number; right: number; bottom: number };
 const pending = new WeakMap<object, object>();
 
 export function mentionPosition(anchor: Rect, input: Rect, width: number, bottom: number, count = 3) {
-  const panelWidth = Math.min(248, width - 24), panelHeight = Math.min(164, 36 + Math.max(1, count) * 52, Math.max(72, bottom - 80));
+  // 40 px heading + 56 px rows (sheets.wxss).
+  const panelWidth = Math.min(248, width - 24), panelHeight = Math.min(210, 42 + Math.max(1, count) * 56, Math.max(98, bottom - 80));
   const y = Math.max(input.top, Math.min(anchor.top, input.bottom - 22));
   const beside = anchor.right + 8 + panelWidth <= width - 12;
   const left = Math.max(12, Math.min(beside ? anchor.right + 8 : anchor.left, width - panelWidth - 12));

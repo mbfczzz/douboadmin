@@ -7,19 +7,20 @@ test("task prompt heading and content stay adjacent; status and actions stay out
   const text = source("task-detail");
   assert.match(
     text,
-    /<text class="section-title">提示词<\/text>\s*<text class="full-prompt"/,
+    // Heading, length and copy sit in the same card right above the text.
+    /<view class="prompt-card">\s*<view class="prompt-head">\s*<text>提示词[^]*?<\/view>\s*<\/view>\s*<text class="full-prompt/,
   );
   assert.ok(
     text.indexOf('class="stage-note"') < text.indexOf('class="waiting-note"'),
   );
   assert.ok(
-    text.indexOf('bindtap="share"') < text.indexOf('class="full-prompt"'),
+    text.indexOf('bindtap="share"') < text.indexOf('class="full-prompt'),
   );
   assert.ok(
-    text.indexOf('class="billing-summary"') >
+    text.indexOf("billing-summary") >
       text.indexOf('class="asset-grid"'),
   );
-  assert.ok(text.indexOf("<points-balance") > text.indexOf('class="specs"'));
+  assert.ok(text.indexOf("<points-balance") > text.indexOf("detail-card specs"));
 });
 
 test("generation stays inside the editor and profile balance precedes the menu grid", () => {

@@ -1,0 +1,74 @@
+/* 参考素材 and 生成信息 as cards in the prompt card's style. */
+.detail-card {
+  margin-top: 12px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: var(--ui-surface);
+}
+.detail-head {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  font-size: 13px;
+  color: var(--ui-muted);
+}
+.detail-empty {
+  font-size: 13px;
+  color: var(--ui-muted);
+}
+.asset-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+.asset-row {
+  min-width: 0;
+}
+.asset-row image,
+.asset-file {
+  display: block;
+  width: 100%;
+  height: 72px;
+  border-radius: 10px;
+}
+.asset-file {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ui-field);
+}
+.asset-row > text {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+  text-align: center;
+  color: var(--ui-muted);
+}
+/* 生成信息: label on the left, value on the right. */
+.spec-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 7px 0;
+  font-size: 13px;
+  color: var(--ui-muted);
+}
+.spec-value {
+  min-width: 0;
+  text-align: right;
+  overflow-wrap: anywhere;
+  color: var(--ui-text);
+}
+.spec-state {
+  margin-left: 8px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  color: var(--ui-muted);
+  background: var(--ui-field);
+}
+.spec-state.released {
+  color: var(--ui-success);
+  background: var(--ui-success-bg);
+}

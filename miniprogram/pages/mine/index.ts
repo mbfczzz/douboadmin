@@ -20,7 +20,7 @@ import { jobPage } from "../../services/job-pages";
 import { dropCover } from "../../services/cover";
 
 const baseMenus = [
-  { icon: "star", art: "", label: "优秀作品", mode: "featured-works" },
+  { icon: "star", art: ICON.featured, label: "优秀作品", mode: "featured-works" },
   { icon: "order", art: ICON.orders, label: "充值订单", mode: "orders" },
   { icon: "heart", art: ICON.favorites, label: "我的收藏", mode: "favorites" },
   { icon: "history", art: ICON.history, label: "生成记录", mode: "tasks" },

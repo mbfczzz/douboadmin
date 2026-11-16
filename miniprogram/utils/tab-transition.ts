@@ -29,7 +29,7 @@ export const TAB_ITEMS = [
     ...art("agent"),
     path: "/pages/agent/index",
   },
-  { text: "优秀", icon: "star", on: "star-filled", art: "", artOn: "", path: FEATURED_TAB_PATH },
+  { text: "优秀", icon: "star", on: "star-filled", ...art("featured"), path: FEATURED_TAB_PATH },
   { text: "我的", icon: "user", on: "user-filled", ...art("mine"), path: "/pages/mine/index" },
 ];
 

@@ -31,7 +31,7 @@ test("the picker stays beside @ and within narrow screens above the keyboard", (
   const beside = styles(mentionPosition({ left: 60, right: 74, top: 200, bottom: 222 }, { left: 24, right: 366, top: 160, bottom: 248 }, 390, 500, 1));
   assert.equal(beside.left, 82);
   assert.equal(beside.top, 200);
-  assert.equal(beside["max-height"], 88);
+  assert.equal(beside["max-height"], 98);
 });
 
 test("continue typing dismisses stale choices and a subsequent @ uses the new cursor", () => {

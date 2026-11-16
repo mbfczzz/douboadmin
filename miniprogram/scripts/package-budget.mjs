@@ -131,7 +131,13 @@ console.log(
 // Reviewed 736 -> 740 KiB feature allowance; see docs/create-task-count.md.
 // Featured works: a native mixed-media gallery and safe preview, +9,016 bytes.
 // Explicit 740 -> 752 KiB feature allowance; see docs/featured-works.md.
-const budget = 752 * 1024;
+// @ 引用图片 popover redesign (count in the heading, labelled rows with a
+// clear 引用 action, no truncated names): 771,304 B (+1,302 over 770,002).
+// 任务详情 prompt card (length, copy, long prompts fold to five lines):
+// 773,461 B (+2,157). 任务详情 as cards (参考素材 named 图片N like the
+// prompt's @图片N with tap-to-preview, 生成信息 rows with billing state):
+// 775,505 B (+2,044). Explicit 752 -> 758 KiB allowance for the three.
+const budget = 758 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

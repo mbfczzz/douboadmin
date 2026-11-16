@@ -1,4 +1,4 @@
-<view class="tabbar">
+<view class="tabbar {{items.length>5?'crowded':''}}">
   <view
     class="item {{selected===index?'active':''}} {{item.primary?'primary':''}}"
     wx:for="{{items}}"

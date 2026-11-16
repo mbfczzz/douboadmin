@@ -6,7 +6,6 @@ import {
   error,
   jobView,
   uid,
-  media,
   enterPage,
   openTab,
   hasSession,
@@ -15,18 +14,20 @@ import {
 } from "../../utils/api";
 import type { Job, Row, Asset } from "../../services/types";
 import { confirmBudget } from "../../services/business";
+import { assetViews } from "./assets";
 Page({
   data: {
     job: null as ReturnType<typeof jobView> | null,
     loading: true,
     loadError: "",
     busy: false,
-    assets: [] as (Row<Asset> & { isImage: boolean })[],
+    assets: [] as ReturnType<typeof assetViews>,
     needsLogin: false,
     signingIn: false,
     assetError: "",
     loadingAssets: false,
     autoplay: false,
+    promptOpen: false, // long prompts start folded to five lines
   },
   id: "",
   timer: 0,
@@ -146,11 +147,7 @@ Page({
       );
       if (!this.destroyed && id === this.id)
         this.setData({
-          assets: rows.map((a) => ({
-            ...a,
-            data: { ...a.data, url: media(a.data.url) },
-            isImage: a.data.type.startsWith("image/"),
-          })),
+          assets: assetViews(rows),
         });
     } catch {
       if (!this.destroyed && id === this.id) {
@@ -200,6 +197,19 @@ Page({
     } finally {
       this.setData({ busy: false });
     }
+  },
+  previewAsset(e: WechatMiniprogram.TouchEvent) {
+    const assets: ReturnType<typeof assetViews> = this.data.assets;
+    const urls = assets.filter((a) => a.isImage).map((a) => a.data.url);
+    const current = String(e.currentTarget.dataset.url || "");
+    if (urls.includes(current)) wx.previewImage({ urls, current });
+  },
+  togglePrompt() {
+    this.setData({ promptOpen: !this.data.promptOpen });
+  },
+  copyPrompt() {
+    const prompt = this.data.job?.input.prompt;
+    if (prompt) wx.setClipboardData({ data: prompt, success: () => wx.showToast({ title: "已复制提示词", icon: "none" }) });
   },
   edit() {
     if (this.data.job) {

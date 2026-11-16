@@ -50,6 +50,22 @@
   color: var(--ui-text, #ffffff);
   background: var(--ui-tab-pill, #2c2c2e);
 }
+/* Six tabs: a slimmer 创作 pill and tighter sides so no column feels
+   squeezed; five tabs keep the roomier layout above. */
+.crowded {
+  padding-left: 4px;
+  padding-right: 4px;
+}
+.crowded .glyph {
+  width: 40px;
+}
+.crowded.tabbar .primary .glyph {
+  width: 46px;
+  height: 36px;
+}
+.crowded .label {
+  font-size: 11px;
+}
 .active {
   color: var(--ui-nav, #ffffff);
 }

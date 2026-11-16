@@ -93,7 +93,8 @@ export const ICON = {
   create: photo("create"), // 我的: 还没有作品
   points: photo("points"), // 积分 balance row
   provider: photo("provider"), // 服务商中心
-  orders: glyph("orders"), // 常用功能
+  featured: glyph("featured"), // 常用功能: 优秀作品
+  orders: glyph("orders"),
   favorites: glyph("favorites"),
   history: glyph("history"),
   notifications: glyph("notifications"),
