@@ -9,8 +9,8 @@
   <text wx:elif="{{accountDeleted&&!logged}}" class="biz-note activation-intro">原账号已删除，旧登录已退出。请重新授权手机号注册新账号。</text>
   <text wx:elif="{{!logged}}" class="biz-note activation-intro">登录后填写资料。</text>
   <text wx:elif="{{status.profileRequired}}" class="biz-note activation-intro">第 1 步：填写资料。</text>
-  <text wx:elif="{{status.status==='review'}}" class="biz-note activation-intro">已登记，超级管理员开通后即可使用。</text>
-  <text wx:elif="{{status.status==='pending'||status.status==='unbound'||status.status==='rejected'}}" class="biz-note activation-intro">{{invite?'已识别邀请码，正在准备登记。':codeMode?'第 2 步：输入服务商或会员给你的邀请码。':'第 2 步：扫描服务商或会员给你的二维码登记。'}}</text>
+  <text wx:elif="{{status.status==='review'}}" class="biz-note activation-intro">已登记，审核开通后即可使用。</text>
+  <text wx:elif="{{status.status==='pending'||status.status==='unbound'||status.status==='rejected'}}" class="biz-note activation-intro">{{invite?'已识别邀请码，正在准备登记。':codeMode?'第 2 步：输入服务商或合伙人给你的邀请码。':'第 2 步：扫描服务商或合伙人给你的二维码登记。'}}</text>
   <view wx:if="{{loading}}" class="biz-note">正在确认授权状态…</view>
   <view wx:if="{{loadError}}" class="biz-error" bindtap="refresh">{{loadError}} · {{loading?'正在检查…':'点击重试'}}</view>
   <block wx:if="{{!logged}}">
@@ -37,7 +37,7 @@
     <block wx:else>
       <view wx:if="{{status.message&&status.status!=='pending'}}" class="biz-card activation-status">
         <image wx:if="{{status.status==='review'}}" class="empty-photo status-icon" src="/assets/photos/empty-review.jpg" mode="aspectFill" aria-hidden="true" />
-        <text class="biz-list-title">{{status.status==='review'?'等待超级管理员开通':'授权状态'}}</text>
+        <text class="biz-list-title">{{status.status==='review'?'等待审核开通':'授权状态'}}</text>
         <text class="biz-note">{{status.status==='review'&&status.partnerName?'已登记到「'+status.partnerName+'」，开通后会通知你，也可稍后刷新查看。':status.message}}</text>
       </view>
       <view wx:if="{{!loadError&&(status.status==='pending'||status.status==='unbound'||status.status==='rejected')}}" class="biz-card activation-options">
@@ -47,7 +47,7 @@
             <view class="scan-tile {{busy||loading?'is-busy':''}}" bindtap="scan" hover-class="scan-pressed" aria-role="button" aria-label="扫码登记">
               <view class="scan-frame"><view class="scan-corners" /><image class="gl gl-34" src="/assets/glyphs/scan-brand.png" /><view class="scan-line" /></view>
               <text class="scan-title">{{busy?'正在登记…':'扫码登记'}}</text>
-              <text class="scan-hint">扫码登记对应角色，超级管理员开通后生效</text>
+              <text class="scan-hint">扫码登记对应角色，审核开通后生效</text>
             </view>
             <text class="mode-link" bindtap="useCode">邀请码激活</text>
           </block>

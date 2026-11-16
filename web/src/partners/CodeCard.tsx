@@ -52,7 +52,7 @@ export default function CodeView({
     const ok = await ask({
       title: `重置${title}？`,
       message:
-        "旧二维码会立即失效，已发出或打印的需要换新；已登记的会员和服务商不受影响。",
+        "旧二维码会立即失效，已发出或打印的需要换新；已登记的合伙人和服务商不受影响。",
       confirmText: "重置",
       danger: true,
       run: () => api(path, { method: "POST", body: "{}", confirmation: false }),

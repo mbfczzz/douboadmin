@@ -19,8 +19,8 @@ export const adminRoleLabel: Record<string, string> = {
   operator: "平台运营",
   partner: "服务商",
   branch: "分公司",
-  s1: "S1 服务商",
-  s2: "S2 推荐官",
+  s1: "一级服务商",
+  s2: "二级服务商",
 };
 
 // Never-logged-in accounts carry Go's zero time.

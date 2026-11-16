@@ -38,13 +38,13 @@ test("a scan only registers: the page waits for the platform to open it", async 
   h.api.request = async () => ({
     active: false,
     status: "review",
-    message: "已登记，等待超级管理员开通",
+    message: "已登记，等待审核开通",
     partnerName: "华东分公司",
   });
   await page.join("ABCD2345", "scan");
   assert.equal(enters, 0);
   assert.equal(page.data.status.status, "review");
-  assert.deepEqual(toasts, ["已登记，等待超级管理员开通"]);
+  assert.deepEqual(toasts, ["已登记，等待审核开通"]);
 });
 
 test("activation-required business response redirects instead of exposing data", async () => {

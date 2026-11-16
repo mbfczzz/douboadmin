@@ -27,7 +27,7 @@ func (s *Service) ChangeMembership(ctx context.Context, user, status, reason, ac
 			return core.ErrConflict
 		}
 		if m.Status != "active" && m.Status != "disabled" {
-			return rulef("只能停用、恢复或解绑已开通的会员")
+			return rulef("只能停用、恢复或解绑已开通的合伙人")
 		}
 		m.Status = status
 		m.Reason = reason

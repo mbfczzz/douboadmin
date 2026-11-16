@@ -23,7 +23,7 @@ export const profileState = {
   saveError: "",
   focusedField: "",
   fieldErrors: {} as Record<string, string>,
-  // 分公司, S1 服务商, S2 推荐官 or 会员; display only.
+  // 分公司, 一级服务商, 二级服务商 or 合伙人; display only.
   identity: null as { kind: string; label: string; partner?: string } | null,
 };
 

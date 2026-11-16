@@ -35,7 +35,7 @@ test("扫码登记 lists pending registrations with their source", async ({
     row = section.locator("tbody tr, article.mobile-record").first();
   await expect(row).toContainText("质检登记用户");
   await expect(row).toContainText("13900000002");
-  await expect(row).toContainText("会员");
+  await expect(row).toContainText("合伙人");
   // The provider name comes from the tree; the referrer from the promo code.
   await expect(row).toContainText(longName);
   await expect(row).toContainText("推广码 · 推荐人 qa-referrer");
@@ -117,10 +117,10 @@ test("the user detail explains a member's registration and referrer", async ({
     .getByRole("button", { name: "详情", exact: true })
     .click();
   const source = page.locator(".user-source");
-  await expect(source).toContainText("会员");
+  await expect(source).toContainText("合伙人");
   await expect(source).toContainText("已开通");
   await expect(source).toContainText("推广码");
-  await expect(source).toContainText("推荐会员");
+  await expect(source).toContainText("推荐合伙人");
   await expect(source).toContainText("qa-referrer");
   await expect(source).toContainText("质检分公司分公司");
   await expect(source).not.toContainText("直接开通");

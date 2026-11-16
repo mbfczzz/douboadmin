@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { api, type Row } from "../api";
 import { ask } from "../confirm/ask";
 import type { Notify } from "../navigation";
-import { useMe, canApproveRegistrations } from "../session";
+import { useMe, canDecideRegistrations } from "../session";
 
 export type Registration = {
   role: string;
@@ -30,8 +30,8 @@ export function useRegistrationDecision(
   scope = "",
 ) {
   const me = useMe(),
-    canApprove = canApproveRegistrations(me);
-  const permissionScope = `${scope}/${me?.id}/${me?.role}/${me?.canApproveRegistrations}`;
+    canApprove = canDecideRegistrations(me);
+  const permissionScope = `${scope}/${me?.id}/${me?.role}/${me?.canApproveRegistrations}/${me?.canActivateChildren}`;
   const [busy, setBusy] = useState(false);
   const active = useRef<AbortController | null>(null);
   const currentScope = useRef(permissionScope);
@@ -49,7 +49,7 @@ export function useRegistrationDecision(
     expected?: { code?: string; partnerId?: string; role?: string },
   ) {
     if (approve && !canApprove) {
-      notify("仅超级管理员可开通账号", "error");
+      notify("未开启下级小程序开通权限，请联系超级管理员", "error");
       return;
     }
     if (active.current) return;

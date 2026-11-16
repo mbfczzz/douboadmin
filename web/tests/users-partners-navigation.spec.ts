@@ -55,14 +55,14 @@ test("users and providers are isolated sidebar routes", async ({ page }) => {
   const row = page.locator(".provider-tree-row").first();
   for (const [button, title, heading] of [
     ["编辑", "编辑服务商", ""],
-    ["分享码", "分享码", "已加入的会员"],
+    ["分享码", "分享码", "已加入的合伙人"],
     ["分佣", "算力分佣", "佣金流水"],
   ]) {
     await row.getByRole("button", { name: button, exact: true }).click();
     const dialog = page.getByRole("dialog", { name: title, exact: true });
     await expect(dialog).toBeVisible();
     if (button === "分享码")
-      await dialog.getByRole("tab", { name: "子账号开通码", exact: true }).click();
+      await dialog.getByRole("tab", { name: "合伙人开通码", exact: true }).click();
     if (heading)
       await expect(
         dialog.getByRole("heading", { name: heading, exact: true }),

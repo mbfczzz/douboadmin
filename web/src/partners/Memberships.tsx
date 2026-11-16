@@ -93,7 +93,7 @@ export default function Memberships({
     <>
       <Records
         placeholder="搜索用户编号或推荐人编号"
-        title="已加入的会员"
+        title="已加入的合伙人"
         resource={resource}
         columns={[
           { title: "微信用户", render: (r) => <IdChip>{r.id}</IdChip> },

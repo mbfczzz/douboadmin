@@ -264,7 +264,7 @@ Page({
       clearCode(this);
       this.setData({ codeMode: false });
       if (status.active) this.enter();
-      else wx.showToast({ title: "已登记，等待超级管理员开通", icon: "none" });
+      else wx.showToast({ title: "已登记，等待审核开通", icon: "none" });
     } catch (e) {
       if (!this.destroyed) {
         if (e instanceof RequestError && e.status === 403) await this.load();

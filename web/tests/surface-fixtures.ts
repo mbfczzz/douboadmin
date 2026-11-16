@@ -192,7 +192,7 @@ export async function surfaceFixtures(page: Page, catalog?: Row<Model>[]) {
       kind: "member",
       membership,
       registration: { ...registration.data, status: "approved" },
-      referrer: { id: "qa-referrer", name: "推荐会员", nickname: "小李" },
+      referrer: { id: "qa-referrer", name: "推荐合伙人", nickname: "小李" },
       chain: [
         {
           id: "qa-provider",

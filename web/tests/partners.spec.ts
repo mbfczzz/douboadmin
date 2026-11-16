@@ -61,14 +61,14 @@ test("scans only register; 总部 opens or rejects; members can be suspended", a
   expect(invited.status()).toBe(200);
 
   let row = await registration(page, member.userId);
-  await expect(row).toContainText("子账号开通码");
+  await expect(row).toContainText("合伙人开通码");
   await row.getByRole("button", { name: "开通", exact: true }).click();
   await answerAsk(page, true);
   expect((await page.request.get("/api/templates", { headers })).status()).toBe(
     200,
   );
   row = await registration(page, scout.userId);
-  await expect(row).toContainText("S2 推荐官");
+  await expect(row).toContainText("二级服务商");
   await row.getByRole("button", { name: "拒绝", exact: true }).click();
   const reject = page.getByRole("dialog", { name: "拒绝登记" });
   await reject.getByLabel("拒绝原因").fill("验收拒绝");
@@ -82,7 +82,7 @@ test("scans only register; 总部 opens or rejects; members can be suspended", a
     .filter({ hasText: `验收 S1 ${stamp}` })
     .getByRole("button", { name: "分享码", exact: true })
     .click();
-  const members = page.getByRole("region", { name: "已加入的会员" });
+  const members = page.getByRole("region", { name: "已加入的合伙人" });
   const memberRow = members.locator("tbody tr").filter({
     hasText: member.userId,
   });

@@ -59,21 +59,21 @@ test("each provider function opens its own readable, contained dialog", async ({
         if (index === 1) {
           // Business invitations and opening codes are separate from owner binding.
           await expect(panel.getByRole("tab")).toHaveText([
-            "S1 服务商邀请码",
-            "S2 推荐官邀请码",
-            "子账号开通码",
+            "一级服务商邀请码",
+            "二级服务商邀请码",
+            "合伙人开通码",
           ]);
-          await panel.getByRole("tab", { name: "子账号开通码" }).click();
+          await panel.getByRole("tab", { name: "合伙人开通码" }).click();
           await expect(panel.locator(".share-code")).toHaveText("ABCD-2345");
           await expect(panel.locator(".code-info")).toContainText(
-            "用户扫码登记为子账号（会员），直接归属本服务商，超级管理员开通后生效",
+            "用户扫码登记为合伙人，直接归属本服务商，审核开通后生效",
           );
-          await panel.getByRole("tab", { name: "S1 服务商邀请码" }).click();
+          await panel.getByRole("tab", { name: "一级服务商邀请码" }).click();
           await expect(panel.locator(".share-code")).toHaveText("KMNP-2345");
           await expect(panel.locator(".code-info")).toContainText(
-            "新用户扫码登记为本服务商下的 S1 服务商，超级管理员开通后生效",
+            "新用户扫码登记为本服务商下的一级服务商，审核开通后生效",
           );
-          await panel.getByRole("tab", { name: "S2 推荐官邀请码" }).click();
+          await panel.getByRole("tab", { name: "二级服务商邀请码" }).click();
           await expect(panel.locator(".share-code")).toHaveText("WXYZ-6789");
           // An admin-made provider shows the account its bind code linked.
           await panel.locator(".owner-bind > summary").click();
@@ -85,7 +85,7 @@ test("each provider function opens its own readable, contained dialog", async ({
           ).toBeVisible();
           await expect(panel).not.toContainText("名额");
           await panel.locator(".owner-bind > summary").click();
-          await panel.getByRole("tab", { name: "S1 服务商邀请码" }).click();
+          await panel.getByRole("tab", { name: "一级服务商邀请码" }).click();
         }
         if (width === 390) {
           const nativeButtons = await panel
@@ -116,10 +116,10 @@ test("provider function dialogs keep their record workflows", async ({
 }) => {
   await row(page).getByRole("button", { name: "分享码", exact: true }).click();
   const share = page.getByRole("dialog", { name: "分享码", exact: true });
-  await share.getByRole("tab", { name: "S2 推荐官邀请码" }).click();
+  await share.getByRole("tab", { name: "二级服务商邀请码" }).click();
   await share.getByRole("button", { name: "重置", exact: true }).click();
-  const reset = page.getByRole("dialog", { name: "重置S2 推荐官邀请码？" });
-  await expect(reset).toContainText("已登记的会员和服务商不受影响");
+  const reset = page.getByRole("dialog", { name: "重置二级服务商邀请码？" });
+  await expect(reset).toContainText("已登记的合伙人和服务商不受影响");
   await reset.getByRole("button", { name: "取消", exact: true }).click();
   await share
     .getByRole("button", { name: "关闭", exact: true })

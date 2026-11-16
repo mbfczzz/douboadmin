@@ -32,7 +32,7 @@ const baseMenus = [
 // The role entry has its own row; shared discovery lives in the common grid.
 const roleMenus: Record<string, { icon: string; art?: string; glyph?: string; label: string; mode: string; hint: string }> =
   {
-    provider: { icon: "cooperate", art: ICON.provider, label: "服务商中心", mode: "provider", hint: "邀请码 · 会员 · 后台登录" },
+    provider: { icon: "cooperate", art: ICON.provider, label: "服务商中心", mode: "provider", hint: "邀请码 · 合伙人 · 后台登录" },
     member: { icon: "qrcode", glyph: "/assets/glyphs/qrcode-brand.png", label: "我的推广码", mode: "promo", hint: "分享推广码，邀请好友加入" },
   };
 Page({

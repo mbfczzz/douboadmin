@@ -96,7 +96,7 @@ test("usage filters follow the selected code and preserve code-card geometry", a
   const { dialog, records, calls } = await openUses(page);
   expect(calls.at(-1)?.get("code")).toBe(codes.s1);
   await expect(
-    dialog.getByRole("heading", { name: "已加入的会员" }),
+    dialog.getByRole("heading", { name: "已加入的合伙人" }),
   ).toHaveCount(0);
   await records
     .getByRole("combobox", { name: "扫码登记状态" })
@@ -113,9 +113,9 @@ test("usage filters follow the selected code and preserve code-card geometry", a
   await expect.poll(() => calls.at(-1)?.get("kind")).toBe("s2");
   expect(calls.at(-1)?.get("code")).toBe(codes.s2);
   await expect(
-    dialog.getByRole("heading", { name: "已加入的会员" }),
+    dialog.getByRole("heading", { name: "已加入的合伙人" }),
   ).toHaveCount(0);
-  await expect(records).toContainText("S2 推荐官");
+  await expect(records).toContainText("二级服务商");
   const after = await dialog.locator(".share-panel").boundingBox();
   expect(Math.abs(after!.height - before!.height)).toBeLessThanOrEqual(1);
 });

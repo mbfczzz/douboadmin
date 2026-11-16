@@ -58,7 +58,7 @@ func TestPromoCodeIsForMembersOnly(t *testing.T) {
 	branch := newBranch(t, a, "promo-owner")
 	boss := appUser(t, a, "boss", "老王", "13900000034")
 	bindOwner(t, a, branch, "boss")
-	if w := call(a, "GET", "/api/promo", boss, "", nil); w.Code != 400 || !strings.Contains(w.Body.String(), "开通会员") {
+	if w := call(a, "GET", "/api/promo", boss, "", nil); w.Code != 400 || !strings.Contains(w.Body.String(), "开通合伙人") {
 		t.Fatal("a provider owner got a promo code", w.Code, w.Body.String())
 	}
 }

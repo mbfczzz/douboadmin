@@ -254,20 +254,20 @@ export const kindNames: Record<string, string> = {
 // How a user registered: scanning a QR code or typing its code.
 export const joinMethod = (method?: string) =>
   method === "scan" ? "扫码登记" : method === "code" ? "输入码登记" : "未记录";
-// Role names: 分公司 → S1 服务商 → S2 推荐官, and their 会员.
+// Role names: 分公司 → 一级服务商 → 二级服务商, and their 合伙人.
 const roles: Record<string, string> = {
   branch: "分公司",
-  s1: "S1 服务商",
-  s2: "S2 推荐官",
-  member: "会员",
+  s1: "一级服务商",
+  s2: "二级服务商",
+  member: "合伙人",
 };
 export const roleName = (role?: string) => roles[role || ""] || "服务商";
 // The code a registration used ("" is a provider's 子账号开通码).
 const codeKinds: Record<string, string> = {
   promo: "推广码",
-  s1: "S1 服务商邀请码",
-  s2: "S2 推荐官邀请码",
+  s1: "一级服务商邀请码",
+  s2: "二级服务商邀请码",
   bind: "负责人绑定码",
 };
 export const codeKindName = (kind?: string) =>
-  codeKinds[kind || ""] || "子账号开通码";
+  codeKinds[kind || ""] || "合伙人开通码";

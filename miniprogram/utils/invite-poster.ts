@@ -73,5 +73,5 @@ export function drawInvitePoster(
   text(c, "微信扫一扫，使用小程序", 360, top + 558, 22, grey);
   const code = data.code.slice(0, 4) + "-" + data.code.slice(4);
   text(c, "邀请码 " + code, 360, POSTER_HEIGHT - 132, 24, ink);
-  text(c, "识别后自动带入邀请码，完成登记后由超级管理员开通", 360, POSTER_HEIGHT - 92, 19, grey);
+  text(c, "识别后自动带入邀请码，完成登记后审核开通", 360, POSTER_HEIGHT - 92, 19, grey);
 }

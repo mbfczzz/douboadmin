@@ -16,7 +16,7 @@ func (s *Service) PromoCode(ctx context.Context, user string) (code string, err 
 		}
 		_, m, e := get[core.Membership](tx, "memberships", user)
 		if errors.Is(e, core.ErrNotFound) || (e == nil && m.Status != "active") {
-			return rulef("开通会员后才有推广码")
+			return rulef("开通合伙人后才有推广码")
 		}
 		if e != nil {
 			return e

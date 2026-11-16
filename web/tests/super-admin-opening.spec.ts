@@ -139,8 +139,8 @@ for (const role of [
     ).toHaveCount(allowed ? 1 : 0);
     await share.getByRole("button", { name: "关闭", exact: true }).click();
     if (provider || allowed) {
-      await own.getByRole("button", { name: "会员登记", exact: true }).click();
-      const inbox = page.getByRole("dialog", { name: "会员登记", exact: true });
+      await own.getByRole("button", { name: "合伙人登记", exact: true }).click();
+      const inbox = page.getByRole("dialog", { name: "合伙人登记", exact: true });
       await expect(inbox).toContainText("待开通用户");
       await expect(
         inbox.getByRole("button", { name: "开通", exact: true }),

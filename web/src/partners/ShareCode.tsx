@@ -9,19 +9,20 @@ import { codeKindName } from "../business/types";
 import type { Scope } from "./types";
 import "./share-code.css";
 
-// Every scan registers first; a super administrator opens the account.
+// Every scan registers first; the account opens after review (the super
+// administrator, or a provider above it with 下级小程序开通权限).
 const kinds = {
   s1: [
     codeKindName("s1"),
-    "新用户扫码登记为本服务商下的 S1 服务商，超级管理员开通后生效",
+    "新用户扫码登记为本服务商下的一级服务商，审核开通后生效",
   ],
   s2: [
     codeKindName("s2"),
-    "新用户扫码登记为本服务商下的 S2 推荐官，超级管理员开通后生效",
+    "新用户扫码登记为本服务商下的二级服务商，审核开通后生效",
   ],
   member: [
     codeKindName(""),
-    "用户扫码登记为子账号（会员），直接归属本服务商，超级管理员开通后生效",
+    "用户扫码登记为合伙人，直接归属本服务商，审核开通后生效",
   ],
 } as const;
 type Kind = keyof typeof kinds;

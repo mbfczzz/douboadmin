@@ -35,7 +35,7 @@ export default function OwnerBindCode({
             owner={name}
             path={path}
             title="负责人绑定码"
-            note="仅用于负责人绑定自己的小程序账号，超级管理员开通后生效；一次有效。"
+            note="仅用于负责人绑定自己的小程序账号，审核开通后生效；一次有效。"
             file={`${name}-负责人绑定码.png`}
             notify={notify}
             share={share}

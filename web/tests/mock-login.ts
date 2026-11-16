@@ -61,9 +61,9 @@ export async function mockLogin(page: Page) {
       return route.fulfill({
         json: {
           branch: "分公司",
-          s1: "S1 服务商",
-          s2: "S2 推荐官",
-          member: "会员",
+          s1: "一级服务商",
+          s2: "二级服务商",
+          member: "合伙人",
         },
       });
     return route.fulfill({

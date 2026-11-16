@@ -96,12 +96,13 @@ func (a *Server) auth(role string, h http.HandlerFunc) http.HandlerFunc {
 				return
 			}
 			v.AdminRole, v.PartnerID, v.Menus = account.Role, account.PartnerID, role.Menus
-			if !menuAllowed(account.Role, role.Menus, r.Method, r.URL.Path) {
+			review := account.PartnerID != "" && providerReviewRoute(r.Method, r.URL.Path)
+			if !review && !menuAllowed(account.Role, role.Menus, r.Method, r.URL.Path) {
 				fail(w, 403, "没有该菜单的访问权限")
 				return
 			}
 		}
-		if v.Role == "admin" && v.AdminRole != core.SuperAdminRole && !limitedAdminRoute(r.Method, r.URL.Path) {
+		if v.Role == "admin" && v.AdminRole != core.SuperAdminRole && !limitedAdminRoute(r.Method, r.URL.Path) && !(v.PartnerID != "" && providerReviewRoute(r.Method, r.URL.Path)) {
 			fail(w, 403, "当前账号仅可设置下级分佣、查看下级活动轨迹和分佣")
 			return
 		}

@@ -44,10 +44,10 @@ func TestIdentityLabelsEachKindOfUser(t *testing.T) {
 	scan(t, a, "waiting", code)
 	for token, want := range map[string]identityView{
 		chief: {Kind: "branch", Label: "分公司", Partner: "江苏分公司"},
-		owner: {Kind: "s1", Label: "S1 服务商", Partner: "华东"},
-		lead:  {Kind: "s1", Label: "S1 服务商", Partner: "小李"},
-		boss:  {Kind: "s2", Label: "S2 推荐官", Partner: "小王"},
-		fan:   {Kind: "member", Label: "会员", Partner: "华东"},
+		owner: {Kind: "s1", Label: "一级服务商", Partner: "华东"},
+		lead:  {Kind: "s1", Label: "一级服务商", Partner: "小李"},
+		boss:  {Kind: "s2", Label: "二级服务商", Partner: "小王"},
+		fan:   {Kind: "member", Label: "合伙人", Partner: "华东"},
 	} {
 		var got identityView
 		w := call(a, "GET", "/api/me/identity", token, "", nil)

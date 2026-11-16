@@ -40,7 +40,7 @@ export const pageInfo = {
   ],
   partners: [
     "服务商管理",
-    "管理分公司、S1 服务商、S2 推荐官、分享码与算力分佣。",
+    "管理分公司、一级服务商、二级服务商、分享码与算力分佣。",
     Handshake,
   ],
   accounts: ["管理账号", "管理后台登录账号、角色与启停状态。", UserCog],

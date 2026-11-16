@@ -8,6 +8,8 @@ export interface Me {
   role: string;
   roleName?: string;
   canApproveRegistrations?: boolean;
+  // 下级小程序开通权限: a provider login may open/reject registrations below it.
+  canActivateChildren?: boolean;
   canManageAccounts?: boolean;
   scope: "platform" | "partner";
   menus: string[];
@@ -24,6 +26,11 @@ export const useMe = () => useContext(MeContext);
 export const isProviderAccount = (me: Me | null) => me?.scope === "partner";
 export const canApproveRegistrations = (me: Me | null) =>
   me?.role === "super_admin" && me.canApproveRegistrations !== false;
+// Super administrators decide every registration; a provider with the switch
+// on decides those below it (the server checks each one).
+export const canDecideRegistrations = (me: Me | null) =>
+  canApproveRegistrations(me) ||
+  (me?.scope === "partner" && me.canActivateChildren === true);
 
 export const canManageAccounts = (me: Me | null) =>
   me?.role === "super_admin" && me.canManageAccounts !== false;
@@ -38,5 +45,6 @@ export const workspaceScopeKey = (me: Me) =>
     me.passwordChangedAt || "",
     me.canManageAccounts !== false,
     me.canApproveRegistrations !== false,
+    me.canActivateChildren === true,
     [...me.menus].sort(),
   ]);

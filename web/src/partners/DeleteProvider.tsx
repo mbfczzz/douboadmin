@@ -91,7 +91,7 @@ export default function DeleteProvider({
               </p>
               <p>
                 同时删除 {impact.data.users}{" "}
-                个用户账号（含负责人、会员和待审核用户），小程序、App及其他用户端的现有登录将失效。
+                个用户账号（含负责人、合伙人和待审核用户），小程序、App及其他用户端的现有登录将失效。
               </p>
               <p>
                 关联的 {impact.data.accounts} 个后台账号也将删除，邀请码作废。

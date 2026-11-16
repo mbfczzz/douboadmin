@@ -2,12 +2,12 @@ import {test,expect,type Page} from "@playwright/test";
 import {mockLogin} from "./mock-login";
 
 const roles=[
-  ["partner","服务商"],["branch","分公司"],["s1","合作服务商"],["s2","S2 推荐官"],["custom-reader","自定义权限角色"],
+  ["partner","服务商"],["branch","分公司"],["s1","合作服务商"],["s2","二级服务商"],["custom-reader","自定义权限角色"],
 ].map(([id,name])=>({id,version:0,data:{name,scope:"partner",menus:["partners"]}}));
 
 async function provider(page:Page,existing=false){
   await mockLogin(page);
-  await page.route("**/api/admin/roles/labels",r=>r.fulfill({json:{branch:"区域公司",s1:"合作服务商",s2:"S2 推荐官",member:"创作会员"}}));
+  await page.route("**/api/admin/roles/labels",r=>r.fulfill({json:{branch:"区域公司",s1:"合作服务商",s2:"二级服务商",member:"创作合伙人"}}));
   await page.route(/\/api\/admin\/roles(?:\?|$)/,r=>r.fulfill({json:roles}));
   await page.route(/\/api\/admin\/partners\/tree\?/,r=>r.fulfill({json:{items:[{id:"p-s1",version:1,children:0,createdAt:"2026-11-11",data:{name:"复查服务商",role:"s1",status:"active",parentId:"root",path:["root"]}}],page:1,size:20,total:1}}));
   const account=existing?{id:"login-one",version:1,createdAt:"2026-11-11",data:{username:"custom-login",name:"负责人",role:"custom-reader",disabled:false}}:null;

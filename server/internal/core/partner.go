@@ -7,7 +7,7 @@ import (
 
 const RootPartner = "root"
 
-var ErrActivationRequired = errors.New("请扫描服务商的二维码登记，并等待超级管理员开通")
+var ErrActivationRequired = errors.New("请扫描服务商的二维码登记，并等待审核开通")
 var ErrPartnerDisabled = errors.New("所属服务商已停用，请联系管理员")
 var ErrUserDisabled = errors.New("账号已停用，请联系管理员")
 
@@ -32,6 +32,10 @@ type Partner struct {
 	// OwnerUser is the mini-program user who became this provider by scanning
 	// its parent's code; empty for providers created in the admin.
 	OwnerUser string `json:"ownerUser,omitempty"`
+	// ActivateChildren is the 下级小程序开通权限 switch, set only by a super
+	// administrator for 分公司 / 一级服务商 / 二级服务商: when on, this provider
+	// may approve and reject registrations anywhere below it.
+	ActivateChildren bool `json:"activateChildren,omitempty"`
 }
 
 // Registration is a mini-program user's request to join, made by scanning a

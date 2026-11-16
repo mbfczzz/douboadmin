@@ -39,20 +39,20 @@ test("a 分公司 switches between its three codes and sees what is below it", a
   assert.equal(page.data.roleName, "分公司");
   assert.deepEqual(
     JSON.parse(JSON.stringify(page.data.tabs.map((t) => t.label))),
-    ["S1 服务商邀请码", "S2 推荐官邀请码", "子账号开通码"],
+    ["一级服务商邀请码", "二级服务商邀请码", "合伙人开通码"],
   );
   assert.equal(page.data.shown.code, "KMNP-2345");
   page.switchTab({ currentTarget: { dataset: { tab: "s2" } } });
   assert.equal(page.data.shown.code, "WXYZ-6789");
-  assert.match(page.data.note, /S2 推荐官/);
+  assert.match(page.data.note, /二级服务商/);
   page.switchTab({ currentTarget: { dataset: { tab: "member" } } });
   assert.equal(page.data.shown.code, "ABCD-2345");
   assert.match(page.data.note, /直接归属当前服务商/);
-  assert.equal(page.data.children[0].roleName, "S1 服务商");
+  assert.equal(page.data.children[0].roleName, "一级服务商");
   assert.equal(page.data.children[0].date, "2026-11-10");
 });
 
-test("an S2 has only its 子账号开通码", async () => {
+test("an S2 has only its 合伙人开通码", async () => {
   const h = harness(),
     page = h.page("provider");
   h.api.request = async () => ({
@@ -63,7 +63,7 @@ test("an S2 has only its 子账号开通码", async () => {
   });
   page.onLoad({});
   await page.load();
-  assert.equal(page.data.roleName, "S2 推荐官");
+  assert.equal(page.data.roleName, "二级服务商");
   assert.equal(page.data.tabs.length, 1);
   assert.equal(page.data.shown.code, "ABCD-2345");
 });
@@ -154,7 +154,7 @@ test("the profile page shows the account's role from the shared catalog", async 
   await h.api.signIn();
   h.api.request = async (path) =>
     path === "/me/role"
-      ? { kind: "member", label: "会员", partner: "华东分公司" }
+      ? { kind: "member", label: "合伙人", partner: "华东分公司" }
       : {
           profile: {
             version: 1,
@@ -164,5 +164,5 @@ test("the profile page shows the account's role from the shared catalog", async 
   const page = h.page("profile");
   await page.load();
   await new Promise(setImmediate);
-  assert.equal(page.data.identity.label, "会员");
+  assert.equal(page.data.identity.label, "合伙人");
 });

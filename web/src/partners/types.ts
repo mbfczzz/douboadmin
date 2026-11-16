@@ -3,7 +3,7 @@ import type { Row } from "../api";
 import type { Notify } from "../navigation";
 export type Partner = {
   name: string;
-  // branch (分公司), s1 (S1 服务商) or s2 (S2 推荐官).
+  // branch (分公司), s1 (一级服务商) or s2 (二级服务商).
   role: string;
   parentId: string;
   path: string[];
@@ -14,6 +14,8 @@ export type Partner = {
   // The mini-program account that runs it (by invite or bind code).
   ownerUser?: string;
   phone?: string;
+  // 下级小程序开通权限 (branch / s1 / s2), set only by a super administrator.
+  activateChildren?: boolean;
 };
 export type BoundUser = {
   id: string;

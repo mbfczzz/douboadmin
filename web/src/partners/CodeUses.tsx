@@ -10,7 +10,7 @@ import { codeKindName, joinMethod } from "../business/types";
 import { useBusinessRoleNames } from "../roles/business";
 import type { PageData } from "./types";
 import type { Notify } from "../navigation";
-import { useMe, canApproveRegistrations } from "../session";
+import { useMe, canDecideRegistrations } from "../session";
 import { useRegistrationDecision } from "../users/useRegistrationDecision";
 import "./records.css";
 
@@ -45,7 +45,7 @@ export default function CodeUses({
   changed: () => Promise<void>;
 }) {
   const me = useMe(),
-    canApprove = canApproveRegistrations(me),
+    canApprove = canDecideRegistrations(me),
     canReject = canApprove;
   const roleName = useBusinessRoleNames();
   const [query, setQuery] = useState(""),

@@ -149,8 +149,8 @@ test("every provider level grows through scanned invitations", async ({
   await expect(add("创作工作室")).toHaveCount(0);
   const tree = page.locator(".provider-tree");
   await expect(tree).toContainText("分公司 · ");
-  await expect(tree).toContainText("S1 服务商 · ");
-  await expect(tree).toContainText("S2 推荐官 · ");
+  await expect(tree).toContainText("一级服务商 · ");
+  await expect(tree).toContainText("二级服务商 · ");
   // A scanned provider waits for 总部: 待开通, and nothing to edit yet.
   const pending = page
     .locator(".provider-tree-row")

@@ -20,8 +20,8 @@ export default function PartnerActivity({ id }: { id: string }) {
     <>
       <p className="quiet">
         {own
-          ? "查看下级会员的操作轨迹。"
-          : "查看该下级登录账号及其会员的操作轨迹。"}
+          ? "查看下级合伙人的操作轨迹。"
+          : "查看该下级登录账号及其合伙人的操作轨迹。"}
       </p>
       <ActivityTimeline showActor items={log.items} onOpen={setEntry} />
       {!log.loading && !log.error && !log.items.length && (

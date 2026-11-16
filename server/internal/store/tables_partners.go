@@ -7,6 +7,7 @@ func init() {
 		Table{Name: "partners", Comment: "服务商节点（分公司 / S1 / S2）", Owner: "上级服务商 id（顶层为 root）", Cols: []Col{
 			c("name", Short), c("role", Key), c("status", Key), c("parentId", Key), c("path", JSON),
 			c("phone", Key), c("ownerUser", Key), c("retailPer100Fen", Int), c("childMarginBps", Int),
+			c("activateChildren", Bool), // 下级小程序开通权限，仅超级管理员设置
 		}, Indexes: []string{"owner_user"}},
 		Table{Name: "partner_owners", Comment: "小程序用户负责的服务商；id = 用户 id", Owner: "用户", Cols: []Col{
 			c("partnerId", Key), c("status", Key),

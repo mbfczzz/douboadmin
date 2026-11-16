@@ -110,6 +110,7 @@ func (s *Service) Update(ctx context.Context, id string, v core.Partner, version
 			return e
 		}
 		v.Role, v.ParentID, v.Path, v.OwnerUser, v.Phone = old.Role, old.ParentID, old.Path, old.OwnerUser, old.Phone
+		v.ActivateChildren = old.ActivateChildren // only SetActivationRight changes it
 		// Only registration approval opens a scanned provider; a rejected
 		// one stays closed.
 		if frozen(old.Status) || frozen(v.Status) {

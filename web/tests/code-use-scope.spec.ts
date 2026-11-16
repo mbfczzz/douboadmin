@@ -37,12 +37,12 @@ test("reset and tab changes scope usage and memberships to the visible code", as
   await expect.poll(() => members.at(-1)?.get("code")).toBe(codes.member);
   expect(members.at(-1)?.get("provider")).toBe("code-provider");
   await expect(
-    dialog.getByRole("heading", { name: "已加入的会员" }),
+    dialog.getByRole("heading", { name: "已加入的合伙人" }),
   ).toBeVisible();
   await dialog.getByRole("tab", { name: titles.s2, exact: true }).click();
   await expect.poll(() => usage.at(-1)?.get("code")).toBe(codes.s2);
   await expect(
-    dialog.getByRole("heading", { name: "已加入的会员" }),
+    dialog.getByRole("heading", { name: "已加入的合伙人" }),
   ).toHaveCount(0);
   expect(usage.every((query) => !!query.get("code"))).toBe(true);
 });

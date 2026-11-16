@@ -64,9 +64,9 @@ test("分享码 tabs follow the role", async ({ page }) => {
       .click();
     const dialog = page.getByRole("dialog", { name: "分享码" });
     await expect(dialog.getByRole("tab")).toHaveText([
-      "S1 服务商邀请码",
-      "S2 推荐官邀请码",
-      "子账号开通码",
+      "一级服务商邀请码",
+      "二级服务商邀请码",
+      "合伙人开通码",
     ]);
     await expect(dialog.locator(".share-poster")).toBeVisible();
     expect(
@@ -85,8 +85,8 @@ test("分享码 tabs follow the role", async ({ page }) => {
     .click();
   let dialog = page.getByRole("dialog", { name: "分享码" });
   await expect(dialog.getByRole("tab")).toHaveText([
-    "S2 推荐官邀请码",
-    "子账号开通码",
+    "二级服务商邀请码",
+    "合伙人开通码",
   ]);
   await dialog.getByRole("button", { name: "关闭" }).first().click();
   await row(page, "质检推荐官")
@@ -95,7 +95,7 @@ test("分享码 tabs follow the role", async ({ page }) => {
   dialog = page.getByRole("dialog", { name: "分享码" });
   await expect(dialog.getByRole("tab")).toHaveCount(0);
   await expect(
-    dialog.getByRole("heading", { name: "子账号开通码" }),
+    dialog.getByRole("heading", { name: "合伙人开通码" }),
   ).toBeVisible();
   await dialog.locator(".owner-bind > summary").click();
   await expect(dialog.locator(".owner-bind .share-code")).toHaveText(

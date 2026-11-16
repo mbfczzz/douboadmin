@@ -6,10 +6,11 @@ import (
 	"strconv"
 
 	"doubo/server/internal/core"
+	"doubo/server/internal/partners"
 )
 
-// Platform-wide registration search. Only super administrators can activate;
-// providers retain scoped inspection and rejection from their own records.
+// Platform-wide registration search. Super administrators decide everything;
+// a provider with 下级小程序开通权限 decides registrations below it.
 func (a *Server) registrationList(w http.ResponseWriter, r *http.Request) {
 	if !platformOnly(w, r) {
 		return
@@ -32,6 +33,9 @@ func (a *Server) registrationList(w http.ResponseWriter, r *http.Request) {
 func (a *Server) memberRegistrations(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	if !a.inPartnerScope(w, r, id) {
+		return
+	}
+	if identity(r).PartnerID != "" && !a.providerMayDecide(w, r) {
 		return
 	}
 	page, ok := providerPageNumber(w, r)
@@ -57,6 +61,11 @@ func (a *Server) replyRegistrations(w http.ResponseWriter, r *http.Request, quer
 				break
 			}
 			approve := canApproveRegistrations(r)
+			if !approve {
+				if approve, e = a.Partners.CanDecideRegistration(r.Context(), reg, registrationReviewer(r)); e != nil {
+					break
+				}
+			}
 			reject := approve
 			rows.Items[i].Data = core.Data(struct {
 				core.Registration
@@ -70,6 +79,9 @@ func (a *Server) replyRegistrations(w http.ResponseWriter, r *http.Request, quer
 }
 
 func (a *Server) decideRegistration(w http.ResponseWriter, r *http.Request) {
+	if !canApproveRegistrations(r) && !a.providerMayDecide(w, r) {
+		return
+	}
 	var v struct {
 		Approve bool   `json:"approve"`
 		Reason  string `json:"reason"`
@@ -81,10 +93,6 @@ func (a *Server) decideRegistration(w http.ResponseWriter, r *http.Request) {
 	if canApproveRegistrations(r) {
 		out, e := a.Partners.Decide(r.Context(), r.PathValue("id"), v.Approve, v.Reason, v.Version, identity(r).ID)
 		partnerResult(w, out, e)
-		return
-	}
-	if v.Approve {
-		fail(w, 403, "仅超级管理员可开通账号")
 		return
 	}
 	out, e := a.Partners.DecideForProvider(r.Context(), r.PathValue("id"), v.Approve, v.Reason, v.Version, identity(r).ID, registrationReviewer(r))
@@ -125,4 +133,32 @@ func (a *Server) myPromo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	reply(w, 200, shareView{Code: code, QR: qr})
+}
+
+// setActivationRight is the super administrator's 下级小程序开通权限 switch for
+// one 分公司 / 一级服务商 / 二级服务商.
+func (a *Server) setActivationRight(w http.ResponseWriter, r *http.Request) {
+	var v struct {
+		Enabled bool  `json:"enabled"`
+		Version int64 `json:"version"`
+	}
+	if !decode(w, r, &v) {
+		return
+	}
+	out, e := a.Partners.SetActivationRight(r.Context(), r.PathValue("id"), v.Enabled, v.Version, identity(r).ID)
+	partnerResult(w, out, e)
+}
+
+// providerMayDecide answers 403 unless this provider login holds 下级小程序开通
+// 权限; each registration is still checked against its subtree.
+func (a *Server) providerMayDecide(w http.ResponseWriter, r *http.Request) bool {
+	ok, e := a.Partners.CanActivateChildren(r.Context(), registrationReviewer(r))
+	if e != nil {
+		dbError(w, e)
+		return false
+	}
+	if !ok {
+		fail(w, 403, partners.ErrApprovalDenied.Error())
+	}
+	return ok
 }

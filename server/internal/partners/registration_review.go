@@ -7,27 +7,17 @@ import (
 	"doubo/server/internal/core"
 )
 
-var ErrReviewDenied = errors.New("只能审核直属下级或本服务商会员的登记")
-var ErrApprovalDenied = errors.New("仅超级管理员可开通账号")
+var ErrReviewDenied = errors.New("只能审核本服务商名下的登记")
+var ErrApprovalDenied = errors.New("未开启下级小程序开通权限，仅超级管理员可开通或拒绝")
 
-// Providers can inspect and reject their direct registrations. Activation
-// uses the separately authorized super-administrator entry point.
+// A provider with the 下级小程序开通权限 switch on inspects and decides every
+// registration below it; with it off, only the super administrator does.
 func checkRegistrationReviewer(r Reader, reg core.Registration, reviewer string) error {
 	if reviewer == "" { // Trusted internal operations; HTTP always supplies a node.
 		return nil
 	}
-	parent := reg.PartnerID
-	if reg.Role != "member" {
-		_, p, e := node(r, reg.PartnerID)
-		if e != nil {
-			return e
-		}
-		parent = p.ParentID
-	}
-	if parent != reviewer {
-		return ErrReviewDenied
-	}
-	return activeChain(r, reviewer)
+	// With the switch off a provider neither sees nor decides registrations.
+	return checkActivation(r, reg, reviewer)
 }
 
 func reviewRegistration(r Reader, user, reviewer string) (core.Record, core.Registration, error) {
@@ -54,19 +44,24 @@ func (s *Service) DecideForProvider(ctx context.Context, user string, approve bo
 	if reviewer == "" {
 		return core.Record{}, ErrReviewDenied
 	}
-	if approve {
-		return core.Record{}, ErrApprovalDenied
-	}
 	return s.decide(ctx, user, approve, reason, version, actor, reviewer)
 }
 
-func (s *Service) CanReviewRegistration(ctx context.Context, reg core.Registration, reviewer string) (bool, error) {
+// CanDecideRegistration: may this provider approve or reject it now?
+func (s *Service) CanDecideRegistration(ctx context.Context, reg core.Registration, reviewer string) (bool, error) {
 	if reviewer == "" {
 		return false, nil
 	}
-	e := checkRegistrationReviewer(reader{ctx, s.Store}, reg, reviewer)
-	if errors.Is(e, ErrReviewDenied) {
+	e := checkActivation(reader{ctx, s.Store}, reg, reviewer)
+	// A provider deleted since the registration simply is not reviewable.
+	if errors.Is(e, ErrApprovalDenied) || errors.Is(e, ErrReviewDenied) || errors.Is(e, core.ErrPartnerDisabled) || errors.Is(e, core.ErrNotFound) {
 		return false, nil
 	}
 	return e == nil, e
+}
+
+// CanReviewRegistration: seeing a registration needs the same right as
+// deciding it.
+func (s *Service) CanReviewRegistration(ctx context.Context, reg core.Registration, reviewer string) (bool, error) {
+	return s.CanDecideRegistration(ctx, reg, reviewer)
 }

@@ -90,7 +90,7 @@ var ops = map[string]op{
 	"PUT /api/admin/integrations/{group}":                 {label: "修改服务接入配置", target: "group"},
 	"PUT /api/admin/alerts/{id}/ack":                      {label: "确认告警", target: "alert"},
 	"POST /api/admin/partners": {creates: "partner", label: "创建服务商", summary: func(q, _ map[string]any) string {
-		return str(q, "name") + " · " + map[string]string{"branch": "分公司", "s1": "S1 服务商", "s2": "S2 推荐官"}[str(q, "role")]
+		return str(q, "name") + " · " + map[string]string{"branch": "分公司", "s1": "一级服务商", "s2": "二级服务商"}[str(q, "role")]
 	}},
 	"PUT /api/admin/partners/{id}":               {label: "编辑服务商", target: "partner"},
 	"PUT /api/admin/partners/{id}/account":       {label: "修改服务商登录账号", target: "partner", summary: accountSummary},

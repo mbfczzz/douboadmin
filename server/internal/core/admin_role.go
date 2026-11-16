@@ -35,9 +35,9 @@ func BuiltinAdminRoles() map[string]AdminRole {
 		"operator":     {Name: "平台运营", Scope: RoleScopePlatform, Menus: operator, System: true},
 		"partner":      {Name: "服务商", Scope: RoleScopePartner, Menus: PartnerMenus, System: true},
 		RoleBranch:     {Name: "分公司", Scope: RoleScopePartner, Menus: PartnerMenus, System: true},
-		RoleS1:         {Name: "S1 服务商", Scope: RoleScopePartner, Menus: PartnerMenus, System: true},
-		RoleS2:         {Name: "S2 推荐官", Scope: RoleScopePartner, Menus: PartnerMenus, System: true},
-		RoleMember:     {Name: "会员", Scope: RoleScopeUser, Menus: []string{}, System: true},
+		RoleS1:         {Name: "一级服务商", Scope: RoleScopePartner, Menus: PartnerMenus, System: true},
+		RoleS2:         {Name: "二级服务商", Scope: RoleScopePartner, Menus: PartnerMenus, System: true},
+		RoleMember:     {Name: "合伙人", Scope: RoleScopeUser, Menus: []string{}, System: true},
 	}
 }
 
@@ -48,3 +48,7 @@ func BuiltinAdminRoleIDs() []string {
 func IsBusinessRole(id string) bool {
 	return id == RoleBranch || id == RoleS1 || id == RoleS2 || id == RoleMember
 }
+
+// LegacyRoleNames are the earlier default names. A stored role still holding
+// one shows the current default instead; a name chosen in 角色管理 is kept.
+var LegacyRoleNames = map[string]string{RoleS1: "S1 服务商", RoleS2: "S2 推荐官", RoleMember: "会员"}

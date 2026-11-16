@@ -6,7 +6,7 @@ import (
 	"errors"
 )
 
-const reviewMessage = "已登记，等待超级管理员开通"
+const reviewMessage = "已登记，等待审核开通"
 
 // access is what a mini-program user may do. Scanning only registers; the
 // super-administrator approval opens generation access.

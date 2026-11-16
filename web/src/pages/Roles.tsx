@@ -51,8 +51,8 @@ export default function Roles({ notify }: PageProps) {
       }
     >
       <p className="quiet">
-        角色同时用于菜单权限和用户角色展示；分公司、S1 服务商、S2
-        推荐官、会员按原有归属自动对应，不改变层级或业务规则。
+        角色同时用于菜单权限和用户角色展示；分公司、一级服务商、二级服务商、
+        合伙人按原有归属自动对应，不改变层级或业务规则。
       </p>
       <Table
         rows={roles.data?.items || []}

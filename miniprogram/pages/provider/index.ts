@@ -8,17 +8,17 @@ export type { Code, Child, Center } from "../../services/provider-types";
 
 const roles: Record<string, string> = {
   branch: "分公司",
-  s1: "S1 服务商",
-  s2: "S2 推荐官",
+  s1: "一级服务商",
+  s2: "二级服务商",
 };
 const tabs = [
-  ["s1", "S1 服务商邀请码", "新用户扫码登记为你的 S1 服务商", "S1 服务商"],
-  ["s2", "S2 推荐官邀请码", "新用户扫码登记为你的 S2 推荐官", "S2 推荐官"],
+  ["s1", "一级服务商邀请码", "新用户扫码登记为你的一级服务商", "一级服务商"],
+  ["s2", "二级服务商邀请码", "新用户扫码登记为你的二级服务商", "二级服务商"],
   [
     "member",
-    "子账号开通码",
-    "用户扫码登记为子账号（会员），直接归属当前服务商",
-    "子账号",
+    "合伙人开通码",
+    "用户扫码登记为合伙人，直接归属当前服务商",
+    "合伙人",
   ],
 ] as const;
 
@@ -57,7 +57,7 @@ Page({
       if (this.data.promo) {
         const c = await request<Code>("/promo");
         this.setData({
-          note: "好友扫码登记为会员，推荐人记为你",
+          note: "好友扫码登记为合伙人，推荐人记为你",
           shown: { code: prettyCode(c.code), raw: c.code, qr: c.qr },
           loadError: "",
         });
@@ -136,7 +136,7 @@ Page({
     this.setData({
       tab: found[0],
       posterTitle: found[1],
-      note: found[2] + "，超级管理员开通后生效",
+      note: found[2] + "，审核开通后生效",
       shown: { code: prettyCode(code.code), raw: code.code, qr: code.qr },
     });
   },

@@ -17,6 +17,7 @@ import Modal from "../components/Modal";
 import type { ProviderAction } from "./ProviderActions";
 import { useRegistrationDecision } from "../users/useRegistrationDecision";
 import { useBusinessRoleNames } from "../roles/business";
+import { toggleActivationRight } from "./activationRight";
 
 const DeleteProvider = lazy(() => import("./DeleteProvider"));
 const ProviderModule = lazy(() => import("./ProviderModule"));
@@ -102,7 +103,9 @@ export default function Providers({ notify }: { notify: Notify }) {
           query={query}
           busy={review.busy}
           open={(kind, row) => {
-            if (kind === "approve" || kind === "reject") {
+            if (kind === "activation")
+              void toggleActivationRight(row, roleName, notify, reload);
+            else if (kind === "approve" || kind === "reject") {
               if (row.data.ownerUser)
                 void review.decide(row.data.ownerUser, kind === "approve", {
                   partnerId: row.id,

@@ -19,7 +19,7 @@ export const modules = {
   activity: "下级活动轨迹",
   share: "分享码",
   commissions: "算力分佣",
-  registrations: "会员登记",
+  registrations: "合伙人登记",
 } as const;
 export type ModuleKey = keyof typeof modules;
 

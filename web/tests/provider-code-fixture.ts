@@ -3,9 +3,9 @@ import { mockLogin } from "./mock-login";
 import { qr } from "./surface-fixtures";
 
 export const titles = {
-  s1: "S1 服务商邀请码",
-  s2: "S2 推荐官邀请码",
-  member: "子账号开通码",
+  s1: "一级服务商邀请码",
+  s2: "二级服务商邀请码",
+  member: "合伙人开通码",
 };
 export const codes = {
   s1: "KMNP2345",

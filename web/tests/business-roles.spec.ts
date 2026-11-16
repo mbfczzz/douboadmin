@@ -18,7 +18,7 @@ test("shared business roles are visible and member editing never requests admin 
     {
       id: "s1",
       data: {
-        name: "S1 服务商",
+        name: "一级服务商",
         scope: "partner",
         menus: ["partners"],
         system: true,
@@ -27,7 +27,7 @@ test("shared business roles are visible and member editing never requests admin 
     {
       id: "s2",
       data: {
-        name: "S2 推荐官",
+        name: "二级服务商",
         scope: "partner",
         menus: ["partners"],
         system: true,
@@ -35,7 +35,7 @@ test("shared business roles are visible and member editing never requests admin 
     },
     {
       id: "member",
-      data: { name: "会员", scope: "user", menus: [], system: true },
+      data: { name: "合伙人", scope: "user", menus: [], system: true },
     },
   ].map((row) => ({ ...row, version: 0, accounts: 0 }));
   const writes: unknown[] = [];
@@ -49,7 +49,7 @@ test("shared business roles are visible and member editing never requests admin 
     });
   });
   await page.getByRole("button", { name: "角色管理", exact: true }).click();
-  for (const label of ["分公司", "S1 服务商", "S2 推荐官", "会员"]) {
+  for (const label of ["分公司", "一级服务商", "二级服务商", "合伙人"]) {
     await expect(
       page.getByRole("cell", { name: label + " 内置", exact: true }),
     ).toBeVisible();
@@ -63,7 +63,7 @@ test("shared business roles are visible and member editing never requests admin 
   const member = page
     .getByRole("row")
     .filter({
-      has: page.getByRole("cell", { name: "会员 内置", exact: true }),
+      has: page.getByRole("cell", { name: "合伙人 内置", exact: true }),
     });
   await expect(member).toContainText("小程序角色");
   await expect(member).toContainText("无后台菜单");
@@ -73,7 +73,7 @@ test("shared business roles are visible and member editing never requests admin 
   await member.getByRole("button", { name: "编辑", exact: true }).click();
   const form = page.getByRole("dialog", { name: "编辑角色", exact: true });
   await expect(form.getByRole("checkbox")).toHaveCount(0);
-  await form.getByLabel("角色名称").fill("创作会员");
+  await form.getByLabel("角色名称").fill("创作合伙人");
   await form.getByRole("button", { name: "保存角色", exact: true }).click();
   await page
     .locator('[role="dialog"].save-confirmation')
@@ -81,6 +81,6 @@ test("shared business roles are visible and member editing never requests admin 
     .click();
   await expect(form).toHaveCount(0);
   expect(writes).toEqual([
-    { name: "创作会员", scope: "user", menus: [], version: 0 },
+    { name: "创作合伙人", scope: "user", menus: [], version: 0 },
   ]);
 });

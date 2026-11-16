@@ -79,9 +79,9 @@ test("single-page child lists do not repeat totals between provider rows", async
     const parent = new URL(route.request().url()).searchParams.get("parent");
     const items =
       parent === "branch"
-        ? [row("s1", "S1 服务商", "s1", 1)]
+        ? [row("s1", "一级服务商", "s1", 1)]
         : parent === "s1"
-          ? [row("s2", "S2 推荐官", "s2")]
+          ? [row("s2", "二级服务商", "s2")]
           : [
               row("branch", "分公司", "branch", 1),
               row("other", "其他分公司", "branch"),
@@ -93,10 +93,10 @@ test("single-page child lists do not repeat totals between provider rows", async
   await page.getByRole("button", { name: "服务商管理", exact: true }).click();
   await page.getByRole("button", { name: "展开分公司", exact: true }).click();
   await page
-    .getByRole("button", { name: "展开S1 服务商", exact: true })
+    .getByRole("button", { name: "展开一级服务商", exact: true })
     .click();
   const tree = page.locator(".provider-tree");
-  await expect(tree.getByText("S2 推荐官", { exact: true })).toBeVisible();
+  await expect(tree.getByText("二级服务商", { exact: true })).toBeVisible();
   await expect(tree.locator(".provider-tree-row")).toHaveCount(4);
   await expect(
     tree.locator(".provider-tree-children .catalog-pagination"),

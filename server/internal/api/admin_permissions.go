@@ -44,6 +44,14 @@ func (a *Server) adminMe(w http.ResponseWriter, r *http.Request) {
 	out := map[string]any{"id": v.ID, "account": v.Account, "role": v.AdminRole, "scope": core.RoleScopePlatform, "menus": core.AdminMenus}
 	out["canApproveRegistrations"] = canApproveRegistrations(r)
 	out["canManageAccounts"] = identity(r).AdminRole == core.SuperAdminRole
+	if v.PartnerID != "" {
+		can, err := a.Partners.CanActivateChildren(r.Context(), v.PartnerID)
+		if err != nil {
+			dbError(w, err)
+			return
+		}
+		out["canActivateChildren"] = can // 下级小程序开通权限
+	}
 	if v.AdminRole == "" {
 		out["role"] = "limited"
 	} else {

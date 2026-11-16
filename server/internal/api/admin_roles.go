@@ -33,6 +33,9 @@ func (a *Server) adminRole(ctx context.Context, id string) (core.AdminRole, bool
 	}
 	if b, ok := builtin[id]; ok {
 		role.Scope, role.System = b.Scope, true
+		if role.Name == core.LegacyRoleNames[id] {
+			role.Name = b.Name // never renamed by hand: follow the new default
+		}
 		if b.Scope == core.RoleScopeUser {
 			role.Menus = []string{}
 		}

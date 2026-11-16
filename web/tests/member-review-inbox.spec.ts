@@ -14,7 +14,7 @@ test("super administrators open pending members from a retired QR code", async (
     version: 9,
     data: {
       role: "member",
-      name: "旧码登记会员",
+      name: "旧码登记合伙人",
       phone: "13900139004",
       codeKind: "",
       code: "QRST6789",
@@ -46,9 +46,9 @@ test("super administrators open pending members from a retired QR code", async (
     status = "approved";
     return route.fulfill({ json: reg() });
   });
-  await page.getByRole("button", { name: "会员登记", exact: true }).click();
-  const inbox = page.getByRole("dialog", { name: "会员登记", exact: true });
-  await expect(inbox).toContainText("旧码登记会员");
+  await page.getByRole("button", { name: "合伙人登记", exact: true }).click();
+  const inbox = page.getByRole("dialog", { name: "合伙人登记", exact: true });
+  await expect(inbox).toContainText("旧码登记合伙人");
   expect(
     await inbox.evaluate((el) => el.scrollWidth <= el.clientWidth + 1),
   ).toBe(true);

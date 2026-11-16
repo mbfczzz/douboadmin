@@ -17,7 +17,7 @@ import { useCachedResource } from "../hooks/useCachedResource";
 import { usePageLimit } from "../hooks/usePageLimit";
 import type { Notify } from "../navigation";
 import { createdCell } from "./cells";
-import { useMe, canApproveRegistrations } from "../session";
+import { useMe, canDecideRegistrations } from "../session";
 
 type Page = { items: Row<Registration>[]; page: number; total: number };
 const states = [
@@ -127,7 +127,7 @@ function List({
   setPage: (page: number) => void;
   decide: (row: Row<Registration>, approve: boolean) => Promise<void>;
 }) {
-  const canApprove = canApproveRegistrations(useMe());
+  const canApprove = canDecideRegistrations(useMe());
   const roleName = useBusinessRoleNames();
   const tree = useResource<Row<{ name: string }>[]>("/admin/partners/tree"),
     names = new Map((tree.data || []).map((r) => [r.id, r.data.name]));
@@ -209,7 +209,7 @@ function List({
                 {canApprove && (r.data.canApprove ?? r.data.canReview) ? (
                   <button onClick={() => void decide(r, true)}>开通</button>
                 ) : (
-                  <span className="quiet">等待超级管理员开通</span>
+                  <span className="quiet">等待审核开通</span>
                 )}
                 {canApprove && (r.data.canReject ?? r.data.canReview) && (
                   <button

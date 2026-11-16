@@ -21,7 +21,7 @@ func TestRoleDisplayCatalogKeepsPermissionDefinitionsPrivate(t *testing.T) {
 	token := adminLoginToken(t, a, "role-label-reader", "Ttac8df8")
 	w = call(a, "GET", "/api/admin/roles/labels", token, "", nil)
 	var labels map[string]string
-	if w.Code != 200 || json.Unmarshal(w.Body.Bytes(), &labels) != nil || len(labels) != 4 || labels[core.RoleS1] != "S1 服务商" {
+	if w.Code != 200 || json.Unmarshal(w.Body.Bytes(), &labels) != nil || len(labels) != 4 || labels[core.RoleS1] != "一级服务商" {
 		t.Fatal(w.Code, w.Body.String())
 	}
 	if w = call(a, "GET", "/api/admin/roles", token, "", nil); w.Code != 403 {

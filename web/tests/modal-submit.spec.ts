@@ -19,7 +19,7 @@ for (const sample of submitCases) {
         .getByRole("button", { name: sample.module, exact: true })
         .click();
     if (sample.name === "用户授权")
-      await page.getByRole("dialog").last().getByRole("tab", { name: "子账号开通码", exact: true }).click();
+      await page.getByRole("dialog").last().getByRole("tab", { name: "合伙人开通码", exact: true }).click();
     await (sample.module ? page.getByRole("dialog").last() : page)
       .getByRole("button", { name: sample.open, exact: true })
       .first()
