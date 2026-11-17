@@ -60,11 +60,11 @@ test("tab selection follows the actual route and recovers from synchronous failu
   const h = harness(), bar = h.component("custom-tab-bar");
   h.pages.push({ route: "pages/mine/index" });
   bar.pageLifetimes.show.call(bar);
-  assert.equal(bar.data.selected, 5);
+  assert.equal(bar.data.selected, 4);
   h.wx.switchTab = () => { throw new Error("busy"); };
   bar.switchTab({ currentTarget: { dataset: { index: 2 } } });
   assert.equal(bar.data.switching, false);
-  assert.equal(bar.data.selected, 5);
+  assert.equal(bar.data.selected, 4);
   h.pages[0].route = "pages/create/index";
   bar.pageLifetimes.show.call(bar);
   assert.equal(bar.data.selected, 2);

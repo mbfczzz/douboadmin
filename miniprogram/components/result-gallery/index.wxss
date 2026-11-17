@@ -1,11 +1,11 @@
-.gallery-heading { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 6px; padding: 12px 2px; font-size: 13px; color: var(--ui-text); }
-.gallery-heading text { font-size: 11px; color: var(--ui-muted); }
-.multiple .gallery-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-.gallery-item { min-width: 0; overflow: hidden; border-radius: 12px; background: var(--ui-field); }
+.gallery-heading { display: flex; justify-content: space-between; align-items: baseline; padding: 12px 12px 8px; font-size: 14px; font-weight: 600; color: var(--ui-text); }
+.gallery-heading text { font-size: 11px; font-weight: 400; color: var(--ui-muted); }
+.multiple .gallery-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; padding: 0 6px 6px; }
+.gallery-item { position: relative; min-width: 0; overflow: hidden; border-radius: 12px; background: var(--ui-field); }
 .gallery-image { display: block; width: 100%; }
-.multiple .gallery-image { height: 160px; }
-.gallery-caption { display: flex; justify-content: space-between; align-items: center; gap: 4px; padding: 6px 8px; font-size: 12px; color: var(--ui-muted); }
-.gallery-caption button { margin: 0; padding: 4px 8px; min-height: 32px; line-height: 24px; font-size: 12px; color: var(--ui-primary); background: transparent; }
-.gallery-caption button::after { border: 0; }
-.gallery-caption button[disabled] { opacity: .5; }
-@media (max-width: 360px) { .multiple .gallery-image { height: 130px; } }
+.multiple .gallery-item { padding-top: 100%; border-radius: 14px; background: rgba(255, 255, 255, .04); }
+.multiple .gallery-image { position: absolute; top: 0; left: 0; height: 100%; }
+.gallery-index, .gallery-save { position: absolute; display: flex; align-items: center; justify-content: center; color: #fff; background: rgba(0, 0, 0, .5); }
+.gallery-index { top: 8px; left: 8px; width: 22px; height: 22px; border-radius: 50%; font-size: 12px; font-weight: 600; }
+.gallery-save { right: 8px; bottom: 8px; height: 30px; padding: 0 12px; border-radius: 15px; font-size: 12px; }
+.gallery-save.off { opacity: .5; }

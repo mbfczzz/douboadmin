@@ -28,7 +28,8 @@ func expireLoop(ctx context.Context, s store.Store) {
 
 func roundLimit(j core.Job, now time.Time) time.Duration {
 	limit := 130 * time.Second
-	if j.Input.Kind == "mix" {
+	// Image submits are synchronous and may run for minutes; mix encodes locally.
+	if j.Input.Kind == "image" || j.Input.Kind == "mix" {
 		limit = 10 * time.Minute
 	}
 	if deadline := core.JobDeadline(j); !deadline.IsZero() {

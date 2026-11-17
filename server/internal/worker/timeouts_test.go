@@ -128,3 +128,16 @@ func TestRoundLimitNeverExtendsTheTaskDeadline(t *testing.T) {
 		t.Fatal("video round exceeded deadline")
 	}
 }
+
+func TestImageRoundWaitsForSlowSynchronousSubmit(t *testing.T) {
+	now := time.Now()
+	j := core.NewJob("u", "slow", core.JobInput{Kind: "image"})
+	j.CreatedAt = now
+	if got := roundLimit(j, now); got != 10*time.Minute {
+		t.Fatal("4K image submit would be cut off early", got)
+	}
+	j.Input.Kind = "video"
+	if got := roundLimit(j, now); got != 130*time.Second {
+		t.Fatal("async video round should stay short", got)
+	}
+}

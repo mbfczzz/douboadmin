@@ -73,7 +73,7 @@ test("generated icon art is bundled and every tab glyph has both states", () => 
   assert.ok(icons.length >= 10);
   for (const file of icons) assert.ok(fs.existsSync(path.join(root, "assets", file.endsWith(".jpg") ? "photos" : "glyphs", file)), file);
   const tabs = [...read("utils/tab-transition.ts").matchAll(/art\("([a-z]+)"\)/g)].map((m) => m[1]);
-  assert.equal(tabs.length, 6);
+  assert.equal(tabs.length, 5);
   for (const name of tabs)
     for (const state of ["on", "off"]) assert.ok(fs.existsSync(path.join(root, "assets/tab", `${name}-${state}.png`)), `${name}-${state}`);
   // The vector icon stays as the fallback when an entry has no art.

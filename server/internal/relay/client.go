@@ -17,14 +17,17 @@ import (
 type Client struct {
 	Base, Key string
 	HTTP      *http.Client
+	// Timeout bounds a call whose context has no deadline. Workers pass the
+	// job's own deadline instead: synchronous image generation can take minutes,
+	// and hanging up early leaves a task the relay finishes but we never see.
+	Timeout time.Duration
 	// Observe, when set, is told about every upstream call (for the model
 	// call log). It runs on the caller's goroutine and must be quick.
 	Observe func(context.Context, Call)
 }
 
 func New(base, key string) *Client {
-	return &Client{Base: strings.TrimRight(base, "/"), Key: strings.TrimSpace(key), HTTP: &http.Client{
-		Timeout:       120 * time.Second,
+	return &Client{Base: strings.TrimRight(base, "/"), Key: strings.TrimSpace(key), Timeout: 120 * time.Second, HTTP: &http.Client{
 		CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse },
 	}}
 }
@@ -75,6 +78,11 @@ func (c *Client) send(ctx context.Context, method, path string, body any) ([]byt
 		if err != nil {
 			return nil, err
 		}
+	}
+	if _, ok := ctx.Deadline(); !ok && c.Timeout > 0 {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, c.Timeout)
+		defer cancel()
 	}
 	req, err := http.NewRequestWithContext(ctx, method, c.Base+path, bytes.NewReader(b))
 	if err != nil {

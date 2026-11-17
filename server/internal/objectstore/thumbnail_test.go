@@ -20,6 +20,10 @@ func TestThumbnailProcessingIsIncludedInPrivateSignature(t *testing.T) {
 		}
 		q := parsed.Query()
 		process := q.Get("x-oss-process")
+		// 160 px thumbnails looked blurry in 3x-screen list tiles.
+		if !strings.Contains(process, "w_640") {
+			t.Fatal("thumbnail too small for list tiles:", process)
+		}
 		if kind == "image" && !strings.HasPrefix(process, "image/resize,") {
 			t.Fatal(process)
 		}

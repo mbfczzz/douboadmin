@@ -134,7 +134,9 @@ func run() error {
 		if production && app.Objects == nil {
 			slog.Warn("尚未配置 OSS，暂不领取生成任务；在后台保存配置并重启 API 和 Worker")
 		} else {
-			for range 2 {
+			// Image submits hold a worker until the relay answers (up to 10 min),
+			// so keep enough workers for other tasks and video polls to move.
+			for range min(envDays("WORKER_CONCURRENCY", 8), 32) {
 				go worker.Run(ctx, s, generator)
 			}
 		}

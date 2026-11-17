@@ -2,11 +2,11 @@
   <view wx:if="{{images.length>1}}" class="gallery-heading">生成结果 · {{images.length}} 张<text>点击图片查看大图</text></view>
   <view class="gallery-grid">
     <view class="gallery-item" wx:for="{{images}}" wx:key="*this">
-      <image class="gallery-image" src="{{item}}" mode="{{images.length>1?'aspectFit':'widthFix'}}" data-index="{{index}}" bindtap="preview" aria-role="button" aria-label="{{'查看第'+(index+1)+'张图片'}}" />
-      <view wx:if="{{images.length>1}}" class="gallery-caption">
-        <text>第 {{index+1}} 张</text>
-        <button wx:if="{{allowSave}}" data-index="{{index}}" bindtap="save" disabled="{{busy}}" aria-label="{{'保存第'+(index+1)+'张图片'}}">保存</button>
-      </view>
+      <image class="gallery-image" src="{{item}}" mode="{{images.length>1?'aspectFill':'widthFix'}}" lazy-load data-index="{{index}}" bindtap="preview" aria-role="button" aria-label="{{'查看第'+(index+1)+'张图片'}}" />
+      <block wx:if="{{images.length>1}}">
+        <view class="gallery-index">{{index+1}}</view>
+        <view wx:if="{{allowSave}}" class="gallery-save {{busy?'off':''}}" data-index="{{index}}" bindtap="save" aria-role="button" aria-label="{{'保存第'+(index+1)+'张图片'}}">保存</view>
+      </block>
     </view>
   </view>
 </view>

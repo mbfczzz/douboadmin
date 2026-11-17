@@ -49,10 +49,12 @@ func (o *OSS) InputURL(ctx context.Context, key string) (string, error) {
 }
 
 // Processing parameters must be included before signing private objects.
+// List tiles span up to ~520 physical pixels on 3x screens; 640 stays sharp
+// without shipping the original.
 func (o *OSS) Thumbnail(ctx context.Context, key, kind string) (string, error) {
-	process := "image/resize,m_lfit,w_160,h_160/auto-orient,1"
+	process := "image/resize,m_lfit,w_640,h_640,limit_1/auto-orient,1/quality,q_82"
 	if kind == "video" || kind == "mix" {
-		process = "video/snapshot,t_0,f_jpg,w_160,h_0,m_fast"
+		process = "video/snapshot,t_0,f_jpg,w_640,h_0,m_fast"
 	} else if kind != "image" {
 		return "", fmt.Errorf("unsupported thumbnail kind")
 	}

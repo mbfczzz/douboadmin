@@ -16,7 +16,8 @@ export const TAB_ITEMS = [
     ...art("templates"),
     path: "/pages/templates/index",
   },
-  { text: "混剪", icon: "cut", ...art("mix"), path: "/pages/mix/index" },
+  // 混剪 is hidden for now (its page stays reachable from old mix tasks).
+  { text: "优秀", icon: "star", on: "star-filled", ...art("featured"), path: FEATURED_TAB_PATH },
   // The centre tab keeps a visible label alongside the primary plus action.
   {
     text: "创作",
@@ -32,7 +33,6 @@ export const TAB_ITEMS = [
     ...art("agent"),
     path: "/pages/agent/index",
   },
-  { text: "优秀", icon: "star", on: "star-filled", ...art("featured"), path: FEATURED_TAB_PATH },
   { text: "我的", icon: "user", on: "user-filled", ...art("mine"), path: "/pages/mine/index" },
 ];
 
