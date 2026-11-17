@@ -55,11 +55,13 @@ func GenerationMode(kind string, modes []string, counts map[string]int, total in
 	if kind == "image" {
 		return "i2i"
 	}
+	// A video with any reference is 全能参考 whenever the model offers it;
+	// 图生视频 / 首尾帧 remain only for models without it.
+	if len(modes) == 0 || slices.Contains(modes, "omni_ref") {
+		return "omni_ref"
+	}
 	if counts["image"] == 1 && total == 1 && slices.Contains(modes, "i2v") {
 		return "i2v"
-	}
-	if slices.Contains(modes, "omni_ref") {
-		return "omni_ref"
 	}
 	if counts["image"] == total && slices.Contains(modes, "keyframe") {
 		return "keyframe"

@@ -5,9 +5,9 @@ const model = {
   id: "video",
   name: "模型",
   kind: "video",
-  modes: ["t2v", "i2v"],
+  modes: ["t2v", "omni_ref"], // references go through 全能参考 in the mini-program
   resolutions: ["1080p", "720p"],
-  resolutionByMode: { i2v: ["720p"] },
+  resolutionByMode: { omni_ref: ["720p"] },
   ratios: ["9:16"],
   durations: [5],
   referenceTypes: ["image"],
@@ -123,7 +123,7 @@ test("no compatible resolution disables submission without discarding the draft"
   let submissions = 0;
   h.api.request = async () => ({
     models: [
-      { ...model, resolutions: ["1080p"], resolutionByMode: { i2v: [] } },
+      { ...model, resolutions: ["1080p"], resolutionByMode: { omni_ref: [] } },
     ],
   });
   page.setData({ assets: [photo], prompt: "保留我的文案" });

@@ -125,7 +125,7 @@ test("an in-flight upload from an older draft cannot alter the new draft", async
     page = h.page("create");
   h.api.request = async () => ({
     models: [
-      { ...models[0], referenceTypes: ["image"], modes: ["t2v", "i2v"] },
+      { ...models[0], referenceTypes: ["image"], modes: ["t2v", "omni_ref"] },
     ],
   });
   await page.loadModels();

@@ -76,11 +76,11 @@ func (a *Server) validateTemplate(r *http.Request, t *core.Template) error {
 			}
 		} else {
 			mode = "t2v"
-			if t.RequiredImages == 1 {
-				mode = "i2v"
-			}
-			if t.RequiredImages > 1 {
+			if t.RequiredImages > 0 {
 				mode = "omni_ref"
+				if len(m.Modes) > 0 && !slices.Contains(m.Modes, "omni_ref") && t.RequiredImages == 1 {
+					mode = "i2v" // models without 全能参考 only
+				}
 			}
 		}
 		t.Mode = mode

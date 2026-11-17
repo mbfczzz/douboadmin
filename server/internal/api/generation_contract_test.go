@@ -66,3 +66,26 @@ func TestMinimumReferencesAndModeResolutionContract(t *testing.T) {
 		t.Fatal("explicit admin override still constrained by upstream mode", limited)
 	}
 }
+
+// An older client or a template asking for 图生视频 / 首尾帧 on a model with
+// 全能参考 is stored and sent as 全能参考.
+func TestRequestedImageModesBecomeOmniReference(t *testing.T) {
+	for _, asked := range []string{"i2v", "keyframe"} {
+		a, _, _ := setup(t)
+		ctx := context.Background()
+		a.Objects = objectstore.New("cn-hangzhou", "test-bucket", "test-key", "test-secret")
+		m := core.Model{ID: "video", Kind: "video", Key: "fixture", Published: true, Available: true, Modes: []string{"t2v", "i2v", "keyframe", "omni_ref"}, ReferenceTypes: []string{"image"}, Resolutions: []string{"720p"}, Ratios: []string{"9:16"}, Durations: []int{5}}
+		_, _ = a.Store.Put(ctx, "models", core.Record{ID: m.ID, Data: core.Data(m)}, 0)
+		_, _ = a.Store.Put(ctx, "assets", core.Record{ID: "photo", Owner: "user-a", Data: core.Data(map[string]any{"type": "image/jpeg", "size": 1024})}, 0)
+		input := core.JobInput{Kind: "video", Model: m.ID, Prompt: "test", Resolution: "720p", Ratio: "9:16", Duration: 5, Assets: []string{"photo"}, Mode: asked}
+		if asked == "keyframe" {
+			input.Assets = append(input.Assets, "photo")
+		}
+		if e := a.validateJob(ctx, "user-a", &input); e != nil || input.Mode != "omni_ref" {
+			t.Fatal(asked, input.Mode, e)
+		}
+		if _, body, e := provider.Request(input, m.Key, nil); e != nil || body["mode"] != "multi_ref" {
+			t.Fatal(asked, body, e)
+		}
+	}
+}

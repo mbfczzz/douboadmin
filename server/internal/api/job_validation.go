@@ -82,6 +82,13 @@ func (a *Server) validateJob(ctx context.Context, user string, in *core.JobInput
 	if mode == "" {
 		mode = core.GenerationMode(in.Kind, m.Modes, counts, len(in.Assets))
 	}
+	// References on a video always go through 全能参考 when the model can take
+	// them that way, even if an older client or a template asked for 图生视频
+	// or 首尾帧.
+	if in.Kind == "video" && (mode == "i2v" || mode == "keyframe") && len(in.Assets) > 0 &&
+		(len(m.Modes) == 0 || slices.Contains(m.Modes, "omni_ref")) && validateModelReferences(m, "omni_ref", counts, sizes) == nil {
+		mode = "omni_ref"
+	}
 	if in.Kind != "chat" && len(m.Modes) > 0 && !slices.Contains(m.Modes, mode) {
 		return fmt.Errorf("此模型不支持当前参考素材的生成方式")
 	}

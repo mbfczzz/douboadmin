@@ -97,29 +97,30 @@ test("updated backend limits preserve materials but prevent invalid submissions"
   assert.equal(page.data.assets.length, 2);
   assert.equal(submitted, 0);
 });
-test("keyframe-only video uses its configured image count and sends the matching mode", async () => {
-  const { h, page } = await editor({
-    ...base,
-    kind: "video",
-    modes: ["keyframe"],
-    durations: [5],
-    settings: {
-      refLimits: { "keyframe.imageCount": 2, "keyframe.imageSizeMB": 3 },
-    },
-  });
+test("video references always go through 全能参考; a model without it is text-only", async () => {
+  // A model offering every mode still sends 全能参考 for one image.
+  const full = await editor({ ...base, kind: "video", modes: ["t2v", "i2v", "keyframe", "omni_ref"], durations: [5] });
   let input;
-  h.api.submitInput = async (value) => {
-    input = value;
-    return { id: "job" };
-  };
-  page.setData({
-    assets: [asset("a"), asset("b")],
-    prompt: "转场",
-    hasPrompt: true,
-  });
+  full.h.api.submitInput = async (value) => { input = value; return { id: "job" }; };
+  full.page.setData({ assets: [asset("a")], prompt: "转场", hasPrompt: true });
+  await full.page.generate();
+  assert.equal(input.mode, "omni_ref");
+  // Text only stays 文生视频 (a fresh editor: the first one has submitted).
+  const text = await editor({ ...base, kind: "video", modes: ["t2v", "i2v", "keyframe", "omni_ref"], durations: [5] });
+  input = undefined;
+  text.h.api.submitInput = async (value) => { input = value; return { id: "job" }; };
+  text.page.setData({ assets: [], prompt: "转场", hasPrompt: true });
+  await text.page.generate();
+  assert.equal(input.mode, "t2v");
+  // 首尾帧-only: no references can be added, so 图生视频/首尾帧 never appear.
+  const { h, page } = await editor({ ...base, kind: "video", modes: ["keyframe"], durations: [5] });
+  assert.equal(page.data.allowImage, false);
+  assert.equal(page.data.maxReferences, 0);
+  let sent;
+  h.api.submitInput = async (value) => { sent = value; return { id: "job" }; };
+  page.setData({ assets: [asset("a"), asset("b")], prompt: "转场", hasPrompt: true });
   await page.generate();
-  assert.equal(input.mode, "keyframe");
-  assert.equal(input.assets.length, 2);
+  assert.equal(sent, undefined);
 });
 test("upstream-constrained limits supplied by the backend take precedence", async () => {
   const { h, page } = await editor({

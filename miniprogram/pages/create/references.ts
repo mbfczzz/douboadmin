@@ -9,8 +9,14 @@ const labels: Record<string, string> = {
   video: "视频",
   audio: "音频",
 };
+// A video model takes references only through 全能参考 here (no 图生视频
+// or 首尾帧): one without it is text-to-video only, and types switched off
+// for 全能参考 cannot be added.
+const omni = (model: Model) => !(model.modes || []).length || (model.modes || []).includes("omni_ref");
 export function referenceSettings(model: Model) {
-  const types = model.referenceTypes || [];
+  const video = model.kind === "video",
+    off = model.settings?.omniReferences || {};
+  const types = video && !omni(model) ? [] : (model.referenceTypes || []).filter((t) => !video || off[t] !== false);
   return {
     allowImage: types.includes("image"),
     allowVideo: types.includes("video"),
@@ -30,20 +36,16 @@ export function referenceSettings(model: Model) {
 
 export function creationMode(model: Model, assets: Row<Asset>[]): string {
   const modes = model.modes || [];
-  const images = assets.filter((a) => a.data.type.startsWith("image/")).length;
   if (model.kind === "image")
     return assets.length
       ? "i2i"
       : modes.includes("t2i") || !modes.length
         ? "t2i"
         : modes[0];
+  // Video: text only is 文生视频; any image, video or audio is 全能参考.
   if (!assets.length)
     return modes.includes("t2v") || !modes.length ? "t2v" : modes[0];
-  if (images === 1 && assets.length === 1 && modes.includes("i2v"))
-    return "i2v";
-  if (modes.includes("omni_ref")) return "omni_ref";
-  if (images === assets.length && modes.includes("keyframe")) return "keyframe";
-  return images === 1 && assets.length === 1 ? "i2v" : "omni_ref";
+  return "omni_ref";
 }
 
 export function referenceError(

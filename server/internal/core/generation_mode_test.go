@@ -22,3 +22,27 @@ func TestGenerationModeAliasesNormalizeAtModelBoundary(t *testing.T) {
 		t.Fatal(got)
 	}
 }
+
+// Video references go through 全能参考 whenever the model offers it; 图生视频 /
+// 首尾帧 remain only for models without it.
+func TestVideoReferencesPreferOmniReference(t *testing.T) {
+	all := []string{"t2v", "i2v", "keyframe", "omni_ref"}
+	for _, c := range []struct {
+		modes  []string
+		counts map[string]int
+		total  int
+		want   string
+	}{
+		{all, map[string]int{}, 0, "t2v"},
+		{all, map[string]int{"image": 1}, 1, "omni_ref"},
+		{all, map[string]int{"image": 2}, 2, "omni_ref"},
+		{all, map[string]int{"video": 1}, 1, "omni_ref"},
+		{nil, map[string]int{"image": 1}, 1, "omni_ref"},
+		{[]string{"t2v", "i2v"}, map[string]int{"image": 1}, 1, "i2v"},
+		{[]string{"keyframe"}, map[string]int{"image": 2}, 2, "keyframe"},
+	} {
+		if got := GenerationMode("video", c.modes, c.counts, c.total); got != c.want {
+			t.Fatal(c.modes, c.counts, got)
+		}
+	}
+}
