@@ -36,7 +36,7 @@ export function iconFor(m: Model) {
   const name = m.key + " " + m.name;
   const special: [[RegExp, string], ...[RegExp, string][]] = [
     [/seedream|jimeng|即梦/i, "jimeng"],
-    [/seedance|bytedance|字节/i, "bytedance"],
+    [/seedance|bytedance|字节|(?:^|\s)sd(?:[\s._-]|(?=\d))/i, "bytedance"],
     [/nano.banana|imagen|veo/i, "google"],
     [/gpt|sora|openai/i, "openai"],
     [/wan|qwen|通义/i, "qwen"],

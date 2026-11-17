@@ -6,6 +6,9 @@ func (m Model) DisplayIcon() string {
 	if m.Settings.Icon != "" {
 		return m.Settings.Icon
 	}
+	if seedanceAbbreviation(m.Name) {
+		return "/media/model-icons/bytedance.png"
+	}
 	name := strings.ToLower(m.Key + " " + m.Name)
 	rules := [][2]string{{"seedream", "jimeng"}, {"seedance", "bytedance"}, {"nano-banana", "google"}, {"imagen", "google"}, {"veo", "google"}, {"gpt", "openai"}, {"sora", "openai"}, {"wan", "qwen"}}
 	for _, slug := range []string{"openai", "google", "gemini", "midjourney", "flux", "stability", "kling", "jimeng", "doubao", "bytedance", "volcengine", "qwen", "hunyuan", "kolors", "minimax", "suno", "vidu", "runway", "luma", "pika", "ideogram", "recraft", "deepseek", "claude", "anthropic", "grok"} {
@@ -17,4 +20,16 @@ func (m Model) DisplayIcon() string {
 		}
 	}
 	return ""
+}
+
+func seedanceAbbreviation(name string) bool {
+	name = strings.ToLower(strings.TrimSpace(name))
+	if !strings.HasPrefix(name, "sd") {
+		return false
+	}
+	if len(name) == 2 {
+		return true
+	}
+	next := name[2]
+	return next == ' ' || next == '-' || next == '_' || next == '.' || next >= '0' && next <= '9'
 }
