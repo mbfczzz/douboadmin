@@ -32,7 +32,7 @@ func TestDeletedModelVisibilitySyncAndExplicitRestore(t *testing.T) {
 	}
 	page := func(query string) core.RecordPage {
 		t.Helper()
-		w := call(a, "GET", "/api/admin/models?page=1&size=20&q=Image%20Live"+query, admin, "", nil)
+		w := call(a, "GET", "/api/admin/models?page=1&size=20&q=保留"+query, admin, "", nil)
 		var result core.RecordPage
 		if w.Code != 200 || json.Unmarshal(w.Body.Bytes(), &result) != nil {
 			t.Fatal(w.Code, w.Body.String())
@@ -45,10 +45,6 @@ func TestDeletedModelVisibilitySyncAndExplicitRestore(t *testing.T) {
 	deleted := page("&deleted=true&kind=image")
 	if deleted.Total != 1 || deleted.Items[0].ID != id {
 		t.Fatal("cannot find deleted model", deleted)
-	}
-	var synced core.Model
-	if json.Unmarshal(deleted.Items[0].Data, &synced) != nil || synced.Name != "Image Live" {
-		t.Fatal("deleted model name did not follow upstream", synced)
 	}
 	if got := page("&deleted=true&kind=video"); got.Total != 0 {
 		t.Fatal("kind filter lost")
@@ -72,7 +68,7 @@ func TestDeletedModelVisibilitySyncAndExplicitRestore(t *testing.T) {
 		t.Fatal("restored model stayed hidden")
 	}
 	restored, _ := a.model(t.Context(), id)
-	if restored.Deleted || !restored.Published || restored.Name != synced.Name || restored.Points != model.Points || restored.Sort != model.Sort || restored.Settings.DefaultPrompt != model.Settings.DefaultPrompt || restored.Settings.MaxPromptChars != 3000 {
+	if restored.Deleted || !restored.Published || restored.Name != model.Name || restored.Points != model.Points || restored.Sort != model.Sort || restored.Settings.DefaultPrompt != model.Settings.DefaultPrompt || restored.Settings.MaxPromptChars != 3000 {
 		t.Fatal("restoration discarded operator configuration", restored)
 	}
 }

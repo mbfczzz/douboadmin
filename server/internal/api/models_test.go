@@ -57,8 +57,8 @@ func TestSyncUsesRealCatalogAndPreservesOperatorChoices(t *testing.T) {
 		t.Fatal(w.Body.String())
 	}
 	fresh, _ := a.model(context.Background(), id)
-	if fresh.Name != "Image Live" || fresh.Points != 8 || fresh.Published {
-		t.Fatal("sync must refresh upstream name and preserve operator pricing and status", fresh)
+	if fresh.Name != m.Name || fresh.Points != 8 || fresh.Published {
+		t.Fatal("sync overwrote edits", fresh)
 	}
 	w = call(a, "GET", "/api/config", "", "", nil)
 	var config struct {

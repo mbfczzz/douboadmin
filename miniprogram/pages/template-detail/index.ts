@@ -29,7 +29,7 @@ Page({
     assets: [] as Row<Asset>[],
     recipePositions: [] as number[], recipeSlots: [] as { position: number; label: string; optional: boolean; id: string; url: string }[],
     recipeActiveSlot: 0, recipeMissing: 0, recipeModel: "", recipeResolution: "", recipeQuality: "", recipeModelIndex: 0, recipeResolutionIndex: 0,
-    recipeModels: [] as { id: string; name: string; resolutions: string[]; quality: string }[], recipeResolutions: [] as string[], recipeError: "",
+    recipeModels: [] as { id: string; name: string; resolutions: string[]; quality: string }[], recipeResolutions: [] as string[], recipeError: "", recipeSheet: "", recipeOptions: [] as string[], recipeChecked: 0,
     optionalNames: ["场景照片", "品牌标识", "商品特写", "宣传文案图"],
     fixedCount: false,
     busy: false,

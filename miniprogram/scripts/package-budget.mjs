@@ -144,7 +144,10 @@ console.log(
 // resolution selection, ownership/refresh guards. +10,959 source bytes,
 // 780,282 -> 791,241 B, with no new SDK/runtime dependency.
 // Reviewed feature allowance 762 -> 774 KiB. See docs/flowlight-template-import.md.
-const budget = 774 * 1024;
+// Template recipe model/resolution: native white <picker> replaced by the
+// app's dark bottom sheet (rows + one shared option list), no new component:
+// 791,241 -> 793,140 B (+1,899). 774 -> 776 KiB.
+const budget = 776 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

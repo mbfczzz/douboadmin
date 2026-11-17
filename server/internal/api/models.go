@@ -130,7 +130,7 @@ func (a *Server) syncModels(w http.ResponseWriter, r *http.Request) {
 				conflicts++
 				continue
 			}
-			// Name follows the upstream ID; operator pricing and settings remain local.
+			m.Name = prev.Name
 			m.Published = prev.Published
 			m.Points = prev.Points
 			m.Sort = prev.Sort

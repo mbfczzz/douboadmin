@@ -72,3 +72,21 @@ func TestRelayDoesNotForwardCredentialsToRedirect(t *testing.T) {
 		t.Fatal("credential destination followed")
 	}
 }
+
+// Seedance S10 lists only t2v + omni_ref; 全能参考 must still take images.
+func TestCatalogOmniReferenceAcceptsImagesWithoutImageModes(t *testing.T) {
+	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write([]byte(`{"data":[{"id":"seedance-2.0-S10","modality":"video","params_schema":{"modes":["t2v","omni_ref"]}},{"id":"no-image","modality":"video","params_schema":{"modes":["omni_ref"],"ref_limits":{"images":0}}}]}`))
+	}))
+	defer s.Close()
+	rows, err := New(s.URL, "test").Catalog(context.Background())
+	if err != nil || len(rows) != 2 {
+		t.Fatal(rows, err)
+	}
+	if got := rows[0].ReferenceTypes; len(got) != 3 || got[0] != "image" {
+		t.Fatal("omni_ref model lost image references:", got)
+	}
+	if got := rows[1].ReferenceTypes; len(got) != 2 || got[0] != "video" {
+		t.Fatal("explicit zero image limit ignored:", got)
+	}
+}

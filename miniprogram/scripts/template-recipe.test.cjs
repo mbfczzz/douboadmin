@@ -32,8 +32,14 @@ test('recipe images retain semantic positions after omitted optional slots, repl
   assert.equal(page.data.recipeMissing, 1);
   assert.deepEqual(Array.from(page.data.recipePositions), [3]);
   recipe.recipeAsset(page, 1, asset('person'));
-  page.chooseRecipeModel({ detail: { value: 1 } });
-  page.chooseRecipeResolution({ detail: { value: 1 } });
+  const pick = (sheet, index) => {
+    page.openRecipeSheet({ currentTarget: { dataset: { sheet } } });
+    assert.equal(page.data.recipeSheet, sheet);
+    page.pickRecipeOption({ currentTarget: { dataset: { index } } });
+    assert.equal(page.data.recipeSheet, "");
+  };
+  pick("model", 1);
+  pick("resolution", 1);
   let submitted;
   h.api.submitInput = async input => { submitted = input; return { id: 'task' }; };
   await page.generate();

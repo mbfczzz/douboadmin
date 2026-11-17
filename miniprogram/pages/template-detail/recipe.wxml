@@ -9,8 +9,15 @@
     </view>
   </view></scroll-view>
   <view class="recipe-choices {{busy||uploading?'controls-busy':''}}">
-    <picker range="{{recipeModels}}" range-key="name" value="{{recipeModelIndex}}" bindchange="chooseRecipeModel"><view>生成模型<text>{{recipeModels[recipeModelIndex].name||'读取中…'}} ›</text></view></picker>
-    <picker wx:if="{{recipeResolutions.length}}" range="{{recipeResolutions}}" value="{{recipeResolutionIndex}}" bindchange="chooseRecipeResolution"><view>清晰度<text>{{recipeResolution}} ›</text></view></picker>
+    <view class="choice-row" data-sheet="model" bindtap="openRecipeSheet" hover-class="choice-pressed" aria-role="button"><text>生成模型</text><text class="choice-value">{{recipeModels[recipeModelIndex].name||'读取中…'}}</text><t-icon name="chevron-right" size="16" /></view>
+    <view wx:if="{{recipeResolutions.length}}" class="choice-row" data-sheet="resolution" bindtap="openRecipeSheet" hover-class="choice-pressed" aria-role="button"><text>清晰度</text><text class="choice-value">{{recipeResolution}}</text><t-icon name="chevron-right" size="16" /></view>
   </view>
   <text wx:if="{{recipeError}}" class="error-box">{{recipeError}}</text>
 </view>
+<t-popup visible="{{!!recipeSheet}}" placement="bottom" bind:visible-change="closeRecipeSheet">
+  <view class="photo-sources">
+    <view class="sheet-handle" />
+    <view class="photo-source-heading"><text>{{recipeSheet==='model'?'生成模型':'清晰度'}}</text><view class="photo-source-close" bindtap="closeRecipeSheet"><t-icon name="close" size="20" /></view></view>
+    <view wx:for="{{recipeOptions}}" wx:key="index" class="choice-option {{index===recipeChecked?'selected':''}}" data-index="{{index}}" bindtap="pickRecipeOption" hover-class="choice-pressed" aria-role="button"><text>{{item}}</text><t-icon wx:if="{{index===recipeChecked}}" name="check" size="18" /></view>
+  </view>
+</t-popup>

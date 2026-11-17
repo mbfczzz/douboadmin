@@ -8,7 +8,7 @@ type Page = {
   data: {
     template: Row<Template> | null; assets: Row<Asset>[]; recipePositions: number[];
     recipeActiveSlot: number; recipeModel: string; recipeResolution: string; recipeModels: Choice[];
-    recipeMissing: number; recipeError: string; busy: boolean; uploading: boolean;
+    recipeMissing: number; recipeError: string; recipeSheet: string; recipeModelIndex: number; recipeResolutionIndex: number; busy: boolean; uploading: boolean;
   };
   recipeRevision?: number; recipeOwner?: string; recipeShape?: string;
   destroyed: boolean; setData(value: Record<string, unknown>): void;
@@ -92,14 +92,18 @@ export const recipeHandlers = {
     this.setData({ assets: keep.map((p) => p.asset), recipePositions: keep.map((p) => p.slot) });
     syncRecipeSlots(this);
   },
-  chooseRecipeModel(this: Page, e: WechatMiniprogram.CustomEvent<{ value: number }>) {
-    if (this.data.busy || this.data.uploading) return;
-    const model = this.data.recipeModels[Number(e.detail.value)];
-    if (model) selectModel(this, model);
+  openRecipeSheet(this: Page, e: WechatMiniprogram.TouchEvent) {
+    if (this.data.busy || this.data.uploading || !this.data.recipeModels.length) return;
+    const model = e.currentTarget.dataset.sheet === "model", d = this.data;
+    this.setData({ recipeSheet: model ? "model" : "resolution", recipeChecked: model ? d.recipeModelIndex : d.recipeResolutionIndex,
+      recipeOptions: model ? d.recipeModels.map((m) => m.name) : d.recipeModels.find((m) => m.id === d.recipeModel)?.resolutions || [] });
   },
-  chooseRecipeResolution(this: Page, e: WechatMiniprogram.CustomEvent<{ value: number }>) {
+  closeRecipeSheet(this: Page) { this.setData({ recipeSheet: "" }); },
+  pickRecipeOption(this: Page, e: WechatMiniprogram.TouchEvent) {
+    const index = Number(e.currentTarget.dataset.index), sheet = this.data.recipeSheet;
+    this.setData({ recipeSheet: "" });
     if (this.data.busy || this.data.uploading) return;
-    const index = Number(e.detail.value);
+    if (sheet === "model") { const model = this.data.recipeModels[index]; if (model) selectModel(this, model); return; }
     const model = this.data.recipeModels.find((m) => m.id === this.data.recipeModel);
     if (model?.resolutions[index]) { this.setData({ recipeResolution: model.resolutions[index], recipeResolutionIndex: index }); quote(this); }
   },

@@ -109,13 +109,17 @@ func (c *Client) Catalog(ctx context.Context) ([]core.Model, error) {
 		if slices.Contains(schema.Modes, "i2i") || slices.Contains(schema.Modes, "i2v") {
 			refs = append(refs, "image")
 		}
+		// 全能参考 takes images as well as video and audio, even when the model
+		// lists no i2v mode (e.g. Seedance S10: only t2v + omni_ref).
 		if r.Modality == "video" && slices.Contains(schema.Modes, "omni_ref") {
-			for _, typ := range []string{"video", "audio"} {
+			for _, typ := range []string{"image", "video", "audio"} {
 				max := 1
 				if raw, ok := schema.RefLimits[typ]; ok {
 					_ = json.Unmarshal(raw, &max)
+				} else if raw, ok := schema.RefLimits[typ+"s"]; ok {
+					_ = json.Unmarshal(raw, &max)
 				}
-				if max > 0 {
+				if max > 0 && !slices.Contains(refs, typ) {
 					refs = append(refs, typ)
 				}
 			}

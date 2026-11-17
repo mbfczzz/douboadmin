@@ -1,5 +1,9 @@
 .recipe-slots .slot-name { max-width: 92px; white-space: normal; text-align: center; line-height: 18px; }
 .recipe-slots .slot-tag { max-width: 88px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .recipe-choices { margin-top: 18px; padding: 0 14px; border-radius: 14px; background: var(--ui-surface); }
-.recipe-choices picker > view { display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 48px; font-size: 13px; }
-.recipe-choices picker text { max-width: 72%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ui-text); }
+.choice-row { display: flex; align-items: center; gap: 8px; min-height: 48px; font-size: 14px; color: var(--ui-muted); }
+.choice-row + .choice-row { border-top: 1px solid var(--ui-border); }
+.choice-value { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: right; color: var(--ui-text); }
+.choice-option { display: flex; align-items: center; justify-content: space-between; min-height: 52px; padding: 0 16px; margin-bottom: 8px; border-radius: 14px; font-size: 15px; background: var(--ui-field); color: var(--ui-text); }
+.choice-option.selected { box-shadow: inset 0 0 0 1.5px #00c8dc80; color: var(--ui-brand); }
+.choice-pressed { opacity: .72; }
