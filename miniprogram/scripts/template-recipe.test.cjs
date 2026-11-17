@@ -14,10 +14,12 @@ const asset = (id) => ({ id, data: { url: `https://example.test/${id}.jpg`, type
 test('recipe images retain semantic positions after omitted optional slots, replacement and removal', async () => {
   const h = harness(), page = h.page('template-detail');
   const recipe = h.service('../pages/template-detail/recipe');
-  h.api.request = async (path) => path.startsWith('/templates/') ? template() : { models: [model('default'), model('choice', ['1080p', '720p']), model('too-short', ['720p'], [15])] };
+  h.api.request = async (path) => path.startsWith('/templates/') ? template() : { models: [model('choice', ['1080p', '720p']), model('default'), model('too-short', ['720p'], [15]), model('unlisted'),
+    { ...model('no-images'), referenceTypes: [] }, { ...model('i2v-only'), modes: ['i2v'] }] };
   page.id = 'recipe';
   await page.load();
-  assert.deepEqual(Array.from(page.data.recipeModels, m => m.id), ['default', 'choice']);
+  // Any model supporting 30 s, 9:16, 全能参考 and images, not only the listed ones; default first.
+  assert.deepEqual(Array.from(page.data.recipeModels, m => m.id), ['default', 'choice', 'unlisted']);
   assert.equal(page.data.recipeMissing, 2);
   recipe.recipeAsset(page, 3, asset('product'));
   recipe.recipeAsset(page, 1, asset('person'));

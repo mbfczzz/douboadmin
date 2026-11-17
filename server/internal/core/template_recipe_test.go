@@ -60,3 +60,22 @@ func TestRecipePromptBoundCoversEveryOptionalCombination(t *testing.T) {
 		}
 	}
 }
+
+func TestTemplateAcceptsAnyModelFittingDurationRatioAndMode(t *testing.T) {
+	tpl := Template{Kind: "video", ImageSlots: []TemplateImageSlot{{Label: "人物"}}}
+	tpl.Duration, tpl.Ratio, tpl.Mode = 30, "9:16", "i2v"
+	fit := Model{ID: "other", Kind: "video", Available: true, Published: true, Durations: []int{15, 30}, Ratios: []string{"9:16"}, Modes: []string{"t2v", "omni_ref"}, ReferenceTypes: []string{"image"}}
+	if !tpl.AcceptsModel(fit) {
+		t.Fatal("unlisted model supporting 30 s and 全能参考 was refused")
+	}
+	for name, m := range map[string]Model{
+		"15 s only":  {ID: "a", Kind: "video", Available: true, Published: true, Durations: []int{15}, Modes: []string{"omni_ref"}, ReferenceTypes: []string{"image"}},
+		"no images":  {ID: "b", Kind: "video", Available: true, Published: true, Durations: []int{30}, Modes: []string{"omni_ref"}},
+		"wrong mode": {ID: "c", Kind: "video", Available: true, Published: true, Durations: []int{30}, Modes: []string{"t2v"}, ReferenceTypes: []string{"image"}},
+		"16:9 only":  {ID: "d", Kind: "video", Available: true, Published: true, Durations: []int{30}, Ratios: []string{"16:9"}, Modes: []string{"omni_ref"}, ReferenceTypes: []string{"image"}},
+	} {
+		if tpl.AcceptsModel(m) {
+			t.Fatal("accepted model that cannot run the template:", name)
+		}
+	}
+}

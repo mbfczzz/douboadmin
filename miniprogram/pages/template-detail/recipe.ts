@@ -54,10 +54,12 @@ export async function loadRecipe(page: Page) {
   try {
     const config = await loadConfig();
     if (page.destroyed || page.recipeRevision !== version || owner !== sessionToken() || page.data.template?.id !== t.id) return;
-    const allowed = [t.data.model, ...(t.data.selectableModels || [])];
-    const models: Choice[] = config.models.filter((m: Model) => allowed.includes(m.id) && m.kind === "video" &&
-      m.durations?.includes(t.data.duration) && (!m.ratios.length || m.ratios.includes(t.data.ratio)) &&
-      (!m.modes?.length || m.modes.includes(t.data.mode))).map((m: Model) => ({
+    // Every video model fitting the template's duration, ratio and mode
+    // (same rule as the server's Template.AcceptsModel); default first.
+    const mode = (m: Model) => ["i2v", "keyframe"].includes(t.data.mode || "") && m.modes?.includes("omni_ref") ? "omni_ref" : t.data.mode;
+    const models: Choice[] = config.models.filter((m: Model) => m.kind === "video" && m.durations?.includes(t.data.duration) &&
+      (!m.ratios.length || m.ratios.includes(t.data.ratio)) && (!m.modes?.length || !t.data.mode || m.modes.includes(mode(m)!)) &&
+      !!m.referenceTypes?.includes("image")).sort((a: Model, b: Model) => Number(b.id === t.data.model) - Number(a.id === t.data.model)).map((m: Model) => ({
         id: m.id, name: m.name, quality: t.data.quality || m.qualities?.[0] || "",
         resolutions: [...m.resolutions].sort((a, b) => resolutionRank.indexOf(a.toLowerCase()) - resolutionRank.indexOf(b.toLowerCase())),
       }));

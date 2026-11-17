@@ -3,6 +3,7 @@ package core
 import (
 	"fmt"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 	"unicode/utf8"
@@ -21,16 +22,22 @@ var numberedImageReference = regexp.MustCompile(`@?图(?:片)?\s*[0-9]+`)
 
 const templateReferenceIntro = "【本次参考素材对应关系】\n只按下列实际上传顺序读取图片；未上传的素材不能用其他图片顶替，正文中的缺图条件按未提供处理。\n"
 
-func (t Template) AllowsModel(id string) bool {
-	if t.Model == id {
-		return true
+// AcceptsModel: a template may run on any usable model of its kind that
+// supports its duration, ratio and mode (image modes run as 全能参考 when the
+// model has it), not only the models listed on the template.
+func (t Template) AcceptsModel(m Model) bool {
+	if !m.Usable() || m.Kind != t.Kind || (t.Kind == "video" && !slices.Contains(m.Durations, t.Duration)) ||
+		(len(m.Ratios) > 0 && !slices.Contains(m.Ratios, t.Ratio)) {
+		return false
 	}
-	for _, candidate := range t.SelectableModels {
-		if candidate == id {
-			return true
-		}
+	mode := t.Mode
+	if (mode == "i2v" || mode == "keyframe") && slices.Contains(m.Modes, "omni_ref") {
+		mode = "omni_ref"
 	}
-	return false
+	if mode != "" && len(m.Modes) > 0 && !slices.Contains(m.Modes, mode) {
+		return false
+	}
+	return len(t.ImageSlots) == 0 && t.RequiredImages == 0 || slices.Contains(m.ReferenceTypes, "image")
 }
 
 func (t Template) ValidateRecipe() error {

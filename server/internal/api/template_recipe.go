@@ -33,7 +33,8 @@ func (a *Server) bindTemplateRecipe(ctx context.Context, in *core.JobInput) erro
 	if err := t.ValidateRecipe(); err != nil {
 		return fmt.Errorf("模板配方无效，请联系管理员检查")
 	}
-	if !t.AllowsModel(in.Model) || in.Ratio != t.Ratio || in.Duration != t.Duration {
+	m, err := a.model(ctx, in.Model)
+	if err != nil || !t.AcceptsModel(m) || in.Ratio != t.Ratio || in.Duration != t.Duration {
 		return fmt.Errorf("模板配置已变化，请重新打开确认")
 	}
 	if len(in.ImageSlots) != len(in.Assets) {
