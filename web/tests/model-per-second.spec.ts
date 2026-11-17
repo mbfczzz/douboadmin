@@ -11,7 +11,7 @@ for (const width of [1440, 390]) {
     let row = modelPage("video").items[0] as Row<Model>;
     row.data = {
       ...row.data,
-      resolutions: ["480p", "720p"],
+      resolutions: ["720p", "480p"],
       durations: [4, 5, 14],
       settings: {
         priceMatrix: {
@@ -36,9 +36,18 @@ for (const width of [1440, 390]) {
     });
     await page.getByRole("button", { name: "定价", exact: true }).click();
     let dialog = page.getByRole("dialog", { name: /^积分定价 ·/ });
+    await expect(dialog.locator("thead tr").first().locator("th")).toHaveText([
+      "时长 / 清晰度",
+      "480P",
+      "720P",
+    ]);
     await dialog.getByLabel("480P 每秒积分", { exact: true }).fill("0.001");
-    await expect(dialog.getByRole("button", { name: "填充 480P 全部时长", exact: true })).toBeDisabled();
-    await expect(dialog.getByLabel("4s 480P 积分", { exact: true })).toHaveValue("1");
+    await expect(
+      dialog.getByRole("button", { name: "填充 480P 全部时长", exact: true }),
+    ).toBeDisabled();
+    await expect(
+      dialog.getByLabel("4s 480P 积分", { exact: true }),
+    ).toHaveValue("1");
     await dialog.getByLabel("480P 每秒积分", { exact: true }).fill("13");
     await dialog
       .getByRole("button", { name: "填充 480P 全部时长", exact: true })
@@ -68,6 +77,7 @@ for (const width of [1440, 390]) {
     expect(writes).toBe(0);
     await confirmSubmission(page);
     await expect(dialog).toHaveCount(0);
+    expect(row.data.settings?.resolutions).toEqual(["720p", "480p"]);
     expect(row.data.settings?.priceMatrix?.["30s"]?.["480p"]).toBe(999);
     await page.getByRole("button", { name: "定价", exact: true }).click();
     dialog = page.getByRole("dialog", { name: /^积分定价 ·/ });
@@ -93,16 +103,49 @@ for (const width of [1440, 390]) {
   });
 }
 
-test("per-request video prices have no per-second fill controls", async ({
+test("per-request prices sort resolutions while retaining their exact price keys", async ({
   page,
 }) => {
-  const row = modelPage("video").items[0];
-  row.data.resolutions = ["720p"];
-  row.data.settings = { videoBillingMode: "per_request" };
+  let row = modelPage("video").items[0] as Row<Model>;
+  row.data.resolutions = ["720P", "480p"];
+  row.data.settings = {
+    videoBillingMode: "per_request",
+    pricePerRequestByResolution: { "720P": 600, "480p": 400 },
+  };
   await openModels(page, (route) =>
     route.fulfill({ json: { ...modelPage("video"), items: [row] } }),
   );
+  await page.route(`**/api/admin/models/${row.id}`, (route) => {
+    row = {
+      ...row,
+      version: row.version + 1,
+      data: route.request().postDataJSON().data,
+    };
+    return route.fulfill({ json: row });
+  });
   await page.getByRole("button", { name: "定价", exact: true }).click();
-  await expect(page.locator(".per-second-fill")).toHaveCount(0);
-  await expect(page.getByLabel("720P 按次积分", { exact: true })).toBeVisible();
+  const dialog = page.getByRole("dialog", { name: /^积分定价 ·/ });
+  await expect(dialog.locator(".per-second-fill")).toHaveCount(0);
+  await expect(dialog.locator("tbody tr td:first-child")).toHaveText([
+    "480P",
+    "720P",
+  ]);
+  await expect(dialog.getByLabel("480P 按次积分", { exact: true })).toHaveValue(
+    "400",
+  );
+  await expect(dialog.getByLabel("720P 按次积分", { exact: true })).toHaveValue(
+    "600",
+  );
+  await page.screenshot({
+    path: "../.runtime/per-request-resolution-order.png",
+  });
+  await dialog.getByLabel("480P 按次积分", { exact: true }).fill("420");
+  await dialog.getByRole("button", { name: "保存", exact: true }).click();
+  await confirmSubmission(page);
+  await expect(dialog).toHaveCount(0);
+  expect(row.data.settings?.resolutions).toEqual(["720P", "480p"]);
+  expect(row.data.settings?.pricePerRequestByResolution).toEqual({
+    "720P": 600,
+    "480p": 420,
+  });
 });

@@ -9,7 +9,7 @@ test("a pricing conflict preserves another editor's cell on retry", async ({
   let row = modelPage("image").items[0] as Row<Model>;
   row.data = {
     ...row.data,
-    resolutions: ["1k", "2k"],
+    resolutions: ["2k", "1k"],
     qualities: ["low"],
     settings: { priceMatrix: { low: { "1k": 2, "2k": 4 } } },
   };
@@ -39,6 +39,11 @@ test("a pricing conflict preserves another editor's cell on retry", async ({
   });
   await page.getByRole("button", { name: "定价", exact: true }).click();
   const dialog = page.getByRole("dialog", { name: /^积分定价 ·/ });
+  await expect(dialog.locator("thead th")).toHaveText([
+    "画质 / 清晰度",
+    "1K",
+    "2K",
+  ]);
   await dialog.getByLabel("低画质 1K 积分", { exact: true }).fill("3");
   await dialog.getByRole("button", { name: "保存", exact: true }).click();
   await confirmSubmission(page);

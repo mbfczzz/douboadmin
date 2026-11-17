@@ -1,13 +1,21 @@
 import { Card } from "./fields";
 import PerSecondFill from "./PerSecondFill";
 import { effectiveModel, qualityLabels, type SettingsProps } from "./settings";
+import { imageResolutions, videoResolutions } from "./parameter-options";
 
 export default function PricingFields({ model: m, onChange }: SettingsProps) {
   const s = m.settings,
     e = effectiveModel(m),
-    resolutions = s.hideResolution ? [] : e.resolutions,
-    qualities = s.hideQuality ? [] : e.qualities,
-    video = m.kind === "video";
+    video = m.kind === "video",
+    resolutionOrder = video ? videoResolutions : imageResolutions,
+    resolutions = s.hideResolution
+      ? []
+      : [...e.resolutions].sort(
+          (a, b) =>
+            resolutionOrder.indexOf(a.toLowerCase()) -
+            resolutionOrder.indexOf(b.toLowerCase()),
+        ),
+    qualities = s.hideQuality ? [] : e.qualities;
   if (m.kind !== "image" && !video) return null;
   const perRequest = video && s.videoBillingMode === "per_request";
   if (!resolutions.length || (video && !perRequest && !e.durations.length)) {
