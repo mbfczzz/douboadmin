@@ -5,6 +5,7 @@ import Modal from "./Modal";
 import TemplateOptions from "./TemplateOptions";
 import { templateSummary } from "./templateSummary";
 import CoverUpload from "./CoverUpload";
+import TemplateImages from "./TemplateImages";
 import { canLeave } from "../hooks/unsaved";
 import { ask } from "../confirm/ask";
 import type { Notify } from "../navigation";
@@ -124,7 +125,7 @@ export default function TemplateEditor({
                 rows={4}
                 value={data.prompt}
                 onChange={(e) => patch({ prompt: e.target.value })}
-                maxLength={500}
+                maxLength={20000}
                 required
               />
             </label>
@@ -152,20 +153,7 @@ export default function TemplateEditor({
                   required
                 />
               </label>
-              <label>
-                必填参考图片
-                <input
-                  type="number"
-                  min="0"
-                  max="5"
-                  step="1"
-                  value={data.requiredImages}
-                  onChange={(e) =>
-                    patch({ requiredImages: Number(e.target.value), mode: "" })
-                  }
-                  required
-                />
-              </label>
+              <TemplateImages value={data} onChange={patch} />
             </div>
             <label className="checkbox">
               <input

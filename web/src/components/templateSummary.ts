@@ -20,6 +20,8 @@ export function templateSummary(
       quality: "画质",
       duration: "时长（秒）",
       requiredImages: "必填参考图片",
+      imageSlots: "图片用途和选填位置",
+      selectableModels: "可选生成模型",
       cover: "封面地址",
       coverAssetId: "封面图片",
       preview: "预览视频",

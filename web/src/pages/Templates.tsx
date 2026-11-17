@@ -11,6 +11,7 @@ import Empty from "../components/Empty";
 import Pagination from "../components/Pagination";
 import TemplateCard from "../components/TemplateCard";
 import TemplateEditor from "../components/TemplateEditor";
+import TemplateImport from "../components/TemplateImport";
 import { newId } from "../id";
 import { ask } from "../confirm/ask";
 
@@ -119,6 +120,10 @@ export default function Templates({ notify }: PageProps) {
         loading={resource.loading}
         onRefresh={resource.reload}
       >
+        <TemplateImport
+          notify={notify}
+          onSaved={() => void resource.reload()}
+        />
         <button className="primary" onClick={() => create()}>
           <Plus size={16} />
           新增视频模板

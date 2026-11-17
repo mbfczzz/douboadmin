@@ -12,6 +12,9 @@ export interface Row<T = Record<string, unknown>> {
   createdAt: string;
 }
 export interface Template {
+  imageSlots?: { label: string; optional: boolean }[];
+  selectableModels?: string[];
+  inputHint?: string;
   model: string;
   resolution: string;
   ratio: string;

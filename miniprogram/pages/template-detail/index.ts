@@ -14,16 +14,22 @@ import {
   enterPage,
   openPage,
   isNavigating,
+  sessionToken,
 } from "../../utils/api";
 import type { Template, Row, Asset } from "../../services/types";
 import { loadQuote } from "./quote";
+import { loadRecipe, recipeAsset, recipeHandlers } from "./recipe";
 Page({
+  ...recipeHandlers,
   data: {
     template: null as Row<Template> | null,
     quoteText: "",
     loading: true,
     loadError: "",
     assets: [] as Row<Asset>[],
+    recipePositions: [] as number[], recipeSlots: [] as { position: number; label: string; optional: boolean; id: string; url: string }[],
+    recipeActiveSlot: 0, recipeMissing: 0, recipeModel: "", recipeResolution: "", recipeQuality: "", recipeModelIndex: 0, recipeResolutionIndex: 0,
+    recipeModels: [] as { id: string; name: string; resolutions: string[]; quality: string }[], recipeResolutions: [] as string[], recipeError: "",
     optionalNames: ["场景照片", "品牌标识", "商品特写", "宣传文案图"],
     fixedCount: false,
     busy: false,
@@ -88,11 +94,16 @@ Page({
       if (this.destroyed) return;
       // Image-to-video and keyframe take an exact photo count; extra
       // photos would only be rejected at submit.
+      const hadRecipe = !!this.data.template?.data.imageSlots?.length;
       this.setData({
         template: t,
         fixedCount: ["i2v", "keyframe"].includes(t.data.mode),
       });
-      loadQuote(this, t);
+      if (t.data.imageSlots?.length) await loadRecipe(this);
+      else {
+        this.setData({ recipeModel: "", recipeResolution: "", recipeQuality: "", recipeError: "", ...(hadRecipe ? { assets: [], recipePositions: [], recipeSlots: [] } : {}) });
+        loadQuote(this, t);
+      }
       if (!hasSession()) {
         this.setData({ favorite: false, favoriteVersion: 0 });
         return;
@@ -127,6 +138,10 @@ Page({
   // One bottom button: it uploads until the photos are in, then generates.
   primary() {
     const t = this.data.template;
+    if (t?.data.imageSlots?.length && this.data.recipeMissing > 0) {
+      const missing = this.data.recipeSlots.find((s: { optional: boolean; id: string }) => !s.optional && !s.id);
+      this.setData({ recipeActiveSlot: missing?.position || 1 }); this.choose(); return;
+    }
     if (t && this.data.assets.length < t.data.requiredImages) this.choose();
     else void this.generate();
   },
@@ -136,6 +151,10 @@ Page({
   async chooseSource(e: WechatMiniprogram.TouchEvent) {
     if (this.data.uploading) return;
     this.setData({ sourceOpen: false });
+    const position = this.data.recipeActiveSlot;
+    const templateId = this.data.template?.id;
+    const owner = sessionToken();
+    const shape = JSON.stringify(this.data.template?.data.imageSlots);
     try {
       const f = await chooseMediaFile(
         true,
@@ -145,7 +164,9 @@ Page({
         url: "/pages/upload-preview/index",
         events: {
           confirmed: (a: Row<Asset>) => {
-            this.setData({ assets: [...this.data.assets, a] });
+            if (this.destroyed || this.data.template?.id !== templateId || owner !== sessionToken() || shape !== JSON.stringify(this.data.template?.data.imageSlots)) return;
+            if (this.data.template?.data.imageSlots?.length) recipeAsset(this, position, a);
+            else this.setData({ assets: [...this.data.assets, a] });
           },
         },
         success: (r) => r.eventChannel.emit("file", f),
@@ -201,6 +222,7 @@ Page({
     if (this.data.busy || !this.data.template || isNavigating(this)) return;
     const t = this.data.template;
     if (t.data.kind !== "video") return error(new Error("模板仅支持视频"));
+    if (t.data.imageSlots?.length && (this.data.recipeMissing || this.data.recipeError || !this.data.recipeModel)) return error(new Error(this.data.recipeError || "请按用途上传必填图片"));
     this.setData({ busy: true });
     try {
       const j = await submitInput(
@@ -208,13 +230,14 @@ Page({
           kind: "video",
           templateId: t.id,
           prompt: t.data.prompt,
-          model: t.data.model,
-          quality: t.data.quality,
+          model: this.data.recipeModel || t.data.model,
+          quality: this.data.recipeQuality || t.data.quality,
           mode: t.data.requiredImages ? t.data.mode : "",
-          resolution: t.data.resolution,
+          resolution: this.data.recipeResolution || t.data.resolution,
           ratio: t.data.ratio,
           duration: t.data.duration || 0,
           assets: this.data.assets.map((a: Row<Asset>) => a.id),
+          ...(t.data.imageSlots?.length ? { imageSlots: this.data.recipePositions } : {}),
         },
         "template-" + t.id,
       );

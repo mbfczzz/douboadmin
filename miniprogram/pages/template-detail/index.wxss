@@ -1,5 +1,6 @@
 @import "./photo-sources.wxss";
 @import "./slots.wxss";
+@import "./recipe.wxss";
 .detail {
   padding: 4px 16px calc(112px + env(safe-area-inset-bottom));
 }

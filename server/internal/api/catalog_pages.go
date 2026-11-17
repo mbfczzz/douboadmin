@@ -78,6 +78,9 @@ func (a *Server) templatePage(w http.ResponseWriter, r *http.Request, ids []stri
 		var t core.Template
 		_ = json.Unmarshal(page.Items[i].Data, &t)
 		a.templateCover(r, &t)
+		if !admin && len(t.ImageSlots) > 0 {
+			t.Prompt = ""
+		}
 		page.Items[i].Data = core.Data(t)
 	}
 	reply(w, 200, page)

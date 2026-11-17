@@ -12,6 +12,7 @@ import (
 var uncertainPrefix = strings.SplitN(provider.ErrUncertain.Error(), "，", 2)[0]
 
 func (a *Server) presentJob(ctx context.Context, j *core.Job) {
+	a.hideTemplateRecipe(ctx, j)
 	resultRef := j.Result
 	j.Featured, j.WorkMetaVersion = false, 0
 	j.ErrorCode, j.ErrorType, j.ErrorAction, j.ErrorEditable = 0, "", "", false

@@ -1,0 +1,5 @@
+.recipe-slots .slot-name { max-width: 92px; white-space: normal; text-align: center; line-height: 18px; }
+.recipe-slots .slot-tag { max-width: 88px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.recipe-choices { margin-top: 18px; padding: 0 14px; border-radius: 14px; background: var(--ui-surface); }
+.recipe-choices picker > view { display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 48px; font-size: 13px; }
+.recipe-choices picker text { max-width: 72%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ui-text); }

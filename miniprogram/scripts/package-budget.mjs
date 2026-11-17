@@ -140,7 +140,11 @@ console.log(
 // 优秀 as a view of the 模板 tab page (components/featured-works, tab
 // routing in utils/tab-transition, redirect at the old page) so it opens
 // like the other tabs: 779,853 B (+3,669). 758 -> 762 KiB.
-const budget = 762 * 1024;
+// FlowLight recipe import: explicit image roles/optional slots, model and
+// resolution selection, ownership/refresh guards. +10,959 source bytes,
+// 780,282 -> 791,241 B, with no new SDK/runtime dependency.
+// Reviewed feature allowance 762 -> 774 KiB. See docs/flowlight-template-import.md.
+const budget = 774 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

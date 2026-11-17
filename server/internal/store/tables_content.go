@@ -16,6 +16,7 @@ func init() {
 			c("mode", Key), c("resolution", Key), c("ratio", Key), c("duration", Int), c("quality", Key),
 			c("cover", Text), c("coverAssetId", Key), c("preview", Text), c("prompt", Text), c("description", Text),
 			c("requiredImages", Int), c("published", Bool), c("deleted", Bool), c("sort", Int),
+			c("imageSlots", JSON), c("selectableModels", JSON), c("inputHint", Text),
 		}},
 		Table{Name: "assets", Comment: "上传文件与生成结果文件", Owner: "上传者或任务所属用户", Cols: []Col{
 			c("name", Short), c("url", Text), c("key", Text), c("type", Short), c("size", Int),

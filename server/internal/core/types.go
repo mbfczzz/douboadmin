@@ -24,21 +24,25 @@ type Record struct {
 }
 type Template struct {
 	GenerationOptions
-	Family         string `json:"family"`
-	Deleted        bool   `json:"deleted,omitempty"`
-	CoverAssetID   string `json:"coverAssetId,omitempty"`
-	Preview        string `json:"preview,omitempty"`
-	Title          string `json:"title"`
-	Category       string `json:"category"`
-	Kind           string `json:"kind"`
-	Cover          string `json:"cover"`
-	Prompt         string `json:"prompt"`
-	Description    string `json:"description"`
-	Published      bool   `json:"published"`
-	Sort           int    `json:"sort"`
-	RequiredImages int    `json:"requiredImages"`
+	ImageSlots       []TemplateImageSlot `json:"imageSlots,omitempty"`
+	SelectableModels []string            `json:"selectableModels,omitempty"`
+	InputHint        string              `json:"inputHint,omitempty"`
+	Family           string              `json:"family"`
+	Deleted          bool                `json:"deleted,omitempty"`
+	CoverAssetID     string              `json:"coverAssetId,omitempty"`
+	Preview          string              `json:"preview,omitempty"`
+	Title            string              `json:"title"`
+	Category         string              `json:"category"`
+	Kind             string              `json:"kind"`
+	Cover            string              `json:"cover"`
+	Prompt           string              `json:"prompt"`
+	Description      string              `json:"description"`
+	Published        bool                `json:"published"`
+	Sort             int                 `json:"sort"`
+	RequiredImages   int                 `json:"requiredImages"`
 }
 type JobInput struct {
+	ImageSlots        []int    `json:"imageSlots,omitempty"`
 	ExpectedCostUnits *int64   `json:"expectedCostUnits,omitempty"`
 	SourceID          string   `json:"sourceId,omitempty"`
 	Voice             string   `json:"voice,omitempty"`

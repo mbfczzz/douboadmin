@@ -17,6 +17,15 @@ func httpsURL(s string) bool {
 }
 
 func (a *Server) validateTemplate(r *http.Request, t *core.Template) error {
+	if err := t.ValidateRecipe(); err != nil {
+		return err
+	}
+	for _, id := range t.SelectableModels {
+		choice, err := a.model(r.Context(), id)
+		if err != nil || choice.Deleted || choice.Kind != t.Kind {
+			return fmt.Errorf("可选模型无效，请重新选择")
+		}
+	}
 	if t.Family == "" {
 		t.Family = "style"
 	}
@@ -58,6 +67,9 @@ func (a *Server) validateTemplate(r *http.Request, t *core.Template) error {
 	if t.Published && !m.Usable() {
 		return fmt.Errorf("发布前请先上架关联模型")
 	}
+	if len(t.ImageSlots) > 0 && t.ExpandedPromptChars() > m.Settings.PromptLimit(m.Kind) {
+		return fmt.Errorf("模板完整提示词超出所选模型的字数上限")
+	}
 	if !core.ParameterValuesAllowed(t.Kind, t.Resolution, t.Ratio, t.Quality, t.Duration) {
 		return fmt.Errorf("模板参数超出已开放选项，视频时长需为 1–30 秒")
 	}
@@ -91,7 +103,7 @@ func (a *Server) validateTemplate(r *http.Request, t *core.Template) error {
 	if (mode == "i2v" && t.RequiredImages != 1) || (mode == "keyframe" && t.RequiredImages != 2) || (slices.Contains([]string{"t2i", "t2v"}, mode) && t.RequiredImages != 0) {
 		return fmt.Errorf("模板参考图数量与生成方式不一致")
 	}
-	return templateImageLimits(m, mode, t.RequiredImages)
+	return templateImageLimits(m, mode, max(t.RequiredImages, len(t.ImageSlots)))
 }
 
 // templateImageLimits keeps a template's required image count inside what its

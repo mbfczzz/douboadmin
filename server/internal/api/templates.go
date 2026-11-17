@@ -38,6 +38,9 @@ func (a *Server) templates(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 		a.templateCover(r, &t)
+		if !admin && len(t.ImageSlots) > 0 {
+			t.Prompt = ""
+		}
 		row.Data = core.Data(t)
 		out = append(out, row)
 	}
@@ -63,6 +66,9 @@ func (a *Server) template(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	a.templateCoverSized(r, &t, 1080)
+	if len(t.ImageSlots) > 0 {
+		t.Prompt = ""
+	}
 	row.Data = core.Data(t)
 	reply(w, 200, row)
 }
@@ -80,8 +86,8 @@ func (a *Server) saveTemplate(w http.ResponseWriter, r *http.Request) {
 		fail(w, 400, "模板仅支持视频")
 		return
 	}
-	if strings.TrimSpace(t.Title) == "" || len([]rune(t.Title)) > 50 || t.Prompt == "" || len([]rune(t.Prompt)) > 500 || t.RequiredImages < 0 || t.RequiredImages > 5 || t.Sort < 0 {
-		fail(w, 400, "模板标题、提示词、类型或素材数量无效")
+	if err := validateTemplateContent(t); err != nil {
+		fail(w, 400, err.Error())
 		return
 	}
 	if err := a.validateTemplate(r, &t); err != nil {

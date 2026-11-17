@@ -28,6 +28,8 @@
       </view>
     </view>
     <text wx:if="{{template.data.description}}" class="template-description">{{template.data.description}}</text>
+    <include src="./recipe.wxml" />
+    <block wx:if="{{!template.data.imageSlots.length}}">
     <view class="section-head">
       <text class="section-name">上传商品照片</text>
       <text class="section-count {{assets.length>=template.data.requiredImages?'done':''}}">{{template.data.requiredImages?(assets.length>=template.data.requiredImages?template.data.requiredImages:assets.length)+' / '+template.data.requiredImages:'选填'}}</text>
@@ -51,15 +53,16 @@
         </block>
       </view>
     </scroll-view>
+    </block>
     <text class="format">JPG / PNG / WebP · 单张不超过 50 MB · 上传不扣费</text>
     <view class="more-head"><text class="section-name">更多同款灵感</text></view>
     <showcase mode="strip" />
-    <view class="submit-bar {{assets.length>=template.data.requiredImages?'is-ready':''}}">
+    <view class="submit-bar {{(template.data.imageSlots.length?!recipeMissing:assets.length>=template.data.requiredImages)?'is-ready':''}}">
       <view class="submit-copy">
         <text class="submit-quote">{{quoteText||'正在估算积分'}}</text>
-        <text class="submit-status">{{assets.length>=template.data.requiredImages?(template.data.requiredImages?'照片已就绪':'可以直接生成'):'还需 '+(template.data.requiredImages-assets.length)+' 张照片'}}</text>
+        <text wx:if="{{template.data.imageSlots.length}}" class="submit-status">{{recipeMissing?'还需 '+recipeMissing+' 个必填图片':'照片已就绪'}}</text><text wx:else class="submit-status">{{assets.length>=template.data.requiredImages?(template.data.requiredImages?'照片已就绪':'可以直接生成'):'还需 '+(template.data.requiredImages-assets.length)+' 张照片'}}</text>
       </view>
-      <button class="submit-action {{assets.length>=template.data.requiredImages?'':'to-upload'}}" disabled="{{busy||uploading}}" loading="{{busy}}" bindtap="primary">{{assets.length>=template.data.requiredImages?'生成同款':'上传照片'}}</button>
+      <button class="submit-action {{(template.data.imageSlots.length?!recipeMissing:assets.length>=template.data.requiredImages)?'':'to-upload'}}" disabled="{{busy||uploading||(template.data.imageSlots.length&&!!recipeError)}}" loading="{{busy}}" bindtap="primary">{{(template.data.imageSlots.length?!recipeMissing:assets.length>=template.data.requiredImages)?'生成同款':'上传照片'}}</button>
     </view>
   </view>
 </view>

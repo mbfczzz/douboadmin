@@ -1,0 +1,16 @@
+<view wx:if="{{template.data.imageSlots.length}}">
+  <view class="section-head"><text class="section-name">上传参考图片</text><text class="section-count">{{recipeMissing?'还需 '+recipeMissing+' 个必填':'必填图片已齐'}}</text></view>
+  <text wx:if="{{template.data.inputHint}}" class="upload-description">{{template.data.inputHint}}</text>
+  <scroll-view scroll-x class="slots recipe-slots"><view class="slot-row">
+    <view wx:for="{{recipeSlots}}" wx:key="position" class="slot {{item.id?'uploaded':item.optional?'optional':'required'}}" data-position="{{item.position}}" bindtap="chooseRecipeSlot">
+      <block wx:if="{{item.id}}"><image src="{{item.url}}" mode="aspectFill" /><text class="slot-tag">{{item.label}}</text>
+        <view class="slot-remove" data-position="{{item.position}}" catchtap="removeRecipeSlot"><t-icon name="close" size="14" /></view></block>
+      <block wx:else><t-icon name="add" size="24" /><text class="slot-name">{{item.label}}</text><text class="slot-hint">{{item.optional?'选填':'必填'}}</text></block>
+    </view>
+  </view></scroll-view>
+  <view class="recipe-choices {{busy||uploading?'controls-busy':''}}">
+    <picker range="{{recipeModels}}" range-key="name" value="{{recipeModelIndex}}" bindchange="chooseRecipeModel"><view>生成模型<text>{{recipeModels[recipeModelIndex].name||'读取中…'}} ›</text></view></picker>
+    <picker wx:if="{{recipeResolutions.length}}" range="{{recipeResolutions}}" value="{{recipeResolutionIndex}}" bindchange="chooseRecipeResolution"><view>清晰度<text>{{recipeResolution}} ›</text></view></picker>
+  </view>
+  <text wx:if="{{recipeError}}" class="error-box">{{recipeError}}</text>
+</view>

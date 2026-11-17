@@ -35,6 +35,9 @@ export interface Row<T = Record<string, unknown>> {
   createdAt: string;
 }
 export interface Template {
+	imageSlots?: { label: string; optional: boolean }[];
+	selectableModels?: string[];
+	inputHint?: string;
   model: string;
   resolution: string;
   ratio: string;
@@ -61,6 +64,7 @@ export interface Asset {
   size: number;
 }
 export interface Input {
+	imageSlots?: number[];
   expectedCostUnits?: number;
   voice?: string;
   purpose?: string;
