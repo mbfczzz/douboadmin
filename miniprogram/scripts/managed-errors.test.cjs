@@ -14,6 +14,7 @@ test("managed job errors show stable code while preserving server user message a
   assert.equal(view.error,"内容未通过安全审核，请调整提示词或参考素材。（错误码 5002）");
   assert.equal(view.errorAction,"调整提示词或参考素材，不要原样重试。");
   assert.equal(view.retryable,false);
+  assert.equal(h.api.jobView(view).error, view.error);
   assert.equal(view.editable,true);
 });
 
@@ -46,4 +47,14 @@ test("task detail renders handling guidance and task cards use the formatted cod
   assert.match(detail,/job\.editable/);
   assert.match(detail,/class="muted small"/);
   assert.match(list,/item\.error/);
+});
+
+test("editing a failed recipe returns to its template with model selection", () => {
+  const h = harness(), page = h.page("task-detail");
+  page.setData({ job: { input: { ...input, templateId: "recipe-a", prompt: "" } } });
+  page.edit();
+  assert.equal(h.nav.at(-1).url, "/pages/template-detail/index?id=recipe-a");
+  assert.equal(h.storage.has("edit-draft"), false);
+  const detail = fs.readFileSync("pages/task-detail/index.wxml", "utf8");
+  assert.match(detail, /job\.input\.templateId\?'已使用模板提示词'/);
 });

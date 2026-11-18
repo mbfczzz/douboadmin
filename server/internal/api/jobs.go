@@ -89,6 +89,7 @@ func (a *Server) submit(w http.ResponseWriter, r *http.Request, in core.JobInput
 		dbError(w, e)
 		return
 	}
+	a.hideTemplateRecipe(r.Context(), &j)
 	reply(w, 202, j)
 }
 

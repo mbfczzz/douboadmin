@@ -49,8 +49,7 @@ func publicReferenceRules(m core.Model) map[string]map[string]core.ReferenceRule
 				rule.MinCount = 2
 			}
 			if mode == "omni_ref" {
-				var limit int
-				if json.Unmarshal(schema.RefLimits[typ], &limit) == nil && limit > 0 {
+				if limit, ok := schema.RefLimit(typ); ok {
 					rule.MaxCount = min(rule.MaxCount, limit)
 				}
 			}

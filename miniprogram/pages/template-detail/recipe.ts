@@ -2,16 +2,16 @@ import { loadConfig } from "../../utils/config-cache";
 import { sessionToken } from "../../services/session";
 import type { Asset, Model, Row, Template } from "../../services/types";
 import { loadQuote } from "./quote";
+import type { QuotePage } from "../../services/page-contracts";
 
 type Choice = { id: string; name: string; resolutions: string[]; quality: string };
-type Page = {
+type Page = QuotePage & {
   data: {
     template: Row<Template> | null; assets: Row<Asset>[]; recipePositions: number[];
     recipeActiveSlot: number; recipeModel: string; recipeResolution: string; recipeModels: Choice[];
     recipeMissing: number; recipeError: string; recipeSheet: string; recipeModelIndex: number; recipeResolutionIndex: number; busy: boolean; uploading: boolean;
   };
   recipeRevision?: number; recipeOwner?: string; recipeShape?: string;
-  destroyed: boolean; setData(value: Record<string, unknown>): void;
 };
 const resolutionRank = ["480p", "720p", "768p", "1080p", "1k", "2k", "4k"];
 
@@ -27,7 +27,7 @@ export function syncRecipeSlots(page: Page) {
 function quote(page: Page) {
   const template = page.data.template;
   const model = page.data.recipeModels.find((m) => m.id === page.data.recipeModel);
-  if (template && model) loadQuote(page as Parameters<typeof loadQuote>[0], {
+  if (template && model) loadQuote(page, {
     ...template, data: { ...template.data, model: model.id, resolution: page.data.recipeResolution, quality: model.quality },
   });
 }
@@ -56,10 +56,13 @@ export async function loadRecipe(page: Page) {
     if (page.destroyed || page.recipeRevision !== version || owner !== sessionToken() || page.data.template?.id !== t.id) return;
     // Same rule as the server's Template.AcceptsModel; default first.
     const mode = (m: Model) => ["i2v", "keyframe"].includes(t.data.mode || "") && m.modes?.includes("omni_ref") ? "omni_ref" : t.data.mode;
-    const models: Choice[] = config.models.filter((m: Model) => m.kind === "video" && m.durations?.includes(t.data.duration) &&
-      (!m.ratios.length || m.ratios.includes(t.data.ratio)) && (!m.modes?.length || !t.data.mode || m.modes.includes(mode(m)!)) &&
-      !!m.referenceTypes?.includes("image")).sort((a: Model, b: Model) => Number(b.id === t.data.model) - Number(a.id === t.data.model)).map((m: Model) => ({
-        id: m.id, name: m.name, quality: t.data.quality || m.qualities?.[0] || "",
+    const models: Choice[] = config.models.filter(m => {
+      const selected = mode(m), rules = m.referenceRules?.[selected];
+      return m.kind === "video" && m.durations?.includes(t.data.duration) && m.referenceTypes?.includes("image") &&
+        (!m.ratios.length || m.ratios.includes(t.data.ratio)) && (!m.modes?.length || !selected || m.modes.includes(selected)) &&
+        (!rules || (rules.image?.maxCount ?? 0) >= t.data.requiredImages);
+    }).sort((a, b) => Number(b.id === t.data.model) - Number(a.id === t.data.model)).map(m => ({
+        id: m.id, name: m.name, quality: m.qualities?.includes(t.data.quality) ? t.data.quality : m.qualities?.[0] || "",
         resolutions: [...m.resolutions].sort((a, b) => resolutionRank.indexOf(a.toLowerCase()) - resolutionRank.indexOf(b.toLowerCase())),
       }));
     page.setData({ recipeModels: models });
@@ -71,13 +74,13 @@ export async function loadRecipe(page: Page) {
   }
 }
 
-export function recipeAsset(page: Page, position: number, asset: Row<Asset>) {
+export function recipeAsset(page: Page, position: number, asset?: Row<Asset>) {
   if (!page.data.template?.data.imageSlots?.[position - 1]) return;
-  if (page.data.assets.some((a, i) => a.id === asset.id && page.data.recipePositions[i] !== position)) {
+  if (asset && page.data.assets.some((a, i) => a.id === asset.id && page.data.recipePositions[i] !== position)) {
     wx.showToast({ title: "同一张图片不能放在不同用途位置", icon: "none" }); return;
   }
   const pairs = page.data.recipePositions.map((slot, i) => ({ slot, asset: page.data.assets[i] })).filter((p) => p.slot !== position);
-  pairs.push({ slot: position, asset });
+  if (asset) pairs.push({ slot: position, asset });
   pairs.sort((a, b) => a.slot - b.slot);
   page.setData({ assets: pairs.map((p) => p.asset), recipePositions: pairs.map((p) => p.slot) });
   syncRecipeSlots(page);
@@ -89,9 +92,7 @@ export const recipeHandlers = {
   },
   removeRecipeSlot(this: Page, e: WechatMiniprogram.TouchEvent) {
     if (this.data.busy || this.data.uploading) return;
-    const keep = this.data.recipePositions.map((slot, i) => ({ slot, asset: this.data.assets[i] })).filter((p) => p.slot !== Number(e.currentTarget.dataset.position));
-    this.setData({ assets: keep.map((p) => p.asset), recipePositions: keep.map((p) => p.slot) });
-    syncRecipeSlots(this);
+    recipeAsset(this, Number(e.currentTarget.dataset.position));
   },
   openRecipeSheet(this: Page, e: WechatMiniprogram.TouchEvent) {
     if (this.data.busy || this.data.uploading || !this.data.recipeModels.length) return;

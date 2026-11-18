@@ -99,6 +99,9 @@ func (a *Server) presentJob(ctx context.Context, j *core.Job) {
 		if err == nil && json.Unmarshal(r.Data, &e) == nil {
 			j.Retryable = e.Phase == "failed"
 			j.ErrorCode, j.ErrorType, j.ErrorAction = e.ErrorCode, e.ErrorType, e.ErrorAction
+			if e.ErrorCode == 5003 && strings.Contains(strings.ToLower(e.ErrorCause), "no provider route supports the requested parameters/input") {
+				j.ErrorAction = "当前模型没有能处理这组参数和素材的通道，请更换模型或调整规格。"
+			}
 			j.ErrorEditable = e.ErrorEditable
 			if e.ErrorCode != 0 {
 				j.Retryable = e.ErrorRetryable

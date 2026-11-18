@@ -117,11 +117,7 @@ func templateImageLimits(m core.Model, mode string, n int) error {
 	max, limited := schema.EditImages.Max, m.Kind == "image" && schema.EditImages.Max > 0
 	if mode == "omni_ref" {
 		// Submit enforces any listed image limit, including 0.
-		var raw json.RawMessage
-		if raw, limited = schema.RefLimits["image"]; limited {
-			max = 0
-			_ = json.Unmarshal(raw, &max)
-		}
+		max, limited = schema.RefLimit("image")
 	}
 	if limited && n > max {
 		return fmt.Errorf("该模型最多支持 %d 张参考图，请调整模板要求的图片数量", max)

@@ -4,6 +4,7 @@ import (
 	"context"
 	"doubo/server/internal/core"
 	"encoding/json"
+	"strings"
 	"testing"
 )
 
@@ -64,5 +65,37 @@ func TestVideoPublicReferenceRulesArePerTypeAndMode(t *testing.T) {
 	}
 	if _, ok := rules["omni_ref"]["audio"]; ok {
 		t.Fatal("disabled audio exposed")
+	}
+}
+
+func TestReferenceLimitAliasesApplyToTemplateQuoteAndSubmit(t *testing.T) {
+	a, user, _ := setup(t)
+	a.Objects = &countingObjects{}
+	ctx := t.Context()
+	m := core.Model{ID: "ref-limits", Kind: "video", Available: true, Published: true,
+		Modes: []string{"i2v", "omni_ref"}, ReferenceTypes: []string{"image"}, Durations: []int{30},
+		ParamsSchema: core.Data(map[string]any{"ref_limits": map[string]int{"images": 1}})}
+	if _, err := a.Store.Put(ctx, "models", core.Record{ID: m.ID, Data: core.Data(m)}, 0); err != nil {
+		t.Fatal(err)
+	}
+	if publicReferenceRules(m)["omni_ref"]["image"].MaxCount != 1 || templateImageLimits(m, "omni_ref", 2) == nil {
+		t.Fatal("template and client must both enforce images:1")
+	}
+	ids := []string{"a", "b"}
+	for _, id := range ids {
+		if _, err := a.Store.Put(ctx, "assets", core.Record{ID: id, Owner: "user-a", Data: core.Data(map[string]any{"type": "image/jpeg"})}, 0); err != nil {
+			t.Fatal(err)
+		}
+	}
+	in := core.JobInput{Kind: "video", Prompt: "test", Duration: 30, Model: m.ID, Mode: "omni_ref", Assets: ids}
+	for _, path := range []string{"/api/jobs/quote", "/api/jobs"} {
+		w := call(a, "POST", path, user, "ref-limit-case", in)
+		if w.Code != 400 || !strings.Contains(w.Body.String(), "数量限制") {
+			t.Fatalf("%s: %d %s", path, w.Code, w.Body.String())
+		}
+	}
+	m.ParamsSchema = core.Data(map[string]any{"ref_limits": map[string]int{"image": 0, "images": 1}})
+	if publicReferenceRules(m)["omni_ref"]["image"].MaxCount != 0 {
+		t.Fatal("explicit singular zero must disable images in omni mode")
 	}
 }

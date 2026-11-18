@@ -62,9 +62,8 @@ export const kinds: Record<string, string> = {
   import: "素材导入",
 };
 export function jobView(j: Job) {
-  const failure = j.errorCode
-    ? `${j.error || "生成失败"}（错误码 ${j.errorCode}）`
-    : j.error;
+  const suffix = j.errorCode ? `（错误码 ${j.errorCode}）` : "";
+  const failure = suffix && !j.error?.endsWith(suffix) ? (j.error || "生成失败") + suffix : j.error;
   return {
     ...j,
     // Import jobs come without reference assets (null from older servers).

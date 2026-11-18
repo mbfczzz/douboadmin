@@ -86,6 +86,21 @@ func TestImportedTemplateUsesServerPromptAndExplicitImageSlots(t *testing.T) {
 	if quote.Code != 200 || json.Unmarshal(quote.Body.Bytes(), &price) != nil || price.Units != 11000 {
 		t.Fatalf("quote with only required images: %d %s", quote.Code, quote.Body.String())
 	}
+	if _, err := a.Billing.Adjust(t.Context(), "user-a", "recipe-credit", "admin", "test balance", price.Units); err != nil {
+		t.Fatal(err)
+	}
+	in.ExpectedCostUnits = &price.Units
+	for _, status := range []int{202, 200} {
+		w := call(a, "POST", "/api/jobs", user, "recipe-submit-key", in)
+		var job core.Job
+		if w.Code != status || json.Unmarshal(w.Body.Bytes(), &job) != nil || job.Input.Prompt != "" {
+			t.Fatalf("recipe submit/replay returned %d or exposed a prompt", w.Code)
+		}
+		stored, err := a.Store.Job(t.Context(), job.ID)
+		if err != nil || !strings.Contains(stored.Input.Prompt, "@图2 @图1") {
+			t.Fatal("worker did not receive the resolved recipe", err)
+		}
+	}
 	missing := in
 	missing.Assets, missing.ImageSlots = in.Assets[:1], in.ImageSlots[:1]
 	if w := call(a, "POST", "/api/jobs/quote", user, "", missing); w.Code != 400 || !strings.Contains(w.Body.String(), "请上传人物") {

@@ -117,11 +117,8 @@ func (a *Server) validateJob(ctx context.Context, user string, in *core.JobInput
 		return fmt.Errorf("此生成方式不支持所选分辨率")
 	}
 	for typ, count := range counts {
-		if raw, ok := schema.RefLimits[typ]; ok && mode == "omni_ref" {
-			var max int
-			if json.Unmarshal(raw, &max) == nil && count > max {
-				return fmt.Errorf("参考素材超过模型数量限制")
-			}
+		if limit, ok := schema.RefLimit(typ); mode == "omni_ref" && ok && count > limit {
+			return fmt.Errorf("参考素材超过模型数量限制")
 		}
 	}
 	if in.TemplateID != "" {

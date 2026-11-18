@@ -67,6 +67,10 @@ func (a *Server) hideTemplateRecipe(ctx context.Context, j *core.Job) {
 	if actor.Role == "admin" || j.Input.TemplateID == "" {
 		return
 	}
+	if len(j.Input.ImageSlots) > 0 {
+		j.Input.Prompt = ""
+		return
+	}
 	row, err := a.Store.Get(ctx, "templates", j.Input.TemplateID)
 	if err == nil {
 		var t core.Template

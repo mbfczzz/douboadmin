@@ -141,13 +141,14 @@ test("switching models and video duration refreshes estimates; busy controls pre
   assert.match(f.requests[2].url, /duration=10/);
   reply(f.requests[2], 1800);
   await tick();
+  const { resolution, quality } = f.page.data;
   f.page.setData({ busy: true });
   f.page.duration({ detail: { value: 0 } });
-  f.page.chooseResolution(event("2k"));
-  f.page.chooseQuality(event("high"));
+  f.page.chooseResolution(event(resolution === "2k" ? "1k" : "2k"));
+  f.page.chooseQuality(event(quality === "high" ? "low" : "high"));
   assert.equal(f.page.data.duration, 10);
-  assert.equal(f.page.data.resolution, "1k");
-  assert.equal(f.page.data.quality, "low");
+  assert.equal(f.page.data.resolution, resolution);
+  assert.equal(f.page.data.quality, quality);
 });
 
 for (const statusCode of [401, 403, 503, 200]) {
@@ -226,7 +227,7 @@ test("changing a setting keeps the last price on screen until the new one arrive
   const seen = [];
   const set = f.page.setData.bind(f.page);
   f.page.setData = (v) => { if ("quoteText" in v) seen.push(v.quoteText); set(v); };
-  f.page.chooseResolution(event("2k"));
+  f.page.chooseResolution(event(f.page.data.resolution === "2k" ? "1k" : "2k"));
   assert.equal(f.page.data.quoteText, "本次 6.25 积分"); // no "正在估算" flicker
   await f.flush();
   reply(f.requests.at(-1), 900);

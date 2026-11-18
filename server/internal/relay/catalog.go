@@ -34,6 +34,14 @@ type Schema struct {
 	ResolutionByMode map[string][]string        `json:"resolution_by_mode"`
 }
 
+func (s Schema) RefLimit(typ string) (int, bool) {
+	var limit *int
+	if json.Unmarshal(s.RefLimits[typ], &limit) != nil || limit == nil || *limit < 0 {
+		return 0, false
+	}
+	return *limit, true
+}
+
 func (s *Schema) UnmarshalJSON(data []byte) error {
 	type schema Schema
 	var decoded schema
@@ -41,6 +49,12 @@ func (s *Schema) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	decoded.Modes = core.NormalizeGenerationModes(decoded.Modes)
+	// Normalize count limits once for catalog, template and job validation.
+	for _, typ := range []string{"image", "video", "audio"} {
+		if plural, ok := decoded.RefLimits[typ+"s"]; ok && decoded.RefLimits[typ] == nil {
+			decoded.RefLimits[typ] = plural
+		}
+	}
 	if len(decoded.ResolutionByMode) > 0 {
 		normalized := make(map[string][]string, len(decoded.ResolutionByMode))
 		for raw, values := range decoded.ResolutionByMode {
@@ -106,20 +120,15 @@ func (c *Client) Catalog(ctx context.Context) ([]core.Model, error) {
 		}
 		slices.Sort(durations)
 		refs := []string{}
-		if slices.Contains(schema.Modes, "i2i") || slices.Contains(schema.Modes, "i2v") {
+		if slices.Contains(schema.Modes, "i2i") || slices.Contains(schema.Modes, "i2v") || slices.Contains(schema.Modes, "keyframe") {
 			refs = append(refs, "image")
 		}
 		// 全能参考 takes images as well as video and audio, even when the model
 		// lists no i2v mode (e.g. Seedance S10: only t2v + omni_ref).
 		if r.Modality == "video" && slices.Contains(schema.Modes, "omni_ref") {
 			for _, typ := range []string{"image", "video", "audio"} {
-				max := 1
-				if raw, ok := schema.RefLimits[typ]; ok {
-					_ = json.Unmarshal(raw, &max)
-				} else if raw, ok := schema.RefLimits[typ+"s"]; ok {
-					_ = json.Unmarshal(raw, &max)
-				}
-				if max > 0 && !slices.Contains(refs, typ) {
+				limit, limited := schema.RefLimit(typ)
+				if (!limited || limit > 0) && !slices.Contains(refs, typ) {
 					refs = append(refs, typ)
 				}
 			}

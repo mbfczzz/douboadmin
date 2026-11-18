@@ -84,18 +84,12 @@ Page({
     this.destroyed = true;
     clearInterval(this.timer);
   },
+  requireLogin() {
+    clearInterval(this.timer);
+    this.setData({ needsLogin: true, loading: false, loadError: "", job: null, assets: [], assetError: "" });
+  },
   async load() {
-    if (!hasSession()) {
-      clearInterval(this.timer);
-      this.setData({
-        needsLogin: true,
-        loading: false,
-        loadError: "",
-        job: null,
-        assets: [],
-      });
-      return;
-    }
+    if (!hasSession()) return this.requireLogin();
     if (this.fetching) return;
     this.fetching = true;
     try {
@@ -110,7 +104,7 @@ Page({
         loadError: "",
         needsLogin: false,
       });
-      if (j.status === "succeeded" || j.status === "failed")
+      if (final(j.status))
         clearInterval(this.timer);
       else if (wasFinal) this.startPolling(); // shown as done, but retried since
       if (
@@ -121,16 +115,8 @@ Page({
         await this.loadAssets();
     } catch (e) {
       if (this.destroyed) return;
-      if (!hasSession()) {
-        clearInterval(this.timer);
-        this.setData({
-          needsLogin: true,
-          loading: false,
-          loadError: "",
-          job: null,
-          assets: [],
-        });
-      } else this.setData({ loading: false, loadError: (e as Error).message });
+      if (!hasSession()) this.requireLogin();
+      else this.setData({ loading: false, loadError: (e as Error).message });
     } finally {
       this.fetching = false;
     }
@@ -151,15 +137,8 @@ Page({
         });
     } catch {
       if (!this.destroyed && id === this.id) {
-        if (!hasSession()) {
-          clearInterval(this.timer);
-          this.setData({
-            needsLogin: true,
-            job: null,
-            assets: [],
-            assetError: "",
-          });
-        } else this.setData({ assetError: "参考素材暂时无法加载，点击重试" });
+        if (!hasSession()) this.requireLogin();
+        else this.setData({ assetError: "参考素材暂时无法加载，点击重试" });
       }
     } finally {
       if (!this.destroyed) this.setData({ loadingAssets: false });
@@ -212,11 +191,13 @@ Page({
     if (prompt) wx.setClipboardData({ data: prompt, success: () => wx.showToast({ title: "已复制提示词", icon: "none" }) });
   },
   edit() {
-    if (this.data.job) {
-      const mix = this.data.job.input.kind === "mix";
-      wx.setStorageSync(mix ? "mix-draft" : "edit-draft", this.data.job.input);
-      openTab(this, mix ? "/pages/mix/index" : "/pages/create/index");
-    }
+    const input = this.data.job?.input;
+    if (!input) return;
+    if (input.templateId && !input.prompt)
+      return openPage(this, { url: "/pages/template-detail/index?id=" + encodeURIComponent(input.templateId) });
+    const mix = input.kind === "mix";
+    wx.setStorageSync(mix ? "mix-draft" : "edit-draft", input);
+    openTab(this, mix ? "/pages/mix/index" : "/pages/create/index");
   },
   continueCreate() {
     openTab(

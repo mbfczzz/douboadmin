@@ -15,7 +15,9 @@ test('recipe images retain semantic positions after omitted optional slots, repl
   const h = harness(), page = h.page('template-detail');
   const recipe = h.service('../pages/template-detail/recipe');
   h.api.request = async (path) => path.startsWith('/templates/') ? template() : { models: [model('choice', ['1080p', '720p']), model('default'), model('too-short', ['720p'], [15]), model('unlisted'),
-    { ...model('no-images'), referenceTypes: [] }, { ...model('i2v-only'), modes: ['i2v'] }] };
+    { ...model('no-images'), referenceTypes: [] }, { ...model('i2v-only'), modes: ['i2v'] },
+    { ...model('one-image'), referenceRules: { omni_ref: { image: { maxCount: 1 } } } },
+    { ...model('video-only-omni'), referenceRules: { omni_ref: { video: { maxCount: 3 } } } }] };
   page.id = 'recipe';
   await page.load();
   // Any model supporting 30 s, 9:16, 全能参考 and images, not only the listed ones; default first.
@@ -77,4 +79,23 @@ test('changing image roles clears old uploads instead of silently rebinding them
   await page.load();
   assert.equal(page.data.assets.length, 0);
   assert.equal(page.data.recipePositions.length, 0);
+});
+
+test('a recipe submits the same quality as its selected model quote', async () => {
+  for (const qualities of [[], ['standard']]) {
+    const h = harness(), page = h.page('template-detail'), t = template();
+    t.data.quality = 'high';
+    h.api.request = async path => path.startsWith('/templates/') ? t :
+      { models: [{ ...model('choice'), qualities }] };
+    page.id = t.id;
+    await page.load();
+    const recipe = h.service('../pages/template-detail/recipe');
+    recipe.recipeAsset(page, 1, asset('person'));
+    recipe.recipeAsset(page, 3, asset('product'));
+    let submitted;
+    h.api.submitInput = async input => { submitted = input; return { id: 'task' }; };
+    await page.generate();
+    assert.equal(submitted.quality, qualities[0] || '');
+    assert.equal(submitted.quality, page.data.recipeModels[0].quality);
+  }
 });

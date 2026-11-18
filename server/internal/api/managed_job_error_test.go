@@ -48,6 +48,24 @@ func TestModelErrorHintOverridesMessageButKeepsManagedCodeAndAction(t *testing.T
 	}
 }
 
+func TestInvalidInputGuidanceDistinguishesMissingRoute(t *testing.T) {
+	a, _, _ := setup(t)
+	for _, tc := range []struct{ id, cause, want string }{
+		{"route", "no provider route supports the requested parameters/input for model=private-key", "更换模型"},
+		{"other", "invalid image input", "调整输入"},
+	} {
+		j := core.Job{ID: tc.id, Status: "failed", Input: core.JobInput{Kind: "video"}}
+		e := provider.Execution{Phase: "failed", ErrorCode: 5003, ErrorAction: "调整输入", ErrorCause: tc.cause}
+		if _, err := a.Store.Put(t.Context(), "executions", core.Record{ID: j.ID, Data: core.Data(e)}, 0); err != nil {
+			t.Fatal(err)
+		}
+		a.presentJob(t.Context(), &j)
+		if !strings.Contains(j.ErrorAction, tc.want) || strings.Contains(string(core.Data(j)), tc.cause) {
+			t.Fatal(j)
+		}
+	}
+}
+
 func TestManagedFailureControlsRetryAndEditActions(t *testing.T) {
 	a, _, _ := setup(t)
 	for _, tc := range []struct {
