@@ -60,4 +60,6 @@ export const creationData = {
   quoteBusy: false,
   quoteError: false,
   quoteText: "正在加载积分…",
+  quoteMode: "",
+  quoteRate: "",
 };

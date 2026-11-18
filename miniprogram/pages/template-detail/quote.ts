@@ -1,5 +1,4 @@
-import { estimateCost } from "../../services/estimate";
-import { points } from "../../services/business";
+import { estimateCost, quoteParts } from "../../services/estimate";
 import { sessionToken } from "../../services/session";
 import type { Row, Template } from "../../services/types";
 
@@ -28,12 +27,8 @@ export function loadQuote(page: QuotePage, t: Row<Template>) {
   request.promise.then(
     (quote) => {
       if (page.destroyed) return;
-      page.setData({
-        quoteText:
-          quote.units === 0
-            ? "本次不扣积分"
-            : `预计 ${points(quote.units)} 积分`,
-      });
+      const q = quoteParts(quote, t.data.duration || 0);
+      page.setData({ quoteText: [q.quoteMode, q.quoteText].filter(Boolean).join(" ") }); // fits beside the button
     },
     () => {
       if (!page.destroyed) page.setData({ quoteText: "" });

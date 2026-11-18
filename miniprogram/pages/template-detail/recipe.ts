@@ -20,7 +20,7 @@ export function syncRecipeSlots(page: Page) {
   const entries = slots.map((slot, index) => {
     const asset = page.data.assets[page.data.recipePositions.indexOf(index + 1)];
     return { ...slot, position: index + 1, id: asset?.id || "", url: asset?.data.url || "" };
-  });
+  }).sort((a, b) => Number(a.optional) - Number(b.optional)); // required first (position = prompt order)
   page.setData({ recipeSlots: entries, recipeMissing: entries.filter((s) => !s.optional && !s.id).length });
 }
 
@@ -54,8 +54,7 @@ export async function loadRecipe(page: Page) {
   try {
     const config = await loadConfig();
     if (page.destroyed || page.recipeRevision !== version || owner !== sessionToken() || page.data.template?.id !== t.id) return;
-    // Every video model fitting the template's duration, ratio and mode
-    // (same rule as the server's Template.AcceptsModel); default first.
+    // Same rule as the server's Template.AcceptsModel; default first.
     const mode = (m: Model) => ["i2v", "keyframe"].includes(t.data.mode || "") && m.modes?.includes("omni_ref") ? "omni_ref" : t.data.mode;
     const models: Choice[] = config.models.filter((m: Model) => m.kind === "video" && m.durations?.includes(t.data.duration) &&
       (!m.ratios.length || m.ratios.includes(t.data.ratio)) && (!m.modes?.length || !t.data.mode || m.modes.includes(mode(m)!)) &&

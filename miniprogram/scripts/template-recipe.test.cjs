@@ -25,7 +25,7 @@ test('recipe images retain semantic positions after omitted optional slots, repl
   recipe.recipeAsset(page, 1, asset('person'));
   assert.deepEqual(Array.from(page.data.recipePositions), [1, 3]);
   assert.equal(page.data.recipeMissing, 0);
-  assert.deepEqual(Array.from(page.data.recipeSlots, s => [s.label, s.id]), [['人物', 'person'], ['场景', ''], ['商品', 'product']]);
+  assert.deepEqual(Array.from(page.data.recipeSlots, s => [s.label, s.id]), [['人物', 'person'], ['商品', 'product'], ['场景', '']]);
   recipe.recipeAsset(page, 2, asset('person'));
   assert.deepEqual(Array.from(page.data.recipePositions), [1, 3]);
   recipe.recipeAsset(page, 1, asset('replacement'));

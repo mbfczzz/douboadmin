@@ -2,6 +2,7 @@ import { API_BASE } from "../config";
 import { sessionToken } from "./session";
 import { AuthCancelledError, RequestError } from "./errors";
 import type { EstimateInput, Estimate } from "./estimate-types";
+import { points } from "./business";
 export type { EstimateInput } from "./estimate-types";
 export function estimateCost(input: EstimateInput, owner: string) {
   let task: WechatMiniprogram.RequestTask | undefined;
@@ -38,4 +39,15 @@ export function estimateCost(input: EstimateInput, owner: string) {
     });
   });
   return { promise, abort: () => task?.abort() };
+}
+
+// 按秒 when the price comes from the video duration table, else 按次.
+export function quoteParts(q: Estimate, duration = 0) {
+  if (!q.units) return { quoteMode: "", quoteRate: "", quoteText: "本次不扣积分" };
+  const perSecond = !!q.perSecond && duration > 0;
+  return {
+    quoteMode: perSecond ? "按秒" : "按次",
+    quoteRate: perSecond ? `每秒 ${points(Math.round(q.units / duration))} 积分 × ${duration} 秒` : "",
+    quoteText: `本次 ${points(q.units)} 积分`,
+  };
 }

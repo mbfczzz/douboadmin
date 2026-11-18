@@ -42,7 +42,7 @@ func (a *Server) estimateJob(w http.ResponseWriter, r *http.Request) {
 		dbError(w, err)
 		return
 	}
-	units, err := billing.Quote(m, in)
+	units, perSecond, err := billing.QuoteDetail(m, in)
 	if err != nil {
 		dbError(w, err)
 		return
@@ -50,5 +50,6 @@ func (a *Server) estimateJob(w http.ResponseWriter, r *http.Request) {
 	if !settings.BillingEnabled {
 		units = 0
 	}
-	reply(w, 200, map[string]any{"units": units, "billingEnabled": settings.BillingEnabled})
+	// perSecond: video priced by duration (按秒); otherwise a flat 按次 price.
+	reply(w, 200, map[string]any{"units": units, "billingEnabled": settings.BillingEnabled, "perSecond": perSecond})
 }

@@ -18,6 +18,6 @@
   <view class="photo-sources">
     <view class="sheet-handle" />
     <view class="photo-source-heading"><text>{{recipeSheet==='model'?'生成模型':'清晰度'}}</text><view class="photo-source-close" bindtap="closeRecipeSheet"><t-icon name="close" size="20" /></view></view>
-    <view wx:for="{{recipeOptions}}" wx:key="index" class="choice-option {{index===recipeChecked?'selected':''}}" data-index="{{index}}" bindtap="pickRecipeOption" hover-class="choice-pressed" aria-role="button"><text>{{item}}</text><t-icon wx:if="{{index===recipeChecked}}" name="check" size="18" /></view>
+    <scroll-view scroll-y class="choice-list"><view wx:for="{{recipeOptions}}" wx:key="index" class="choice-option {{index===recipeChecked?'selected':''}}" data-index="{{index}}" bindtap="pickRecipeOption" hover-class="choice-pressed" aria-role="button"><text>{{item}}</text><t-icon wx:if="{{index===recipeChecked}}" name="check" size="18" /></view></scroll-view>
   </view>
 </t-popup>

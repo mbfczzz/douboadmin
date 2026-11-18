@@ -1,5 +1,4 @@
-import { estimateCost } from "../../services/estimate";
-import { points } from "../../services/business";
+import { estimateCost, quoteParts } from "../../services/estimate";
 import { sessionToken } from "../../services/session";
 import { pricingInput } from "./input";
 
@@ -74,10 +73,7 @@ export function updateEstimate(page: Editor, force = false) {
       page.setData({
         quoteUnits: quote.units,
         quoteBusy: false,
-        quoteText:
-          quote.units === 0
-            ? "本次不扣积分"
-            : `预计 ${points(quote.units)} 积分`,
+        ...quoteParts(quote, input.kind === "video" ? input.duration : 0),
       });
     } catch {
       if (!current()) return;

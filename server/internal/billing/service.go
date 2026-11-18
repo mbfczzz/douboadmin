@@ -40,7 +40,14 @@ func (s *Service) Adjust(ctx context.Context, user, key, actor, note string, uni
 }
 
 func Quote(model core.Model, input core.JobInput) (int64, error) {
-	price := model.Points
+	units, _, err := QuoteDetail(model, input)
+	return units, err
+}
+
+// QuoteDetail also reports whether the price came from the video
+// duration × resolution table (按秒/按时长) rather than a flat per-request price.
+func QuoteDetail(model core.Model, input core.JobInput) (int64, bool, error) {
+	price, perSecond := model.Points, false
 	s := model.Settings
 	visibleGrid := len(model.Resolutions) > 0 && (input.Kind != "video" || s.VideoBillingMode == "per_request" || len(model.Durations) > 0)
 	if !s.HideResolution && visibleGrid && (input.Kind == "image" || input.Kind == "video") {
@@ -56,10 +63,11 @@ func Quote(model core.Model, input core.JobInput) (int64, error) {
 				price = p
 			}
 		} else if p, configured := s.PriceMatrix[row][input.Resolution]; configured {
-			price = p
+			price, perSecond = p, input.Kind == "video" && input.Duration > 0
 		}
 	}
-	return core.PointUnits(price)
+	units, err := core.PointUnits(price)
+	return units, perSecond, err
 }
 
 func (s *Service) CreateOrder(ctx context.Context, user, key string, fen int64, settings core.PlatformSettings, appid, mchid, openid string, pricingVersion ...string) (out core.Record, err error) {

@@ -89,7 +89,7 @@ test("shows the server price before typing or attaching required references", as
   assert.equal(request.header.Authorization, "Bearer estimate-owner");
   reply(request, 625);
   await tick();
-  assert.equal(f.page.data.quoteText, "预计 6.25 积分");
+  assert.equal(f.page.data.quoteText, "本次 6.25 积分");
   f.page.input({ detail: { value: "一只小猫" } });
   await f.flush();
   assert.equal(
@@ -118,7 +118,7 @@ test("rapid parameter changes debounce and stale responses cannot replace a newe
   reply(f.requests[0], 99900);
   await tick();
   assert.equal(f.page.data.quoteUnits, 700);
-  assert.equal(f.page.data.quoteText, "预计 7 积分");
+  assert.equal(f.page.data.quoteText, "本次 7 积分");
   f.page.chooseResolution(event("1k"));
   await f.flush();
   assert.equal(
@@ -195,7 +195,7 @@ test("hidden pages abort estimates and returning reloads the backend price", asy
   await f.flush();
   reply(f.requests[1], 950);
   await tick();
-  assert.equal(f.page.data.quoteText, "预计 9.50 积分");
+  assert.equal(f.page.data.quoteText, "本次 9.50 积分");
   f.page.onUnload();
 });
 
@@ -222,14 +222,14 @@ test("changing a setting keeps the last price on screen until the new one arrive
   await f.flush();
   reply(f.requests[0], 625);
   await tick();
-  assert.equal(f.page.data.quoteText, "预计 6.25 积分");
+  assert.equal(f.page.data.quoteText, "本次 6.25 积分");
   const seen = [];
   const set = f.page.setData.bind(f.page);
   f.page.setData = (v) => { if ("quoteText" in v) seen.push(v.quoteText); set(v); };
   f.page.chooseResolution(event("2k"));
-  assert.equal(f.page.data.quoteText, "预计 6.25 积分"); // no "正在估算" flicker
+  assert.equal(f.page.data.quoteText, "本次 6.25 积分"); // no "正在估算" flicker
   await f.flush();
   reply(f.requests.at(-1), 900);
   await tick();
-  assert.deepEqual(seen, ["预计 9 积分"]);
+  assert.deepEqual(seen, ["本次 9 积分"]);
 });

@@ -82,7 +82,7 @@
       <include src="./parts/mention.wxml" />
       <view class="editor-meta">
         <view class="editor-balance"><points-balance compact /></view>
-        <view class="quote-note {{quoteError?'quote-retry':hasPrompt?'':'quote-idle'}}" bindtap="retryEstimate" aria-role="{{quoteError?'button':'text'}}" aria-label="{{quoteText}}">{{quoteError?'估价失败 · 重试':quoteText}}</view>
+        <view class="quote-note {{quoteError?'quote-retry':hasPrompt?'':'quote-idle'}}" bindtap="retryEstimate" aria-role="{{quoteError?'button':'text'}}" aria-label="{{quoteMode+quoteText+quoteRate}}"><view class="quote-main"><text wx:if="{{quoteMode&&quoteUnits!==null&&!quoteError}}" class="quote-mode">{{quoteMode}}</text><text>{{quoteError?'估价失败 · 重试':quoteText}}</text></view><text wx:if="{{quoteRate&&quoteUnits!==null&&!quoteError}}" class="quote-rate">{{quoteRate}}</text></view>
       </view>
     </view>
     <view class="workspace-foot">

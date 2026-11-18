@@ -8,7 +8,7 @@
 | --- | --- | --- |
 | GET | /wallet | 可用/预留积分、充值规则、设置版本、支付通道是否已配置 |
 | GET | /wallet/ledger | 本人最近积分流水（不含操作管理员与内部引用编号） |
-| GET | /jobs/estimate | 传 kind、model、resolution、ratio、quality、duration，返回 units、billingEnabled；仅预估当前参数，无需描述或素材，不创建任务或扣积分 |
+| GET | /jobs/estimate | 传 kind、model、resolution、ratio、quality、duration，返回 units、billingEnabled、perSecond（视频按时长×清晰度价格表计价时为 true，小程序显示“按秒 · 每秒 X 积分 × N 秒”，否则显示“按次”）；仅预估当前参数，无需描述或素材，不创建任务或扣积分 |
 | POST | /jobs/quote | 传任务输入，返回 units、configuredUnits、billingEnabled、availableUnits、sufficient |
 | GET / POST | /orders | 本人订单 / `{amountFen,settingsVersion,platform}`，创建充值订单需 Idempotency-Key |
 | GET | /orders/{id} | 本人订单，不泄露 OpenID 或 prepayId |
