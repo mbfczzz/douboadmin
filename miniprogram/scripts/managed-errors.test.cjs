@@ -40,13 +40,15 @@ test("do-not-regenerate codes hide both retry paths but keep their guidance", ()
   assert.match(view.errorAction,/不要重新生成/);
 });
 
-test("task detail renders handling guidance and task cards use the formatted code", () => {
+test("task detail renders handling guidance; queue cards stay short", () => {
   const detail = fs.readFileSync("pages/task-detail/index.wxml","utf8");
   const list = fs.readFileSync("pages/tasks/index.wxml","utf8");
   assert.match(detail,/job\.errorAction/);
   assert.match(detail,/job\.editable/);
   assert.match(detail,/class="muted small"/);
-  assert.match(list,/item\.error/);
+  // The reason lives on task detail; queue cards only link to it.
+  assert.doesNotMatch(list,/item\.error/);
+  assert.match(list,/查看原因 ›/);
 });
 
 test("editing a failed recipe returns to its template with model selection", () => {

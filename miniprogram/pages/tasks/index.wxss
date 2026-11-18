@@ -1,13 +1,7 @@
-@import "../../styles/works.wxss";
 @import "../../styles/job-pagination.wxss";
 @import "./cards.wxss";
 .queue-page {
   padding: 24px 20px calc(30px + env(safe-area-inset-bottom));
-}
-.completed-heading {
-  font-size: 15px;
-  font-weight: 500;
-  margin: 20px 0 16px;
 }
 .completed-more {
   margin: -12px 0;

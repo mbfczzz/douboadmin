@@ -7,20 +7,25 @@ import {
   openTask,
   enterPage,
   openTab,
-  openPage,
   hasSession,
   login,
   error,
 } from "../../utils/api";
 import { jobPage } from "../../services/job-pages";
 import { dropCover } from "../../services/cover";
+// A queue row: its counter group, cover (finished work) and elapsed time.
+function row(j: ReturnType<typeof jobView>) {
+  const live = /queued|running/.test(j.status), done = j.status === "succeeded";
+  return { ...j, group: live ? "running" : done ? "done" : "failed", elapsed: live ? elapsed(j.createdAt, j.status) : "",
+    cover: done ? j.thumbnailUrl || (j.input.kind === "image" ? j.result : "") || "" : "" };
+}
 Page({
   data: {
-    jobs: [] as ReturnType<typeof jobView>[],
-    ongoing: [] as (ReturnType<typeof jobView> & { elapsed: string })[],
-    completed: [] as ReturnType<typeof jobView>[],
+    // Every task on this page, newest first, with its counter group.
+    jobs: [] as ReturnType<typeof row>[],
     runningCount: 0,
     failedCount: 0,
+    doneCount: 0,
     loading: true,
     loadError: "",
     needsLogin: false,
@@ -28,7 +33,7 @@ Page({
     page: 1,
     total: 0,
     refs: {} as Record<string, string>, // job id → its first reference image
-    filter: "", // "", "running" or "failed": the counters filter the list
+    filter: "", // "", "running", "failed" or "done": the counters filter the list
   },
   timer: 0,
   shown: "", // last list sent to the view, to skip identical polls
@@ -74,10 +79,9 @@ Page({
         loading: false,
         loadError: "",
         jobs: [],
-        ongoing: [],
-        completed: [],
         runningCount: 0,
         failedCount: 0,
+        doneCount: 0,
       });
       return;
     }
@@ -85,36 +89,20 @@ Page({
     this.fetching = true;
     try {
       const result = await jobPage(this.data.page, "&excludeChat=true");
-      const jobs = result.items
-        .filter((j) => j.input.kind !== "chat")
-        .map(jobView);
+      const jobs = keepImages(this.data.jobs, result.items.filter((j) => j.input.kind !== "chat").map((j) => row(jobView(j))));
       if (this.destroyed) return;
       // Nothing in progress: stop polling until the page is shown again.
-      if (!jobs.some((j) => /queued|running/.test(j.status)))
-        clearInterval(this.timer);
-      const view = {
-        jobs,
-        total: result.total,
-        loading: false,
-        needsLogin: false,
-        loadError: "",
-        ongoing: jobs
-          .filter((j) => j.status !== "succeeded")
-          .map((j) => ({ ...j, elapsed: /queued|running/.test(j.status) ? elapsed(j.createdAt, j.status) : "" })),
-        completed: jobs.filter((j) => j.status === "succeeded"),
-        runningCount: jobs.filter(
-          (j) => j.status === "running" || j.status === "queued",
-        ).length,
-        failedCount: jobs.filter((j) => j.status === "failed").length,
-      };
-      view.completed = keepImages(this.data.completed, view.completed);
-      rememberRows([...view.ongoing, ...view.completed]);
+      if (!jobs.some((j) => j.group === "running")) clearInterval(this.timer);
+      const count = (group: string) => jobs.filter((j) => j.group === group).length;
+      const view = { jobs, total: result.total, loading: false, needsLogin: false, loadError: "",
+        runningCount: count("running"), failedCount: count("failed"), doneCount: count("done") };
+      rememberRows(jobs);
       // Polling every 3 s: send nothing to the view when nothing changed.
-      const next = JSON.stringify([view.ongoing, view.completed, view.total]);
+      const next = JSON.stringify([jobs, view.total]);
       if (next !== this.shown) {
         this.shown = next;
         this.setData(view);
-        if (this.data.page === 1) writeView("tasks", { jobs: view.jobs, ongoing: view.ongoing, completed: view.completed, runningCount: view.runningCount, failedCount: view.failedCount, total: view.total });
+        if (this.data.page === 1) writeView("tasks", { jobs, runningCount: view.runningCount, failedCount: view.failedCount, doneCount: view.doneCount, total: view.total });
       } else if (this.data.loading || this.data.loadError) this.setData({ loading: false, loadError: "" });
       void loadRefs(this);
     } catch (e) {
@@ -126,8 +114,6 @@ Page({
           loading: false,
           loadError: "",
           jobs: [],
-          ongoing: [],
-          completed: [],
         });
       } else this.setData({ loading: false, loadError: (e as Error).message });
     } finally {
@@ -139,7 +125,7 @@ Page({
     openTask(e.currentTarget.dataset.id, this);
   },
   coverError(e: WechatMiniprogram.CustomEvent) {
-    dropCover(this, e.currentTarget.dataset.id, "completed");
+    dropCover(this, e.currentTarget.dataset.id, "jobs");
   },
   onPullDownRefresh() {
     this.setData({ page: 1 });
@@ -150,9 +136,6 @@ Page({
   },
   next() {
     movePage(this, 1);
-  },
-  works() {
-    openPage(this, { url: "/pages/works/index" });
   },
   pick(e: WechatMiniprogram.TouchEvent) {
     wx.vibrateShort?.({ type: "light" });

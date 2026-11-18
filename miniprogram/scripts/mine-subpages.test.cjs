@@ -69,11 +69,12 @@ test("unfinished tasks show their own first reference image, looked up once", as
     const id = o.url.split("/assets/")[1];
     o.success({ statusCode: 200, data: { id, data: { url: "https://cdn.test/" + id + ".jpg", type: id === "v1" ? "video/mp4" : "image/png" } } });
   };
-  const page = { data: { refs: {}, ongoing: [{ id: "j1", input: { assets: ["a1"] } }, { id: "j2", input: { assets: ["v1"] } }, { id: "j3", input: { assets: [] } }] }, setData(v) { Object.assign(this.data, v); } };
+  const page = { data: { refs: {}, jobs: [{ id: "j1", status: "running", input: { assets: ["a1"] } }, { id: "j2", status: "failed", input: { assets: ["v1"] } }, { id: "j3", status: "queued", input: { assets: [] } }, { id: "j4", status: "succeeded", input: { assets: ["a4"] } }] }, setData(v) { Object.assign(this.data, v); } };
   await loadRefs(page);
   assert.equal(page.data.refs.j1, "https://cdn.test/a1.jpg");
   assert.equal(page.data.refs.j2, ""); // a video reference keeps the status tile
   assert.equal("j3" in page.data.refs, false);
+  assert.equal("j4" in page.data.refs, false); // finished work shows its result instead
   await loadRefs(page); // polling again does not refetch
   assert.equal(calls, 2);
 });

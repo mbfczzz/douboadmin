@@ -54,14 +54,14 @@ export async function loadRecipe(page: Page) {
   try {
     const config = await loadConfig();
     if (page.destroyed || page.recipeRevision !== version || owner !== sessionToken() || page.data.template?.id !== t.id) return;
-    // Same rule as the server's Template.AcceptsModel; default first.
+    // Same rule as the server's Template.AcceptsModel; admin model order, default preselected.
     const mode = (m: Model) => ["i2v", "keyframe"].includes(t.data.mode || "") && m.modes?.includes("omni_ref") ? "omni_ref" : t.data.mode;
     const models: Choice[] = config.models.filter(m => {
       const selected = mode(m), rules = m.referenceRules?.[selected];
       return m.kind === "video" && m.durations?.includes(t.data.duration) && m.referenceTypes?.includes("image") &&
         (!m.ratios.length || m.ratios.includes(t.data.ratio)) && (!m.modes?.length || !selected || m.modes.includes(selected)) &&
         (!rules || (rules.image?.maxCount ?? 0) >= t.data.requiredImages);
-    }).sort((a, b) => Number(b.id === t.data.model) - Number(a.id === t.data.model)).map(m => ({
+    }).map(m => ({
         id: m.id, name: m.name, quality: m.qualities?.includes(t.data.quality) ? t.data.quality : m.qualities?.[0] || "",
         resolutions: [...m.resolutions].sort((a, b) => resolutionRank.indexOf(a.toLowerCase()) - resolutionRank.indexOf(b.toLowerCase())),
       }));

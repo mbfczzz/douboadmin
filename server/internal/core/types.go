@@ -62,6 +62,7 @@ type JobInput struct {
 type Job struct {
 	ActivationRequired  bool      `json:"-"`
 	ResultAssetID       string    `json:"resultAssetId,omitempty"`
+	TemplateTitle       string    `json:"templateTitle,omitempty"`
 	CostUnits           int64     `json:"costUnits"`
 	BillingState        string    `json:"billingState,omitempty"`
 	EstimatedCostMicros *int64    `json:"estimatedCostMicros,omitempty"`

@@ -4,7 +4,7 @@ import type { Row, Asset } from "../../services/types";
 
 type RefPage = {
   destroyed?: boolean;
-  data: { ongoing: { id: string; input: { assets: string[] } }[]; refs: Record<string, string> };
+  data: { jobs: { id: string; status: string; input: { assets: string[] } }[]; refs: Record<string, string> };
   setData(value: Record<string, unknown>): void;
 };
 
@@ -24,7 +24,7 @@ function assetImage(id: string) {
 }
 
 export async function loadRefs(page: RefPage) {
-  const wanted = page.data.ongoing.filter((j) => j.input.assets.length && !(j.id in page.data.refs));
+  const wanted = page.data.jobs.filter((j) => j.status !== "succeeded" && j.input.assets.length && !(j.id in page.data.refs));
   if (!wanted.length) return;
   const found = await Promise.all(wanted.map(async (j) => [j.id, await assetImage(j.input.assets[0])] as const));
   if (page.destroyed) return;

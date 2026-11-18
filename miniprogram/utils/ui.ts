@@ -74,7 +74,7 @@ export function jobView(j: Job) {
     time: date(j.createdAt),
     result: j.result && j.input.kind !== "chat" ? media(j.result) : j.result,
     results: j.input.kind === "image" ? resultImages(j) : [],
-    shortTitle: j.input.prompt.slice(0, 24),
+    shortTitle: (j.templateTitle || j.input.prompt).slice(0, 24),
     error: failure,
     editable: j.errorCode ? !!j.editable : true,
   };

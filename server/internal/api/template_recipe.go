@@ -62,20 +62,18 @@ func (a *Server) bindTemplateRecipe(ctx context.Context, in *core.JobInput) erro
 	return nil
 }
 
+// hideTemplateRecipe names a template job after its template and, for
+// users, hides recipe prompts.
 func (a *Server) hideTemplateRecipe(ctx context.Context, j *core.Job) {
+	if j.Input.TemplateID == "" {
+		return
+	}
+	var t core.Template
+	if row, err := a.Store.Get(ctx, "templates", j.Input.TemplateID); err == nil && json.Unmarshal(row.Data, &t) == nil {
+		j.TemplateTitle = t.Title
+	}
 	actor, _ := ctx.Value(identityKey).(Identity)
-	if actor.Role == "admin" || j.Input.TemplateID == "" {
-		return
-	}
-	if len(j.Input.ImageSlots) > 0 {
+	if actor.Role != "admin" && (len(j.Input.ImageSlots) > 0 || len(t.ImageSlots) > 0) {
 		j.Input.Prompt = ""
-		return
-	}
-	row, err := a.Store.Get(ctx, "templates", j.Input.TemplateID)
-	if err == nil {
-		var t core.Template
-		if json.Unmarshal(row.Data, &t) == nil && len(t.ImageSlots) > 0 {
-			j.Input.Prompt = ""
-		}
 	}
 }

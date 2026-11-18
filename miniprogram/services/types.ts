@@ -97,6 +97,7 @@ export interface Input {
 }
 export interface Job {
   thumbnailUrl?: string;
+  templateTitle?: string;
   costUnits?: number;
   billingState?: string;
   stage?: string;
