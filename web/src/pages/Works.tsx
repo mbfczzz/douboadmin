@@ -8,6 +8,7 @@ import ResourcePage from "../business/ResourcePage";
 import Table from "../business/Table";
 import Modal from "../components/Modal";
 import MediaPreview from "../business/MediaPreview";
+import JobThumbnail from "../components/JobThumbnail";
 import { IdChip } from "../components/Tag";
 import { ask } from "../confirm/ask";
 
@@ -106,13 +107,16 @@ export default function Works({ notify }: PageProps) {
           {
             title: "作品",
             render: (j) => (
-              <>
-                <b>{j.input.prompt.slice(0, 30) || "混剪作品"}</b>
-                <small className="cell-note">
-                  {j.modelName || j.input.kind}
-                </small>
-                {j.featured && <Badge state="succeeded" label="优秀作品" />}
-              </>
+              <div className="task-name">
+                <JobThumbnail job={j} />
+                <div>
+                  <b>{(j.templateTitle || j.input.prompt).slice(0, 30) || "混剪作品"}</b>
+                  <small className="cell-note">
+                    {j.modelName || j.input.kind}
+                  </small>
+                  {j.featured && <Badge state="succeeded" label="优秀作品" />}
+                </div>
+              </div>
             ),
           },
           { title: "用户", render: (j) => <IdChip>{j.userId}</IdChip> },

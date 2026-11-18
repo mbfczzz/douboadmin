@@ -24,7 +24,9 @@ for (const width of [1440, 390]) {
               featured,
               workMetaVersion: version,
               createdAt: "2026-11-15T10:00:00Z",
-              input: { kind: "image", prompt: "测试优秀作品", assets: [] },
+              thumbnailUrl: "https://fixture.test/thumb.png",
+              templateTitle: "W01 社区日常综合宣传",
+              input: { kind: "image", prompt: "【本次参考素材对应关系】私有配方", assets: [] },
             },
           ],
           total: 1,
@@ -39,7 +41,13 @@ for (const width of [1440, 390]) {
       version = version ? version + 1 : 2;
       return route.fulfill({ json: { ok: true } });
     });
+    await page.route("https://fixture.test/**", (route) =>
+      route.fulfill({ contentType: "image/png", body: Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==", "base64") }),
+    );
     await page.goto("/#works");
+    // Each row shows its small cover and the template's name, not the recipe.
+    await expect(page.locator(".job-thumbnail img").first()).toBeVisible();
+    await expect(page.getByText("W01 社区日常综合宣传")).toBeVisible();
     await page.getByRole("button", { name: "设为优秀", exact: true }).click();
     const confirm = page.getByRole("dialog", {
       name: "设为优秀作品？",

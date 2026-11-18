@@ -60,6 +60,7 @@ export interface Job {
   progress: number;
   result?: string;
   thumbnailUrl?: string;
+  templateTitle?: string;
   error?: string;
   demo: boolean;
   attempts: number;
