@@ -78,12 +78,17 @@
       <button wx:if="{{job.retryable}}" class="retry-pill" loading="{{busy}}" disabled="{{busy}}" bindtap="retry"><image wx:if="{{!busy}}" class="gl gl-18" src="/assets/glyphs/refresh-dark.png" />重新生成</button>
       <text wx:if="{{job.editable}}" class="edit-link" bindtap="edit">修改后再试 ›</text>
     </view>
-    <view class="prompt-card">
+    <view wx:if="{{!job.input.prompt&&job.input.templateId}}" class="prompt-card template-card" bindtap="openTemplate" hover-class="card-pressed" aria-role="button" aria-label="{{'查看模板 '+(job.templateTitle||'')}}">
+      <view class="prompt-head"><text>创作模板</text><text class="template-go">查看模板 ›</text></view>
+      <text class="template-name">{{job.templateTitle||'模板创作'}}</text>
+      <text class="template-note">提示词由模板提供</text>
+    </view>
+    <view wx:else class="prompt-card">
       <view class="prompt-head">
         <text>提示词<text wx:if="{{job.input.prompt}}" class="prompt-size"> · {{job.input.prompt.length}} 字</text></text>
         <view wx:if="{{job.input.prompt}}" class="prompt-copy" bindtap="copyPrompt" hover-class="act-pressed" aria-role="button" aria-label="复制提示词"><image class="gl gl-14" src="/assets/glyphs/copy-muted.png" /><text>复制</text></view>
       </view>
-      <text class="full-prompt {{job.input.prompt.length>100&&!promptOpen?'folded':''}}" selectable>{{job.input.prompt||(job.input.templateId?'已使用模板提示词':'未填写提示词')}}</text>
+      <text class="full-prompt {{job.input.prompt.length>100&&!promptOpen?'folded':''}}" selectable>{{job.input.prompt||'未填写提示词'}}</text>
       <view wx:if="{{job.input.prompt.length>100}}" class="prompt-more" bindtap="togglePrompt" aria-role="button">{{promptOpen?'收起':'展开全文'}}<image class="gl gl-14 {{promptOpen?'up':''}}" src="/assets/glyphs/open-muted.png" /></view>
     </view>
     <view class="detail-card">

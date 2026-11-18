@@ -190,6 +190,10 @@ Page({
     const prompt = this.data.job?.input.prompt;
     if (prompt) wx.setClipboardData({ data: prompt, success: () => wx.showToast({ title: "已复制提示词", icon: "none" }) });
   },
+  openTemplate() {
+    const id = this.data.job?.input.templateId;
+    if (id) openPage(this, { url: "/pages/template-detail/index?id=" + encodeURIComponent(id) });
+  },
   edit() {
     const input = this.data.job?.input;
     if (!input) return;

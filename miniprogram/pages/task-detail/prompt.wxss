@@ -56,3 +56,21 @@
 .prompt-more .gl.up {
   transform: rotate(-45deg);
 }
+/* Template jobs: the template stands in for its private prompt. */
+.template-go {
+  font-size: 12px;
+  color: var(--ui-link);
+}
+.template-name {
+  display: block;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--ui-text);
+}
+.template-note {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--ui-muted);
+}

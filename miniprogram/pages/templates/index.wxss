@@ -48,10 +48,32 @@
   color: var(--ui-muted);
   align-items: center;
 }
-button.queue-entry {
+/* 任务队列: a round icon beside search; the badge counts running tasks. */
+.queue-entry {
+  position: relative;
   flex: none;
-  width: auto;
+  width: 44px;
   height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--ui-field);
+}
+.queue-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  box-sizing: border-box;
+  border-radius: 9px;
+  font-size: 11px;
+  line-height: 18px;
+  text-align: center;
+  color: var(--ui-on-brand);
+  background: var(--ui-brand);
 }
 .search-field input {
   flex: 1;

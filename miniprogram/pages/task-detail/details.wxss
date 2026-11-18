@@ -22,14 +22,15 @@
   gap: 10px;
 }
 .asset-row {
+  position: relative;
   min-width: 0;
 }
 .asset-row image,
 .asset-file {
   display: block;
   width: 100%;
-  height: 72px;
-  border-radius: 10px;
+  height: 76px;
+  border-radius: 12px;
 }
 .asset-file {
   display: flex;
@@ -37,12 +38,17 @@
   justify-content: center;
   background: var(--ui-field);
 }
+/* The 图片N label sits on the tile, matching @图片N in prompts. */
 .asset-row > text {
-  display: block;
-  margin-top: 6px;
-  font-size: 12px;
-  text-align: center;
-  color: var(--ui-muted);
+  position: absolute;
+  left: 4px;
+  bottom: 4px;
+  padding: 0 6px;
+  border-radius: 999px;
+  font-size: 10px;
+  line-height: 16px;
+  color: #fff;
+  background: #00000080;
 }
 /* 生成信息: label on the left, value on the right. */
 .spec-row {

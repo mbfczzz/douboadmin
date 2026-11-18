@@ -58,5 +58,9 @@ test("editing a failed recipe returns to its template with model selection", () 
   assert.equal(h.nav.at(-1).url, "/pages/template-detail/index?id=recipe-a");
   assert.equal(h.storage.has("edit-draft"), false);
   const detail = fs.readFileSync("pages/task-detail/index.wxml", "utf8");
-  assert.match(detail, /job\.input\.templateId\?'已使用模板提示词'/);
+  // Template jobs show the template (tap opens it) instead of a hidden prompt.
+  assert.match(detail, /wx:if="\{\{!job\.input\.prompt&&job\.input\.templateId\}\}" class="prompt-card template-card" bindtap="openTemplate"/);
+  assert.match(detail, /job\.templateTitle/);
+  page.openTemplate();
+  assert.equal(h.nav.at(-1).url, "/pages/template-detail/index?id=recipe-a");
 });

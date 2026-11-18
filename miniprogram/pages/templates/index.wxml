@@ -15,7 +15,7 @@
         />
         <button wx:if="{{search}}" class="clear-search" bindtap="clearSearch" aria-label="清空搜索"><t-icon name="close" size="16" /></button>
       </view>
-      <button class="text-button queue-entry" bindtap="queue" hover-class="act-pressed">任务队列{{runningTasks?' · '+runningTasks:''}}</button>
+      <view class="queue-entry" bindtap="queue" hover-class="card-pressed" aria-role="button" aria-label="{{'任务队列'+(runningTasks?'，'+runningTasks+' 个进行中':'')}}"><image class="gl gl-20" src="/assets/glyphs/history.png" /><text wx:if="{{runningTasks}}" class="queue-badge">{{runningTasks>99?'99+':runningTasks}}</text></view>
     </view>
     <scroll-view scroll-x class="filter-scroll">
       <view
