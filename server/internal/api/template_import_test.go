@@ -13,7 +13,7 @@ func importFixture(t *testing.T) (*Server, string, string, map[string]any) {
 	admin := adminLoginToken(t, a, "admin", "Tt661ea2")
 	for _, m := range []core.Model{
 		{ID: "import-model", Key: "source-video", Name: "Default", Kind: "video", Published: true, Available: true, Resolutions: []string{"720p"}, Ratios: []string{"9:16"}, Durations: []int{30}, Modes: []string{"omni_ref"}, ReferenceTypes: []string{"image"}},
-		{ID: "import-choice", Key: "other-video", Name: "Choice", Kind: "video", Published: true, Available: true, Resolutions: []string{"1080p"}, Ratios: []string{"9:16"}, Durations: []int{30}, Modes: []string{"omni_ref"}, ReferenceTypes: []string{"image"}},
+		{ID: "import-choice", Key: "other-video", Name: "Choice", Kind: "video", Points: 110, Published: true, Available: true, Resolutions: []string{"1080p"}, Ratios: []string{"9:16"}, Durations: []int{30}, Modes: []string{"omni_ref"}, ReferenceTypes: []string{"image"}},
 	} {
 		if _, err := a.Store.Put(t.Context(), "models", core.Record{ID: m.ID, Data: core.Data(m)}, 0); err != nil {
 			t.Fatal(err)
@@ -80,15 +80,23 @@ func TestImportedTemplateUsesServerPromptAndExplicitImageSlots(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	in := core.JobInput{Kind: "video", TemplateID: rows[0].ID, Model: "import-choice", Resolution: "1080p", Ratio: "9:16", Duration: 30, Prompt: "tampered", Assets: []string{"product", "person"}, ImageSlots: []int{6, 1}}
-	if err := a.bindTemplateRecipe(t.Context(), &in); err != nil {
+	in := core.JobInput{Kind: "video", TemplateID: rows[0].ID, Model: "import-choice", Resolution: "1080p", Ratio: "9:16", Duration: 30, Assets: []string{"product", "person"}, ImageSlots: []int{6, 1}}
+	quote := call(a, "POST", "/api/jobs/quote", user, "", in)
+	var price struct{ Units int64 }
+	if quote.Code != 200 || json.Unmarshal(quote.Body.Bytes(), &price) != nil || price.Units != 11000 {
+		t.Fatalf("quote with only required images: %d %s", quote.Code, quote.Body.String())
+	}
+	missing := in
+	missing.Assets, missing.ImageSlots = in.Assets[:1], in.ImageSlots[:1]
+	if w := call(a, "POST", "/api/jobs/quote", user, "", missing); w.Code != 400 || !strings.Contains(w.Body.String(), "请上传人物") {
+		t.Fatalf("quote without required image: %d %s", w.Code, w.Body.String())
+	}
+	in.Prompt = "tampered"
+	if err := a.validateJob(t.Context(), "user-a", &in); err != nil {
 		t.Fatal(err)
 	}
 	if strings.Contains(in.Prompt, "tampered") || !strings.Contains(in.Prompt, "@图2 @图1") || !strings.Contains(in.Prompt, "未上传的") {
 		t.Fatal("incorrect recipe binding", in.Prompt)
-	}
-	if err := a.validateJob(t.Context(), "user-a", &in); err != nil {
-		t.Fatal(err)
 	}
 	public := call(a, "GET", "/api/templates/"+rows[0].ID, user, "", nil)
 	if public.Code != 200 || strings.Contains(public.Body.String(), "场景描述") {

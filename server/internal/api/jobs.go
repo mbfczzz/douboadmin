@@ -62,10 +62,6 @@ func (a *Server) submit(w http.ResponseWriter, r *http.Request, in core.JobInput
 		dbError(w, e)
 		return
 	}
-	if e := a.bindTemplateRecipe(r.Context(), &in); e != nil {
-		fail(w, 400, e.Error())
-		return
-	}
 	if e := a.validateJob(r.Context(), user, &in); e != nil {
 		fail(w, 400, e.Error())
 		return

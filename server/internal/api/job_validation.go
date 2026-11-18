@@ -11,6 +11,10 @@ import (
 )
 
 func (a *Server) validateJob(ctx context.Context, user string, in *core.JobInput) error {
+	// Recipe prompts live on the server. Resolve them for both quote and submit.
+	if err := a.bindTemplateRecipe(ctx, in); err != nil {
+		return err
+	}
 	if !core.IsGeneration(in.Kind) {
 		return fmt.Errorf("该任务类型暂未开放")
 	}
