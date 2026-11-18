@@ -1,7 +1,7 @@
 import { showArt } from "../../utils/ui-art";
-import { startTaskCount, stopTaskCount } from "./task-count";
+import { queue, startTaskCount, stopTaskCount } from "../../services/task-count";
 import { loadConfig, peekConfig } from "../../utils/config-cache";
-import { request, tab, openPage, openTab, sessionToken } from "../../utils/api";
+import { request, tab, openTab, sessionToken } from "../../utils/api";
 import type { Config, Row, Asset, Input } from "../../services/types";
 import { creationData } from "./state";
 import { generate } from "./submit";
@@ -283,9 +283,7 @@ Page({
   async generate() {
     await generate(this);
   },
-  queue() {
-    openPage(this, { url: "/pages/tasks/index" });
-  },
+  queue,
   // Resolution, duration, aspect ratio and quality live in a sheet.
   openParams() {
     if (!this.data.modelsLoading) this.setData({ paramsOpen: true });

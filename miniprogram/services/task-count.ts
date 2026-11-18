@@ -1,5 +1,10 @@
-import { API_BASE } from "../../config";
-import { sessionToken } from "../../services/session";
+import { API_BASE } from "../config";
+import { sessionToken } from "./session";
+import { openPage } from "../utils/navigation";
+
+export function queue(this: object) {
+  openPage(this, { url: "/pages/tasks/index" });
+}
 
 type Page = { visible: boolean; destroyed: boolean; data: { runningTasks: number }; setData(value: Record<string, unknown>): void };
 type Poll = { timer?: ReturnType<typeof setTimeout>; task?: WechatMiniprogram.RequestTask };

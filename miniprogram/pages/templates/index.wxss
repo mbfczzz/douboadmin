@@ -36,6 +36,8 @@
   margin-right: 0;
 }
 .search-field {
+  flex: 1;
+  min-width: 0;
   display: flex;
   background: var(--ui-field);
   padding: 0 16px;
@@ -45,6 +47,11 @@
   height: 44px;
   color: var(--ui-muted);
   align-items: center;
+}
+button.queue-entry {
+  flex: none;
+  width: auto;
+  height: 44px;
 }
 .search-field input {
   flex: 1;

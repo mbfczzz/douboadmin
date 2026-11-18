@@ -2,17 +2,20 @@
 <view class="{{featured?'':'view-off'}}"><featured-works id="featured" active="{{featured&&shown}}" /></view>
 <view class="page templates-page {{featured?'view-off':''}}">
   <view class="catalog-head" style="top:{{stickyTop}}px">
-    <view class="search-field">
-      <image class="gl gl-20" src="/assets/glyphs/search-muted.png" />
-      <input
-        placeholder="搜索你想要的画面"
-        placeholder-class="muted"
-        value="{{search}}"
-        bindinput="input"
-        confirm-type="search"
-        bindconfirm="search"
-      />
-      <button wx:if="{{search}}" class="clear-search" bindtap="clearSearch" aria-label="清空搜索"><t-icon name="close" size="16" /></button>
+    <view class="row">
+      <view class="search-field">
+        <image class="gl gl-20" src="/assets/glyphs/search-muted.png" />
+        <input
+          placeholder="搜索你想要的画面"
+          placeholder-class="muted"
+          value="{{search}}"
+          bindinput="input"
+          confirm-type="search"
+          bindconfirm="search"
+        />
+        <button wx:if="{{search}}" class="clear-search" bindtap="clearSearch" aria-label="清空搜索"><t-icon name="close" size="16" /></button>
+      </view>
+      <button class="text-button queue-entry" bindtap="queue" hover-class="act-pressed">任务队列{{runningTasks?' · '+runningTasks:''}}</button>
     </view>
     <scroll-view scroll-x class="filter-scroll">
       <view

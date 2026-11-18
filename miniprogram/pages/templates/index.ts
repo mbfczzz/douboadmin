@@ -1,21 +1,23 @@
 import { loadConfig, peekConfig } from "../../utils/config-cache";
 import { readView, writeView, rememberRows, VIEW_MAX_AGE, noteIssued } from "../../utils/view-cache";
 import { request, tab, media, error, openPage, openTab } from "../../utils/api";
-import type { Row, Template, Config } from "../../services/types";
+import type { Row, Template } from "../../services/types";
 import { layout } from "./masonry";
+import type { Card } from "./masonry";
 import { navBottom } from "../../utils/nav-metrics";
 import { featuredOn } from "../../utils/featured-mode";
+import { queue, startTaskCount, stopTaskCount } from "../../services/task-count";
 
-const PAGE_SIZE = 10;
-import type { Card } from "./masonry";
+type Feed = { items: Row<Template>[]; total: number };
 Page({
   data: {
     featured: false, // the 优秀 tab's view of this page (utils/featured-mode)
     shown: false,
+    runningTasks: 0,
     items: [] as Row<Template>[],
-    visibleCount: 4,
-    page: 1,
+    visibleCount: 0,
     total: 0,
+    page: 1,
     hero: null as Card | null,
     heroPlay: false, // the featured preview plays only while the page shows
     stickyTop: 0,
@@ -32,20 +34,20 @@ Page({
   loadedQuery: "",
   fetching: false,
   visible: true,
+  queue,
   onLoad() {
     this.setData({ stickyTop: navBottom() });
   },
   onHide() {
     this.visible = false;
-    this.setData({ heroPlay: false, shown: false });
+    stopTaskCount(this);
+    this.setData({ heroPlay: false, shown: false, loading: false });
     this.loadVersion++;
     this.fetching = false;
-    this.setData({ loading: false });
   },
   onUnload() {
     this.onHide();
     this.destroyed = true;
-    this.loadVersion++;
   },
   onShow() {
     this.visible = true;
@@ -61,9 +63,16 @@ Page({
       wx.pageScrollTo({ scrollTop: 0, duration: 0 });
     }
     tab(this, 0);
-    if (featured) return; // the 优秀 view loads its own list
+    if (featured) return stopTaskCount(this);
+    startTaskCount(this);
     void this.loadCategories();
     if (!this.loadedQuery) void this.load(true);
+  },
+  showFeed({ items, total }: Feed, query: string, page: number) {
+    this.loadedQuery = query;
+    rememberRows(items);
+    const featured = this.data.category === this.data.categories[0] && !this.data.search;
+    this.setData({ items, page, total, visibleCount: items.length, hasMore: items.length < total, ...layout(items, featured) });
   },
   async load(keepContent = false, append = false) {
     if (this.destroyed || !this.visible) return;
@@ -78,39 +87,27 @@ Page({
       encodeURIComponent(this.data.search);
     const preserve = keepContent === true && this.loadedQuery === query;
     // Seen before (this session or a recent launch): show it at once.
-    const cached = !append && !preserve ? readView<{ items: Row<Template>[]; total: number }>("templates:" + query, VIEW_MAX_AGE) : undefined;
-    const seen = cached?.items;
-    if (seen) {
-      rememberRows(seen);
-      this.loadedQuery = query;
-      this.setData({ items: seen, visibleCount: seen.length, page: 1, total: cached.total, hasMore: seen.length < cached.total, ...layout(seen, this.data.category === this.data.categories[0] && !this.data.search) });
-    }
-    this.setData({ loading: !seen && (!preserve || append), loadError: "" });
+    const key = "templates:" + query;
+    const cached = !append && !preserve && readView<Feed>(key, VIEW_MAX_AGE);
+    if (cached) this.showFeed(cached, query, 1);
+    this.setData({ loading: !cached && (!preserve || append), loadError: "" });
     try {
-      const result = await request<{items:Row<Template>[]; total:number}>(
-        query + "&page=" + page + "&size=" + PAGE_SIZE,
+      const result = await request<Feed | Row<Template>[]>(
+        query + "&page=" + page + "&size=10",
         "GET",
         undefined,
         undefined,
         false,
       );
       if (version !== this.loadVersion) return;
-      this.loadedQuery = query;
       const fetched = Array.isArray(result) ? result : result.items;
       const combined = append ? [...this.data.items, ...fetched] : fetched;
       const items = [...new Map(combined.map(row=>[row.id,row])).values()];
       items.forEach((t) => (t.data.cover = media(t.data.cover)));
-      const visibleCount = items.length;
-      if (!append) writeView("templates:" + query, { items, total: Array.isArray(result) ? result.length : result.total }, !this.data.search);
-      rememberRows(items);
+      const feed = { items, total: Array.isArray(result) ? result.length : result.total };
+      if (!append) writeView(key, feed, !this.data.search);
       noteIssued(...items.map((t) => t.data.cover));
-      this.setData({
-        items,
-        visibleCount,
-        page, total: Array.isArray(result) ? result.length : result.total,
-        hasMore: !Array.isArray(result) && items.length < result.total,
-        ...layout(items.slice(0, visibleCount), this.data.category === this.data.categories[0] && !this.data.search),
-      });
+      this.showFeed(feed, query, page);
     } catch (e) {
       if (version !== this.loadVersion) return;
       if (preserve) error(e);
@@ -143,7 +140,7 @@ Page({
     else void this.load(true);
   },
   more() {
-    if (this.data.items.length < this.data.total) void this.load(true,true);
+    if (this.data.hasMore) void this.load(true, true);
   },
   // Scrolling to the bottom loads the next page; there is no "more" button.
   onReachBottom() {
