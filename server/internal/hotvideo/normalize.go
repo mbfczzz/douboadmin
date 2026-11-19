@@ -76,6 +76,7 @@ func video(m map[string]any) Video {
 	}
 	return Video{ID: id, Title: string(runes), Text: text, Author: str(author["nickname"]), Cover: cover, URL: play, SourceURL: "https://www.douyin.com/video/" + id, Likes: integer(stats["digg_count"]), Views: integer(stats["play_count"]), Comments: integer(stats["comment_count"]), PublishedAt: time.Unix(number(m["create_time"]), 0).UTC(), Duration: float64(number(media["duration"])) / 1000}
 }
+
 // searchRows finds the result list and the object that holds it (with the
 // cursor fields). TikHub's search v2 now answers {data: {business_data:
 // [{data: {aweme_info}}]}}; older shapes used data[] or aweme_list[].

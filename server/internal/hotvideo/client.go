@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"sort"
@@ -77,7 +78,10 @@ func (c *Client) request(ctx context.Context, method, path string, body any) (ma
 	}
 	defer response.Body.Close()
 	if response.StatusCode != 200 {
-		return nil, fmt.Errorf("抖音数据服务返回 HTTP %d", response.StatusCode)
+		raw, _ := io.ReadAll(io.LimitReader(response.Body, 64<<10))
+		err := upstreamError(response.StatusCode, raw)
+		slog.Warn("tikhub request failed", "path", strings.SplitN(path, "?", 2)[0], "status", response.StatusCode, "error", err)
+		return nil, err
 	}
 	data, err := io.ReadAll(io.LimitReader(response.Body, (8<<20)+1))
 	if err != nil || len(data) > 8<<20 {
@@ -90,7 +94,9 @@ func (c *Client) request(ctx context.Context, method, path string, body any) (ma
 		return nil, fmt.Errorf("抖音数据格式无效")
 	}
 	if code := integer(payload["code"]); code != nil && *code != 0 && *code != 200 {
-		return nil, fmt.Errorf("抖音数据服务暂未返回有效结果")
+		err := upstreamError(int(*code), data)
+		slog.Warn("tikhub request failed", "path", strings.SplitN(path, "?", 2)[0], "code", *code, "error", err)
+		return nil, err
 	}
 	return payload, nil
 }

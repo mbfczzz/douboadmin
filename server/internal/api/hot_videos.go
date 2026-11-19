@@ -5,6 +5,7 @@ import (
 	"doubo/server/internal/hotvideo"
 	"encoding/json"
 	"io"
+	"log/slog"
 	"net/http"
 	"regexp"
 	"slices"
@@ -32,7 +33,7 @@ func (a *Server) hotSearch(w http.ResponseWriter, r *http.Request) {
 	feed := q.Get("history") == "0"
 	result, e := a.Hot.Search(r.Context(), hotvideo.Query{Keyword: keyword, Sort: order, Cursor: cursor, SearchID: q.Get("searchId"), Backtrace: q.Get("backtrace"), Feed: feed})
 	if e != nil {
-		fail(w, 502, e.Error())
+		hotFail(w, r, e)
 		return
 	}
 	user := identity(r).ID
@@ -58,7 +59,7 @@ func (a *Server) hotDetail(w http.ResponseWriter, r *http.Request) {
 	}
 	v, e := a.Hot.Client.Detail(r.Context(), id)
 	if e != nil {
-		fail(w, 502, e.Error())
+		hotFail(w, r, e)
 		return
 	}
 	old, _ := a.Store.Get(r.Context(), "hot_videos", id)
@@ -148,8 +149,15 @@ func (a *Server) hotLink(w http.ResponseWriter, r *http.Request) {
 		video, e = a.Hot.Client.ShareVideo(r.Context(), link)
 	}
 	if e != nil {
-		fail(w, 502, e.Error())
+		hotFail(w, r, e)
 		return
 	}
 	reply(w, 200, video)
+}
+
+// hotFail answers a Douyin data failure and logs it, so the reason shows in
+// the service log and in 运行监控 → 错误日志 (WARN entries are kept there).
+func hotFail(w http.ResponseWriter, r *http.Request, e error) {
+	slog.Warn("hot video request failed", "path", r.URL.Path, "error", e.Error())
+	fail(w, 502, e.Error())
 }
