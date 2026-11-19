@@ -62,26 +62,17 @@
       <t-icon name="{{expanded?'fullscreen-exit':'fullscreen'}}" size="20" />
     </view>
     <view class="editor">
-      <view wx:if="{{!promptFocus&&refs.list(prompt,assets).length}}" class="prompt-input prompt-rich" bindtap="editPrompt" aria-role="button" aria-label="编辑描述"
-        ><block wx:for="{{refs.segments(prompt,assets)}}" wx:key="index"><text wx:if="{{!item.chip}}">{{item.text}}</text><view wx:else class="prompt-chip" data-id="{{item.id}}" catchtap="previewReference"><image wx:if="{{item.url}}" src="{{item.url}}" mode="aspectFill" /><text>{{item.label}}</text></view></block></view>
-      <textarea
-        wx:else
+      <prompt-editor
+        id="prompt"
         class="prompt-input"
         value="{{prompt}}"
-        cursor="{{promptCursor}}"
-        maxlength="{{prompt.length>maxPromptChars?prompt.length:maxPromptChars}}"
+        assets="{{assets}}"
+        max="{{maxPromptChars}}"
         placeholder="{{kind==='video'?videoPlaceholder:imagePlaceholder}}"
-        placeholder-class="prompt-placeholder"
-        bindinput="input"
-        cursor-spacing="{{mentionOpen?180:120}}"
-        focus="{{promptFocus}}"
-        hold-keyboard="{{mentionOpen}}"
-        disable-default-padding
-        show-confirm-bar="{{false}}"
-        bindfocus="focusPrompt"
-        bindblur="blurPrompt"
-        bindkeyboardheightchange="promptKeyboard"
-        fixed="{{expanded}}"
+        bind:input="input"
+        bind:focus="focusPrompt"
+        bind:blur="blurPrompt"
+        bind:keyboard="promptKeyboard"
       />
       <text class="count">{{prompt.length}} / {{maxPromptChars}}</text>
       <include src="./parts/mention.wxml" />

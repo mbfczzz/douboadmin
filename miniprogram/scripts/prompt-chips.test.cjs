@@ -22,14 +22,10 @@ test("a prompt splits into text runs and reference chips; unknown references sta
   assert.deepEqual(Array.from(segments("", []), (p) => p.text), []);
 });
 
-test("create: keyboard closed shows chips; tapping the text edits at the end", () => {
-  const h = harness(), page = h.page("create");
-  page.setData({ prompt: "这个@图片1 美女", promptFocus: false });
-  page.editPrompt();
-  assert.equal(page.data.promptFocus, true);
-  assert.equal(page.data.promptCursor, "这个@图片1 美女".length);
+test("create: the prompt box is the thumbnail editor, fed and read as plain text", () => {
   const wxml = fs.readFileSync("pages/create/index.wxml", "utf8");
-  assert.match(wxml, /wx:if="\{\{!promptFocus&&refs\.list\(prompt,assets\)\.length\}\}" class="prompt-input prompt-rich" bindtap="editPrompt"/);
+  assert.match(wxml, /<prompt-editor\s+id="prompt"\s+class="prompt-input"\s+value="\{\{prompt\}\}"\s+assets="\{\{assets\}\}"/);
+  assert.doesNotMatch(wxml, /<textarea/);
   assert.ok(wxml.indexOf('<wxs module="refs"') === 0, "the module is declared before use");
 });
 

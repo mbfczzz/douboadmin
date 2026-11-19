@@ -162,7 +162,10 @@ console.log(
 // 808,645 B. 787 -> 790 KiB.
 // Device-safe @ parsing in WXS (string scan, no RegExp) and full-width ＠
 // from Chinese keyboards: 809,378 B. 790 -> 791 KiB.
-const budget = 791 * 1024;
+// The create box becomes a WeChat <editor> (components/prompt-editor) so
+// @图片N / @视频N show as inline thumbnails while typing; the prompt text is
+// unchanged (utils/prompt-delta converts both ways): 814,241 B. 791 -> 796 KiB.
+const budget = 796 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

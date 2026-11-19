@@ -14,14 +14,13 @@ const imageNumber = (page: Editor, id: string) =>
 export const referenceHandlers = {
   onPageScroll(this: Editor) { if (this.data.mentionOpen) positionMention(this); },
   holdMentionTap() {},
-  focusPrompt(this: Editor) { this.setData({ promptFocus: true }); },
-  // The read-only view (with reference chips) turns back into the input.
-  editPrompt(this: Editor) { this.setData({ promptFocus: true, promptCursor: this.data.prompt.length }); },
+  // Typing again closes an open @ picker.
+  focusPrompt(this: Editor) { cancelMention(this); this.setData({ promptFocus: true }); },
   blurPrompt(this: Editor) { this.setData({ promptFocus: false }); },
+  // The @ picker opens with the keyboard closed, so a closing keyboard keeps it.
   promptKeyboard(this: Editor, e: WechatMiniprogram.CustomEvent<{ height: number }>) {
     this.setData({ keyboardHeight: Math.max(0, e.detail.height) });
-    if (!e.detail.height) { cancelMention(this); this.setData({ promptFocus: false }); }
-    else if (this.data.mentionOpen) positionMention(this);
+    if (this.data.mentionOpen) positionMention(this);
   },
   // Images open the in-page viewer (引用 / 删除); videos play full screen.
   previewReference(this: Editor, e: Tap) {

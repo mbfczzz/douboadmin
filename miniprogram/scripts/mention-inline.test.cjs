@@ -13,8 +13,8 @@ test("inline picker replaces the bottom popup and supports native text input lay
   assert.match(template, /<cover-view[^>]+class="mention-popover"/);
   assert.match(template, /<cover-image/);
   assert.doesNotMatch(sheets, /t-popup[^>]+mentionOpen/);
-  assert.match(editor, /hold-keyboard="{{mentionOpen}}"/);
-  assert.match(editor, /disable-default-padding/);
+  // The prompt box is the thumbnail editor; the picker opens with its keyboard closed.
+  assert.match(editor, /<prompt-editor[^>]+bind:keyboard="promptKeyboard"/);
 });
 
 test("the picker stays beside @ and within narrow screens above the keyboard", () => {
@@ -46,8 +46,6 @@ test("continue typing dismisses stale choices and a subsequent @ uses the new cu
   page.blurPrompt();
   page.pickMention({ currentTarget: { dataset: { index: 1 } } });
   assert.equal(page.data.prompt, "把@改成红色，参考@图片2 ");
-  assert.equal(page.data.promptFocus, true);
-  assert.equal(page.data.promptCursor, page.data.prompt.length);
 });
 
 test("delayed layout callbacks cannot reopen a canceled or hidden picker", () => {
@@ -67,13 +65,17 @@ test("delayed layout callbacks cannot reopen a canceled or hidden picker", () =>
   assert.equal(page.data.mentionReady, false);
 });
 
-test("closing the keyboard cancels the picker without changing the prompt", () => {
+test("typing @ closes the keyboard and opens the picker; typing again closes it", () => {
   const h = harness(), page = h.page("create");
+  let closed = 0;
+  page.selectComponent = (id) => (id === "#prompt" ? { close: () => closed++ } : null);
   page.setData({ assets: [image(1)] });
   input(page, "人物@");
-  page.promptKeyboard({ detail: { height: 320 } });
-  assert.equal(page.data.keyboardHeight, 320);
+  assert.equal(closed, 1);
+  assert.equal(page.data.mentionOpen, true);
   page.promptKeyboard({ detail: { height: 0 } });
+  assert.equal(page.data.mentionOpen, true, "the closed keyboard keeps the picker");
+  page.focusPrompt();
   assert.equal(page.data.mentionOpen, false);
   assert.equal(page.data.prompt, "人物@");
 });

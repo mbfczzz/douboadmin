@@ -1,0 +1,1 @@
+<editor id="editor" class="editor" placeholder="{{placeholder}}" show-img-size="{{false}}" show-img-toolbar="{{false}}" show-img-resize="{{false}}" bindready="ready" bindinput="input" bindfocus="focus" bindblur="blur" />

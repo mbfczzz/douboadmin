@@ -33,7 +33,9 @@ export function chooseMention(page: VisibleEditor, cursor: number) {
     return;
   }
   choosing.set(page, { text, cursor, ids: items.map((a) => a.id) });
-  page.setData({ mentionOpen: true, mentionReady: false, mentionPrefix: text.slice(0, cursor - 1), mentionItems: items });
+  // Close the keyboard first so tapping the picker cannot blur mid-tap.
+  (page as unknown as { selectComponent?(id: string): { close?(): void } | null }).selectComponent?.("#prompt")?.close?.();
+  page.setData({ mentionOpen: true, mentionReady: false, mentionPrefix: text.slice(0, cursor - 1), mentionItems: items, keyboardHeight: 0 });
   positionMention(page);
 }
 
@@ -56,7 +58,7 @@ export function insertMention(page: VisibleEditor, text: string, cursor: number,
     wx.showToast({ title: "引用后超出字数限制", icon: "none" });
     return false;
   }
-  page.setData({ prompt, hasPrompt: true, promptCursor: cursor + token.length, promptFocus: true });
+  page.setData({ prompt, hasPrompt: true });
   return true;
 }
 

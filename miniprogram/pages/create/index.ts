@@ -97,7 +97,7 @@ Page({
     cancelMention(this);
     cancelPreview(this);
     const prompt = clearMentions(this.data.prompt);
-    this.setData({ prompt, hasPrompt: !!prompt.trim(), promptCursor: -1 });
+    this.setData({ prompt, hasPrompt: !!prompt.trim() });
     clearEditorAssets(this);
     this.refreshParameters();
   },

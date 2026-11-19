@@ -40,7 +40,6 @@ test("typing @ opens an inline thumbnail picker and inserts the picked image at 
   pick(page, 1);
   assert.equal(page.data.mentionOpen, false);
   assert.equal(page.data.prompt, "参考@图片2 保持人物");
-  assert.equal(page.data.promptCursor, 7);
   assert.equal(page.data.assets.length, 3);
 });
 
@@ -103,12 +102,11 @@ test("removing a reference clears that mention and renumbers later images only",
 test("clearing references removes every image mention but keeps ordinary text",()=>{
   const h=harness(),page=h.page("create");
   page.refreshParameters=()=>{};
-  page.setData({assets:[image(1),image(2)],prompt:"让 @图片1 与 @图片2 同框",promptCursor:15});
+  page.setData({assets:[image(1),image(2)],prompt:"让 @图片1 与 @图片2 同框"});
   page.clearReferences();
   assert.equal(page.data.prompt,"让  与  同框");
   assert.equal(page.data.hasPrompt,true);
   assert.equal(page.data.assets.length,0);
-  assert.equal(page.data.promptCursor,-1);
 });
 
 test("the viewer quotes or deletes the image it shows", () => {

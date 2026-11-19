@@ -5,6 +5,7 @@
     "points-balance": "/components/points-balance/index",
     "t-popup": "tdesign-miniprogram/popup/popup",
     "showcase": "/components/showcase/index",
-    "media-viewer": "/components/media-viewer/index"
+    "media-viewer": "/components/media-viewer/index",
+    "prompt-editor": "/components/prompt-editor/index"
   }
 }
