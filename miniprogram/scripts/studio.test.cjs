@@ -11,7 +11,7 @@ function studio(signedIn = true) {
   h.api.hasSession = () => signedIn;
   h.api.request = async (path) => {
     if (path.startsWith("/hot")) calls.push(path);
-    if (path.startsWith("/hot/discovery")) return { enabled: true, keywords: ["新闻热搜"], source: "抖音热词" };
+    if (path.startsWith("/hot/discovery")) return { enabled: true, keywords: ["剧情带货", "探店", "美食"], source: "创作关键词" };
     if (!path.includes("?")) return video(path.split("/").pop());
     const cursor = Number(/cursor=(\d+)/.exec(path)[1]);
     return { items: [video("a" + cursor), video("b" + cursor)], cursor: cursor + 2, hasMore: cursor === 0, searchId: "s", backtrace: "" };
@@ -35,7 +35,7 @@ test("the feed lists the first keyword's videos without saving search history", 
   const { calls, page } = studio();
   page.onShow();
   await settle();
-  // Creative keywords, not Douyin's news hot words; discovery only says "on".
+  // The server's creative feed keywords (words=0), not Douyin's news hot words.
   assert.equal(calls[0], "/hot/discovery?words=0");
   assert.deepEqual(Array.from(page.data.keywords).slice(0, 3), ["剧情带货", "探店", "美食"]);
   assert.equal(page.data.keyword, "剧情带货");

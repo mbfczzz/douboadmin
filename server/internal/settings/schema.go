@@ -73,6 +73,8 @@ var definitions = []Group{
 	{ID: "hot", Name: "热门视频接口", Hint: "未填写 API Key 时，热门视频查询功能不可用。", Fields: []Field{
 		{Key: "TIKHUB_BASE_URL", Label: "TikHub API 地址", Kind: "url", Default: "https://api.tikhub.io"},
 		{Key: "TIKHUB_API_KEY", Label: "TikHub API Key", Kind: "secret"},
+		{Key: "HOT_FEED_SOURCE", Label: "创作页视频来源", Kind: "select", Default: "billboard", Options: []Option{{"billboard", "抖音视频热榜（按标签筛选，「热门」为整个榜单）"}, {"search", "关键词搜索"}}, Hint: "保存后重启服务生效。"},
+		{Key: "HOT_FEED_KEYWORDS", Label: "创作页关键词", Kind: "text", Default: DefaultFeedKeywords, Hint: "创作页视频流的标签，按顺序显示，第一个默认选中；视频来源为热榜时按标签筛选近 7 天视频热榜（「热门」为整个榜单）；为关键词搜索时按标签搜索抖音视频。用逗号或顿号分隔，最多 12 个、每个不超过 20 字。保存后重启服务生效。"},
 	}},
 	{ID: "notifications", Name: "完成订阅通知", Hint: "需先配置微信登录，并在微信后台取得订阅消息模板。", Fields: []Field{
 		{Key: "WECHAT_COMPLETION_TEMPLATE_ID", Label: "订阅模板 ID", Kind: "text"},

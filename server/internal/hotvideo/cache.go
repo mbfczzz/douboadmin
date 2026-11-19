@@ -6,16 +6,31 @@ import (
 	"doubo/server/internal/store"
 	"encoding/json"
 	"time"
+
+	"github.com/redis/go-redis/v9"
 )
 
 type Service struct {
 	Client *Client
 	Store  store.Store
+	// Redis holds the 创作 feed (feed.go); without it feed pages use Store.
+	Redis *redis.Client
+	// Keywords are the 创作 feed's chips (HOT_FEED_KEYWORDS).
+	Keywords []string
+	// Source of the 创作 feed (HOT_FEED_SOURCE): "billboard" (default, the
+	// video hot list) or "search" (keyword search).
+	Source string
 }
 
 func (s *Service) Ready() bool { return s != nil && s.Client.Ready() }
 func (s *Service) Search(ctx context.Context, q Query) (Result, error) {
-	id := core.Digest(s.Client.BaseURL + core.Digest(s.Client.Key) + string(core.Data(q)))[:32]
+	if q.Feed && s.Redis != nil {
+		if r, ok := s.feedGet(ctx, q); ok {
+			return r, nil
+		}
+		return s.feedFetch(ctx, q)
+	}
+	id := s.cacheID(q)
 	old, e := s.Store.Get(ctx, "hot_cache", id)
 	if e == nil {
 		var data Result
@@ -29,7 +44,7 @@ func (s *Service) Search(ctx context.Context, q Query) (Result, error) {
 			return data, nil
 		}
 	}
-	result, e := s.Client.Search(ctx, q)
+	result, e := s.fetch(ctx, q)
 	if e != nil {
 		return result, e
 	}

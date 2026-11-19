@@ -12,7 +12,7 @@
 | 阿里云 OSS | Region、Bucket、AccessKey ID、AccessKey Secret |
 | 微信虚拟支付 | 支付通道、现网/沙箱、加载开关、OfferID、AppKey、消息 Token、EncodingAESKey、iOS 开关 |
 | 积分商品 | 商品 ID、名称、售价（元）、到账积分、自定义金额基础商品 |
-| 热门视频 | TikHub API 地址、API Key |
+| 热门视频 | TikHub API 地址、API Key、创作页关键词（逗号或顿号分隔，最多 12 个，留空用默认 8 个） |
 | 完成订阅通知 | 模板 ID、微信字段和内容映射 |
 | 站点地址 | 公网地址、允许的后台来源 |
 | 外部告警 | Webhook 地址 |

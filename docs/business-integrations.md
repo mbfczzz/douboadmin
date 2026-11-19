@@ -37,6 +37,8 @@
 
 TikHub 适配已核对其 OpenAPI：搜索 `POST /api/v1/douyin/search/fetch_video_search_v2`，详情 `fetch_one_video`，热词 `fetch_hot_search_list`。后端缓存上游结果；播放量仅对返回页面内已提供数据排序。账号实际权限、数据字段与下载链接需要凭证到位后验证。
 
+创作页视频流：默认取抖音视频热榜 `POST /api/v1/douyin/billboard/fetch_hot_total_video_list`（近 7 天、视频总榜 `sub_type=1001`，每页 20 条，按标签关键词过滤，「热门」不过滤）；后台「创作页视频来源」可切回关键词搜索 `fetch_video_search_v2`（`HOT_FEED_SOURCE=search`，重启生效），两种来源分开缓存。TikHub 未写明返回格式，解析兼容 `objs` / `list` 等常见结构，读不懂时记 `tikhub billboard reply not understood` 警告并附返回开头。创作关键词在后台「服务接入配置 → 热门视频接口 → 创作页关键词」设置（`HOT_FEED_KEYWORDS`，保存后重启生效；经 `GET /api/hot/discovery?words=0` 下发）首页结果存 Redis（`doubo:hot:feed:*`），有效 1 小时；API 进程每分钟检查，结果满 59 分钟即提前刷新，多实例用 Redis 锁保证每个关键词只刷新一次；刷新失败保留旧数据（最长 2 小时）并在下一分钟重试，失败写入 `hot feed refresh failed` 警告日志。未配置 Redis 时退回数据库缓存（30 分钟）。
+
 分享链接与无水印原视频（文案提取、一键复刻）：
 
 - 分享链接：链接里已带作品 ID 时直接用详情接口；短链接（`v.douyin.com`）交给 `GET /api/v1/douyin/app/v3/fetch_one_video_by_share_url`，返回空时按 TikHub 说明改用同参数的 `web/fetch_one_video_by_share_url`。服务端自身不打开用户粘贴的地址，只接受抖音域名。`filter_list[0].reason` 为 5 / 10 / 8 时分别提示私密、部分可见、删除或版权受限（不可用结果同样计费）。

@@ -64,6 +64,11 @@ func validate(g Group, v Values, production bool) error {
 			}
 		}
 	}
+	if g.ID == "hot" {
+		if _, err := FeedKeywords(v["HOT_FEED_KEYWORDS"]); err != nil {
+			return invalid("HOT_FEED_KEYWORDS", err.Error())
+		}
+	}
 	if g.ID == "wechat" && v["WECHAT_APP_ID"] != "" && !appIDPattern.MatchString(v["WECHAT_APP_ID"]) {
 		return invalid("WECHAT_APP_ID", "请填写有效的小程序 AppID")
 	}

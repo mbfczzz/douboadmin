@@ -74,8 +74,11 @@ func (a *Server) hotDiscovery(w http.ResponseWriter, r *http.Request) {
 	}
 	words := settings.HotKeywords
 	source := "推荐关键词"
-	// words=0 (the 创作 feed) only asks whether the source is on: no TikHub call.
-	if a.Hot.Ready() && !browseOnly(r) && r.URL.Query().Get("words") != "0" {
+	// words=0 is the 创作 feed: its fixed keywords (kept fresh in Redis), no
+	// TikHub call here.
+	if r.URL.Query().Get("words") == "0" {
+		words, source = a.Hot.FeedWords(), "创作关键词"
+	} else if a.Hot.Ready() && !browseOnly(r) {
 		if live, err := a.Hot.Hotwords(r.Context()); err == nil && len(live) > 0 {
 			words = live
 			source = "抖音热词"
