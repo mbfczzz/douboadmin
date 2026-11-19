@@ -56,7 +56,8 @@ export async function confirmAdditionalPurchase(
   const token = sessionToken();
   const confirmed = await ask({
     title: "另购一笔积分？",
-    content: "原订单仍可能到账。另购会新建一笔付费订单，原订单可在充值订单中继续查询。",
+    rows: [{ label: "原订单", value: "仍可能到账" }, { label: "另购", value: "新建一笔付费订单" }],
+    content: "原订单可在充值订单中继续查询",
     confirmText: "另购一笔",
     cancelText: "继续等待",
     icon: "time",

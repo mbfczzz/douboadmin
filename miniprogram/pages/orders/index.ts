@@ -10,7 +10,7 @@ import {
   login,
   cancelled,
   date,
-  openPage,
+  openOrBack,
 } from "../../utils/api";
 import type { Row } from "../../services/types";
 import type { Order } from "../../services/business";
@@ -26,7 +26,7 @@ import {
 } from "../../services/payment-status";
 Page({
   wallet() {
-    openPage(this, { url: "/pages/wallet/index" });
+    openOrBack(this, "/pages/wallet/index");
   },
   toggle(e: WechatMiniprogram.TouchEvent) {
     const id = e.currentTarget.dataset.id;

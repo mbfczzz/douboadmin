@@ -141,13 +141,16 @@ Page({
       }
     }
   },
+  leaving: false,
   back() {
+    if (this.leaving) return; // a double tap must not also close the page below
     if (wx.getStorageSync("activation-required")) {
       activationRedirect();
       return;
     }
+    this.leaving = true;
     wx.navigateBack({
-      fail: () => wx.switchTab({ url: "/pages/templates/index" }),
+      fail: () => wx.switchTab({ url: "/pages/templates/index", complete: () => (this.leaving = false) }),
     });
   },
   brandError() {

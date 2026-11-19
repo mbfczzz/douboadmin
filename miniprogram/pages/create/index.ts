@@ -111,8 +111,11 @@ Page({
   },
   async loadModels() {
     const version = ++this.modelVersion;
-    // Cold start: paint the last known models at once, then refresh.
-    const known = !this.data.availableModels.length && !this.data.resolutionChosen && !this.data.qualityChosen && peekConfig(10 * 60 * 1000);
+    // Cold start or 视频/图片 switch: paint known models now, refresh after.
+    const listed = this.data.availableModels as ModelChoice[];
+    const cold = !listed.length && !this.data.resolutionChosen && !this.data.qualityChosen;
+    const switched = listed.length > 0 && !listed.some((m) => m.kind === this.data.kind);
+    const known = (cold || switched) && peekConfig(10 * 60 * 1000);
     if (known) {
       const first = modelChoices(known.models, this.data.kind);
       const m = first.find((item) => item.id === this.data.model) || first[0];
@@ -122,7 +125,7 @@ Page({
       modelsLoading: !this.data.availableModels.some((m: ModelChoice) => m.kind === this.data.kind),
       modelError: "",
     });
-    if (this.data.modelsLoading) updateEstimate(this);
+    if (this.data.modelsLoading || switched) updateEstimate(this); // a switch prices the new model at once
     try {
       // Always refresh: a model changed in the admin must show on return.
       const c = await loadConfig(true);

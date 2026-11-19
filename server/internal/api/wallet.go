@@ -157,5 +157,10 @@ func (a *Server) quoteJob(w http.ResponseWriter, r *http.Request) {
 	if !enabled {
 		charge = 0
 	}
-	reply(w, 200, map[string]any{"units": charge, "configuredUnits": units, "billingEnabled": enabled, "availableUnits": wallet.Available, "sufficient": wallet.Available >= charge})
+	// perSecond lets the confirm dialog say 按秒 (duration table) or 按次.
+	perSecond := false
+	if m, err := a.model(r.Context(), in.Model); err == nil {
+		_, perSecond, _ = billing.QuoteDetail(m, in)
+	}
+	reply(w, 200, map[string]any{"units": charge, "configuredUnits": units, "billingEnabled": enabled, "availableUnits": wallet.Available, "sufficient": wallet.Available >= charge, "perSecond": perSecond})
 }

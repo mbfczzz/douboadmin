@@ -3,6 +3,8 @@
     ><image class="empty-photo" src="/assets/photos/empty-login.jpg" mode="aspectFill" aria-hidden="true" /><text>登录后设置个人偏好</text><text class="empty-link" bindtap="signIn">去登录 ›</text></view
   ><view wx:if="{{loadError}}" class="biz-error" bindtap="load"
     >{{loadError}} · 重试</view
+  ><view wx:elif="{{!row&&!needsLogin}}" class="skel-page" aria-label="正在加载设置"
+    ><view class="skeleton skel-card" /><view class="skeleton skel-card" /></view
   ><block wx:if="{{row}}"
     ><view class="biz-card"
       ><view class="biz-row"

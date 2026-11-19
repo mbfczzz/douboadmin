@@ -8,6 +8,7 @@ export type DialogOptions = {
   icon?: string;
   amount?: string; // a large figure under the title, e.g. "120"
   unit?: string; // its unit, e.g. "积分"
+  rows?: { label: string; value: string }[]; // a small label/value panel
 };
 type Dialog = { open(options: DialogOptions): Promise<boolean> };
 
@@ -18,7 +19,7 @@ export function ask(options: DialogOptions): Promise<boolean> {
   const page = pages[pages.length - 1] as { selectComponent?(id: string): unknown } | undefined;
   const dialog = page?.selectComponent?.("#ui-dialog") as Dialog | null | undefined;
   if (dialog && typeof dialog.open === "function") return dialog.open(options);
-  const text = [options.amount && `${options.amount} ${options.unit || ""}`.trim(), options.content]
+  const text = [options.amount && `${options.amount} ${options.unit || ""}`.trim(), ...(options.rows || []).map((r) => `${r.label} ${r.value}`), options.content]
     .filter(Boolean)
     .join("\n");
   return new Promise((resolve) => {

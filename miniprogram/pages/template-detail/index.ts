@@ -1,5 +1,5 @@
 import { showArt } from "../../utils/ui-art";
-import { recallRow, freshUrl } from "../../utils/view-cache";
+import { recallRow, freshUrl, rememberRows } from "../../utils/view-cache";
 import {
   request,
   error,
@@ -241,6 +241,7 @@ Page({
         },
         "template-" + t.id,
       );
+      rememberRows([j]); // task detail paints it at once
       if (this.visible) openTask(j.id, this);
       else wx.showToast({ title: "任务已加入队列", icon: "success" });
     } catch (e) {

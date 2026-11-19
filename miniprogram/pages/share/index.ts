@@ -9,6 +9,7 @@ import {
 import type { Job } from "../../services/types";
 import { track } from "../../services/analytics";
 import { resultImages } from "../../services/result-images";
+import { recallRow, freshUrl, noteIssued } from "../../utils/view-cache";
 interface Share {
   token: string;
   path: string;
@@ -28,14 +29,19 @@ Page({
   },
   id: "",
   revision: 0,
+  loaded: false,
   shareRevision: 0,
   destroyed: false,
   onLoad(o: Record<string, string>) {
     this.id = o.id;
+    // Opened from task detail: paint the known work at once.
+    const known = recallRow<Job>(o.id);
+    if (known?.status === "succeeded") this.setData({ job: known });
   },
+  // Back from the share sheet or a preview: keep the work (no video reload).
   onShow() {
     enterPage(this);
-    void this.load();
+    if (!this.loaded || this.data.loadError) void this.load(); // a load cut short by leaving retries
   },
   onUnload() {
     this.revision++;
@@ -63,10 +69,12 @@ Page({
       if (revision !== this.revision) return;
       if (job.result) job.result = media(job.result);
       if (job.input.kind === "image") job.results = resultImages(job);
+      noteIssued(job.result, ...(job.results || []));
       if (job.deleted) {
         this.shareRevision++;
         this.setData({ share: null });
       }
+      this.loaded = true;
       this.setData({ job, needsLogin: false, loadError: "" });
     } catch (e) {
       if (revision === this.revision) {
@@ -82,6 +90,9 @@ Page({
     this.setData({ title: e.detail.value, share: null });
   },
   async preview(e: WechatMiniprogram.CustomEvent<{ index: number }>) {
+    const shown = this.data.job ? resultImages(this.data.job) : [];
+    if (shown[e.detail.index] && freshUrl(shown[e.detail.index]))
+      return wx.previewImage({ urls: shown, current: shown[e.detail.index] });
     const revision = this.revision + 1;
     await this.load();
     if (this.destroyed || this.revision !== revision || this.data.loadError) return;

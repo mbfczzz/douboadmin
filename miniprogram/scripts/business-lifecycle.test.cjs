@@ -24,26 +24,28 @@ test("session expiry clears private data in the new business pages", async () =>
   }
 });
 
-test("a notification response cannot navigate after leaving its page", async () => {
+// A notice opens at once (marked read locally); a quick second tap neither
+// opens it twice nor sends a second read.
+test("a notification opens immediately and only once", async () => {
   const h = harness(),
     page = h.page("notifications");
-  let finish,
-    calls = 0;
+  let calls = 0;
   page.setData({
-    items: [{ id: "notice", data: { kind: "job", targetId: "task" } }],
+    items: [{ id: "notice", data: { kind: "job", targetId: "task", read: false } }],
+    unread: 1,
   });
   h.api.request = () => {
     calls++;
-    return new Promise((resolve) => (finish = resolve));
+    return new Promise(() => {});
   };
   const event = { currentTarget: { dataset: { id: "notice" } } };
-  const opened = page.open(event);
+  await page.open(event);
   await page.open(event);
   assert.equal(calls, 1);
-  page.onHide();
-  finish({});
-  await opened;
-  assert.equal(h.nav.length, 0);
+  assert.equal(h.nav.length, 1);
+  assert.match(h.nav[0].url, /task-detail\/index\?id=task/);
+  assert.equal(page.data.items[0].data.read, true);
+  assert.equal(page.data.unread, 0);
 });
 
 test("clearing search history prevents an older history request from restoring it", async () => {
@@ -104,8 +106,15 @@ test("an invalidated public share clears the previously displayed work", async (
   const h = harness(),
     page = h.page("shared-work");
   page.setData({ work: { title: "old", result: "old-result" } });
+  // A network blip keeps what is on screen…
   h.api.request = async () => {
-    throw Error("分享已失效");
+    throw Error("网络不稳定");
+  };
+  await page.load();
+  assert.equal(page.data.work.title, "old");
+  // …a withdrawn share (4xx) clears it.
+  h.api.request = async () => {
+    throw new h.api.RequestError(410, "分享已失效");
   };
   await page.load();
   assert.equal(page.data.work, null);

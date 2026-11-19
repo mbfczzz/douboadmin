@@ -46,8 +46,10 @@ Page({
   onLoad(options: Record<string, string>) {
     this.setData({ promo: options.mode === "promo" });
   },
+  // Load once; returning (e.g. from the poster) keeps the list and its pages.
+  // Pull down refreshes.
   onShow() {
-    void this.load();
+    if (!this.data.center && !this.data.shown.code) void this.load();
   },
   onPullDownRefresh() {
     void pullRefresh(() => this.load());

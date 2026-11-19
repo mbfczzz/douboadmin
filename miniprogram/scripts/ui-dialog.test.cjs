@@ -44,3 +44,19 @@ test("ask() uses the page's dialog, else falls back to the native modal", async 
   h.wx.showModal = async () => ({ confirm: true });
   assert.equal(await ask({ title: "x" }), true);
 });
+
+test("the points confirm lists billing mode, balance and what remains", async () => {
+  const h = harness();
+  await h.api.signIn();
+  let shown;
+  h.pages.push({ selectComponent: () => ({ open: async (o) => { shown = o; return true; } }) });
+  h.wx.request = (o) => o.success({ statusCode: 200, data: { units: 3500, billingEnabled: true, sufficient: true, availableUnits: 75800, perSecond: true } });
+  const { confirmBudget } = h.service("business");
+  const out = await confirmBudget({ kind: "video", duration: 5, model: "m", prompt: "p" });
+  assert.equal(out.expectedCostUnits, 3500);
+  assert.equal(shown.amount, "35");
+  assert.deepEqual(Array.from(shown.rows, (r) => r.value), ["按秒 · 每秒 7 × 5 秒", "758 积分", "723 积分"]);
+  h.wx.request = (o) => o.success({ statusCode: 200, data: { units: 3500, billingEnabled: true, sufficient: true, availableUnits: 75800 } });
+  await confirmBudget({ kind: "video", duration: 5, model: "m", prompt: "p" });
+  assert.equal(shown.rows[0].value, "按次");
+});

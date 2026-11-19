@@ -9,6 +9,8 @@ type RecordQuery struct {
 	AfterID                                     string
 	ByID                                        bool
 	Namespace, Owner, Search, Status, PartnerID string
+	// SearchFields limits Search to these fields; empty searches every text field.
+	SearchFields []string
 	// OwnerIn and PartnerIn restrict rows to a provider subtree when non-nil.
 	OwnerIn, PartnerIn []string
 	Page, Size         int

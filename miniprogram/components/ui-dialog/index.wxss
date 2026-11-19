@@ -34,9 +34,9 @@
   .dialog-mask, .dialog { animation: none; }
 }
 .dialog-icon {
-  width: 52px;
-  height: 52px;
-  margin-bottom: 14px;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -45,8 +45,8 @@
   background: #00c8dc1f;
 }
 .dialog-glyph {
-  width: 26px;
-  height: 26px;
+  width: 24px;
+  height: 24px;
 }
 .tone-danger .dialog-icon {
   color: #ff5c6c;
@@ -79,9 +79,37 @@
 .dialog-content {
   margin-top: 10px;
   font-size: 14px;
-  line-height: 1.6;
+  line-height: 1.65;
   text-align: center;
   color: var(--ui-muted, #a6a8ad);
+}
+/* Details under the amount: billing mode, balance before and after. */
+.dialog-rows {
+  width: 100%;
+  margin-top: 16px;
+  padding: 4px 14px;
+  box-sizing: border-box;
+  border-radius: 12px;
+  background: var(--ui-field, #2f3238);
+}
+.dialog-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  font-size: 13px;
+  color: var(--ui-muted, #a6a8ad);
+}
+.dialog-row-value {
+  color: var(--ui-text, #fff);
+  text-align: right;
+}
+.dialog-note {
+  font-size: 12px;
+}
+.dialog-wide {
+  align-self: stretch;
+  text-align: left;
 }
 .dialog-actions {
   display: flex;

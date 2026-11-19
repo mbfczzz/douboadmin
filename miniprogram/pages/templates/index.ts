@@ -34,11 +34,15 @@ Page({
   loadedQuery: "",
   fetching: false,
   visible: true,
+  searchTimer: 0,
+  scrollAt: [0, 0], // 模板 / 优秀 scroll positions
   queue,
   onLoad() {
+    this.scrollAt = [0, 0];
     this.setData({ stickyTop: navBottom() });
   },
   onHide() {
+    clearTimeout(this.searchTimer);
     this.visible = false;
     stopTaskCount(this);
     this.setData({ heroPlay: false, shown: false, loading: false });
@@ -59,8 +63,16 @@ Page({
   applyTabView() {
     const featured = featuredOn();
     if (featured !== this.data.featured) {
+      // Each view keeps its own scroll: read the old one before switching
+      // (the query runs ahead of setData), then return to the new one's.
+      const from = Number(this.data.featured), to = Number(featured), at = this.scrollAt;
+      if (typeof wx.createSelectorQuery === "function")
+        wx.createSelectorQuery().selectViewport().scrollOffset((r) => {
+          at[from] = r?.scrollTop || 0;
+          wx.pageScrollTo({ scrollTop: at[to], duration: 0 });
+        }).exec();
+      else wx.pageScrollTo({ scrollTop: 0, duration: 0 });
       this.setData({ featured });
-      wx.pageScrollTo({ scrollTop: 0, duration: 0 });
     }
     tab(this, 0);
     if (featured) return stopTaskCount(this);
@@ -71,7 +83,7 @@ Page({
   showFeed({ items, total }: Feed, query: string, page: number) {
     this.loadedQuery = query;
     rememberRows(items);
-    const featured = this.data.category === this.data.categories[0] && !this.data.search;
+    const featured = this.data.category === this.data.categories[0] && !this.data.search.trim();
     this.setData({ items, page, total, visibleCount: items.length, hasMore: items.length < total, ...layout(items, featured) });
   },
   async load(keepContent = false, append = false) {
@@ -81,10 +93,11 @@ Page({
     const page = append ? this.data.page + 1 : 1;
     const version = ++this.loadVersion;
     const query = append ? this.loadedQuery :
+      // A search spans every category.
       "/templates?kind=video&category=" +
-      encodeURIComponent(this.data.category) +
+      encodeURIComponent(this.data.search.trim() ? "推荐" : this.data.category) +
       "&q=" +
-      encodeURIComponent(this.data.search);
+      encodeURIComponent(this.data.search.trim());
     const preserve = keepContent === true && this.loadedQuery === query;
     // Seen before (this session or a recent launch): show it at once.
     const key = "templates:" + query;
@@ -105,7 +118,7 @@ Page({
       const items = [...new Map(combined.map(row=>[row.id,row])).values()];
       items.forEach((t) => (t.data.cover = media(t.data.cover)));
       const feed = { items, total: Array.isArray(result) ? result.length : result.total };
-      if (!append) writeView(key, feed, !this.data.search);
+      if (!append) writeView(key, feed, !this.data.search.trim());
       noteIssued(...items.map((t) => t.data.cover));
       this.showFeed(feed, query, page);
     } catch (e) {
@@ -147,16 +160,22 @@ Page({
     if (!this.data.featured) this.more();
   },
   choose(e: WechatMiniprogram.TouchEvent) {
-    this.setData({ category: e.currentTarget.dataset.value });
+    clearTimeout(this.searchTimer);
+    this.setData({ category: e.currentTarget.dataset.value, search: "" });
     void this.load();
   },
+  // Results follow typing after a short pause; the 搜索 key searches at once.
   input(e: WechatMiniprogram.Input) {
     this.setData({ search: e.detail.value });
+    clearTimeout(this.searchTimer);
+    this.searchTimer = setTimeout(() => void this.load(), 400) as unknown as number;
   },
   search() {
+    clearTimeout(this.searchTimer);
     void this.load();
   },
   clearSearch() {
+    clearTimeout(this.searchTimer);
     this.setData({ search: "" });
     void this.load();
   },

@@ -41,8 +41,11 @@ Page({
       if (!this.destroyed) this.setData({ busy: false });
     }
   },
+  leaving: false,
   back() {
-    wx.navigateBack();
+    if (this.leaving) return; // a double tap must not also close the page below
+    this.leaving = true;
+    wx.navigateBack({ fail: () => (this.leaving = false) });
   },
   zoom() {
     if (this.data.path) wx.previewImage({ urls: [this.data.path] });

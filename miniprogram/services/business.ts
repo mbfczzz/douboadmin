@@ -35,6 +35,7 @@ export async function confirmBudget(input: Input): Promise<Input> {
     billingEnabled: boolean;
     sufficient: boolean;
     availableUnits: number;
+    perSecond?: boolean;
   }>("/jobs/quote", "POST", input);
   if (!q.billingEnabled || !q.units) return { ...input, expectedCostUnits: 0 };
   if (!q.sufficient) {
@@ -42,11 +43,17 @@ export async function confirmBudget(input: Input): Promise<Input> {
       `可用积分不足，需 ${points(q.units)}，当前 ${points(q.availableUnits)}`,
     );
   }
+  const seconds = input.kind === "video" && q.perSecond ? input.duration || 0 : 0;
   const approved = await ask({
     title: "本次将使用",
     amount: points(q.units),
     unit: "积分",
-    content: `生成成功后扣除，失败自动退回\n当前可用 ${points(q.availableUnits)} 积分`,
+    rows: [
+      { label: "计费方式", value: seconds ? `按秒 · 每秒 ${points(Math.round(q.units / seconds))} × ${seconds} 秒` : "按次" },
+      { label: "当前可用", value: `${points(q.availableUnits)} 积分` },
+      { label: "确认后剩余", value: `${points(q.availableUnits - q.units)} 积分` },
+    ],
+    content: "生成成功后扣除，失败自动退回",
     confirmText: "确认生成",
     icon: "star",
   });

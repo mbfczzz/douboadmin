@@ -3,7 +3,7 @@ import { request } from "../../services/request";
 import { estimateCost } from "../../services/estimate";
 import { sessionToken } from "../../services/session";
 import { money, points } from "../../services/business";
-import type { VirtualProduct } from "../../services/business";
+import type { VirtualProduct, WalletInfo } from "../../services/business";
 import type { Config, Model, Row } from "../../services/types";
 import type { Ledger } from "../../services/wallet-ledger";
 import { ledgerView } from "../../services/wallet-ledger";
@@ -13,6 +13,21 @@ import { withDays } from "../../utils/day";
 // for each kind's default model, and ledger rows. Nothing is invented.
 
 const per100 = (fen: number, units: number) => money(Math.round((fen * 10000) / units)); // ¥ per 100 points
+
+// ¥ per 100 points as the user actually pays. Virtual payment: the base
+// (custom-amount) product, else the package with no bonus. JSAPI: the
+// ratio × provider index (10000 = standard), as wallet-checkout credits.
+export function pricePer100(info: WalletInfo) {
+  const c = info.virtualCustom;
+  if (c?.unitAmountFen && c.unitPointsUnits) return per100(c.unitAmountFen, c.unitPointsUnits);
+  if (info.paymentChannel === "wechat_virtual") {
+    const valid = (info.virtualProducts || []).filter((p) => p.amountFen > 0 && p.pointsUnits > 0);
+    const base = valid.sort((a, b) => b.amountFen / b.pointsUnits - a.amountFen / a.pointsUnits)[0];
+    return base ? per100(base.amountFen, base.pointsUnits) : "";
+  }
+  const index = info.pricing?.retailPer100Fen, ratio = info.settings.pointsPerYuan;
+  return index && ratio > 0 ? money(Math.round(index / ratio)) : "";
+}
 
 export function productCards(products: VirtualProduct[]) {
   const rate = (p: VirtualProduct) => p.pointsUnits / p.amountFen;

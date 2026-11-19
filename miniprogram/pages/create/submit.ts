@@ -1,3 +1,4 @@
+import { rememberRows } from "../../utils/view-cache";
 import { error, isNavigating, openTask, submitInput } from "../../utils/api";
 import { referenceError, selectedModel } from "./references";
 import { creationInput } from "./input";
@@ -36,6 +37,7 @@ export async function generate(page: Editor) {
   page.setData({ busy: true });
   try {
     const job = await submitInput(creationInput(data, model), "create");
+    rememberRows([job]); // task detail paints it at once
     if (page.visible) openTask(job.id, page);
     else wx.showToast({ title: "任务已加入队列", icon: "success" });
   } catch (e) {

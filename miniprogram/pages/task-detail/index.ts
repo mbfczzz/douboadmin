@@ -1,4 +1,4 @@
-import { keepImages, recallRow } from "../../utils/view-cache";
+import { keepImages, recallRow, rememberRows } from "../../utils/view-cache";
 import { saveResults, previewResults } from "./results";
 import { ask } from "../../services/dialog";
 import {
@@ -98,6 +98,7 @@ Page({
       const final = (status?: string) => status === "succeeded" || status === "failed";
       const wasFinal = final(this.data.job?.status);
       const [job] = keepImages(this.data.job ? [this.data.job] : [], [jobView(j)]);
+      rememberRows([job]); // 分享 opens with these same links
       this.setData({
         job, // the result already playing keeps its URL
         loading: false,
@@ -225,7 +226,7 @@ Page({
     if (this.data.busy) return;
     const confirmed = await ask({
       title: "删除这个作品？",
-      content: "删除后不再展示，分享链接会失效；订单和积分记录会保留。",
+      rows: [{ label: "作品", value: "不再展示" }, { label: "分享链接", value: "失效" }, { label: "订单和积分记录", value: "保留" }],
       confirmText: "删除",
       tone: "danger",
       icon: "delete",

@@ -54,6 +54,8 @@ func (a *Server) templatePage(w http.ResponseWriter, r *http.Request, ids []stri
 		}
 	}
 	if !admin {
+		// Users search what they can see, never private recipe prompts or URLs.
+		q.SearchFields = []string{"title", "description", "category"}
 		q.Fields["published"] = "true"
 		models, e := store.AllRecords(r.Context(), a.Store, "models", "")
 		if e != nil {

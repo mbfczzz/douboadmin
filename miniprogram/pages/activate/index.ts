@@ -260,9 +260,9 @@ Page({
         clearInvite();
         this.setData({ invite: "" });
       }
-      this.setData({ status });
+      this.revision++; // newer than any status load still in flight
+      this.setData({ status, loading: false, codeMode: false });
       clearCode(this);
-      this.setData({ codeMode: false });
       if (status.active) this.enter();
       else wx.showToast({ title: "已登记，等待审核开通", icon: "none" });
     } catch (e) {

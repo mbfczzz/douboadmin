@@ -41,10 +41,13 @@ func (t Table) has(field string) bool {
 }
 
 // searchable is the text a page search looks in: the id and every string column.
-func (t Table) searchable() string {
-	parts := []string{"id"}
+func (t Table) searchable(only []string) string {
+	parts := []string{"''"}
+	if len(only) == 0 {
+		parts[0] = "id"
+	}
 	for _, c := range t.Cols {
-		if c.Kind == Text || c.Kind == Short || c.Kind == Key {
+		if (c.Kind == Text || c.Kind == Short || c.Kind == Key) && (len(only) == 0 || slices.Contains(only, c.Field)) {
 			parts = append(parts, "`"+c.column()+"`")
 		}
 	}
@@ -91,7 +94,7 @@ func (m *MySQL) RecordPage(ctx context.Context, q core.RecordQuery) (out core.Re
 		args = append(args, anyStrings(q.PartnerIn)...)
 	}
 	if q.Search != "" {
-		where += ` AND LOCATE(?,` + t.searchable() + `)>0`
+		where += ` AND LOCATE(?,` + t.searchable(q.SearchFields) + `)>0`
 		args = append(args, q.Search)
 	}
 	if q.Status != "" {
@@ -156,7 +159,7 @@ func (m *Memory) RecordPage(_ context.Context, q core.RecordQuery) (out core.Rec
 		if q.OwnerIn != nil && !slices.Contains(q.OwnerIn, row.Owner) {
 			continue
 		}
-		if !recordSearch(t, row, q.Search) {
+		if !recordSearch(t, row, q.Search, q.SearchFields) {
 			continue
 		}
 		if q.Status != "" {

@@ -27,6 +27,8 @@ Component({
     icon: "",
     amount: "",
     unit: "",
+    rows: [] as { label: string; value: string }[],
+    wide: false,
   },
   methods: {
     open(options: DialogOptions): Promise<boolean> {
@@ -43,6 +45,9 @@ Component({
         glyph: GLYPHS[options.icon || (options.tone === "danger" ? "error-circle" : "")] || "",
         amount: options.amount || "",
         unit: options.unit || "",
+        rows: options.rows || [],
+        // Long text reads better left-aligned than as a centred block.
+        wide: (options.content || "").length > 24,
       });
       return new Promise((resolve) => {
         (this as unknown as { resolver?: (v: boolean) => void }).resolver = resolve;

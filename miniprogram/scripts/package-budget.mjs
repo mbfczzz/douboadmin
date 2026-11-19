@@ -147,7 +147,14 @@ console.log(
 // Template recipe model/resolution: native white <picker> replaced by the
 // app's dark bottom sheet (rows + one shared option list), no new component:
 // 791,241 -> 793,140 B (+1,899). 774 -> 776 KiB.
-const budget = 776 * 1024;
+// Points confirm dialog details panel (计费方式 / 当前可用 / 确认后剩余) in the
+// shared ui-dialog, plus template card and round queue button since 776:
+// 794,859 B. 776 -> 778 KiB.
+// Smoothness pass: cached models on 视频/图片 switch, 优秀 cache + skeleton,
+// per-view scroll, template search, showcase tap guard, instant task detail
+// after submit, notifications/share/shared-work/provider/settings keep their
+// content on return, double-back guards. 802,248 B. 778 -> 784 KiB.
+const budget = 784 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

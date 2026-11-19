@@ -18,6 +18,14 @@ export function openPage(
   return startNavigation(page, (fail) => wx.navigateTo({ ...options, fail }), options.fail);
 }
 
+// wallet ⇄ orders: go back when the target is the page underneath instead
+// of stacking another copy of it.
+export function openOrBack(page: object, url: string) {
+  const pages = typeof getCurrentPages === "function" ? getCurrentPages() : [];
+  if (pages.length > 1 && "/" + pages[pages.length - 2].route === url) return startNavigation(page, (fail) => wx.navigateBack({ fail }));
+  return openPage(page, { url });
+}
+
 export function switchPageTab(page: object, url: string, onFail?: () => void) {
   return startNavigation(page, (fail) => wx.switchTab({ url, fail }), () => {
     onFail?.();

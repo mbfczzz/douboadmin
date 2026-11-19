@@ -141,15 +141,18 @@ func recordMatches(t Table, row core.Record, q core.RecordQuery) bool {
 	return true
 }
 
-func recordSearch(t Table, row core.Record, query string) bool {
+func recordSearch(t Table, row core.Record, query string, only []string) bool {
 	if query == "" {
 		return true
 	}
 	var data map[string]any
 	_ = json.Unmarshal(row.Data, &data)
-	parts := []string{row.ID}
+	parts := []string{}
+	if len(only) == 0 {
+		parts = append(parts, row.ID)
+	}
 	for _, col := range t.Cols {
-		if col.Kind == Text || col.Kind == Short || col.Kind == Key {
+		if (col.Kind == Text || col.Kind == Short || col.Kind == Key) && (len(only) == 0 || slices.Contains(only, col.Field)) {
 			if value, ok := data[col.Field].(string); ok {
 				parts = append(parts, value)
 			}

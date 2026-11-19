@@ -103,11 +103,14 @@ Page({
     if (!this.data.row || this.data.busy) return;
     const revision = this.actionRevision;
     const key = e.currentTarget.dataset.field as keyof Preferences;
-    this.setData({ busy: true });
+    const before = this.data.row, data = { ...before.data, [key]: e.detail.value };
+    // Show the new value now (a failed save then visibly snaps back on
+    // reload); an older load still in flight must not undo it.
+    this.revision++;
+    this.setData({ busy: true, row: { ...before, data } });
     try {
-      const data = { ...this.data.row.data, [key]: e.detail.value };
       const row = await request<Row<Preferences>>("/preferences", "PUT", {
-        version: this.data.row.version,
+        version: before.version,
         data,
       });
       if (revision !== this.actionRevision) return;

@@ -1,4 +1,4 @@
-import { openPage } from "../../utils/navigation";
+import { openPage, resetNavigation } from "../../utils/navigation";
 import { templateCovers as covers } from "../../services/covers";
 import type { Cover } from "../../services/covers";
 
@@ -8,6 +8,8 @@ import type { Cover } from "../../services/covers";
 Component({
   properties: { mode: { type: String, value: "fan" } },
   data: { covers: [] as Cover[], placeholders: [{}, {}, {}] }, // grey cards until covers load
+  // The tap guard is this component's own; release it when its page returns.
+  pageLifetimes: { show() { resetNavigation(this); } },
   lifetimes: {
     attached() {
       void covers().then((list) =>

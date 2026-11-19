@@ -50,11 +50,12 @@ export async function loadRecipe(page: Page) {
   syncRecipeSlots(page);
   const version = (page.recipeRevision || 0) + 1;
   page.recipeRevision = version;
-  page.setData({ recipeError: "正在读取可用模型…", quoteText: "" });
+  // A refresh (e.g. back from the photo picker) keeps the shown models and price.
+  if (!page.data.recipeModels.length) page.setData({ recipeError: "正在读取可用模型…", quoteText: "" });
   try {
     const config = await loadConfig();
     if (page.destroyed || page.recipeRevision !== version || owner !== sessionToken() || page.data.template?.id !== t.id) return;
-    // Same rule as the server's Template.AcceptsModel; admin model order, default preselected.
+    // Same rule as the server's Template.AcceptsModel, in the admin model order.
     const mode = (m: Model) => ["i2v", "keyframe"].includes(t.data.mode || "") && m.modes?.includes("omni_ref") ? "omni_ref" : t.data.mode;
     const models: Choice[] = config.models.filter(m => {
       const selected = mode(m), rules = m.referenceRules?.[selected];
@@ -66,7 +67,7 @@ export async function loadRecipe(page: Page) {
         resolutions: [...m.resolutions].sort((a, b) => resolutionRank.indexOf(a.toLowerCase()) - resolutionRank.indexOf(b.toLowerCase())),
       }));
     page.setData({ recipeModels: models });
-    const model = models.find((m) => m.id === page.data.recipeModel) || models.find((m) => m.id === t.data.model) || models[0];
+    const model = models.find((m) => m.id === page.data.recipeModel) || models[0]; // keep a pick, else the first listed
     if (!model) { page.setData({ recipeError: "暂无兼容当前模板参数的可用模型，请联系管理员" }); return; }
     selectModel(page, model);
   } catch {

@@ -10,7 +10,7 @@
 | POST | /auth/logout | 撤销当前会话 |
 | GET / POST | /access、/access/join | 查询使用授权 / 用服务商分享码加入；微信登录本身不授予业务权限 |
 | GET / PUT | /me | 当前用户资料、作品统计 / 版本化更新 |
-| GET | /templates | 已发布视频模板，支持 `category`、`q`；`kind=video`，其他类型返回空列表 |
+| GET | /templates | 已发布视频模板，支持 `category`、`q`（用户端只匹配标题、简介、分类，不匹配私有提示词；小程序输入停顿 0.4 秒自动搜索，搜索时跨全部分类）；`kind=video`，其他类型返回空列表 |
 | GET | /templates/{id} | 已发布模板详情及新签名封面 URL |
 | POST | /assets | multipart `file`，本人素材；头像最多 5 MB |
 | GET | /assets/{id} | 本人素材详情及新签名 URL |

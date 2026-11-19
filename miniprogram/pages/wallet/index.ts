@@ -8,7 +8,7 @@ import {
   hasSession,
   login,
   sessionUserId,
-  openPage,
+  openOrBack,
 } from "../../utils/api";
 import type { Row } from "../../services/types";
 import { money, points } from "../../services/business";
@@ -19,7 +19,7 @@ import {
   paymentMessage,
   watchPayment,
 } from "../../services/payment-status";
-import { productCards, ledgerRows, loadInsights } from "./insights";
+import { pricePer100, productCards, ledgerRows, loadInsights } from "./insights";
 import type { Ledger } from "../../services/wallet-ledger";
 import { financePage } from "../../services/finance-page";
 import type { FinancePage } from "../../services/finance-page";
@@ -31,7 +31,8 @@ import {
 } from "../../services/wallet-checkout";
 Page({
   explain() {
-    void ask({ title: "积分说明", content: "提交创作时先预留积分，生成成功后结算，失败自动退回。预留中的积分暂不可用，以积分明细为准。", showCancel: false, confirmText: "知道了", icon: "info-circle" });
+    void ask({ title: "积分说明", rows: [{ label: "提交创作", value: "先预留积分" }, { label: "生成成功", value: "正式扣除" }, { label: "生成失败", value: "自动退回" }, { label: "预留中的积分", value: "暂不可用" }],
+      content: "以积分明细为准", showCancel: false, confirmText: "知道了", icon: "info-circle" });
   },
   data: walletData,
   revision: 0,
@@ -100,7 +101,7 @@ Page({
       this.setData({
         info,
         products: productCards(info.virtualProducts || []),
-        price100: info.pricing?.retailPer100Fen ? money(info.pricing.retailPer100Fen) : "",
+        price100: pricePer100(info),
         productId: info.virtualProducts?.some(
           (p) => p.id === this.data.productId,
         )
@@ -240,6 +241,6 @@ Page({
     await checkout(this);
   },
   orders() {
-    openPage(this, { url: "/pages/orders/index" });
+    openOrBack(this, "/pages/orders/index");
   },
 });

@@ -1,3 +1,4 @@
+import { pullRefresh } from "../../utils/refresh";
 import { readView, writeView, keepImages, rememberRows, VIEW_MAX_AGE } from "../../utils/view-cache";
 import { elapsed, nextFilter } from "./view";
 import { loadRefs } from "./refs";
@@ -129,7 +130,7 @@ Page({
   },
   onPullDownRefresh() {
     this.setData({ page: 1 });
-    void this.load();
+    void pullRefresh(() => this.load()); // stops the spinner on every path
   },
   previous() {
     movePage(this, -1);

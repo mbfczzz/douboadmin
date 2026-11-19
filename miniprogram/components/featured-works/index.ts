@@ -1,4 +1,5 @@
 import { error } from "../../utils/api";
+import { readView, writeView } from "../../utils/view-cache";
 import { featuredPage, featuredDetail } from "../../services/featured-works";
 import type { FeaturedWork } from "../../services/featured-works";
 
@@ -48,13 +49,17 @@ Component({
     },
     async load() {
       const s = this.self(), version = ++s.revision;
-      this.setData({ loading: true, loadError: "" });
+      // Seen this session (covers are signed for 15 min): show it at once.
+      const key = `featured:${this.data.kind}:${this.data.page}`;
+      const seen = readView<{ items: FeaturedWork[]; total: number }>(key, 10 * 60 * 1000);
+      this.setData({ loading: true, loadError: "", ...(seen && !this.data.works.length ? { works: seen.items, total: seen.total } : {}) });
       try {
         const result = await featuredPage(this.data.page, this.data.kind);
         if (!s.visible || version !== s.revision) return;
         const last = Math.max(1, Math.ceil(result.total / 20));
         if (this.data.page > last) { this.setData({ page: last, works: [] }); void this.load(); return; }
         this.setData({ works: result.items, total: result.total });
+        writeView(key, { items: result.items, total: result.total }, false);
       } catch (e) {
         if (s.visible && version === s.revision) this.setData({ works: [], total: 0, loadError: (e as Error).message });
       } finally {

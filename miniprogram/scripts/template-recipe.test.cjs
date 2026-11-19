@@ -20,9 +20,9 @@ test('recipe images retain semantic positions after omitted optional slots, repl
     { ...model('video-only-omni'), referenceRules: { omni_ref: { video: { maxCount: 3 } } } }] };
   page.id = 'recipe';
   await page.load();
-  // Any model supporting 30 s, 9:16, 全能参考 and images, in the admin's model order; default preselected.
+  // Any model supporting 30 s, 9:16, 全能参考 and images, in the admin's model order; the first is preselected.
   assert.deepEqual(Array.from(page.data.recipeModels, m => m.id), ['choice', 'default', 'unlisted']);
-  assert.equal(page.data.recipeModel, 'default');
+  assert.equal(page.data.recipeModel, 'choice');
   assert.equal(page.data.recipeMissing, 2);
   recipe.recipeAsset(page, 3, asset('product'));
   recipe.recipeAsset(page, 1, asset('person'));

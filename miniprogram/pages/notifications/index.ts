@@ -4,6 +4,7 @@ import {
   request,
   error,
   enterPage,
+  isNavigating,
   hasSession,
   login,
   openPage,
@@ -36,7 +37,9 @@ Page({
   onShow() {
     this.visible = true;
     enterPage(this);
-    void this.load();
+    // Returning from an opened notice keeps the loaded pages and scroll;
+    // pull down refreshes.
+    if (!this.data.items.length) void this.load();
   },
   onHide() {
     this.visible = false;
@@ -112,24 +115,26 @@ Page({
     }
   },
   async open(e: WechatMiniprogram.TouchEvent) {
-    if (this.opening || !this.visible) return;
+    if (this.opening || !this.visible || isNavigating(this)) return;
     const row = this.data.items.find(
       (r: Row<Notice>) => r.id === e.currentTarget.dataset.id,
     );
     if (!row) return;
-    const revision = this.revision;
+    // Open at once and mark it read locally; the server catches up quietly.
+    const read = request("/notifications/" + row.id + "/read", "PUT", {});
+    if (!row.data.read)
+      this.setData({
+        items: this.data.items.map((r: Row<Notice>) => (r.id === row.id ? { ...r, data: { ...r.data, read: true } } : r)),
+        unread: Math.max(0, this.data.unread - 1),
+      });
+    if (row.data.targetId) {
+      openPage(this, { url: row.data.kind === "order" ? "/pages/orders/index" : "/pages/task-detail/index?id=" + row.data.targetId });
+      read.catch(() => undefined);
+      return;
+    }
     this.opening = true;
     try {
-      await request("/notifications/" + row.id + "/read", "PUT", {});
-      if (!this.visible || revision !== this.revision) return;
-      if (row.data.targetId) {
-        openPage(this, {
-          url:
-            row.data.kind === "order"
-              ? "/pages/orders/index"
-              : "/pages/task-detail/index?id=" + row.data.targetId,
-        });
-      } else await this.load();
+      await read;
     } catch (e) {
       if (this.visible) error(e);
     } finally {

@@ -9,6 +9,9 @@ export function movePage(view: PagedView, delta: number) {
     (page - 1) * 20 >= view.data.total
   )
     return;
+  // Pages show their skeleton only when empty, so the rows stay until the
+  // next page arrives; it starts at its top.
   view.setData({ page, loading: true });
+  wx.pageScrollTo?.({ scrollTop: 0, duration: 0 });
   void view.load();
 }
