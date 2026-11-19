@@ -187,7 +187,20 @@ console.log(
 // 一键复刻 after Clipcat: the video model's breakdown (services/hot-breakdown.ts),
 // the user's own product / person pictures (pages/remake/pictures.ts) and a
 // breakdown-driven brief (pages/create/remake-brief.ts): 881,199 B. 853 -> 861 KiB.
-const budget = 861 * 1024;
+// 一键复刻 as a queued task: the remake page submits it, the task page shows
+// its stages and 去复刻 (pages/task-detail/remake.ts): 882,689 B. 861 -> 863 KiB.
+// 生成同款 straight from the task page: model and length picked for the
+// reference video, description built from the breakdown, one points
+// confirmation (pages/task-detail/remake.ts): 887,029 B. 863 -> 867 KiB.
+// 剧情带货 / 探店 presets: 热门案例 from the hot feed, a picture entry and 清空
+// (pages/create/feature-cases.ts): 891,513 B. 867 -> 871 KiB.
+// Feature pages after the reference screenshots: picture-style cards (OSS
+// art), text examples, 清空, two-column option tiles and switches; 证件照
+// sizes: 898,106 B. 871 -> 878 KiB.
+// Interface-first feature pages do their real part: uploads into the user's
+// materials with progress and thumbnails, option sheets, and required-input
+// checks before 即将开放 (pages/feature/actions.ts): 904,380 B. 878 -> 884 KiB.
+const budget = 884 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

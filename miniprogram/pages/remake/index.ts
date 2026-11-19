@@ -1,7 +1,6 @@
-import { request, error, enterPage, openPage } from "../../utils/api";
+import { request, error, enterPage, openTask } from "../../utils/api";
 import { hotView } from "../../services/hot-video";
-import { importHotVideo, REMAKE_SOURCE_KEY } from "../../services/hot-import";
-import { breakdownVideo } from "../../services/hot-breakdown";
+import { startRemake } from "../../services/hot-import";
 import { pictureHandlers } from "./pictures";
 import type { Picture } from "./pictures";
 import type { HotVideo } from "../../services/hot-video";
@@ -11,11 +10,9 @@ import type { HotVideo } from "../../services/hot-video";
 const REFERENCE_SECONDS = 15;
 
 // 一键复刻 (after Clipcat's flow): a hot video (做同款) or a pasted Douyin link,
-// optionally the user's own product / person pictures. Starting saves the
-// original without watermark into the user's materials, has the video model
-// break it down (hook, shots, selling points), then opens the editor's
-// 一键复刻 preset with the video and pictures as references; the editor
-// writes the remake description from the breakdown.
+// optionally the user's own product / person pictures. Starting adds a task
+// to the queue (services/hot-import.ts) that saves the original without
+// watermark and breaks it down; its task page then opens the editor.
 Page({
   ...pictureHandlers,
   data: {
@@ -26,7 +23,6 @@ Page({
     loadError: "",
     link: "",
     busy: false,
-    stage: "",
     pictures: [] as Picture[],
     picturing: false,
   },
@@ -87,32 +83,15 @@ Page({
   async start() {
     const video = this.data.video;
     if (!video || this.data.busy || this.data.picturing) return;
-    this.setData({ busy: true, stage: "正在获取无水印原视频" });
+    this.setData({ busy: true });
     try {
-      const asset = await importHotVideo(video.id, () => !this.destroyed, (stage) => this.setData({ stage }));
-      if (!asset || this.destroyed) return;
-      this.setData({ stage: "正在拆解原视频的钩子和分镜" });
-      // A failed or unavailable breakdown never stops the remake.
-      const breakdown = await breakdownVideo(video.id, asset, () => !this.destroyed).catch(() => null);
-      if (this.destroyed) return;
       const pictures = this.data.pictures.map((p: Picture) => p.id);
-      const refs = pictures.map((_: string, i: number) => "@图片" + (i + 1)).join("、");
-      const swap = refs ? `，并把原视频中的商品或人物换成${refs}中的商品或人物` : "";
-      // The editor turns these into a shot-by-shot description (feature.ts).
-      wx.setStorageSync(REMAKE_SOURCE_KEY, { title: video.title, text: video.text, duration: video.duration, breakdown, images: pictures.length });
-      wx.setStorageSync("edit-draft", {
-        kind: "video",
-        prompt: `参考@视频1的画面内容、镜头运动和节奏，复刻一条同款视频${swap}。视频主题：${video.title}`,
-        ratio: "9:16",
-        resolution: "",
-        duration: Math.round(video.duration) || 5,
-        assets: [asset, ...pictures],
-      });
-      openPage(this, { url: "/pages/create/index?feature=remake" });
+      const job = await startRemake(video.id, { title: video.title, text: video.text, duration: video.duration }, pictures);
+      if (!this.destroyed) openTask(job.id, this);
     } catch (e) {
       if (!this.destroyed) error(e);
     } finally {
-      if (!this.destroyed) this.setData({ busy: false, stage: "" });
+      if (!this.destroyed) this.setData({ busy: false });
     }
   },
 });

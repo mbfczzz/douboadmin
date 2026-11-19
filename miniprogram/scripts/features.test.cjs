@@ -31,7 +31,9 @@ test("剧情带货 and AI证件照 are editor presets with their own kind and pr
   assert.equal(id.data.kind, "image");
   assert.match(id.data.prompt, /^将@图片1中的人物生成标准证件照.*白色纯色背景/);
   id.chooseOption({ currentTarget: { dataset: { key: "bg", index: 1 } } });
-  assert.match(id.data.prompt, /蓝色纯色背景/);
+  assert.match(id.data.prompt, /蓝色纯色背景[^]*按一寸（25×35mm）证件照比例/);
+  id.chooseOption({ currentTarget: { dataset: { key: "size", index: 1 } } });
+  assert.match(id.data.prompt, /蓝色纯色背景[^]*按二寸（35×49mm）证件照比例/);
 });
 
 test("AI写剧本 asks the chat model and puts its reply in the prompt", async () => {
@@ -146,4 +148,107 @@ test("the remake brief follows the video breakdown and swaps in the user's pictu
   assert.match(text, /生成时长为 10 秒[^]*前 3 秒[^]*@图片1、@图片2[^]*@视频1/);
   const plain = remakeInstruction({ title: "t", text: "文案", duration: 8 }, 5, 300);
   assert.match(plain, /未能拆解画面[^]*文案：文案[^]*不要照搬原作者/);
+});
+
+test("剧情带货 shows real hot cases for its keyword, an upload entry and 清空", async () => {
+  const h = harness(), calls = [];
+  h.api.hasSession = () => true;
+  h.api.request = async (path) => { calls.push(path); return { items: [{ id: "7301", cover: "https://c/1.jpg", title: "洗衣机广告：一洗就干净的秘密" }, { id: "7302", cover: "", title: "无封面" }] }; };
+  const page = h.page("create");
+  page.onLoad({ feature: "ad" });
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.match(calls[0], /^\/hot\/videos\?q=%E5%89%A7%E6%83%85%E5%B8%A6%E8%B4%A7&cursor=0.*&history=0$/);
+  assert.deepEqual(JSON.parse(JSON.stringify(page.data.featureCases)), [{ id: "7301", cover: "https://c/1.jpg", title: "洗衣机广告：一洗" }]);
+  assert.equal(page.data.featureUpload, "上传商品图");
+  page.openCase({ currentTarget: { dataset: { id: "7301" } } });
+  assert.equal(h.nav[0].url, "/pages/remake/index?id=7301");
+  page.setData({ prompt: "写好的剧本", hasPrompt: true });
+  page.clearPrompt();
+  assert.equal(page.data.prompt, "");
+  const visitor = harness();
+  visitor.api.hasSession = () => false;
+  visitor.api.request = async () => { throw new Error("must not ask"); };
+  const quiet = visitor.page("create");
+  quiet.onLoad({ feature: "shop" });
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.equal(quiet.data.featureCases.length, 0);
+  assert.equal(quiet.data.featureUpload, "上传门店图");
+});
+
+test("story pages: style cards, examples that fill the text, 清空 and switches", () => {
+  const h = harness(), page = h.page("feature");
+  page.onLoad({ key: "article" });
+  const kinds = Array.from(page.data.sections, (s) => s.type);
+  assert.deepEqual(kinds, ["text", "examples", "chips", "styles", "rows"]);
+  const styles = page.data.sections[3];
+  assert.equal(styles.picks[0].art, "styleGeneral");
+  assert.equal(styles.picks.length, 5);
+  page.setData = function (v) { for (const [k, val] of Object.entries(v)) { const m = /^sections\[(\d+)\]\.(\w+)$/.exec(k); if (m) this.data.sections[m[1]][m[2]] = val; else this.data[k] = val; } };
+  page.example({ currentTarget: { dataset: { section: 1, index: 1 } } });
+  assert.match(page.data.sections[0].value, /^凌晨两点/);
+  page.clear({ currentTarget: { dataset: { section: 0 } } });
+  assert.equal(page.data.sections[0].value, "");
+  const remix = harness().page("feature");
+  remix.onLoad({ key: "remix" });
+  assert.ok(remix.data.sections.some((s) => s.type === "toggles" && s.items[0].label === "视频加结尾"));
+});
+
+test("a long original squeezed into a short remake merges overlapping beats", () => {
+  const h = harness();
+  const { remakePrompt } = h.service("../pages/create/remake-brief");
+  const shots = Array.from({ length: 6 }, (_, i) => ({ start: i * 10, end: i * 10 + 10, scene: "场景" + i, action: "", camera: "", speech: "" }));
+  const text = remakePrompt({ title: "t", text: "", duration: 60, breakdown: { hook: "", style: "", shots } }, 5, 2000);
+  const lines = text.split("\n").slice(1);
+  const starts = lines.map((l) => Number(l.split("–")[0]));
+  assert.deepEqual(starts, [...new Set(starts)], "no repeated time ranges");
+  assert.ok(lines.every((l) => /^\d+–\d+秒：/.test(l)));
+  assert.match(text, /场景0[^]*场景5/);
+  assert.ok(Number(lines[lines.length - 1].split("–")[1].split("秒")[0]) <= 5);
+});
+
+test("a failed 一键复刻 preparation offers 重新复刻 on the remake page", () => {
+  const h = harness(), detail = h.page("task-detail");
+  detail.setData({ job: { id: "j", status: "failed", input: { kind: "import", purpose: "remake", sourceId: "7301", prompt: "一键复刻：t", assets: [] } } });
+  detail.remakeAgain();
+  assert.equal(h.nav[0].url, "/pages/remake/index?id=7301");
+});
+
+test("interface-first pages: real uploads, option sheets, and checks before 即将开放", async () => {
+  const h = harness(), toasts = [], sheets = [];
+  h.wx.showToast = (o) => toasts.push(o.title);
+  h.wx.showActionSheet = (o) => { sheets.push(o.itemList); o.success({ tapIndex: 1 }); };
+  h.api.chooseReferenceFile = async (kind) => ({ path: "/tmp/" + kind, name: "形象.mp4", size: 1 });
+  h.api.upload = async () => ({ id: "asset-9", data: { url: "/media/v.mp4", type: "video/mp4", name: "形象.mp4", thumbnailUrl: "/media/v.jpg" } });
+  const page = h.page("feature");
+  page.onLoad({ key: "avatar" });
+  page.setData = function (v) {
+    for (const [k, val] of Object.entries(v)) {
+      const m = /^sections\[(\d+)\]\.(\w+)(?:\[(\d+)\]\.(\w+))?$/.exec(k);
+      if (!m) this.data[k] = val;
+      else if (m[3] === undefined) this.data.sections[m[1]][m[2]] = val;
+      else this.data.sections[m[1]][m[2]][m[3]][m[4]] = val;
+    }
+  };
+  page.start();
+  assert.equal(toasts.pop(), "请先上传形象视频");
+  await page.upload({ currentTarget: { dataset: { section: 0 } } });
+  assert.equal(page.data.sections[0].file.id, "asset-9");
+  assert.equal(page.data.sections[0].uploading, false);
+  page.start();
+  assert.equal(toasts.pop(), "请先输入口播文案");
+  page.input({ currentTarget: { dataset: { section: 1 } }, detail: { value: "大家好" } });
+  page.start();
+  assert.equal(toasts.pop(), "该功能即将开放");
+  page.removeUpload({ currentTarget: { dataset: { section: 0 } } });
+  assert.equal(page.data.sections[0].file, null);
+
+  const story = harness();
+  story.wx.showActionSheet = (o) => { sheets.push(o.itemList); o.success({ tapIndex: 1 }); };
+  const article = story.page("feature");
+  article.onLoad({ key: "article" });
+  article.setData = page.setData;
+  const rows = article.data.sections.findIndex((s) => s.type === "rows");
+  article.row({ currentTarget: { dataset: { section: rows, index: 1 } } });
+  assert.deepEqual(Array.from(sheets[0]), ["9:16", "16:9", "1:1", "3:4"]);
+  assert.equal(article.data.sections[rows].items[1].value, "16:9");
 });

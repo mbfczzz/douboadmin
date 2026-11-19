@@ -14,7 +14,9 @@ import {
 import type { Job, Row, Asset } from "../../services/types";
 import { confirmBudget } from "../../services/business";
 import { assetViews } from "./assets";
+import { remakeHandlers } from "./remake";
 Page({
+  ...remakeHandlers,
   data: {
     job: null as ReturnType<typeof jobView> | null,
     loading: true,

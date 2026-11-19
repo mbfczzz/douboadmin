@@ -218,3 +218,27 @@ button.retry-pill::after {
 .live-stage .stage-note {
   margin: 0;
 }
+/* 一键复刻: the prepared task continues in the editor. */
+.remake-ready {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 14px;
+  font-size: 13px;
+  color: var(--ui-muted);
+}
+button.remake-go {
+  flex: none;
+  padding: 0 28px;
+}
+.remake-copy {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.remake-edit {
+  color: var(--ui-link);
+}

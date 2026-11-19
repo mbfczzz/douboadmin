@@ -33,6 +33,6 @@
     </view>
   </view>
   <text wx:if="{{video&&tooLong}}" class="biz-note remake-long">原视频 {{seconds}} 秒，多数模型的参考视频限 15 秒左右，较长时可能无法直接生成</text>
-  <text wx:if="{{busy}}" class="biz-note">{{stage}}</text>
   <button class="biz-action remake-start" loading="{{busy}}" disabled="{{!video||busy||picturing}}" bindtap="start">开始复刻</button>
+  <text wx:if="{{video}}" class="biz-note remake-note">开始后在任务队列里准备原视频和拆解，可以先离开</text>
 </view>

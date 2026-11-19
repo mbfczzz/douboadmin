@@ -1,32 +1,55 @@
 import { request } from "./request";
 import { uid } from "./ids";
 import type { Job } from "./types";
+import type { Breakdown } from "./hot-breakdown";
 
-// Saves a Douyin video into the user's materials: the server downloads the
-// original upload without watermark (or the clean play address) and returns
-// the asset. `stage` reports the server's progress text.
-const WAIT_MS = 2500;
+// 一键复刻 runs as a task in the queue: the server saves the original without
+// watermark into the user's materials and breaks it down (hook, shots,
+// selling points). When it is done, the task page hands it to the editor's
+// 一键复刻 preset (pages/create/feature.ts writes the description).
 
-// What 一键复刻 hands the editor about the original (pages/create/feature.ts
-// turns it into a shot-by-shot description).
+// What 一键复刻 hands the editor about the original.
 export type RemakeSource = {
   title: string;
   text: string;
   duration: number;
-  breakdown?: import("./hot-breakdown").Breakdown | null; // the video model's reading, when available
+  breakdown?: Breakdown | null; // the video model's reading, when available
   images?: number; // the user's own product / person pictures, @图片1…
 };
 export const REMAKE_SOURCE_KEY = "remake-source";
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-export async function importHotVideo(id: string, alive: () => boolean, stage: (text: string) => void) {
-  let job = await request<Job>("/hot/videos/" + id + "/import", "POST", {}, uid());
-  while (job.status !== "succeeded" || !job.resultAssetId) {
-    if (job.status === "failed") throw new Error(job.error || "原视频获取失败，请重试");
-    stage(job.stage || "正在获取无水印原视频");
-    await sleep(WAIT_MS);
-    if (!alive()) return "";
-    job = await request<Job>("/jobs/" + job.id);
-  }
-  return job.resultAssetId;
+export type RemakeOriginal = { title: string; text: string; duration: number };
+
+export function startRemake(videoId: string, original: RemakeOriginal, pictures: string[]) {
+  return request<Job>("/hot/videos/" + videoId + "/import", "POST", {
+    purpose: "remake",
+    assets: pictures,
+    title: original.title,
+    text: original.text.slice(0, 500),
+    duration: Math.round(original.duration) || 0,
+  }, uid());
+}
+
+// The task keeps "一键复刻：title" then the caption in its prompt.
+export function remakeOriginal(job: Job): RemakeOriginal {
+  const [first, ...rest] = (job.input.prompt || "").split("\n");
+  return { title: first.replace(/^一键复刻：/, ""), text: rest.join("\n"), duration: job.input.duration || 0 };
+}
+
+// Opens the editor's preset with the saved video (@视频1) and pictures (@图片N).
+export function remakeHandoff(job: Job, breakdown: Breakdown | null) {
+  const original = remakeOriginal(job);
+  const pictures = job.input.assets || [];
+  const refs = pictures.map((_, i) => "@图片" + (i + 1)).join("、");
+  const swap = refs ? `，并把原视频中的商品或人物换成${refs}中的商品或人物` : "";
+  const source: RemakeSource = { ...original, breakdown, images: pictures.length };
+  wx.setStorageSync(REMAKE_SOURCE_KEY, source);
+  wx.setStorageSync("edit-draft", {
+    kind: "video",
+    prompt: `参考@视频1的画面内容、镜头运动和节奏，复刻一条同款视频${swap}。视频主题：${original.title}`,
+    ratio: "9:16",
+    resolution: "",
+    duration: Math.round(original.duration) || 5,
+    assets: [job.resultAssetId, ...pictures],
+  });
 }

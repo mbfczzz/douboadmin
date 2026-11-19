@@ -2,6 +2,7 @@ import { error } from "../../utils/api";
 import { writeScript } from "../../services/ai-script";
 import { loadConfig } from "../../utils/config-cache";
 import { remakeInstruction } from "./remake-brief";
+import { loadCases, openCase } from "./feature-cases";
 import { REMAKE_SOURCE_KEY } from "../../services/hot-import";
 import type { RemakeSource } from "../../services/hot-import";
 import { defaultPromptChars } from "./models";
@@ -16,17 +17,19 @@ import type { VisibleEditor } from "./editor-types";
 // pricing and generation stay the editor's own.
 type Choice = { label: string; text: string };
 type Option = { key: string; label: string; values: Choice[] };
-type Feature = { title: string; kind: "video" | "image"; placeholder: string; tip: string; script?: string; ratio?: string; options?: Option[]; uses?: "image" | "video"; needs?: string };
+// upload: the big picture entry's label; cases: the keyword of its 热门案例.
+type Feature = { title: string; kind: "video" | "image"; placeholder: string; tip: string; script?: string; ratio?: string; options?: Option[]; uses?: "image" | "video"; needs?: string; upload?: string; cases?: string };
 
 const ID_OPTIONS: Option[] = [
   { key: "bg", label: "背景", values: [{ label: "白底", text: "白色" }, { label: "蓝底", text: "蓝色" }, { label: "红底", text: "红色" }] },
   { key: "dress", label: "服装", values: [{ label: "原服装", text: "保留原来的服装" }, { label: "正装西服", text: "换成深色正装西服配白衬衫" }, { label: "白衬衫", text: "换成白色衬衫" }] },
+  { key: "size", label: "尺寸", values: [{ label: "一寸", text: "一寸（25×35mm）" }, { label: "二寸", text: "二寸（35×49mm）" }, { label: "小二寸", text: "小二寸（33×48mm）" }] },
 ];
 
 export const FEATURES: Record<string, Feature> = {
-  ad: { title: "剧情带货", kind: "video", uses: "image", script: "剧情带货短视频", tip: "建议上传清晰完整的商品图", placeholder: "描述剧情或商品卖点，\n也可以写个想法，点「AI写剧本」。" },
-  shop: { title: "探店视频", kind: "video", uses: "image", script: "探店打卡短视频", tip: "按描述顺序上传门店、菜品图", placeholder: "介绍门店和想拍的画面，\n例如：拍一个女生在我的奶茶店打卡。" },
-  idphoto: { title: "AI证件照", kind: "image", ratio: "3:4", uses: "image", needs: "请先上传一张本人照片", options: ID_OPTIONS, tip: "上传一张正脸清晰的照片", placeholder: "选好背景和服装后自动生成描述，也可以修改。" },
+  ad: { title: "剧情带货", kind: "video", uses: "image", upload: "上传商品图", cases: "剧情带货", script: "剧情带货短视频", tip: "建议上传清晰完整的商品图", placeholder: "描述剧情或商品卖点，\n也可以写个想法，点「AI写剧本」。" },
+  shop: { title: "探店视频", kind: "video", uses: "image", upload: "上传门店图", cases: "探店", script: "探店打卡短视频", tip: "按描述顺序上传门店、菜品图", placeholder: "介绍门店和想拍的画面，\n例如：拍一个女生在我的奶茶店打卡。" },
+  idphoto: { title: "AI证件照", kind: "image", ratio: "3:4", uses: "image", upload: "上传照片", needs: "请先上传一张本人照片", options: ID_OPTIONS, tip: "上传一张正脸清晰的照片", placeholder: "选好背景和服装后自动生成描述，也可以修改。" },
   remake: { title: "一键复刻", kind: "video", uses: "video", needs: "请先带入要复刻的视频", script: "同款复刻短视频", tip: "已带入无水印原视频作为参考", placeholder: "描述想怎么复刻，例如换成自己的产品或人物。" },
 };
 
@@ -47,20 +50,21 @@ export async function startFeatureScript(page: Page) {
 
 function idPrompt(choice: Record<string, number>) {
   const pick = (o: Option) => o.values[choice[o.key] || 0].text;
-  return `将@图片1中的人物生成标准证件照：正面免冠，五官清晰，表情自然，光线均匀，${pick(ID_OPTIONS[0])}纯色背景，${pick(ID_OPTIONS[1])}，头肩构图，保持本人长相不变。`;
+  return `将@图片1中的人物生成标准证件照：正面免冠，五官清晰，表情自然，光线均匀，${pick(ID_OPTIONS[0])}纯色背景，${pick(ID_OPTIONS[1])}，按${pick(ID_OPTIONS[2])}证件照比例头肩构图，保持本人长相不变。`;
 }
 
 export function applyFeature(page: Page, key: string) {
   const f = FEATURES[key];
   if (!f) return;
-  const choice = { bg: 0, dress: 0 };
+  const choice = { bg: 0, dress: 0, size: 0 };
   const prompt = f.options ? idPrompt(choice) : "";
   page.setData({
     feature: key, featureTitle: f.title, featureTip: f.tip, featurePlaceholder: f.placeholder,
-    featureScript: !!f.script, featureOptions: f.options || [], featureChoice: choice,
+    featureScript: !!f.script, featureOptions: f.options || [], featureChoice: choice, featureUpload: f.upload || "",
     kind: f.kind, maxPromptChars: defaultPromptChars(f.kind), ratio: f.ratio || (f.kind === "image" ? "1:1" : "9:16"),
     prompt, hasPrompt: !!prompt,
   });
+  void loadCases(page, f.cases || "");
 }
 
 // Presets work from references: start on a model that takes their kind.
@@ -78,6 +82,12 @@ export function featureProblem(data: { feature: string; assets: { isImage?: bool
 }
 
 export const featureHandlers = {
+  openCase(this: Page, e: WechatMiniprogram.TouchEvent) {
+    openCase(this, e.currentTarget.dataset.id);
+  },
+  clearPrompt(this: Page) {
+    if (!this.data.busy && !this.data.scriptBusy) this.setData({ prompt: "", hasPrompt: false });
+  },
   chooseOption(this: Page, e: WechatMiniprogram.TouchEvent) {
     const { key, index } = e.currentTarget.dataset as { key: string; index: number };
     if (this.data.busy) return;

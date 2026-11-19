@@ -6,20 +6,51 @@
     </view>
     <view wx:elif="{{s.tab===undefined||s.tab===tab}}" class="biz-card feature-card">
       <text wx:if="{{s.label}}" class="feature-label">{{s.label}}</text>
-      <view wx:if="{{s.type==='upload'}}" class="upload-box" bindtap="upload" hover-class="card-pressed" aria-role="button">
-        <image class="gl gl-24" src="/assets/glyphs/{{s.media==='video'?'video':'image'}}-muted-lg.png" />
-        <text>{{s.hint}}</text>
-      </view>
+      <block wx:if="{{s.type==='upload'}}">
+        <view wx:if="{{s.file}}" class="upload-done">
+          <image wx:if="{{s.file.isImage||s.file.cover}}" class="upload-thumb" src="{{s.file.isImage?s.file.url:s.file.cover}}" mode="aspectFill" />
+          <view wx:else class="upload-thumb upload-video"><image class="gl gl-24" src="/assets/glyphs/video-muted-lg.png" /></view>
+          <view class="upload-info">
+            <text class="upload-name">{{s.file.name}}</text>
+            <text class="upload-change" data-section="{{si}}" bindtap="upload">{{s.uploading?'上传中…':'重新上传'}}</text>
+          </view>
+          <view class="upload-remove" data-section="{{si}}" catchtap="removeUpload" aria-role="button" aria-label="删除">×</view>
+        </view>
+        <view wx:else class="upload-box {{s.uploading?'is-busy':''}}" data-section="{{si}}" bindtap="upload" hover-class="card-pressed" aria-role="button">
+          <image class="gl gl-24" src="/assets/glyphs/{{s.uploading?'clock-muted':(s.media==='video'?'video-muted-lg':'image-muted-lg')}}.png" />
+          <text>{{s.uploading?'上传中…':s.hint}}</text>
+        </view>
+      </block>
       <block wx:elif="{{s.type==='text'}}">
         <textarea class="feature-text" always-embed disable-default-padding value="{{s.value}}" maxlength="{{s.max}}" placeholder="{{s.placeholder}}" placeholder-class="feature-placeholder" data-section="{{si}}" bindinput="input" />
-        <text class="feature-count">{{s.value.length}} / {{s.max}}</text>
+        <view class="text-foot">
+          <text wx:if="{{s.value.length}}" class="text-clear" data-section="{{si}}" bindtap="clear" aria-role="button">清空</text>
+          <text class="feature-count">{{s.value.length}} / {{s.max}}</text>
+        </view>
       </block>
+      <view wx:elif="{{s.type==='examples'}}" class="feature-chips">
+        <text wx:for="{{s.values}}" wx:key="label" class="chip example" data-section="{{si}}" data-index="{{index}}" bindtap="example">{{item.label}}</text>
+      </view>
+      <scroll-view wx:elif="{{s.type==='styles'}}" scroll-x enhanced show-scrollbar="{{false}}" class="style-strip">
+        <view class="style-row">
+          <view wx:for="{{s.picks}}" wx:key="label" class="style-card {{item.on?'on':''}}" data-section="{{si}}" data-index="{{index}}" bindtap="pick" aria-role="button" aria-label="{{item.label}}">
+            <image wx:if="{{art[item.art]}}" src="{{art[item.art]}}" mode="aspectFill" />
+            <text>{{item.label}}</text>
+          </view>
+        </view>
+      </scroll-view>
       <view wx:elif="{{s.type==='chips'}}" class="feature-chips">
         <text wx:for="{{s.picks}}" wx:key="label" class="chip {{item.on?'on':''}}" data-section="{{si}}" data-index="{{index}}" bindtap="pick">{{item.label}}</text>
       </view>
-      <view wx:elif="{{s.type==='rows'}}">
-        <view wx:for="{{s.items}}" wx:key="label" class="feature-row" bindtap="row" hover-class="card-pressed">
-          <text>{{item.label}}</text><text class="row-value">{{item.value}} ›</text>
+      <view wx:elif="{{s.type==='rows'}}" class="{{s.grid?'feature-grid':''}}">
+        <view wx:for="{{s.items}}" wx:key="label" class="feature-row" data-section="{{si}}" data-index="{{index}}" bindtap="row" hover-class="card-pressed" aria-role="button" aria-label="{{item.label+'：'+item.value}}">
+          <view class="row-name"><image wx:if="{{item.icon}}" class="gl gl-18" src="/assets/glyphs/{{item.icon}}.png" /><text>{{item.label}}</text></view><text class="row-value">{{item.value}} ›</text>
+        </view>
+      </view>
+      <view wx:elif="{{s.type==='toggles'}}">
+        <view wx:for="{{s.items}}" wx:key="label" class="feature-row">
+          <text>{{item.label}}</text>
+          <switch checked="{{item.on}}" color="#00c8dc" data-section="{{si}}" data-index="{{index}}" bindchange="toggle" />
         </view>
       </view>
       <view wx:elif="{{s.type==='notes'}}" class="feature-notes">

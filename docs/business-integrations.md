@@ -39,7 +39,7 @@ TikHub 适配已核对其 OpenAPI：搜索 `POST /api/v1/douyin/search/fetch_vid
 
 创作页视频流：默认取抖音视频热榜 `POST /api/v1/douyin/billboard/fetch_hot_total_video_list`（近 7 天、视频总榜 `sub_type=1001`，每页 20 条，按标签关键词过滤，「热门」不过滤）；后台「创作页视频来源」可切回关键词搜索 `fetch_video_search_v2`（`HOT_FEED_SOURCE=search`，重启生效），两种来源分开缓存。TikHub 未写明返回格式，解析兼容 `objs` / `list` 等常见结构，读不懂时记 `tikhub billboard reply not understood` 警告并附返回开头。创作关键词在后台「服务接入配置 → 热门视频接口 → 创作页关键词」设置（`HOT_FEED_KEYWORDS`，保存后重启生效；经 `GET /api/hot/discovery?words=0` 下发）首页结果存 Redis（`doubo:hot:feed:*`），有效 1 小时；API 进程每分钟检查，结果满 59 分钟即提前刷新，多实例用 Redis 锁保证每个关键词只刷新一次；刷新失败保留旧数据（最长 2 小时）并在下一分钟重试，失败写入 `hot feed refresh failed` 警告日志。未配置 Redis 时退回数据库缓存（30 分钟）。
 
-一键复刻视频拆解：后台「服务接入配置 → 视频理解」配置 OpenAI 兼容的视频理解接口（默认火山方舟 `https://ark.cn-beijing.volces.com/api/v3`，模型 `doubao-seed-1-6-vision-250815`）。复刻时先把无水印原视频存入用户素材，再以其 OSS 签名地址调用 `chat/completions`（`video_url`，fps=1，方舟要求 URL 方式视频 ≤50MB），输出钩子、结构、卖点、风格、音乐和 3–12 个分镜。结果按「模型 + 抖音视频 ID」存入 `hot_breakdowns` 表并全员共用；接口 `POST/GET /api/hot/videos/{id}/breakdown` 异步执行、客户端轮询，失败或超过 5 分钟未完成的可重新发起。未配置、失败或视频过大时复刻照常进行，只参考视频文案。拆解费用由平台承担。
+一键复刻视频拆解：后台「服务接入配置 → 视频理解」配置 OpenAI 兼容的视频理解接口（默认火山方舟 `https://ark.cn-beijing.volces.com/api/v3`，模型 `doubao-seed-1-6-vision-250815`）。复刻在任务队列中进行：复刻页以 `POST /api/hot/videos/{id}/import`（`purpose=remake`，附用户替换图片、原视频标题/文案/时长）创建导入任务，Worker 先把无水印原视频存入用户素材，再以其 OSS 签名地址调用 `chat/completions`（`video_url`，fps=1，方舟要求 URL 方式视频 ≤50MB），输出钩子、结构、卖点、风格、音乐和 3–12 个分镜。结果按「模型 + 抖音视频 ID」存入 `hot_breakdowns` 表并全员共用；同一视频并发准备时只调用一次模型，其余等待其结果；失败或超过 5 分钟未完成的可重新发起。任务就绪后，任务详情「生成同款」读取 `GET /api/hot/videos/{id}/breakdown`，自动选支持参考视频的模型与最接近原视频的时长，按拆解结果拼出分时段描述，确认积分后直接提交视频生成；「调整后再生成」打开编辑页复刻预设。未配置、失败或视频过大时复刻照常进行，只参考视频文案。拆解费用由平台承担。
 
 分享链接与无水印原视频（文案提取、一键复刻）：
 

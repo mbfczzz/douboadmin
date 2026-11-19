@@ -60,3 +60,15 @@ func TestJobThumbnailDecoratesCompletedAuthorizedResults(t *testing.T) {
 		}
 	}
 }
+
+// An imported original (一键复刻 preparation) is a video: it gets a cover.
+func TestImportJobThumbnailIsAVideoSnapshot(t *testing.T) {
+	a, _, _ := setup(t)
+	a.Media = &media.Service{Store: a.Store, Objects: &thumbnailObjects{}}
+	_, _ = a.Store.Put(t.Context(), "assets", core.Record{ID: "original", Data: core.Data(media.Asset{Key: "imports/v.mp4", Type: "video/mp4"})}, 0)
+	j := core.Job{ID: "job-import", UserID: "user-a", Status: "succeeded", Input: core.JobInput{Kind: "import", Model: "hot-import", Purpose: "remake"}, Result: "asset:original"}
+	a.presentJob(context.WithValue(t.Context(), identityKey, Identity{Role: "user", ID: "user-a"}), &j)
+	if j.ThumbnailURL == "" || j.ResultAssetID != "original" {
+		t.Fatalf("%+v", j)
+	}
+}

@@ -62,6 +62,12 @@ const NAMES = {
   toolLibrary: "tool-library",
   toolWorks: "tool-works",
   toolTasks: "tool-tasks",
+  // 图文成片 / 漫画推文 picture-style cards
+  styleGeneral: "style-general",
+  styleRomance: "style-romance",
+  styleXianxia: "style-xianxia",
+  styleSuspense: "style-suspense",
+  styleGuoman: "style-guoman",
 };
 export type Art = Record<keyof typeof NAMES, string>;
 

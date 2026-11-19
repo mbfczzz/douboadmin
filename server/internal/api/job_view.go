@@ -82,7 +82,11 @@ func (a *Server) presentJob(ctx context.Context, j *core.Job) {
 		}
 	}
 	if actor, ok := ctx.Value(identityKey).(Identity); ok && (actor.Role == "admin" || actor.Role == "user" && actor.ID == j.UserID) && j.Status == "succeeded" && !j.Deleted && j.Result != "" && a.Media != nil {
-		j.ThumbnailURL, _ = a.Media.Thumbnail(ctx, resultRef, j.Input.Kind)
+		kind := j.Input.Kind
+		if kind == "import" { // an imported (or 一键复刻) original is a video
+			kind = "video"
+		}
+		j.ThumbnailURL, _ = a.Media.Thumbnail(ctx, resultRef, kind)
 	}
 	j.Retryable = false
 	if j.Input.Assets == nil {

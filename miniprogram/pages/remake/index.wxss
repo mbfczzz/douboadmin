@@ -100,3 +100,8 @@ button.remake-start {
 .picture-add.is-busy {
   opacity: 0.6;
 }
+.remake-note {
+  display: block;
+  margin-top: 10px;
+  text-align: center;
+}

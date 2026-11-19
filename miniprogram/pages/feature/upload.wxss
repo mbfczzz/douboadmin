@@ -1,0 +1,62 @@
+/* Upload sections: the empty picker, then the uploaded file. */
+.upload-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 140px;
+  border: 1px dashed var(--ui-border);
+  border-radius: 12px;
+  font-size: 13px;
+  color: var(--ui-muted);
+}
+.upload-box.is-busy {
+  opacity: 0.6;
+}
+/* An uploaded file: its picture, name, 重新上传 and remove. */
+.upload-done {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.upload-thumb {
+  flex: none;
+  width: 72px;
+  height: 72px;
+  border-radius: 10px;
+  background: var(--ui-field);
+}
+.upload-video {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.upload-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.upload-name {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 14px;
+}
+.upload-change {
+  font-size: 13px;
+  color: var(--ui-link);
+}
+.upload-remove {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 14px;
+  line-height: 26px;
+  text-align: center;
+  font-size: 18px;
+  color: var(--ui-muted);
+  background: var(--ui-field);
+}

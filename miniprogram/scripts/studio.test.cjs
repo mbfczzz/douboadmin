@@ -60,31 +60,76 @@ test("a visitor sees the keywords with a sign-in prompt, not a failed search", a
   assert.deepEqual(calls, ["/hot/discovery?words=0"]);
 });
 
-test("做同款 opens 一键复刻; starting saves the clean original and opens the remake preset", async () => {
+test("做同款 opens 一键复刻; starting queues the preparation task and opens it", async () => {
   const { h, page } = studio();
   page.remake({ currentTarget: { dataset: { id: "v1" } } });
   assert.equal(h.nav[0].url, "/pages/remake/index?id=v1");
-  const remake = h.page("remake"), imported = [];
-  h.service("hot-import").importHotVideo = async (id, alive, stage) => { imported.push(id); stage("下载视频素材"); return "asset-1"; };
-  const broken = [];
-  h.service("hot-breakdown").breakdownVideo = async (id, asset) => { broken.push([id, asset]); return { hook: "撕快递", shots: [] }; };
+  const remake = h.page("remake"), started = [];
+  h.service("hot-import").startRemake = async (id, original, pictures) => { started.push([id, original.title, Array.from(pictures)]); return { id: "job-9" }; };
   remake.onLoad({ id: "v1" });
   remake.onShow();
   await settle();
   assert.equal(remake.data.video.id, "v1");
   remake.setData({ pictures: [{ id: "pic-1", url: "u" }] });
   await remake.start();
-  assert.deepEqual(imported, ["v1"]);
-  assert.deepEqual(broken, [["v1", "asset-1"]]);
-  const source = h.storage.get("remake-source");
-  assert.equal(source.title, "视频v1");
-  assert.equal(source.breakdown.hook, "撕快递");
-  assert.equal(source.images, 1);
-  const draft = h.storage.get("edit-draft");
-  assert.deepEqual(Array.from(draft.assets), ["asset-1", "pic-1"]);
-  assert.match(draft.prompt, /^参考@视频1[^]*换成@图片1中的商品或人物/);
-  assert.equal(h.nav[1].url, "/pages/create/index?feature=remake");
+  assert.deepEqual(started, [["v1", "视频v1", ["pic-1"]]]);
+  assert.equal(h.nav[1].url, "/pages/task-detail/index?id=job-9");
   assert.equal(remake.data.busy, false);
+});
+
+test("a finished 一键复刻 task hands video, pictures and breakdown to the editor", async () => {
+  const h = harness(), calls = [];
+  const { startRemake, remakeHandoff, remakeOriginal } = h.service("hot-import");
+  h.service("request").request = async (path, method, body, key) => { calls.push([path, method, body, !!key]); return { id: "job-1" }; };
+  await startRemake("7301", { title: "开箱口红", text: "黄皮也能涂", duration: 17.6 }, ["pic-1"]);
+  assert.deepEqual(calls[0].slice(0, 2), ["/hot/videos/7301/import", "POST"]);
+  assert.deepEqual(JSON.parse(JSON.stringify(calls[0][2])), { purpose: "remake", assets: ["pic-1"], title: "开箱口红", text: "黄皮也能涂", duration: 18 });
+  assert.equal(calls[0][3], true, "idempotency key");
+  const job = { id: "job-1", resultAssetId: "asset-1", input: { kind: "import", purpose: "remake", sourceId: "7301", prompt: "一键复刻：开箱口红\n黄皮也能涂", duration: 18, assets: ["pic-1", "pic-2"] } };
+  assert.deepEqual(JSON.parse(JSON.stringify(remakeOriginal(job))), { title: "开箱口红", text: "黄皮也能涂", duration: 18 });
+  remakeHandoff(job, { hook: "撕快递", shots: [] });
+  const source = h.storage.get("remake-source"), draft = h.storage.get("edit-draft");
+  assert.equal(source.breakdown.hook, "撕快递");
+  assert.equal(source.images, 2);
+  assert.deepEqual(Array.from(draft.assets), ["asset-1", "pic-1", "pic-2"]);
+  assert.match(draft.prompt, /^参考@视频1[^]*换成@图片1、@图片2中的商品或人物[^]*视频主题：开箱口红$/);
+  assert.equal(draft.duration, 18);
+});
+
+test("生成同款 picks a fitting model, writes from the breakdown and submits after one confirmation", async () => {
+  const h = harness(), submitted = [];
+  h.service("hot-breakdown").readBreakdown = async () => ({ hook: "撕快递", style: "手持暖光", shots: [{ start: 0, end: 6, scene: "卧室", action: "撕开快递", camera: "手持", speech: "终于到了" }, { start: 6, end: 18, scene: "镜前", action: "试色", camera: "特写", speech: "" }] });
+  const video = (id, refs) => ({ id, kind: "video", name: id, referenceTypes: refs, modes: ["t2v", "omni_ref"], durations: [5, 10, 15], resolutions: ["480p", "720p"], ratios: ["9:16", "16:9"], settings: {} });
+  h.service("../utils/config-cache").loadConfig = async () => ({ models: [video("text-only", []), video("video-only", ["video"]), video("both", ["image", "video"])] });
+  h.api.submitInput = async (input, channel) => { submitted.push([input, channel]); return { id: "gen-1", input, status: "queued" }; };
+  const detail = h.page("task-detail");
+  detail.setData({ job: { id: "job-1", status: "succeeded", resultAssetId: "asset-1", input: { kind: "import", purpose: "remake", sourceId: "7301", prompt: "一键复刻：开箱口红", duration: 18, assets: ["pic-1"] } } });
+  await detail.generateRemake();
+  const [input, channel] = submitted[0];
+  assert.equal(channel, "remake");
+  assert.equal(input.model, "both", "a model taking the video and the picture");
+  assert.equal(input.duration, 15);
+  assert.equal(input.mode, "omni_ref");
+  assert.deepEqual(Array.from(input.assets), ["asset-1", "pic-1"]);
+  assert.match(input.prompt, /^参考@视频1[^]*15 秒的同款视频[^]*换成@图片1[^]*开头 3 秒保留钩子：撕快递[^]*\n0–5秒：卧室，撕开快递，手持，台词“终于到了”\n5–15秒：镜前，试色，特写$/);
+  assert.equal(h.nav[0].url, "/pages/task-detail/index?id=gen-1");
+  assert.equal(detail.data.busy, false);
+});
+
+test("调整后再生成 still opens the editor preset; labels say 一键复刻", async () => {
+  const h = harness();
+  h.service("hot-breakdown").readBreakdown = async (id) => (id === "7301" ? { hook: "钩子", shots: [] } : null);
+  const detail = h.page("task-detail");
+  detail.setData({ job: { id: "job-1", status: "succeeded", resultAssetId: "asset-1", input: { kind: "import", purpose: "remake", sourceId: "7301", prompt: "一键复刻：标题", duration: 10, assets: [] } } });
+  await detail.editRemake();
+  assert.equal(h.storage.get("remake-source").breakdown.hook, "钩子");
+  assert.equal(h.nav[0].url, "/pages/create/index?feature=remake");
+  const { jobView } = h.api;
+  const remake = jobView({ ...detail.data.job, createdAt: "2026-11-20T00:00:00Z", input: { ...detail.data.job.input, prompt: "一键复刻：标题\n文案" } });
+  assert.equal(remake.kindText, "一键复刻");
+  assert.equal(remake.stateText, "已就绪");
+  assert.equal(remake.shortTitle, "一键复刻：标题");
+  assert.equal(jobView({ id: "x", status: "running", createdAt: "2026-11-20T00:00:00Z", input: { kind: "import", prompt: "导入抖音视频素材", assets: [] } }).kindText, "素材导入");
 });
 
 test("一键复刻 also reads a pasted Douyin link", async () => {

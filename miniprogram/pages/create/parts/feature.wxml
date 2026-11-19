@@ -1,5 +1,21 @@
+<view wx:if="{{featureCases.length}}" class="feature-cases">
+  <text class="feature-section">热门案例</text>
+  <scroll-view scroll-x enhanced show-scrollbar="{{false}}" class="cases-strip">
+    <view class="cases-row">
+      <view wx:for="{{featureCases}}" wx:key="id" class="case" data-id="{{item.id}}" bindtap="openCase" hover-class="card-pressed" aria-role="button" aria-label="{{'做同款：'+item.title}}">
+        <image src="{{item.cover}}" mode="aspectFill" lazy-load />
+        <text>{{item.title}}</text>
+      </view>
+    </view>
+  </scroll-view>
+</view>
+<view wx:if="{{featureUpload&&!assets.length}}" class="feature-upload" data-kind="image" bindtap="addAsset" hover-class="card-pressed" aria-role="button" aria-label="{{featureUpload}}">
+  <view class="upload-icon"><image class="gl gl-24" src="/assets/glyphs/{{uploading?'clock-muted':'image'}}.png" /><text>{{uploading?'上传中':featureUpload}}</text></view>
+  <text class="upload-tip">{{featureTip}}</text>
+</view>
 <view wx:if="{{feature}}" class="feature-bar">
-  <text class="feature-tip">{{featureTip}}</text>
+  <text class="feature-tip">{{featureUpload&&!assets.length?'':featureTip}}</text>
+  <text wx:if="{{hasPrompt&&!busy}}" class="clear-prompt" bindtap="clearPrompt" aria-role="button">清空</text>
   <view wx:if="{{featureScript}}" class="script-button {{scriptBusy||busy?'is-busy':''}}" bindtap="aiScript" hover-class="card-pressed" aria-role="button" aria-label="AI写剧本">
     <image class="gl gl-16" src="/assets/glyphs/ai-pen-dark.png" /><text>{{scriptBusy?'正在写剧本…':'AI写剧本'}}</text>
   </view>

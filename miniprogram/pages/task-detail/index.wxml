@@ -30,7 +30,7 @@
     </view>
     <view wx:if="{{job.status==='running'||job.status==='queued'}}" class="live-stage {{job.status}}">
       <view class="live-ring"><t-loading size="28px" /></view>
-      <text class="live-title">{{job.status==='queued'?'排队中，马上开始':'正在生成'+job.kindText}}</text>
+      <text class="live-title">{{job.status==='queued'?'排队中，马上开始':job.input.purpose==='remake'?'正在准备一键复刻':'正在生成'+job.kindText}}</text>
       <view wx:if="{{job.status==='running'&&job.progress}}" class="live-bar"><view style="width:{{job.progress}}%" /></view>
       <text wx:if="{{job.stage}}" class="stage-note">{{job.stage}} · {{job.progress}}%</text>
     </view>
@@ -38,7 +38,7 @@
       wx:if="{{job.status==='queued'||job.status==='running'}}"
       class="waiting-note"
     >
-      <text>可以先离开，完成后到「我的作品」查看。</text>
+      <text>{{job.input.purpose==='remake'?'可以先离开，准备好后在任务队列里打开，点「生成同款」。':'可以先离开，完成后到「我的作品」查看。'}}</text>
       <view class="continue-create" bindtap="continueCreate">继续创作 ›</view>
     </view>
     <view wx:if="{{job.status==='failed'}}" class="failure-reason">
@@ -69,15 +69,23 @@
         object-fit="contain"
       />
     </view>
-    <view wx:if="{{job.status==='succeeded'&&!job.deleted}}" class="result-actions">
+    <view wx:if="{{job.status==='succeeded'&&!job.deleted&&job.input.purpose==='remake'}}" class="remake-ready">
+      <view class="remake-copy">
+        <text>原视频已拆解，确认积分后直接生成同款</text>
+        <text class="remake-edit" bindtap="editRemake">调整后再生成 ›</text>
+      </view>
+      <button class="retry-pill remake-go" loading="{{busy}}" disabled="{{busy}}" bindtap="generateRemake">生成同款</button>
+    </view>
+    <view wx:elif="{{job.status==='succeeded'&&!job.deleted}}" class="result-actions">
       <view class="act" bindtap="save" hover-class="act-pressed" aria-role="button"><view class="act-icon primary"><t-loading wx:if="{{busy}}" size="20px" /><image wx:else class="gl gl-22" src="/assets/glyphs/download-dark.png" /></view><text>{{job.results.length>1?'保存全部':'保存'}}</text></view>
       <view class="act" bindtap="share" hover-class="act-pressed" aria-role="button"><view class="act-icon"><image class="gl gl-22" src="/assets/glyphs/share.png" /></view><text>分享</text></view>
       <view class="act" bindtap="edit" hover-class="act-pressed" aria-role="button"><view class="act-icon"><image class="gl gl-22" src="/assets/glyphs/edit.png" /></view><text>再编辑</text></view>
       <view class="act" bindtap="remove" hover-class="act-pressed" aria-role="button"><view class="act-icon"><image class="gl gl-22" src="/assets/glyphs/delete-danger.png" /></view><text>删除</text></view>
     </view>
     <view wx:elif="{{job.status==='failed'&&!job.deleted}}" class="failed-actions">
-      <button wx:if="{{job.retryable}}" class="retry-pill" loading="{{busy}}" disabled="{{busy}}" bindtap="retry"><image wx:if="{{!busy}}" class="gl gl-18" src="/assets/glyphs/refresh-dark.png" />重新生成</button>
-      <text wx:if="{{job.editable}}" class="edit-link" bindtap="edit">修改后再试 ›</text>
+      <button wx:if="{{job.input.purpose==='remake'}}" class="retry-pill" bindtap="remakeAgain"><image class="gl gl-18" src="/assets/glyphs/refresh-dark.png" />重新复刻</button>
+      <button wx:elif="{{job.retryable}}" class="retry-pill" loading="{{busy}}" disabled="{{busy}}" bindtap="retry"><image wx:if="{{!busy}}" class="gl gl-18" src="/assets/glyphs/refresh-dark.png" />重新生成</button>
+      <text wx:if="{{job.editable&&job.input.kind!=='import'}}" class="edit-link" bindtap="edit">修改后再试 ›</text>
     </view>
     <view wx:if="{{!job.input.prompt&&job.input.templateId}}" class="prompt-card template-card" bindtap="openTemplate" hover-class="card-pressed" aria-role="button" aria-label="{{'查看模板 '+(job.templateTitle||'')}}">
       <view class="prompt-head"><text>创作模板</text><text class="template-go">查看模板 ›</text></view>
@@ -86,7 +94,7 @@
     </view>
     <view wx:else class="prompt-card">
       <view class="prompt-head">
-        <text>提示词<text wx:if="{{job.input.prompt}}" class="prompt-size"> · {{job.input.prompt.length}} 字</text></text>
+        <text>{{job.input.purpose==='remake'?'原视频':'提示词'}}<text wx:if="{{job.input.prompt}}" class="prompt-size"> · {{job.input.prompt.length}} 字</text></text>
         <view wx:if="{{job.input.prompt}}" class="prompt-copy" bindtap="copyPrompt" hover-class="act-pressed" aria-role="button" aria-label="复制提示词"><image class="gl gl-14" src="/assets/glyphs/copy-muted.png" /><text>复制</text></view>
       </view>
       <view class="full-prompt {{job.input.prompt.length>100&&!promptOpen?'folded':''}}"
@@ -109,8 +117,8 @@
         </view>
       </view>
     </view>
-    <view class="detail-card specs">
-      <view wx:if="{{job.modelName}}" class="spec-row"><text>模型</text><text class="spec-value">{{job.modelName}}</text></view>
+    <view wx:if="{{job.input.kind!=='import'}}" class="detail-card specs">
+      <view wx:if="{{job.modelName&&job.input.kind!=='import'}}" class="spec-row"><text>模型</text><text class="spec-value">{{job.modelName}}</text></view>
       <view wx:if="{{job.input.resolution||job.input.ratio||job.input.duration}}" class="spec-row"><text>规格</text><text class="spec-value">{{job.input.resolution||''}}{{job.input.resolution&&job.input.ratio?' · ':''}}{{job.input.ratio||''}}{{(job.input.resolution||job.input.ratio)&&job.input.duration?' · ':''}}{{job.input.duration?job.input.duration+' 秒':''}}</text></view>
       <view wx:if="{{job.costUnits}}" class="spec-row billing-summary"><text>积分</text><text class="spec-value">{{job.costUnits/100}}<text wx:if="{{job.billingState==='reserved'||job.billingState==='charged'||job.billingState==='released'}}" class="spec-state {{job.billingState}}">{{job.billingState==='released'?'已退回':'已扣除'}}</text></text></view>
     </view>

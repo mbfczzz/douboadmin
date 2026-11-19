@@ -43,5 +43,5 @@ func integrations(ctx context.Context, app *api.Server, values settings.Values) 
 	app.Vision = &vision.Client{BaseURL: values["VISION_BASE_URL"], Key: values["VISION_API_KEY"], Model: values["VISION_MODEL"]}
 	feedWords, _ := settings.FeedKeywords(values["HOT_FEED_KEYWORDS"]) // validated on save; bad values fall back to defaults
 	app.Hot = &hotvideo.Service{Client: &hotvideo.Client{BaseURL: values["TIKHUB_BASE_URL"], Key: values["TIKHUB_API_KEY"]}, Store: app.Store, Redis: app.Sessions.Redis, Keywords: feedWords, Source: values["HOT_FEED_SOURCE"]}
-	return provider.Router{AI: ai, Import: hotvideo.Importer{Service: app.Hot, Media: app.Media}}, nil
+	return provider.Router{AI: ai, Import: hotvideo.Importer{Service: app.Hot, Media: app.Media, Vision: app.Vision}}, nil
 }

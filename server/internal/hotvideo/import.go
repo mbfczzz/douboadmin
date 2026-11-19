@@ -4,14 +4,22 @@ import (
 	"context"
 	"doubo/server/internal/core"
 	"doubo/server/internal/media"
+	"doubo/server/internal/vision"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 )
 
 type Importer struct {
 	Service *Service
 	Media   *media.Service
+	// Vision breaks the video down when the import prepares a 一键复刻
+	// (Purpose "remake"); nil or unconfigured skips that step.
+	Vision *vision.Client
 }
+
+// RemakePurpose marks an import that prepares a 一键复刻.
+const RemakePurpose = "remake"
 
 func (p Importer) Generate(ctx context.Context, j core.Job) (string, error) {
 	id := core.Digest(j.ID + ":result")[:32]
@@ -55,5 +63,20 @@ func (p Importer) Generate(ctx context.Context, j core.Job) (string, error) {
 	if _, e = p.Service.Store.Put(ctx, "assets", row, row.Version); e != nil && e != core.ErrConflict {
 		return "", e
 	}
+	if j.Input.Purpose == RemakePurpose && p.Vision.Ready() {
+		p.breakdown(ctx, j, v.ID, data)
+	}
 	return result, nil
+}
+
+// breakdown is best effort: the remake goes on from the caption without it.
+func (p Importer) breakdown(ctx context.Context, j core.Job, videoID string, asset map[string]any) {
+	key, _ := asset["key"].(string)
+	if size, _ := asset["size"].(float64); key == "" || size > 50<<20 { // Ark takes up to 50 MB by URL
+		return
+	}
+	_ = p.Service.Store.Progress(ctx, j, 70, "拆解原视频的钩子和分镜")
+	if _, err := p.Service.EnsureBreakdown(ctx, p.Vision, videoID, func() (string, error) { return p.Media.InputURL(ctx, key) }); err != nil {
+		slog.Warn("video breakdown failed", "video", videoID, "error", err.Error())
+	}
 }

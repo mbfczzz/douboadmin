@@ -47,3 +47,40 @@ export function remakeInstruction(source: RemakeSource, seconds: number, limit: 
 4. 用 @视频1 指代参考视频，说明参考它的镜头与节奏。
 不超过 ${limit} 字。只输出描述本身，不要标题和解释。`;
 }
+
+// The remake description built straight from the breakdown, with no chat
+// model (no extra charge or wait), for 生成同款 on the task page: the
+// original's shots squeezed into the generated length, hook first.
+export function remakePrompt(source: RemakeSource, seconds: number, limit: number) {
+  const images = source.images || 0;
+  const refs = Array.from({ length: images }, (_, i) => "@图片" + (i + 1)).join("、");
+  const swap = refs ? `，并把原视频中的商品或人物换成${refs}中的商品或人物，外观以图片为准` : "";
+  const b = source.breakdown;
+  if (!b || !b.shots.length) return cut(`参考@视频1的画面内容、镜头运动和节奏，复刻一条同款视频${swap}。视频主题：${source.title}`, limit);
+  const length = source.duration > 0 ? source.duration : b.shots[b.shots.length - 1].end;
+  const scale = length > seconds ? seconds / length : 1;
+  // Squeezed into a short length, shots that land in the same seconds merge.
+  const beats: { from: number; to: number; text: string }[] = [];
+  for (const s of b.shots.slice(0, 8)) {
+    const from = Math.min(seconds - 1, Math.round(s.start * scale));
+    const to = Math.max(from + 1, Math.min(seconds, Math.round(s.end * scale)));
+    const text = [s.scene, s.action, s.camera].filter(Boolean).join("，") + (s.speech ? `，台词“${s.speech}”` : "");
+    const last = beats[beats.length - 1];
+    if (last && from < last.to) {
+      last.to = Math.max(last.to, to);
+      last.text += "；" + text;
+    } else beats.push({ from, to, text });
+  }
+  const lines = beats.map((beat) => `${beat.from}–${beat.to}秒：${beat.text}`);
+  const head = [
+    `参考@视频1的画面结构、镜头运动和节奏，复刻一条 ${seconds} 秒的同款视频${swap}。`,
+    b.hook && `开头 3 秒保留钩子：${b.hook}。`,
+    b.style && `画面风格：${b.style}。`,
+  ].filter(Boolean).join("");
+  return cut(head + "\n" + lines.join("\n"), limit);
+}
+
+function cut(text: string, limit: number) {
+  const chars = Array.from(text);
+  return chars.length > limit ? chars.slice(0, limit).join("") : text;
+}

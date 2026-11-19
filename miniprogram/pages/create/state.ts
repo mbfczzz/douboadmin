@@ -70,5 +70,7 @@ export const creationData = {
   featureOptions: [] as { key: string; label: string; values: { label: string }[] }[],
   featureChoice: {} as Record<string, number>,
   scriptBusy: false,
+  featureUpload: "", // the big picture entry's label (剧情带货 / 探店 / 证件照)
+  featureCases: [] as { id: string; cover: string; title: string }[], // 热门案例
   remakeSource: null as { title: string; text: string; duration: number } | null, // 一键复刻's original
 };

@@ -53,6 +53,8 @@ export const states: Record<string, string> = {
   succeeded: "已完成",
   failed: "生成失败",
 };
+// A 一键复刻 task prepares the original rather than generating.
+const remakeStates: Record<string, string> = { running: "准备中", succeeded: "已就绪" };
 export const kinds: Record<string, string> = {
   video: "视频",
   image: "图片",
@@ -68,13 +70,14 @@ export function jobView(j: Job) {
     ...j,
     // Import jobs come without reference assets (null from older servers).
     input: { ...j.input, assets: j.input.assets || [] },
-    stateText: states[j.status],
-    kindText: kinds[j.input.kind],
+    stateText: (j.input.purpose === "remake" && remakeStates[j.status]) || states[j.status],
+    // An import that prepares a 一键复刻 (task queue) or a plain material import.
+    kindText: j.input.purpose === "remake" ? "一键复刻" : kinds[j.input.kind] || "素材导入",
     modelName: j.modelName || "模型信息暂缺",
     time: date(j.createdAt),
     result: j.result && j.input.kind !== "chat" ? media(j.result) : j.result,
     results: j.input.kind === "image" ? resultImages(j) : [],
-    shortTitle: (j.templateTitle || j.input.prompt).slice(0, 24),
+    shortTitle: (j.templateTitle || j.input.prompt).split("\n")[0].slice(0, 24),
     error: failure,
     editable: j.errorCode ? !!j.editable : true,
   };
