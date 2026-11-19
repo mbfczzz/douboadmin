@@ -81,6 +81,14 @@ var definitions = []Group{
 		{Key: "VISION_API_KEY", Label: "API Key", Kind: "secret"},
 		{Key: "VISION_MODEL", Label: "模型 ID", Kind: "text", Default: "doubao-seed-1-6-vision-250815", Hint: "须支持视频输入，例如 doubao-seed-1-6-vision-250815；也可填方舟推理接入点 ID。"},
 	}},
+	{ID: "chat", Name: "对话模型", Hint: "创作助手（Agent）和「AI写剧本」直接调用 DeepSeek、豆包（火山方舟）。填写的每个模型会出现在「模型管理」里，按输入、输出 token 计费，单价在模型的生成能力里设置。保存后重启服务生效。", Fields: []Field{
+		{Key: "CHAT_DEEPSEEK_BASE_URL", Label: "DeepSeek API 地址", Kind: "url", Default: "https://api.deepseek.com"},
+		{Key: "CHAT_DEEPSEEK_API_KEY", Label: "DeepSeek API Key", Kind: "secret"},
+		{Key: "CHAT_DEEPSEEK_MODELS", Label: "DeepSeek 模型", Kind: "text", Default: DefaultDeepSeekModels, Hint: "模型 ID，多个用逗号分隔，例如 deepseek-chat。DeepSeek 不能识别图片。"},
+		{Key: "CHAT_ARK_BASE_URL", Label: "火山方舟 API 地址", Kind: "url", Default: "https://ark.cn-beijing.volces.com/api/v3"},
+		{Key: "CHAT_ARK_API_KEY", Label: "火山方舟 API Key", Kind: "secret", Hint: "留空时使用「视频理解」的 API Key。"},
+		{Key: "CHAT_ARK_MODELS", Label: "豆包模型", Kind: "text", Default: DefaultArkChatModels, Hint: "方舟控制台已开通的模型 ID 或推理接入点 ID，多个用逗号分隔。"},
+	}},
 	{ID: "notifications", Name: "完成订阅通知", Hint: "需先配置微信登录，并在微信后台取得订阅消息模板。", Fields: []Field{
 		{Key: "WECHAT_COMPLETION_TEMPLATE_ID", Label: "订阅模板 ID", Kind: "text"},
 		{Key: "WECHAT_COMPLETION_FIELDS", Label: "模板字段映射", Kind: "mapping", Default: "{}", Hint: "例如 thing1 对应 {{title}}；字段名以微信模板为准。", Limit: 30, Columns: []Column{

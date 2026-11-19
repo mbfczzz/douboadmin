@@ -21,6 +21,9 @@ export interface ModelSettings {
   videoBillingMode?: "duration" | "per_request";
   priceMatrix?: Record<string, Record<string, number>>;
   pricePerRequestByResolution?: Record<string, number>;
+  tokenInputPrice?: number;
+  tokenOutputPrice?: number;
+  maxOutputTokens?: number;
   errorHints?: { contains: string; message: string }[];
   availabilityStatus?: "normal" | "maintenance";
 }

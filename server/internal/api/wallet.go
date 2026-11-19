@@ -162,10 +162,12 @@ func (a *Server) quoteJob(w http.ResponseWriter, r *http.Request) {
 	if !enabled {
 		charge = 0
 	}
-	// perSecond lets the confirm dialog say 按秒 (duration table) or 按次.
-	perSecond := false
+	// perSecond lets the confirm dialog say 按秒 (duration table) or 按次;
+	// perToken (按量) means units is the most this chat turn can cost.
+	perSecond, perToken := false, false
 	if m, err := a.model(r.Context(), in.Model); err == nil {
 		_, perSecond, _ = billing.QuoteDetail(m, in)
+		perToken = in.Kind == "chat" && m.Settings.TokenPriced()
 	}
-	reply(w, 200, map[string]any{"units": charge, "configuredUnits": units, "billingEnabled": enabled, "availableUnits": wallet.Available, "sufficient": wallet.Available >= charge, "perSecond": perSecond})
+	reply(w, 200, map[string]any{"units": charge, "configuredUnits": units, "billingEnabled": enabled, "availableUnits": wallet.Available, "sufficient": wallet.Available >= charge, "perSecond": perSecond, "perToken": perToken})
 }

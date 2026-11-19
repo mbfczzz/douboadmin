@@ -61,10 +61,18 @@ export function needsConfirmation(path: string, method: string, body: unknown) {
       /^\/admin\/commission-payouts$/.test(path))
   );
 }
+// Chat token prices are numbers to review, not credentials.
+const notSecret = new Set([
+  "tokenInputPrice",
+  "tokenOutputPrice",
+  "maxOutputTokens",
+]);
 const secret = (key: string, options: ConfirmationOptions) =>
-  /password|secret|token|app.?key|api.?key|access.?key|aes.?key|private.?key|^current$|^next$/i.test(
-    key,
-  ) || options.secrets?.includes(key);
+  (!notSecret.has(key) &&
+    /password|secret|token|app.?key|api.?key|access.?key|aes.?key|private.?key|^current$|^next$/i.test(
+      key,
+    )) ||
+  options.secrets?.includes(key);
 function safe(
   value: unknown,
   key: string,

@@ -43,6 +43,12 @@ func (s ModelSettings) Validate(m Model) error {
 			return fmt.Errorf("成本价无效")
 		}
 	}
+	if !validRate(s.TokenInputPrice) || !validRate(s.TokenOutputPrice) || s.TokenInputPrice > 1000 || s.TokenOutputPrice > 1000 || s.MaxOutputTokens < 0 || s.MaxOutputTokens > 32768 {
+		return fmt.Errorf("按量价格应为 0–1000 积分/千 token，最大回复长度为 0–32768 token")
+	}
+	if s.TokenPriced() && m.Kind != "chat" {
+		return fmt.Errorf("只有对话模型可以按 token 计费")
+	}
 	for i, b := range s.Badges {
 		if strings.TrimSpace(b.Text) == "" || len([]rune(b.Text)) > 16 {
 			return fmt.Errorf("第 %d 个模型标签需填写 1–16 个字，或删除该标签", i+1)

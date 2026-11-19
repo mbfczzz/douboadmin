@@ -1,4 +1,5 @@
 @import "./reply.wxss";
+@import "./models.wxss";
 .agent-page {
   height: calc(100vh - var(--nav-bottom, 68px) - var(--ui-tabbar-height) - 1px - env(safe-area-inset-bottom));
   display: flex;

@@ -4,17 +4,19 @@ import type { Job, Input } from "./types";
 import { confirmBudget } from "./business";
 import { track } from "./analytics";
 import { RequestError } from "./errors";
-export async function submitInput(input: Input, channel: string) {
+// quietPerToken: a 按量 chat turn whose price the page already shows sends
+// without the confirm dialog.
+export async function submitInput(input: Input, channel: string, quietPerToken = false) {
   const storage = "pending-" + channel;
   const fingerprint = JSON.stringify(input);
   let pending = wx.getStorageSync(storage) as
     { fingerprint: string; key: string; input?: Input } | undefined;
   if (!pending || pending.fingerprint !== fingerprint) {
-    pending = { fingerprint, key: uid(), input: await confirmBudget(input) };
+    pending = { fingerprint, key: uid(), input: await confirmBudget(input, quietPerToken) };
     wx.setStorageSync(storage, pending);
   }
   if (!pending.input) {
-    pending.input = await confirmBudget(input);
+    pending.input = await confirmBudget(input, quietPerToken);
     wx.setStorageSync(storage, pending);
   }
   let j: Job;

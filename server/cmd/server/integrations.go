@@ -4,6 +4,7 @@ import (
 	"context"
 	"doubo/server/internal/api"
 	"doubo/server/internal/hotvideo"
+	"doubo/server/internal/llm"
 	"doubo/server/internal/media"
 	"doubo/server/internal/objectstore"
 	"doubo/server/internal/payments"
@@ -43,5 +44,30 @@ func integrations(ctx context.Context, app *api.Server, values settings.Values) 
 	app.Vision = &vision.Client{BaseURL: values["VISION_BASE_URL"], Key: values["VISION_API_KEY"], Model: values["VISION_MODEL"]}
 	feedWords, _ := settings.FeedKeywords(values["HOT_FEED_KEYWORDS"]) // validated on save; bad values fall back to defaults
 	app.Hot = &hotvideo.Service{Client: &hotvideo.Client{BaseURL: values["TIKHUB_BASE_URL"], Key: values["TIKHUB_API_KEY"]}, Store: app.Store, Redis: app.Sessions.Redis, Keywords: feedWords, Source: values["HOT_FEED_SOURCE"]}
-	return provider.Router{AI: ai, Import: hotvideo.Importer{Service: app.Hot, Media: app.Media, Vision: app.Vision}}, nil
+	return provider.Router{AI: ai, Import: hotvideo.Importer{Service: app.Hot, Media: app.Media, Vision: app.Vision}, Chat: chatModels(ctx, app, values)}, nil
+}
+
+// chatModels sets up DeepSeek / 豆包 (服务接入配置 → 对话模型) and lists their
+// models in 模型管理. Default prices are the providers' list prices at
+// 1 元 = 10 积分 (DeepSeek ¥2/¥3, 豆包 lite ¥0.8/¥2 per million tokens);
+// operators set their own per model.
+func chatModels(ctx context.Context, app *api.Server, values settings.Values) *provider.DirectChat {
+	arkKey := values["CHAT_ARK_API_KEY"]
+	if arkKey == "" {
+		arkKey = values["VISION_API_KEY"]
+	}
+	deepseekModels, _ := settings.ChatModels(values.Get("CHAT_DEEPSEEK_MODELS", settings.DefaultDeepSeekModels))
+	arkModels, _ := settings.ChatModels(values.Get("CHAT_ARK_MODELS", settings.DefaultArkChatModels))
+	providers := []llm.Provider{
+		{Name: "deepseek", Label: "DeepSeek", Client: &llm.Client{BaseURL: values.Get("CHAT_DEEPSEEK_BASE_URL", "https://api.deepseek.com"), Key: values["CHAT_DEEPSEEK_API_KEY"]}, Models: deepseekModels, InputPrice: 0.02, OutputPrice: 0.03},
+		{Name: "ark", Label: "豆包", Client: &llm.Client{BaseURL: values.Get("CHAT_ARK_BASE_URL", "https://ark.cn-beijing.volces.com/api/v3"), Key: arkKey}, Models: arkModels, InputPrice: 0.008, OutputPrice: 0.02},
+	}
+	if err := llm.EnsureModels(ctx, app.Store, providers); err != nil {
+		slog.Warn("对话模型登记失败", "error", err)
+	}
+	clients := map[string]*llm.Client{}
+	for _, p := range providers {
+		clients[p.Name] = p.Client
+	}
+	return &provider.DirectChat{Clients: clients, Store: app.Store, Assets: app.Media.Inputs}
 }

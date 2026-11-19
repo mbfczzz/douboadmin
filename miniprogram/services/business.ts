@@ -29,19 +29,37 @@ export const orderStates: Record<string, string> = {
   refunded: "已退款",
 };
 
-export async function confirmBudget(input: Input): Promise<Input> {
+export async function confirmBudget(input: Input, quietPerToken = false): Promise<Input> {
   const q = await request<{
     units: number;
     billingEnabled: boolean;
     sufficient: boolean;
     availableUnits: number;
     perSecond?: boolean;
+    perToken?: boolean; // units is the most a chat turn can cost
   }>("/jobs/quote", "POST", input);
   if (!q.billingEnabled || !q.units) return { ...input, expectedCostUnits: 0 };
   if (!q.sufficient) {
     throw new Error(
       `可用积分不足，需 ${points(q.units)}，当前 ${points(q.availableUnits)}`,
     );
+  }
+  if (q.perToken && quietPerToken) return { ...input, expectedCostUnits: q.units };
+  if (q.perToken) {
+    const ok = await ask({
+      title: "本次最多使用",
+      amount: points(q.units),
+      unit: "积分",
+      rows: [
+        { label: "计费方式", value: "按量 · 按实际 token 扣除" },
+        { label: "当前可用", value: `${points(q.availableUnits)} 积分` },
+      ],
+      content: "完成后按实际用量扣除，多余积分退回；失败全部退回",
+      confirmText: "确认",
+      icon: "star",
+    });
+    if (!ok) throw new AuthCancelledError();
+    return { ...input, expectedCostUnits: q.units };
   }
   const seconds = input.kind === "video" && q.perSecond ? input.duration || 0 : 0;
   const approved = await ask({

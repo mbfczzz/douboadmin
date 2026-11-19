@@ -50,6 +50,9 @@ type Execution struct {
 	// Note is the latest reason a task is still waiting, for administrators.
 	Note      string    `json:"note,omitempty"`
 	StartedAt time.Time `json:"startedAt"`
+	// Tokens a directly-called chat model reported (按量计费).
+	InputTokens  int `json:"inputTokens,omitempty"`
+	OutputTokens int `json:"outputTokens,omitempty"`
 }
 
 func (p *Relay) checkpoint(ctx context.Context, row *core.Record, e Execution) error {

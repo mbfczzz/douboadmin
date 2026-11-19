@@ -15,8 +15,14 @@ import type { ChatMessage } from "../../utils/chat";
 import { jobPage } from "../../services/job-pages";
 import { sessionToken } from "../../services/session";
 import { navBottom } from "../../utils/nav-metrics";
+import { agentModels } from "./models";
+import type { ChatModel } from "./models";
 Page({
+  ...agentModels,
   data: {
+    models: [] as ChatModel[], // chat models to talk to (DeepSeek / 豆包)
+    model: "",
+    priceHint: "",
     navBottom: 68,
     prompt: "",
     messages: [] as ChatMessage[],
@@ -47,6 +53,7 @@ Page({
     this.onResize();
     showArt(this, (art) => ({ "quick[0].image": art.agentScript, "quick[1].image": art.agentPrompt, "quick[2].image": art.agentCoffee }));
     tab(this, 3);
+    void this.loadModels().catch(() => undefined);
     void this.load();
     this.poll();
   },
@@ -181,7 +188,7 @@ Page({
     try {
       const config = await loadConfig();
       if (this.destroyed) return;
-      const model = config.models.find((m) => m.kind === "chat");
+      const model = config.models.find((m) => m.kind === "chat" && m.id === this.data.model) || config.models.find((m) => m.kind === "chat");
       if (!model) throw new Error("创作助手暂未开放，请稍后再试");
       const job = await submitInput(
         {
@@ -194,6 +201,7 @@ Page({
           assets: [],
         },
         "agent",
+        true, // the composer already shows the price; no dialog per message
       );
       if (this.destroyed) return;
       const added = chatMessages([job]);

@@ -2,6 +2,7 @@ import { Card } from "./fields";
 import PerSecondFill from "./PerSecondFill";
 import { effectiveModel, qualityLabels, type SettingsProps } from "./settings";
 import { imageResolutions, videoResolutions } from "./parameter-options";
+import TokenPricing from "./TokenPricing";
 
 export default function PricingFields({ model: m, onChange }: SettingsProps) {
   const s = m.settings,
@@ -16,6 +17,7 @@ export default function PricingFields({ model: m, onChange }: SettingsProps) {
             resolutionOrder.indexOf(b.toLowerCase()),
         ),
     qualities = s.hideQuality ? [] : e.qualities;
+  if (m.kind === "chat") return <TokenPricing model={m} onChange={onChange} />;
   if (m.kind !== "image" && !video) return null;
   const perRequest = video && s.videoBillingMode === "per_request";
   if (!resolutions.length || (video && !perRequest && !e.durations.length)) {

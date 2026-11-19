@@ -14,26 +14,30 @@ type ErrorHint struct {
 	Message  string `json:"message"`
 }
 type ModelSettings struct {
-	Description                 string                        `json:"description,omitempty"`
-	Icon                        string                        `json:"icon,omitempty"`
-	CostUSD                     string                        `json:"costUsd,omitempty"`
-	EstSeconds                  int                           `json:"estSeconds,omitempty"`
-	Badges                      []ModelBadge                  `json:"badges,omitempty"`
-	Modes                       []string                      `json:"modes,omitempty"`
-	Resolutions                 []string                      `json:"resolutions,omitempty"`
-	Ratios                      []string                      `json:"ratios,omitempty"`
-	Qualities                   []string                      `json:"qualities,omitempty"`
-	HideQuality                 bool                          `json:"hideQuality,omitempty"`
-	HideResolution              bool                          `json:"hideResolution,omitempty"`
-	Durations                   []int                         `json:"durations,omitempty"`
-	MaxRefImages                int                           `json:"maxRefImages,omitempty"`
-	MaxRefImageSizeMB           float64                       `json:"maxRefImageSizeMB,omitempty"`
-	RefLimits                   map[string]float64            `json:"refLimits,omitempty"`
-	OmniReferences              map[string]bool               `json:"omniReferences,omitempty"`
-	DefaultPrompt               string                        `json:"defaultPrompt,omitempty"`
-	Ideas                       []string                      `json:"ideas,omitempty"`
-	MaxPromptChars              int                           `json:"maxPromptChars,omitempty"`
-	VideoBillingMode            string                        `json:"videoBillingMode,omitempty"`
+	Description       string             `json:"description,omitempty"`
+	Icon              string             `json:"icon,omitempty"`
+	CostUSD           string             `json:"costUsd,omitempty"`
+	EstSeconds        int                `json:"estSeconds,omitempty"`
+	Badges            []ModelBadge       `json:"badges,omitempty"`
+	Modes             []string           `json:"modes,omitempty"`
+	Resolutions       []string           `json:"resolutions,omitempty"`
+	Ratios            []string           `json:"ratios,omitempty"`
+	Qualities         []string           `json:"qualities,omitempty"`
+	HideQuality       bool               `json:"hideQuality,omitempty"`
+	HideResolution    bool               `json:"hideResolution,omitempty"`
+	Durations         []int              `json:"durations,omitempty"`
+	MaxRefImages      int                `json:"maxRefImages,omitempty"`
+	MaxRefImageSizeMB float64            `json:"maxRefImageSizeMB,omitempty"`
+	RefLimits         map[string]float64 `json:"refLimits,omitempty"`
+	OmniReferences    map[string]bool    `json:"omniReferences,omitempty"`
+	DefaultPrompt     string             `json:"defaultPrompt,omitempty"`
+	Ideas             []string           `json:"ideas,omitempty"`
+	MaxPromptChars    int                `json:"maxPromptChars,omitempty"`
+	VideoBillingMode  string             `json:"videoBillingMode,omitempty"`
+	// 按量计费 for chat: points per 1,000 input / output tokens.
+	TokenInputPrice             float64                       `json:"tokenInputPrice,omitempty"`
+	TokenOutputPrice            float64                       `json:"tokenOutputPrice,omitempty"`
+	MaxOutputTokens             int                           `json:"maxOutputTokens,omitempty"`
 	PriceMatrix                 map[string]map[string]float64 `json:"priceMatrix,omitempty"`
 	PricePerRequestByResolution map[string]float64            `json:"pricePerRequestByResolution,omitempty"`
 	ErrorHints                  []ErrorHint                   `json:"errorHints,omitempty"`

@@ -11,11 +11,11 @@ export const modelSections = {
 } as const;
 export type ModelSection = keyof typeof modelSections;
 
-// Chat models have no price matrix.
+// Chat models are priced per token; audio has no pricing of its own.
 export const sectionsFor = (model: Model) =>
   (Object.keys(modelSections) as ModelSection[]).filter(
     (key) =>
-      key !== "pricing" || model.kind === "image" || model.kind === "video",
+      key !== "pricing" || ["image", "video", "chat"].includes(model.kind),
   );
 
 // Labels for the change summary of a model save.
@@ -42,6 +42,9 @@ export const modelFieldLabels: Record<string, string> = {
   videoBillingMode: "视频计费方式",
   priceMatrix: "积分定价",
   pricePerRequestByResolution: "按次定价",
+  tokenInputPrice: "输入单价（积分/千 token）",
+  tokenOutputPrice: "输出单价（积分/千 token）",
+  maxOutputTokens: "单次回复上限（token）",
   errorHints: "错误提示映射",
   availabilityStatus: "运行状态",
   points: "基础积分",

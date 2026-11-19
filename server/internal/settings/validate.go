@@ -69,6 +69,13 @@ func validate(g Group, v Values, production bool) error {
 			return invalid("HOT_FEED_KEYWORDS", err.Error())
 		}
 	}
+	if g.ID == "chat" {
+		for _, key := range []string{"CHAT_DEEPSEEK_MODELS", "CHAT_ARK_MODELS"} {
+			if _, err := ChatModels(v[key]); err != nil {
+				return invalid(key, err.Error())
+			}
+		}
+	}
 	if g.ID == "wechat" && v["WECHAT_APP_ID"] != "" && !appIDPattern.MatchString(v["WECHAT_APP_ID"]) {
 		return invalid("WECHAT_APP_ID", "请填写有效的小程序 AppID")
 	}

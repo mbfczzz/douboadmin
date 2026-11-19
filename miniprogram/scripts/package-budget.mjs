@@ -200,7 +200,10 @@ console.log(
 // Interface-first feature pages do their real part: uploads into the user's
 // materials with progress and thumbnails, option sheets, and required-input
 // checks before 即将开放 (pages/feature/actions.ts): 904,380 B. 878 -> 884 KiB.
-const budget = 884 * 1024;
+// DeepSeek / 豆包 on the Agent: model chips, the 按量 per-turn price above
+// the composer (pages/agent/models.ts) and the 按量 confirm wording: 909,645 B.
+// 884 -> 889 KiB.
+const budget = 889 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

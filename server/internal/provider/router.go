@@ -9,6 +9,7 @@ import (
 type Router struct {
 	AI     Provider
 	Import Provider
+	Chat   *DirectChat // DeepSeek / 豆包 called directly; nil when not set up
 }
 
 func (p Router) Generate(ctx context.Context, j core.Job) (string, error) {
@@ -20,6 +21,9 @@ func (p Router) Generate(ctx context.Context, j core.Job) (string, error) {
 	}
 	if !core.IsGeneration(j.Input.Kind) {
 		return "", fmt.Errorf("该任务类型已停止支持")
+	}
+	if p.Chat.Handles(ctx, j) {
+		return p.Chat.Generate(ctx, j)
 	}
 	return p.AI.Generate(ctx, j)
 }

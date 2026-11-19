@@ -47,6 +47,10 @@ func Quote(model core.Model, input core.JobInput) (int64, error) {
 // QuoteDetail also reports whether the price came from the video
 // duration × resolution table (按秒/按时长) rather than a flat per-request price.
 func QuoteDetail(model core.Model, input core.JobInput) (int64, bool, error) {
+	if input.Kind == "chat" && model.Settings.TokenPriced() {
+		units, err := tokenHold(model, input) // the most this turn can cost; settled on usage
+		return units, false, err
+	}
 	price, perSecond := model.Points, false
 	s := model.Settings
 	visibleGrid := len(model.Resolutions) > 0 && (input.Kind != "video" || s.VideoBillingMode == "per_request" || len(model.Durations) > 0)

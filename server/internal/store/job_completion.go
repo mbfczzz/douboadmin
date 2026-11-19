@@ -4,6 +4,7 @@ import (
 	"doubo/server/internal/core"
 	"encoding/json"
 	"errors"
+	"fmt"
 )
 
 // Completion and expiration settle funds and notify in the same transaction.
@@ -30,6 +31,11 @@ func completeJobAccounting(tx Transaction, j core.Job, failure string) error {
 	if failure != "" {
 		entry.Kind, entry.AvailableDelta, entry.Note = "job_release", bill.Units, "生成失败退回积分"
 		bill.State = "released"
+	} else if bill.UsedUnits != nil {
+		used := min(max(*bill.UsedUnits, 0), bill.Units)
+		entry.Kind, entry.AvailableDelta = "job_usage", bill.Units-used
+		entry.Note = fmt.Sprintf("对话按用量扣除 %s 积分（输入 %d / 输出 %d token）", core.FormatPoints(used), bill.InputTokens, bill.OutputTokens)
+		bill.ReservedUnits, bill.Units = bill.Units, used
 	}
 	if _, err = ApplyFunds(tx, entry); err != nil {
 		return err

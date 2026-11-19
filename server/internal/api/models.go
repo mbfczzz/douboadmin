@@ -169,6 +169,9 @@ func (a *Server) syncModels(w http.ResponseWriter, r *http.Request) {
 		if json.Unmarshal(row.Data, &m) != nil {
 			continue
 		}
+		if _, _, direct := core.DirectChat(m.Key); direct {
+			continue // DeepSeek / 豆包 are listed by 对话模型 settings, not the relay
+		}
 		m.Available = false
 		if _, e := a.Store.Put(ctx, "models", core.Record{ID: row.ID, Data: core.Data(m)}, row.Version); e != nil {
 			conflicts++

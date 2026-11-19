@@ -11,6 +11,7 @@ const labels: Record<string, string> = {
   job_hold: "生成扣除",
   job_charge: "生成扣除",
   job_release: "失败退回",
+  job_usage: "按量结算退回",
   refund_hold: "退款扣回",
   refund_complete: "退款回收",
   refund_cancel: "退款取消，已退回",
@@ -22,7 +23,7 @@ const glyph = (name: string) => `/assets/glyphs/${name}.png`;
 export function ledgerView(row: Row<Ledger>) {
   const entry = row.data;
   return {
-    glyph: glyph(entry.kind === "topup" ? "add-success" : entry.kind.includes("release") || entry.kind.includes("refund") ? "refresh-muted" : entry.kind === "admin_adjust" ? "settings-muted" : "image-muted"),
+    glyph: glyph(entry.kind === "topup" ? "add-success" : entry.kind.includes("release") || entry.kind.includes("refund") || entry.kind === "job_usage" ? "refresh-muted" : entry.kind === "admin_adjust" ? "settings-muted" : "image-muted"),
     id: row.id,
     title: labels[entry.kind] || entry.kind,
     note: entry.note,

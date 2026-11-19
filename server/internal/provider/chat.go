@@ -3,15 +3,20 @@ package provider
 import (
 	"context"
 	"doubo/server/internal/core"
+	"doubo/server/internal/store"
 	"slices"
 )
 
-// History is reconstructed from this user's successful jobs, never supplied by a client.
 func (p *Relay) chatHistory(ctx context.Context, j core.Job, body map[string]any) error {
+	return chatHistory(ctx, p.Store, j, body)
+}
+
+// History is reconstructed from this user's successful jobs, never supplied by a client.
+func chatHistory(ctx context.Context, s store.Store, j core.Job, body map[string]any) error {
 	if j.Input.Purpose != "" && j.Input.Purpose != "agent" {
 		return nil
 	}
-	jobs, err := p.Store.Jobs(ctx, j.UserID)
+	jobs, err := s.Jobs(ctx, j.UserID)
 	if err != nil {
 		return err
 	}

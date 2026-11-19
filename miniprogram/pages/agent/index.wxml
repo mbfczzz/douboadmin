@@ -51,9 +51,18 @@
       </view>
     </view>
   </scroll-view>
-  <view class="composer {{focus?'is-focus':''}}">
+  <view wx:if="{{models.length>1||priceHint}}" class="agent-bar">
+    <scroll-view scroll-x enhanced show-scrollbar="{{false}}" class="model-strip">
+      <view class="model-row">
+        <view wx:if="{{models.length>1}}" wx:for="{{models}}" wx:key="id" class="model-chip {{item.id===model?'on':''}}" data-id="{{item.id}}" bindtap="pickModel" aria-role="button" aria-label="{{'对话模型：'+item.name}}">{{item.name}}</view>
+      </view>
+    </scroll-view>
+    <text wx:if="{{prompt.length>400}}" class="bar-note {{prompt.length>=500?'full':''}}">{{prompt.length}}/500</text>
+    <text wx:elif="{{priceHint}}" class="bar-note">{{priceHint}}</text>
+  </view>
+  <view class="composer {{focus?'is-focus':''}} {{models.length>1||priceHint?'has-bar':''}}">
     <textarea auto-height maxlength="500" focus="{{focus}}" placeholder="{{messages.length?'继续说说你的想法…':'说说你的创作想法…'}}" placeholder-class="composer-placeholder" value="{{prompt}}" bindinput="input" bindblur="blur" cursor-spacing="24" show-confirm-bar="{{false}}" />
-    <text wx:if="{{prompt.length>400}}" class="composer-count {{prompt.length>=500?'full':''}}">{{prompt.length}}/500</text>
+    <text wx:if="{{prompt.length>400&&!(models.length>1||priceHint)}}" class="composer-count {{prompt.length>=500?'full':''}}">{{prompt.length}}/500</text>
     <view class="send {{prompt&&!busy?'ready':''}}" bindtap="send" hover-class="icon-pressed" aria-role="button" aria-label="发送">
       <t-loading wx:if="{{busy}}" size="18px" /><image wx:else class="gl gl-20" src="/assets/glyphs/send-{{prompt&&!busy?'dark':'muted'}}.png" />
     </view>

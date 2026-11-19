@@ -34,6 +34,13 @@ type JobBilling struct {
 	Units               int64  `json:"units"`
 	State               string `json:"state"`
 	EstimatedCostMicros *int64 `json:"estimatedCostMicros,omitempty"`
+	// 按量（token）计费: the provider records what a chat turn used before it
+	// completes; settlement charges that (never more than Units) and returns
+	// the rest. ReservedUnits keeps the original hold once Units becomes the charge.
+	UsedUnits     *int64 `json:"usedUnits,omitempty"`
+	ReservedUnits int64  `json:"reservedUnits,omitempty"`
+	InputTokens   int    `json:"inputTokens,omitempty"`
+	OutputTokens  int    `json:"outputTokens,omitempty"`
 }
 type Order struct {
 	Virtual       *VirtualOrder         `json:"virtual,omitempty"`
@@ -93,4 +100,16 @@ func PointUnits(points float64) (int64, error) {
 		return int64(rounded), nil
 	}
 	return int64(math.Ceil(scaled - 1e-8)), nil
+}
+
+// FormatPoints shows point units as points: 1234 -> "12.34", 220 -> "2.2", 500 -> "5".
+func FormatPoints(units int64) string {
+	whole, frac := units/PointScale, units%PointScale
+	switch {
+	case frac == 0:
+		return fmt.Sprint(whole)
+	case frac%10 == 0:
+		return fmt.Sprintf("%d.%d", whole, frac/10)
+	}
+	return fmt.Sprintf("%d.%02d", whole, frac)
 }
