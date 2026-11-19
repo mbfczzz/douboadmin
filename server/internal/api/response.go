@@ -49,7 +49,7 @@ func dbError(w http.ResponseWriter, err error) {
 		fail(w, 409, err.Error())
 	case errors.Is(err, errPhoneUnverified), errors.Is(err, errIdentityMerge):
 		fail(w, 409, err.Error())
-	case errors.Is(err, errPhoneConflict), errors.Is(err, errPhoneRequired), errors.Is(err, errPhoneFormat):
+	case errors.Is(err, errPhoneConflict), errors.Is(err, errPhoneRequired), errors.Is(err, errPhoneFormat), errors.Is(err, errWeChatOtherAccount):
 		fail(w, 400, err.Error())
 	case errors.Is(err, context.Canceled):
 		return

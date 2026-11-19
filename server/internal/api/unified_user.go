@@ -12,6 +12,7 @@ var errPhoneConflict = errors.New(errPhoneTaken)
 var errPhoneFormat = errors.New("请输入11位手机号")
 var errPhoneRequired = errors.New("手机号是必填项，不能清空")
 var errPhoneUnverified = errors.New("历史账号手机号尚未验证，请先在原小程序账号完成手机号授权")
+var errWeChatOtherAccount = errors.New("当前微信已登录其他手机号的账号，请点「使用其他手机号」用短信验证码登录")
 var errIdentityMerge = errors.New("该手机号与已有账号冲突，请联系超级管理员核对，原账号数据已保留")
 
 func lockIdentity(tx store.Transaction) error {

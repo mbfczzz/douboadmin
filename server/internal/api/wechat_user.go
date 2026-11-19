@@ -62,6 +62,11 @@ func (a *Server) wechatUser(ctx context.Context, subject, phone string) (id stri
 				return core.ErrUserDisabled
 			}
 		}
+		// This WeChat already belongs to a live account with another number: the
+		// authorised number is not "taken", this WeChat just cannot switch to it.
+		if current := inputPhone(profile); phone != "" && !fresh && current != "" && current != phone {
+			return errWeChatOtherAccount
+		}
 		if phone != "" {
 			preferred := id
 			if candidate != "" {

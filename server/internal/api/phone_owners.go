@@ -37,11 +37,38 @@ func claimPhone(tx store.Transaction, phone, user string) (bool, error) {
 	if json.Unmarshal(row.Data, &o) != nil {
 		return false, fmt.Errorf("手机号记录异常")
 	}
-	if o.User != "" {
-		return o.User == user, nil
+	if o.User == user {
+		return true, nil
+	}
+	if active, e := ownerActive(tx, o.User, phone); e != nil || active {
+		return false, e
 	}
 	_, e = tx.Put("phone_owners", core.Record{ID: phone, Data: core.Data(phoneOwner{user})}, row.Version)
 	return e == nil, e
+}
+
+// ownerActive reports whether a phone_owners entry still names a live
+// account that holds this number (as its phone or verified phone). A deleted
+// (archived) or missing account, or one whose profile no longer has the
+// number, does not hold it even if the release was never recorded (older
+// data), so the number can log in or register again. A disabled account that
+// still has the number keeps it.
+func ownerActive(tx store.Transaction, user, phone string) (bool, error) {
+	if user == "" {
+		return false, nil
+	}
+	row, e := tx.Get("users", user)
+	if errors.Is(e, core.ErrNotFound) {
+		return false, nil
+	} else if e != nil {
+		return false, e
+	}
+	var profile map[string]any
+	if json.Unmarshal(row.Data, &profile) != nil {
+		return true, nil
+	}
+	verified, _ := profile["verifiedPhone"].(string)
+	return profile["archived"] != true && (inputPhone(profile) == phone || verified == phone), nil
 }
 
 // releasePhone frees a number the user no longer holds (new phone, archived).

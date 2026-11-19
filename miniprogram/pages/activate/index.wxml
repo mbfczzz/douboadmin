@@ -16,7 +16,7 @@
   <block wx:if="{{!logged}}">
     <button wx:if="{{phoneReady}}" class="biz-action" open-type="getPhoneNumber" bindgetphonenumber="phoneLogin" loading="{{busy}}" disabled="{{busy||loading||!wechatReady}}">{{accountDeleted?'手机号授权重新注册':'手机号授权登录'}}</button>
     <button wx:else class="biz-action" loading="{{busy}}" disabled="{{busy||loading||!wechatReady}}" bindtap="login">微信登录</button>
-    <button wx:if="{{phoneReady}}" class="text-button phone-alternative" bindtap="login" disabled="{{busy||loading}}">使用其他手机号</button>
+    <navigator wx:if="{{phoneReady}}" url="/pages/login/index?sms=1" hover-class="none"><button class="text-button phone-alternative" disabled="{{busy||loading}}">使用其他手机号</button></navigator>
   </block>
   <block wx:else>
     <view wx:if="{{status.profileRequired}}" class="biz-card activation-options">

@@ -89,3 +89,42 @@ button.phone-login[disabled] {
     margin-bottom: 20px;
   }
 }
+/* 使用其他手机号: phone + SMS code, then the same primary button. */
+.sms-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: left;
+}
+.sms-row {
+  display: flex;
+  gap: 10px;
+}
+.sms-field {
+  flex: 1;
+  min-width: 0;
+  height: 48px;
+  padding: 0 16px;
+  border-radius: 14px;
+  font-size: 16px;
+  color: var(--ui-text);
+  background: var(--ui-field);
+}
+.sms-placeholder {
+  color: var(--ui-placeholder);
+}
+button.sms-send {
+  flex: none;
+  width: 116px;
+  height: 48px;
+  margin: 0;
+  padding: 0;
+  border-radius: 14px;
+  font-size: 14px;
+  line-height: 48px;
+  color: var(--ui-text);
+  background: var(--ui-surface);
+}
+button.sms-send[disabled] {
+  color: var(--ui-muted);
+}

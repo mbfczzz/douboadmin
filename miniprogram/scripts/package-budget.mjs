@@ -165,7 +165,9 @@ console.log(
 // The create box becomes a WeChat <editor> (components/prompt-editor) so
 // @图片N / @视频N show as inline thumbnails while typing; the prompt text is
 // unchanged (utils/prompt-delta converts both ways): 814,241 B. 791 -> 796 KiB.
-const budget = 796 * 1024;
+// 登录页“使用其他手机号”改为手机号 + 短信验证码登录（pages/login/sms.ts），
+// 不再用微信身份直接登回原账号: 819,591 B. 796 -> 801 KiB.
+const budget = 801 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

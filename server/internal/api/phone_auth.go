@@ -93,13 +93,13 @@ func (a *Server) sendPhoneLoginCode(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *Server) phoneLogin(w http.ResponseWriter, r *http.Request) {
-	var v struct{ Phone, Code, Challenge, Source string }
+	var v struct{ Phone, Code, Challenge, Source, WechatCode string }
 	if !decode(w, r, &v) {
 		return
 	}
 	v.Phone = strings.TrimSpace(v.Phone)
 	v.Source = loginSource(v.Source)
-	if !mainlandPhone.MatchString(v.Phone) || !smsDigits.MatchString(v.Code) || !validSource(v.Source) || len(v.Challenge) != 32 {
+	if !mainlandPhone.MatchString(v.Phone) || !smsDigits.MatchString(v.Code) || !validSource(v.Source) || len(v.Challenge) != 32 || len(v.WechatCode) > 256 {
 		fail(w, 400, "手机号、验证码或来源无效")
 		return
 	}
@@ -157,7 +157,20 @@ func (a *Server) phoneLogin(w http.ResponseWriter, r *http.Request) {
 		fail(w, 400, problem)
 		return
 	}
-	token, e := a.Sessions.Create(r.Context(), user, "user")
+	// Mini-program "使用其他手机号": the session also carries this WeChat
+	// OpenID (WeChat Pay needs it) without relinking the WeChat identity,
+	// which stays with the account it already belongs to.
+	openID := ""
+	if v.WechatCode != "" && v.Source == "miniprogram" {
+		if openID, e = a.WeChat.Exchange(r.Context(), v.WechatCode); e != nil {
+			openID = ""
+		}
+	}
+	session := Identity{ID: user, Account: user, Role: "user", Expires: time.Now().Add(24 * time.Hour)}
+	if openID != "" {
+		session.WeChatOpenID, session.WeChatAppID = openID, a.Config.WeChatAppID
+	}
+	token, e := a.Sessions.create(r.Context(), session)
 	if e != nil {
 		dbError(w, e)
 		return

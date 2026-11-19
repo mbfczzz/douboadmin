@@ -20,6 +20,12 @@ func (a *Server) resolvePhoneUser(tx store.Transaction, phone, preferred, source
 		return "", false, errors.New("手机号记录异常")
 	}
 	id := owner.User
+	// A number left on a deleted account belongs to whoever signs in now.
+	if active, e := ownerActive(tx, id, phone); e != nil {
+		return "", false, e
+	} else if !active {
+		id = ""
+	}
 	if id == "" {
 		id = preferred
 	}

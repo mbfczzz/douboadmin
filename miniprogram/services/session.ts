@@ -79,7 +79,12 @@ export function login(purpose: LoginPurpose = "default"): Promise<void> {
   });
   return promise;
 }
-export async function signIn(mode: "wechat" | "demo" = "wechat", phoneCode?: string) {
+// "使用其他手机号": the SMS code for another phone's account.
+export type SmsLogin = { phone: string; code: string; challenge: string };
+export function sendPhoneCode(phone: string) {
+  return publicRequest<{ challenge: string; resendIn: number }>("/auth/phone/code", "POST", { phone, source: "miniprogram" });
+}
+export async function signIn(mode: "wechat" | "demo" | "phone" = "wechat", phoneCode?: string, sms?: SmsLogin) {
   const generation = authGeneration;
   if (exchange?.generation === generation) {
     if (exchange.mode !== mode || exchange.phoneCode !== phoneCode) throw new Error("请等待当前登录完成");
@@ -89,7 +94,13 @@ export async function signIn(mode: "wechat" | "demo" = "wechat", phoneCode?: str
   attempt.promise = (async () => {
     let body: object;
     let endpoint = "/auth/wechat";
-    if (mode === "wechat") {
+    if (mode === "phone") {
+      // The WeChat code lets the session pay with WeChat; login works without it.
+      const wechat = await wx.login({ timeout: 10000 }).catch(() => undefined);
+      if (generation !== authGeneration) throw new AuthCancelledError();
+      body = { ...sms, source: "miniprogram", ...(wechat?.code ? { wechatCode: wechat.code } : {}) };
+      endpoint = "/auth/phone/login";
+    } else if (mode === "wechat") {
       let result: WechatMiniprogram.LoginSuccessCallbackResult;
       try {
         result = await wx.login({ timeout: 10000 });

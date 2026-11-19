@@ -15,6 +15,7 @@ import { loginContext } from "../../services/login-context";
 import { canEnter, activationRedirect } from "../../services/access";
 import { supportsPhoneLogin, authorizedPhoneCode } from "../../services/phone-login";
 import { showArt } from "../../utils/ui-art";
+import { smsState, smsHandlers } from "./sms";
 Page({
   data: {
     brandIcon: "",
@@ -28,7 +29,10 @@ Page({
     loadError: "",
     returning: false,
     activationRequired: false,
+    ...smsState,
   },
+  ...smsHandlers,
+  smsTimer: 0,
   completed: false,
   destroyed: false,
   autoReturn: false,
@@ -38,10 +42,12 @@ Page({
     enterPage(this);
   },
   onLoad(query: Record<string, string | undefined> = {}) {
-    this.setData(loginContext(query.purpose));
+    // Opened as "使用其他手机号" (e.g. from activation): start on the SMS form.
+    this.setData({ ...loginContext(query.purpose), smsOpen: query.sms === "1" });
     showArt(this, (art) => ({ backdrop: art.loginBackdrop }));
     this.flow = captureLoginFlow();
-    if (hasSession()) {
+    // Signed in already: go back, unless switching to another phone.
+    if (hasSession() && query.sms !== "1") {
       this.autoReturn = true;
       this.setData({ returning: true, loading: false, wechatReady: true });
       return;
@@ -63,6 +69,7 @@ Page({
     void this.finish();
   },
   onUnload() {
+    clearInterval(this.smsTimer);
     this.destroyed = true;
     if (this.returnTimer !== undefined) clearTimeout(this.returnTimer);
     if (!this.completed) this.flow?.cancel();
