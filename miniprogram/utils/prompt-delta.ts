@@ -1,10 +1,11 @@
 // The create box shows each @图片N / @视频N as an inline thumbnail (WeChat
 // <editor>), while the prompt itself keeps the text "@图片N". These convert
-// between the prompt string and the editor (drawn from HTML, read back
-// from its Quill delta).
+// between the prompt string and the editor's Quill delta. (Drawing it from
+// HTML broke signed image links on devices, so the delta is used both ways.)
 type Ref = { id: string; isImage: boolean; isVideo?: boolean; data: { url: string; thumbnailUrl?: string } };
 type Op = { insert?: unknown; attributes?: Record<string, unknown> };
 const VIDEO_GLYPH = "/assets/glyphs/video-muted.png";
+const SIZE = "22px";
 
 // "@图片1" → its thumbnail, numbered per kind in strip order.
 function thumbnails(assets: Ref[]) {
@@ -17,29 +18,21 @@ function thumbnails(assets: Ref[]) {
   return map;
 }
 
-const escape = (t: string) => t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-// Spaces are drawn as &nbsp; so HTML parsing cannot collapse them (a lost
-// space after "@图片1" would turn "@图片1 2个人" into "@图片12个人").
-const text = (t: string) => escape(t).replace(/ /g, "&nbsp;");
-// Rounded, centred on the text line, with a little air on both sides.
-const IMG_STYLE = "width:22px;height:22px;border-radius:6px;object-fit:cover;vertical-align:-5px;margin:0 3px";
-
-// The editor's HTML: one paragraph per line; each known reference is an
-// inline thumbnail whose alt keeps its "@图片N" text.
-export function toHtml(prompt: string, assets: Ref[]) {
-  const thumbs = thumbnails(assets);
-  return prompt.split("\n").map((line) => {
-    let html = "";
-    for (let i = 0; i < line.length; ) {
-      const match = /^[@＠](图片|视频)\d+/.exec(line.slice(i, i + 12));
-      const label = match ? "@" + match[0].slice(1) : "";
-      if (match && thumbs[label]) {
-        html += `<img src="${escape(thumbs[label])}" alt="${label}" style="${IMG_STYLE}">`;
-        i += match[0].length;
-      } else html += text(line[i++]);
-    }
-    return `<p>${html || "<br>"}</p>`;
-  }).join("");
+export function toDelta(prompt: string, assets: Ref[]): Op[] {
+  const thumbs = thumbnails(assets), ops: Op[] = [];
+  let text = "";
+  for (let i = 0; i < prompt.length; ) {
+    const match = /^[@＠](图片|视频)\d+/.exec(prompt.slice(i, i + 12));
+    const label = match ? "@" + match[0].slice(1) : "";
+    if (match && thumbs[label]) {
+      if (text) ops.push({ insert: text });
+      text = "";
+      ops.push({ insert: { image: thumbs[label] }, attributes: { alt: label, width: SIZE, height: SIZE } });
+      i += match[0].length;
+    } else text += prompt[i++];
+  }
+  ops.push({ insert: text + "\n" }); // a Quill document ends with a newline
+  return ops;
 }
 
 export function fromDelta(ops: Op[], assets: Ref[]) {

@@ -1,4 +1,4 @@
-import { toHtml, fromDelta, caretAfter } from "../../utils/prompt-delta";
+import { toDelta, fromDelta, caretAfter } from "../../utils/prompt-delta";
 
 type Ctx = { setContents(o: object): void; blur(o?: object): void };
 type Self = { ctx?: Ctx; shown: string; refs: unknown; keyboard?: (r: { height: number }) => void };
@@ -41,7 +41,7 @@ Component({
       const s = this.self();
       s.shown = this.data.value;
       s.refs = this.data.assets;
-      s.ctx?.setContents({ html: toHtml(this.data.value, this.data.assets as never[]) });
+      s.ctx?.setContents({ delta: { ops: toDelta(this.data.value, this.data.assets as never[]) } });
     },
     input(e: WechatMiniprogram.CustomEvent<{ delta?: { ops?: object[] } }>) {
       const s = this.self(), before = s.shown || "";
