@@ -94,37 +94,59 @@ button.phone-login[disabled] {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  margin-top: 4px;
   text-align: left;
 }
 .sms-row {
   display: flex;
   gap: 10px;
 }
-.sms-field {
+.sms-box {
   flex: 1;
   min-width: 0;
-  height: 48px;
+  height: 52px;
+  display: flex;
+  align-items: center;
   padding: 0 16px;
-  border-radius: 14px;
+  border-radius: 16px;
+  background: var(--ui-field);
+}
+.sms-prefix {
+  flex: none;
+  margin-right: 12px;
+  padding-right: 12px;
+  border-right: 1px solid var(--ui-border);
+  font-size: 16px;
+  line-height: 20px;
+  color: var(--ui-muted);
+}
+.sms-input {
+  flex: 1;
+  min-width: 0;
+  height: 52px;
   font-size: 16px;
   color: var(--ui-text);
-  background: var(--ui-field);
 }
 .sms-placeholder {
   color: var(--ui-placeholder);
 }
 button.sms-send {
   flex: none;
-  width: 116px;
-  height: 48px;
+  width: 112px;
+  height: 52px;
   margin: 0;
   padding: 0;
-  border-radius: 14px;
+  border-radius: 16px;
   font-size: 14px;
-  line-height: 48px;
-  color: var(--ui-text);
+  font-weight: 500;
+  line-height: 52px;
+  color: var(--ui-brand);
   background: var(--ui-surface);
 }
+button.sms-send.idle,
 button.sms-send[disabled] {
   color: var(--ui-muted);
+}
+.sms-form button.phone-login {
+  margin-top: 8px;
 }

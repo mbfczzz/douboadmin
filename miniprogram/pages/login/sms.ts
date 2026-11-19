@@ -21,7 +21,7 @@ function countdown(page: Page, seconds: number) {
   }, 1000) as unknown as number;
 }
 
-export const smsState = { smsOpen: false, smsPhone: "", smsCode: "", smsChallenge: "", smsWait: 0 };
+export const smsState = { smsOpen: false, smsPhone: "", smsCode: "", smsChallenge: "", smsWait: 0, smsCodeFocus: false };
 
 export const smsHandlers = {
   otherPhone(this: Page) {
@@ -44,7 +44,7 @@ export const smsHandlers = {
     try {
       const r = await sendPhoneCode(phone);
       if (this.destroyed) return;
-      this.setData({ smsChallenge: r.challenge, smsCode: "" });
+      this.setData({ smsChallenge: r.challenge, smsCode: "", smsCodeFocus: true });
       countdown(this, r.resendIn || 60);
       wx.showToast({ title: "验证码已发送", icon: "none" });
     } catch (e) {
