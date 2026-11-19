@@ -46,9 +46,11 @@ export function modelSettings(
   },
 ) {
   const durations = [...new Set(model.durations || [])].filter((n) => Number.isInteger(n) && n >= 1 && n <= 30).sort((a, b) => a - b);
-  const duration = durations.includes(current.duration || 0)
-    ? current.duration || 0
-    : durations[0] || 0;
+  // An unsupported length (a draft, a remade video) takes the closest one.
+  const wanted = current.duration || 0;
+  const duration = durations.includes(wanted)
+    ? wanted
+    : durations.reduce((best, n) => (Math.abs(n - wanted) < Math.abs(best - wanted) ? n : best), durations[0] || 0);
   const qualities = model.qualities || [];
   const chosenQuality = matching(qualities, current.quality);
   const keepQuality = !model.settings?.hideQuality && !!chosenQuality &&

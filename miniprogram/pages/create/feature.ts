@@ -1,5 +1,9 @@
 import { error } from "../../utils/api";
 import { writeScript } from "../../services/ai-script";
+import { loadConfig } from "../../utils/config-cache";
+import { remakeInstruction } from "./remake-brief";
+import { REMAKE_SOURCE_KEY } from "../../services/hot-import";
+import type { RemakeSource } from "../../services/hot-import";
 import { defaultPromptChars } from "./models";
 import { referenceSettings } from "./references";
 import type { Model } from "../../services/types";
@@ -26,7 +30,20 @@ export const FEATURES: Record<string, Feature> = {
   remake: { title: "一键复刻", kind: "video", uses: "video", needs: "请先带入要复刻的视频", script: "同款复刻短视频", tip: "已带入无水印原视频作为参考", placeholder: "描述想怎么复刻，例如换成自己的产品或人物。" },
 };
 
-type Page = VisibleEditor & { data: VisibleEditor["data"] & { feature: string; featureChoice: Record<string, number>; scriptBusy: boolean } };
+
+type Page = VisibleEditor & { data: VisibleEditor["data"] & { feature: string; featureChoice: Record<string, number>; scriptBusy: boolean; remakeSource: RemakeSource | null } };
+
+// Opening the 一键复刻 preset writes the detailed description once (quietly
+// skipped when no chat model is offered; AI写剧本 then says so on tap).
+export async function startFeatureScript(page: Page) {
+  if (page.data.feature !== "remake") return;
+  const source = wx.getStorageSync(REMAKE_SOURCE_KEY) as RemakeSource | "";
+  if (!source) return;
+  wx.removeStorageSync(REMAKE_SOURCE_KEY);
+  page.setData({ remakeSource: source });
+  const config = await loadConfig().catch(() => null);
+  if (config?.models.some((m) => m.kind === "chat") && !page.destroyed) await featureHandlers.aiScript.call(page);
+}
 
 function idPrompt(choice: Record<string, number>) {
   const pick = (o: Option) => o.values[choice[o.key] || 0].text;
@@ -75,7 +92,9 @@ export const featureHandlers = {
     const images = count(false), videos = count(true);
     const refs = (images ? `用户上传了 ${images} 张参考图，用 @图片1…@图片${images} 指代并写进画面里。` : "") + (videos ? `参考视频用 @视频1…@视频${videos} 指代，沿用它的镜头和节奏。` : "");
     const idea = this.data.prompt.trim() || "（未填写，请根据参考图自由发挥）";
-    const instruction = `你是短视频编剧。为一条 ${this.data.duration || 5} 秒的${f.script}写一段可直接用于 AI 视频生成的画面描述：按时间顺序写清场景、人物动作、镜头运动和要展示的重点，不超过 ${Math.min(this.data.maxPromptChars, 500)} 字。${refs}只输出画面描述本身，不要标题和解释。\n用户的想法：${idea}`;
+    const limit = Math.min(this.data.maxPromptChars, 500);
+    const source = this.data.feature === "remake" ? this.data.remakeSource : null;
+    const instruction = source ? remakeInstruction(source, this.data.duration || 5, limit) : `你是短视频编剧。为一条 ${this.data.duration || 5} 秒的${f.script}写一段可直接用于 AI 视频生成的画面描述：按时间顺序写清场景、人物动作、镜头运动和要展示的重点，不超过 ${limit} 字。${refs}只输出画面描述本身，不要标题和解释。\n用户的想法：${idea}`;
     this.setData({ scriptBusy: true });
     try {
       const script = await writeScript(instruction, () => this.visible && !this.destroyed);

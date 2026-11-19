@@ -13,7 +13,7 @@ import { addReference, selectedModel } from "./references";
 import { chooseMention, promptWithout, clearMentions, cancelMention } from "./mentions";
 import { cancelPreview } from "./reference-preview";
 import { referenceHandlers } from "./reference-ui";
-import { applyFeature, featureHandlers, featureModel } from "./feature";
+import { applyFeature, featureHandlers, featureModel, startFeatureScript } from "./feature";
 import {
   restoreEditorAssets,
   clearEditorAssets,
@@ -77,7 +77,8 @@ Page({
       });
       void this.restoreAssets(draft.assets || []);
     }
-    void this.loadModels();
+    // The remake description waits for the models so it uses the real length.
+    void this.loadModels().then(() => startFeatureScript(this));
     // After loadModels so it shares that /config request.
     showArt(this, (art) => ({ sourceArt: { image: art.srcImage, video: art.srcVideo, audio: art.srcAudio } }));
   },

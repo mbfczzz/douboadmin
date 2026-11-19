@@ -202,7 +202,7 @@ export function forgetDeletedAccount() {
 function clearLocalAccount() {
   clearSession();
   cancelLogin();
-  for (const key of ["edit-draft", "mix-draft", "mix-add-asset", "mix-source-text"]) {
+  for (const key of ["edit-draft", "mix-draft", "mix-add-asset", "mix-source-text", "remake-source"]) {
     wx.removeStorageSync(key);
   }
   for (const key of wx.getStorageInfoSync?.().keys || []) {

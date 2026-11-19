@@ -70,4 +70,5 @@ export const creationData = {
   featureOptions: [] as { key: string; label: string; values: { label: string }[] }[],
   featureChoice: {} as Record<string, number>,
   scriptBusy: false,
+  remakeSource: null as { title: string; text: string; duration: number } | null, // 一键复刻's original
 };

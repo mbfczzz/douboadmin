@@ -10,6 +10,7 @@ var reads = map[string]string{
 	"GET /api/hot/history":                      "查看热门搜索记录",
 	"GET /api/hot/videos":                       "搜索热门视频",
 	"GET /api/hot/videos/{id}":                  "查看热门视频",
+	"GET /api/hot/videos/{id}/breakdown":        "查看视频拆解",
 	"GET /api/jobs":                             "查看生成任务",
 	"GET /api/jobs/estimate":                    "估算生成积分",
 	"GET /api/jobs/{id}":                        "查看任务详情",

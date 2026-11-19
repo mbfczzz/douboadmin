@@ -1,0 +1,150 @@
+// Package vision asks a video-understanding model (Doubao Seed Vision on
+// Volcengine Ark by default, any OpenAI-compatible chat API that takes
+// video_url) to break a video down for 一键复刻: hook, shots, selling points.
+package vision
+
+import (
+	"bytes"
+	"context"
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+	"strings"
+	"time"
+)
+
+type Client struct {
+	BaseURL, Key, Model string
+	HTTP                *http.Client
+}
+
+func (c *Client) Ready() bool {
+	return c != nil && c.BaseURL != "" && c.Key != "" && c.Model != ""
+}
+
+// Shot is one beat of the original, in seconds from the start.
+type Shot struct {
+	Start  float64 `json:"start"`
+	End    float64 `json:"end"`
+	Scene  string  `json:"scene"`
+	Action string  `json:"action"`
+	Camera string  `json:"camera"`
+	Speech string  `json:"speech"`
+}
+
+type Breakdown struct {
+	Summary       string   `json:"summary"`
+	Hook          string   `json:"hook"`
+	Structure     string   `json:"structure"`
+	SellingPoints []string `json:"sellingPoints"`
+	Style         string   `json:"style"`
+	Music         string   `json:"music"`
+	Shots         []Shot   `json:"shots"`
+}
+
+const instruction = `你是短视频爆款拆解专家。请完整观看这条视频，拆解它为什么能火，只输出一个 JSON 对象，不要任何其他文字：
+{"summary":"一句话概括视频内容","hook":"前 3 秒用什么画面或台词抓住观众","structure":"整体结构，如：痛点开场→产品展示→效果对比→引导下单","sellingPoints":["卖点或情绪点"],"style":"画面风格、色调、拍摄方式（手持/固定/口播等）","music":"背景音乐与音效的风格和节奏","shots":[{"start":0,"end":3,"scene":"场景与人物外观","action":"按时间顺序的具体动作","camera":"景别与运镜","speech":"台词、口播或画面字幕，没有则留空"}]}
+要求：shots 按时间顺序覆盖整条视频，3–12 个；时间单位为秒；描述具体、可被 AI 视频模型直接执行；没有的信息留空字符串。`
+
+func (c *Client) Breakdown(ctx context.Context, videoURL string) (Breakdown, error) {
+	body := map[string]any{
+		"model": c.Model,
+		"messages": []any{map[string]any{"role": "user", "content": []any{
+			map[string]any{"type": "video_url", "video_url": map[string]any{"url": videoURL, "fps": 1}},
+			map[string]any{"type": "text", "text": instruction},
+		}}},
+		"temperature": 0.2,
+		"max_tokens":  4096,
+	}
+	raw, _ := json.Marshal(body)
+	r, err := http.NewRequestWithContext(ctx, "POST", strings.TrimRight(c.BaseURL, "/")+"/chat/completions", bytes.NewReader(raw))
+	if err != nil {
+		return Breakdown{}, fmt.Errorf("视频理解接口地址无效")
+	}
+	r.Header.Set("Authorization", "Bearer "+c.Key)
+	r.Header.Set("Content-Type", "application/json")
+	client := c.HTTP
+	if client == nil {
+		client = &http.Client{Timeout: 3 * time.Minute}
+	}
+	res, err := client.Do(r)
+	if err != nil {
+		return Breakdown{}, fmt.Errorf("视频理解服务连接失败")
+	}
+	defer res.Body.Close()
+	data, _ := io.ReadAll(io.LimitReader(res.Body, 4<<20))
+	if res.StatusCode != 200 {
+		return Breakdown{}, upstreamError(res.StatusCode, data)
+	}
+	var reply struct {
+		Choices []struct {
+			Message struct {
+				Content string `json:"content"`
+			} `json:"message"`
+		} `json:"choices"`
+	}
+	if json.Unmarshal(data, &reply) != nil || len(reply.Choices) == 0 {
+		return Breakdown{}, fmt.Errorf("视频理解服务返回格式无效")
+	}
+	return Parse(reply.Choices[0].Message.Content)
+}
+
+// Parse reads the model's JSON (tolerating code fences and stray text) and
+// keeps it within sane bounds.
+func Parse(text string) (Breakdown, error) {
+	start, end := strings.Index(text, "{"), strings.LastIndex(text, "}")
+	var b Breakdown
+	if start < 0 || end <= start || json.Unmarshal([]byte(text[start:end+1]), &b) != nil {
+		return Breakdown{}, fmt.Errorf("视频拆解结果无法解析")
+	}
+	shots := []Shot{}
+	for _, s := range b.Shots {
+		if s.End < s.Start {
+			s.End = s.Start
+		}
+		s.Scene, s.Action, s.Camera, s.Speech = clip(s.Scene, 200), clip(s.Action, 300), clip(s.Camera, 100), clip(s.Speech, 300)
+		if s.Scene+s.Action+s.Speech != "" && len(shots) < 12 {
+			shots = append(shots, s)
+		}
+	}
+	if len(shots) == 0 {
+		return Breakdown{}, fmt.Errorf("视频拆解没有得到镜头")
+	}
+	b.Shots = shots
+	b.Summary, b.Hook, b.Structure = clip(b.Summary, 200), clip(b.Hook, 200), clip(b.Structure, 200)
+	b.Style, b.Music = clip(b.Style, 200), clip(b.Music, 120)
+	points := []string{}
+	for _, p := range b.SellingPoints {
+		if p = clip(p, 60); p != "" && len(points) < 6 {
+			points = append(points, p)
+		}
+	}
+	b.SellingPoints = points
+	return b, nil
+}
+
+func clip(s string, n int) string {
+	s = strings.TrimSpace(s)
+	if r := []rune(s); len(r) > n {
+		return string(r[:n])
+	}
+	return s
+}
+
+func upstreamError(status int, body []byte) error {
+	var reply struct {
+		Error struct {
+			Message string `json:"message"`
+		} `json:"error"`
+	}
+	_ = json.Unmarshal(body, &reply)
+	reason := map[int]string{401: "视频理解 API Key 无效", 403: "视频理解 API Key 没有该模型的权限", 404: "视频理解模型不存在或未开通", 429: "视频理解请求过于频繁"}[status]
+	if reason == "" {
+		reason = fmt.Sprintf("视频理解服务出错（%d）", status)
+	}
+	if m := clip(reply.Error.Message, 120); m != "" {
+		reason += "：" + m
+	}
+	return fmt.Errorf("%s", reason)
+}

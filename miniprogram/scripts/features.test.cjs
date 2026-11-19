@@ -87,3 +87,63 @@ test("the 一键复刻 preset needs its video and starts on a model that takes v
   assert.equal(featureModel([image, video], "remake").id, "v");
   assert.equal(featureModel([image, video], "ad").id, "i");
 });
+
+test("一键复刻 writes a shot-by-shot description from the original once", async () => {
+  const h = harness(), sent = [];
+  h.service("../utils/config-cache").loadConfig = async () => ({ models: [{ id: "chat-1", kind: "chat" }] });
+  h.service("jobs").submitInput = async (input) => { sent.push(input); return { id: "j1", status: "succeeded", result: "镜头1：……" }; };
+  h.storage.set("remake-source", { title: "三分钟学会一道家常菜", text: "番茄炒蛋的秘诀 #美食", duration: 23.4 });
+  h.storage.set("edit-draft", { kind: "video", prompt: "参考@视频1……", ratio: "9:16", resolution: "", duration: 10, assets: [] });
+  const page = h.page("create");
+  page.visible = true;
+  page.restoreAssets = async () => undefined;
+  page.loadModels = async () => undefined;
+  page.onLoad({ feature: "remake" });
+  page.onShow();
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.equal(sent.length, 1);
+  assert.match(sent[0].prompt, /复刻编剧[^]*三分钟学会一道家常菜[^]*番茄炒蛋的秘诀[^]*约 23 秒[^]*生成时长为 10 秒[^]*@视频1/);
+  assert.equal(page.data.prompt, "镜头1：……");
+  assert.equal(h.storage.has("remake-source"), false);
+  page.onShow();
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.equal(sent.length, 1, "only once");
+});
+
+test("without a chat model the remake description is skipped quietly", async () => {
+  const h = harness(), toasts = [], sent = [];
+  h.wx.showToast = (o) => toasts.push(o.title);
+  h.service("../utils/config-cache").loadConfig = async () => ({ models: [{ id: "v", kind: "video" }] });
+  h.service("jobs").submitInput = async (input) => { sent.push(input); return { id: "j", status: "succeeded", result: "x" }; };
+  h.storage.set("remake-source", { title: "t", text: "", duration: 8 });
+  const page = h.page("create");
+  page.visible = true;
+  page.onLoad({ feature: "remake" });
+  const { startFeatureScript } = h.service("../pages/create/feature");
+  await startFeatureScript(page);
+  assert.deepEqual(sent, []);
+  assert.deepEqual(toasts, []);
+  assert.equal(h.storage.has("remake-source"), false);
+});
+
+test("an unsupported length takes the closest the model offers", () => {
+  const h = harness();
+  const { modelSettings } = h.service("../pages/create/models");
+  const model = { id: "m", kind: "video", durations: [5, 10, 15], resolutions: [], ratios: [] };
+  const pick = (duration) => modelSettings(model, { resolution: "", ratio: "9:16", duration }).duration;
+  assert.equal(pick(23), 15);
+  assert.equal(pick(7), 5);
+  assert.equal(pick(9), 10);
+  assert.equal(pick(10), 10);
+});
+
+test("the remake brief follows the video breakdown and swaps in the user's pictures", () => {
+  const h = harness();
+  const { remakeInstruction } = h.service("../pages/create/remake-brief");
+  const source = { title: "开箱口红", text: "", duration: 18, images: 2, breakdown: { summary: "深夜开箱", hook: "撕快递盒", structure: "开箱→试色→下单", sellingPoints: ["显白"], style: "手持暖光", music: "轻快", shots: [{ start: 0, end: 2.5, scene: "卧室书桌", action: "撕开快递", camera: "手持中景", speech: "" }, { start: 2.5, end: 6, scene: "镜前", action: "试色", camera: "特写", speech: "黄皮也能涂" }] } };
+  const text = remakeInstruction(source, 10, 500);
+  assert.match(text, /视频理解模型对原视频的拆解[^]*开头钩子：撕快递盒[^]*0–2.5秒｜场景：卧室书桌｜动作：撕开快递｜镜头：手持中景\n2.5–6秒[^]*台词\/字幕：黄皮也能涂/);
+  assert.match(text, /生成时长为 10 秒[^]*前 3 秒[^]*@图片1、@图片2[^]*@视频1/);
+  const plain = remakeInstruction({ title: "t", text: "文案", duration: 8 }, 5, 300);
+  assert.match(plain, /未能拆解画面[^]*文案：文案[^]*不要照搬原作者/);
+});

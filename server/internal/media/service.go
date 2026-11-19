@@ -43,21 +43,31 @@ func (s *Service) Inputs(ctx context.Context, j core.Job) ([]core.Reference, err
 		if json.Unmarshal(r.Data, &a) != nil {
 			return nil, fmt.Errorf("素材记录无效")
 		}
-		if s.Objects == nil {
-			return nil, fmt.Errorf("参考素材需要配置 OSS 公网存储后才能提交给模型")
-		}
-		u, err := s.Objects.URL(ctx, a.Key)
-		if signer, ok := s.Objects.(interface {
-			InputURL(context.Context, string) (string, error)
-		}); ok {
-			u, err = signer.InputURL(ctx, a.Key)
-		}
+		u, err := s.InputURL(ctx, a.Key)
 		if err != nil {
-			return nil, fmt.Errorf("无法读取参考素材")
+			return nil, err
 		}
 		out = append(out, core.Reference{URL: u, Type: strings.Split(a.Type, "/")[0]})
 	}
 	return out, nil
+}
+
+// InputURL is a public, signed address of a stored file that an outside
+// model service can fetch.
+func (s *Service) InputURL(ctx context.Context, key string) (string, error) {
+	if s.Objects == nil {
+		return "", fmt.Errorf("参考素材需要配置 OSS 公网存储后才能提交给模型")
+	}
+	u, err := s.Objects.URL(ctx, key)
+	if signer, ok := s.Objects.(interface {
+		InputURL(context.Context, string) (string, error)
+	}); ok {
+		u, err = signer.InputURL(ctx, key)
+	}
+	if err != nil {
+		return "", fmt.Errorf("无法读取参考素材")
+	}
+	return u, nil
 }
 
 // Save transfers relay results to owned storage. Deterministic IDs make retries safe.

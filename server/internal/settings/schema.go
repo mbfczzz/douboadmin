@@ -76,6 +76,11 @@ var definitions = []Group{
 		{Key: "HOT_FEED_SOURCE", Label: "创作页视频来源", Kind: "select", Default: "billboard", Options: []Option{{"billboard", "抖音视频热榜（按标签筛选，「热门」为整个榜单）"}, {"search", "关键词搜索"}}, Hint: "保存后重启服务生效。"},
 		{Key: "HOT_FEED_KEYWORDS", Label: "创作页关键词", Kind: "text", Default: DefaultFeedKeywords, Hint: "创作页视频流的标签，按顺序显示，第一个默认选中；视频来源为热榜时按标签筛选近 7 天视频热榜（「热门」为整个榜单）；为关键词搜索时按标签搜索抖音视频。用逗号或顿号分隔，最多 12 个、每个不超过 20 字。保存后重启服务生效。"},
 	}},
+	{ID: "vision", Name: "视频理解", Hint: "一键复刻用它看懂原视频（钩子、分镜、卖点）。默认火山方舟豆包视觉模型，也可填写兼容 OpenAI 接口并支持视频输入的服务。未填写 API Key 时复刻只参考视频文案。保存后重启服务生效。", Fields: []Field{
+		{Key: "VISION_BASE_URL", Label: "API 基础地址", Kind: "url", Default: "https://ark.cn-beijing.volces.com/api/v3"},
+		{Key: "VISION_API_KEY", Label: "API Key", Kind: "secret"},
+		{Key: "VISION_MODEL", Label: "模型 ID", Kind: "text", Default: "doubao-seed-1-6-vision-250815", Hint: "须支持视频输入，例如 doubao-seed-1-6-vision-250815；也可填方舟推理接入点 ID。"},
+	}},
 	{ID: "notifications", Name: "完成订阅通知", Hint: "需先配置微信登录，并在微信后台取得订阅消息模板。", Fields: []Field{
 		{Key: "WECHAT_COMPLETION_TEMPLATE_ID", Label: "订阅模板 ID", Kind: "text"},
 		{Key: "WECHAT_COMPLETION_FIELDS", Label: "模板字段映射", Kind: "mapping", Default: "{}", Hint: "例如 thing1 对应 {{title}}；字段名以微信模板为准。", Limit: 30, Columns: []Column{

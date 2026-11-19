@@ -13,6 +13,7 @@ import (
 	"doubo/server/internal/settings"
 	"doubo/server/internal/store"
 	"doubo/server/internal/virtualpay"
+	"doubo/server/internal/vision"
 	"doubo/server/internal/wechat"
 	"io"
 	"net/http"
@@ -49,6 +50,7 @@ type Server struct {
 	Activity     *analytics.Recorder
 	Visits       *analytics.Visits
 	Hot          *hotvideo.Service
+	Vision       *vision.Client // 一键复刻's video breakdown (hot_breakdown.go)
 	Billing      *billing.Service
 	Pay          *payments.Client
 	Virtual      *virtualpay.Service

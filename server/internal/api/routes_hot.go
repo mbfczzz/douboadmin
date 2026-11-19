@@ -7,6 +7,8 @@ func (a *Server) hotRoutes() {
 	m.HandleFunc("GET /api/hot/videos/{id}", a.auth("user", a.hotDetail))
 	m.HandleFunc("POST /api/hot/videos/{id}/import", a.auth("user", a.importHot))
 	m.HandleFunc("POST /api/hot/link", a.auth("user", a.hotLink))
+	m.HandleFunc("POST /api/hot/videos/{id}/breakdown", a.auth("user", a.hotBreakdown))
+	m.HandleFunc("GET /api/hot/videos/{id}/breakdown", a.auth("user", a.hotBreakdown))
 	m.HandleFunc("GET /api/hot/history", a.auth("user", a.searchHistory))
 	m.HandleFunc("DELETE /api/hot/history", a.auth("user", a.searchHistory))
 }

@@ -181,7 +181,13 @@ console.log(
 // 864,618 B. 819 -> 845 KiB.
 // 一键复刻 reads a pasted link, saves the watermark-free original and opens
 // the editor's 一键复刻 preset (services/hot-import.ts): 869,562 B. 845 -> 850 KiB.
-const budget = 850 * 1024;
+// 一键复刻 writes a shot-by-shot description from the original (title, caption,
+// length) with the chat model, and the remake page shows the original's
+// length with a note past 15 s, closest supported length: 873,459 B. 850 -> 853 KiB.
+// 一键复刻 after Clipcat: the video model's breakdown (services/hot-breakdown.ts),
+// the user's own product / person pictures (pages/remake/pictures.ts) and a
+// breakdown-driven brief (pages/create/remake-brief.ts): 881,199 B. 853 -> 861 KiB.
+const budget = 861 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

@@ -45,6 +45,10 @@ func init() {
 			c("cover", Text), c("url", Text), c("sourceUrl", Text), c("likes", Int), c("views", Int),
 			c("comments", Int), c("publishedAt", Time), c("duration", Float),
 		}},
+		Table{Name: "hot_breakdowns", Comment: "一键复刻的视频拆解结果；id = 模型与抖音视频 ID 的摘要", Cols: []Col{
+			c("videoId", Key), c("model", Short), c("status", Key), c("result", JSON), c("error", Text),
+			c("startedAt", Time), c("finishedAt", Time),
+		}},
 		Table{Name: "hot_cache", Comment: "抖音搜索结果与热词缓存；id = 查询摘要", Cols: []Col{
 			c("items", JSON), c("words", JSON), c("cursor", Int), c("hasMore", Bool), c("searchId", Text),
 			c("backtrace", Text), c("sortScope", Key), c("cached", Bool), c("fetchedAt", Time),
