@@ -1,0 +1,27 @@
+<nav-bar title="文案提取" back />
+<view class="subpage extract-page">
+  <text class="extract-heading">选择提取方式</text>
+  <block wx:for="{{methods}}" wx:key="key">
+    <view class="method {{linkOpen&&item.key==='link'?'open':''}}" data-key="{{item.key}}" bindtap="choose" hover-class="card-pressed" aria-role="button" aria-label="{{item.title}}">
+      <view class="method-icon"><image class="gl gl-24" src="/assets/glyphs/{{item.icon}}.png" /></view>
+      <view class="method-copy"><text class="method-title">{{item.title}}</text><text class="method-note">{{item.note}}</text></view>
+      <text class="method-go">›</text>
+    </view>
+    <view wx:if="{{linkOpen&&item.key==='link'}}" class="biz-card link-card">
+      <textarea class="link-input" always-embed disable-default-padding value="{{link}}" maxlength="500" placeholder="粘贴抖音分享的链接或整段分享文字" placeholder-class="link-placeholder" bindinput="input" auto-height />
+      <view class="link-actions">
+        <text class="link-paste" bindtap="paste">粘贴</text>
+        <button class="biz-action link-go" loading="{{busy}}" disabled="{{busy}}" bindtap="extract">提取文案</button>
+      </view>
+    </view>
+    <view wx:if="{{video&&item.key==='link'}}" class="biz-card result-card">
+      <text class="biz-heading">{{video.title}}</text>
+      <text class="biz-small">{{video.author}}</text>
+      <text selectable="true" class="result-text">{{video.text||video.title}}</text>
+      <view class="result-actions">
+        <button class="biz-secondary" bindtap="copy">复制文案</button>
+        <button class="biz-action" bindtap="create">用文案创作</button>
+      </view>
+    </view>
+  </block>
+</view>

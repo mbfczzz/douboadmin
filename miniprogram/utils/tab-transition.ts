@@ -24,7 +24,7 @@ export const TAB_ITEMS = [
     icon: "add",
     primary: true,
     ...art("create"),
-    path: "/pages/create/index",
+    path: "/pages/studio/index",
   },
   {
     text: "Agent",

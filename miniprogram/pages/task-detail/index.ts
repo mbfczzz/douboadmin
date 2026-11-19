@@ -7,7 +7,6 @@ import {
   jobView,
   uid,
   enterPage,
-  openTab,
   hasSession,
   login,
   openPage,
@@ -209,15 +208,11 @@ Page({
       return openPage(this, { url: "/pages/template-detail/index?id=" + encodeURIComponent(input.templateId) });
     const mix = input.kind === "mix";
     wx.setStorageSync(mix ? "mix-draft" : "edit-draft", input);
-    openTab(this, mix ? "/pages/mix/index" : "/pages/create/index");
+    openPage(this, { url: mix ? "/pages/mix/index" : "/pages/create/index" });
   },
   continueCreate() {
-    openTab(
-      this,
-      this.data.job?.input.kind === "mix"
-        ? "/pages/mix/index"
-        : "/pages/create/index",
-    );
+    const kind = this.data.job?.input.kind;
+    openPage(this, { url: kind === "mix" ? "/pages/mix/index" : "/pages/create/index?kind=" + (kind === "image" ? "image" : "video") });
   },
   save(e?: WechatMiniprogram.CustomEvent<{ index?: number }>) {
     return saveResults(this, e?.detail?.index);

@@ -140,6 +140,6 @@ Page({
     });
   },
   upload() {
-    openTab(this, "/pages/create/index");
+    openTab(this, "/pages/studio/index");
   },
 });

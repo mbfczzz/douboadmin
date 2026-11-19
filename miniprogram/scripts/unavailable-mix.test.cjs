@@ -21,7 +21,7 @@ test("unavailable-feature exits lead to creation",()=>{
   h.wx.switchTab=options=>calls.push(options.url);
   h.page("mix").create();
   h.page("hot-videos").upload();
-  assert.deepEqual(calls,["/pages/create/index","/pages/create/index"]);
+  assert.deepEqual(calls,["/pages/studio/index","/pages/studio/index"]);
 });
 
 test("the full mix form works locally; only service actions say it is not open", async () => {

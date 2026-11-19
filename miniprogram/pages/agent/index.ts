@@ -7,7 +7,7 @@ import {
   tab,
   submitInput,
   hasSession,
-  openTab,
+  openPage,
 } from "../../utils/api";
 import type { Job, Config } from "../../services/types";
 import { chatMessages } from "../../utils/chat";
@@ -225,6 +225,6 @@ Page({
       resolution: "768p",
       duration: 5,
     });
-    openTab(this, "/pages/create/index");
+    openPage(this, { url: "/pages/create/index" });
   },
 });

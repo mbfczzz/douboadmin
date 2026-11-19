@@ -1,0 +1,54 @@
+/* Feature presets (剧情带货, 探店视频, AI证件照): a hint with "AI写剧本",
+   or option chips that write the prompt. */
+.feature-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.feature-tip {
+  flex: 1;
+  min-width: 0;
+  font-size: 12px;
+  color: var(--ui-muted);
+}
+.script-button {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ui-on-brand);
+  background: var(--ui-brand);
+}
+.script-button.is-busy {
+  opacity: 0.6;
+  pointer-events: none;
+}
+.feature-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.option-label {
+  width: 40px;
+  font-size: 13px;
+  color: var(--ui-muted);
+}
+.option-chip {
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  color: var(--ui-link);
+  background: var(--ui-surface);
+}
+.option-chip.active {
+  color: var(--ui-on-brand);
+  background: var(--ui-primary);
+  font-weight: 600;
+}

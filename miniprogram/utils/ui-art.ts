@@ -41,6 +41,27 @@ const NAMES = {
   bgProfile: "bg-profile", // 编辑资料
   bgProvider: "bg-provider", // 服务商中心
   bgWorks: "bg-works", // 我的作品
+  // 创作 entry page: four feature cards
+  hubVideo: "hub-video",
+  hubImage: "hub-image",
+  hubMix: "hub-mix",
+  hubRemake: "hub-remake",
+  // feature tiles (two rows of five, then the rest behind 展开)
+  toolAd: "tool-ad",
+  toolShop: "tool-shop",
+  toolAvatar: "tool-avatar",
+  toolArticle: "tool-article",
+  toolSing: "tool-sing",
+  toolRemix: "tool-remix",
+  toolExtract: "tool-extract",
+  toolIdphoto: "tool-idphoto",
+  toolDesub: "tool-desub",
+  toolMore: "tool-more",
+  toolComic: "tool-comic",
+  toolHot: "tool-hot",
+  toolLibrary: "tool-library",
+  toolWorks: "tool-works",
+  toolTasks: "tool-tasks",
 };
 export type Art = Record<keyof typeof NAMES, string>;
 

@@ -108,3 +108,20 @@ export function resolutionSettings(
         : "",
   };
 }
+
+// Shown when the chosen kind has no model to offer.
+export const NO_MODELS = {
+  model: "",
+  modelName: "暂无可用模型",
+  availableModels: [],
+  resolutions: [],
+  ratios: [],
+  durations: [],
+  qualities: [],
+  allowImage: false,
+  allowVideo: false,
+  allowAudio: false,
+  maxReferences: 0,
+  parameterError: "",
+  modelError: "当前类型暂无可用模型",
+};

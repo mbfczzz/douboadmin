@@ -204,11 +204,14 @@ button.generate-button.is-disabled {
   .model-select {
     gap: 4px;
   }
+  .quote-note {
+    font-size: 12px;
+  }
 }
 .workspace.expanded {
   position: fixed;
   top: calc(58px + env(safe-area-inset-top));
-  bottom: calc(80px + env(safe-area-inset-bottom));
+  bottom: calc(20px + env(safe-area-inset-bottom));
   left: 20px;
   right: 20px;
   height: auto;

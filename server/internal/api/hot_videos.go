@@ -4,6 +4,7 @@ import (
 	"doubo/server/internal/core"
 	"doubo/server/internal/hotvideo"
 	"encoding/json"
+	"io"
 	"net/http"
 	"regexp"
 	"slices"
@@ -34,7 +35,8 @@ func (a *Server) hotSearch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	user := identity(r).ID
-	if cursor == 0 {
+	// history=0: the 创作 page's video feed browses keywords, it is not the user's own search.
+	if cursor == 0 && q.Get("history") != "0" {
 		_, _ = a.Store.Put(r.Context(), "search_history", core.Record{ID: core.NewID(), Owner: user, Data: core.Data(map[string]any{"keyword": keyword, "searchedAt": time.Now().UTC()})}, 0)
 	}
 	for _, item := range result.Items {
@@ -117,4 +119,30 @@ func (a *Server) searchHistory(w http.ResponseWriter, r *http.Request) {
 		out = out[:20]
 	}
 	reply(w, 200, out)
+}
+
+// 文案提取: the caption of a pasted Douyin share link.
+func (a *Server) hotLink(w http.ResponseWriter, r *http.Request) {
+	if !a.Hot.Ready() {
+		fail(w, 503, "抖音数据接口尚未配置")
+		return
+	}
+	var v struct {
+		Text string `json:"text"`
+	}
+	if json.NewDecoder(io.LimitReader(r.Body, 4096)).Decode(&v) != nil || strings.TrimSpace(v.Text) == "" {
+		fail(w, 400, "请粘贴抖音视频的分享链接")
+		return
+	}
+	id, e := hotvideo.LinkID(r.Context(), v.Text, hotvideo.FollowHTTP)
+	if e != nil {
+		fail(w, 400, e.Error())
+		return
+	}
+	video, e := a.Hot.Client.Detail(r.Context(), id)
+	if e != nil {
+		fail(w, 502, e.Error())
+		return
+	}
+	reply(w, 200, video)
 }

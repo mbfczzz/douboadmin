@@ -3,6 +3,7 @@
     "pages/activate/index",
     "pages/templates/index",
     "pages/mix/index",
+    "pages/studio/index",
     "pages/create/index",
     "pages/agent/index",
     "pages/mine/index",
@@ -23,7 +24,10 @@
     "pages/shared-work/index",
     "pages/hot-videos/index",
     "pages/hot-detail/index",
-    "pages/provider/index"
+    "pages/provider/index",
+    "pages/remake/index",
+    "pages/extract/index",
+    "pages/feature/index"
   ],
   "window": {
     "navigationStyle": "custom",
@@ -44,11 +48,7 @@
         "text": "模板"
       },
       {
-        "pagePath": "pages/mix/index",
-        "text": "混剪"
-      },
-      {
-        "pagePath": "pages/create/index",
+        "pagePath": "pages/studio/index",
         "text": "创作"
       },
       {

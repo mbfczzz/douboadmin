@@ -143,7 +143,7 @@ test("tab switching ignores repeated taps and unlocks after failure", () => {
   tap(2);
   tap(2);
   assert.equal(calls.length, 1);
-  assert.equal(calls[0].url, "/pages/create/index");
+  assert.equal(calls[0].url, "/pages/studio/index");
   calls[0].fail();
   calls[0].complete();
   tap(2);

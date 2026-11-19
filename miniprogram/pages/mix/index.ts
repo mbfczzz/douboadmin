@@ -1,6 +1,6 @@
 import { showArt } from "../../utils/ui-art";
 import { loadConfig } from "../../utils/config-cache";
-import { request, error, tab, openPage, openTab } from "../../utils/api";
+import { request, error, enterPage, openPage, openTab } from "../../utils/api";
 import type { Row, Asset, Input, Config } from "../../services/types";
 import {
   restoreEditorAssets,
@@ -19,7 +19,7 @@ Page({
   onShow() {
     this.visible = true;
     showArt(this, (art) => ({ "styles[0].image": art.mixNatural, "styles[1].image": art.mixFast, "styles[2].image": art.mixCinema }));
-    tab(this, 1);
+    enterPage(this);
     void this.load();
     const added = wx.getStorageSync("mix-add-asset") as Row<Asset>;
     if (added) {
@@ -55,7 +55,7 @@ Page({
     }
   },
   create() {
-    openTab(this, "/pages/create/index");
+    openTab(this, "/pages/studio/index");
   },
   onHide() {
     this.visible = false;

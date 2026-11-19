@@ -1,0 +1,76 @@
+<nav-bar title="创作" />
+<view class="page studio-page">
+  <view class="studio-cards">
+    <view
+      wx:for="{{cards}}"
+      wx:key="key"
+      class="studio-card card-{{item.key}}"
+      data-key="{{item.key}}"
+      bindtap="open"
+      hover-class="card-pressed"
+      aria-role="button"
+      aria-label="{{item.title}}"
+    >
+      <image wx:if="{{art[item.key]}}" class="card-art" src="{{art[item.key]}}" mode="aspectFill" aria-hidden="true" />
+      <text class="card-title">{{item.title}}</text>
+      <text class="card-note">{{item.note}}</text>
+    </view>
+  </view>
+  <view class="studio-tools">
+    <block wx:for="{{tools}}" wx:key="key">
+      <view
+        wx:if="{{moreOpen||index<firstTools}}"
+        class="studio-tool"
+        data-key="{{item.key}}"
+        bindtap="open"
+        hover-class="tool-pressed"
+        aria-role="button"
+      >
+        <view class="tool-icon"><image wx:if="{{art[item.key]}}" src="{{art[item.key]}}" mode="aspectFill" aria-hidden="true" /></view>
+        <text>{{item.title}}</text>
+      </view>
+    </block>
+    <view class="studio-tool" bindtap="toggleMore" hover-class="tool-pressed" aria-role="button">
+      <view class="tool-icon tool-more {{moreOpen?'open':''}}"><image wx:if="{{art.more}}" src="{{art.more}}" mode="aspectFill" aria-hidden="true" /></view>
+      <text>{{moreOpen?'收起':'展开'}}</text>
+    </view>
+  </view>
+  <block wx:if="{{feedState!=='off'}}">
+    <scroll-view wx:if="{{keywords.length}}" scroll-x class="studio-chips" enhanced show-scrollbar="{{false}}">
+      <view class="chip-row">
+        <text
+          wx:for="{{keywords}}"
+          wx:key="*this"
+          class="chip {{feedState==='ready'&&item===keyword?'active':''}}"
+          data-word="{{item}}"
+          bindtap="choose"
+        >{{item}}</text>
+      </view>
+    </scroll-view>
+    <view wx:if="{{feedState==='login'}}" class="biz-empty feed-login">
+      <text>登录后查看热门视频</text>
+      <text class="empty-link" bindtap="signIn">去登录 ›</text>
+    </view>
+    <view wx:elif="{{feedError}}" class="biz-error" bindtap="retry">{{feedError}} · 点击重试</view>
+    <view wx:elif="{{feedState==='ready'&&keywords.length&&!loading&&!videos.length}}" class="biz-empty feed-empty">
+      <text>暂无相关视频，换个关键词看看</text>
+    </view>
+    <view class="studio-videos">
+      <view wx:for="{{videos}}" wx:key="id" class="studio-video" data-id="{{item.id}}" bindtap="detail" hover-class="card-pressed">
+        <view class="video-cover">
+          <image src="{{item.cover}}" mode="aspectFill" lazy-load />
+          <view class="video-likes"><image class="gl gl-14" src="/assets/glyphs/favorites.png" /><text>{{item.likesText}}</text></view>
+        </view>
+        <text class="video-title">{{item.title}}</text>
+        <view class="video-foot">
+          <text class="video-author">{{item.author}}</text>
+          <view class="video-same" data-id="{{item.id}}" catchtap="remake" hover-class="tool-pressed" hover-stop-propagation aria-role="button">做同款</view>
+        </view>
+      </view>
+      <block wx:if="{{loading&&!videos.length}}">
+        <view wx:for="{{[0,1,2,3]}}" wx:key="*this" class="studio-video"><view class="video-cover skeleton" /></view>
+      </block>
+    </view>
+    <view wx:if="{{videos.length}}" class="end">{{hasMore?(loading?'加载中…':'上滑加载更多'):'已经到底了'}}</view>
+  </block>
+</view>

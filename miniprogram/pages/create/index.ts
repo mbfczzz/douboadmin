@@ -1,18 +1,19 @@
 import { showArt } from "../../utils/ui-art";
 import { queue, startTaskCount, stopTaskCount } from "../../services/task-count";
 import { loadConfig, peekConfig } from "../../utils/config-cache";
-import { request, tab, openTab, sessionToken } from "../../utils/api";
+import { request, enterPage, openTab, sessionToken } from "../../utils/api";
 import type { Config, Row, Asset, Input } from "../../services/types";
 import { creationData } from "./state";
 import { generate } from "./submit";
 import { cancelEstimate, updateEstimate } from "./estimate";
 import { openModelMenu, measureModelMenu } from "./model-menu";
-import { modelChoices, modelSettings, resolutionSettings, defaultPromptChars } from "./models";
+import { modelChoices, modelSettings, resolutionSettings, defaultPromptChars, NO_MODELS } from "./models";
 import type { ModelChoice } from "./editor-types";
 import { addReference, selectedModel } from "./references";
 import { chooseMention, promptWithout, clearMentions, cancelMention } from "./mentions";
 import { cancelPreview } from "./reference-preview";
 import { referenceHandlers } from "./reference-ui";
+import { applyFeature, featureHandlers, featureModel } from "./feature";
 import {
   restoreEditorAssets,
   clearEditorAssets,
@@ -20,6 +21,7 @@ import {
 Page({
   data: creationData,
   ...referenceHandlers,
+  ...featureHandlers,
   assetRevision: 0,
   restoreIds: [] as string[],
   modelVersion: 0,
@@ -38,6 +40,11 @@ Page({
   onResize() {
     this.closeModels();
   },
+  // 视频创作 / 图片创作 on the 创作 page open this editor with their kind.
+  onLoad(query: Record<string, string>) {
+    if (query.kind === "image") this.setData({ kind: "image", maxPromptChars: defaultPromptChars("image"), ratio: "1:1" });
+    if (query.feature) applyFeature(this, query.feature);
+  },
   onReady() {
     measureModelMenu(this); // so the first open lands in place
   },
@@ -48,7 +55,7 @@ Page({
     const owner = sessionToken();
     if (owner !== this.quoteOwner) cancelEstimate(this, true);
     this.quoteOwner = owner;
-    tab(this, 2);
+    enterPage(this);
     const draft = wx.getStorageSync("edit-draft") as Input;
     if (draft) {
       wx.removeStorageSync("edit-draft");
@@ -118,7 +125,7 @@ Page({
     const known = (cold || switched) && peekConfig(10 * 60 * 1000);
     if (known) {
       const first = modelChoices(known.models, this.data.kind);
-      const m = first.find((item) => item.id === this.data.model) || first[0];
+      const m = first.find((item) => item.id === this.data.model) || featureModel(first, this.data.feature) || first[0];
       if (m) this.setData({ availableModels: first, modelIndex: first.indexOf(m), ...modelSettings(m, this.data) });
     }
     this.setData({
@@ -133,7 +140,7 @@ Page({
       const available = modelChoices(c.models, this.data.kind);
       if (available.length) {
         const m =
-          available.find((item) => item.id === this.data.model) || available[0];
+          available.find((item) => item.id === this.data.model) || featureModel(available, this.data.feature) || available[0];
         // Unchanged catalog: skip re-sending the model list to the view.
         const same = JSON.stringify(available) === JSON.stringify(this.data.availableModels);
         this.setData({
@@ -141,22 +148,7 @@ Page({
           modelIndex: available.indexOf(m),
           ...modelSettings(m, this.data),
         });
-      } else
-        this.setData({
-          model: "",
-          modelName: "暂无可用模型",
-          availableModels: [],
-          resolutions: [],
-          ratios: [],
-          durations: [],
-          qualities: [],
-          allowImage: false,
-          allowVideo: false,
-          allowAudio: false,
-          maxReferences: 0,
-          parameterError: "",
-          modelError: "当前类型暂无可用模型",
-        });
+      } else this.setData(NO_MODELS);
     } catch (e) {
       if (version === this.modelVersion)
         this.setData({ modelError: "模型加载失败，请点击重试" });

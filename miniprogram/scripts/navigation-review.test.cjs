@@ -9,7 +9,7 @@ test("template empty-state creation opens the create tab without submitting a jo
   h.wx.switchTab = options => h.nav.push(options);
   page.create();
   assert.equal(h.nav.length, 1);
-  assert.equal(h.nav[0].url, "/pages/create/index");
+  assert.equal(h.nav[0].url, "/pages/studio/index");
   assert.equal(h.sent.length, 0);
 });
 

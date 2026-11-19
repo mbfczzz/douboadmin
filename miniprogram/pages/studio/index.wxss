@@ -1,0 +1,179 @@
+@import "../../styles/business.wxss";
+/* 创作 entry: four photo cards, eight shortcut tiles, then hot videos. */
+.studio-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+/* Each card: a tinted gradient with its photo fading in from the right. */
+.studio-card {
+  position: relative;
+  width: calc(50% - 5px);
+  height: 92px;
+  padding: 16px 14px;
+  box-sizing: border-box;
+  border-radius: 16px;
+  overflow: hidden;
+  background: linear-gradient(135deg, #1d3a40, #18191e 70%);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+.card-image { background: linear-gradient(135deg, #3a2f20, #18191e 70%); }
+.card-mix { background: linear-gradient(135deg, #2e2433, #18191e 70%); }
+.card-remake { background: linear-gradient(135deg, #20283d, #18191e 70%); }
+.card-art {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 62%;
+  height: 100%;
+  opacity: 0.85;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 55%);
+  mask-image: linear-gradient(90deg, transparent, #000 55%);
+}
+.card-title {
+  position: relative;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--ui-text);
+}
+.card-note {
+  position: relative;
+  margin-top: 4px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 11px;
+  color: var(--ui-muted);
+}
+.studio-tools {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 20px -8px 8px; /* five across: labels get the full width */
+  row-gap: 14px;
+}
+.studio-tool {
+  width: 20%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-size: 11.5px;
+  color: var(--ui-link);
+  white-space: nowrap;
+}
+/* Icons are drawn on the page colour, so they sit on the page, no tile. */
+.tool-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.tool-icon image {
+  width: 100%;
+  height: 100%;
+}
+.tool-more.open {
+  transform: rotate(180deg);
+}
+.tool-pressed { opacity: 0.7; }
+.studio-chips {
+  margin: 16px -20px 12px;
+  white-space: nowrap;
+}
+.chip-row {
+  display: inline-flex;
+  gap: 8px;
+  padding: 0 20px;
+}
+.chip {
+  flex: none;
+  white-space: nowrap;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  color: var(--ui-muted);
+  background: var(--ui-surface);
+}
+.chip.active {
+  color: var(--ui-on-brand);
+  background: var(--ui-primary);
+  font-weight: 600;
+}
+.feed-login,
+.feed-empty { padding: 32px 0; }
+.studio-videos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 10px;
+}
+.studio-video { width: calc(50% - 5px); }
+.video-cover {
+  position: relative;
+  padding-top: 133%;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--ui-field);
+}
+.video-cover > image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+.video-likes {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  color: #fff;
+  text-shadow: 0 1px 2px #0009;
+}
+.video-title {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  height: 36px; /* two lines kept, so both columns line up */
+  margin-top: 8px;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--ui-text);
+}
+.video-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 6px;
+}
+.video-author {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 11px;
+  color: var(--ui-muted);
+}
+.video-same {
+  flex: none;
+  padding: 4px 12px;
+  line-height: 16px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ui-on-brand);
+  background: var(--ui-brand);
+}
+.end {
+  padding: 16px 0 4px;
+  text-align: center;
+  color: var(--ui-muted);
+  font-size: 12px;
+}

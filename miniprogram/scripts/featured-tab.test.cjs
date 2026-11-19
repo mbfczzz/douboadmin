@@ -3,13 +3,13 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const { harness } = require("./harness.cjs");
 
-// 优秀 is a sixth tab, but the native tab bar holds five pages: it is the 模板
+// 优秀 is a fifth tab, but the native tab bar holds four pages: it is the 模板
 // tab page's featured view, so selecting it is a tab switch, not a new page.
 test("bottom navigation shows 优秀 as a view of the 模板 tab page", () => {
   const h = harness(), bar = h.component("custom-tab-bar");
   assert.deepEqual(Array.from(bar.data.items, (item) => item.text), ["模板", "优秀", "创作", "Agent", "我的"]);
   const app = JSON.parse(fs.readFileSync("app.json", "utf8"));
-  assert.equal(app.tabBar.list.length, 5);
+  assert.equal(app.tabBar.list.length, 4); // 混剪 is a subpage opened from 创作
   assert.ok(!app.tabBar.list.some((item) => item.pagePath === "pages/featured-works/index"));
   const templates = fs.readFileSync("pages/templates/index.wxml", "utf8");
   assert.match(templates, /<view class="\{\{featured\?'':'view-off'\}\}"><featured-works id="featured" active="\{\{featured&&shown\}\}" \/><\/view>/);
@@ -74,8 +74,5 @@ test("a failed switch unlocks, and openTab takes 优秀 to the same tab page", (
   switches[0].complete();
   assert.equal(bar.data.switching, false);
   assert.equal(h.api.openTab({}, "/pages/featured-works/index"), true);
-  // 混剪 is hidden from the bar; its page selects no tab.
-  h.api.tab({ getTabBar: () => bar }, 1);
-  assert.equal(bar.data.selected, -1);
   assert.equal(switches.at(-1).url, "/pages/templates/index");
 });

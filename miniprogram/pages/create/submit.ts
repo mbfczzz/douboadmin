@@ -2,6 +2,7 @@ import { rememberRows } from "../../utils/view-cache";
 import { error, isNavigating, openTask, submitInput } from "../../utils/api";
 import { referenceError, selectedModel } from "./references";
 import { creationInput } from "./input";
+import { featureProblem } from "./feature";
 
 import type { SubmitEditor as Editor } from "./editor-types";
 export async function generate(page: Editor) {
@@ -21,7 +22,7 @@ export async function generate(page: Editor) {
     error(new Error(data.parameterError || "请先选择可用模型"));
     return;
   }
-  const problem = referenceError(model, data.assets, true);
+  const problem = referenceError(model, data.assets, true) || featureProblem(data);
   if (problem) {
     error(new Error(problem));
     return;

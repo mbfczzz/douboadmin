@@ -1,6 +1,6 @@
-/* Room for the start bar pinned above the tab bar. */
+/* Room for the start bar pinned to the bottom (a subpage: no tab bar). */
 .mix-page {
-  padding-bottom: calc(var(--ui-tabbar-height) + 98px + env(safe-area-inset-bottom));
+  padding-bottom: calc(98px + env(safe-area-inset-bottom));
 }
 .mix-label {
   display: block;
@@ -122,17 +122,17 @@
 .mix-music-copy text {
   display: block;
 }
-/* Start: pinned above the tab bar with a one-line summary of the job. */
+/* Start: pinned to the bottom with a one-line summary of the job. */
 .mix-submit {
   position: fixed;
   left: 0;
   right: 0;
-  bottom: calc(var(--ui-tabbar-height) + 1px + env(safe-area-inset-bottom));
+  bottom: 0;
   z-index: 30;
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 20px 16px;
+  padding: 12px 20px calc(16px + env(safe-area-inset-bottom));
   background: var(--ui-bg);
   border-top: 1px solid var(--ui-border);
 }

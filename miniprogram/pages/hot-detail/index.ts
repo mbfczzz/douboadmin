@@ -3,7 +3,7 @@ import {
   error,
   enterPage,
   uid,
-  openTab,
+  openPage,
   media,
 } from "../../utils/api";
 import type { Job, Row, Asset } from "../../services/types";
@@ -105,7 +105,7 @@ Page({
         );
         this.jobId = "";
         this.setData({ busy: false });
-        openTab(this, "/pages/mix/index");
+        openPage(this, { url: "/pages/mix/index" });
         return;
       }
       this.timer = setTimeout(() => void this.poll(), 2500);

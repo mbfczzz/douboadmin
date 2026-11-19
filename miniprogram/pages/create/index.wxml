@@ -1,7 +1,7 @@
 <wxs module="refs" src="../../utils/mentions.wxs" />
-<nav-bar title="创作" />
+<nav-bar title="{{featureTitle||'创作'}}" back />
 <view class="page create-page" bindtap="closeMention">
-  <view class="mode-tabs {{busy||uploading||restoring?'controls-busy':''}}">
+  <view wx:if="{{!feature}}" class="mode-tabs {{busy||uploading||restoring?'controls-busy':''}}">
     <view
       class="mode-tab {{kind==='video'?'active':''}}"
       data-kind="video"
@@ -23,6 +23,7 @@
       <image class="gl gl-20" src="/assets/glyphs/image{{kind==='image'?'':'-muted'}}.png" />生成图片
     </view>
   </view>
+  <include src="./parts/feature.wxml" />
   <view wx:if="{{modelError}}" class="error-box" bindtap="loadModels">{{modelError}}</view>
   <view wx:elif="{{parameterError}}" class="error-box">{{parameterError}}</view>
   <view class="workspace {{expanded?'expanded':''}} {{showModels?'model-open':''}}" style="{{expanded&&expandedTop?'top:'+expandedTop+'px':''}}">
@@ -68,7 +69,7 @@
         value="{{prompt}}"
         assets="{{assets}}"
         max="{{maxPromptChars}}"
-        placeholder="{{kind==='video'?videoPlaceholder:imagePlaceholder}}"
+        placeholder="{{featurePlaceholder||(kind==='video'?videoPlaceholder:imagePlaceholder)}}"
         bind:input="input"
         bind:focus="focusPrompt"
         bind:blur="blurPrompt"
@@ -129,8 +130,10 @@
     </view>
     <text class="params-go">调整 ›</text>
   </view>
-  <view class="inspire-head"><text>灵感 · 做同款</text><text class="inspire-more" bindtap="templates">全部模板 ›</text></view>
-  <showcase mode="strip" />
+  <block wx:if="{{!feature}}">
+    <view class="inspire-head"><text>灵感 · 做同款</text><text class="inspire-more" bindtap="templates">全部模板 ›</text></view>
+    <showcase mode="strip" />
+  </block>
 
 </view>
 <view class="model-mask" wx:if="{{showModels}}" bindtap="closeModels" />

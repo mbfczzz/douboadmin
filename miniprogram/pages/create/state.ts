@@ -61,4 +61,13 @@ export const creationData = {
   quoteText: "正在加载积分…",
   quoteMode: "",
   quoteRate: "",
+  // Feature presets (feature.ts); empty in the plain editor.
+  feature: "",
+  featureTitle: "",
+  featureTip: "",
+  featurePlaceholder: "",
+  featureScript: false,
+  featureOptions: [] as { key: string; label: string; values: { label: string }[] }[],
+  featureChoice: {} as Record<string, number>,
+  scriptBusy: false,
 };

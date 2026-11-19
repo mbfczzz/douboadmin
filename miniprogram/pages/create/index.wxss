@@ -2,8 +2,9 @@
 @import "./settings.wxss";
 @import "./menus.wxss";
 @import "./sheets.wxss";
+@import "./feature.wxss";
 .create-page {
-  padding: 10px 20px calc(90px + env(safe-area-inset-bottom));
+  padding: 10px 20px calc(24px + env(safe-area-inset-bottom));
 }
 /* 生成视频 / 生成图片 are text tabs (as on 模板): bold white with a short cyan bar. */
 .mode-tabs {

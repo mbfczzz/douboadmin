@@ -1,0 +1,19 @@
+<view wx:if="{{feature}}" class="feature-bar">
+  <text class="feature-tip">{{featureTip}}</text>
+  <view wx:if="{{featureScript}}" class="script-button {{scriptBusy||busy?'is-busy':''}}" bindtap="aiScript" hover-class="card-pressed" aria-role="button" aria-label="AI写剧本">
+    <image class="gl gl-16" src="/assets/glyphs/ai-pen-dark.png" /><text>{{scriptBusy?'正在写剧本…':'AI写剧本'}}</text>
+  </view>
+</view>
+<view wx:for="{{featureOptions}}" wx:key="key" class="feature-option">
+  <text class="option-label">{{item.label}}</text>
+  <text
+    wx:for="{{item.values}}"
+    wx:for-item="value"
+    wx:for-index="i"
+    wx:key="label"
+    class="option-chip {{featureChoice[item.key]===i?'active':''}}"
+    data-key="{{item.key}}"
+    data-index="{{i}}"
+    bindtap="chooseOption"
+  >{{value.label}}</text>
+</view>

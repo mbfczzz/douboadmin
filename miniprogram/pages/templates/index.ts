@@ -180,7 +180,7 @@ Page({
     void this.load();
   },
   create() {
-    openTab(this, "/pages/create/index");
+    openTab(this, "/pages/studio/index");
   },
   detail(e: WechatMiniprogram.TouchEvent) {
     openPage(this, {

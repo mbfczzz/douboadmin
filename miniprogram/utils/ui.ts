@@ -32,7 +32,7 @@ export function error(e: unknown) {
   });
 }
 export function tab(page: any, index: number) {
-  const name = ["templates", "mix", "create", "agent", "mine"][index];
+  const name = ["templates", "featured-works", "studio", "agent", "mine"][index];
   // The 模板 page in its 优秀 view selects the 优秀 tab.
   const selected = tabIndexOf(`pages/${name}/index`);
   track("page_view", TAB_ITEMS[selected]?.path === FEATURED_TAB_PATH ? "featured" : name);

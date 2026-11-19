@@ -167,7 +167,19 @@ console.log(
 // unchanged (utils/prompt-delta converts both ways): 814,241 B. 791 -> 796 KiB.
 // 登录页“使用其他手机号”改为手机号 + 短信验证码登录（pages/login/sms.ts），
 // 不再用微信身份直接登回原账号: 819,591 B. 796 -> 801 KiB.
-const budget = 801 * 1024;
+// SMS form polish: +86 prefix, send-button states, focus on the code field,
+// login enabled only when complete: 820,546 B. 801 -> 802 KiB.
+// 创作 becomes an entry page (pages/studio: four feature cards, shortcut
+// tiles, hot-video feed with 做同款) plus the UI-only 一键复刻 page
+// (pages/remake); its pictures load from OSS (ui-art), not the package:
+// 838,003 B (with the no-video state). 802 -> 819 KiB.
+// 创作 feature grid (Codex icons from OSS): 剧情带货 / 探店视频 / AI证件照 as
+// editor presets with AI写剧本 (pages/create/feature.ts), 文案提取 from a
+// Douyin share link (pages/extract), and the interface-first pages for
+// 数字人, 视频唱歌, 图文成片, 漫画推文, 视频去字幕, 视频二创 drawn from one
+// config (pages/feature); narrow-phone fixes and the 证件照 photo check:
+// 864,618 B. 819 -> 845 KiB.
+const budget = 845 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

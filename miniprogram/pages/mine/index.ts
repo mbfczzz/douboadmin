@@ -186,6 +186,6 @@ Page({
     dropCover(this, e.currentTarget.dataset.id, "jobs");
   },
   create() {
-    openTab(this, "/pages/create/index");
+    openTab(this, "/pages/studio/index");
   },
 });

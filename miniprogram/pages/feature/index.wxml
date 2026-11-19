@@ -1,0 +1,31 @@
+<nav-bar title="{{title}}" back />
+<view class="subpage feature-page">
+  <block wx:for="{{sections}}" wx:for-item="s" wx:for-index="si" wx:key="si">
+    <view wx:if="{{s.type==='tabs'}}" class="feature-tabs">
+      <text wx:for="{{s.picks}}" wx:key="label" class="{{item.on?'on':''}}" data-section="{{si}}" data-index="{{index}}" bindtap="pick">{{item.label}}</text>
+    </view>
+    <view wx:elif="{{s.tab===undefined||s.tab===tab}}" class="biz-card feature-card">
+      <text wx:if="{{s.label}}" class="feature-label">{{s.label}}</text>
+      <view wx:if="{{s.type==='upload'}}" class="upload-box" bindtap="upload" hover-class="card-pressed" aria-role="button">
+        <image class="gl gl-24" src="/assets/glyphs/{{s.media==='video'?'video':'image'}}-muted-lg.png" />
+        <text>{{s.hint}}</text>
+      </view>
+      <block wx:elif="{{s.type==='text'}}">
+        <textarea class="feature-text" always-embed disable-default-padding value="{{s.value}}" maxlength="{{s.max}}" placeholder="{{s.placeholder}}" placeholder-class="feature-placeholder" data-section="{{si}}" bindinput="input" />
+        <text class="feature-count">{{s.value.length}} / {{s.max}}</text>
+      </block>
+      <view wx:elif="{{s.type==='chips'}}" class="feature-chips">
+        <text wx:for="{{s.picks}}" wx:key="label" class="chip {{item.on?'on':''}}" data-section="{{si}}" data-index="{{index}}" bindtap="pick">{{item.label}}</text>
+      </view>
+      <view wx:elif="{{s.type==='rows'}}">
+        <view wx:for="{{s.items}}" wx:key="label" class="feature-row" bindtap="row" hover-class="card-pressed">
+          <text>{{item.label}}</text><text class="row-value">{{item.value}} ›</text>
+        </view>
+      </view>
+      <view wx:elif="{{s.type==='notes'}}" class="feature-notes">
+        <text wx:for="{{s.lines}}" wx:key="*this">{{index+1}}. {{item}}</text>
+      </view>
+    </view>
+  </block>
+  <view class="feature-foot"><button class="biz-action" bindtap="start">{{action}}</button></view>
+</view>

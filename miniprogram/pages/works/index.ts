@@ -146,6 +146,6 @@ Page({
     dropCover(this, e.currentTarget.dataset.id, "works", "filtered");
   },
   create() {
-    openTab(this, "/pages/create/index");
+    openTab(this, "/pages/studio/index");
   },
 });

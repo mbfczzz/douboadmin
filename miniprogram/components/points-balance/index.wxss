@@ -83,11 +83,23 @@ button.action {
 }
 .inline-balance text {
   min-width: 0;
+  overflow: hidden;
   white-space: nowrap;
+  text-overflow: ellipsis; /* narrow phones: the chevron keeps its room */
 }
 
 .points-mark {
   margin-right: 4px;
+}
+/* Narrow phones: smaller, so the whole balance fits beside the price. */
+@media (max-width: 350px) {
+  .inline-balance {
+    gap: 3px;
+    font-size: 12px;
+  }
+  .points-mark {
+    margin-right: 0;
+  }
 }
 .balance-row {
   display: flex;
