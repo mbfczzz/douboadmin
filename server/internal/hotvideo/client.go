@@ -106,10 +106,7 @@ func (c *Client) Search(ctx context.Context, q Query) (Result, error) {
 	if err != nil {
 		return Result{}, err
 	}
-	data := unwrap(root)
-	_, list := data["data"].([]any)
-	_, awemes := data["aweme_list"].([]any)
-	if !list && !awemes {
+	if rows, _ := searchRows(root); rows == nil {
 		return Result{}, fmt.Errorf("抖音接口未返回可识别的视频列表")
 	}
 	result := normalizeSearch(root)

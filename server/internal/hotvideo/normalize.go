@@ -76,12 +76,28 @@ func video(m map[string]any) Video {
 	}
 	return Video{ID: id, Title: string(runes), Text: text, Author: str(author["nickname"]), Cover: cover, URL: play, SourceURL: "https://www.douyin.com/video/" + id, Likes: integer(stats["digg_count"]), Views: integer(stats["play_count"]), Comments: integer(stats["comment_count"]), PublishedAt: time.Unix(number(m["create_time"]), 0).UTC(), Duration: float64(number(media["duration"])) / 1000}
 }
-func normalizeSearch(root map[string]any) Result {
-	data := unwrap(root)
-	rows, _ := data["data"].([]any)
-	if rows == nil {
-		rows, _ = data["aweme_list"].([]any)
+// searchRows finds the result list and the object that holds it (with the
+// cursor fields). TikHub's search v2 now answers {data: {business_data:
+// [{data: {aweme_info}}]}}; older shapes used data[] or aweme_list[].
+func searchRows(root map[string]any) ([]any, map[string]any) {
+	m := root
+	for range 5 {
+		for _, key := range []string{"business_data", "aweme_list", "data"} {
+			if rows, ok := m[key].([]any); ok {
+				return rows, m
+			}
+		}
+		next := object(m["data"])
+		if next == nil {
+			break
+		}
+		m = next
 	}
+	return nil, m
+}
+
+func normalizeSearch(root map[string]any) Result {
+	rows, data := searchRows(root)
 	result := Result{Items: []Video{}, Cursor: number(data["cursor"]), HasMore: number(data["has_more"]) > 0, SearchID: str(data["search_id"]), Backtrace: str(data["backtrace"]), SortScope: "upstream", FetchedAt: time.Now().UTC()}
 	if has, ok := data["has_more"].(bool); ok {
 		result.HasMore = has
@@ -92,6 +108,9 @@ func normalizeSearch(root map[string]any) Result {
 	seen := map[string]bool{}
 	for _, row := range rows {
 		item := object(row)
+		if wrapped := object(item["data"]); wrapped != nil {
+			item = wrapped
+		}
 		if nested := object(item["aweme_info"]); nested != nil {
 			item = nested
 		}

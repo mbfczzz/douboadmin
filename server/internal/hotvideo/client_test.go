@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 )
 
@@ -36,5 +37,23 @@ func TestSearchContractCacheAndMissingMetrics(t *testing.T) {
 	result, e = s.Search(context.Background(), query)
 	if e != nil || !result.Cached || calls != 1 {
 		t.Fatal("cache not used", calls, e)
+	}
+}
+
+// TikHub search v2's current shape: business_data[].data.aweme_info.
+func TestSearchBusinessDataShape(t *testing.T) {
+	root := map[string]any{}
+	body := `{"code":200,"data":{"business_data":[{"data_id":"0","type":1,"data":{"type":1,"aweme_info":{"aweme_id":"7301","desc":"剧情带货","author":{"nickname":"作者"},"video":{"cover":{"url_list":["https://cdn.example/c.jpg"]},"play_addr":{"url_list":["https://cdn.example/v.mp4"]}},"statistics":{"digg_count":12}}}},{"data_id":"1","type":999,"data":{"type":999}}],"cursor":10,"has_more":1,"extra":{}}}`
+	decoder := json.NewDecoder(strings.NewReader(body))
+	decoder.UseNumber() // as Client.request reads replies
+	if err := decoder.Decode(&root); err != nil {
+		t.Fatal(err)
+	}
+	if rows, _ := searchRows(root); len(rows) != 2 {
+		t.Fatal("business_data not found")
+	}
+	r := normalizeSearch(root)
+	if len(r.Items) != 1 || r.Items[0].ID != "7301" || r.Items[0].Author != "作者" || r.Cursor != 10 || !r.HasMore {
+		t.Fatalf("%+v", r)
 	}
 }
