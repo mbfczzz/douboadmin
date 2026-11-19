@@ -48,6 +48,6 @@ func (s *Service) ReleaseJob(ctx context.Context, id, actor, reason string) erro
 		if _, e = tx.Put("job_billing", row, row.Version); e != nil {
 			return e
 		}
-		return store.NotifyOnce(tx, j.UserID, "manual-release:"+id, core.Notification{Kind: "job", Title: "任务预留积分已退回", Content: reason, TargetID: id})
+		return store.NotifyOnce(tx, j.UserID, "manual-release:"+id, core.Notification{Kind: "job", Title: "任务积分已退回", Content: reason, TargetID: id})
 	})
 }

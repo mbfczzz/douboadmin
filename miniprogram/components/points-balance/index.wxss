@@ -64,7 +64,7 @@ button.action::after {
   gap: 8px;
 }
 .balance-bottom {
-  justify-content: space-between;
+  justify-content: flex-end;
 }
 .note {
   min-width: 0;

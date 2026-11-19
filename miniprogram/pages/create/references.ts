@@ -1,3 +1,4 @@
+import { editorAsset } from "../../utils/editor-assets";
 import { cancelled, chooseReferenceFile, error, upload } from "../../utils/api";
 import type { Model, Row, Asset } from "../../services/types";
 
@@ -163,10 +164,7 @@ export async function addReference(page: Editor, kind: string) {
     problem = referenceError(current, [...page.data.assets, row]);
     if (problem) throw new Error(problem);
     page.setData({
-      assets: [
-        ...page.data.assets,
-        { ...row, isImage: row.data.type.startsWith("image/") },
-      ],
+      assets: [...page.data.assets, editorAsset(row)],
     });
     page.refreshParameters?.();
   } catch (e) {

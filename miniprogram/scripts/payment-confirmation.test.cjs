@@ -186,22 +186,22 @@ test("cancelling a new payment clears the preceding order's success notice", asy
   f.page.onHide();
 });
 
-test("held points never schedule wallet refresh; manual refresh reads settlement", async () => {
+// Points for a running task are already taken from 可用积分 (no separate
+// "预留" figure); a failed task's refund shows up on the next refresh.
+test("points for running tasks never schedule wallet refresh; manual refresh shows a refund", async () => {
   const f = await fixture();
   f.info.wallet.availableUnits = 97500;
   f.info.wallet.heldUnits = 2500;
   await f.page.load();
   assert.equal(f.page.data.available, "975");
-  assert.equal(f.page.data.held, "25");
+  assert.equal(f.page.data.held, undefined, "no reserve figure on screen");
   assert.equal(f.timers.size, 0);
   f.info.wallet.availableUnits = 100000;
   f.info.wallet.heldUnits = 0;
   await new Promise(setImmediate);
   assert.equal(f.page.data.available, "975");
-  assert.equal(f.page.data.held, "25");
   await f.page.load();
   assert.equal(f.page.data.available, "1,000");
-  assert.equal(f.page.data.held, "0");
   assert.equal(f.timers.size, 0);
   f.page.onHide();
 });
@@ -218,7 +218,6 @@ test("reentering the wallet page refreshes settlement without starting a balance
   await new Promise(setImmediate);
   await new Promise(setImmediate);
   assert.equal(f.page.data.available, "975");
-  assert.equal(f.page.data.held, "0");
   assert.equal(f.timers.size, 0);
   f.page.onHide();
 });

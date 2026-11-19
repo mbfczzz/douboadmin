@@ -14,7 +14,6 @@ Component({
     logged: false,
     loaded: false,
     available: "—",
-    held: "0",
     loadError: "",
     rechargeEnabled: false,
   },
@@ -59,7 +58,6 @@ Component({
           logged: false,
           loaded: false,
           available: "—",
-          held: "0",
           loadError: "",
         });
         return;
@@ -78,7 +76,6 @@ Component({
         this.setData({
           loaded: true,
           available: points(info.wallet.availableUnits),
-          held: points(info.wallet.heldUnits),
           // Same rule as the wallet page (channel, platform, pricing).
           rechargeEnabled: canRecharge(info),
           loadError: "",

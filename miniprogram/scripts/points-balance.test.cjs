@@ -29,7 +29,9 @@ async function fixture() {
   return { h, balance, info, timers };
 }
 
-test("balance shows server credit, reservation and successful settlement without subtracting twice", async () => {
+// A running task's points are already out of 可用积分; success does not take
+// them twice. No separate reserve figure is shown.
+test("balance shows server credit, a running task and its success without subtracting twice", async () => {
   const f = await fixture();
   await f.balance.reload();
   assert.equal(f.balance.data.available, "1,000");
@@ -38,11 +40,10 @@ test("balance shows server credit, reservation and successful settlement without
   f.info.wallet.heldUnits = 2500;
   await f.balance.reload();
   assert.equal(f.balance.data.available, "975");
-  assert.equal(f.balance.data.held, "25");
+  assert.equal(f.balance.data.held, undefined, "no reserve figure on screen");
   f.info.wallet.heldUnits = 0;
   await f.balance.reload();
   assert.equal(f.balance.data.available, "975");
-  assert.equal(f.balance.data.held, "0");
   f.info.wallet.availableUnits = 100000;
   await f.balance.reload();
   assert.equal(f.balance.data.available, "1,000");

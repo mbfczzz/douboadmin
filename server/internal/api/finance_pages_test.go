@@ -18,7 +18,7 @@ func TestFinanceListsReachRecordsBeyondLegacyLimit(t *testing.T) {
 		for namespace, data := range map[string]any{
 			"orders":        core.Order{UserID: "user-a", Status: "paid", OpenID: "private-openid", PrepayID: "private-prepay", RequestHash: "private-hash"},
 			"refunds":       core.Refund{UserID: "user-a", OrderID: id, Status: "pending"},
-			"wallet_ledger": core.LedgerEntry{UserID: "user-a", Reference: "private-reference", Actor: "private-actor", Kind: "topup", Note: id},
+			"wallet_ledger": core.LedgerEntry{UserID: "user-a", Reference: "private-reference", Actor: "private-actor", Kind: "topup", AvailableDelta: 100, Note: id},
 		} {
 			if _, e = a.Store.Put(t.Context(), namespace, core.Record{ID: id, Owner: "user-a", Data: core.Data(data)}, 0); e != nil {
 				t.Fatal(e)

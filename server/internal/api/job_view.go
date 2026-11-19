@@ -65,7 +65,7 @@ func (a *Server) presentJob(ctx context.Context, j *core.Job) {
 			j.CostUnits = bill.Units
 			j.BillingState = bill.State
 			if j.Status == "failed" && bill.State == "released" && strings.HasPrefix(j.Error, uncertainPrefix) {
-				j.Error = "已核实上游未生成结果，预留积分已退回，可重新提交创作"
+				j.Error = "已核实上游未生成结果，积分已退回，可重新提交创作"
 				verifiedRefund = true
 			}
 		}

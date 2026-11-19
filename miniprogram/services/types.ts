@@ -62,6 +62,7 @@ export interface Asset {
   key: string;
   type: string;
   size: number;
+  thumbnailUrl?: string; // videos: signed first-frame cover
 }
 export interface Input {
 	imageSlots?: number[];

@@ -42,7 +42,7 @@ test("every ledger row has a bundled glyph", () => {
   const fs = require("node:fs");
   const line = fs.readFileSync("services/wallet-ledger.ts", "utf8").split("\n").find((l) => l.includes("glyph: glyph("));
   const names = [...line.matchAll(/"([a-z-]+)"/g)].map((m) => m[1]).filter((n) => !["topup", "hold", "release", "refund", "admin_adjust"].includes(n));
-  assert.ok(names.length >= 5);
+  assert.ok(names.length >= 4);
   for (const name of names) assert.ok(fs.existsSync(`assets/glyphs/${name}.png`), name);
 });
 

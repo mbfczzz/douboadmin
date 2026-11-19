@@ -3,6 +3,17 @@ import { media } from "../services/media";
 
 import type { AssetEditor } from "../services/page-contracts";
 
+// One reference as the editor shows it: signed URLs, kind flags, video cover.
+export function editorAsset(row: Row<Asset>) {
+  const cover = row.data.thumbnailUrl;
+  return {
+    ...row,
+    data: { ...row.data, url: media(row.data.url), thumbnailUrl: cover ? media(cover) : "" },
+    isImage: row.data.type.startsWith("image/"),
+    isVideo: row.data.type.startsWith("video/"),
+  };
+}
+
 export async function restoreEditorAssets(
   page: AssetEditor,
   ids: string[],
@@ -15,11 +26,7 @@ export async function restoreEditorAssets(
     const rows = await Promise.all(ids.map(read));
     if (page.assetRevision !== revision) return;
     page.setData({
-      assets: rows.map((row) => ({
-        ...row,
-        data: { ...row.data, url: media(row.data.url) },
-        isImage: row.data.type.startsWith("image/"),
-      })),
+      assets: rows.map(editorAsset),
     });
   } catch {
     if (page.assetRevision === revision)

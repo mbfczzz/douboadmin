@@ -71,7 +71,6 @@
   margin: 28px 0;
 }
 .summary-label,
-.summary-held,
 .wallet-shortcuts > view,
 .purchase-summary {
   display: flex;
@@ -90,16 +89,6 @@
 }
 .summary-label {
   color: var(--ui-points-muted);
-}
-.summary-held {
-  border-top: 1px solid var(--ui-points-border);
-  color: var(--ui-points-muted);
-  padding-top: 16px;
-  flex-wrap: wrap;
-  font-size: 13px;
-}
-.summary-held .biz-small {
-  margin-left: auto;
 }
 .wallet-shortcuts {
   padding: 0 16px;

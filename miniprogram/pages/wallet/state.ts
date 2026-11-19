@@ -18,7 +18,6 @@ export const walletData = {
   error: "",
   info: null as WalletInfo | null,
   available: "—",
-  held: "0",
   amount: "10",
   estimated: "0",
   displayRate: "0",

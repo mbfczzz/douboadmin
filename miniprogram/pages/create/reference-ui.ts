@@ -21,8 +21,11 @@ export const referenceHandlers = {
     if (!e.detail.height) { cancelMention(this); this.setData({ promptFocus: false }); }
     else if (this.data.mentionOpen) positionMention(this);
   },
+  // Images open the in-page viewer (引用 / 删除); videos play full screen.
   previewReference(this: Editor, e: Tap) {
-    void openReferencePreview(this, e.currentTarget.dataset.id);
+    const asset = this.data.assets.find((a) => a.id === e.currentTarget.dataset.id);
+    if (asset?.isVideo) wx.previewMedia({ sources: [{ url: asset.data.url, type: "video", poster: asset.data.thumbnailUrl || undefined }], fail() {} });
+    else void openReferencePreview(this, e.currentTarget.dataset.id);
   },
   pickMention(this: Editor, e: Tap) {
     pickMention(this, Number(e.currentTarget.dataset.index));
@@ -35,7 +38,7 @@ export const referenceHandlers = {
   },
   viewerMention(this: Editor, e: Detail) {
     const number = imageNumber(this, e.detail.id);
-    if (number && appendMention(this, number)) {
+    if (number && appendMention(this, "图片" + number)) {
       closeViewer(this);
       wx.showToast({ title: `已引用图片${number}`, icon: "none" });
     }

@@ -31,7 +31,7 @@ import {
 } from "../../services/wallet-checkout";
 Page({
   explain() {
-    void ask({ title: "积分说明", rows: [{ label: "提交创作", value: "先预留积分" }, { label: "生成成功", value: "正式扣除" }, { label: "生成失败", value: "自动退回" }, { label: "预留中的积分", value: "暂不可用" }],
+    void ask({ title: "积分说明", rows: [{ label: "提交创作", value: "扣除积分" }, { label: "生成失败", value: "自动退回" }],
       content: "以积分明细为准", showCancel: false, confirmText: "知道了", icon: "info-circle" });
   },
   data: walletData,
@@ -108,7 +108,6 @@ Page({
           ? this.data.productId
           : "",
         available: points(info.wallet.availableUnits),
-        held: points(info.wallet.heldUnits),
         allowed: canRecharge(info),
         needsLogin: false,
         error: ledger ? "" : "余额已更新，积分流水暂时无法加载，点击重试",

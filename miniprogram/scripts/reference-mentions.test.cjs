@@ -20,7 +20,7 @@ test("typing @ opens an inline thumbnail picker and inserts the picked image at 
   page.setData({
     assets: [
       image(1),
-      { id: "video", isImage: false, data: { type: "video/mp4" } },
+      { id: "video", isImage: false, isVideo: true, data: { type: "video/mp4", url: "https://fixture.test/v.mp4", thumbnailUrl: "https://fixture.test/v.jpg" } },
       image(2),
     ],
     prompt: "",
@@ -28,11 +28,13 @@ test("typing @ opens an inline thumbnail picker and inserts the picked image at 
   });
   page.input(event("参考@保持人物", 3));
   assert.equal(page.data.mentionOpen, true);
+  // Images first, then videos (with their cover), each numbered by kind.
   assert.deepEqual(
-    page.data.mentionItems.map((m) => [m.id, m.label, m.url]),
+    Array.from(page.data.mentionItems, (m) => [m.id, m.label, m.url]),
     [
       ["image-1", "图片1", "https://fixture.test/1"],
       ["image-2", "图片2", "https://fixture.test/2"],
+      ["video", "视频1", "https://fixture.test/v.jpg"],
     ],
   );
   pick(page, 1);
@@ -125,4 +127,44 @@ test("the viewer quotes or deletes the image it shows", () => {
   assert.equal(page.data.prompt, "海边  ");
   assert.equal(page.data.assets.length, 1);
   assert.equal(page.data.viewerOpen, false);
+});
+
+test("videos can be referenced; removing one renumbers only its own kind", () => {
+  const h = harness(), page = h.page("create");
+  const video = (n) => ({ id: "video-" + n, isImage: false, isVideo: true, data: { type: "video/mp4", url: "https://fixture.test/v" + n, thumbnailUrl: "" } });
+  page.setData({ assets: [image(1), video(1), video(2)], prompt: "", maxPromptChars: 500 });
+  page.input(event("@"));
+  pick(page, 2);
+  assert.equal(page.data.prompt, "@视频2 ");
+  page.setData({ prompt: "@图片1 跳舞，参考 @视频1 和 @视频2" });
+  page.removeAsset("video-1");
+  assert.equal(page.data.prompt, "@图片1 跳舞，参考  和 @视频1");
+});
+
+// The row under the editor lists what the prompt references, in mention order.
+test("the referenced row lists mentioned images and videos once each", () => {
+  global.getRegExp = (pattern, flags) => new RegExp(pattern, flags);
+  const vm = require("node:vm"), fs = require("node:fs");
+  const sandbox = { module: { exports: {} }, getRegExp: global.getRegExp };
+  vm.runInNewContext(fs.readFileSync("pages/create/mentioned.wxs", "utf8"), sandbox);
+  const { list } = sandbox.module.exports;
+  const assets = [image(1), { id: "clip", isVideo: true, data: { thumbnailUrl: "https://fixture.test/c.jpg" } }, image(2)];
+  const out = list("@视频1 开场，@图片2 结尾，再用 @视频1 和 @图片9", assets);
+  assert.deepEqual(Array.from(out, (o) => [o.id, o.label, o.url, o.video]), [
+    ["clip", "视频1", "https://fixture.test/c.jpg", true],
+    ["image-2", "图片2", "https://fixture.test/2", false],
+  ]);
+  assert.equal(list("没有引用", assets).length, 0);
+  const { any } = sandbox.module.exports;
+  assert.equal(any(assets), true);
+  assert.equal(any([{ id: "voice", data: {} }]), false, "audio alone offers nothing to @");
+});
+
+test("tapping a referenced video plays it full screen with its cover", () => {
+  const h = harness(), page = h.page("create");
+  let shown;
+  h.wx.previewMedia = (o) => { shown = o; };
+  page.setData({ assets: [{ id: "clip", isImage: false, isVideo: true, data: { type: "video/mp4", url: "https://fixture.test/c.mp4", thumbnailUrl: "https://fixture.test/c.jpg" } }] });
+  page.previewReference({ currentTarget: { dataset: { id: "clip" } } });
+  assert.deepEqual({ ...shown.sources[0] }, { url: "https://fixture.test/c.mp4", type: "video", poster: "https://fixture.test/c.jpg" });
 });

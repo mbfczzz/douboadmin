@@ -1,14 +1,17 @@
 package api
 
 import (
+	"context"
 	"doubo/server/internal/core"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
 	"os"
 	"path/filepath"
 	"slices"
+	"strings"
 )
 
 func (a *Server) upload(w http.ResponseWriter, r *http.Request) {
@@ -89,16 +92,9 @@ func (a *Server) upload(w http.ResponseWriter, r *http.Request) {
 		dbError(w, e)
 		return
 	}
-	if a.Objects != nil {
-		u, err := a.Objects.URL(r.Context(), key)
-		if err != nil {
-			dbError(w, err)
-			return
-		}
-		var data map[string]any
-		_ = json.Unmarshal(row.Data, &data)
-		data["url"] = u
-		row.Data = core.Data(data)
+	if row, e = a.signedAsset(r.Context(), row); e != nil {
+		dbError(w, e)
+		return
 	}
 	reply(w, 201, row)
 }
@@ -113,20 +109,38 @@ func (a *Server) asset(w http.ResponseWriter, r *http.Request) {
 		fail(w, 404, "素材不存在或已删除")
 		return
 	}
-	if a.Objects != nil {
-		var data map[string]any
-		if json.Unmarshal(row.Data, &data) != nil {
-			fail(w, 500, "Invalid asset")
-			return
-		}
-		key, _ := data["key"].(string)
-		u, e := a.Objects.URL(r.Context(), key)
-		if e != nil {
-			dbError(w, e)
-			return
-		}
-		data["url"] = u
-		row.Data = core.Data(data)
+	if row, err = a.signedAsset(r.Context(), row); err != nil {
+		dbError(w, err)
+		return
 	}
 	reply(w, 200, row)
+}
+
+// signedAsset signs the file URL and, for videos, a first-frame cover so
+// reference strips and @ mentions can show a thumbnail.
+func (a *Server) signedAsset(ctx context.Context, row core.Record) (core.Record, error) {
+	if a.Objects == nil {
+		return row, nil
+	}
+	var data map[string]any
+	if json.Unmarshal(row.Data, &data) != nil {
+		return row, fmt.Errorf("invalid asset")
+	}
+	key, _ := data["key"].(string)
+	u, err := a.Objects.URL(ctx, key)
+	if err != nil {
+		return row, err
+	}
+	data["url"] = u
+	if typ, _ := data["type"].(string); strings.HasPrefix(typ, "video/") {
+		if s, ok := a.Objects.(interface {
+			Thumbnail(context.Context, string, string) (string, error)
+		}); ok {
+			if cover, e := s.Thumbnail(ctx, key, "video"); e == nil {
+				data["thumbnailUrl"] = cover
+			}
+		}
+	}
+	row.Data = core.Data(data)
+	return row, nil
 }

@@ -154,7 +154,10 @@ console.log(
 // per-view scroll, template search, showcase tap guard, instant task detail
 // after submit, notifications/share/shared-work/provider/settings keep their
 // content on return, double-back guards. 802,248 B. 778 -> 784 KiB.
-const budget = 784 * 1024;
+// @ mentions for videos, the 已引用 thumbnail row (WXS, no extra setData),
+// video covers in the reference strip with full-screen play: 805,519 B.
+// 784 -> 787 KiB.
+const budget = 787 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

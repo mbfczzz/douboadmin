@@ -1,0 +1,24 @@
+// The row under the editor: each @图片N / @视频N in the prompt that matches an
+// attached reference, in first-mention order (numbered per kind, strip order).
+function list(prompt, assets) {
+  var images = [], videos = [], out = [], seen = {}, m;
+  for (var i = 0; i < assets.length; i++) {
+    if (assets[i].isImage) images.push(assets[i]);
+    else if (assets[i].isVideo) videos.push(assets[i]);
+  }
+  var re = getRegExp("@(图片|视频)(\\d+)", "g");
+  while ((m = re.exec(prompt || "")) !== null) {
+    var a = (m[1] === "图片" ? images : videos)[parseInt(m[2]) - 1];
+    if (a && !seen[a.id]) {
+      seen[a.id] = true;
+      out.push({ id: a.id, label: m[1] + m[2], url: a.isImage ? a.data.url : a.data.thumbnailUrl, video: !a.isImage });
+    }
+  }
+  return out;
+}
+// Whether anything can be referenced (audio alone cannot).
+function any(assets) {
+  for (var i = 0; i < assets.length; i++) if (assets[i].isImage || assets[i].isVideo) return true;
+  return false;
+}
+module.exports = { list: list, any: any };

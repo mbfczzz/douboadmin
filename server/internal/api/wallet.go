@@ -68,6 +68,11 @@ func (a *Server) ledger(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
+	// Users see points taken at submit and returned on failure; settling an
+	// already-taken charge changes nothing they can spend, so it is not listed.
+	if identity(r).Role != "admin" {
+		query.NotFields = map[string]string{"availableDelta": "0"}
+	}
 	page, e := a.Store.RecordPage(r.Context(), query)
 	if e != nil {
 		dbError(w, e)

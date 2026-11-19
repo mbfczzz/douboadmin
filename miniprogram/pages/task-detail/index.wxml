@@ -110,7 +110,7 @@
     <view class="detail-card specs">
       <view wx:if="{{job.modelName}}" class="spec-row"><text>模型</text><text class="spec-value">{{job.modelName}}</text></view>
       <view wx:if="{{job.input.resolution||job.input.ratio||job.input.duration}}" class="spec-row"><text>规格</text><text class="spec-value">{{job.input.resolution||''}}{{job.input.resolution&&job.input.ratio?' · ':''}}{{job.input.ratio||''}}{{(job.input.resolution||job.input.ratio)&&job.input.duration?' · ':''}}{{job.input.duration?job.input.duration+' 秒':''}}</text></view>
-      <view wx:if="{{job.costUnits}}" class="spec-row billing-summary"><text>积分</text><text class="spec-value">{{job.costUnits/100}}<text wx:if="{{job.billingState==='reserved'||job.billingState==='charged'||job.billingState==='released'}}" class="spec-state {{job.billingState}}">{{job.billingState==='reserved'?'已预留':job.billingState==='charged'?'已扣除':'已退回'}}</text></text></view>
+      <view wx:if="{{job.costUnits}}" class="spec-row billing-summary"><text>积分</text><text class="spec-value">{{job.costUnits/100}}<text wx:if="{{job.billingState==='reserved'||job.billingState==='charged'||job.billingState==='released'}}" class="spec-state {{job.billingState}}">{{job.billingState==='released'?'已退回':'已扣除'}}</text></text></view>
     </view>
     <view class="task-balance"><points-balance compact /></view>
   </view>

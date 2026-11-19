@@ -53,7 +53,7 @@ export async function confirmBudget(input: Input): Promise<Input> {
       { label: "当前可用", value: `${points(q.availableUnits)} 积分` },
       { label: "确认后剩余", value: `${points(q.availableUnits - q.units)} 积分` },
     ],
-    content: "生成成功后扣除，失败自动退回",
+    content: "提交后扣除，生成失败自动退回",
     confirmText: "确认生成",
     icon: "star",
   });

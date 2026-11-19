@@ -10,7 +10,7 @@ import { openModelMenu, measureModelMenu } from "./model-menu";
 import { modelChoices, modelSettings, resolutionSettings, defaultPromptChars } from "./models";
 import type { ModelChoice } from "./editor-types";
 import { addReference, selectedModel } from "./references";
-import { chooseMention, removeMention, clearMentions, cancelMention } from "./mentions";
+import { chooseMention, promptWithout, clearMentions, cancelMention } from "./mentions";
 import { cancelPreview } from "./reference-preview";
 import { referenceHandlers } from "./reference-ui";
 import {
@@ -274,8 +274,7 @@ Page({
     this.removeAsset(e.currentTarget.dataset.id);
   },
   removeAsset(id: string) {
-    const index = this.data.assets.filter((a: Row<Asset> & { isImage: boolean }) => a.isImage).findIndex((a: Row<Asset>) => a.id === id);
-    const prompt = index < 0 ? this.data.prompt : removeMention(this.data.prompt, index + 1);
+    const prompt = promptWithout(this.data.prompt, this.data.assets, id);
     this.setData({
       prompt,
       hasPrompt: !!prompt.trim(),
