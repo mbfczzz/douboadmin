@@ -49,7 +49,8 @@ func urls(v any) string {
 	for _, raw := range list {
 		s := str(raw)
 		u, e := url.Parse(s)
-		if e == nil && u.Scheme == "https" && u.Hostname() != "" && u.User == nil {
+		// "playwm" is the watermarked copy; play and download_addr keep the clean one first.
+		if e == nil && u.Scheme == "https" && u.Hostname() != "" && u.User == nil && !strings.Contains(u.Path, "playwm") {
 			return s
 		}
 	}

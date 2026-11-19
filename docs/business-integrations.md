@@ -37,6 +37,11 @@
 
 TikHub 适配已核对其 OpenAPI：搜索 `POST /api/v1/douyin/search/fetch_video_search_v2`，详情 `fetch_one_video`，热词 `fetch_hot_search_list`。后端缓存上游结果；播放量仅对返回页面内已提供数据排序。账号实际权限、数据字段与下载链接需要凭证到位后验证。
 
+分享链接与无水印原视频（文案提取、一键复刻）：
+
+- 分享链接：链接里已带作品 ID 时直接用详情接口；短链接（`v.douyin.com`）交给 `GET /api/v1/douyin/app/v3/fetch_one_video_by_share_url`，返回空时按 TikHub 说明改用同参数的 `web/fetch_one_video_by_share_url`。服务端自身不打开用户粘贴的地址，只接受抖音域名。`filter_list[0].reason` 为 5 / 10 / 8 时分别提示私密、部分可见、删除或版权受限（不可用结果同样计费）。
+- 无水印原视频：导入素材（`POST /api/hot/videos/{id}/import`）先调 `GET /api/v1/douyin/app/v3/fetch_video_high_quality_play_url?aweme_id=…&region=CN` 取原始上传画质（每次约 0.005 美元，`region=CN` 返回国内 CDN）；蓝 V 账号与投流作品不支持原画，此时改用详情里的 `play_addr`（跳过带水印的 `playwm` 地址）。
+
 ## 混剪界面与通知
 
 小程序混剪界面保留，生成服务暂未开放。后台音乐管理、混剪专用配置及服务器视频合成代码已移除。

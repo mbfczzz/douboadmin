@@ -77,3 +77,13 @@ test("an ID photo needs a photo, and presets start on a model that takes picture
   assert.equal(featureModel([text, picture], "idphoto").id, "p");
   assert.equal(featureModel([text, picture], ""), undefined);
 });
+
+test("the 一键复刻 preset needs its video and starts on a model that takes videos", () => {
+  const h = harness();
+  const { featureProblem, featureModel } = h.service("../pages/create/feature");
+  assert.equal(featureProblem({ feature: "remake", assets: [{ isImage: true }] }), "请先带入要复刻的视频");
+  assert.equal(featureProblem({ feature: "remake", assets: [{ isVideo: true }] }), "");
+  const image = { id: "i", kind: "video", referenceTypes: ["image"] }, video = { id: "v", kind: "video", referenceTypes: ["image", "video"] };
+  assert.equal(featureModel([image, video], "remake").id, "v");
+  assert.equal(featureModel([image, video], "ad").id, "i");
+});

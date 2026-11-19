@@ -21,18 +21,24 @@ func (p Importer) Generate(ctx context.Context, j core.Job) (string, error) {
 	if !p.Service.Ready() {
 		return "", fmt.Errorf("抖音数据接口尚未配置")
 	}
-	_ = p.Service.Store.Progress(ctx, j, 10, "获取公开视频地址")
+	_ = p.Service.Store.Progress(ctx, j, 10, "获取无水印原视频")
 	v, e := p.Service.Client.Detail(ctx, j.Input.SourceID)
 	if e != nil {
 		return "", e
 	}
-	if v.URL == "" {
+	// The original upload has no watermark; when TikHub cannot give it
+	// (blue-V or promoted videos) the clean play address is used.
+	source := v.URL
+	if original, e := p.Service.Client.OriginalURL(ctx, v.ID); e == nil {
+		source = original
+	}
+	if source == "" {
 		return "", fmt.Errorf("数据源未提供可导入的视频地址")
 	}
 	_ = p.Service.Store.Progress(ctx, j, 30, "下载视频素材")
 	saveJob := j
 	saveJob.Input.Kind = "video"
-	result, e := p.Media.Save(ctx, saveJob, v.URL)
+	result, e := p.Media.Save(ctx, saveJob, source)
 	if e != nil {
 		return "", e
 	}

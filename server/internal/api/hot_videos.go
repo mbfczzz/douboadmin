@@ -29,14 +29,15 @@ func (a *Server) hotSearch(w http.ResponseWriter, r *http.Request) {
 		fail(w, 400, "搜索条件无效")
 		return
 	}
-	result, e := a.Hot.Search(r.Context(), hotvideo.Query{Keyword: keyword, Sort: order, Cursor: cursor, SearchID: q.Get("searchId"), Backtrace: q.Get("backtrace")})
+	feed := q.Get("history") == "0"
+	result, e := a.Hot.Search(r.Context(), hotvideo.Query{Keyword: keyword, Sort: order, Cursor: cursor, SearchID: q.Get("searchId"), Backtrace: q.Get("backtrace"), Feed: feed})
 	if e != nil {
 		fail(w, 502, e.Error())
 		return
 	}
 	user := identity(r).ID
 	// history=0: the 创作 page's video feed browses keywords, it is not the user's own search.
-	if cursor == 0 && q.Get("history") != "0" {
+	if cursor == 0 && !feed {
 		_, _ = a.Store.Put(r.Context(), "search_history", core.Record{ID: core.NewID(), Owner: user, Data: core.Data(map[string]any{"keyword": keyword, "searchedAt": time.Now().UTC()})}, 0)
 	}
 	for _, item := range result.Items {
@@ -72,7 +73,8 @@ func (a *Server) hotDiscovery(w http.ResponseWriter, r *http.Request) {
 	}
 	words := settings.HotKeywords
 	source := "推荐关键词"
-	if a.Hot.Ready() && !browseOnly(r) {
+	// words=0 (the 创作 feed) only asks whether the source is on: no TikHub call.
+	if a.Hot.Ready() && !browseOnly(r) && r.URL.Query().Get("words") != "0" {
 		if live, err := a.Hot.Hotwords(r.Context()); err == nil && len(live) > 0 {
 			words = live
 			source = "抖音热词"
@@ -121,7 +123,7 @@ func (a *Server) searchHistory(w http.ResponseWriter, r *http.Request) {
 	reply(w, 200, out)
 }
 
-// 文案提取: the caption of a pasted Douyin share link.
+// 文案提取 / 一键复刻: the video behind a pasted Douyin share link.
 func (a *Server) hotLink(w http.ResponseWriter, r *http.Request) {
 	if !a.Hot.Ready() {
 		fail(w, 503, "抖音数据接口尚未配置")
@@ -134,12 +136,17 @@ func (a *Server) hotLink(w http.ResponseWriter, r *http.Request) {
 		fail(w, 400, "请粘贴抖音视频的分享链接")
 		return
 	}
-	id, e := hotvideo.LinkID(r.Context(), v.Text, hotvideo.FollowHTTP)
+	id, link, e := hotvideo.ParseLink(v.Text)
 	if e != nil {
 		fail(w, 400, e.Error())
 		return
 	}
-	video, e := a.Hot.Client.Detail(r.Context(), id)
+	var video hotvideo.Video
+	if id != "" {
+		video, e = a.Hot.Client.Detail(r.Context(), id)
+	} else {
+		video, e = a.Hot.Client.ShareVideo(r.Context(), link)
+	}
 	if e != nil {
 		fail(w, 502, e.Error())
 		return

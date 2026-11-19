@@ -1,19 +1,16 @@
 package hotvideo
 
 import (
-	"context"
 	"errors"
-	"net/http"
 	"net/url"
 	"regexp"
 	"strings"
-	"time"
 )
 
-// 文案提取: a pasted Douyin share text ("… https://v.douyin.com/xxxx/ 复制此链接…")
-// becomes a video ID. Only Douyin hosts are accepted, and a short link is
-// followed hop by hop without leaving them, so the server never fetches an
-// address the user chose.
+// 文案提取 / 一键复刻: a pasted Douyin share text ("… https://v.douyin.com/xxxx/
+// 复制此链接…"). A link that already names the video gives its ID; a short
+// link is handed to TikHub (ShareVideo), so the server never opens addresses
+// users type. Only Douyin hosts are accepted.
 var (
 	linkPattern = regexp.MustCompile(`https?://[^\s"'<>，。]+`)
 	pathID      = regexp.MustCompile(`/(?:video|note)/([0-9]{6,32})`)
@@ -23,48 +20,19 @@ var (
 
 var ErrNotDouyin = errors.New("请粘贴抖音视频的分享链接")
 
-// Follow returns where a short link points (its Location header).
-type Follow func(ctx context.Context, link string) (string, error)
-
-func LinkID(ctx context.Context, text string, follow Follow) (string, error) {
-	link := linkPattern.FindString(text)
-	for hop := 0; hop < 4; hop++ {
-		u, err := url.Parse(link)
-		if link == "" || err != nil || !douyinHosts[strings.ToLower(u.Hostname())] {
-			return "", ErrNotDouyin
-		}
-		if m := pathID.FindStringSubmatch(u.Path); m != nil {
-			return m[1], nil
-		}
-		if m := queryID.FindStringSubmatch("?" + u.RawQuery); m != nil {
-			return m[1], nil
-		}
-		if follow == nil {
-			break
-		}
-		if link, err = follow(ctx, u.String()); err != nil {
-			return "", errors.New("链接打开失败，请确认链接完整")
-		}
+// ParseLink returns the video ID when the link carries it, otherwise the
+// cleaned Douyin link to resolve.
+func ParseLink(text string) (id, link string, err error) {
+	link = linkPattern.FindString(text)
+	u, e := url.Parse(link)
+	if link == "" || e != nil || u.User != nil || !douyinHosts[strings.ToLower(u.Hostname())] {
+		return "", "", ErrNotDouyin
 	}
-	return "", errors.New("没有在链接里找到视频")
-}
-
-// FollowHTTP asks the link for its redirect without reading any page.
-func FollowHTTP(ctx context.Context, link string) (string, error) {
-	r, err := http.NewRequestWithContext(ctx, "GET", link, nil)
-	if err != nil {
-		return "", err
+	if m := pathID.FindStringSubmatch(u.Path); m != nil {
+		return m[1], "", nil
 	}
-	r.Header.Set("User-Agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)")
-	client := &http.Client{Timeout: 8 * time.Second, CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}
-	response, err := client.Do(r)
-	if err != nil {
-		return "", err
+	if m := queryID.FindStringSubmatch("?" + u.RawQuery); m != nil {
+		return m[1], "", nil
 	}
-	response.Body.Close()
-	next, err := response.Location()
-	if err != nil {
-		return "", err
-	}
-	return next.String(), nil
+	return "", "https://" + u.Hostname() + u.EscapedPath(), nil
 }

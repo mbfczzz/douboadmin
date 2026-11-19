@@ -19,7 +19,12 @@ func (s *Service) Search(ctx context.Context, q Query) (Result, error) {
 	old, e := s.Store.Get(ctx, "hot_cache", id)
 	if e == nil {
 		var data Result
-		if json.Unmarshal(old.Data, &data) == nil && time.Since(data.FetchedAt) < 5*time.Minute {
+		// Feed keywords are the same for everyone: their pages stay 30 min.
+		fresh := 5 * time.Minute
+		if q.Feed {
+			fresh = 30 * time.Minute
+		}
+		if json.Unmarshal(old.Data, &data) == nil && time.Since(data.FetchedAt) < fresh {
 			data.Cached = true
 			return data, nil
 		}

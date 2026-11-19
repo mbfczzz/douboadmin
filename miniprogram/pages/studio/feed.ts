@@ -2,10 +2,12 @@ import { request, hasSession } from "../../utils/api";
 import { hotView } from "../../services/hot-video";
 import type { HotResult } from "../../services/hot-video";
 
-// The 创作 page's video feed: the hot-video keywords become chips, and the
-// chosen one lists its videos in two columns ("做同款" opens 一键复刻).
-// `state` is "off" when the Douyin source is not configured, "login" when
-// the visitor must sign in first (searching needs an account).
+// The 创作 page's video feed: creative keywords as chips (Douyin's own hot
+// words are news topics, not things to remake), and the chosen one lists its
+// videos in two columns ("做同款" opens 一键复刻). `state` is "off" when the
+// Douyin source is not configured, "login" when the visitor must sign in
+// first (searching needs an account).
+export const FEED_KEYWORDS = ["剧情带货", "探店", "美食", "好物推荐", "穿搭", "萌宠", "旅行", "家居"];
 export type FeedVideo = ReturnType<typeof hotView>;
 type FeedPage = {
   data: { keywords: string[]; keyword: string; videos: FeedVideo[]; loading: boolean; hasMore: boolean };
@@ -27,12 +29,13 @@ export function cancelFeed(page: object) {
 export async function loadKeywords(page: FeedPage) {
   const c = cursorOf(page), revision = ++c.revision;
   try {
-    const d = await request<{ enabled: boolean; keywords: string[] }>("/hot/discovery", "GET", undefined, undefined, false);
+    // words=0: only whether the source is on; its hot words are not used here.
+    const d = await request<{ enabled: boolean }>("/hot/discovery?words=0", "GET", undefined, undefined, false);
     if (revision !== c.revision) return;
-    if (!d.enabled || !d.keywords.length) return page.setData({ feedState: "off", loading: false });
-    if (!hasSession()) return page.setData({ feedState: "login", keywords: d.keywords, loading: false });
-    const keyword = d.keywords.includes(page.data.keyword) ? page.data.keyword : d.keywords[0];
-    page.setData({ feedState: "ready", keywords: d.keywords, keyword });
+    if (!d.enabled) return page.setData({ feedState: "off", loading: false });
+    if (!hasSession()) return page.setData({ feedState: "login", keywords: FEED_KEYWORDS, loading: false });
+    const keyword = FEED_KEYWORDS.includes(page.data.keyword) ? page.data.keyword : FEED_KEYWORDS[0];
+    page.setData({ feedState: "ready", keywords: FEED_KEYWORDS, keyword });
     await loadVideos(page, false);
   } catch (e) {
     if (revision === c.revision) page.setData({ feedError: (e as Error).message, loading: false });
@@ -46,7 +49,8 @@ export async function loadVideos(page: FeedPage, append: boolean) {
   const revision = ++c.revision;
   page.setData({ loading: true, feedError: "", ...(append ? {} : { videos: [], hasMore: false }) });
   try {
-    // history=0: browsing the feed is not a search of the visitor's own.
+    // history=0: browsing the feed is not a search of the visitor's own (the
+    // server also keeps these shared results longer).
     const q = `?q=${encodeURIComponent(page.data.keyword)}&cursor=${c.cursor}&searchId=${encodeURIComponent(c.searchId)}&backtrace=${encodeURIComponent(c.backtrace)}&history=0`;
     const r = await request<HotResult>("/hot/videos" + q);
     if (revision !== c.revision) return;

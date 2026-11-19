@@ -1,17 +1,24 @@
 <nav-bar title="一键复刻" back />
 <view class="subpage remake-page">
   <view wx:if="{{loadError}}" class="biz-error" bindtap="load">{{loadError}} · 点击重试</view>
-  <view wx:if="{{loading&&!video}}" class="skel-list" aria-label="正在加载视频"><view class="skeleton skel-hero" /></view>
+  <view wx:if="{{loading&&!video}}" class="skel-list" aria-label="正在读取视频"><view class="skeleton skel-hero" /></view>
   <view wx:elif="{{video}}" class="biz-card remake-source">
     <video wx:if="{{video.url}}" class="biz-preview" src="{{video.url}}" poster="{{video.cover}}" controls />
     <image wx:else class="biz-image" src="{{video.cover}}" mode="aspectFill" />
     <text class="biz-heading remake-title">{{video.title}}</text>
-    <text class="biz-small">{{video.author}} · {{video.dateText}}</text>
+    <view class="remake-meta">
+      <text class="biz-small">{{video.author}} · {{video.dateText}}</text>
+      <text wx:if="{{!busy}}" class="remake-change" bindtap="change">换一个</text>
+    </view>
   </view>
-  <view wx:elif="{{!loadError}}" class="biz-empty">
-    <image class="empty-photo" src="/assets/photos/empty-video.jpg" mode="aspectFill" aria-hidden="true" />
-    <text>从创作页的热门视频点「做同款」</text>
-    <text class="empty-link" bindtap="pick">去选视频 ›</text>
+  <view wx:else class="biz-card remake-link">
+    <text class="remake-label">要复刻的视频</text>
+    <textarea class="remake-input" always-embed disable-default-padding value="{{link}}" maxlength="500" placeholder="粘贴抖音分享的链接或整段分享文字；也可以在创作页的热门视频点「做同款」" placeholder-class="remake-placeholder" bindinput="input" />
+    <view class="remake-actions">
+      <text class="remake-paste" bindtap="paste">粘贴</text>
+      <button class="biz-secondary remake-read" loading="{{loading}}" disabled="{{loading}}" bindtap="readLink">读取视频</button>
+    </view>
   </view>
-  <button class="biz-action remake-start" disabled="{{!video}}" bindtap="start">开始复刻</button>
+  <text wx:if="{{busy}}" class="biz-note">{{stage}}</text>
+  <button class="biz-action remake-start" loading="{{busy}}" disabled="{{!video||busy}}" bindtap="start">开始复刻</button>
 </view>

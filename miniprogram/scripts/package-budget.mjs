@@ -179,7 +179,9 @@ console.log(
 // 数字人, 视频唱歌, 图文成片, 漫画推文, 视频去字幕, 视频二创 drawn from one
 // config (pages/feature); narrow-phone fixes and the 证件照 photo check:
 // 864,618 B. 819 -> 845 KiB.
-const budget = 845 * 1024;
+// 一键复刻 reads a pasted link, saves the watermark-free original and opens
+// the editor's 一键复刻 preset (services/hot-import.ts): 869,562 B. 845 -> 850 KiB.
+const budget = 850 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

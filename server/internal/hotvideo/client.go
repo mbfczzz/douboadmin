@@ -30,6 +30,8 @@ type Video struct {
 type Query struct {
 	Keyword, Sort, SearchID, Backtrace string
 	Cursor                             int64
+	// Feed: the 创作 page's fixed keywords, shared by every user.
+	Feed bool
 }
 type Result struct {
 	Items     []Video   `json:"items"`

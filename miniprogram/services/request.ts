@@ -53,7 +53,8 @@ export function request<T>(
             ...(sentToken ? { Authorization: "Bearer " + sentToken } : {}),
             ...(key ? { "Idempotency-Key": key } : {}),
           },
-          timeout: 20000,
+          // Douyin data (TikHub) can take up to the server's 40 s wait.
+          timeout: path.startsWith("/hot/") ? 45000 : 20000,
           success(res) {
             const meta = res.data as ResponseMeta;
             if (storedToken() !== storedAtSend) {
