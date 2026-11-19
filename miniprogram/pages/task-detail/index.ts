@@ -184,6 +184,13 @@ Page({
     const current = String(e.currentTarget.dataset.url || "");
     if (urls.includes(current)) wx.previewImage({ urls, current });
   },
+  // A reference chip in the prompt: images open the gallery, videos play.
+  previewChip(e: WechatMiniprogram.TouchEvent) {
+    const assets: ReturnType<typeof assetViews> = this.data.assets;
+    const a = assets.find((x) => x.id === e.currentTarget.dataset.id);
+    if (a?.isVideo) wx.previewMedia({ sources: [{ url: a.data.url, type: "video", poster: a.data.thumbnailUrl || undefined }], fail() {} });
+    else if (a) this.previewAsset({ currentTarget: { dataset: { url: a.data.url } } } as unknown as WechatMiniprogram.TouchEvent);
+  },
   togglePrompt() {
     this.setData({ promptOpen: !this.data.promptOpen });
   },

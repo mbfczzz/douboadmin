@@ -14,19 +14,20 @@ import { withDays } from "../../utils/day";
 
 const per100 = (fen: number, units: number) => money(Math.round((fen * 10000) / units)); // ¥ per 100 points
 
-// ¥ per 100 points as the user actually pays. Virtual payment: the base
-// (custom-amount) product, else the package with no bonus. JSAPI: the
-// ratio × provider index (10000 = standard), as wallet-checkout credits.
-export function pricePer100(info: WalletInfo) {
+// 当前价格 as "¥1 = N 积分", from what the user actually pays. Virtual
+// payment: the base (custom-amount) product, else the package with no bonus.
+// JSAPI: the ratio × provider index (10000 = standard), as checkout credits.
+const perYuan = (fen: number, units: number) => points(Math.floor((units * 100) / fen));
+export function pointsPerYuan(info: WalletInfo) {
   const c = info.virtualCustom;
-  if (c?.unitAmountFen && c.unitPointsUnits) return per100(c.unitAmountFen, c.unitPointsUnits);
+  if (c?.unitAmountFen && c.unitPointsUnits) return perYuan(c.unitAmountFen, c.unitPointsUnits);
   if (info.paymentChannel === "wechat_virtual") {
     const valid = (info.virtualProducts || []).filter((p) => p.amountFen > 0 && p.pointsUnits > 0);
     const base = valid.sort((a, b) => b.amountFen / b.pointsUnits - a.amountFen / a.pointsUnits)[0];
-    return base ? per100(base.amountFen, base.pointsUnits) : "";
+    return base ? perYuan(base.amountFen, base.pointsUnits) : "";
   }
   const index = info.pricing?.retailPer100Fen, ratio = info.settings.pointsPerYuan;
-  return index && ratio > 0 ? money(Math.round(index / ratio)) : "";
+  return index && ratio > 0 ? points(Math.floor((100 * ratio * 10000) / index)) : "";
 }
 
 export function productCards(products: VirtualProduct[]) {

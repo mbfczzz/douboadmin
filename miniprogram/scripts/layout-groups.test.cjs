@@ -8,7 +8,7 @@ test("task prompt heading and content stay adjacent; status and actions stay out
   assert.match(
     text,
     // Heading, length and copy sit in the same card right above the text.
-    /<view wx:else class="prompt-card">\s*<view class="prompt-head">\s*<text>提示词[^]*?<\/view>\s*<\/view>\s*<text class="full-prompt/,
+    /<view wx:else class="prompt-card">\s*<view class="prompt-head">\s*<text>提示词[^]*?<\/view>\s*<\/view>\s*<view class="full-prompt/,
   );
   assert.ok(
     text.indexOf('class="stage-note"') < text.indexOf('class="waiting-note"'),

@@ -1,0 +1,48 @@
+// @图片N / @视频N in a prompt, resolved against the attached references
+// (numbered per kind, in strip order). Assets carry isImage / isVideo and
+// data.url / data.thumbnailUrl (video cover).
+function pick(assets, kind, number) {
+  var n = 0;
+  for (var i = 0; i < assets.length; i++) {
+    var a = assets[i];
+    if (kind === "图片" ? a.isImage : a.isVideo) {
+      n++;
+      if (n === number) return a;
+    }
+  }
+  return null;
+}
+function chip(a, label) {
+  return { chip: true, id: a.id, label: label, url: a.isImage ? a.data.url : a.data.thumbnailUrl, video: !a.isImage };
+}
+// The prompt as text runs and reference chips, in order.
+function segments(prompt, assets) {
+  var out = [], last = 0, m, re = getRegExp("@(图片|视频)(\\d+)", "g");
+  prompt = prompt || "";
+  while ((m = re.exec(prompt)) !== null) {
+    var a = pick(assets, m[1], parseInt(m[2])), start = re.lastIndex - m[0].length;
+    if (!a) continue;
+    if (start > last) out.push({ text: prompt.substring(last, start) });
+    out.push(chip(a, m[1] + m[2]));
+    last = re.lastIndex;
+  }
+  if (last < prompt.length) out.push({ text: prompt.substring(last) });
+  return out;
+}
+// Each referenced item once, in first-mention order (the row under the editor).
+function list(prompt, assets) {
+  var parts = segments(prompt, assets), out = [], seen = {};
+  for (var i = 0; i < parts.length; i++) {
+    if (parts[i].chip && !seen[parts[i].id]) {
+      seen[parts[i].id] = true;
+      out.push(parts[i]);
+    }
+  }
+  return out;
+}
+// Whether anything can be referenced (audio alone cannot).
+function any(assets) {
+  for (var i = 0; i < assets.length; i++) if (assets[i].isImage || assets[i].isVideo) return true;
+  return false;
+}
+module.exports = { segments: segments, list: list, any: any };

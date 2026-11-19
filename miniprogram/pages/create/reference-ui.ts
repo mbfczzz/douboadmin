@@ -15,6 +15,8 @@ export const referenceHandlers = {
   onPageScroll(this: Editor) { if (this.data.mentionOpen) positionMention(this); },
   holdMentionTap() {},
   focusPrompt(this: Editor) { this.setData({ promptFocus: true }); },
+  // The read-only view (with reference chips) turns back into the input.
+  editPrompt(this: Editor) { this.setData({ promptFocus: true, promptCursor: this.data.prompt.length }); },
   blurPrompt(this: Editor) { this.setData({ promptFocus: false }); },
   promptKeyboard(this: Editor, e: WechatMiniprogram.CustomEvent<{ height: number }>) {
     this.setData({ keyboardHeight: Math.max(0, e.detail.height) });

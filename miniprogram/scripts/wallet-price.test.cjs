@@ -2,10 +2,10 @@ const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const { harness } = require("./harness.cjs");
 
-// retailPer100Fen is a price index (10000 = standard); the shown price of
-// 100 points must follow the 积分/元 ratio (1 元 = 10 积分 → ¥10.00).
+// retailPer100Fen is a price index (10000 = standard); 当前价格 reads
+// "¥1 = N 积分" and follows the 积分/元 ratio (1 元 = 10 积分 → 10).
 test("current price per 100 points follows points-per-yuan and the provider index", async () => {
-  for (const [ratio, index, shown] of [[10, 10000, "10.00"], [100, 10000, "1.00"], [10, 12000, "12.00"]]) {
+  for (const [ratio, index, shown] of [[10, 10000, "10"], [100, 10000, "100"], [10, 12500, "8"]]) {
     const h = harness({ setTimeout: () => 1, clearTimeout() {} });
     await h.api.signIn();
     h.wx.getDeviceInfo = () => ({ platform: "android" });
@@ -19,16 +19,16 @@ test("current price per 100 points follows points-per-yuan and the provider inde
     const page = h.page("wallet");
     page.onLoad?.({});
     await page.load();
-    assert.equal(page.data.price100, shown, `ratio ${ratio}, index ${index}`);
+    assert.equal(page.data.perYuan, shown, `ratio ${ratio}, index ${index}`);
   }
 });
 
 test("virtual payment prices 100 points from the packages, not the legacy ratio", () => {
-  const { pricePer100 } = harness().service("../pages/wallet/insights");
+  const { pointsPerYuan } = harness().service("../pages/wallet/insights");
   const base = { settings: { pointsPerYuan: 100 }, pricing: { retailPer100Fen: 10000 }, paymentChannel: "wechat_virtual" };
-  // ¥1 → 10 积分 (1:10) is ¥10.00 per 100; a bonus package does not set the price.
+  // ¥1 → 10 积分 (1:10) reads "¥1 = 10 积分"; a bonus package does not set the price.
   const products = [{ id: "a", amountFen: 100, pointsUnits: 1000 }, { id: "b", amountFen: 10000, pointsUnits: 120000 }];
-  assert.equal(pricePer100({ ...base, virtualProducts: products }), "10.00");
-  assert.equal(pricePer100({ ...base, virtualProducts: products, virtualCustom: { unitAmountFen: 100, unitPointsUnits: 1000 } }), "10.00");
-  assert.equal(pricePer100({ ...base, virtualProducts: [] }), "");
+  assert.equal(pointsPerYuan({ ...base, virtualProducts: products }), "10");
+  assert.equal(pointsPerYuan({ ...base, virtualProducts: products, virtualCustom: { unitAmountFen: 100, unitPointsUnits: 1000 } }), "10");
+  assert.equal(pointsPerYuan({ ...base, virtualProducts: [] }), "");
 });

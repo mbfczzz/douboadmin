@@ -1,3 +1,4 @@
+<wxs module="refs" src="../../utils/mentions.wxs" />
 <nav-bar title="创作" />
 <view class="page create-page" bindtap="closeMention">
   <view class="mode-tabs {{busy||uploading||restoring?'controls-busy':''}}">
@@ -61,7 +62,10 @@
       <t-icon name="{{expanded?'fullscreen-exit':'fullscreen'}}" size="20" />
     </view>
     <view class="editor">
+      <view wx:if="{{!promptFocus&&refs.list(prompt,assets).length}}" class="prompt-input prompt-rich" bindtap="editPrompt" aria-role="button" aria-label="编辑描述"
+        ><block wx:for="{{refs.segments(prompt,assets)}}" wx:key="index"><text wx:if="{{!item.chip}}">{{item.text}}</text><view wx:else class="prompt-chip" data-id="{{item.id}}" catchtap="previewReference"><image wx:if="{{item.url}}" src="{{item.url}}" mode="aspectFill" /><text>{{item.label}}</text></view></block></view>
       <textarea
+        wx:else
         class="prompt-input"
         value="{{prompt}}"
         cursor="{{promptCursor}}"
@@ -110,7 +114,6 @@
       </view>
     </scroll-view>
   </view>
-  <wxs module="refs" src="./mentioned.wxs" />
   <view class="creation-hint">
     <view wx:if="{{refs.list(prompt,assets).length}}" class="mentioned">
       <view wx:for="{{refs.list(prompt,assets)}}" wx:key="id" class="mentioned-item" data-id="{{item.id}}" bindtap="previewReference" hover-class="card-pressed" aria-role="button" aria-label="{{'查看'+item.label}}">

@@ -146,7 +146,7 @@ test("the referenced row lists mentioned images and videos once each", () => {
   global.getRegExp = (pattern, flags) => new RegExp(pattern, flags);
   const vm = require("node:vm"), fs = require("node:fs");
   const sandbox = { module: { exports: {} }, getRegExp: global.getRegExp };
-  vm.runInNewContext(fs.readFileSync("pages/create/mentioned.wxs", "utf8"), sandbox);
+  vm.runInNewContext(fs.readFileSync("utils/mentions.wxs", "utf8"), sandbox);
   const { list } = sandbox.module.exports;
   const assets = [image(1), { id: "clip", isVideo: true, data: { thumbnailUrl: "https://fixture.test/c.jpg" } }, image(2)];
   const out = list("@视频1 开场，@图片2 结尾，再用 @视频1 和 @图片9", assets);

@@ -19,7 +19,7 @@
       <image wx:if="{{backdrop}}" class="summary-photo" src="{{backdrop}}" mode="aspectFill" aria-hidden="true" />
       <view class="summary-label"><image class="points-mark gl gl-14" src="/assets/glyphs/points-star.png" /><text>可用积分</text></view>
       <view class="row"><text class="biz-value">{{available}}</text></view>
-      <view wx:if="{{price100}}" class="summary-price"><text>当前价格</text><text class="price-value">¥{{price100}} / 100 积分</text></view>
+      <view wx:if="{{perYuan}}" class="summary-price"><text>当前价格</text><text class="price-value">¥1 = {{perYuan}} 积分</text></view>
     </view>
     <view wx:if="{{uses.length}}" class="uses">
       <text class="uses-head">当前积分大约可以</text>

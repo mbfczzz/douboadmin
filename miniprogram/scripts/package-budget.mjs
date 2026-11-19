@@ -157,7 +157,10 @@ console.log(
 // @ mentions for videos, the 已引用 thumbnail row (WXS, no extra setData),
 // video covers in the reference strip with full-screen play: 805,519 B.
 // 784 -> 787 KiB.
-const budget = 787 * 1024;
+// @ references as inline chips (thumbnail + label) in the create box
+// (keyboard closed) and the task-detail prompt; one shared WXS module:
+// 808,645 B. 787 -> 790 KiB.
+const budget = 790 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

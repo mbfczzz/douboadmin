@@ -19,7 +19,7 @@ import {
   paymentMessage,
   watchPayment,
 } from "../../services/payment-status";
-import { pricePer100, productCards, ledgerRows, loadInsights } from "./insights";
+import { pointsPerYuan, productCards, ledgerRows, loadInsights } from "./insights";
 import type { Ledger } from "../../services/wallet-ledger";
 import { financePage } from "../../services/finance-page";
 import type { FinancePage } from "../../services/finance-page";
@@ -101,7 +101,7 @@ Page({
       this.setData({
         info,
         products: productCards(info.virtualProducts || []),
-        price100: pricePer100(info),
+        perYuan: pointsPerYuan(info),
         productId: info.virtualProducts?.some(
           (p) => p.id === this.data.productId,
         )

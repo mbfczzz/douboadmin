@@ -268,3 +268,24 @@ button.phone-alternative {
   font-size: 24px;
   font-weight: 600;
 }
+
+/* An @图片N / @视频N reference inside a prompt: thumbnail + label. */
+.prompt-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0 2px;
+  padding: 1px 6px 1px 2px;
+  border-radius: 6px;
+  vertical-align: middle;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--ui-text);
+  background: var(--ui-field);
+}
+.prompt-chip image {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  background: var(--ui-surface);
+}

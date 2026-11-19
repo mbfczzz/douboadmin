@@ -10,6 +10,7 @@ export function assetViews(rows: Row<Asset>[]) {
     const kind = type.startsWith("image/") ? "image" : type.startsWith("video/") ? "video" : type.startsWith("audio/") ? "audio" : "file";
     counts[kind] = (counts[kind] || 0) + 1;
     const name = { image: "图片", video: "视频", audio: "音频", file: "文件" }[kind];
-    return { ...a, data: { ...a.data, url: media(a.data.url) }, isImage: kind === "image", kind, label: name + counts[kind] };
+    const cover = a.data.thumbnailUrl ? media(a.data.thumbnailUrl) : "";
+    return { ...a, data: { ...a.data, url: media(a.data.url), thumbnailUrl: cover }, isImage: kind === "image", isVideo: kind === "video", kind, label: name + counts[kind] };
   });
 }

@@ -4,7 +4,7 @@ import type { PurchaseMode } from "../../services/virtual-amount";
 export const walletData = {
   productId: "",
   products: [] as ReturnType<typeof import("./insights").productCards>,
-  price100: "",
+  perYuan: "",
   backdrop: "", // glass stars fading in from the right (showArt)
   // "能做什么" covers: bundled photos of a photo print and a cinema camera.
   useArt: { image: "/assets/photos/use-image.jpg", video: "/assets/photos/use-video.jpg" } as Record<string, string>,
