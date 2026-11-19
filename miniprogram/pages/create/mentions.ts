@@ -26,7 +26,7 @@ export function chooseMention(page: VisibleEditor, cursor: number) {
   const previous = choosing.get(page);
   if (previous?.text === text && previous.cursor === cursor) return;
   cancelMention(page);
-  if (text[cursor - 1] !== "@" || page.data.busy) return;
+  if ((text[cursor - 1] !== "@" && text[cursor - 1] !== "＠") || page.data.busy) return; // Chinese keyboards may type ＠
   const items = mentionables(page.data.assets);
   if (!items.length) {
     wx.showToast({ title: "请先添加参考图片或视频", icon: "none" });
@@ -43,7 +43,9 @@ export function pickMention(page: VisibleEditor, index: number) {
   if (!snap || !page.visible || page.destroyed || page.data.prompt !== snap.text) return;
   const items = mentionables(page.data.assets);
   if (items.map((a) => a.id).join() !== snap.ids.join() || !items[index]) return;
-  insertMention(page, snap.text, snap.cursor, items[index].label);
+  // A full-width ＠ becomes "@" so the model reads a standard reference.
+  const text = snap.text.slice(0, snap.cursor - 1) + "@" + snap.text.slice(snap.cursor);
+  insertMention(page, text, snap.cursor, items[index].label);
 }
 
 // Inserts "图片N " (or "视频N ") right after an "@" that sits before `cursor`.
@@ -66,12 +68,12 @@ export function appendMention(page: VisibleEditor, label: string) {
 }
 
 export function clearMentions(text: string) {
-  return text.replace(/@(图片|视频)\d+/g, "");
+  return text.replace(/[@＠](图片|视频)\d+/g, "");
 }
 
 // Numbers follow each kind's current order in the attachment strip.
 export function removeMention(text: string, kind: "图片" | "视频", number: number) {
-  return text.replace(new RegExp(`@${kind}(\\d+)(?!\\d)`, "g"), (token, raw) => {
+  return text.replace(new RegExp(`[@＠]${kind}(\\d+)(?!\\d)`, "g"), (token, raw) => {
     const index = Number(raw);
     return index === number ? "" : index > number ? `@${kind}${index - 1}` : token;
   });

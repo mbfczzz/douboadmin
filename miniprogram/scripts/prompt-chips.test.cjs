@@ -44,3 +44,24 @@ test("task detail: tapping a video chip plays it, an image chip opens the galler
   assert.deepEqual(played, ["https://fixture.test/v1"]);
   assert.deepEqual(shown, ["https://fixture.test/1"]);
 });
+
+// On devices WXS regex support differs; the parser must not need getRegExp,
+// and a full-width ＠ from a Chinese keyboard still counts.
+test("chips parse without any regex helper and accept a full-width ＠", () => {
+  const sandbox = { module: { exports: {} } };
+  vm.runInNewContext(fs.readFileSync("utils/mentions.wxs", "utf8"), sandbox);
+  const { segments, list } = sandbox.module.exports;
+  const parts = segments("这个＠图片1 美女@视频1", [image(1), video(1)]);
+  assert.deepEqual(Array.from(parts, (p) => (p.chip ? p.label : p.text)), ["这个", "图片1", " 美女", "视频1"]);
+  assert.equal(list("这个@图片1 美女", [image(1)]).length, 1);
+  assert.equal(list("@图片 美女 @图", [image(1)]).length, 0);
+});
+
+test("picking after a full-width ＠ writes a standard @", () => {
+  const h = harness(), page = h.page("create");
+  page.setData({ assets: [{ ...image(1), data: { url: "https://fixture.test/1", type: "image/png" } }], prompt: "", maxPromptChars: 500 });
+  page.input({ detail: { value: "这个＠", cursor: 3 } });
+  assert.equal(page.data.mentionOpen, true);
+  page.pickMention({ currentTarget: { dataset: { index: 0 } } });
+  assert.equal(page.data.prompt, "这个@图片1 ");
+});

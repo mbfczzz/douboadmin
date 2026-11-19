@@ -15,16 +15,25 @@ function pick(assets, kind, number) {
 function chip(a, label) {
   return { chip: true, id: a.id, label: label, url: a.isImage ? a.data.url : a.data.thumbnailUrl, video: !a.isImage };
 }
-// The prompt as text runs and reference chips, in order.
+// The prompt as text runs and reference chips, in order. Plain string scanning
+// (no RegExp: WXS regex support differs on devices); "@" or "＠", then 图片/视频
+// and digits.
 function segments(prompt, assets) {
-  var out = [], last = 0, m, re = getRegExp("@(图片|视频)(\\d+)", "g");
   prompt = prompt || "";
-  while ((m = re.exec(prompt)) !== null) {
-    var a = pick(assets, m[1], parseInt(m[2])), start = re.lastIndex - m[0].length;
-    if (!a) continue;
-    if (start > last) out.push({ text: prompt.substring(last, start) });
-    out.push(chip(a, m[1] + m[2]));
-    last = re.lastIndex;
+  var out = [], last = 0, i = 0;
+  while (i < prompt.length) {
+    var c = prompt.charAt(i), kind = prompt.substring(i + 1, i + 3), j = i + 3;
+    if ((c === "@" || c === "＠") && (kind === "图片" || kind === "视频")) {
+      while (j < prompt.length && "0123456789".indexOf(prompt.charAt(j)) >= 0) j++;
+      var a = j > i + 3 ? pick(assets, kind, parseInt(prompt.substring(i + 3, j))) : null;
+      if (a) {
+        if (i > last) out.push({ text: prompt.substring(last, i) });
+        out.push(chip(a, kind + prompt.substring(i + 3, j)));
+        last = i = j;
+        continue;
+      }
+    }
+    i++;
   }
   if (last < prompt.length) out.push({ text: prompt.substring(last) });
   return out;

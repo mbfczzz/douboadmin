@@ -160,7 +160,9 @@ console.log(
 // @ references as inline chips (thumbnail + label) in the create box
 // (keyboard closed) and the task-detail prompt; one shared WXS module:
 // 808,645 B. 787 -> 790 KiB.
-const budget = 790 * 1024;
+// Device-safe @ parsing in WXS (string scan, no RegExp) and full-width ＠
+// from Chinese keyboards: 809,378 B. 790 -> 791 KiB.
+const budget = 791 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");
