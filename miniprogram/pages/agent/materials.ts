@@ -1,87 +1,92 @@
 import { chooseReferenceFiles, upload, cancelled, error } from "../../utils/api";
-import { ask } from "../../services/dialog";
-import { updateSession } from "../../services/agent";
+import { createSession, updateSession } from "../../services/agent";
 import type { SessionDetail } from "../../services/agent";
 import { editorAsset } from "../../utils/editor-assets";
-import { MAX_MATERIALS } from "./constants";
+import { MAX_MATERIALS, MAX_ATTACHED } from "./constants";
 
-// A project's materials: pictures and videos the plans refer to as @图片N /
-// @视频N (numbered per type, in order). Kept on the project, not per message.
+// Pictures and videos are attached to the message being written and go
+// with that message only. Each upload is also kept on the project, numbered
+// per type (图片3, 视频1), so plans can still say @图片3 and generate with it.
 type Material = ReturnType<typeof editorAsset>;
+export type Labelled = Material & { label: string };
 type Page = {
-  data: { session: SessionDetail | null; materials: (Material & { label: string })[]; prompt: string; uploading: boolean };
+  data: { session: SessionDetail | null; materials: Labelled[]; attached: Labelled[]; uploading: boolean; skills: unknown[] };
   destroyed: boolean;
   setData(data: Record<string, unknown>): void;
   priceLatest?(): Promise<void>;
+  load?(force?: boolean): Promise<void>;
 };
 
-export function materialLabels(materials: Material[]) {
+export function materialLabels(materials: Material[]): Labelled[] {
   let images = 0, videos = 0;
   return materials.map((m) => ({ ...m, label: m.isImage ? "图片" + ++images : "视频" + ++videos }));
 }
 
-// Labels plus a label -> picture map the plan cards read (videos: cover).
+// Labels, a label -> picture map the plan cards read (videos: cover), and an
+// id -> file map the sent messages show their attachments from.
 export function materialData(list: Material[]) {
   const materials = materialLabels(list);
   const thumbs: Record<string, string> = {};
-  for (const m of materials) thumbs[m.label] = m.isImage ? m.data.url : m.data.thumbnailUrl || "";
-  return { materials, thumbs };
+  const files: Record<string, { label: string; thumb: string; video: boolean }> = {};
+  for (const m of materials) {
+    const thumb = m.isImage ? m.data.url : m.data.thumbnailUrl || "";
+    thumbs[m.label] = thumb;
+    files[m.id] = { label: m.label, thumb, video: !m.isImage };
+  }
+  return { materials, thumbs, files };
 }
 
-async function save(page: Page, ids: string[], materials: Material[]) {
+async function save(page: Page, materials: Material[]) {
   const s = page.data.session!;
-  const row = await updateSession(s.id, s.version, { assets: ids });
+  const row = await updateSession(s.id, s.version, { assets: materials.map((m) => m.id) });
   if (page.destroyed) return;
-  page.setData({ session: { ...s, version: row.version, data: row.data }, ...materialData(materials) });
+  const data = materialData(materials);
+  // The attached ones keep their (new) labels.
+  const attached = data.materials.filter((m) => page.data.attached.some((a) => a.id === m.id));
+  page.setData({ session: { ...page.data.session!, version: row.version, data: row.data }, ...data, attached });
   void page.priceLatest?.(); // a material can change which model the plan uses
 }
 
 export const materialHandlers = {
   async addMaterial(this: Page, e: WechatMiniprogram.TouchEvent) {
-    if (!this.data.session || this.data.uploading) return;
-    if (this.data.materials.length >= MAX_MATERIALS) return error(new Error(`每个项目最多 ${MAX_MATERIALS} 个素材`));
+    if (this.data.uploading) return;
+    const room = Math.min(MAX_ATTACHED - this.data.attached.length, MAX_MATERIALS - this.data.materials.length);
+    if (room <= 0) return error(new Error(this.data.attached.length >= MAX_ATTACHED ? `每条消息最多 ${MAX_ATTACHED} 个素材` : `每个项目最多 ${MAX_MATERIALS} 个素材`));
     this.setData({ uploading: true });
     try {
-      // Pictures several at a time (a shop's photos), up to the project's room.
       const kind = e.currentTarget.dataset.kind === "video" ? "video" : "image";
-      const files = await chooseReferenceFiles(kind, MAX_MATERIALS - this.data.materials.length);
+      const files = await chooseReferenceFiles(kind, room); // pictures several at a time
+      if (!this.data.session) {
+        const row = await createSession("general"); // a first upload starts a free project
+        this.setData({ session: { ...row, assets: [] } });
+        void this.load?.(true);
+      }
       const added = [];
       for (const file of files) added.push(editorAsset(await upload(file.path)));
-      const materials = [...this.data.materials, ...added];
-      await save(this, materials.map((m) => m.id), materials);
+      this.setData({ attached: [...this.data.attached, ...added.map((m) => ({ ...m, label: "" }))] });
+      await save(this, [...this.data.materials, ...added]);
     } catch (err) {
       if (!cancelled(err) && !this.destroyed) error(err);
     } finally {
       if (!this.destroyed) this.setData({ uploading: false });
     }
   },
-  // Later ones of the same type move up a number, so plans that name them
-  // would point elsewhere: say so before removing.
-  async removeMaterial(this: Page, e: WechatMiniprogram.TouchEvent) {
-    const gone = this.data.materials.find((m) => m.id === e.currentTarget.dataset.id);
-    if (!gone) return;
-    const ok = await ask({ title: `移除${gone.label}？`, content: "后面的同类素材会往前编号，已有方案里的 @ 引用可能对不上，需要让 Agent 按现有素材重写。", confirmText: "移除", tone: "danger", icon: "delete" });
-    if (!ok || this.destroyed) return;
-    const materials = this.data.materials.filter((m) => m.id !== gone.id);
+  // × on an attachment: it leaves the message, and the project (it was only
+  // just added, so no plan names it yet).
+  async detach(this: Page, e: WechatMiniprogram.TouchEvent) {
+    const id = e.currentTarget.dataset.id as string;
+    this.setData({ attached: this.data.attached.filter((m) => m.id !== id) });
     try {
-      await save(this, materials.map((m) => m.id), materials);
+      await save(this, this.data.materials.filter((m) => m.id !== id));
     } catch (err) {
       error(err);
     }
   },
-  // Long press shows the material full screen.
+  // Tap shows a material full screen (an attachment, or one in a sent message).
   previewMaterial(this: Page, e: WechatMiniprogram.TouchEvent) {
     const m = this.data.materials.find((x) => x.id === e.currentTarget.dataset.id);
     if (!m) return;
-    if (m.isImage) {
-      const urls = this.data.materials.filter((x) => x.isImage).map((x) => x.data.url);
-      wx.previewImage({ urls, current: m.data.url });
-    } else wx.previewMedia({ sources: [{ url: m.data.url, type: "video", poster: m.data.thumbnailUrl || "" }] });
-  },
-  // Tapping a material adds its mention to the message being written.
-  mention(this: Page, e: WechatMiniprogram.TouchEvent) {
-    const label = e.currentTarget.dataset.label as string;
-    const prompt = this.data.prompt;
-    this.setData({ prompt: (prompt && !/\s$/.test(prompt) ? prompt + " " : prompt) + "@" + label + " ", focus: true });
+    if (m.isImage) wx.previewImage({ urls: [m.data.url], current: m.data.url });
+    else wx.previewMedia({ sources: [{ url: m.data.url, type: "video", poster: m.data.thumbnailUrl || "" }] });
   },
 };

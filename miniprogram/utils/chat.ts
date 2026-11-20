@@ -45,12 +45,13 @@ export function chatMessages(jobs: Job[], partials: Record<string, string> = {})
     .flatMap((job): ChatMessage[] => {
       if (job.input.kind !== "chat") return [genMessage(job)];
       const partial = job.status === "running" || job.status === "queued" ? partials[job.id] : "";
-      if (partial) return [{ id: job.id + "u", role: "user", text: job.input.prompt }, streaming(job, partial)];
+      const asked: ChatMessage = { id: job.id + "u", role: "user", text: job.input.prompt, ...(job.input.assets?.length ? { files: job.input.assets } : {}) };
+      if (partial) return [asked, streaming(job, partial)];
       const failed = job.status === "failed";
       const split = job.status === "succeeded" ? splitReply(job.result || "") : { text: failed ? job.error || "回复失败" : waiting(job) };
       const reply = { ...split, text: job.status === "succeeded" ? plainReply(split.text) : split.text };
       return [
-        { id: job.id + "u", role: "user", text: job.input.prompt },
+        asked,
         {
           id: job.id + "a",
           role: "assistant",

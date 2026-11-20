@@ -20,7 +20,7 @@ type AgentSession struct {
 	SummaryUntil int64  `json:"summaryUntil,omitempty"` // UnixNano of the last turn summarized
 }
 
-const MaxAgentAssets = 9
+const MaxAgentAssets = 60 // every message can attach more
 
 // AgentSkill is what a project sets out to make. The instruction steers the
 // chat model; every skill ends a reply with the same ```plan contract so the

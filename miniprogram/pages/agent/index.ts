@@ -14,8 +14,9 @@ import { chatModel } from "../../services/chat-model";
 import { streamHandlers } from "./stream";
 import { sessionHandlers, projectView } from "./session";
 import { materialHandlers, materialLabels } from "./materials";
+import type { Labelled } from "./materials";
 import { generateHandlers } from "./generate";
-import { namedMaterials } from "./named";
+
 
 // Agent: one 创作项目 at a time (session.ts). Replies end with a 创作方案
 // card that generates (generate.ts) from the project's materials.
@@ -59,9 +60,8 @@ Page({
     examples: [] as string[], // first messages to try in an empty project
     planPrice: { id: "", text: "" }, // the newest plan's points, on 确认生成
     expanded: {} as Record<string, boolean>, // earlier plans opened to their full card
-    compact: false, // short screens fold the materials strip to one line
-    short: false,
-    compactPicked: false, // the user chose, so a resize does not override
+    attached: [] as Labelled[], // go with the message being written only
+    files: {} as Record<string, { label: string; thumb: string; video: boolean }>, // sent messages' attachments
     art: {} as Record<string, string>,
   },
   timer: 0,
@@ -88,11 +88,7 @@ Page({
       .then(() => this.poll());
   },
   onResize() {
-    const short = wx.getWindowInfo().windowHeight < 700;
-    this.setData({ navBottom: navBottom(), short, ...(this.data.compactPicked ? {} : { compact: short }) });
-  },
-  toggleMaterials() {
-    this.setData({ compact: !this.data.compact, compactPicked: true });
+    this.setData({ navBottom: navBottom() });
   },
   onHide() {
     this.loadVersion++;
@@ -132,12 +128,14 @@ Page({
       error(new Error("上一条还在回复，稍等一下再发"));
       return;
     }
-    if (!this.data.prompt.trim()) {
+    const attached = this.data.attached as Labelled[];
+    // Attachments alone ask for an analysis of them.
+    const submitted = this.data.prompt.trim() ? this.data.prompt : attached.length ? (attached.some((m) => !m.isImage) ? "分析这个视频" : "分析这张图片") : "";
+    if (!submitted) {
       error(new Error("请输入要发送的内容"));
       return;
     }
     this.setData({ busy: true });
-    const submitted = this.data.prompt;
     try {
       const model = await chatModel(this.data.model);
       if (this.destroyed) return;
@@ -147,10 +145,10 @@ Page({
         this.setData({ session: { ...row, assets: [] }, projects: [projectView(row, this.data.skills), ...this.data.projects] });
         await this.load(true); // adopt the new project before its first turn shows
       }
-      // Only the materials this message names (each is read again and slows
-      // the reply); pictures only to models that read them, videos always.
-      const sees = (model.referenceTypes || []).includes("image");
-      const assets = namedMaterials(submitted, this.data.materials, sees);
+      // This message's attachments only. Pictures need a model that reads
+      // them; videos are watched by 视频理解 for any model.
+      if (attached.some((m) => m.isImage) && !(model.referenceTypes || []).includes("image")) throw new Error(`${model.name} 看不到图片，请换成能识图的模型`);
+      const assets = attached.map((m) => m.id);
       const job = await submitInput(
         { kind: "chat", model: model.id, prompt: submitted, resolution: "", ratio: "", duration: 0, assets, sessionId: this.data.session!.id },
         "agent",
@@ -164,7 +162,8 @@ Page({
         bottom: "m" + job.id + "a",
         replying: true,
       });
-      if (this.data.prompt === submitted) this.setData({ prompt: "" });
+      if (this.data.prompt === submitted || !this.data.prompt.trim()) this.setData({ prompt: "" });
+      this.setData({ attached: [] }); // the next message starts without them
       await this.load(true);
       this.poll();
     } catch (e) {
@@ -185,7 +184,8 @@ Page({
       ratio: plan?.ratio || "9:16",
       resolution: "",
       duration: plan?.kind === "image" ? 0 : plan?.duration || 5,
-      assets: this.data.materials.map((x: { id: string }) => x.id),
+      // The materials the plan names (the project may hold many).
+      assets: (this.data.materials as Labelled[]).filter((x) => plan && new RegExp(x.label + "(?!\\d)").test(plan.prompt + plan.shots.map((s) => s.asset).join(" "))).map((x) => x.id),
     });
     openPage(this, { url: "/pages/create/index?kind=" + (plan?.kind || "video") });
   },

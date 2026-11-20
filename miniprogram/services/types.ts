@@ -14,6 +14,7 @@ export interface ChatMessage {
   role: string;
   text: string;
   pending?: boolean;
+  files?: string[]; // a user message's attachments (asset ids)
   streaming?: boolean; // a reply shown as it is written
   planning?: boolean; // …and it has started writing a plan
   failed?: boolean;

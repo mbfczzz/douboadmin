@@ -41,24 +41,6 @@
       <view id="end-a" /><view id="end-b" />
     </view>
   </scroll-view>
-  <view wx:if="{{session&&compact&&materials.length}}" class="material-fold" bindtap="toggleMaterials" hover-class="starter-pressed" aria-role="button" aria-label="展开素材">
-    <block wx:for="{{materials}}" wx:key="id"><image wx:if="{{index<4}}" class="fold-thumb" src="{{item.isImage?item.data.url:item.data.thumbnailUrl}}" mode="aspectFill" /></block>
-    <text class="fold-text">{{materials.length}} 个素材</text>
-    <text class="fold-open">展开 · 添加</text>
-  </view>
-  <scroll-view wx:elif="{{session}}" scroll-x enhanced show-scrollbar="{{false}}" class="material-strip">
-    <view class="material-row">
-      <view wx:for="{{materials}}" wx:key="id" class="material" data-id="{{item.id}}" data-label="{{item.label}}" bindtap="mention" bindlongpress="previewMaterial" aria-role="button" aria-label="{{'引用'+item.label}}">
-        <image class="material-photo" src="{{item.isImage?item.data.url:item.data.thumbnailUrl}}" mode="aspectFill" />
-        <text class="material-label">{{item.label}}</text>
-        <view class="material-remove" data-id="{{item.id}}" catchtap="removeMaterial" catchlongpress="previewMaterial" aria-role="button" aria-label="{{'移除'+item.label}}">×</view>
-      </view>
-      <view class="material add {{uploading?'busy':''}} {{!materials.length&&(session.data.skill==='product'||session.data.skill==='store')?'wanted':''}}" data-kind="image" bindtap="addMaterial" aria-role="button" aria-label="添加图片"><image class="gl gl-18" src="/assets/glyphs/{{uploading?'clock-muted':'image-muted-lg'}}.png" /><text>{{uploading?'上传中':'图片'}}</text></view>
-      <view wx:if="{{!uploading}}" class="material add {{!materials.length&&session.data.skill==='store'?'wanted':''}}" data-kind="video" bindtap="addMaterial" aria-role="button" aria-label="添加视频"><image class="gl gl-18" src="/assets/glyphs/video-muted-lg.png" /><text>视频</text></view>
-      <view wx:if="{{materials.length&&(short||compactPicked)}}" class="material add" bindtap="toggleMaterials" aria-role="button" aria-label="收起素材"><image class="gl gl-18" src="/assets/glyphs/open-muted.png" /><text>收起</text></view>
-    </view>
-  </scroll-view>
-  <text wx:if="{{session&&!sees&&materials.length}}" class="blind-note">当前模型看不到图片，只按「图片1」等名称引用</text>
   <view wx:if="{{current||priceHint}}" class="agent-bar">
     <view wx:if="{{current}}" class="model-pill {{models.length>1?'':'solo'}}" bindtap="openModels" hover-class="{{models.length>1?'icon-pressed':''}}" aria-role="button" aria-label="{{'对话模型：'+current.name+(models.length>1?'，点按切换':'')}}">
       <view class="model-dot"><image wx:if="{{current.icon}}" class="model-dot-img" src="{{current.icon}}" mode="aspectFit" /><t-icon wx:else name="chat" size="12" /></view>
@@ -71,11 +53,24 @@
     <text wx:elif="{{priceHint}}" class="bar-note">{{priceHint}}</text>
   </view>
   <view class="composer {{focus?'is-focus':''}} {{models.length>1||priceHint||session?'has-bar':''}}">
-    <textarea auto-height maxlength="500" focus="{{focus}}" placeholder="{{messages.length?'继续说说要怎么改…':'说说你的创作想法…'}}" placeholder-class="composer-placeholder" value="{{prompt}}" bindinput="input" bindblur="blur" cursor-spacing="24" show-confirm-bar="{{false}}" />
-    <text wx:if="{{prompt.length>400&&!(models.length>1||priceHint)}}" class="composer-count {{prompt.length>=500?'full':''}}">{{prompt.length}}/500</text>
-    <view wx:if="{{replying&&!busy&&!prompt}}" class="send ready" bindtap="stopReply" hover-class="icon-pressed" aria-role="button" aria-label="停止回复"><view class="stop-mark" /></view>
-    <view wx:else class="send {{prompt&&!busy?'ready':''}}" bindtap="send" hover-class="icon-pressed" aria-role="button" aria-label="发送">
-      <t-loading wx:if="{{busy}}" size="18px" /><image wx:else class="gl gl-20" src="/assets/glyphs/send-{{prompt&&!busy?'dark':'muted'}}.png" />
+    <view wx:if="{{attached.length||uploading}}" class="attach-row">
+      <view wx:for="{{attached}}" wx:key="id" class="attach" data-id="{{item.id}}" bindtap="previewMaterial" aria-role="button" aria-label="{{'查看'+item.label}}">
+        <image class="attach-photo" src="{{item.isImage?item.data.url:item.data.thumbnailUrl}}" mode="aspectFill" />
+        <view wx:if="{{!item.isImage}}" class="attach-play"><image class="gl gl-12" src="/assets/glyphs/play-muted.png" /></view>
+        <text class="attach-label">{{item.label}}</text>
+        <view class="attach-remove" data-id="{{item.id}}" catchtap="detach" aria-role="button" aria-label="{{'移除'+item.label}}">×</view>
+      </view>
+      <view wx:if="{{uploading}}" class="attach attach-busy"><t-loading size="16px" /></view>
+    </view>
+    <view class="composer-row">
+      <view class="attach-btn" data-kind="image" bindtap="addMaterial" hover-class="icon-pressed" aria-role="button" aria-label="添加图片"><image class="gl gl-20" src="/assets/glyphs/image-muted.png" /></view>
+      <view class="attach-btn" data-kind="video" bindtap="addMaterial" hover-class="icon-pressed" aria-role="button" aria-label="添加视频"><image class="gl gl-20" src="/assets/glyphs/video-muted.png" /></view>
+      <textarea auto-height maxlength="500" focus="{{focus}}" placeholder="{{attached.length?'说说想怎么分析，或直接发送':messages.length?'继续说说要怎么改…':'说说你的创作想法…'}}" placeholder-class="composer-placeholder" value="{{prompt}}" bindinput="input" bindblur="blur" cursor-spacing="24" show-confirm-bar="{{false}}" />
+      <text wx:if="{{prompt.length>400&&!(models.length>1||priceHint)}}" class="composer-count {{prompt.length>=500?'full':''}}">{{prompt.length}}/500</text>
+      <view wx:if="{{replying&&!busy&&!prompt&&!attached.length}}" class="send ready" bindtap="stopReply" hover-class="icon-pressed" aria-role="button" aria-label="停止回复"><view class="stop-mark" /></view>
+      <view wx:else class="send {{(prompt||attached.length)&&!busy&&!uploading?'ready':''}}" bindtap="send" hover-class="icon-pressed" aria-role="button" aria-label="发送">
+        <t-loading wx:if="{{busy}}" size="18px" /><image wx:else class="gl gl-20" src="/assets/glyphs/send-{{(prompt||attached.length)&&!busy&&!uploading?'dark':'muted'}}.png" />
+      </view>
     </view>
   </view>
 </view>

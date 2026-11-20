@@ -1,5 +1,16 @@
 <view wx:for="{{messages}}" wx:key="id" id="m{{item.id}}" class="message {{item.role}}">
-  <view wx:if="{{item.role==='user'}}" class="bubble"><text selectable>{{item.text}}</text></view>
+  <block wx:if="{{item.role==='user'}}">
+    <view wx:if="{{item.files.length}}" class="sent-files">
+      <block wx:for="{{item.files}}" wx:for-item="fid" wx:key="*this">
+        <view wx:if="{{files[fid]}}" class="attach sent" data-id="{{fid}}" bindtap="previewMaterial" aria-role="button" aria-label="{{'查看'+files[fid].label}}">
+          <image class="attach-photo" src="{{files[fid].thumb}}" mode="aspectFill" />
+          <view wx:if="{{files[fid].video}}" class="attach-play"><image class="gl gl-12" src="/assets/glyphs/play-muted.png" /></view>
+          <text class="attach-label">{{files[fid].label}}</text>
+        </view>
+      </block>
+    </view>
+    <view class="bubble"><text selectable>{{item.text}}</text></view>
+  </block>
   <view wx:elif="{{item.role==='gen'}}" class="gen-card" data-id="{{item.text}}" bindtap="openGen" hover-class="starter-pressed" aria-role="button">
     <view wx:if="{{item.gen.thumb}}" class="gen-thumb gen-done">
       <image class="gen-bg full" src="{{item.gen.thumb}}" mode="aspectFill" />

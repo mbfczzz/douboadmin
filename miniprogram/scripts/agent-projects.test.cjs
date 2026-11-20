@@ -76,31 +76,39 @@ test("确认生成 asks for the points once and adds the generation to the proje
   page.onUnload();
 });
 
-test("materials are numbered per type; tapping one mentions it; chat sends pictures only to models that read them", async () => {
+test("attachments go with their message only; pictures need a model that sees them", async () => {
   const h = harness();
   await h.api.signIn();
   const page = h.page("agent");
   const { materialLabels } = h.service("../pages/agent/materials");
   const labelled = materialLabels(materials);
   assert.deepEqual(labelled.map((m) => m.label), ["图片1", "视频1", "图片2"]);
-  page.setData({ session: { id: "s1", version: 1, data: { title: "店", skill: "store", assets: [] }, assets: [] }, materials: labelled, prompt: "开场用" });
-  page.mention({ currentTarget: { dataset: { label: "图片2" } } });
-  assert.equal(page.data.prompt, "开场用 @图片2 ");
-  const sent = [];
+  const sent = [], toasts = [];
+  h.wx.showToast = (o) => toasts.push(o.title);
   h.wx.request = (o) => {
     const path = o.url.split("/api")[1];
     const ok = (data, statusCode = 200) => o.success({ statusCode, data });
-    if (path === "/config") return ok({ models: [{ id: "ds", kind: "chat", referenceTypes: [] }, { id: "db", kind: "chat", referenceTypes: ["image"] }] });
+    if (path === "/config") return ok({ models: [{ id: "ds", name: "DeepSeek Pro", kind: "chat", referenceTypes: [] }, { id: "db", kind: "chat", referenceTypes: ["image"] }] });
     if (path === "/jobs/quote") return ok({ units: 5, billingEnabled: true, sufficient: true, availableUnits: 100, perToken: true });
-    if (path === "/jobs" && o.method === "POST") return sent.push(o.data), ok({ id: "c" + sent.length, status: "queued", input: o.data }, 202);
+    if (path === "/jobs" && o.method === "POST") return sent.push(o.data), ok({ id: "c" + sent.length, status: "succeeded", result: "好", input: o.data }, 202);
     return ok({ items: [], total: 0 });
   };
+  page.setData({ session: { id: "s1", version: 1, data: { title: "店", skill: "store", assets: [] }, assets: [] }, materials: labelled, model: "ds", prompt: "对比一下", attached: [labelled[0], labelled[2]] });
+  await page.send(); // a text-only model cannot take the pictures
+  assert.equal(sent.length, 0);
+  assert.match(toasts.join(), /DeepSeek Pro 看不到图片/);
+  page.setData({ model: "db" });
+  await page.send();
+  assert.deepEqual(plain(sent[0].assets), ["p1", "p2"]);
+  assert.equal(page.data.attached.length, 0, "the next message starts without them");
+  page.setData({ attached: [labelled[1]], prompt: "" }); // a video alone: analysed (视频理解), any model
   page.setData({ model: "ds" });
   await page.send();
-  page.setData({ model: "db", prompt: "对比图片1和图片2" });
+  assert.deepEqual(plain(sent[1].assets), ["v1"]);
+  assert.equal(sent[1].prompt, "分析这个视频");
+  page.setData({ prompt: "再写个开场" });
   await page.send();
-  assert.deepEqual(plain(sent.map((s) => s.assets)), [[], ["p1", "p2"]]);
-  assert.ok(sent.every((s) => s.sessionId === "s1"));
+  assert.deepEqual(plain(sent[2].assets), [], "nothing attached, nothing sent");
   page.onUnload();
 });
 
@@ -132,7 +140,7 @@ test("the newest plan shows its points on 确认生成, quoted once per plan and
   page.onUnload();
 });
 
-test("a project named after its skill takes its first plan's title; removing a material asks first", async () => {
+test("a project named after its skill takes its first plan's title; an attachment can be taken off", async () => {
   const h = harness();
   await h.api.signIn();
   const page = h.page("agent");
@@ -152,18 +160,17 @@ test("a project named after its skill takes its first plan's title; removing a m
   assert.equal(page.data.projects[0].data.title, "春日咖啡");
   await page.autoTitle(); // renamed already: no second request
   assert.equal(puts.length, 1);
-  page.setData({ materials: h.service("../pages/agent/materials").materialLabels(materials) });
-  await page.removeMaterial({ currentTarget: { dataset: { id: "p1" } } });
-  assert.equal(modals, 1);
-  assert.equal(puts.length, 1, "declined: nothing removed");
-  answer = true;
-  await page.removeMaterial({ currentTarget: { dataset: { id: "p1" } } });
-  assert.deepEqual(plain(puts[1].assets), ["v1", "p2"]);
-  assert.deepEqual(page.data.materials.map((m) => m.label), ["视频1", "图片1"]);
+  // × on a fresh attachment takes it off the message and the project.
+  const labelled = h.service("../pages/agent/materials").materialLabels(materials);
+  page.setData({ materials: labelled, attached: [labelled[2]] });
+  await page.detach({ currentTarget: { dataset: { id: "p2" } } });
+  assert.deepEqual(plain(puts[1].assets), ["p1", "v1"]);
+  assert.equal(page.data.attached.length, 0);
+  assert.equal(modals, 0);
   page.onUnload();
 });
 
-test("several pictures upload in one pick; a model that cannot see pictures says so", async () => {
+test("several pictures upload in one pick and attach to the message", async () => {
   const h = harness();
   await h.api.signIn();
   const page = h.page("agent");
@@ -177,12 +184,11 @@ test("several pictures upload in one pick; a model that cannot see pictures says
   await page.addMaterial({ currentTarget: { dataset: { kind: "image" } } });
   assert.equal(picked, 9);
   assert.deepEqual(plain(puts[0].assets), ["u1", "u2"]);
-  const wxml = require("node:fs").readFileSync("pages/agent/index.wxml", "utf8");
-  assert.match(wxml, /wx:if="\{\{session&&!sees&&materials\.length\}\}" class="blind-note"/);
+  assert.deepEqual(plain(page.data.attached.map((m) => m.label)), ["图片1", "图片2"], "attached to the message being written");
   page.onUnload();
 });
 
-test("an earlier plan opens and can be used; short screens fold the materials", async () => {
+test("an earlier plan opens and can be used", async () => {
   const h = harness();
   await h.api.signIn();
   const page = h.page("agent");
@@ -207,13 +213,6 @@ test("an earlier plan opens and can be used; short screens fold the materials", 
   page.togglePlan({ currentTarget: { dataset: { id: "old" } } });
   assert.equal(page.data.expanded.old, false);
 
-  h.wx.getWindowInfo = () => ({ windowHeight: 640, windowWidth: 320, statusBarHeight: 20 });
-  page.onResize();
-  assert.equal(page.data.compact, true);
-  page.toggleMaterials();
-  h.wx.getWindowInfo = () => ({ windowHeight: 640, windowWidth: 320, statusBarHeight: 20 });
-  page.onResize(); // the user's choice survives a resize
-  assert.equal(page.data.compact, false);
   page.onUnload();
 });
 

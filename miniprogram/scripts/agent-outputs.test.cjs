@@ -86,13 +86,11 @@ test("plan mentions are renumbered to the materials actually sent", () => {
   assert.equal(plain(sentMaterials("@图片1 和 @图片10", assets)).assets.length, 1, "图片10 is not 图片1");
 });
 
-test("a message sends only the pictures it names; a waiting reply shows its seconds", () => {
-  const { namedPictures } = h.service("../pages/agent/named");
-  const m = [{ id: "a", isImage: true, label: "图片1" }, { id: "v", isImage: false, label: "视频1" }, { id: "b", isImage: true, label: "图片2" }];
-  assert.deepEqual(plain(namedPictures("分析图片2", m)), ["b"]);
-  assert.deepEqual(plain(namedPictures("@图片1 和 图片 2 对比", m)), ["a", "b"]);
-  assert.deepEqual(plain(namedPictures("写个开场", m)), []);
-  assert.deepEqual(plain(namedPictures("分析这张图", m.slice(0, 2))), ["a"]); // the only picture
+test("a waiting reply shows its seconds; a sent message keeps its attachments", () => {
+  const [asked] = plain(chatMessages([{ id: "f", status: "succeeded", result: "好", input: { kind: "chat", prompt: "分析", assets: ["p3"] } }]));
+  assert.deepEqual(asked.files, ["p3"]);
+  const [plainAsk] = plain(chatMessages([{ id: "n", status: "succeeded", result: "好", input: { kind: "chat", prompt: "你好", assets: [] } }]));
+  assert.equal(plainAsk.files, undefined);
   const [, waiting] = chatMessages([{ id: "w", status: "running", createdAt: new Date(Date.now() - 12000).toISOString(), input: { kind: "chat", prompt: "做" } }]);
   assert.equal(waiting.text, "正在构思… 已 12 秒");
 });
@@ -117,16 +115,7 @@ test("plan revisions (缩短到 10 秒…) are offered only under a plan", () =>
   assert.match(wxml, /index===messages\.length-1&&!busy&&!item\.streaming&&item\.plan\}\}" scroll-x class="follow-ups"/);
 });
 
-test("videos a message names go along (watched by 视频理解); pictures only to models that see", () => {
-  const { namedMaterials } = h.service("../pages/agent/named");
-  const m = [
-    { id: "p1", isImage: true, label: "图片1" },
-    { id: "v1", isImage: false, label: "视频1" },
-  ];
-  assert.deepEqual(plain(namedMaterials("分析这个视频", m, true)), ["v1"]); // the only video
-  assert.deepEqual(plain(namedMaterials("图片1 配 视频1 的节奏", m, false)), ["v1"]); // a text-only model gets no picture
-  assert.deepEqual(plain(namedMaterials("图片1 配 视频1 的节奏", m, true)), ["p1", "v1"]);
-  assert.deepEqual(plain(namedMaterials("写个开场", m, true)), []);
-  const [, w] = chatMessages([{ id: "w", status: "running", stage: "正在观看视频1…", createdAt: new Date().toISOString(), input: { kind: "chat", prompt: "分析视频1" } }]);
+test("waiting shows what the server is doing (正在观看视频1…)", () => {
+  const [, w] = chatMessages([{ id: "w", status: "running", stage: "正在观看视频1…", createdAt: new Date().toISOString(), input: { kind: "chat", prompt: "分析" } }]);
   assert.equal(w.text, "正在观看视频1…");
 });
