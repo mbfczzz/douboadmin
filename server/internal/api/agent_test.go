@@ -20,6 +20,12 @@ func TestAgentProjectsBelongToTheirOwnerAndScopeJobs(t *testing.T) {
 	chat := core.Model{ID: "chat", Key: "chat-fixture", Name: "对话", Kind: "chat", Published: true, Available: true}
 	_, _ = a.Store.Put(ctx, "models", core.Record{ID: "chat", Data: core.Data(chat)}, 0)
 
+	if w := call(a, "GET", "/api/agent/skills", "", "", nil); w.Code != 200 || !json.Valid(w.Body.Bytes()) {
+		t.Fatal("skills are shown before sign-in", w.Code)
+	}
+	if w := call(a, "GET", "/api/agent/sessions", "", "", nil); w.Code != 401 {
+		t.Fatal("projects need sign-in", w.Code)
+	}
 	if w := call(a, "POST", "/api/agent/sessions", one, "", map[string]string{"skill": "nope"}); w.Code != 400 {
 		t.Fatal("unknown skill", w.Code)
 	}

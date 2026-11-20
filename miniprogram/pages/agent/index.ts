@@ -32,6 +32,8 @@ Page({
     session: null as SessionDetail | null,
     projects: [] as ProjectView[],
     projectsOpen: false,
+    projectsReady: false, // projects and skills have loaded once
+    projectsError: "",
     skills: [] as Skill[],
     materials: [] as ReturnType<typeof materialLabels>,
     thumbs: {} as Record<string, string>, // "图片1" -> its picture, for plan cards
@@ -69,7 +71,7 @@ Page({
     tab(this, 3);
     void this.loadModels().catch(() => undefined);
     void this.loadSession()
-      .catch(() => undefined)
+      .catch((e: Error) => !this.destroyed && this.setData({ projectsError: e.message || "加载失败" }))
       .then(() => this.load())
       .then(() => this.poll());
   },

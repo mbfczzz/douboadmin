@@ -14,6 +14,7 @@
         <button class="biz-action link-go" loading="{{busy}}" disabled="{{busy}}" bindtap="extract">提取文案</button>
       </view>
     </view>
+    <page-loading wx:if="{{busy&&!video&&item.key==='link'}}" show mode="inline" text="正在读取视频文案…" />
     <view wx:if="{{video&&item.key==='link'}}" class="biz-card result-card">
       <text class="biz-heading">{{video.title}}</text>
       <text class="biz-small">{{video.author}}</text>

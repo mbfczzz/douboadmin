@@ -13,7 +13,7 @@
     <view class="skeleton skel-bubble mine" /><view class="skeleton skel-bubble" /><view class="skeleton skel-bubble short" />
   </view>
   <scroll-view wx:elif="{{!messages.length}}" scroll-y class="chat-scroll"><view class="agent-empty">
-    <view class="agent-hello">
+    <view wx:if="{{session||projectsReady||projectsError}}" class="agent-hello">
       <image wx:if="{{session&&art[session.data.skill]}}" class="skill-hero" src="{{art[session.data.skill]}}" mode="aspectFill" />
       <view wx:else class="agent-mark"><image class="gl gl-30" src="/assets/glyphs/ai-pen-dark.png" /></view>
       <text class="headline">{{session?'说说这次想做什么':'选一个开始创作'}}</text>
@@ -22,7 +22,9 @@
     <view wx:if="{{session&&examples.length}}" class="example-list">
       <view wx:for="{{examples}}" wx:key="*this" class="example-chip" data-value="{{item}}" bindtap="quick" hover-class="starter-pressed" aria-role="button"><image class="gl gl-14" src="/assets/glyphs/rewrite.png" /><text>{{item}}</text></view>
     </view>
-    <view wx:if="{{!session}}" class="starters">
+    <page-loading wx:if="{{!session&&!projectsReady&&!projectsError}}" show mode="inline" text="正在准备创作项目…" />
+    <view wx:elif="{{!session&&projectsError}}" class="error-box" bindtap="retryProjects">{{projectsError}} · 点击重试</view>
+    <view wx:elif="{{!session}}" class="starters">
       <view wx:for="{{skills}}" wx:key="id" class="starter" data-id="{{item.id}}" bindtap="newProject" hover-class="starter-pressed" aria-role="button">
         <image wx:if="{{art[item.id]}}" class="starter-photo" src="{{art[item.id]}}" mode="aspectFill" lazy-load /><view wx:else class="source-glyph starter-glyph glyph-video"><t-icon name="{{item.icon}}" size="20" /></view>
         <view class="starter-copy"><text class="starter-title">{{item.name}}</text><text class="starter-hint">{{item.hint}}</text></view>

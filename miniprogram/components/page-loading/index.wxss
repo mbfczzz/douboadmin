@@ -9,6 +9,11 @@
   opacity: 0;
   animation: pl-in 200ms ease 250ms both; /* a fast load never shows it */
 }
+/* inline: the same, sized to sit inside a card or under a page heading. */
+.page-loading.inline {
+  min-height: 0;
+  padding: 40px 0;
+}
 /* hint: a small floating line that takes no room, so the skeleton under
    it does not move; it appears only once loading has been slow. */
 .page-loading.hint {

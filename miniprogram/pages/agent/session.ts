@@ -35,15 +35,21 @@ type Page = {
   setData(data: Record<string, unknown>): void;
   load(force?: boolean): Promise<void>;
   showSession(id: string): Promise<void>;
+  loadSession(): Promise<void>;
   titling?: boolean;
 };
 
 export const sessionHandlers = {
   // The open project (or none: the skill picker), with its materials signed.
   async loadSession(this: Page) {
-    if (!hasSession()) return this.setData({ session: null });
+    if (!hasSession()) {
+      const all = await skills(); // signed out: the picker still shows what can be made
+      if (!this.destroyed) this.setData({ session: null, skills: all, projectsReady: true, projectsError: "" });
+      return;
+    }
     const [list, all] = await Promise.all([sessions(), skills()]);
     if (this.destroyed) return;
+    this.setData({ projectsReady: true, projectsError: "" });
     const saved = remembered();
     // "new": the user went back to the skill picker and stays there.
     const mine = saved.user === sessionUserId();
@@ -66,6 +72,13 @@ export const sessionHandlers = {
     await this.showSession("");
     this.setData({ messages: [], prompt: "", projectsOpen: false });
     await this.load(true);
+  },
+  // A first load that failed: the picker offers to try again.
+  retryProjects(this: Page) {
+    this.setData({ projectsError: "" });
+    void this.loadSession()
+      .then(() => this.load(true))
+      .catch((e: Error) => !this.destroyed && this.setData({ projectsError: e.message || "加载失败" }));
   },
   openProjects(this: Page) {
     this.setData({ projectsOpen: true });

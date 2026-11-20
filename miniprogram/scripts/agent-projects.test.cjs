@@ -242,3 +242,23 @@ test("新建 goes back to the skill picker and stays there on the next visit", a
   assert.equal(page.data.session.id, "s1");
   page.onUnload();
 });
+
+test("signed out, the picker still lists the skills; a failed first load can be retried", async () => {
+  const h = harness();
+  const page = h.page("agent");
+  let fail = true;
+  h.wx.request = (o) => {
+    const path = o.url.split("/api")[1];
+    if (path === "/agent/skills") return fail ? o.success({ statusCode: 500, data: { error: "服务繁忙" } }) : o.success({ statusCode: 200, data: [{ id: "store", name: "探店视频" }] });
+    o.success({ statusCode: 200, data: [] });
+  };
+  await page.loadSession().catch((e) => page.setData({ projectsError: e.message }));
+  assert.ok(page.data.projectsError);
+  fail = false;
+  page.retryProjects();
+  await new Promise((r) => setTimeout(r, 20));
+  assert.equal(page.data.projectsReady, true);
+  assert.equal(page.data.projectsError, "");
+  assert.equal(page.data.skills[0].name, "探店视频");
+  page.onUnload();
+});

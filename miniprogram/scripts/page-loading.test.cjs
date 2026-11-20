@@ -24,3 +24,14 @@ test("list skeletons carry the slow-network line; both appear late", () => {
   assert.match(css, /\.page-loading\.hint \{[^}]*position: fixed[^}]*animation: pl-in 300ms ease 4s both/); // takes no room, shows when slow
   assert.match(read("app.json"), /"page-loading": "\/components\/page-loading\/index"/);
 });
+
+test("sign-in, activation, sharing, extraction and the Agent picker wait visibly too", () => {
+  assert.match(read("pages/activate/index.wxml"), /<page-loading wx:if="\{\{loading&&!status&&!loadError\}\}" show mode="inline"[^>]*\/>\s*<block wx:else>/);
+  assert.match(read("pages/login/index.wxml"), /<page-loading wx:if="\{\{loading\}\}" show mode="inline" text="正在连接微信…"/);
+  assert.match(read("pages/share/index.wxml"), /<page-loading show="\{\{!job&&!needsLogin&&!loadError\}\}"/);
+  assert.match(read("pages/extract/index.wxml"), /<page-loading wx:if="\{\{busy&&!video&&item\.key==='link'\}\}"/);
+  assert.match(read("components/featured-works/index.wxml"), /<page-loading show mode="hint" \/>/);
+  const agent = read("pages/agent/index.wxml");
+  assert.match(agent, /<page-loading wx:if="\{\{!session&&!projectsReady&&!projectsError\}\}"/);
+  assert.match(agent, /wx:elif="\{\{!session&&projectsError\}\}" class="error-box" bindtap="retryProjects"/);
+});

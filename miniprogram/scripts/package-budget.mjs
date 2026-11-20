@@ -228,7 +228,10 @@ console.log(
 // Loading page for slow first loads (components/page-loading) on eight
 // detail pages and hot video search, slow-network line on list skeletons:
 // 962,454 B. 938 -> 940 KiB.
-const budget = 940 * 1024;
+// Loading on the remaining slow waits: 授权开通, 登录, 分享作品, 文案提取,
+// 优秀作品, the Agent picker (with retry; skills listed before sign-in):
+// 964,151 B. 940 -> 942 KiB.
+const budget = 942 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

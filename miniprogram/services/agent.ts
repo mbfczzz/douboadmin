@@ -9,7 +9,8 @@ export type SessionDetail = SessionRow & { assets: Row<Asset>[] };
 
 let skillCache: Skill[] | undefined;
 export async function skills(): Promise<Skill[]> {
-  if (!skillCache) skillCache = await request<Skill[]>("/agent/skills");
+  // Public: listing what can be made must not ask a signed-out user to log in.
+  if (!skillCache) skillCache = await request<Skill[]>("/agent/skills", "GET", undefined, undefined, false);
   return skillCache;
 }
 export const sessions = () => request<SessionRow[]>("/agent/sessions");

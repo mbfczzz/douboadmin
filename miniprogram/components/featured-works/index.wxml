@@ -1,7 +1,7 @@
 <view class="featured-page">
   <view class="featured-filters"><view wx:for="{{filters}}" wx:key="key" class="featured-tab {{kind===item.key?'active':''}}" data-kind="{{item.key}}" bindtap="choose">{{item.text}}</view></view>
   <view wx:if="{{loadError}}" class="error-box" bindtap="load">{{loadError}} · 点击重试</view>
-  <view wx:elif="{{loading&&!works.length}}" class="featured-grid" aria-label="正在加载优秀作品"><view wx:for="{{[1,2,3,4]}}" wx:key="*this" class="featured-card"><view class="featured-cover skeleton" /></view></view>
+  <view wx:elif="{{loading&&!works.length}}" class="featured-grid" aria-label="正在加载优秀作品"><page-loading show mode="hint" /><view wx:for="{{[1,2,3,4]}}" wx:key="*this" class="featured-card"><view class="featured-cover skeleton" /></view></view>
   <view wx:elif="{{!works.length}}" class="empty"><t-icon name="star" size="32" /><text>暂无优秀作品</text></view>
   <view class="featured-grid">
     <view class="featured-card" wx:for="{{works}}" wx:key="id" data-id="{{item.id}}" bindtap="open" hover-class="card-pressed" aria-role="button" aria-label="{{'查看'+item.title}}">

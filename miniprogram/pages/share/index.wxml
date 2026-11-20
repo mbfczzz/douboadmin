@@ -3,6 +3,7 @@
   ><view wx:if="{{needsLogin}}" class="biz-empty"
     ><image class="empty-photo" src="/assets/photos/empty-login.jpg" mode="aspectFill" aria-hidden="true" /><text>登录后分享自己的作品</text><text class="empty-link" bindtap="signIn">去登录 ›</text></view
   ><view wx:if="{{loadError}}" class="biz-error">{{loadError}}</view
+  ><page-loading show="{{!job&&!needsLogin&&!loadError}}" text="正在打开作品…"></page-loading
   ><block wx:if="{{job}}"
     ><view class="biz-card"
       ><result-gallery

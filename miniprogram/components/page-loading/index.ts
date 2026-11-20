@@ -1,6 +1,6 @@
 // Loading for slow first loads. mode "page": a centred spinner and what is
 // being loaded, in place of a page that would otherwise show empty boxes and
-// disabled buttons. mode "hint": only the slow-network line, under a list's
+// disabled buttons ("inline": the same, sized for a card or under a heading). mode "hint": only the slow-network line, under a list's
 // skeleton. Both appear late on purpose (CSS delays, no timers): nothing
 // flashes on a fast network, and the slow line shows after a few seconds.
 Component({
