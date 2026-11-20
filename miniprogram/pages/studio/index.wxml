@@ -19,7 +19,6 @@
   <view class="studio-tools">
     <block wx:for="{{tools}}" wx:key="key">
       <view
-        wx:if="{{moreOpen||index<firstTools}}"
         class="studio-tool"
         data-key="{{item.key}}"
         bindtap="open"
@@ -30,10 +29,6 @@
         <text>{{item.title}}</text>
       </view>
     </block>
-    <view class="studio-tool" bindtap="toggleMore" hover-class="tool-pressed" aria-role="button">
-      <view class="tool-icon tool-more {{moreOpen?'open':''}}"><image wx:if="{{art.more}}" src="{{art.more}}" mode="aspectFill" aria-hidden="true" /></view>
-      <text>{{moreOpen?'收起':'展开'}}</text>
-    </view>
   </view>
   <block wx:if="{{feedState!=='off'}}">
     <scroll-view wx:if="{{keywords.length}}" scroll-x class="studio-chips" enhanced show-scrollbar="{{false}}">

@@ -1,7 +1,7 @@
 import { tab, openPage, openTab, login, error, isNavigating } from "../../utils/api";
 import { showArt } from "../../utils/ui-art";
 import { pullRefresh } from "../../utils/refresh";
-import { CARDS, TOOLS, FIRST_TOOLS, ENTRIES, entryArt } from "./entries";
+import { CARDS, TOOLS, ENTRIES, entryArt } from "./entries";
 import { loadKeywords, loadVideos, cancelFeed } from "./feed";
 import type { FeedVideo } from "./feed";
 
@@ -11,8 +11,6 @@ Page({
   data: {
     cards: CARDS,
     tools: TOOLS,
-    firstTools: FIRST_TOOLS,
-    moreOpen: false,
     art: {} as Record<string, string>,
     feedState: "ready",
     keywords: [] as string[],
@@ -47,9 +45,6 @@ Page({
     if (!entry || isNavigating(this)) return;
     if (entry.tab) openTab(this, entry.url);
     else openPage(this, { url: entry.url });
-  },
-  toggleMore() {
-    this.setData({ moreOpen: !this.data.moreOpen });
   },
   choose(e: WechatMiniprogram.TouchEvent) {
     const keyword = e.currentTarget.dataset.word as string;

@@ -4,13 +4,13 @@ const { harness } = require("./harness.cjs");
 
 const settle = () => new Promise((resolve) => setTimeout(resolve, 0));
 
-test("the feature grid shows nine tiles before 展开 and every tile has a page", () => {
+test("the feature grid shows every tile (no 展开) and every tile has a page", () => {
   const h = harness(), page = h.page("studio");
-  const TOOLS = page.data.tools, FIRST_TOOLS = page.data.firstTools;
-  assert.equal(FIRST_TOOLS, 9);
-  assert.deepEqual(Array.from(TOOLS.slice(0, 9), (t) => t.title), ["剧情带货", "探店视频", "数字人", "图文成片", "视频唱歌", "视频二创", "文案提取", "AI证件照", "视频去字幕"]);
-  page.toggleMore();
-  assert.equal(page.data.moreOpen, true);
+  const TOOLS = page.data.tools;
+  assert.deepEqual(Array.from(TOOLS, (t) => t.title), ["剧情带货", "探店视频", "数字人", "图文成片", "视频唱歌", "视频二创", "文案提取", "AI证件照", "漫画推文", "我的作品", "生成记录"]);
+  assert.equal(page.toggleMore, undefined);
+  const wxml = require("node:fs").readFileSync("pages/studio/index.wxml", "utf8");
+  assert.doesNotMatch(wxml, /展开|收起|moreOpen/);
   for (const tool of TOOLS.filter((t) => t.url.startsWith("/pages/feature/"))) {
     const feature = harness().page("feature");
     feature.onLoad({ key: tool.url.split("key=")[1] });

@@ -57,11 +57,7 @@ const NAMES = {
   toolRemix: "tool-remix",
   toolExtract: "tool-extract",
   toolIdphoto: "tool-idphoto",
-  toolDesub: "tool-desub",
-  toolMore: "tool-more",
   toolComic: "tool-comic",
-  toolHot: "tool-hot",
-  toolLibrary: "tool-library",
   toolWorks: "tool-works",
   toolTasks: "tool-tasks",
   // 图文成片 / 漫画推文 picture-style cards
