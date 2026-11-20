@@ -31,7 +31,7 @@ function genMessage(job: Job): ChatMessage {
 
 // A reply still being written: its prose so far; a plan block being written
 // shows as "正在整理方案" until the whole reply arrives as a card.
-function streaming(job: Job, partial: string): ChatMessage {
+export function streaming(job: Job, partial: string): ChatMessage {
   const fence = partial.indexOf("```");
   const text = plainReply(fence >= 0 ? partial.slice(0, fence) : partial);
   return { id: job.id + "a", role: "assistant", text, prompt: job.input.prompt, lines: scriptLines(text), pending: true, streaming: true, ...(fence >= 0 ? { planning: true } : {}) };

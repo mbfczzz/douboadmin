@@ -237,7 +237,8 @@ console.log(
 // Chunked reply stream (UTF-8 piece decoder, SSE reader) and 停止回复: 977,488 B. 949 -> 955 KiB.
 // One chat-model picker (DeepSeek Flash by default) for Agent and AI写剧本: 978,518 B. 955 -> 956 KiB.
 // Model picker: pill with the model's logo, and a sheet of model cards (description, picture / text tags, price per turn): 983,698 B. 956 -> 961 KiB.
-const budget = 961 * 1024;
+// Smooth streaming (replies typed out evenly; only the reply being written re-renders): 985,603 B. 961 -> 963 KiB.
+const budget = 963 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

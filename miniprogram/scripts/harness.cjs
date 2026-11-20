@@ -95,7 +95,12 @@ function harness(timers = {}) {
       ...capturedPage,
       data: JSON.parse(JSON.stringify(capturedPage.data)),
       setData(v) {
-        Object.assign(this.data, v);
+        for (const [k, value] of Object.entries(v)) {
+          const keys = k.match(/[^.[\]]+/g);
+          let at = this.data;
+          for (const key of keys.slice(0, -1)) at = at[key];
+          at[keys[keys.length - 1]] = value;
+        }
       },
     };
   }

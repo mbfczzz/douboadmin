@@ -48,7 +48,10 @@ test("a streamed reply grows with each event and ends with the whole reply", asy
   // byte 20 falls inside 的 (3 bytes): held until the rest arrives
   task().listeners.forEach((f) => f({ data: raw.buffer.slice(raw.byteOffset, raw.byteOffset + 20) }));
   task().listeners.forEach((f) => f({ data: raw.buffer.slice(raw.byteOffset + 20, raw.byteOffset + raw.length) }));
+  const seen = new Set();
+  for (let i = 0; i < 40 && page.data.messages[1].text !== "好的，开场先推门"; i++) await wait(20), seen.add(page.data.messages[1].text);
   assert.equal(page.data.messages[1].text, "好的，开场先推门");
+  assert.ok(seen.size > 2, "typed out in steps, not all at once");
   assert.equal(page.data.messages[1].streaming, true);
   assert.equal(page.data.replying, true);
   status.value = "succeeded";

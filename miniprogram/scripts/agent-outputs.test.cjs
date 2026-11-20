@@ -111,3 +111,8 @@ test("a reply being written shows its prose so far, then a plan placeholder", ()
   const [, done] = plain(chatMessages([{ ...job, status: "succeeded", result: "好的" }], { s: "好" }));
   assert.equal(done.streaming, undefined); // the finished reply replaces the partial
 });
+
+test("plan revisions (缩短到 10 秒…) are offered only under a plan", () => {
+  const wxml = require("node:fs").readFileSync("pages/agent/parts/messages.wxml", "utf8");
+  assert.match(wxml, /index===messages\.length-1&&!busy&&!item\.streaming&&item\.plan\}\}" scroll-x class="follow-ups"/);
+});

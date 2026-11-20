@@ -105,7 +105,7 @@ func (a *Server) jobStream(w http.ResponseWriter, r *http.Request) {
 			send(map[string]bool{"again": true})
 			return
 		}
-		wait := time.NewTimer(300 * time.Millisecond)
+		wait := time.NewTimer(200 * time.Millisecond)
 		select {
 		case <-ctx.Done():
 			wait.Stop()

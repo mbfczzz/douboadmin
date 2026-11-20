@@ -10,7 +10,7 @@ import (
 
 // PartialEvery is how often a reply being written is saved for readers in
 // other processes; readers in this one get every change through Turns.
-var PartialEvery = 400 * time.Millisecond
+var PartialEvery = 200 * time.Millisecond
 
 var errTurnTaken = errors.New("another worker owns this chat turn")
 

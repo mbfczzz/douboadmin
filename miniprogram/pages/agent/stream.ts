@@ -1,7 +1,7 @@
 import { request } from "../../services/request";
 import { openReplyStream } from "../../services/chat-stream";
 import { error } from "../../utils/api";
-import { chatMessages } from "../../utils/chat";
+import { chatMessages, streaming } from "../../utils/chat";
 import type { ChatMessage } from "../../utils/chat";
 import type { Job } from "../../services/types";
 
@@ -15,6 +15,7 @@ type Page = {
   streamTimer: number;
   streamClose?: () => void;
   streamEnded?: { id: string; at: number };
+  typer?: { id: string; target: string; shown: number; timer: number; scrolled: number };
   follow: boolean;
   destroyed: boolean;
   setData(data: Record<string, unknown>): void;
@@ -27,16 +28,57 @@ export const STREAM_MS = 500;
 const writing = (j: Job) => j.input.kind === "chat" && /queued|running/.test(j.status);
 export const replying = (messages: ChatMessage[]) => messages.some((m) => m.role === "assistant" && m.pending);
 
+// Text arrives in bursts (network, server saves); it is typed out evenly
+// every 50 ms instead, faster when more is waiting, so it reads smoothly.
+const TYPE_MS = 50;
+
 function show(page: Page, id: string, text: string) {
-  if (page.streamId !== id || !text || text === page.partials[id]) return;
+  if (page.streamId !== id || !text) return;
+  const t = page.typer?.id === id ? page.typer : (page.typer = { id, target: "", shown: (page.partials[id] || "").length, timer: 0, scrolled: 0 });
+  if (text.length < t.shown) t.shown = 0; // a reconnect resent a different start
+  t.target = text;
+  if (!t.timer) t.timer = setTimeout(() => type(page), TYPE_MS) as unknown as number;
+}
+
+// One step, then the next while text is waiting (idle once caught up).
+function type(page: Page) {
+  const t = page.typer;
+  if (!t || page.destroyed) return stopTyping(page);
+  t.timer = 0;
+  const backlog = t.target.length - t.shown;
+  if (backlog <= 0) return;
+  t.shown += Math.max(1, Math.ceil(backlog / 6)); // a burst drains in about 0.3 s
+  render(page, t.id, t.target.slice(0, t.shown));
+  if (t.shown < t.target.length) t.timer = setTimeout(() => type(page), TYPE_MS) as unknown as number;
+}
+
+// Only the reply being written changes; the rest of the conversation stays.
+function render(page: Page, id: string, text: string) {
   page.partials = { ...page.partials, [id]: text };
-  const messages = chatMessages(page.history, page.partials);
-  // Keep the newest words in view unless the reader scrolled up.
-  const bottom = page.data.bottom === "end-a" ? "end-b" : "end-a";
-  page.setData(page.follow ? { messages, bottom, replying: true } : { messages, replying: true });
+  const job = page.history.find((j) => j.id === id);
+  const at = page.data.messages.findIndex((m) => m.id === id + "a");
+  const update: Record<string, unknown> = { replying: true };
+  if (job && at >= 0 && page.data.messages[at].pending) update["messages[" + at + "]"] = streaming(job, text);
+  else update.messages = chatMessages(page.history, page.partials);
+  // Keep the newest words in view unless the reader scrolled up (not on
+  // every tick: each scroll animates).
+  const t = page.typer!;
+  if (page.follow && Date.now() - t.scrolled > 300) {
+    t.scrolled = Date.now();
+    update.bottom = page.data.bottom === "end-a" ? "end-b" : "end-a";
+  }
+  page.setData(update);
+}
+
+function stopTyping(page: Page) {
+  if (page.typer?.timer) clearTimeout(page.typer.timer);
+  page.typer = undefined;
 }
 
 function ended(page: Page, id: string) {
+  const t = page.typer;
+  if (t?.id === id && t.shown < t.target.length) render(page, id, t.target); // the rest at once
+  stopTyping(page);
   page.streamId = "";
   page.streamEnded = { id, at: Date.now() };
   void page.load(true); // the whole reply (and its plan card)
@@ -86,6 +128,7 @@ export const streamHandlers = {
     else poll(this, id);
   },
   stopStream(this: Page) {
+    stopTyping(this);
     this.streamId = "";
     clearTimeout(this.streamTimer);
     this.streamClose?.();
