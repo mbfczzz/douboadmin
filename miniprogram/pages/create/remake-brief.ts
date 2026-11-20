@@ -1,4 +1,4 @@
-import type { RemakeSource } from "../../services/hot-import";
+import type { RemakeSource, Swap } from "../../services/hot-import";
 import type { Breakdown } from "../../services/hot-breakdown";
 
 // The chat model's brief for 一键复刻 (after Clipcat's replicate): the video
@@ -6,6 +6,12 @@ import type { Breakdown } from "../../services/hot-breakdown";
 // rewritten as a time-coded description for the reference video, with the
 // user's own pictures standing in for the original product or person.
 const second = (n: number) => Math.round(n * 10) / 10;
+
+// "把【主角（长发女生）】换成@图片1中的人物；…": each picture names what it replaces.
+export function swapText(swaps: Swap[]) {
+  const what = (s: Swap) => (s.kind === "person" ? "人物" : s.kind === "product" ? "商品" : "主体");
+  return swaps.map((s) => `把【${s.name}${s.look ? "（" + s.look + "）" : ""}】换成${s.ref}中的${what(s)}`).join("；");
+}
 
 function shotsText(b: Breakdown) {
   return b.shots
@@ -36,9 +42,11 @@ function originalText(source: RemakeSource) {
 export function remakeInstruction(source: RemakeSource, seconds: number, limit: number) {
   const images = source.images || 0;
   const refs = Array.from({ length: images }, (_, i) => "@图片" + (i + 1)).join("、");
-  const swap = refs
-    ? `用户提供了 ${refs}：把原视频里的商品或人物换成这些图片中的商品或人物，外观以图片为准，动作和镜头保持原样；描述中用 ${refs} 指代它们。`
-    : "主体与原视频同类，但不要照搬原作者的人物形象和品牌标识。";
+  const swap = source.swaps?.length
+    ? `用户指定了替换：${swapText(source.swaps)}，外观以图片为准，动作和镜头保持原样；其他主体保持原视频的样子（不要照搬原作者的人物形象和品牌标识）。`
+    : refs
+      ? `用户提供了 ${refs}：把原视频里的商品或人物换成这些图片中的商品或人物，外观以图片为准，动作和镜头保持原样；描述中用 ${refs} 指代它们。`
+      : "主体与原视频同类，但不要照搬原作者的人物形象和品牌标识。";
   const from = source.breakdown ? "下面是视频理解模型对原视频的拆解" : "下面是原视频的文案信息（未能拆解画面，请据此合理推断）";
   return `你是短视频复刻编剧。参考视频已作为 @视频1 提供。${from}：\n${originalText(source)}\n\n请写一段可直接用于 AI 视频生成的复刻描述，生成时长为 ${seconds} 秒：
 1. 保留原视频的开头钩子、结构、节奏和卖点；原视频比 ${seconds} 秒长时，合并或精简镜头，开头钩子必须保留在前 3 秒。
@@ -54,7 +62,9 @@ export function remakeInstruction(source: RemakeSource, seconds: number, limit: 
 export function remakePrompt(source: RemakeSource, seconds: number, limit: number) {
   const images = source.images || 0;
   const refs = Array.from({ length: images }, (_, i) => "@图片" + (i + 1)).join("、");
-  const swap = refs ? `，并把原视频中的商品或人物换成${refs}中的商品或人物，外观以图片为准` : "";
+  const swap = source.swaps?.length
+    ? `。替换：${swapText(source.swaps)}，外观以图片为准，其他主体保持原样`
+    : refs ? `，并把原视频中的商品或人物换成${refs}中的商品或人物，外观以图片为准` : "";
   const b = source.breakdown;
   if (!b || !b.shots.length) return cut(`参考@视频1的画面内容、镜头运动和节奏，复刻一条同款视频${swap}。视频主题：${source.title}`, limit);
   const length = source.duration > 0 ? source.duration : b.shots[b.shots.length - 1].end;

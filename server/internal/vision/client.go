@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -17,11 +18,14 @@ import (
 type Client struct {
 	BaseURL, Key, Model string
 	HTTP                *http.Client
+	// Fallback watches when this model cannot be used (not configured, not
+	// activated or refused): the 豆包 chat model, which also takes video.
+	Fallback *Client
 }
 
-func (c *Client) Ready() bool {
-	return c != nil && c.BaseURL != "" && c.Key != "" && c.Model != ""
-}
+func (c *Client) own() bool { return c != nil && c.BaseURL != "" && c.Key != "" && c.Model != "" }
+
+func (c *Client) Ready() bool { return c.own() || c != nil && c.Fallback.own() }
 
 // Shot is one beat of the original, in seconds from the start.
 type Shot struct {
@@ -33,21 +37,45 @@ type Shot struct {
 	Speech string  `json:"speech"`
 }
 
+// Subject is someone or something the video is about, which a 一键复刻 may
+// swap for the user's own picture.
+type Subject struct {
+	Name string `json:"name"` // 主角、商品…
+	Kind string `json:"kind"` // person | product | other
+	Look string `json:"look"` // appearance, to recognise it
+	When string `json:"when"` // e.g. 0–8秒
+}
+
 type Breakdown struct {
-	Summary       string   `json:"summary"`
-	Hook          string   `json:"hook"`
-	Structure     string   `json:"structure"`
-	SellingPoints []string `json:"sellingPoints"`
-	Style         string   `json:"style"`
-	Music         string   `json:"music"`
-	Shots         []Shot   `json:"shots"`
+	Subjects      []Subject `json:"subjects"`
+	Summary       string    `json:"summary"`
+	Hook          string    `json:"hook"`
+	Structure     string    `json:"structure"`
+	SellingPoints []string  `json:"sellingPoints"`
+	Style         string    `json:"style"`
+	Music         string    `json:"music"`
+	Shots         []Shot    `json:"shots"`
 }
 
 const instruction = `你是短视频爆款拆解专家。请完整观看这条视频，拆解它为什么能火，只输出一个 JSON 对象，不要任何其他文字：
-{"summary":"一句话概括视频内容","hook":"前 3 秒用什么画面或台词抓住观众","structure":"整体结构，如：痛点开场→产品展示→效果对比→引导下单","sellingPoints":["卖点或情绪点"],"style":"画面风格、色调、拍摄方式（手持/固定/口播等）","music":"背景音乐与音效的风格和节奏","shots":[{"start":0,"end":3,"scene":"场景与人物外观","action":"按时间顺序的具体动作","camera":"景别与运镜","speech":"台词、口播或画面字幕，没有则留空"}]}
-要求：shots 按时间顺序覆盖整条视频，3–12 个；时间单位为秒；描述具体、可被 AI 视频模型直接执行；没有的信息留空字符串。`
+{"subjects":[{"name":"主体名称，如 主角、商品","kind":"person 或 product 或 other","look":"外观特征，便于辨认","when":"出现的时间段，如 0-8秒"}],"summary":"一句话概括视频内容","hook":"前 3 秒用什么画面或台词抓住观众","structure":"整体结构，如：痛点开场→产品展示→效果对比→引导下单","sellingPoints":["卖点或情绪点"],"style":"画面风格、色调、拍摄方式（手持/固定/口播等）","music":"背景音乐与音效的风格和节奏","shots":[{"start":0,"end":3,"scene":"场景与人物外观","action":"按时间顺序的具体动作","camera":"景别与运镜","speech":"台词、口播或画面字幕，没有则留空"}]}
+要求：subjects 列出视频里可以被替换的主要人物和商品（1–5 个，按重要程度排序，不列背景）；shots 按时间顺序覆盖整条视频，3–12 个；时间单位为秒；描述具体、可被 AI 视频模型直接执行；没有的信息留空字符串。`
 
+// Breakdown watches the video; when this model cannot be used (not
+// configured, not activated, no access) the fallback model watches instead.
 func (c *Client) Breakdown(ctx context.Context, videoURL string) (Breakdown, error) {
+	if !c.own() {
+		return c.Fallback.watch(ctx, videoURL)
+	}
+	b, err := c.watch(ctx, videoURL)
+	var refused *refusedError
+	if errors.As(err, &refused) && c.Fallback.own() {
+		return c.Fallback.watch(ctx, videoURL)
+	}
+	return b, err
+}
+
+func (c *Client) watch(ctx context.Context, videoURL string) (Breakdown, error) {
 	body := map[string]any{
 		"model": c.Model,
 		"messages": []any{map[string]any{"role": "user", "content": []any{
@@ -56,6 +84,9 @@ func (c *Client) Breakdown(ctx context.Context, videoURL string) (Breakdown, err
 		}}},
 		"temperature": 0.2,
 		"max_tokens":  4096,
+	}
+	if strings.HasPrefix(c.Model, "doubao-seed") { // no deep thinking: a breakdown does not need it
+		body["thinking"] = map[string]string{"type": "disabled"}
 	}
 	raw, _ := json.Marshal(body)
 	r, err := http.NewRequestWithContext(ctx, "POST", strings.TrimRight(c.BaseURL, "/")+"/chat/completions", bytes.NewReader(raw))
@@ -121,6 +152,17 @@ func Parse(text string) (Breakdown, error) {
 		}
 	}
 	b.SellingPoints = points
+	subjects := []Subject{}
+	for _, s := range b.Subjects {
+		s.Name, s.Look, s.When = clip(s.Name, 20), clip(s.Look, 80), clip(s.When, 30)
+		if s.Kind != "person" && s.Kind != "product" {
+			s.Kind = "other"
+		}
+		if s.Name != "" && len(subjects) < 5 {
+			subjects = append(subjects, s)
+		}
+	}
+	b.Subjects = subjects
 	return b, nil
 }
 
@@ -146,5 +188,14 @@ func upstreamError(status int, body []byte) error {
 	if m := clip(reply.Error.Message, 120); m != "" {
 		reason += "：" + m
 	}
+	if status == 401 || status == 403 || status == 404 { // the model cannot be used here
+		return &refusedError{reason}
+	}
 	return fmt.Errorf("%s", reason)
 }
+
+// refusedError: the model is missing, not activated or not allowed, so
+// another model may watch instead.
+type refusedError struct{ reason string }
+
+func (e *refusedError) Error() string { return e.reason }

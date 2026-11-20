@@ -140,3 +140,16 @@ func TestArkModelsTakeVideos(t *testing.T) {
 		}
 	}
 }
+
+// 豆包 still at the old default (¥2 output) moves to Seed 2.1 lite's ¥2.7;
+// it has no cache or peak price of its own.
+func TestArkOldDefaultMovesToTheCurrentPrice(t *testing.T) {
+	p := Provider{Name: "ark", InputPrice: 0.008, OutputPrice: 0.027, Previous: [2]float64{0.008, 0.02}}
+	s := core.ModelSettings{TokenInputPrice: 0.008, TokenOutputPrice: 0.02}
+	if !reprice(&s, p, "doubao-seed-2-1-lite-260915") || s.TokenOutputPrice != 0.027 || s.TokenCachedPrice != nil || s.PeakPriceRate != 0 {
+		t.Fatal(s)
+	}
+	if reprice(&s, p, "doubao-seed-2-1-lite-260915") {
+		t.Fatal("repriced twice")
+	}
+}

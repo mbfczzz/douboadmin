@@ -83,7 +83,7 @@ var definitions = []Group{
 	{ID: "vision", Name: "视频理解", Hint: "一键复刻用它看懂原视频（钩子、分镜、卖点）。默认火山方舟豆包视觉模型，也可填写兼容 OpenAI 接口并支持视频输入的服务。未填写 API Key 时复刻只参考视频文案。保存后重启服务生效。", Fields: []Field{
 		{Key: "VISION_BASE_URL", Label: "API 基础地址", Kind: "url", Default: "https://ark.cn-beijing.volces.com/api/v3"},
 		{Key: "VISION_API_KEY", Label: "API Key", Kind: "secret"},
-		{Key: "VISION_MODEL", Label: "模型 ID", Kind: "text", Default: "doubao-seed-1-6-vision-250815", Hint: "须支持视频输入，例如 doubao-seed-1-6-vision-250815；也可填方舟推理接入点 ID。"},
+		{Key: "VISION_MODEL", Label: "模型 ID", Kind: "text", Default: "doubao-seed-2-1-lite-260915", Hint: "须支持视频输入，例如 doubao-seed-2-1-lite-260915（豆包 Seed 2.1 lite，能看视频）；也可填方舟推理接入点 ID。未开通或无权限时自动改用「对话模型」里的豆包。"},
 	}},
 	{ID: "chat", Name: "对话模型", Hint: "创作助手（Agent）和「AI写剧本」直接调用 DeepSeek、豆包（火山方舟）。填写的每个模型会出现在「模型管理」里，按输入、输出 token 计费，单价在模型的生成能力里设置。保存后重启服务生效。", Fields: []Field{
 		{Key: "CHAT_DEEPSEEK_BASE_URL", Label: "DeepSeek API 地址", Kind: "url", Default: "https://api.deepseek.com"},

@@ -51,8 +51,8 @@ func integrations(ctx context.Context, app *api.Server, values settings.Values) 
 // models in 模型管理. Default prices are the providers' list prices at
 // 1 元 = 10 积分, per million tokens: DeepSeek Flash (2026-11) ¥1 input,
 // ¥0.02 cache hit, ¥4 output off-peak and twice that at peak (V4 Pro ¥4.5 /
-// ¥0.15 / ¥13.5; only Flash reads pictures); 豆包 lite
-// ¥0.8 / ¥2 (its cache price is set by the operator). Operators set their
+// ¥0.15 / ¥13.5; only Flash reads pictures); 豆包 Seed 2.1 lite ¥0.8 / ¥2.7
+// (2026-11; its cache price is set by the operator). Operators set their
 // own per model.
 func chatModels(ctx context.Context, app *api.Server, values settings.Values) *provider.DirectChat {
 	arkKey := values["CHAT_ARK_API_KEY"]
@@ -67,7 +67,7 @@ func chatModels(ctx context.Context, app *api.Server, values settings.Values) *p
 			ModelPrices: map[string][3]float64{"deepseek-v4-pro": {0.045, 0.0015, 0.135}}, Seeing: []string{"flash"},
 			Names:   map[string]string{"deepseek-flash": "DeepSeek", "deepseek-v4-pro": "DeepSeek Pro"},
 			Tagline: map[string]string{"deepseek-flash": "反应快、价格低，写脚本方案首选", "deepseek-v4-pro": "推理更强，适合复杂策划"}},
-		{Name: "ark", Label: "豆包", Client: &llm.Client{BaseURL: values.Get("CHAT_ARK_BASE_URL", "https://ark.cn-beijing.volces.com/api/v3"), Key: arkKey}, Models: arkModels, InputPrice: 0.008, OutputPrice: 0.02, Watches: true,
+		{Name: "ark", Label: "豆包", Client: &llm.Client{BaseURL: values.Get("CHAT_ARK_BASE_URL", "https://ark.cn-beijing.volces.com/api/v3"), Key: arkKey}, Models: arkModels, InputPrice: 0.008, OutputPrice: 0.027, Watches: true, Previous: [2]float64{0.008, 0.02},
 			Tagline: map[string]string{"": "字节豆包，看图细致，中文表达自然"}},
 	}
 	if err := llm.EnsureModels(ctx, app.Store, providers); err != nil {
@@ -77,6 +77,11 @@ func chatModels(ctx context.Context, app *api.Server, values settings.Values) *p
 	for _, p := range providers {
 		clients[p.Name] = p.Client
 		app.ChatReady = app.ChatReady || p.Client.Ready()
+		// 豆包 watches videos itself: it stands in for 视频理解 (一键复刻's
+		// breakdown, videos in chats) when that model cannot be used.
+		if p.Watches && p.Client.Ready() && len(p.Models) > 0 && app.Vision != nil {
+			app.Vision.Fallback = &vision.Client{BaseURL: p.Client.BaseURL, Key: p.Client.Key, Model: p.Models[0]}
+		}
 	}
 	return &provider.DirectChat{Clients: clients, Store: app.Store, Assets: app.Media.Inputs, Vision: app.Vision}
 }

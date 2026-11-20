@@ -15,14 +15,18 @@ import type { Job, Row, Asset } from "../../services/types";
 import { confirmBudget } from "../../services/business";
 import { assetViews } from "./assets";
 import { remakeHandlers } from "./remake";
+import { swapHandlers } from "./swap";
+import type { SwapRow } from "./swap";
 Page({
   ...remakeHandlers,
+  ...swapHandlers,
   data: {
     job: null as ReturnType<typeof jobView> | null,
     loading: true,
     loadError: "",
     busy: false,
     assets: [] as ReturnType<typeof assetViews>,
+    swaps: [] as SwapRow[], // 一键复刻: which picture replaces which subject
     needsLogin: false,
     signingIn: false,
     assetError: "",
@@ -115,6 +119,7 @@ Page({
         !this.data.assetError
       )
         await this.loadAssets();
+      void this.loadSwaps(); // a ready 一键复刻 with pictures: match them to its subjects
     } catch (e) {
       if (this.destroyed) return;
       if (!hasSession()) this.requireLogin();

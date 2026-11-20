@@ -15,7 +15,11 @@ export type RemakeSource = {
   duration: number;
   breakdown?: Breakdown | null; // the video model's reading, when available
   images?: number; // the user's own product / person pictures, @图片1…
+  // Which subject each picture replaces (@图片N in order); when set, only
+  // these swaps are written, the other subjects stay as they are.
+  swaps?: Swap[];
 };
+export type Swap = { name: string; kind: string; look: string; ref: string };
 export const REMAKE_SOURCE_KEY = "remake-source";
 
 export type RemakeOriginal = { title: string; text: string; duration: number };
@@ -37,12 +41,14 @@ export function remakeOriginal(job: Job): RemakeOriginal {
 }
 
 // Opens the editor's preset with the saved video (@视频1) and pictures (@图片N).
-export function remakeHandoff(job: Job, breakdown: Breakdown | null) {
+export function remakeHandoff(job: Job, breakdown: Breakdown | null, chosen?: { swaps: Swap[]; pictures: string[] }) {
   const original = remakeOriginal(job);
-  const pictures = job.input.assets || [];
+  const pictures = chosen ? chosen.pictures : job.input.assets || [];
   const refs = pictures.map((_, i) => "@图片" + (i + 1)).join("、");
-  const swap = refs ? `，并把原视频中的商品或人物换成${refs}中的商品或人物` : "";
-  const source: RemakeSource = { ...original, breakdown, images: pictures.length };
+  const swap = chosen?.swaps.length
+    ? "，" + chosen.swaps.map((s) => `把${s.name}换成${s.ref}`).join("，")
+    : refs ? `，并把原视频中的商品或人物换成${refs}中的商品或人物` : "";
+  const source: RemakeSource = { ...original, breakdown, images: pictures.length, swaps: chosen?.swaps };
   wx.setStorageSync(REMAKE_SOURCE_KEY, source);
   wx.setStorageSync("edit-draft", {
     kind: "video",

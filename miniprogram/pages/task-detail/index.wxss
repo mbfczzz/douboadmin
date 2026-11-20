@@ -1,5 +1,6 @@
 @import "./prompt.wxss";
 @import "./details.wxss";
+@import "./swap.wxss";
 .task-detail-page {
   padding: 24px 20px calc(30px + env(safe-area-inset-bottom));
 }

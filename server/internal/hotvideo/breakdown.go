@@ -33,7 +33,10 @@ func (r BreakdownRecord) Active() bool {
 	return r.Status == "running" && time.Since(r.StartedAt) < breakdownStale
 }
 
-func breakdownID(model, videoID string) string { return core.Digest(model + ":" + videoID)[:32] }
+// v2: breakdowns list the subjects a remake can swap (older ones did not).
+func breakdownID(model, videoID string) string {
+	return core.Digest("v2:" + model + ":" + videoID)[:32]
+}
 
 // ReadBreakdown returns the shared record (core.ErrNotFound when none).
 func (s *Service) ReadBreakdown(ctx context.Context, model, videoID string) (BreakdownRecord, int64, error) {
