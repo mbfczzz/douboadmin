@@ -26,7 +26,8 @@ func TestProviderErrorsAreExplainedInChinese(t *testing.T) {
 	}
 }
 
-// 豆包 Seed answers without deep thinking (much faster); others are untouched.
+// 豆包 Seed and DeepSeek answer without deep thinking (much faster); 方舟
+// endpoint IDs keep their own setting.
 func TestSeedModelsAnswerWithoutThinking(t *testing.T) {
 	var got []map[string]any
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -37,7 +38,7 @@ func TestSeedModelsAnswerWithoutThinking(t *testing.T) {
 	}))
 	defer srv.Close()
 	c := &Client{BaseURL: srv.URL, Key: "k"}
-	for _, m := range []string{"doubao-seed-2-1-lite-260915", "ep-20261120-abc", "deepseek-chat"} {
+	for _, m := range []string{"doubao-seed-2-1-lite-260915", "ep-20261120-abc", "deepseek-flash"} {
 		if _, _, err := c.Complete(t.Context(), m, nil, 0, nil); err != nil {
 			t.Fatal(err)
 		}
@@ -48,7 +49,7 @@ func TestSeedModelsAnswerWithoutThinking(t *testing.T) {
 	if _, ok := got[1]["thinking"]; ok {
 		t.Fatal("endpoint ids keep their own setting")
 	}
-	if _, ok := got[2]["thinking"]; ok {
-		t.Fatal("deepseek untouched")
+	if th, ok := got[2]["thinking"].(map[string]any); !ok || th["type"] != "disabled" {
+		t.Fatal("deepseek still thinks", got[2])
 	}
 }

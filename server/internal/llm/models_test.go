@@ -78,3 +78,23 @@ func TestOldDefaultPricesMoveToTheCurrentOnes(t *testing.T) {
 		t.Fatal(mine)
 	}
 }
+
+// DeepSeek Flash reads pictures and V4 Pro does not; Pro gets its own prices.
+func TestDeepSeekModelsGetTheirOwnPicturesAndPrices(t *testing.T) {
+	s := store.NewMemory()
+	hit := 0.0002
+	p := Provider{Name: "deepseek", Label: "DeepSeek", Client: &Client{BaseURL: "https://api.deepseek.com", Key: "k"}, Models: []string{"deepseek-flash", "deepseek-v4-pro"},
+		InputPrice: 0.01, CachedPrice: &hit, OutputPrice: 0.04, PeakRate: 2, Seeing: []string{"flash"},
+		ModelPrices: map[string][3]float64{"deepseek-v4-pro": {0.045, 0.0015, 0.135}}}
+	if err := EnsureModels(t.Context(), s, []Provider{p}); err != nil {
+		t.Fatal(err)
+	}
+	flash, _ := model(t, s, ModelID("deepseek", "deepseek-flash"))
+	pro, _ := model(t, s, ModelID("deepseek", "deepseek-v4-pro"))
+	if len(flash.ReferenceTypes) != 1 || flash.Settings.TokenOutputPrice != 0.04 || *flash.Settings.TokenCachedPrice != hit {
+		t.Fatal(flash)
+	}
+	if len(pro.ReferenceTypes) != 0 || pro.Settings.TokenInputPrice != 0.045 || *pro.Settings.TokenCachedPrice != 0.0015 || pro.Settings.TokenOutputPrice != 0.135 || pro.Settings.PeakPriceRate != 2 {
+		t.Fatal(pro)
+	}
+}

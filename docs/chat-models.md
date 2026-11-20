@@ -9,7 +9,7 @@
 | 配置项 | 说明 |
 | --- | --- |
 | DeepSeek API 地址 / API Key | 默认 `https://api.deepseek.com` |
-| DeepSeek 模型 | 模型 ID，逗号分隔，默认 `deepseek-chat`。DeepSeek 不能识别图片 |
+| DeepSeek 模型 | 模型 ID，逗号分隔，默认 `deepseek-flash`（能识别图片）；`deepseek-v4-pro` 不能识别图片 |
 | 火山方舟 API 地址 / API Key | 默认北京地域；Key 留空时用「视频理解」的 Key |
 | 豆包模型 | 方舟已开通的模型 ID 或推理接入点 ID，默认 `doubao-seed-2-1-lite-260915` |
 
@@ -36,7 +36,8 @@
   服务商没返回用量（或用户中途停止）时按字数估算。
 - 默认单价（新登记的模型，以及仍是旧默认价、未被改过的模型）：DeepSeek Flash 官方 2026-11 价（闲时 输入 ¥1、缓存命中 ¥0.02、输出 ¥4 / 百万 token，高峰 ×2）
   → 0.01 / 0.0002 / 0.04 积分，倍数 2；豆包 0.008 / 0.02 积分，缓存命中价请按方舟控制台「模型价格」填写。
-- DeepSeek 默认模型改为 `deepseek-flash`（官方当前模型名）。
+- DeepSeek 默认模型改为 `deepseek-flash`（官方当前模型名）。新登记的 `deepseek-v4-pro` 默认 0.045 / 0.0015 / 0.135 积分（官方闲时 ¥4.5 / ¥0.15 / ¥13.5），倍数 2，不能识别图片。
+- 豆包 Seed 和 DeepSeek 默认开启思考模式（先推理再回答，慢几十秒），请求里统一以 `"thinking": {"type": "disabled"}` 关闭；方舟推理接入点 ID（`ep-…`）沿用接入点自身设置。
 
 小程序 Agent 页输入框上方可切换对话模型，并显示「每轮最多约 X 积分」；按量对话发送时不再逐条弹确认框。
 

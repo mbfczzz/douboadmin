@@ -6,6 +6,7 @@ import (
 	"doubo/server/internal/store"
 	"encoding/json"
 	"errors"
+	"strings"
 )
 
 // Provider is one configured chat provider: its client and listed model IDs.
@@ -19,6 +20,12 @@ type Provider struct {
 	InputPrice, OutputPrice float64
 	CachedPrice             *float64
 	PeakRate                float64
+	// ModelPrices overrides the defaults for a listed model ID: input,
+	// cache hit, output (deepseek-v4-pro costs more than Flash).
+	ModelPrices map[string][3]float64
+	// Seeing lists the model IDs (substrings) that read pictures, when not
+	// all of the provider's models do.
+	Seeing []string
 	// Previous are the input / output defaults before these: a model still
 	// at them (never repriced by an operator) moves to the new prices.
 	Previous [2]float64
@@ -84,8 +91,14 @@ func ensure(ctx context.Context, s store.Store, p Provider, key, id string, orde
 		return err
 	}
 	refs := []string{}
-	if p.Name == "ark" {
-		refs = []string{"image"} // 豆包 reads pictures; DeepSeek does not
+	if sees(p, id) {
+		refs = []string{"image"}
+	}
+	settings := core.ModelSettings{TokenInputPrice: p.InputPrice, TokenOutputPrice: p.OutputPrice, TokenCachedPrice: p.CachedPrice, PeakPriceRate: p.PeakRate,
+		Description: p.Label + " 对话模型，按 token 计费"}
+	if price, ok := p.ModelPrices[id]; ok {
+		hit := price[1]
+		settings.TokenInputPrice, settings.TokenCachedPrice, settings.TokenOutputPrice = price[0], &hit, price[2]
 	}
 	name := p.Label // the first listed model carries just the provider's name
 	if order > 0 {
@@ -93,8 +106,7 @@ func ensure(ctx context.Context, s store.Store, p Provider, key, id string, orde
 	}
 	m := core.Model{ID: modelID, Key: key, Name: name, Kind: "chat", Published: true, Available: ready, Sort: 900 + order,
 		ReferenceTypes: refs, Resolutions: []string{}, Ratios: []string{}, Durations: []int{}, Qualities: []string{}, Modes: []string{}, Operations: []string{},
-		Settings: core.ModelSettings{TokenInputPrice: p.InputPrice, TokenOutputPrice: p.OutputPrice, TokenCachedPrice: p.CachedPrice, PeakPriceRate: p.PeakRate,
-			Description: p.Label + " 对话模型，按 token 计费"}}
+		Settings: settings}
 	_, err = s.Put(ctx, "models", core.Record{ID: modelID, Data: core.Data(m)}, 0)
 	return err
 }
@@ -107,4 +119,17 @@ func reprice(s *core.ModelSettings, p Provider) bool {
 	}
 	s.TokenInputPrice, s.TokenOutputPrice, s.TokenCachedPrice, s.PeakPriceRate = p.InputPrice, p.OutputPrice, p.CachedPrice, p.PeakRate
 	return true
+}
+
+// sees: 豆包 models read pictures; of DeepSeek's, the Flash models do.
+func sees(p Provider, id string) bool {
+	if len(p.Seeing) == 0 {
+		return p.Name == "ark"
+	}
+	for _, s := range p.Seeing {
+		if strings.Contains(id, s) {
+			return true
+		}
+	}
+	return false
 }

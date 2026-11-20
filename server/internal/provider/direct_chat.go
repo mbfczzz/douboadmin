@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"slices"
 	"strings"
 	"time"
 )
@@ -92,7 +93,7 @@ func (p *DirectChat) Generate(ctx context.Context, j core.Job) (string, error) {
 		spent.Input, spent.Cached, spent.Output = spent.Input+u.Input, spent.Cached+u.Cached, spent.Output+u.Output
 		return out, err
 	}
-	messages, err := p.messages(ctx, j, provider, summarize)
+	messages, err := p.messages(ctx, j, m, summarize)
 	if err != nil {
 		return "", err
 	}
@@ -150,7 +151,7 @@ func estimateTokens(messages []any) int {
 	return len([]rune(string(raw))) + 1500*strings.Count(string(raw), `"image_url"`)
 }
 
-func (p *DirectChat) messages(ctx context.Context, j core.Job, provider string, summarize Summarizer) ([]any, error) {
+func (p *DirectChat) messages(ctx context.Context, j core.Job, m core.Model, summarize Summarizer) ([]any, error) {
 	content := any(j.Input.Prompt)
 	if len(j.Input.Assets) > 0 {
 		refs, err := p.Assets(ctx, j)
@@ -162,8 +163,8 @@ func (p *DirectChat) messages(ctx context.Context, j core.Job, provider string, 
 			if r.Type != "image" {
 				continue
 			}
-			if provider == "deepseek" {
-				return nil, fmt.Errorf("DeepSeek 不能识别图片，请换用豆包模型")
+			if !slices.Contains(m.ReferenceTypes, "image") { // e.g. deepseek-v4-pro
+				return nil, fmt.Errorf("%s 不能识别图片，请换用能看图的模型", m.Name)
 			}
 			parts = append(parts, map[string]any{"type": "image_url", "image_url": map[string]string{"url": r.URL}})
 		}

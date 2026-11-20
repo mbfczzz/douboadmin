@@ -154,11 +154,27 @@ func TestDirectChatFailureReturnsEverything(t *testing.T) {
 	}
 }
 
-func TestDeepSeekRejectsPictures(t *testing.T) {
+// A model that does not read pictures (deepseek-v4-pro) refuses them; one
+// that does (deepseek-flash) receives them as image_url parts.
+func TestPicturesGoOnlyToModelsThatReadThem(t *testing.T) {
 	_, p, j, bodies := directFixture(t, `{}`, 200)
 	j.Input.Assets = []string{"asset-1"}
 	if _, err := p.Generate(t.Context(), j); err == nil || !strings.Contains(err.Error(), "不能识别图片") || len(*bodies) != 0 {
 		t.Fatal(err)
+	}
+	s, p, j, bodies := directFixture(t, `{"choices":[{"message":{"content":"图里是一杯拿铁"}}],"usage":{"prompt_tokens":900,"completion_tokens":8}}`, 200)
+	row, _ := s.Get(t.Context(), "models", "ds")
+	var m core.Model
+	_ = json.Unmarshal(row.Data, &m)
+	m.ReferenceTypes = []string{"image"}
+	_, _ = s.Put(t.Context(), "models", core.Record{ID: "ds", Data: core.Data(m)}, row.Version)
+	j.Input.Assets = []string{"asset-1"}
+	if text, err := p.Generate(t.Context(), j); err != nil || text != "图里是一杯拿铁" {
+		t.Fatal(text, err)
+	}
+	raw, _ := json.Marshal((*bodies)[0]["messages"])
+	if !strings.Contains(string(raw), `"image_url":{"url":"https://x/a.png"}`) {
+		t.Fatal(string(raw))
 	}
 }
 
