@@ -66,6 +66,8 @@ const notSecret = new Set([
   "tokenInputPrice",
   "tokenOutputPrice",
   "maxOutputTokens",
+  "tokenCachedPrice",
+  "peakPriceRate",
 ]);
 const secret = (key: string, options: ConfirmationOptions) =>
   (!notSecret.has(key) &&

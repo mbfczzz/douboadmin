@@ -39,6 +39,7 @@ func init() {
 		}},
 		Table{Name: "agent_sessions", Comment: "Agent 创作项目；id = 项目 id", Owner: "用户", Cols: []Col{
 			c("title", Short), c("skill", Key), c("assets", JSON), c("deleted", Bool), c("activeAt", Time),
+			c("summary", Long), c("summaryUntil", Int),
 		}},
 		Table{Name: "favorites", Comment: "模板收藏；id = 摘要(用户:模板)", Owner: "用户", Cols: []Col{
 			c("templateId", Key), c("active", Bool),

@@ -49,8 +49,10 @@ func integrations(ctx context.Context, app *api.Server, values settings.Values) 
 
 // chatModels sets up DeepSeek / 豆包 (服务接入配置 → 对话模型) and lists their
 // models in 模型管理. Default prices are the providers' list prices at
-// 1 元 = 10 积分 (DeepSeek ¥2/¥3, 豆包 lite ¥0.8/¥2 per million tokens);
-// operators set their own per model.
+// 1 元 = 10 积分, per million tokens: DeepSeek Flash (2026-11) ¥1 input,
+// ¥0.02 cache hit, ¥4 output off-peak and twice that at peak; 豆包 lite
+// ¥0.8 / ¥2 (its cache price is set by the operator). Operators set their
+// own per model.
 func chatModels(ctx context.Context, app *api.Server, values settings.Values) *provider.DirectChat {
 	arkKey := values["CHAT_ARK_API_KEY"]
 	if arkKey == "" {
@@ -59,7 +61,8 @@ func chatModels(ctx context.Context, app *api.Server, values settings.Values) *p
 	deepseekModels, _ := settings.ChatModels(values.Get("CHAT_DEEPSEEK_MODELS", settings.DefaultDeepSeekModels))
 	arkModels, _ := settings.ChatModels(values.Get("CHAT_ARK_MODELS", settings.DefaultArkChatModels))
 	providers := []llm.Provider{
-		{Name: "deepseek", Label: "DeepSeek", Client: &llm.Client{BaseURL: values.Get("CHAT_DEEPSEEK_BASE_URL", "https://api.deepseek.com"), Key: values["CHAT_DEEPSEEK_API_KEY"]}, Models: deepseekModels, InputPrice: 0.02, OutputPrice: 0.03},
+		{Name: "deepseek", Label: "DeepSeek", Client: &llm.Client{BaseURL: values.Get("CHAT_DEEPSEEK_BASE_URL", "https://api.deepseek.com"), Key: values["CHAT_DEEPSEEK_API_KEY"]}, Models: deepseekModels,
+			InputPrice: 0.01, CachedPrice: ptr(0.0002), OutputPrice: 0.04, PeakRate: 2, Previous: [2]float64{0.02, 0.03}},
 		{Name: "ark", Label: "豆包", Client: &llm.Client{BaseURL: values.Get("CHAT_ARK_BASE_URL", "https://ark.cn-beijing.volces.com/api/v3"), Key: arkKey}, Models: arkModels, InputPrice: 0.008, OutputPrice: 0.02},
 	}
 	if err := llm.EnsureModels(ctx, app.Store, providers); err != nil {
@@ -77,3 +80,5 @@ func hotCacheTTL(values settings.Values) hotvideo.CacheTTL {
 	d := settings.HotCache(values)
 	return hotvideo.CacheTTL{Feed: d["HOT_CACHE_FEED_MINUTES"], Search: d["HOT_CACHE_SEARCH_MINUTES"], Words: d["HOT_CACHE_WORDS_MINUTES"], Video: d["HOT_CACHE_VIDEO_MINUTES"]}
 }
+
+func ptr(v float64) *float64 { return &v }

@@ -41,6 +41,8 @@ type JobBilling struct {
 	ReservedUnits int64  `json:"reservedUnits,omitempty"`
 	InputTokens   int    `json:"inputTokens,omitempty"`
 	OutputTokens  int    `json:"outputTokens,omitempty"`
+	CachedTokens  int    `json:"cachedTokens,omitempty"` // of InputTokens, read from the provider's cache
+	Peak          bool   `json:"peak,omitempty"`         // charged at peak-hour prices
 }
 type Order struct {
 	Virtual       *VirtualOrder         `json:"virtual,omitempty"`

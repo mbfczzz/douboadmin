@@ -45,6 +45,8 @@ export const modelFieldLabels: Record<string, string> = {
   tokenInputPrice: "输入单价（积分/千 token）",
   tokenOutputPrice: "输出单价（积分/千 token）",
   maxOutputTokens: "单次回复上限（token）",
+  tokenCachedPrice: "缓存命中输入单价（积分/千 token）",
+  peakPriceRate: "高峰时段倍数",
   errorHints: "错误提示映射",
   availabilityStatus: "运行状态",
   points: "基础积分",

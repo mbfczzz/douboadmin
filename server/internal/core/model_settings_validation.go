@@ -46,6 +46,9 @@ func (s ModelSettings) Validate(m Model) error {
 	if !validRate(s.TokenInputPrice) || !validRate(s.TokenOutputPrice) || s.TokenInputPrice > 1000 || s.TokenOutputPrice > 1000 || s.MaxOutputTokens < 0 || s.MaxOutputTokens > 32768 {
 		return fmt.Errorf("按量价格应为 0–1000 积分/千 token，最大回复长度为 0–32768 token")
 	}
+	if s.TokenCachedPrice != nil && (!validRate(*s.TokenCachedPrice) || *s.TokenCachedPrice > 1000) || !validRate(s.PeakPriceRate) || s.PeakPriceRate > 10 {
+		return fmt.Errorf("缓存命中单价应为 0–1000 积分/千 token，高峰倍数为 0–10")
+	}
 	if s.TokenPriced() && m.Kind != "chat" {
 		return fmt.Errorf("只有对话模型可以按 token 计费")
 	}

@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 )
 
@@ -54,7 +55,7 @@ func (p *DirectChat) Generate(ctx context.Context, j core.Job) (string, error) {
 		case "succeeded":
 			// The reply is kept; usage may still need recording after a crash.
 			if m, err := p.model(ctx, j.Input.Model); err == nil && m.Settings.TokenPriced() {
-				if p.recordUsage(ctx, j.ID, m.Settings, llm.Usage{Input: e.InputTokens, Output: e.OutputTokens}) != nil {
+				if p.recordUsage(ctx, j.ID, m.Settings, llm.Usage{Input: e.InputTokens, Output: e.OutputTokens, Cached: e.CachedTokens}, billing.Peak(e.StartedAt)) != nil {
 					return "", ErrPending
 				}
 			}
@@ -64,7 +65,7 @@ func (p *DirectChat) Generate(ctx context.Context, j core.Job) (string, error) {
 		}
 		// Interrupted mid-call: a chat turn is cheap to resend, so end it and
 		// return the points rather than holding them for review.
-		e.Phase, e.Error = "failed", "对话中断，请重新发送"
+		e.Phase, e.Error, e.Partial = "failed", "对话中断，请重新发送", ""
 		_ = p.checkpoint(ctx, &row, e)
 		return "", errors.New(e.Error)
 	}
@@ -80,7 +81,18 @@ func (p *DirectChat) Generate(ctx context.Context, j core.Job) (string, error) {
 	if !client.Ready() {
 		return "", fmt.Errorf("对话模型尚未配置，请联系管理员")
 	}
-	messages, err := p.messages(ctx, j, provider)
+	if stopAsked(ctx, p.Store, j.ID) {
+		return "", errors.New("已停止回复")
+	}
+	// A long project's earlier turns are summarized first; that call is part
+	// of this turn's usage.
+	var spent llm.Usage
+	summarize := func(ctx context.Context, text string) (string, error) {
+		out, u, err := client.Complete(ctx, key, summaryMessages(text), billing.SummaryOutput, nil)
+		spent.Input, spent.Cached, spent.Output = spent.Input+u.Input, spent.Cached+u.Cached, spent.Output+u.Output
+		return out, err
+	}
+	messages, err := p.messages(ctx, j, provider, summarize)
 	if err != nil {
 		return "", err
 	}
@@ -89,32 +101,56 @@ func (p *DirectChat) Generate(ctx context.Context, j core.Job) (string, error) {
 	if err = p.checkpoint(ctx, &row, e); err != nil {
 		return "", ErrPending // another worker owns this turn
 	}
-	text, usage, err := client.Complete(ctx, key, messages, m.Settings.OutputTokens(), p.partial(ctx, &row, &e))
-	if errors.Is(err, errTurnTaken) {
-		return "", ErrPending
-	}
-	if err != nil {
-		e.Phase, e.Error = "failed", err.Error()
+	fail := func(err error) (string, error) {
+		e.Phase, e.Error, e.Partial = "failed", err.Error(), ""
 		_ = p.checkpoint(ctx, &row, e)
 		return "", err
 	}
-	if usage.Input+usage.Output == 0 { // provider omitted usage: count characters instead
-		usage = llm.Usage{Input: len([]rune(j.Input.Prompt)), Output: len([]rune(text))}
+	call, cancel := context.WithCancel(ctx)
+	defer cancel()
+	Turns.start(j.ID, cancel)
+	defer Turns.finish(j.ID)
+	go watchStop(call, p.Store, j.ID, cancel)
+	written := ""
+	text, usage, err := client.Complete(call, key, messages, m.Settings.OutputTokens(), p.partial(ctx, j.ID, &row, &e, &written))
+	if errors.Is(err, errTurnTaken) {
+		return "", ErrPending
 	}
+	if err != nil && ctx.Err() == nil && stopAsked(ctx, p.Store, j.ID) {
+		// Stopped by the user: keep what was written, charge for it.
+		if strings.TrimSpace(written) == "" {
+			return fail(errors.New("已停止回复"))
+		}
+		text, usage, err = strings.TrimSpace(written)+"\n\n（已停止回复）", llm.Usage{Input: estimateTokens(messages), Output: len([]rune(written))}, nil
+	}
+	if err != nil {
+		return fail(err)
+	}
+	if usage.Input+usage.Output == 0 { // provider omitted usage: count characters instead
+		usage = llm.Usage{Input: estimateTokens(messages), Output: len([]rune(text))}
+	}
+	usage.Input, usage.Cached, usage.Output = usage.Input+spent.Input, usage.Cached+spent.Cached, usage.Output+spent.Output
 	e.Partial = ""
-	e.Phase, e.Result, e.InputTokens, e.OutputTokens = "succeeded", text, usage.Input, usage.Output
+	e.Phase, e.Result, e.InputTokens, e.OutputTokens, e.CachedTokens = "succeeded", text, usage.Input, usage.Output, usage.Cached
 	if err = p.checkpoint(ctx, &row, e); err != nil {
 		return "", ErrPending // the next attempt sees "submitting" and ends the turn
 	}
 	if m.Settings.TokenPriced() {
-		if err = p.recordUsage(ctx, j.ID, m.Settings, usage); err != nil {
+		if err = p.recordUsage(ctx, j.ID, m.Settings, usage, billing.Peak(e.StartedAt)); err != nil {
 			return "", ErrPending // retried from the "succeeded" checkpoint
 		}
 	}
 	return text, nil
 }
 
-func (p *DirectChat) messages(ctx context.Context, j core.Job, provider string) ([]any, error) {
+// estimateTokens bounds a request's tokens by its characters (and 1500 per
+// picture) when the provider reported none.
+func estimateTokens(messages []any) int {
+	raw, _ := json.Marshal(messages)
+	return len([]rune(string(raw))) + 1500*strings.Count(string(raw), `"image_url"`)
+}
+
+func (p *DirectChat) messages(ctx context.Context, j core.Job, provider string, summarize Summarizer) ([]any, error) {
 	content := any(j.Input.Prompt)
 	if len(j.Input.Assets) > 0 {
 		refs, err := p.Assets(ctx, j)
@@ -134,7 +170,7 @@ func (p *DirectChat) messages(ctx context.Context, j core.Job, provider string) 
 		content = parts
 	}
 	body := map[string]any{"messages": []any{map[string]any{"role": "user", "content": content}}}
-	if err := chatHistory(ctx, p.Store, j, body); err != nil {
+	if err := chatHistory(ctx, p.Store, j, body, summarize); err != nil {
 		return nil, ErrPending
 	}
 	return body["messages"].([]any), nil
@@ -142,7 +178,7 @@ func (p *DirectChat) messages(ctx context.Context, j core.Job, provider string) 
 
 // recordUsage stores the charge for this turn on its billing row; completion
 // settles it (charging at most the hold) in the same step that ends the job.
-func (p *DirectChat) recordUsage(ctx context.Context, id string, s core.ModelSettings, u llm.Usage) error {
+func (p *DirectChat) recordUsage(ctx context.Context, id string, s core.ModelSettings, u llm.Usage, peak bool) error {
 	row, err := p.Store.Get(ctx, "job_billing", id)
 	if errors.Is(err, core.ErrNotFound) {
 		return nil
@@ -157,11 +193,12 @@ func (p *DirectChat) recordUsage(ctx context.Context, id string, s core.ModelSet
 	if bill.State != "reserved" {
 		return nil // free (billing off) or already settled
 	}
-	used, err := billing.TokenUnits(s, u.Input, u.Output)
+	used, err := billing.TokenUnits(s, billing.Tokens{Input: u.Input, Cached: u.Cached, Output: u.Output}, peak)
 	if err != nil {
 		return err
 	}
-	bill.UsedUnits, bill.InputTokens, bill.OutputTokens = &used, u.Input, u.Output
+	bill.UsedUnits, bill.InputTokens, bill.OutputTokens, bill.CachedTokens = &used, u.Input, u.Output, u.Cached
+	bill.Peak = peak && s.PeakPriceRate > 1
 	row.Data = core.Data(bill)
 	_, err = p.Store.Put(ctx, "job_billing", row, row.Version)
 	return err

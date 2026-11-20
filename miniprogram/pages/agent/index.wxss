@@ -255,3 +255,10 @@
   color: var(--ui-on-brand);
   background: var(--ui-primary);
 }
+/* 停止回复: a square in the send button while a reply is written. */
+.stop-mark {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  background: var(--ui-on-brand);
+}

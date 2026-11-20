@@ -14,8 +14,14 @@ type Provider struct {
 	Label  string // shown in model names: "DeepSeek", "豆包"
 	Client *Client
 	Models []string
-	// Default 按量 prices (points per 1,000 tokens) for newly listed models.
+	// Default 按量 prices (points per 1,000 tokens) for newly listed models;
+	// CachedPrice nil charges cache hits at the input price.
 	InputPrice, OutputPrice float64
+	CachedPrice             *float64
+	PeakRate                float64
+	// Previous are the input / output defaults before these: a model still
+	// at them (never repriced by an operator) moves to the new prices.
+	Previous [2]float64
 }
 
 // ModelID is the catalog ID of a directly-called chat model.
@@ -63,7 +69,11 @@ func ensure(ctx context.Context, s store.Store, p Provider, key, id string, orde
 	row, err := s.Get(ctx, "models", modelID)
 	if err == nil {
 		var m core.Model
-		if json.Unmarshal(row.Data, &m) != nil || m.Available == ready {
+		if json.Unmarshal(row.Data, &m) != nil {
+			return nil
+		}
+		repriced := reprice(&m.Settings, p)
+		if m.Available == ready && !repriced {
 			return nil
 		}
 		m.Available = ready
@@ -83,7 +93,18 @@ func ensure(ctx context.Context, s store.Store, p Provider, key, id string, orde
 	}
 	m := core.Model{ID: modelID, Key: key, Name: name, Kind: "chat", Published: true, Available: ready, Sort: 900 + order,
 		ReferenceTypes: refs, Resolutions: []string{}, Ratios: []string{}, Durations: []int{}, Qualities: []string{}, Modes: []string{}, Operations: []string{},
-		Settings: core.ModelSettings{TokenInputPrice: p.InputPrice, TokenOutputPrice: p.OutputPrice, Description: p.Label + " 对话模型，按 token 计费"}}
+		Settings: core.ModelSettings{TokenInputPrice: p.InputPrice, TokenOutputPrice: p.OutputPrice, TokenCachedPrice: p.CachedPrice, PeakPriceRate: p.PeakRate,
+			Description: p.Label + " 对话模型，按 token 计费"}}
 	_, err = s.Put(ctx, "models", core.Record{ID: modelID, Data: core.Data(m)}, 0)
 	return err
+}
+
+// reprice moves a model still at the previous default prices (and without
+// cache or peak prices, added later) to the current defaults.
+func reprice(s *core.ModelSettings, p Provider) bool {
+	if p.Previous == [2]float64{} || s.TokenInputPrice != p.Previous[0] || s.TokenOutputPrice != p.Previous[1] || s.TokenCachedPrice != nil || s.PeakPriceRate != 0 {
+		return false
+	}
+	s.TokenInputPrice, s.TokenOutputPrice, s.TokenCachedPrice, s.PeakPriceRate = p.InputPrice, p.OutputPrice, p.CachedPrice, p.PeakRate
+	return true
 }

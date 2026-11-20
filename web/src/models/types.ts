@@ -24,6 +24,8 @@ export interface ModelSettings {
   tokenInputPrice?: number;
   tokenOutputPrice?: number;
   maxOutputTokens?: number;
+  tokenCachedPrice?: number; // unset: cache hits cost the input price
+  peakPriceRate?: number;
   errorHints?: { contains: string; message: string }[];
   availabilityStatus?: "normal" | "maintenance";
 }

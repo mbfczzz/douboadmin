@@ -1,6 +1,7 @@
 import { error, hasSession } from "../../utils/api";
 import { readView, writeView } from "../../utils/view-cache";
 import { chatMessages } from "../../utils/chat";
+import { replying } from "./stream";
 import type { ChatMessage } from "../../utils/chat";
 import { jobPage } from "../../services/job-pages";
 import { sessionToken } from "../../services/session";
@@ -52,7 +53,7 @@ export const historyHandlers = {
       this.historyPage = 1;
       // Until history arrives, show this project's last conversation.
       const seen = session ? readView<ChatMessage[]>("agent:" + session.id, 24 * 60 * 60 * 1000) : undefined;
-      this.setData({ messages: seen || [], hasOlder: false, ready: !!seen, bottom: seen?.length ? "m" + seen[seen.length - 1].id : "" });
+      this.setData({ messages: seen || [], replying: false, hasOlder: false, ready: !!seen, bottom: seen?.length ? "m" + seen[seen.length - 1].id : "" });
     }
     if (!hasSession() || !session) {
       clearInterval(this.timer); // nothing to wait for without a project
@@ -82,7 +83,7 @@ export const historyHandlers = {
       const tail = (list: ChatMessage[]) => (list.length ? list[list.length - 1].id + (list[list.length - 1].pending ? "…" : "") : "");
       const last = messages.length ? "m" + messages[messages.length - 1].id : "";
       const arrived = tail(messages) !== tail(this.data.messages); // a new message, or the reply finished
-      if (changed) this.setData(arrived ? { messages, bottom: last } : { messages });
+      if (changed) this.setData(arrived ? { messages, bottom: last, replying: replying(messages) } : { messages, replying: replying(messages) });
       if (changed) void this.priceLatest?.();
       if (changed) void this.autoTitle?.();
       if (!this.data.ready) this.setData({ ready: true });

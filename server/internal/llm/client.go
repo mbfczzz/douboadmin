@@ -22,10 +22,31 @@ type Client struct {
 
 func (c *Client) Ready() bool { return c != nil && c.BaseURL != "" && c.Key != "" }
 
-// Usage is what the provider reports for one reply.
+// Usage is what the provider reports for one reply. Cached is the part of
+// Input read from the provider's cache, charged at the cache price.
 type Usage struct {
-	Input  int `json:"prompt_tokens"`
-	Output int `json:"completion_tokens"`
+	Input, Output, Cached int
+}
+
+// DeepSeek reports prompt_cache_hit_tokens; 方舟 (OpenAI style) reports
+// prompt_tokens_details.cached_tokens.
+func (u *Usage) UnmarshalJSON(b []byte) error {
+	var v struct {
+		Input   int `json:"prompt_tokens"`
+		Output  int `json:"completion_tokens"`
+		Hit     int `json:"prompt_cache_hit_tokens"`
+		Details *struct {
+			Cached int `json:"cached_tokens"`
+		} `json:"prompt_tokens_details"`
+	}
+	if err := json.Unmarshal(b, &v); err != nil {
+		return err
+	}
+	*u = Usage{Input: v.Input, Output: v.Output, Cached: v.Hit}
+	if v.Details != nil && v.Details.Cached > u.Cached {
+		u.Cached = v.Details.Cached
+	}
+	return nil
 }
 
 // Complete sends messages (OpenAI shape) and returns the reply text and usage.

@@ -9,7 +9,7 @@ import (
 // Chat models called directly at DeepSeek / 火山方舟 (服务接入配置 → 对话模型).
 // Each listed model ID becomes a chat model in 模型管理, priced per token.
 const (
-	DefaultDeepSeekModels = "deepseek-chat"
+	DefaultDeepSeekModels = "deepseek-flash"
 	DefaultArkChatModels  = "doubao-seed-2-1-lite-260915"
 )
 

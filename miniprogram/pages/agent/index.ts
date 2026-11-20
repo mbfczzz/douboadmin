@@ -45,6 +45,7 @@ Page({
     prompt: "",
     messages: [] as ChatMessage[],
     busy: false,
+    replying: false, // a reply is being written: the send button stops it
     bottom: "",
     hasOlder: false,
     loadingOlder: false,
@@ -71,6 +72,7 @@ Page({
   partials: {} as Record<string, string>,
   streamId: "",
   streamTimer: 0,
+  streamClose: undefined as undefined | (() => void),
   follow: true,
   onShow() {
     this.onResize();
@@ -158,6 +160,7 @@ Page({
       this.setData({
         messages: [...this.data.messages.filter((m: ChatMessage) => !added.some((item) => item.id === m.id)), ...added],
         bottom: "m" + job.id + "a",
+        replying: true,
       });
       if (this.data.prompt === submitted) this.setData({ prompt: "" });
       await this.load(true);

@@ -53,6 +53,7 @@ type Execution struct {
 	// Tokens a directly-called chat model reported (按量计费).
 	InputTokens  int `json:"inputTokens,omitempty"`
 	OutputTokens int `json:"outputTokens,omitempty"`
+	CachedTokens int `json:"cachedTokens,omitempty"`
 	// Partial is a direct chat reply so far, while it is being written.
 	Partial string `json:"partial,omitempty"`
 }

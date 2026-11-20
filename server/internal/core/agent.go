@@ -14,6 +14,10 @@ type AgentSession struct {
 	Assets   []string  `json:"assets"` // numbered per type in order: 图片1…, 视频1…
 	Deleted  bool      `json:"deleted,omitempty"`
 	ActiveAt time.Time `json:"activeAt"` // last new job, for ordering
+	// Summary condenses the turns up to SummaryUntil, so long conversations
+	// are remembered without resending them (provider.summarize).
+	Summary      string `json:"summary,omitempty"`
+	SummaryUntil int64  `json:"summaryUntil,omitempty"` // UnixNano of the last turn summarized
 }
 
 const MaxAgentAssets = 9

@@ -35,8 +35,12 @@ type ModelSettings struct {
 	MaxPromptChars    int                `json:"maxPromptChars,omitempty"`
 	VideoBillingMode  string             `json:"videoBillingMode,omitempty"`
 	// 按量计费 for chat: points per 1,000 input / output tokens.
-	TokenInputPrice             float64                       `json:"tokenInputPrice,omitempty"`
-	TokenOutputPrice            float64                       `json:"tokenOutputPrice,omitempty"`
+	TokenInputPrice  float64 `json:"tokenInputPrice,omitempty"`
+	TokenOutputPrice float64 `json:"tokenOutputPrice,omitempty"`
+	// Input tokens the provider read from its cache (unset: the input price).
+	TokenCachedPrice *float64 `json:"tokenCachedPrice,omitempty"`
+	// Peak-hour multiplier on all three prices (DeepSeek: 2); 0 or 1 = none.
+	PeakPriceRate               float64                       `json:"peakPriceRate,omitempty"`
 	MaxOutputTokens             int                           `json:"maxOutputTokens,omitempty"`
 	PriceMatrix                 map[string]map[string]float64 `json:"priceMatrix,omitempty"`
 	PricePerRequestByResolution map[string]float64            `json:"pricePerRequestByResolution,omitempty"`

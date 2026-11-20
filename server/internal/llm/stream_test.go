@@ -1,6 +1,7 @@
 package llm
 
 import (
+	"encoding/json"
 	"errors"
 	"net/http"
 	"net/http/httptest"
@@ -59,6 +60,20 @@ func TestStreamErrorsMidReplyAreExplained(t *testing.T) {
 		srv.Close()
 		if err == nil || !strings.Contains(err.Error(), want) {
 			t.Fatal(want, err)
+		}
+	}
+}
+
+// Cache hits are read from either provider's usage shape.
+func TestUsageReadsCacheHits(t *testing.T) {
+	for raw, want := range map[string]Usage{
+		`{"prompt_tokens":100,"completion_tokens":5,"prompt_cache_hit_tokens":60,"prompt_cache_miss_tokens":40}`: {100, 5, 60},
+		`{"prompt_tokens":100,"completion_tokens":5,"prompt_tokens_details":{"cached_tokens":30}}`:               {100, 5, 30},
+		`{"prompt_tokens":100,"completion_tokens":5}`:                                                            {100, 5, 0},
+	} {
+		var u Usage
+		if err := json.Unmarshal([]byte(raw), &u); err != nil || u != want {
+			t.Fatal(raw, u, err)
 		}
 	}
 }

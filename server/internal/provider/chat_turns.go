@@ -16,8 +16,8 @@ const (
 	historyRunes = 8000 // all earlier turns together
 )
 
-// recentTurns reads the turns before j in its project, oldest first, from
-// one short page of the user's chat jobs rather than all of their jobs.
+// recentTurns reads up to 30 turns before j in its project, oldest first,
+// from one page of the user's chat jobs rather than all of their jobs.
 func recentTurns(ctx context.Context, s store.Store, j core.Job) ([]core.Job, error) {
 	q := core.JobQuery{User: j.UserID, Kind: "chat", Status: "succeeded", Session: j.Input.SessionID, Page: 1, Size: 30}
 	page, err := s.JobPage(ctx, q)
@@ -29,9 +29,6 @@ func recentTurns(ctx context.Context, s store.Store, j core.Job) ([]core.Job, er
 		// Session "" matches every project in the query; keep the exact one.
 		if old.Input.SessionID == j.Input.SessionID && old.ID != j.ID && old.CreatedAt.Before(j.CreatedAt) {
 			out = append(out, old)
-			if len(out) == historyTurns {
-				break
-			}
 		}
 	}
 	slices.Reverse(out)

@@ -28,7 +28,7 @@ func TestProjectHistoryIsScopedAndCarriesSkillAndMaterials(t *testing.T) {
 	add("other", "别的项目")
 	now := core.NewJob("u", "now", core.JobInput{Kind: "chat", Prompt: "改第二镜", Purpose: "agent", SessionID: "proj"})
 	body := map[string]any{"messages": []any{map[string]any{"role": "user", "content": "改第二镜"}}}
-	if err := chatHistory(ctx, s, now, body); err != nil {
+	if err := chatHistory(ctx, s, now, body, nil); err != nil {
 		t.Fatal(err)
 	}
 	msgs := body["messages"].([]any)

@@ -88,7 +88,7 @@ var definitions = []Group{
 	{ID: "chat", Name: "对话模型", Hint: "创作助手（Agent）和「AI写剧本」直接调用 DeepSeek、豆包（火山方舟）。填写的每个模型会出现在「模型管理」里，按输入、输出 token 计费，单价在模型的生成能力里设置。保存后重启服务生效。", Fields: []Field{
 		{Key: "CHAT_DEEPSEEK_BASE_URL", Label: "DeepSeek API 地址", Kind: "url", Default: "https://api.deepseek.com"},
 		{Key: "CHAT_DEEPSEEK_API_KEY", Label: "DeepSeek API Key", Kind: "secret"},
-		{Key: "CHAT_DEEPSEEK_MODELS", Label: "DeepSeek 模型", Kind: "text", Default: DefaultDeepSeekModels, Hint: "模型 ID，多个用逗号分隔，例如 deepseek-chat。DeepSeek 不能识别图片。"},
+		{Key: "CHAT_DEEPSEEK_MODELS", Label: "DeepSeek 模型", Kind: "text", Default: DefaultDeepSeekModels, Hint: "模型 ID，多个用逗号分隔，例如 deepseek-flash、deepseek-v4-pro。DeepSeek 不能识别图片。"},
 		{Key: "CHAT_ARK_BASE_URL", Label: "火山方舟 API 地址", Kind: "url", Default: "https://ark.cn-beijing.volces.com/api/v3"},
 		{Key: "CHAT_ARK_API_KEY", Label: "火山方舟 API Key", Kind: "secret", Hint: "留空时使用「视频理解」的 API Key。"},
 		{Key: "CHAT_ARK_MODELS", Label: "豆包模型", Kind: "text", Default: DefaultArkChatModels, Hint: "方舟控制台已开通的模型 ID 或推理接入点 ID，多个用逗号分隔。"},

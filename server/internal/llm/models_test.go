@@ -63,3 +63,18 @@ func TestEnsureModelsListsConfiguredModelsAndKeepsOperatorSettings(t *testing.T)
 		t.Fatal(relay)
 	}
 }
+
+// A model never repriced moves to the new default prices; one an operator
+// priced keeps its prices.
+func TestOldDefaultPricesMoveToTheCurrentOnes(t *testing.T) {
+	hit := 0.0002
+	p := Provider{InputPrice: 0.01, OutputPrice: 0.04, CachedPrice: &hit, PeakRate: 2, Previous: [2]float64{0.02, 0.03}}
+	old := core.ModelSettings{TokenInputPrice: 0.02, TokenOutputPrice: 0.03}
+	if !reprice(&old, p) || old.TokenInputPrice != 0.01 || *old.TokenCachedPrice != hit || old.PeakPriceRate != 2 {
+		t.Fatal(old)
+	}
+	mine := core.ModelSettings{TokenInputPrice: 0.05, TokenOutputPrice: 0.03}
+	if reprice(&mine, p) || mine.TokenInputPrice != 0.05 {
+		t.Fatal(mine)
+	}
+}

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 )
 
 // Completion and expiration settle funds and notify in the same transaction.
@@ -35,6 +36,16 @@ func completeJobAccounting(tx Transaction, j core.Job, failure string) error {
 		used := min(max(*bill.UsedUnits, 0), bill.Units)
 		entry.Kind, entry.AvailableDelta = "job_usage", bill.Units-used
 		entry.Note = fmt.Sprintf("对话按用量扣除 %s 积分（输入 %d / 输出 %d token）", core.FormatPoints(used), bill.InputTokens, bill.OutputTokens)
+		if bill.CachedTokens > 0 || bill.Peak {
+			extra := []string{}
+			if bill.CachedTokens > 0 {
+				extra = append(extra, fmt.Sprintf("其中缓存命中 %d", bill.CachedTokens))
+			}
+			if bill.Peak {
+				extra = append(extra, "高峰时段")
+			}
+			entry.Note = strings.TrimSuffix(entry.Note, "）") + "；" + strings.Join(extra, "，") + "）"
+		}
 		bill.ReservedUnits, bill.Units = bill.Units, used
 	}
 	if _, err = ApplyFunds(tx, entry); err != nil {

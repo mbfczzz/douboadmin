@@ -83,7 +83,7 @@ func TestDirectChatChargesTokensUsedAndReturnsTheRest(t *testing.T) {
 	}
 	hold := j.CostUnits
 	// (input cap + 1000 output) at 1 and 2 points per 1,000 tokens
-	if want, _ := billing.TokenUnits(core.ModelSettings{TokenInputPrice: 1, TokenOutputPrice: 2}, billing.ChatInputCap(j.Input), 1000); hold != want || hold == 0 {
+	if want, _ := billing.TokenUnits(core.ModelSettings{TokenInputPrice: 1, TokenOutputPrice: 2}, billing.Tokens{Input: billing.ChatInputCap(j.Input), Output: 1000}, false); hold != want || hold == 0 {
 		t.Fatal("hold", hold, want)
 	}
 	text, err := p.Generate(t.Context(), j)
