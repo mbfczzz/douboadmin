@@ -1,4 +1,5 @@
 import type { Job } from "../../services/types";
+import { error } from "../../utils/api";
 import type { Labelled } from "./materials";
 
 // 编辑: a sent question comes back into the input box (with its
@@ -17,8 +18,10 @@ export const editHandlers = {
     const job = this.history.find((j) => j.id === id);
     if (!job) return;
     const assets = job.input.assets || [];
-    const attached = this.data.materials.filter((m) => assets.includes(m.id));
+    // Its pictures and videos come back too, in the order it sent them.
+    const attached = assets.map((a) => this.data.materials.find((m) => m.id === a)).filter((m): m is Labelled => !!m);
     this.setData({ prompt: job.input.prompt, attached, editing: id, focus: true });
+    if (attached.length < assets.length) error(new Error(`有 ${assets.length - attached.length} 个附件已从项目移除，需要的话请重新上传`));
   },
   cancelEdit(this: Page) {
     this.setData({ editing: "", prompt: "", attached: [] });

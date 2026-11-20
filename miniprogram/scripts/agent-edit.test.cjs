@@ -43,23 +43,30 @@ test("编辑 brings a sent question back; sending asks again and revises it", as
     return ok({ items: [], total: 0 });
   };
   const { materialLabels } = h.service("../pages/agent/materials");
-  const materials = materialLabels([{ id: "p1", isImage: true, data: { url: "/1.png" } }, { id: "p2", isImage: true, data: { url: "/2.png" } }]);
+  const materials = materialLabels([{ id: "p1", isImage: true, data: { url: "/1.png" } }, { id: "p2", isImage: true, data: { url: "/2.png" } }, { id: "v1", isImage: false, data: { url: "/v.mp4", thumbnailUrl: "/v.jpg" } }]);
   page.setData({ session: { id: "s1", version: 1, data: { title: "店", skill: "general", assets: [] }, assets: [] }, materials, model: "db" });
-  page.history = [{ id: "c1", status: "succeeded", result: "旧回答", input: { kind: "chat", prompt: "分析这张图片", assets: ["p2"], sessionId: "s1" } }];
+  page.history = [{ id: "c1", status: "succeeded", result: "旧回答", input: { kind: "chat", prompt: "分析这张图片", assets: ["p2", "v1"], sessionId: "s1" } }];
   page.editMessage({ currentTarget: { dataset: { id: "c1u" } } });
   assert.equal(page.data.prompt, "分析这张图片");
-  assert.deepEqual(plain(page.data.attached.map((m) => m.id)), ["p2"]);
+  // The picture and the video it carried come back with their names.
+  assert.deepEqual(plain(page.data.attached.map((m) => [m.id, m.label])), [["p2", "图片2"], ["v1", "视频1"]]);
   assert.equal(page.data.editing, "c1");
   page.setData({ prompt: "分析这张图片的配色" });
   await page.send();
   assert.equal(sent[0].revises, "c1");
-  assert.deepEqual(plain(sent[0].assets), ["p2"]);
+  assert.deepEqual(plain(sent[0].assets), ["p2", "v1"]);
   assert.equal(page.data.editing, "");
   // A plain message afterwards revises nothing; 取消 clears an edit.
   page.setData({ prompt: "再来一版" });
   await page.send();
   assert.equal(sent[1].revises, undefined);
+  // A file since removed from the project is said, not silently dropped.
+  const toasts = [];
+  h.wx.showToast = (o) => toasts.push(o.title);
+  page.history = [{ id: "c1", status: "succeeded", result: "旧回答", input: { kind: "chat", prompt: "分析这张图片", assets: ["p2", "gone"], sessionId: "s1" } }];
   page.editMessage({ currentTarget: { dataset: { id: "c1u" } } });
+  assert.deepEqual(plain(page.data.attached.map((m) => m.id)), ["p2"]);
+  assert.match(toasts.join(), /有 1 个附件已从项目移除/);
   page.cancelEdit();
   assert.equal(page.data.editing, "");
   assert.equal(page.data.prompt, "");
