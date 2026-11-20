@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"strings"
 	"time"
@@ -88,12 +89,22 @@ func (e *Error) Error() string { return e.Message }
 func upstream(status int, body []byte) error {
 	var reply struct {
 		Error struct {
+			Code    string `json:"code"`
 			Message string `json:"message"`
 		} `json:"error"`
 	}
 	_ = json.Unmarshal(body, &reply)
 	e := &Error{Status: status, Retry: status == 429 || status >= 500}
+	// Users get Chinese; the provider's own words go to the log for the operator.
+	slog.Warn("chat model request failed", "status", status, "code", reply.Error.Code, "message", reply.Error.Message)
+	lower := strings.ToLower(reply.Error.Code + " " + reply.Error.Message)
 	switch {
+	case strings.Contains(lower, "not activated") || strings.Contains(lower, "modelnotopen"):
+		e.Message = "该对话模型还没有在服务商处开通，请联系管理员开通或换一个模型"
+	case strings.Contains(lower, "model") && (strings.Contains(lower, "not found") || strings.Contains(lower, "not exist") || strings.Contains(lower, "does not exist")):
+		e.Message = "对话模型不存在，请联系管理员检查模型 ID"
+	case strings.Contains(lower, "content") && (strings.Contains(lower, "sensitive") || strings.Contains(lower, "risk") || strings.Contains(lower, "inspection")):
+		e.Message = "内容未通过安全审核，请换个说法再试"
 	case status == 401 || status == 403:
 		e.Message = "对话模型 API Key 无效或没有权限，请联系管理员"
 	case status == 402:
@@ -103,13 +114,7 @@ func upstream(status int, body []byte) error {
 	case status >= 500:
 		e.Message = "对话模型服务繁忙，请稍后重试"
 	default:
-		e.Message = "对话模型拒绝了请求"
-		if m := strings.TrimSpace(reply.Error.Message); m != "" {
-			if r := []rune(m); len(r) > 120 {
-				m = string(r[:120])
-			}
-			e.Message += "：" + m
-		}
+		e.Message = "对话模型暂时无法处理这次请求，请稍后重试；多次失败请联系管理员"
 	}
 	return e
 }
