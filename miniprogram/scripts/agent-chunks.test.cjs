@@ -76,3 +76,19 @@ test("停止回复 asks the server to stop the reply being written", async () =>
   page.onHide();
   assert.equal(task().aborted, true); // leaving closes the stream
 });
+
+test("typing never stops inside an emoji", async () => {
+  const h = harness();
+  await h.api.signIn();
+  const page = h.page("agent");
+  const status = { value: "running" };
+  const task = streaming(h, status);
+  page.setData({ session });
+  await page.load(true);
+  task().push('data: {"text":"' + "🎬".repeat(20) + '"}\n\n');
+  const seen = [];
+  for (let i = 0; i < 40 && page.data.messages[1].text !== "🎬".repeat(20); i++) await wait(20), seen.push(page.data.messages[1].text);
+  assert.ok(seen.length > 1);
+  for (const s of seen) assert.ok(!/[\ud800-\udbff]$/.test(s), "half an emoji shown: " + JSON.stringify(s.slice(-2)));
+  page.onUnload();
+});

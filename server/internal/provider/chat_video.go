@@ -70,22 +70,27 @@ func (p *DirectChat) videoNote(ctx context.Context, j core.Job, assetID, url str
 	return "【" + label + " 的内容（由视频理解模型观看后整理）】\n" + n.Note
 }
 
-// materialLabel is the name the user sees: 视频2 is the project's second video.
+// materialLabel is the name the user sees: 视频2 is the project's second
+// video, 图片3 its third picture (as plans refer to them).
 func materialLabel(ctx context.Context, p *DirectChat, j core.Job, assetID string) string {
+	word := map[string]string{"image": "图片", "video": "视频"}[assetType(ctx, p, assetID)]
+	if word == "" {
+		word = "素材"
+	}
 	session, err := loadSession(ctx, p.Store, j)
 	if err != nil {
-		return "视频"
+		return word
 	}
-	n := 0
+	n, typ := 0, assetType(ctx, p, assetID)
 	for _, id := range session.Assets {
-		if assetType(ctx, p, id) == "video" {
+		if assetType(ctx, p, id) == typ {
 			n++
 		}
 		if id == assetID {
-			return fmt.Sprintf("视频%d", n)
+			return fmt.Sprintf("%s%d", word, n)
 		}
 	}
-	return "视频"
+	return word
 }
 
 func assetType(ctx context.Context, p *DirectChat, id string) string {

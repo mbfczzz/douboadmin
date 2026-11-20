@@ -188,8 +188,11 @@ Page({
       ratio: plan?.ratio || "9:16",
       resolution: "",
       duration: plan?.kind === "image" ? 0 : plan?.duration || 5,
-      // The materials the plan names (the project may hold many).
-      assets: (this.data.materials as Labelled[]).filter((x) => plan && new RegExp(x.label + "(?!\\d)").test(plan.prompt + plan.shots.map((s) => s.asset).join(" "))).map((x) => x.id),
+      // The materials the plan names (the project may hold many), or for
+      // a plain reply, what its question carried.
+      assets: plan
+        ? (this.data.materials as Labelled[]).filter((x) => new RegExp(x.label + "(?!\\d)").test(plan.prompt + plan.shots.map((s) => s.asset).join(" "))).map((x) => x.id)
+        : (this.history as Job[]).find((j) => m && j.id + "a" === m.id)?.input.assets || [],
     });
     openPage(this, { url: "/pages/create/index?kind=" + (plan?.kind || "video") });
   },

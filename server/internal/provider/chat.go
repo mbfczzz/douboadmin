@@ -5,6 +5,7 @@ import (
 	"doubo/server/internal/core"
 	"doubo/server/internal/store"
 	"encoding/json"
+	"strconv"
 	"strings"
 )
 
@@ -28,12 +29,14 @@ func chatHistory(ctx context.Context, s store.Store, j core.Job, body map[string
 	}
 	system, keep := assistantSystem, 2000
 	var session *sessionRow
+	names := map[string]string{} // material id -> 图片3 / 视频1
 	if j.Input.SessionID != "" {
 		var err error
 		if session, err = loadSession(ctx, s, j); err != nil {
 			return err
 		}
-		system, keep = sessionSystem(ctx, s, j, session.AgentSession), 4000 // the last plan must reach the model whole
+		system, names = sessionSystem(ctx, s, j, session.AgentSession)
+		keep = 4000 // the last plan must reach the model whole
 	}
 	turns, err := recentTurns(ctx, s, j)
 	if err != nil {
@@ -50,7 +53,7 @@ func chatHistory(ctx context.Context, s store.Store, j core.Job, body map[string
 	}
 	messages := []any{map[string]string{"role": "system", "content": system}}
 	for _, old := range trimTurns(turns, keep) {
-		messages = append(messages, map[string]string{"role": "user", "content": old.Input.Prompt}, map[string]string{"role": "assistant", "content": old.Result})
+		messages = append(messages, map[string]string{"role": "user", "content": old.Input.Prompt + attachedNote(old, names)}, map[string]string{"role": "assistant", "content": old.Result})
 	}
 	if current, ok := body["messages"].([]any); ok {
 		messages = append(messages, current...)
@@ -73,20 +76,40 @@ func loadSession(ctx context.Context, s store.Store, j core.Job) (*sessionRow, e
 	return out, json.Unmarshal(row.Data, &out.AgentSession)
 }
 
-func sessionSystem(ctx context.Context, s store.Store, j core.Job, session core.AgentSession) string {
+// attachedNote names what an earlier question carried (the files are not
+// sent again), so "刚才那张图" can be matched to 图片3.
+func attachedNote(j core.Job, names map[string]string) string {
+	list := []string{}
+	for _, id := range j.Input.Assets {
+		if n := names[id]; n != "" {
+			list = append(list, n)
+		}
+	}
+	if len(list) == 0 {
+		return ""
+	}
+	return "（附带：" + strings.Join(list, "、") + "）"
+}
+
+// sessionSystem is the project's system prompt, and its materials' names.
+func sessionSystem(ctx context.Context, s store.Store, j core.Job, session core.AgentSession) (string, map[string]string) {
 	skill, ok := core.AgentSkillByID(session.Skill)
 	if !ok {
 		skill, _ = core.AgentSkillByID("general")
 	}
-	counts := map[string]int{}
+	counts, names := map[string]int{}, map[string]string{}
 	for _, id := range session.Assets {
 		if a, err := s.Get(ctx, "assets", id); err == nil && a.Owner == j.UserID {
 			var v struct {
 				Type string `json:"type"`
 			}
 			_ = json.Unmarshal(a.Data, &v)
-			counts[strings.Split(v.Type, "/")[0]]++
+			typ := strings.Split(v.Type, "/")[0]
+			counts[typ]++
+			if word := map[string]string{"image": "图片", "video": "视频"}[typ]; word != "" {
+				names[id] = word + strconv.Itoa(counts[typ])
+			}
 		}
 	}
-	return core.AgentSystemPrompt(skill, counts)
+	return core.AgentSystemPrompt(skill, counts), names
 }

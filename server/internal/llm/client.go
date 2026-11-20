@@ -26,6 +26,7 @@ func (c *Client) Ready() bool { return c != nil && c.BaseURL != "" && c.Key != "
 // Input read from the provider's cache, charged at the cache price.
 type Usage struct {
 	Input, Output, Cached int
+	Truncated             bool // the reply hit max_tokens (finish_reason "length")
 }
 
 // DeepSeek reports prompt_cache_hit_tokens; 方舟 (OpenAI style) reports

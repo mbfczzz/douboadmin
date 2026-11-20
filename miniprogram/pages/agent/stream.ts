@@ -48,6 +48,9 @@ function type(page: Page) {
   const backlog = t.target.length - t.shown;
   if (backlog <= 0) return;
   t.shown += Math.max(1, Math.ceil(backlog / 6)); // a burst drains in about 0.3 s
+  // Never stop between the two halves of an emoji (UTF-16 surrogates).
+  const last = t.target.charCodeAt(t.shown - 1);
+  if (last >= 0xd800 && last <= 0xdbff && t.shown < t.target.length) t.shown++;
   render(page, t.id, t.target.slice(0, t.shown));
   if (t.shown < t.target.length) t.timer = setTimeout(() => type(page), TYPE_MS) as unknown as number;
 }

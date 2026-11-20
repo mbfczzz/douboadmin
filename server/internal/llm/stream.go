@@ -23,6 +23,7 @@ type chunk struct {
 func readStream(body io.Reader, onText func(string) error) (string, Usage, error) {
 	var text strings.Builder
 	var usage Usage
+	truncated := false
 	lines := bufio.NewScanner(body)
 	lines.Buffer(make([]byte, 64<<10), 1<<20)
 	for lines.Scan() {
@@ -32,6 +33,7 @@ func readStream(body io.Reader, onText func(string) error) (string, Usage, error
 			continue
 		}
 		if data == "[DONE]" {
+			usage.Truncated = truncated
 			return text.String(), usage, nil
 		}
 		var c chunk
@@ -43,6 +45,9 @@ func readStream(body io.Reader, onText func(string) error) (string, Usage, error
 		}
 		if c.Usage != nil {
 			usage = *c.Usage
+		}
+		if len(c.Choices) > 0 && c.Choices[0].FinishReason == "length" {
+			truncated = true
 		}
 		if len(c.Choices) > 0 && c.Choices[0].FinishReason == "content_filter" {
 			return "", Usage{}, &Error{Message: "内容未通过安全审核，请换个说法再试"}
@@ -68,6 +73,7 @@ func readWhole(body io.Reader) (string, Usage, error) {
 			Message struct {
 				Content string `json:"content"`
 			} `json:"message"`
+			FinishReason string `json:"finish_reason"`
 		} `json:"choices"`
 		Usage *Usage `json:"usage"`
 	}
@@ -78,5 +84,6 @@ func readWhole(body io.Reader) (string, Usage, error) {
 	if reply.Usage != nil {
 		usage = *reply.Usage
 	}
+	usage.Truncated = reply.Choices[0].FinishReason == "length"
 	return reply.Choices[0].Message.Content, usage, nil
 }

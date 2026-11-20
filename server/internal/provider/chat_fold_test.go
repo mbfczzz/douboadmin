@@ -95,3 +95,21 @@ func TestEditedTurnsLeaveTheConversation(t *testing.T) {
 		t.Fatal(string(raw))
 	}
 }
+
+// Earlier questions say what they carried (the files are not resent).
+func TestEarlierTurnsNameTheirAttachments(t *testing.T) {
+	s, now := projectTurns(t, 1)
+	_, _ = s.Put(t.Context(), "assets", core.Record{ID: "p1", Owner: "u", Data: core.Data(map[string]any{"type": "image/png"})}, 0)
+	row, _ := s.Get(t.Context(), "agent_sessions", "proj")
+	_, _ = s.Put(t.Context(), "agent_sessions", core.Record{ID: "proj", Owner: "u", Data: core.Data(core.AgentSession{Skill: "store", Assets: []string{"p1"}})}, row.Version)
+	page, _ := s.JobPage(t.Context(), core.JobQuery{User: "u", Kind: "chat", Session: "proj", Page: 1, Size: 10})
+	old := page.Items[0]
+	old.Input.Assets = []string{"p1"}
+	if note := attachedNote(old, map[string]string{"p1": "图片1"}); note != "（附带：图片1）" {
+		t.Fatal(note)
+	}
+	_, names := sessionSystem(t.Context(), s, now, core.AgentSession{Skill: "store", Assets: []string{"p1"}})
+	if names["p1"] != "图片1" {
+		t.Fatal(names)
+	}
+}

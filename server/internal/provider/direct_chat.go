@@ -132,6 +132,9 @@ func (p *DirectChat) Generate(ctx context.Context, j core.Job) (string, error) {
 	if err != nil {
 		return fail(err)
 	}
+	if usage.Truncated { // cut at the reply cap: say so (a cut plan shows as 方案没有完整输出)
+		text += "\n\n（回复达到长度上限，后面的内容被截断了，可以说“继续”接着写）"
+	}
 	if usage.Input+usage.Output == 0 { // provider omitted usage: count characters instead
 		usage = llm.Usage{Input: estimateTokens(messages), Output: len([]rune(text))}
 	}
@@ -188,7 +191,7 @@ func (p *DirectChat) messages(ctx context.Context, j core.Job, m core.Model, sum
 		if err != nil {
 			return nil, err
 		}
-		text, pictures := j.Input.Prompt, []any{}
+		text, pictures, names := j.Input.Prompt, []any{}, []string{}
 		for i, r := range refs {
 			switch {
 			case r.Type == "video" && i < len(j.Input.Assets): // watched by 视频理解, told as text
@@ -198,7 +201,15 @@ func (p *DirectChat) messages(ctx context.Context, j core.Job, m core.Model, sum
 				return nil, fmt.Errorf("%s 不能识别图片，请换用能看图的模型", m.Name)
 			default:
 				pictures = append(pictures, map[string]any{"type": "image_url", "image_url": map[string]string{"url": r.URL}})
+				if i < len(j.Input.Assets) {
+					names = append(names, materialLabel(ctx, p, j, j.Input.Assets[i]))
+				}
 			}
+		}
+		// The model sees the pictures but not their project names; plans must
+		// say @图片3 for the third picture, not count from this message.
+		if len(names) == len(pictures) && len(names) > 0 {
+			text += "\n\n（这条消息附带的图片依次是：" + strings.Join(names, "、") + "）"
 		}
 		content = text
 		if len(pictures) > 0 {

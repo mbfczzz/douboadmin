@@ -67,13 +67,30 @@ func TestStreamErrorsMidReplyAreExplained(t *testing.T) {
 // Cache hits are read from either provider's usage shape.
 func TestUsageReadsCacheHits(t *testing.T) {
 	for raw, want := range map[string]Usage{
-		`{"prompt_tokens":100,"completion_tokens":5,"prompt_cache_hit_tokens":60,"prompt_cache_miss_tokens":40}`: {100, 5, 60},
-		`{"prompt_tokens":100,"completion_tokens":5,"prompt_tokens_details":{"cached_tokens":30}}`:               {100, 5, 30},
-		`{"prompt_tokens":100,"completion_tokens":5}`:                                                            {100, 5, 0},
+		`{"prompt_tokens":100,"completion_tokens":5,"prompt_cache_hit_tokens":60,"prompt_cache_miss_tokens":40}`: {100, 5, 60, false},
+		`{"prompt_tokens":100,"completion_tokens":5,"prompt_tokens_details":{"cached_tokens":30}}`:               {100, 5, 30, false},
+		`{"prompt_tokens":100,"completion_tokens":5}`:                                                            {100, 5, 0, false},
 	} {
 		var u Usage
 		if err := json.Unmarshal([]byte(raw), &u); err != nil || u != want {
 			t.Fatal(raw, u, err)
 		}
+	}
+}
+
+// A reply cut at max_tokens is marked, streamed or whole.
+func TestRepliesCutAtTheCapAreMarked(t *testing.T) {
+	srv := httptest.NewServer(sse(`{"choices":[{"delta":{"content":"镜头"}}]}`, `{"choices":[{"delta":{"content":""},"finish_reason":"length"}]}`,
+		`{"choices":[],"usage":{"prompt_tokens":3,"completion_tokens":4096}}`, "[DONE]"))
+	defer srv.Close()
+	if _, u, err := (&Client{BaseURL: srv.URL, Key: "k"}).Complete(t.Context(), "m", nil, 0, nil); err != nil || !u.Truncated || u.Output != 4096 {
+		t.Fatal(u, err)
+	}
+	whole := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write([]byte(`{"choices":[{"message":{"content":"镜头"},"finish_reason":"length"}]}`))
+	}))
+	defer whole.Close()
+	if _, u, _ := (&Client{BaseURL: whole.URL, Key: "k"}).Complete(t.Context(), "m", nil, 0, nil); !u.Truncated {
+		t.Fatal("not marked")
 	}
 }

@@ -67,11 +67,24 @@ export function splitReply(text: string): { text: string; plan?: PlanView; broke
 }
 
 // Reply prose without Markdown marks the chat does not render.
+// Tables become "A · B · C" lines, links keep their text and address,
+// code keeps its content without fences or backticks.
+const tableRule = /^[ \t]*\|?[ \t]*:?-{3,}:?[ \t]*(\|[ \t]*:?-{3,}:?[ \t]*)*\|?[ \t]*$/gm;
 export const plainReply = (text: string) =>
   text
+    .replace(/\r\n?/g, "\n")
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/```[a-zA-Z]*[ \t]*\n?/g, "")
+    .replace(tableRule, "")
+    .replace(/^[ \t]*\|(.+?)\|?[ \t]*$/gm, (_, row: string) => row.split("|").map((c) => c.trim()).filter(Boolean).join(" · "))
+    .replace(/\[([^\]\n]+)\]\((https?:\/\/[^)\s]+)\)/g, "$1（$2）")
+    .replace(/`([^`\n]+)`/g, "$1")
+    .replace(/^[ \t]*>[ \t]?/gm, "")
+    .replace(/^[ \t]*(?:\*{3,}|_{3,})[ \t]*$/gm, "")
     .replace(/\*\*(.+?)\*\*/g, "$1")
+    .replace(/__(.+?)__/g, "$1")
     .replace(/^#{1,6}\s*/gm, "")
-    .replace(/^\s*[-*]\s+/gm, "· ")
+    .replace(/^\s*[-*+]\s+/gm, "· ")
     .replace(/\n{3,}/g, "\n\n")
     .trim();
 

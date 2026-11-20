@@ -54,3 +54,26 @@ func TestUnwatchableVideosAreSaidSo(t *testing.T) {
 		t.Fatal(note)
 	}
 }
+
+// Attached pictures are named as the project numbers them, so a plan's
+// @图片3 means the right picture.
+func TestAttachedPicturesAreNamedAsInTheProject(t *testing.T) {
+	s, p, j, bodies := directFixture(t, `{"choices":[{"message":{"content":"好"}}]}`, 200)
+	for _, id := range []string{"a", "b", "c"} {
+		_, _ = s.Put(t.Context(), "assets", core.Record{ID: id, Owner: "u", Data: core.Data(map[string]any{"type": "image/png"})}, 0)
+	}
+	_, _ = s.Put(t.Context(), "agent_sessions", core.Record{ID: "proj", Owner: "u", Data: core.Data(core.AgentSession{Skill: "general", Assets: []string{"a", "b", "c"}})}, 0)
+	row, _ := s.Get(t.Context(), "models", "ds")
+	var m core.Model
+	_ = json.Unmarshal(row.Data, &m)
+	m.ReferenceTypes = []string{"image"}
+	_, _ = s.Put(t.Context(), "models", core.Record{ID: "ds", Data: core.Data(m)}, row.Version)
+	j.Input.SessionID, j.Input.Assets = "proj", []string{"c"}
+	if _, err := p.Generate(t.Context(), j); err != nil {
+		t.Fatal(err)
+	}
+	raw, _ := json.Marshal((*bodies)[0]["messages"])
+	if !strings.Contains(string(raw), "这条消息附带的图片依次是：图片3") {
+		t.Fatal(string(raw))
+	}
+}

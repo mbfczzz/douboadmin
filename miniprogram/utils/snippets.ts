@@ -14,7 +14,8 @@ export function keyContent(text: string): string[] {
   const out: string[] = [];
   const add = (s: string) => {
     s = unquote(s);
-    if (s.length >= 4 && s.length <= 400 && !out.includes(s) && out.length < MAX) out.push(s);
+    // Prompts and code can be long; copying them whole is the point.
+    if (s.length >= 4 && s.length <= 2000 && !out.includes(s) && out.length < MAX) out.push(s);
   };
   fence.lastIndex = 0;
   for (let m = fence.exec(text); m; m = fence.exec(text)) add(m[1]);
