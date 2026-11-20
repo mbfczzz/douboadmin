@@ -28,7 +28,8 @@ export function splitReply(text: string): { text: string; plan?: PlanView } {
     }));
     const kind = v.kind === "image" ? "image" : "video";
     const plan: Plan = { kind, title: str(v.title, 20) || "创作方案", duration: Math.round(Number(v.duration)) || 15, ratio: str(v.ratio, 6) || "9:16", prompt, shots };
-    return { text: rest, plan: { ...plan, meta: planMeta(plan) } };
+    const lead = shots.find((s) => s.asset)?.asset || ""; // the plan cover's picture
+    return { text: rest, plan: { ...plan, meta: planMeta(plan), lead } };
   } catch {
     return { text: rest }; // a broken block is dropped rather than shown as code
   }

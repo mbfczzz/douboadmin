@@ -18,10 +18,18 @@ export function materialLabels(materials: Material[]) {
   return materials.map((m) => ({ ...m, label: m.isImage ? "图片" + ++images : "视频" + ++videos }));
 }
 
+// Labels plus a label -> picture map the plan cards read (videos: cover).
+export function materialData(list: Material[]) {
+  const materials = materialLabels(list);
+  const thumbs: Record<string, string> = {};
+  for (const m of materials) thumbs[m.label] = m.isImage ? m.data.url : m.data.thumbnailUrl || "";
+  return { materials, thumbs };
+}
+
 async function save(page: Page, ids: string[], materials: Material[]) {
   const s = page.data.session!;
   const row = await updateSession(s.id, s.version, { assets: ids });
-  if (!page.destroyed) page.setData({ session: { ...s, version: row.version, data: row.data }, materials: materialLabels(materials) });
+  if (!page.destroyed) page.setData({ session: { ...s, version: row.version, data: row.data }, ...materialData(materials) });
 }
 
 export const materialHandlers = {

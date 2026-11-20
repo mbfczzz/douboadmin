@@ -6,11 +6,12 @@ import type { ChatMessage } from "../../utils/chat";
 import { chatMessages } from "../../utils/chat";
 import { navBottom } from "../../utils/nav-metrics";
 import { createSession } from "../../services/agent";
-import type { Skill, SessionRow, SessionDetail } from "../../services/agent";
+import type { Skill, SessionDetail } from "../../services/agent";
+import type { ProjectView } from "./session";
 import { agentModels } from "./models";
 import type { ChatModel } from "./models";
 import { historyHandlers } from "./history";
-import { sessionHandlers } from "./session";
+import { sessionHandlers, projectView } from "./session";
 import { materialHandlers, materialLabels } from "./materials";
 import { generateHandlers } from "./generate";
 
@@ -28,10 +29,11 @@ Page({
     model: "",
     priceHint: "",
     session: null as SessionDetail | null,
-    projects: [] as SessionRow[],
+    projects: [] as ProjectView[],
     projectsOpen: false,
     skills: [] as Skill[],
     materials: [] as ReturnType<typeof materialLabels>,
+    thumbs: {} as Record<string, string>, // "图片1" -> its picture, for plan cards
     uploading: false,
     generating: false,
     prompt: "",
@@ -56,7 +58,7 @@ Page({
   historyKey: "",
   onShow() {
     this.onResize();
-    showArt(this, (art) => ({ art: { product: art.agentScript, image: art.agentPrompt, store: art.agentCoffee } }));
+    showArt(this, (art) => ({ art: { product: art.skillProduct, store: art.skillStore, image: art.skillImage, general: art.skillGeneral } }));
     tab(this, 3);
     void this.loadModels().catch(() => undefined);
     void this.loadSession()
@@ -109,7 +111,7 @@ Page({
       if (!model) throw new Error("创作助手暂未开放，请稍后再试");
       if (!this.data.session) {
         const row = await createSession("general"); // a first message starts a free project
-        this.setData({ session: { ...row, assets: [] }, projects: [row, ...this.data.projects] });
+        this.setData({ session: { ...row, assets: [] }, projects: [projectView(row, this.data.skills), ...this.data.projects] });
         await this.load(true); // adopt the new project before its first turn shows
       }
       // Pictures go to models that read them; others work from the names.

@@ -4,7 +4,8 @@ import { ask } from "../../services/dialog";
 import { skills, sessions, createSession, sessionDetail, updateSession } from "../../services/agent";
 import type { Skill, SessionRow, SessionDetail } from "../../services/agent";
 import { editorAsset } from "../../utils/editor-assets";
-import { materialLabels } from "./materials";
+import { materialData } from "./materials";
+import { date } from "../../utils/ui";
 
 // The Agent's 创作项目: which one is open (remembered per account), the
 // project sheet, starting one from a skill, and deleting one.
@@ -12,8 +13,16 @@ const KEY = "agent-session";
 const remembered = () => (wx.getStorageSync(KEY) as { user?: string; id?: string }) || {};
 const remember = (id: string) => wx.setStorageSync(KEY, { user: sessionUserId(), id });
 
+// A row in the project sheet: its skill (for the picture and name) and when it was last used.
+export type ProjectView = SessionRow & { skillName: string; when: string };
+export const projectView = (row: SessionRow, skills: Skill[]): ProjectView => ({
+  ...row,
+  skillName: skills.find((s) => s.id === row.data.skill)?.name || "创作",
+  when: row.data.activeAt ? date(row.data.activeAt) : "",
+});
+
 type Page = {
-  data: { session: SessionDetail | null; skills: Skill[]; projects: SessionRow[]; projectsOpen: boolean; prompt: string; materials: ReturnType<typeof editorAsset>[] };
+  data: { session: SessionDetail | null; skills: Skill[]; projects: ProjectView[]; projectsOpen: boolean; prompt: string; materials: ReturnType<typeof editorAsset>[] };
   destroyed: boolean;
   setData(data: Record<string, unknown>): void;
   load(force?: boolean): Promise<void>;
@@ -28,22 +37,23 @@ export const sessionHandlers = {
     if (this.destroyed) return;
     const saved = remembered();
     const id = saved.user === sessionUserId() && list.some((s) => s.id === saved.id) ? saved.id! : list[0]?.id;
-    this.setData({ projects: list, skills: all });
+    this.setData({ projects: list.map((row) => projectView(row, all)), skills: all });
     await this.showSession(id || "");
   },
   async showSession(this: Page, id: string) {
-    if (!id) return this.setData({ session: null, materials: [] });
+    if (!id) return this.setData({ session: null, materials: [], thumbs: {} });
     const detail = await sessionDetail(id);
     if (this.destroyed) return;
     remember(id);
     // Re-signed links for the same files would reload every picture on each visit.
     const shown = new Map(this.data.materials.map((m) => [m.id, m]));
-    const materials = materialLabels(detail.assets.map((a) => shown.get(a.id) || editorAsset(a)));
-    this.setData({ session: detail, materials });
+    this.setData({ session: detail, ...materialData(detail.assets.map((a) => shown.get(a.id) || editorAsset(a))) });
   },
   openProjects(this: Page) {
     this.setData({ projectsOpen: true });
-    void sessions().then((projects) => !this.destroyed && this.setData({ projects })).catch(() => undefined);
+    void sessions()
+      .then((list) => !this.destroyed && this.setData({ projects: list.map((row) => projectView(row, this.data.skills)) }))
+      .catch(() => undefined);
   },
   closeProjects(this: Page) {
     this.setData({ projectsOpen: false });
@@ -66,8 +76,8 @@ export const sessionHandlers = {
       const row = await createSession(skill.id);
       if (this.destroyed) return;
       remember(row.id);
-      this.setData({ session: { ...row, assets: [] }, materials: [], prompt: skill.starter || this.data.prompt, focus: true });
-      this.setData({ projects: [row, ...this.data.projects] });
+      this.setData({ session: { ...row, assets: [] }, materials: [], thumbs: {}, prompt: skill.starter || this.data.prompt, focus: true });
+      this.setData({ projects: [projectView(row, this.data.skills), ...this.data.projects] });
       await this.load(true);
     } catch (err) {
       error(err);

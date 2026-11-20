@@ -17,9 +17,11 @@ const ART_VERSION = 4;
 const SIGNED_MS = 12 * 60 * 60 * 1000;
 const NAMES = {
   mineBackdrop: "mine-bg", // 我的: backdrop before the user has a work
-  agentScript: "agent-script", // Agent starters
-  agentPrompt: "agent-prompt",
-  agentCoffee: "agent-coffee",
+  // Agent skills: picker, project bar, project sheet, empty project, plan covers
+  skillProduct: "skill-product",
+  skillStore: "skill-store",
+  skillImage: "skill-image",
+  skillGeneral: "skill-general",
   uploadExample: "upload-example", // 模板详情: how to shoot a product
   srcImage: "src-image", // upload sources: 图片 / 相册
   srcVideo: "src-video",

@@ -208,7 +208,10 @@ console.log(
 // utils/agent-plan.ts): 936,004 B. 889 -> 915 KiB.
 // Agent review: plan text for 复制, per-skill guidance in an empty project,
 // keeping signed material links across visits: 937,175 B. 915 -> 916 KiB.
-const budget = 916 * 1024;
+// Agent colour pass: skill photos on the project bar, sheet and empty
+// project, plan covers and shot thumbnails from the project's materials,
+// highlighted add buttons: 942,173 B. 916 -> 921 KiB.
+const budget = 921 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

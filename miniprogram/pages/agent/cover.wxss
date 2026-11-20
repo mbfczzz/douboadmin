@@ -1,0 +1,134 @@
+/* Colour from real content: skill photos (Codex, media/ui-art) and the
+   project's own materials on plan cards, generation cards and the sheet. */
+.project-thumb {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border-radius: 7px;
+}
+.skill-hero {
+  display: block;
+  width: 200px;
+  height: 132px;
+  margin: 0 auto 18px;
+  border-radius: 20px;
+  box-shadow: 0 12px 32px #00000099;
+}
+.plan-cover {
+  position: relative;
+  height: 108px;
+  margin: -14px -14px 6px;
+  overflow: hidden;
+  border-radius: 16px 16px 0 0;
+  background: var(--ui-field);
+}
+.plan-cover-photo,
+.plan-cover-shade {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+}
+.plan-cover-shade {
+  background: linear-gradient(180deg, #00000014 30%, #000000c7);
+}
+.plan-kind {
+  position: absolute;
+  left: 12px;
+  top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px 2px 6px;
+  border-radius: 10px;
+  font-size: 11px;
+  line-height: 16px;
+  color: #fff;
+  background: #0000008c;
+}
+.plan-cover .plan-title {
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 16px;
+  color: #fff;
+}
+.plan-shot .shot-time {
+  width: auto;
+  min-width: 48px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 6px;
+  text-align: center;
+  font-size: 11px;
+  line-height: 20px;
+  color: var(--ui-primary);
+  background: #00c8dc1f;
+}
+.plan-shot .shot-asset {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 24px;
+  padding: 0 6px 0 2px;
+  border-radius: 7px;
+}
+.shot-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+}
+.gen-wait {
+  position: relative;
+  overflow: hidden;
+}
+.gen-bg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.35;
+}
+.gen-wait t-loading,
+.gen-wait t-icon {
+  position: relative;
+}
+.gen-wait.is-failed {
+  color: #ff8a94;
+  background: #ff4d5a1f;
+}
+.chip-thumb {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border-radius: 8px;
+}
+.row-thumb {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  background: var(--ui-field);
+}
+.project-copy {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.project-sub {
+  font-size: 11px;
+  color: var(--ui-muted);
+}
+.material.add.wanted {
+  color: var(--ui-primary);
+  box-shadow: inset 0 0 0 1px #00c8dc80;
+  background: #00c8dc14;
+}

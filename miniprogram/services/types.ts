@@ -8,7 +8,7 @@ export type PendingPayment = { id: string; owner: string; deferred?: boolean };
 // An Agent reply's 创作方案 (see utils/agent-plan).
 export interface Shot { time: string; scene: string; asset: string; line: string; thumb?: string }
 export interface Plan { kind: "video" | "image"; title: string; duration: number; ratio: string; prompt: string; shots: Shot[] }
-export type PlanView = Plan & { meta: string };
+export type PlanView = Plan & { meta: string; lead: string };
 export interface ChatMessage {
   id: string;
   role: string;

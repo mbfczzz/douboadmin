@@ -5,13 +5,14 @@
     <text class="projects-label">新建</text>
     <view class="skill-grid">
       <view wx:for="{{skills}}" wx:key="id" class="skill-chip" data-id="{{item.id}}" bindtap="newProject" hover-class="starter-pressed" aria-role="button">
-        <t-icon name="{{item.icon}}" size="18" /><text>{{item.name}}</text>
+        <image wx:if="{{art[item.id]}}" class="chip-thumb" src="{{art[item.id]}}" mode="aspectFill" /><t-icon wx:else name="{{item.icon}}" size="18" /><text>{{item.name}}</text>
       </view>
     </view>
     <text wx:if="{{projects.length}}" class="projects-label">最近</text>
     <scroll-view scroll-y class="project-list">
       <view wx:for="{{projects}}" wx:key="id" class="project-row {{session&&session.id===item.id?'on':''}}" data-id="{{item.id}}" bindtap="switchProject" hover-class="starter-pressed" aria-role="button">
-        <text class="project-name">{{item.data.title}}</text>
+        <image wx:if="{{art[item.data.skill]}}" class="row-thumb" src="{{art[item.data.skill]}}" mode="aspectFill" /><view wx:else class="row-thumb" />
+        <view class="project-copy"><text class="project-name">{{item.data.title}}</text><text class="project-sub">{{item.skillName}}{{item.when?' · '+item.when:''}}</text></view>
         <view class="project-delete" data-id="{{item.id}}" catchtap="removeProject" aria-role="button" aria-label="{{'删除'+item.data.title}}"><t-icon name="delete" size="16" /></view>
       </view>
     </scroll-view>

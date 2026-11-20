@@ -14,9 +14,10 @@ Codex 生成的实拍风格深色图片，用于小程序界面装饰。所有�
 | 文件 | 宽度 | 用在哪里 |
 |---|---|---|
 | mine-bg.jpg | 1080 | 我的：用户还没有作品时的顶部背景 |
-| agent-script.jpg | 240 | Agent：示例「产品短视频脚本」 |
-| agent-prompt.jpg | 240 | Agent：示例「照片创意提示词」 |
-| agent-coffee.jpg | 240 | Agent：示例「咖啡品牌宣传片」 |
+| skill-product.jpg | 480 | Agent 技能「商品带货视频」：技能卡、项目栏、项目面板、空项目、方案封面 |
+| skill-store.jpg | 480 | Agent 技能「探店视频」 |
+| skill-image.jpg | 480 | Agent 技能「图片创作」 |
+| skill-general.jpg | 480 | Agent 技能「自由创作」 |
 | upload-example.jpg | 720 | 模板详情：上传商品照片的示例图 |
 | src-image.jpg | 240 | 创作「添加参考」的图片、模板详情的相册 |
 | src-video.jpg | 240 | 创作「添加参考」的视频 |

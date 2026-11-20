@@ -39,6 +39,7 @@ test("Agent switches between chat models and shows the per-turn price", async ()
   await page.loadModels();
   assert.equal(page.data.model, "db");
   await page.pickModel({ currentTarget: { dataset: { id: "ds" } } });
+  page.setData({ session: { id: "s1", version: 1, data: { title: "项目", skill: "general", assets: [] }, assets: [] } });
   page.input({ detail: { value: "写一段咖啡店脚本" } });
   await page.send();
   assert.equal(sent[0].model, "ds");

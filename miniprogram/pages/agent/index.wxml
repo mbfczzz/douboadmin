@@ -1,7 +1,8 @@
 <nav-bar title="Agent" />
 <view class="agent-page" style="--nav-bottom:{{navBottom}}px">
   <view class="project-bar" bindtap="openProjects" hover-class="starter-pressed" aria-role="button" aria-label="切换创作项目">
-    <image class="gl gl-16" src="/assets/glyphs/history-muted.png" />
+    <image wx:if="{{session&&art[session.data.skill]}}" class="project-thumb" src="{{art[session.data.skill]}}" mode="aspectFill" />
+    <image wx:else class="gl gl-16" src="/assets/glyphs/history-muted.png" />
     <text class="project-title">{{session?session.data.title:'新的创作'}}</text>
     <text class="project-switch">项目 ›</text>
   </view>
@@ -10,7 +11,8 @@
   </view>
   <scroll-view wx:elif="{{!messages.length}}" scroll-y class="chat-scroll"><view class="agent-empty">
     <view class="agent-hello">
-      <view class="agent-mark"><image class="gl gl-30" src="/assets/glyphs/ai-pen-dark.png" /></view>
+      <image wx:if="{{session&&art[session.data.skill]}}" class="skill-hero" src="{{art[session.data.skill]}}" mode="aspectFill" />
+      <view wx:else class="agent-mark"><image class="gl gl-30" src="/assets/glyphs/ai-pen-dark.png" /></view>
       <text class="headline">{{session?'说说这次想做什么':'选一个开始创作'}}</text>
       <text class="intro-sub">{{!session?'素材、方案、修改和生成，都在这一段对话里完成。':session.data.skill==='product'?'先在下方添加商品图，再说说想突出的卖点':session.data.skill==='store'?'先在下方添加门头、环境、菜品照片，再说说店名和特色':session.data.skill==='image'?'说说想要的画面，也可以在下方添加参考图':'说说你的想法，素材可以随时在下方添加'}}</text>
     </view>
@@ -37,8 +39,8 @@
         <text class="material-label">{{item.label}}</text>
         <view class="material-remove" data-id="{{item.id}}" catchtap="removeMaterial" aria-role="button" aria-label="{{'移除'+item.label}}">×</view>
       </view>
-      <view class="material add {{uploading?'busy':''}}" data-kind="image" bindtap="addMaterial" aria-role="button" aria-label="添加图片"><image class="gl gl-18" src="/assets/glyphs/{{uploading?'clock-muted':'image-muted-lg'}}.png" /><text>{{uploading?'上传中':'图片'}}</text></view>
-      <view wx:if="{{!uploading}}" class="material add" data-kind="video" bindtap="addMaterial" aria-role="button" aria-label="添加视频"><image class="gl gl-18" src="/assets/glyphs/video-muted-lg.png" /><text>视频</text></view>
+      <view class="material add {{uploading?'busy':''}} {{!materials.length&&(session.data.skill==='product'||session.data.skill==='store')?'wanted':''}}" data-kind="image" bindtap="addMaterial" aria-role="button" aria-label="添加图片"><image class="gl gl-18" src="/assets/glyphs/{{uploading?'clock-muted':'image-muted-lg'}}.png" /><text>{{uploading?'上传中':'图片'}}</text></view>
+      <view wx:if="{{!uploading}}" class="material add {{!materials.length&&session.data.skill==='store'?'wanted':''}}" data-kind="video" bindtap="addMaterial" aria-role="button" aria-label="添加视频"><image class="gl gl-18" src="/assets/glyphs/video-muted-lg.png" /><text>视频</text></view>
     </view>
   </scroll-view>
   <view wx:if="{{models.length>1||priceHint}}" class="agent-bar">
