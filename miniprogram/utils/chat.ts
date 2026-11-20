@@ -18,7 +18,8 @@ export function scriptLines(text: string) {
 // How long a reply has been coming, so a slow one does not look stuck.
 function waiting(job: Job) {
   const s = Math.round((Date.now() - new Date(job.createdAt || Date.now()).getTime()) / 1000);
-  return s >= 5 ? `正在构思… 已 ${s} 秒` : "正在构思…";
+  const doing = job.stage || "正在构思…"; // e.g. 正在观看视频1…
+  return s >= 5 ? `${doing} 已 ${s} 秒` : doing;
 }
 
 // A generation started from a plan shows in the conversation as its own card.

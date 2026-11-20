@@ -15,7 +15,7 @@ import { streamHandlers } from "./stream";
 import { sessionHandlers, projectView } from "./session";
 import { materialHandlers, materialLabels } from "./materials";
 import { generateHandlers } from "./generate";
-import { namedPictures } from "./named";
+import { namedMaterials } from "./named";
 
 // Agent: one 创作项目 at a time (session.ts). Replies end with a 创作方案
 // card that generates (generate.ts) from the project's materials.
@@ -147,10 +147,10 @@ Page({
         this.setData({ session: { ...row, assets: [] }, projects: [projectView(row, this.data.skills), ...this.data.projects] });
         await this.load(true); // adopt the new project before its first turn shows
       }
-      // Pictures go to models that read them, and only those this message
-      // names: every extra picture is read again and slows the reply.
+      // Only the materials this message names (each is read again and slows
+      // the reply); pictures only to models that read them, videos always.
       const sees = (model.referenceTypes || []).includes("image");
-      const assets = sees ? namedPictures(submitted, this.data.materials) : [];
+      const assets = namedMaterials(submitted, this.data.materials, sees);
       const job = await submitInput(
         { kind: "chat", model: model.id, prompt: submitted, resolution: "", ratio: "", duration: 0, assets, sessionId: this.data.session!.id },
         "agent",

@@ -116,3 +116,17 @@ test("plan revisions (缩短到 10 秒…) are offered only under a plan", () =>
   const wxml = require("node:fs").readFileSync("pages/agent/parts/messages.wxml", "utf8");
   assert.match(wxml, /index===messages\.length-1&&!busy&&!item\.streaming&&item\.plan\}\}" scroll-x class="follow-ups"/);
 });
+
+test("videos a message names go along (watched by 视频理解); pictures only to models that see", () => {
+  const { namedMaterials } = h.service("../pages/agent/named");
+  const m = [
+    { id: "p1", isImage: true, label: "图片1" },
+    { id: "v1", isImage: false, label: "视频1" },
+  ];
+  assert.deepEqual(plain(namedMaterials("分析这个视频", m, true)), ["v1"]); // the only video
+  assert.deepEqual(plain(namedMaterials("图片1 配 视频1 的节奏", m, false)), ["v1"]); // a text-only model gets no picture
+  assert.deepEqual(plain(namedMaterials("图片1 配 视频1 的节奏", m, true)), ["p1", "v1"]);
+  assert.deepEqual(plain(namedMaterials("写个开场", m, true)), []);
+  const [, w] = chatMessages([{ id: "w", status: "running", stage: "正在观看视频1…", createdAt: new Date().toISOString(), input: { kind: "chat", prompt: "分析视频1" } }]);
+  assert.equal(w.text, "正在观看视频1…");
+});

@@ -6,6 +6,7 @@ import (
 	"doubo/server/internal/core"
 	"doubo/server/internal/llm"
 	"doubo/server/internal/store"
+	"doubo/server/internal/vision"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -21,6 +22,7 @@ type DirectChat struct {
 	Clients map[string]*llm.Client // by provider: "deepseek", "ark"
 	Store   store.Store
 	Assets  AssetResolver
+	Vision  *vision.Client // watches videos the user names (chat_video.go)
 }
 
 // Handles reports whether the job's chat model is called directly.
@@ -158,17 +160,22 @@ func (p *DirectChat) messages(ctx context.Context, j core.Job, m core.Model, sum
 		if err != nil {
 			return nil, err
 		}
-		parts := []any{map[string]string{"type": "text", "text": j.Input.Prompt}}
-		for _, r := range refs {
-			if r.Type != "image" {
-				continue
-			}
-			if !slices.Contains(m.ReferenceTypes, "image") { // e.g. deepseek-v4-pro
+		text, pictures := j.Input.Prompt, []any{}
+		for i, r := range refs {
+			switch {
+			case r.Type == "video" && i < len(j.Input.Assets): // watched by 视频理解, told as text
+				text += "\n\n" + p.videoNote(ctx, j, j.Input.Assets[i], r.URL)
+			case r.Type != "image":
+			case !slices.Contains(m.ReferenceTypes, "image"): // e.g. deepseek-v4-pro
 				return nil, fmt.Errorf("%s 不能识别图片，请换用能看图的模型", m.Name)
+			default:
+				pictures = append(pictures, map[string]any{"type": "image_url", "image_url": map[string]string{"url": r.URL}})
 			}
-			parts = append(parts, map[string]any{"type": "image_url", "image_url": map[string]string{"url": r.URL}})
 		}
-		content = parts
+		content = text
+		if len(pictures) > 0 {
+			content = append([]any{map[string]string{"type": "text", "text": text}}, pictures...)
+		}
 	}
 	body := map[string]any{"messages": []any{map[string]any{"role": "user", "content": content}}}
 	if err := chatHistory(ctx, p.Store, j, body, summarize); err != nil {

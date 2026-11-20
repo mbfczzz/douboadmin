@@ -82,7 +82,9 @@ func (a *Server) validateJob(ctx context.Context, user string, in *core.JobInput
 		typ := strings.Split(asset.Type, "/")[0]
 		counts[typ]++
 		sizes[typ] = append(sizes[typ], asset.Size)
-		if !slices.Contains(m.ReferenceTypes, typ) {
+		// DeepSeek / 豆包 hear about videos from 视频理解 (provider/chat_video.go).
+		_, _, direct := core.DirectChat(m.Key)
+		if watched := in.Kind == "chat" && typ == "video" && direct; !slices.Contains(m.ReferenceTypes, typ) && !watched {
 			return fmt.Errorf("此模型不支持该类型参考素材")
 		}
 	}

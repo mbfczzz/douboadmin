@@ -28,6 +28,9 @@ func init() {
 			c("errorCode", Int), c("errorType", Key), c("errorAction", Text), c("upstreamCode", Short), c("upstreamType", Short), c("errorRetryable", Bool), c("errorEditable", Bool),
 			c("inputTokens", Int), c("outputTokens", Int), c("cachedTokens", Int), c("partial", Long),
 		}},
+		Table{Name: "video_notes", Comment: "对话中视频的观看结果（视频理解模型整理）；id = 素材 id", Owner: "用户", Cols: []Col{
+			c("model", Short), c("note", Long), c("at", Time),
+		}},
 		Table{Name: "chat_stops", Comment: "用户要求停止的对话回复；id = 任务 id", Owner: "用户", Cols: []Col{
 			c("at", Time),
 		}},

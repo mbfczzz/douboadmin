@@ -78,7 +78,7 @@ func chatModels(ctx context.Context, app *api.Server, values settings.Values) *p
 		clients[p.Name] = p.Client
 		app.ChatReady = app.ChatReady || p.Client.Ready()
 	}
-	return &provider.DirectChat{Clients: clients, Store: app.Store, Assets: app.Media.Inputs}
+	return &provider.DirectChat{Clients: clients, Store: app.Store, Assets: app.Media.Inputs, Vision: app.Vision}
 }
 
 // hotCacheTTL reads the TikHub cache durations (服务接入配置 → 热门视频接口).
