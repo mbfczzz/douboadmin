@@ -44,6 +44,7 @@ export const historyHandlers = {
       this.setData({ messages: seen || [], hasOlder: false, ready: !!seen, bottom: seen?.length ? "m" + seen[seen.length - 1].id : "" });
     }
     if (!hasSession() || !session) {
+      clearInterval(this.timer); // nothing to wait for without a project
       this.loadVersion++;
       this.fetching = false;
       this.setData({ messages: [], ready: true });
