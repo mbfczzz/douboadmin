@@ -34,7 +34,7 @@ test("a reply's plan block becomes a card; only the newest plan can generate", (
   // 复制 gives the plan as lines, not JSON; a reply with nothing to copy has no button.
   assert.equal(plans[1].copy, "给你一版方案：\n\n【第二版】视频 · 12 秒 · 9:16\n0-3秒 推门 “周末好去处” （图片2）");
   assert.match(require("node:fs").readFileSync("pages/agent/parts/messages.wxml", "utf8"), /wx:if="\{\{item\.copy&&\(item\.latest\|\|!item\.plan\|\|item\.text\)\}\}" class="reply-icon"/);
-  assert.deepEqual(messages.at(-1).gen, { status: "running", progress: 40, kind: "video", thumb: "", error: "" });
+  assert.deepEqual(messages.at(-1).gen, { status: "running", progress: 40, kind: "video", thumb: "", error: "", count: 0 });
 });
 
 test("a plan generates on the first model taking its materials, sending only the mentioned ones", () => {
@@ -43,6 +43,7 @@ test("a plan generates on the first model taking its materials, sending only the
   const input = plain(planInput(PLAN, models, materials, "s1"));
   assert.equal(input.model, "omni"); // 只文生 cannot take @图片2
   assert.deepEqual(input.assets, ["p2"]); // 图片2 is the second picture, not the third material
+  assert.equal(input.prompt, "开场@图片1推门进店，特写拉花"); // renumbered: it is the only picture sent
   assert.equal(input.duration, 10); // 12 s snaps to the nearest supported length
   assert.equal(input.sessionId, "s1");
   assert.equal(plain(planInput({ ...PLAN, prompt: "纯文字" }, models, materials, "s1")).model, "t2v");

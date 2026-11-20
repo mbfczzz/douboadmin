@@ -217,7 +217,11 @@ console.log(
 // Agent user pass: projects named after their first plan, confirm before
 // removing a material, several pictures per pick, long-press preview, a
 // note when the chat model cannot see pictures: 951,470 B. 926 -> 930 KiB.
-const budget = 930 * 1024;
+// Agent output handling: ```json and repeated plan blocks, cut-off or
+// malformed plans flagged with 重新整理, Chinese plan values, Markdown-free
+// prose, mentions renumbered to the materials sent, richer generation
+// cards: 955,739 B. 930 -> 934 KiB.
+const budget = 934 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

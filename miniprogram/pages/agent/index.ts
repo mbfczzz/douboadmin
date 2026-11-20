@@ -136,6 +136,8 @@ Page({
       this.poll();
     } catch (e) {
       error(e);
+      // Deleted on another device: fall back to the remaining projects.
+      if (!this.destroyed && /创作项目不存在/.test((e as Error)?.message || "")) void this.loadSession().then(() => this.load(true));
     } finally {
       if (!this.destroyed) this.setData({ busy: false });
     }

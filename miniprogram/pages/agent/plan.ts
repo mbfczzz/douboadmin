@@ -3,15 +3,34 @@ import { referenceSettings, creationMode } from "../create/references";
 import type { Plan } from "../../utils/agent-plan";
 import type { Model, Row, Asset, Input } from "../../services/types";
 
+const labelOf = (type: string) => (type.startsWith("image/") ? "图片" : "视频");
+
+// Only the materials the prompt mentions are sent, and a model numbers its
+// references by what it receives. So the mentions are renumbered to match
+// (the project's 图片2 alone becomes @图片1), and a mention of a material the
+// project does not have loses its @ rather than pointing at nothing.
+export function sentMaterials(prompt: string, assets: Row<Asset>[]) {
+  const counts: Record<string, number> = {};
+  const named = assets.map((a) => {
+    const kind = labelOf(a.data.type);
+    counts[kind] = (counts[kind] || 0) + 1;
+    return { asset: a, kind, name: kind + counts[kind] };
+  });
+  const mentioned = (name: string) => new RegExp(`@${name}(?!\\d)`).test(prompt);
+  const used = named.filter((m) => mentioned(m.name));
+  const renamed: Record<string, string> = {};
+  const next: Record<string, number> = {};
+  for (const m of used) renamed[m.name] = m.kind + (next[m.kind] = (next[m.kind] || 0) + 1);
+  const text = prompt.replace(/@(图片|视频)(\d+)/g, (whole, kind: string, n: string) => (renamed[kind + n] ? "@" + renamed[kind + n] : kind + n));
+  return { assets: used.map((m) => m.asset), prompt: text };
+}
+
 // The generation request for a plan: the first model (in the admin's order)
 // that takes the referenced materials, snapped to its nearest supported
-// length and ratio. Only materials the prompt mentions are sent.
+// length and ratio.
 export function planInput(plan: Plan, models: Model[], assets: Row<Asset>[], session: string): Input {
-  const used = assets.filter((_, i) => {
-    const kind = assets[i].data.type.startsWith("image/") ? "图片" : "视频";
-    const n = assets.slice(0, i + 1).filter((a) => a.data.type.startsWith(assets[i].data.type.split("/")[0])).length;
-    return plan.prompt.includes(`@${kind}${n}`);
-  });
+  const sent = sentMaterials(plan.prompt, assets);
+  const used = sent.assets;
   const needs = { image: used.some((a) => a.data.type.startsWith("image/")), video: used.some((a) => a.data.type.startsWith("video/")) };
   const choices = modelChoices(models, plan.kind);
   const fits = (m: (typeof choices)[number]) => {
@@ -23,6 +42,6 @@ export function planInput(plan: Plan, models: Model[], assets: Row<Asset>[], ses
   const s = modelSettings(model, { resolution: "", ratio: plan.ratio, duration: plan.kind === "video" ? plan.duration : 0, assets: used });
   return {
     kind: plan.kind, model: model.id, resolution: s.resolution, ratio: s.ratio, duration: plan.kind === "video" ? s.duration : 0,
-    quality: s.quality, mode: creationMode(model, used), prompt: plan.prompt.slice(0, s.maxPromptChars), assets: used.map((a) => a.id), sessionId: session,
+    quality: s.quality, mode: creationMode(model, used), prompt: sent.prompt.slice(0, s.maxPromptChars), assets: used.map((a) => a.id), sessionId: session,
   } as Input;
 }

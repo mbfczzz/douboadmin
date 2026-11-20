@@ -16,6 +16,11 @@ Agent 页一次打开一个「创作项目」。每个项目有一个技能、�
 - 表 `agent_sessions`（标题、技能、素材 ID、删除标记、最近活动时间）；接口 `GET/POST /api/agent/sessions`、`GET/PUT /api/agent/sessions/{id}`、`GET /api/agent/skills`。
 - 对话和生成都是普通任务，`input.sessionId` 指向项目；`GET /api/jobs?page=1&session=ID` 取出整个项目对话。项目必须属于本人且未删除，项目内的对话一律按 Agent 对话处理。
 - 对话历史只取本项目最近 6 轮（每轮回复保留 4000 字，保证上一版方案完整），系统提示由技能说明、方案格式（`core.agentContract`）和本项目素材清单组成。看得懂图片的模型（如豆包）会收到项目图片；DeepSeek 只收到素材名称。
-- 方案格式：回复最后一个 ```plan 代码块里的 JSON：kind、title、duration、ratio、prompt、shots[time, scene, asset, line]。解析失败的方案块不显示。
+- 方案格式：回复最后一个 ```plan 代码块里的 JSON：kind、title、duration、ratio、prompt、shots[time, scene, asset, line]。模型不守格式时的处理（`utils/agent-plan.ts`）：
+  - 带 prompt 的 ```json 代码块也算方案；有多个方案块时用最后一个，所有方案块都不显示在文字里。
+  - 允许多余逗号；kind 写「视频 / 图片」、比例写「竖屏 / 横屏 / 方形」、时长写「15秒」、素材写「@图片 1」都能识别；时长限制在 1–60 秒。
+  - 回复在方案块里被截断、或 JSON 无法解析：不显示代码，提示「方案没有完整输出」并给出「重新整理 ›」。
+  - 正文去掉 **加粗**、# 标题，列表改成「·」。
+- 生成时只发送方案里提到的素材，并把 @ 引用按实际发送的顺序重新编号（只发项目的图片2 时，提示词里写 @图片1）；项目里没有的素材去掉 @。
 - 每个技能带示例说法（空项目里点一下填进输入框）和快捷追问。方案按「第 N 版」编号，旧方案折叠成一行；最新方案的「确认生成」上直接显示这次要扣的积分（用和按钮相同的选模型规则报价，素材变了会重新报价）。
 - 技能目前写在 `server/internal/core/agent.go`；之后的「后台技能管理」会让只靠指令的技能可以在后台新增。

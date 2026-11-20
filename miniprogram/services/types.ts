@@ -18,10 +18,11 @@ export interface ChatMessage {
   prompt?: string; // the question a reply answers, for "重新编辑"
   lines?: { label: string; text: string }[];
   plan?: PlanView; // the reply's 创作方案 card
-  gen?: { status: string; progress: number; kind: string; thumb: string; error: string }; // a generation from a plan
+  gen?: { status: string; progress: number; kind: string; thumb: string; error: string; count: number }; // a generation from a plan
   latest?: boolean; // the newest plan, the one that can still generate
   copy?: string; // what 复制 puts on the clipboard
   version?: number; // 第 N 版 among the conversation's plans
+  broken?: boolean; // the reply had a plan the app could not read (cut off or malformed)
 }
 export interface JobPage {
   items: Job[];
