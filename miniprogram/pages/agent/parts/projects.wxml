@@ -1,0 +1,19 @@
+<t-popup visible="{{projectsOpen}}" placement="bottom" bind:visible-change="closeProjects">
+  <view class="projects-sheet">
+    <view class="sheet-grip" />
+    <view class="projects-head"><text>创作项目</text><view class="projects-close" bindtap="closeProjects" aria-role="button" aria-label="关闭"><t-icon name="close" size="20" /></view></view>
+    <text class="projects-label">新建</text>
+    <view class="skill-grid">
+      <view wx:for="{{skills}}" wx:key="id" class="skill-chip" data-id="{{item.id}}" bindtap="newProject" hover-class="starter-pressed" aria-role="button">
+        <t-icon name="{{item.icon}}" size="18" /><text>{{item.name}}</text>
+      </view>
+    </view>
+    <text wx:if="{{projects.length}}" class="projects-label">最近</text>
+    <scroll-view scroll-y class="project-list">
+      <view wx:for="{{projects}}" wx:key="id" class="project-row {{session&&session.id===item.id?'on':''}}" data-id="{{item.id}}" bindtap="switchProject" hover-class="starter-pressed" aria-role="button">
+        <text class="project-name">{{item.data.title}}</text>
+        <view class="project-delete" data-id="{{item.id}}" catchtap="removeProject" aria-role="button" aria-label="{{'删除'+item.data.title}}"><t-icon name="delete" size="16" /></view>
+      </view>
+    </scroll-view>
+  </view>
+</t-popup>

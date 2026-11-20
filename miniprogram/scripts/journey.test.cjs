@@ -125,6 +125,7 @@ test("Agent does not erase a follow-up message while sending the previous one", 
     new Promise((resolve) => {
       done = resolve;
     });
+  page.setData({ session: { id: "s1", version: 1, data: { title: "项目", skill: "general", assets: [], activeAt: "" }, assets: [] } });
   page.input({ detail: { value: "先写一段脚本" } });
   h.api.request = async (path) => path === "/config" ? {models:[{id:"text-fixture",kind:"chat"}]} : [];
   const pending = page.send();

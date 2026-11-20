@@ -1,0 +1,71 @@
+/* 创作项目 sheet: new from a skill, or switch / delete a recent one. */
+.projects-sheet {
+  padding: 8px 16px calc(16px + env(safe-area-inset-bottom));
+  border-radius: 20px 20px 0 0;
+  background: var(--ui-surface);
+}
+.sheet-grip {
+  width: 36px;
+  height: 4px;
+  margin: 0 auto 8px;
+  border-radius: 2px;
+  background: #ffffff33;
+}
+.projects-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 40px;
+  font-size: 16px;
+  font-weight: 600;
+}
+.projects-close {
+  padding: 8px;
+  color: var(--ui-muted);
+}
+.projects-label {
+  display: block;
+  margin: 12px 0 8px;
+  font-size: 12px;
+  color: var(--ui-muted);
+}
+.skill-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.skill-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 12px;
+  border-radius: 12px;
+  font-size: 14px;
+  background: var(--ui-field);
+}
+.project-list {
+  max-height: 40vh;
+}
+.project-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  border-bottom: 1px solid #ffffff12;
+}
+.project-row.on .project-name {
+  color: var(--ui-primary);
+}
+.project-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+}
+.project-delete {
+  padding: 12px;
+  color: var(--ui-muted);
+}

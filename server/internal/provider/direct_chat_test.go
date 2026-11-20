@@ -58,7 +58,9 @@ func directFixture(t *testing.T, reply string, status int) (*store.Memory, *Dire
 		t.Fatal(err)
 	}
 	p := &DirectChat{Clients: map[string]*llm.Client{"deepseek": {BaseURL: srv.URL, Key: "key"}}, Store: s,
-		Assets: func(context.Context, core.Job) ([]core.Reference, error) { return []core.Reference{{URL: "https://x/a.png", Type: "image"}}, nil }}
+		Assets: func(context.Context, core.Job) ([]core.Reference, error) {
+			return []core.Reference{{URL: "https://x/a.png", Type: "image"}}, nil
+		}}
 	return s, p, j, bodies
 }
 

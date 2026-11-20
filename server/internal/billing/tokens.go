@@ -8,7 +8,7 @@ import (
 // Upper bounds for one chat turn. A token is at most one character for the
 // Chinese and English the models see, so characters bound tokens from above.
 const (
-	chatHistoryChars = 6*(500+2000) + 200 // provider.chatHistory: 6 turns + system prompt
+	chatHistoryChars = 6*(500+4000) + 2000 // provider.chatHistory: 6 project turns + system prompt
 	tokensPerImage   = 1500
 )
 

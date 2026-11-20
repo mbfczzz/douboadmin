@@ -102,6 +102,7 @@ for (const entry of ["image", "video", "template", "agent", "retry"]) {
     } else if (entry === "agent") {
       page = h.page("agent");
       h.api.request = async () => ({ models });
+      page.setData({ session: { id: "s1", version: 1, data: { title: "项目", skill: "general", assets: [], activeAt: "" }, assets: [] } });
       page.setData({ prompt: "保留这条消息" });
       await page.send();
       assert.equal(page.data.prompt, "保留这条消息");

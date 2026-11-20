@@ -90,6 +90,7 @@ func (a *Server) submit(w http.ResponseWriter, r *http.Request, in core.JobInput
 		return
 	}
 	a.hideTemplateRecipe(r.Context(), &j)
+	a.touchSession(r.Context(), j.Input.SessionID)
 	reply(w, 202, j)
 }
 

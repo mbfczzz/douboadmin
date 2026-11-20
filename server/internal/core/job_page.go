@@ -4,12 +4,13 @@ import "time"
 
 type JobQuery struct {
 	User, Search, Status, Kind, Deleted      string
+	Session                                  string // Agent project
 	Works, ExcludeChat, ExcludeImport, Ended bool
 	Page, Size                               int
 }
 
 func (q JobQuery) Valid() bool {
-	return q.Page > 0 && q.Page <= 1000000 && q.Size > 0 && q.Size <= 100 && len([]rune(q.Search)) <= 100 && len(q.Status) < 20 && len(q.Kind) < 20 && (q.Deleted == "" || q.Deleted == "active" || q.Deleted == "deleted")
+	return q.Page > 0 && q.Page <= 1000000 && q.Size > 0 && q.Size <= 100 && len([]rune(q.Search)) <= 100 && len(q.Status) < 20 && len(q.Kind) < 20 && len(q.Session) <= 64 && (q.Deleted == "" || q.Deleted == "active" || q.Deleted == "deleted")
 }
 
 type JobPage struct {

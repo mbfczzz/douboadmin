@@ -2,15 +2,18 @@ const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const { harness } = require("./harness.cjs");
 
-test("starter cards fill and focus the composer; replies copy in one tap", () => {
+test("a skill starts a project and fills the composer; replies copy in one tap", async () => {
   const h = harness(),
     page = h.page("agent"),
     copied = [];
-  assert.equal(page.data.quick.length, 3);
-  for (const card of page.data.quick) assert.ok(card.prompt && card.hint && card.icon && card.tone);
-  page.quick({ currentTarget: { dataset: { value: page.data.quick[0].prompt } } });
-  assert.equal(page.data.prompt, "帮我写一段产品短视频脚本");
+  await h.api.signIn();
+  h.wx.request = (o) => o.success({ statusCode: 201, data: { id: "p1", version: 1, data: { title: "商品带货视频", skill: o.data.skill, assets: [] } } });
+  page.setData({ skills: [{ id: "product", name: "商品带货视频", hint: "上传商品图", icon: "shop", kind: "video", starter: "帮我做一条 15 秒的商品种草视频，突出" }] });
+  await page.newProject({ currentTarget: { dataset: { id: "product" } } });
+  assert.equal(page.data.session.id, "p1");
+  assert.equal(page.data.prompt, "帮我做一条 15 秒的商品种草视频，突出");
   assert.equal(page.data.focus, true);
+  assert.equal(page.data.projects[0].id, "p1");
   page.blur();
   assert.equal(page.data.focus, false);
   h.wx.setClipboardData = (o) => copied.push(o.data);

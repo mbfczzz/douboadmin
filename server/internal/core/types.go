@@ -58,6 +58,8 @@ type JobInput struct {
 	TemplateID        string   `json:"templateId,omitempty"`
 	Assets            []string `json:"assets"`
 	ParentID          string   `json:"parentId,omitempty"`
+	// SessionID ties chat and generation jobs to an Agent project.
+	SessionID string `json:"sessionId,omitempty"`
 }
 type Job struct {
 	ActivationRequired  bool      `json:"-"`

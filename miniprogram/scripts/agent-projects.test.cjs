@@ -1,0 +1,101 @@
+const { test } = require("node:test");
+const assert = require("node:assert/strict");
+const { harness } = require("./harness.cjs");
+
+const plain = (v) => JSON.parse(JSON.stringify(v));
+const PLAN = { kind: "video", title: "春日咖啡", duration: 12, ratio: "9:16", prompt: "开场@图片2推门进店，特写拉花", shots: [{ time: "0-3秒", scene: "推门", asset: "图片2", line: "周末好去处" }] };
+const reply = (plan) => "给你一版方案：\n```plan\n" + JSON.stringify(plan) + "\n```";
+const materials = [
+  { id: "p1", isImage: true, data: { type: "image/png", url: "/m/1.png" } },
+  { id: "v1", isImage: false, data: { type: "video/mp4", url: "/m/v.mp4" } },
+  { id: "p2", isImage: true, data: { type: "image/jpeg", url: "/m/2.jpg" } },
+];
+const models = [
+  { id: "t2v", name: "只文生", kind: "video", modes: ["t2v"], referenceTypes: [], durations: [5, 10], ratios: ["9:16"], resolutions: ["720p"] },
+  { id: "omni", name: "全能参考", kind: "video", modes: ["t2v", "omni_ref"], referenceTypes: ["image", "video"], durations: [5, 10, 15], ratios: ["9:16", "16:9"], resolutions: ["720p"] },
+];
+
+test("a reply's plan block becomes a card; only the newest plan can generate", () => {
+  const h = harness();
+  const { splitReply } = h.service("../utils/agent-plan");
+  const { chatMessages } = h.service("../utils/chat");
+  const split = splitReply(reply(PLAN));
+  assert.equal(split.text, "给你一版方案：");
+  assert.equal(split.plan.meta, "视频 · 12 秒 · 9:16");
+  assert.equal(splitReply("```plan\n{broken\n```").plan, undefined);
+  const jobs = [
+    { id: "gen", status: "running", progress: 40, input: { kind: "video", sessionId: "s1", prompt: "x" } },
+    { id: "c2", status: "succeeded", result: reply({ ...PLAN, title: "第二版" }), input: { kind: "chat", prompt: "改开场" } },
+    { id: "c1", status: "succeeded", result: reply(PLAN), input: { kind: "chat", prompt: "做探店" } },
+  ];
+  const messages = plain(chatMessages(jobs));
+  const plans = messages.filter((m) => m.plan);
+  assert.deepEqual(plans.map((m) => [m.plan.title, !!m.latest]), [["春日咖啡", false], ["第二版", true]]);
+  assert.deepEqual(messages.at(-1).gen, { status: "running", progress: 40, kind: "video", thumb: "", error: "" });
+});
+
+test("a plan generates on the first model taking its materials, sending only the mentioned ones", () => {
+  const h = harness();
+  const { planInput } = h.service("../pages/agent/plan");
+  const input = plain(planInput(PLAN, models, materials, "s1"));
+  assert.equal(input.model, "omni"); // 只文生 cannot take @图片2
+  assert.deepEqual(input.assets, ["p2"]); // 图片2 is the second picture, not the third material
+  assert.equal(input.duration, 10); // 12 s snaps to the nearest supported length
+  assert.equal(input.sessionId, "s1");
+  assert.equal(plain(planInput({ ...PLAN, prompt: "纯文字" }, models, materials, "s1")).model, "t2v");
+  assert.throws(() => planInput(PLAN, [models[0]], materials, "s1"), /暂无支持这些素材的模型/);
+});
+
+test("确认生成 asks for the points once and adds the generation to the project", async () => {
+  const h = harness();
+  await h.api.signIn();
+  const page = h.page("agent");
+  const sent = [];
+  let modals = 0;
+  h.wx.showModal = async () => (modals++, { confirm: true });
+  h.wx.request = (o) => {
+    const path = o.url.split("/api")[1];
+    const ok = (data, statusCode = 200) => o.success({ statusCode, data });
+    if (path === "/config") return ok({ models });
+    if (path === "/jobs/quote") return ok({ units: 3500, billingEnabled: true, sufficient: true, availableUnits: 9000 });
+    if (path === "/jobs" && o.method === "POST") return sent.push(o.data), ok({ id: "gen", status: "queued", input: o.data }, 202);
+    return ok({ items: [], total: 0 });
+  };
+  page.setData({ session: { id: "s1", version: 1, data: { title: "店", skill: "store", assets: [] }, assets: [] }, materials });
+  page.setData({ messages: [{ id: "a", role: "assistant", plan: PLAN, latest: false }, { id: "b", role: "assistant", plan: PLAN, latest: true }] });
+  await page.generatePlan({ currentTarget: { dataset: { index: 0 } } });
+  assert.equal(sent.length, 0, "a revised plan cannot generate");
+  await page.generatePlan({ currentTarget: { dataset: { index: 1 } } });
+  assert.equal(modals, 1);
+  assert.equal(sent[0].sessionId, "s1");
+  assert.equal(sent[0].expectedCostUnits, 3500);
+  page.onUnload();
+});
+
+test("materials are numbered per type; tapping one mentions it; chat sends pictures only to models that read them", async () => {
+  const h = harness();
+  await h.api.signIn();
+  const page = h.page("agent");
+  const { materialLabels } = h.service("../pages/agent/materials");
+  const labelled = materialLabels(materials);
+  assert.deepEqual(labelled.map((m) => m.label), ["图片1", "视频1", "图片2"]);
+  page.setData({ session: { id: "s1", version: 1, data: { title: "店", skill: "store", assets: [] }, assets: [] }, materials: labelled, prompt: "开场用" });
+  page.mention({ currentTarget: { dataset: { label: "图片2" } } });
+  assert.equal(page.data.prompt, "开场用 @图片2 ");
+  const sent = [];
+  h.wx.request = (o) => {
+    const path = o.url.split("/api")[1];
+    const ok = (data, statusCode = 200) => o.success({ statusCode, data });
+    if (path === "/config") return ok({ models: [{ id: "ds", kind: "chat", referenceTypes: [] }, { id: "db", kind: "chat", referenceTypes: ["image"] }] });
+    if (path === "/jobs/quote") return ok({ units: 5, billingEnabled: true, sufficient: true, availableUnits: 100, perToken: true });
+    if (path === "/jobs" && o.method === "POST") return sent.push(o.data), ok({ id: "c" + sent.length, status: "queued", input: o.data }, 202);
+    return ok({ items: [], total: 0 });
+  };
+  page.setData({ model: "ds" });
+  await page.send();
+  page.setData({ model: "db", prompt: "再来一版" });
+  await page.send();
+  assert.deepEqual(plain(sent.map((s) => s.assets)), [[], ["p1", "p2"]]);
+  assert.ok(sent.every((s) => s.sessionId === "s1"));
+  page.onUnload();
+});

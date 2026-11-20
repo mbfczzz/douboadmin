@@ -1,18 +1,23 @@
 <nav-bar title="Agent" />
 <view class="agent-page" style="--nav-bottom:{{navBottom}}px">
+  <view class="project-bar" bindtap="openProjects" hover-class="starter-pressed" aria-role="button" aria-label="切换创作项目">
+    <image class="gl gl-16" src="/assets/glyphs/history-muted.png" />
+    <text class="project-title">{{session?session.data.title:'新的创作'}}</text>
+    <text class="project-switch">项目 ›</text>
+  </view>
   <view wx:if="{{!ready}}" class="chat-scroll agent-skeleton" aria-label="正在加载对话">
     <view class="skeleton skel-bubble mine" /><view class="skeleton skel-bubble" /><view class="skeleton skel-bubble short" />
   </view>
   <scroll-view wx:elif="{{!messages.length}}" scroll-y class="chat-scroll"><view class="agent-empty">
     <view class="agent-hello">
       <view class="agent-mark"><image class="gl gl-30" src="/assets/glyphs/ai-pen-dark.png" /></view>
-      <text class="headline">让想法，再往前一步。</text>
-      <text class="intro-sub">从一个模糊的念头，到一份清晰的创作脚本。</text>
+      <text class="headline">{{session?'说说这次想做什么':'选一个开始创作'}}</text>
+      <text class="intro-sub">素材、方案、修改和生成，都在这一段对话里完成。</text>
     </view>
-    <view class="starters">
-      <view wx:for="{{quick}}" wx:key="prompt" class="starter" data-value="{{item.prompt}}" bindtap="quick" hover-class="starter-pressed" aria-role="button">
-        <image wx:if="{{item.image}}" class="starter-photo" src="{{item.image}}" mode="aspectFill" lazy-load /><view wx:else class="source-glyph starter-glyph glyph-{{item.tone}}"><t-icon name="{{item.icon}}" size="20" /></view>
-        <view class="starter-copy"><text class="starter-title">{{item.prompt}}</text><text class="starter-hint">{{item.hint}}</text></view>
+    <view wx:if="{{!session}}" class="starters">
+      <view wx:for="{{skills}}" wx:key="id" class="starter" data-id="{{item.id}}" bindtap="newProject" hover-class="starter-pressed" aria-role="button">
+        <image wx:if="{{art[item.id]}}" class="starter-photo" src="{{art[item.id]}}" mode="aspectFill" lazy-load /><view wx:else class="source-glyph starter-glyph glyph-video"><t-icon name="{{item.icon}}" size="20" /></view>
+        <view class="starter-copy"><text class="starter-title">{{item.name}}</text><text class="starter-hint">{{item.hint}}</text></view>
         <image class="gl gl-16" src="/assets/glyphs/open-muted.png" />
       </view>
     </view>
@@ -22,33 +27,18 @@
       <view wx:if="{{hasOlder}}" class="older" bindtap="older">
         <t-loading wx:if="{{loadingOlder}}" size="14px" /><image wx:else class="gl gl-14" src="/assets/glyphs/history-muted.png" /><text>{{loadingOlder?'正在加载…':'查看更早对话'}}</text>
       </view>
-      <view wx:for="{{messages}}" wx:key="id" id="m{{item.id}}" class="message {{item.role}}">
-        <view wx:if="{{item.role==='user'}}" class="bubble"><text selectable>{{item.text}}</text></view>
-        <block wx:else>
-          <view class="agent-name"><view class="agent-avatar"><image class="gl gl-14" src="/assets/glyphs/ai-pen-dark.png" /></view><text>豆播 Agent</text></view>
-          <view wx:if="{{item.pending}}" class="typing" aria-label="正在回复"><view /><view /><view /></view>
-          <view wx:elif="{{item.failed}}" class="reply-failed">
-            <t-icon name="error-circle" size="16" /><text>{{item.text}}</text>
-            <text class="retry" data-prompt="{{item.prompt}}" bindtap="retry">重新编辑 ›</text>
-          </view>
-          <block wx:else>
-            <view class="reply">
-              <view wx:for="{{item.lines}}" wx:for-item="line" wx:for-index="n" wx:key="n" class="line {{line.label?'shot':''}} {{line.text||line.label?'':'gap'}}">
-                <text wx:if="{{line.label}}" class="shot-label">{{line.label}}</text><text selectable>{{line.text}}</text>
-              </view>
-            </view>
-            <view class="reply-actions">
-              <view class="reply-icon" data-text="{{item.text}}" bindtap="copy" hover-class="icon-pressed" aria-role="button" aria-label="复制"><image class="gl gl-18" src="/assets/glyphs/copy-muted.png" /></view>
-              <view class="use-script" data-text="{{item.text}}" bindtap="use" hover-class="starter-pressed" aria-role="button"><image class="gl gl-16" src="/assets/glyphs/video.png" /><text>带到创作</text></view>
-            </view>
-            <scroll-view wx:if="{{index===messages.length-1&&!busy}}" scroll-x class="follow-ups">
-              <view class="follow-row">
-                <view wx:for="{{followUps}}" wx:for-item="ask" wx:key="*this" class="follow" data-value="{{ask}}" bindtap="quick" hover-class="starter-pressed">{{ask}}</view>
-              </view>
-            </scroll-view>
-          </block>
-        </block>
+      <include src="./parts/messages.wxml" />
+    </view>
+  </scroll-view>
+  <scroll-view wx:if="{{session}}" scroll-x enhanced show-scrollbar="{{false}}" class="material-strip">
+    <view class="material-row">
+      <view wx:for="{{materials}}" wx:key="id" class="material" data-label="{{item.label}}" bindtap="mention" aria-role="button" aria-label="{{'引用'+item.label}}">
+        <image class="material-photo" src="{{item.isImage?item.data.url:item.data.thumbnailUrl}}" mode="aspectFill" />
+        <text class="material-label">{{item.label}}</text>
+        <view class="material-remove" data-id="{{item.id}}" catchtap="removeMaterial" aria-role="button" aria-label="{{'移除'+item.label}}">×</view>
       </view>
+      <view class="material add {{uploading?'busy':''}}" data-kind="image" bindtap="addMaterial" aria-role="button" aria-label="添加图片"><image class="gl gl-18" src="/assets/glyphs/{{uploading?'clock-muted':'image-muted-lg'}}.png" /><text>{{uploading?'上传中':'图片'}}</text></view>
+      <view wx:if="{{!uploading}}" class="material add" data-kind="video" bindtap="addMaterial" aria-role="button" aria-label="添加视频"><image class="gl gl-18" src="/assets/glyphs/video-muted-lg.png" /><text>视频</text></view>
     </view>
   </scroll-view>
   <view wx:if="{{models.length>1||priceHint}}" class="agent-bar">
@@ -61,11 +51,12 @@
     <text wx:elif="{{priceHint}}" class="bar-note">{{priceHint}}</text>
   </view>
   <view class="composer {{focus?'is-focus':''}} {{models.length>1||priceHint?'has-bar':''}}">
-    <textarea auto-height maxlength="500" focus="{{focus}}" placeholder="{{messages.length?'继续说说你的想法…':'说说你的创作想法…'}}" placeholder-class="composer-placeholder" value="{{prompt}}" bindinput="input" bindblur="blur" cursor-spacing="24" show-confirm-bar="{{false}}" />
+    <textarea auto-height maxlength="500" focus="{{focus}}" placeholder="{{messages.length?'继续说，例如：第二镜换成特写':'说说你的创作想法…'}}" placeholder-class="composer-placeholder" value="{{prompt}}" bindinput="input" bindblur="blur" cursor-spacing="24" show-confirm-bar="{{false}}" />
     <text wx:if="{{prompt.length>400&&!(models.length>1||priceHint)}}" class="composer-count {{prompt.length>=500?'full':''}}">{{prompt.length}}/500</text>
     <view class="send {{prompt&&!busy?'ready':''}}" bindtap="send" hover-class="icon-pressed" aria-role="button" aria-label="发送">
       <t-loading wx:if="{{busy}}" size="18px" /><image wx:else class="gl gl-20" src="/assets/glyphs/send-{{prompt&&!busy?'dark':'muted'}}.png" />
     </view>
   </view>
 </view>
+<include src="./parts/projects.wxml" />
 <ui-dialog id="ui-dialog" />

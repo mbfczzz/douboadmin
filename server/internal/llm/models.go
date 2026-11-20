@@ -19,7 +19,9 @@ type Provider struct {
 }
 
 // ModelID is the catalog ID of a directly-called chat model.
-func ModelID(provider, model string) string { return core.Digest("direct:" + provider + ":" + model)[:32] }
+func ModelID(provider, model string) string {
+	return core.Digest("direct:" + provider + ":" + model)[:32]
+}
 
 // EnsureModels lists each configured model in 模型管理. New ones start
 // published with the default prices; existing ones keep every operator

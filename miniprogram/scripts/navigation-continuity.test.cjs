@@ -86,7 +86,8 @@ test("a hidden Agent page cannot show a late request-error toast on the next pag
   const h = harness();
   await h.api.signIn();
   const page = h.page("agent"), toasts = [];
-  page.historyToken = h.api.sessionToken();
+  page.setData({ session: { id: "s1", version: 1, data: { title: "项目", skill: "general", assets: [], activeAt: "" }, assets: [] } });
+  page.historyKey = h.api.sessionToken() + ":s1";
   h.wx.showToast = (message) => toasts.push(message);
   let reject;
   h.api.request = () => new Promise((_, fail) => { reject = fail; });

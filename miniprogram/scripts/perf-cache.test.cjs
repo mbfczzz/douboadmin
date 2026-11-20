@@ -157,12 +157,13 @@ test("pending replies never enter the cached conversation", async () => {
   const h = harness();
   await h.api.signIn();
   const page = h.page("agent");
+  page.setData({ session: { id: "s1", version: 1, data: { title: "项目", skill: "general", assets: [], activeAt: "" }, assets: [] } });
   h.wx.request = (o) => o.success({ statusCode: 200, data: { items: [
     { id: "a", status: "succeeded", result: "完成的回复", input: { kind: "chat", prompt: "问1" } },
     { id: "b", status: "running", input: { kind: "chat", prompt: "问2" } },
   ], total: 2, page: 1, size: 20 } });
   await page.load(true);
-  const cached = h.storage.get("view-cache:agent").value;
+  const cached = h.storage.get("view-cache:agent:s1").value;
   assert.ok(cached.length > 0);
   assert.equal(cached.some((m) => m.pending), false);
   page.onUnload();

@@ -5,6 +5,10 @@ export interface NativeFailure {
   err_msg?: string;
 }
 export type PendingPayment = { id: string; owner: string; deferred?: boolean };
+// An Agent reply's 创作方案 (see utils/agent-plan).
+export interface Shot { time: string; scene: string; asset: string; line: string; thumb?: string }
+export interface Plan { kind: "video" | "image"; title: string; duration: number; ratio: string; prompt: string; shots: Shot[] }
+export type PlanView = Plan & { meta: string };
 export interface ChatMessage {
   id: string;
   role: string;
@@ -13,6 +17,9 @@ export interface ChatMessage {
   failed?: boolean;
   prompt?: string; // the question a reply answers, for "重新编辑"
   lines?: { label: string; text: string }[];
+  plan?: PlanView; // the reply's 创作方案 card
+  gen?: { status: string; progress: number; kind: string; thumb: string; error: string }; // a generation from a plan
+  latest?: boolean; // the newest plan, the one that can still generate
 }
 export interface JobPage {
   items: Job[];
@@ -65,6 +72,7 @@ export interface Asset {
   thumbnailUrl?: string; // videos: signed first-frame cover
 }
 export interface Input {
+  sessionId?: string; // Agent 创作项目
 	imageSlots?: number[];
   expectedCostUnits?: number;
   voice?: string;

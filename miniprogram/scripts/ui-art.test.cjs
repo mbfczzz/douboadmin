@@ -58,7 +58,7 @@ test("each photo slot keeps a flat fallback", () => {
     "pages/create/parts/sheets.wxml": /wx:if="\{\{sourceArt\.image\}\}"[^]*?wx:else class="source-glyph/,
     "pages/template-detail/index.wxml": /wx:if="\{\{item\.image\}\}" class="source-photo"[^]*?wx:else class="source-glyph/,
     "pages/mix/parts/settings.wxml": /wx:if="\{\{item\.image\}\}"[^]*?<t-icon wx:else/,
-    "pages/agent/index.wxml": /wx:if="\{\{item\.image\}\}" class="starter-photo"[^]*?wx:else/,
+    "pages/agent/index.wxml": /wx:if="\{\{art\[item\.id\]\}\}" class="starter-photo"[^]*?wx:else/,
     "pages/login/index.wxml": /wx:if="\{\{backdrop\}\}" class="page-backdrop"/,
     "pages/activate/index.wxml": /wx:if="\{\{backdrop\}\}" class="page-backdrop"/,
     "pages/wallet/index.wxml": /wx:if="\{\{backdrop\}\}" class="summary-photo"/,

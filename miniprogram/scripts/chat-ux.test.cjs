@@ -6,6 +6,7 @@ test("a sent message is shown even when an older poll is still in flight", async
   const h = harness();
   await h.api.signIn();
   const page = h.page("agent");
+  page.setData({ session: { id: "s1", version: 1, data: { title: "项目", skill: "general", assets: [], activeAt: "" }, assets: [] } });
   let oldPoll,
     calls = 0;
   const sent = {

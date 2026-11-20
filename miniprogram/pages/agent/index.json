@@ -2,6 +2,7 @@
   "backgroundColorContent": "#0f0f11ff",
   "backgroundColor": "#0f0f11",
   "usingComponents": {
-    "t-loading": "tdesign-miniprogram/loading/loading"
+    "t-loading": "tdesign-miniprogram/loading/loading",
+    "t-popup": "tdesign-miniprogram/popup/popup"
   }
 }

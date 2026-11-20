@@ -203,7 +203,10 @@ console.log(
 // DeepSeek / 豆包 on the Agent: model chips, the 按量 per-turn price above
 // the composer (pages/agent/models.ts) and the 按量 confirm wording: 909,645 B.
 // 884 -> 889 KiB.
-const budget = 889 * 1024;
+// Agent 创作项目: project bar and sheet, materials, the 创作方案 card and
+// generation cards, project-scoped history (pages/agent/*, services/agent.ts,
+// utils/agent-plan.ts): 936,004 B. 889 -> 915 KiB.
+const budget = 915 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");
