@@ -18,6 +18,9 @@ export async function providerTreeFixture(page: Page, rows: Provider[], root?: s
 
 export async function expandProviderTree(page: Page, expected: number) {
   const rows = page.locator(".provider-tree-row");
+  // A remounted tree (e.g. after clearing the search) starts empty; count
+  // only once its first page has rendered, or that load passes for an expansion.
+  await expect(rows.first()).toBeVisible();
   for (let attempt = 0; attempt < 20 && await rows.count() < expected; attempt++) {
     const before = await rows.count();
     await page.locator('.tree-toggle[aria-label^="展开"]').first().click();

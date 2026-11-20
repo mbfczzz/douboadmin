@@ -261,6 +261,12 @@ export async function surfaceFixtures(page: Page, catalog?: Row<Model>[]) {
         ),
       });
     const code = surfaceCode(path, qr);
+    // The share card fetches the code's QR as an image (?image=1).
+    if (code && url.searchParams.get("image") === "1")
+      return route.fulfill({
+        contentType: "image/png",
+        body: Buffer.from(qr.split(",")[1], "base64"),
+      });
     if (code) return route.fulfill({ json: code });
     const record = partnerTree.find((r) => path === "/partners/" + r.id);
     if (record)

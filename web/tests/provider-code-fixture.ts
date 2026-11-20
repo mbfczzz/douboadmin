@@ -14,7 +14,8 @@ export const codes = {
   bind: "BIND2345",
 };
 
-export async function openCodes(
+// Mocks one provider row and its codes, then shows 服务商管理.
+export async function mockCodes(
   page: Page,
   role = "branch",
   unbound = false,
@@ -84,6 +85,11 @@ export async function openCodes(
   });
   await page.goto("/#partners");
   if (self) await page.reload();
+  return { requests, row };
+}
+
+export async function openCodes(page: Page, role = "branch", unbound = false) {
+  const { requests, row } = await mockCodes(page, role, unbound);
   await page.getByRole("button", { name: "分享码", exact: true }).click();
   const dialog = page.getByRole("dialog", { name: "分享码", exact: true });
   await expect(dialog.locator(".share-poster")).toBeVisible();

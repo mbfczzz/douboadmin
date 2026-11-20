@@ -38,6 +38,7 @@ test('a phone grant joins only the matching concurrent login',async()=>{
 
 test('a server-verified phone needs only name completion, not another SMS',async()=>{
   const h=harness();const page=h.page('activate');
+  await h.api.signIn();page.owner=h.service('session').sessionUserId(); // the page's own user, as on a real visit
   page.setData({logged:true,name:'用户',phone:'13900139000',status:{profileRequired:true,phoneVerified:true,smsRequired:false}});
   let body;h.api.request=async(path,method,data)=>{body=data;return {profileRequired:false,active:false}};
   await page.register();

@@ -84,8 +84,11 @@
   min-height: 4.8em;
 }
 .share-code-placeholder {
+  /* Top-aligned inside the 1.1em line so the loading line keeps the code's
+     height (middle alignment grew the line box by ~3px). */
   display: inline-block;
-  vertical-align: middle;
+  vertical-align: top;
+  margin-top: 0.05em;
   width: 9ch;
   height: 1em;
   border-radius: 4px;

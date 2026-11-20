@@ -38,6 +38,8 @@ for (const width of [1440, 390, 320]) {
     await codes.getByRole("button", { name: "重置", exact: true }).click();
     await audit("重置S1服务商邀请码");
     await closeTop(page);
+    // Joined members belong to the 合伙人开通码 tab (records follow the shown code).
+    await codes.getByRole("tab", { name: "合伙人开通码", exact: true }).click();
     for (const action of ["停用", "解绑"]) {
       await codes.getByRole("button", { name: action, exact: true }).click();
       await audit(`${action}用户授权`);

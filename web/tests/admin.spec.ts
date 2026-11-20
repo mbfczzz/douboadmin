@@ -23,7 +23,10 @@ test("real catalog, template upload, publish, copy, unpublish and delete", async
     .first()
     .getByRole("button", { name: "基础信息", exact: true })
     .click();
-  await expect(page.getByLabel("模型 ID", { exact: true })).toHaveCount(0);
+  // The model ID is shown read-only in the editor (41a7a0c).
+  const modelId = page.getByLabel("模型 ID", { exact: true });
+  await expect(modelId).toHaveValue(m.data.key);
+  await expect(modelId).toHaveAttribute("readonly", "");
   await expect(page.getByLabel("名称", { exact: true })).toHaveValue(m.data.name);
   await page.getByRole("button", { name: "取消", exact: true }).click();
   await page.getByLabel("搜索模型").fill("");

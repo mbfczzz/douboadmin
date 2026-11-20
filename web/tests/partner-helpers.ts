@@ -39,8 +39,8 @@ export async function providerCode(
   return code as string;
 }
 
-// A signed-in mini-program user who finished the SMS registration step; the
-// development server returns the code instead of sending it.
+// A signed-in mini-program user who finished registration (name and phone,
+// plus the SMS code when verification is on).
 export async function miniUser(request: APIRequestContext, name = "验收用户") {
   const signIn = await request.post("/api/auth/login", {
     data: { demoId: crypto.randomUUID() },
@@ -49,14 +49,21 @@ export async function miniUser(request: APIRequestContext, name = "验收用户"
   const user: { token: string; userId: string } = await signIn.json(),
     headers = { Authorization: "Bearer " + user.token },
     phone = "139" + String(Math.floor(Math.random() * 1e8)).padStart(8, "0");
-  const sent = await request.post("/api/access/sms", {
-    headers,
-    data: { phone },
-  });
-  expect(sent.status()).toBe(200);
+  // The SMS step only exists while 短信验证 is switched on (363f736).
+  const access = await request.get("/api/access", { headers });
+  expect(access.status()).toBe(200);
+  let code: string | undefined;
+  if ((await access.json()).smsRequired) {
+    const sent = await request.post("/api/access/sms", {
+      headers,
+      data: { phone },
+    });
+    expect(sent.status()).toBe(200);
+    code = (await sent.json()).debugCode;
+  }
   const registered = await request.post("/api/access/profile", {
     headers,
-    data: { name, phone, code: (await sent.json()).debugCode },
+    data: { name, phone, code },
   });
   expect(registered.status()).toBe(200);
   return { ...user, headers };

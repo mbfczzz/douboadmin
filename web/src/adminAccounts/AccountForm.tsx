@@ -148,6 +148,7 @@ export default function AccountForm({
               初始密码
               <input
                 name="password"
+                aria-label="初始密码"
                 spellCheck={false}
                 {...passwordRules}
                 required

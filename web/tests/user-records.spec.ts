@@ -59,8 +59,12 @@ test("user rows open model use and activity records", async ({ page }) => {
   await expect(entries.filter({ hasText: "完善注册信息" })).toBeVisible({
     timeout: 10000,
   });
+  // Browse requests (here the registration status read) only show under
+  // 全部请求; the SMS send step is gone while 短信验证 is off (363f736).
+  const browse = entries.filter({ hasText: "查询授权状态" });
+  await expect(browse).toHaveCount(0);
   await dialog.getByRole("tab", { name: "全部请求" }).click();
-  await expect(entries.filter({ hasText: "发送短信验证码" })).toBeVisible();
+  await expect(browse).toBeVisible();
   await expect(dialog.getByText(/^今天 · /)).toBeVisible();
   await entries
     .filter({ hasText: "完善注册信息" })
@@ -78,7 +82,8 @@ test("without 日志管理 / 生成任务 the user records hide those views", as
   await login(page);
   await page.route("**/api/admin/me", async (route) => {
     const me = await (await route.fetch()).json();
-    await route.fulfill({ json: { ...me, role: "custom", menus: ["users"] } });
+    // Only super admins reach 用户管理 (af8c271); narrow their menus instead.
+    await route.fulfill({ json: { ...me, menus: ["users"] } });
   });
   await page.route(`**/api/admin/users/${user.userId}/models?*`, (route) =>
     route.fulfill({

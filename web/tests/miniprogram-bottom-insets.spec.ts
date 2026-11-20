@@ -13,7 +13,7 @@ function css(file: string, width: number, safe: number): string {
     .replace(/([\d.]+)rpx/g, (_, n) => `${Number(n) * width / 750}px`)
     .replace(/env\(safe-area-inset-bottom\)/g, `${safe}px`);
 }
-const bar = `<div class="tabbar">${["模板", "混剪", "创作", "Agent", "我的"].map(name => `<div class="item"><div class="glyph">◇</div><span class="label">${name}</span></div>`).join("")}</div>`;
+const bar = `<div class="tabbar">${["模板", "优秀", "创作", "Agent", "我的"].map(name => `<div class="item"><div class="glyph">◇</div><span class="label">${name}</span></div>`).join("")}</div>`;
 const devices = [
   { width: 320, height: 568, nav: 68, safe: 0 },
   { width: 393, height: 852, nav: 103, safe: 34 },
@@ -27,19 +27,20 @@ for (const d of devices) {
     "styles/theme.wxss", "styles/common.wxss", pageFile, "custom-tab-bar/index.wxss",
   ].map(file => css(file, d.width, d.safe)).join("\n")}`;
 
-  test(`mix action and final content clear the tab bar: ${name}`, async ({ page }) => {
+  // 混剪 is a sub-page (no tab bar since 172d539): its action sits at the
+  // screen's bottom, above the safe area, and the last content stays clear.
+  test(`mix action and final content clear the bottom edge: ${name}`, async ({ page }) => {
     await page.setViewportSize(d);
     await page.setContent(`<style>${styles("pages/mix/index.wxss")}</style>
       <div style="height:${d.nav}px">混剪</div><div class="page mix-page">
       <div style="height:850px"></div><div class="biz-card sound-last"><span>声音</span><div style="height:120px"></div><span>背景音乐音量 · 20%</span></div>
-      <div class="mix-submit"><span class="mix-summary">0 个素材 · 30 秒 · 9:16</span><button class="biz-action">开始混剪</button></div></div>${bar}`);
+      <div class="mix-submit"><span class="mix-summary">0 个素材 · 30 秒 · 9:16</span><button class="biz-action">开始混剪</button></div></div>`);
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
     const submit = (await page.locator(".mix-submit").boundingBox())!;
     const button = (await page.locator(".mix-submit button").boundingBox())!;
-    const tab = (await page.locator(".tabbar").boundingBox())!;
     const last = (await page.locator(".sound-last").boundingBox())!;
-    expect(tab.y - button.y - button.height).toBeGreaterThanOrEqual(15);
-    expect(submit.y + submit.height).toBeLessThanOrEqual(tab.y + .1);
+    expect(d.height - d.safe - button.y - button.height).toBeGreaterThanOrEqual(15);
+    expect(submit.y + submit.height).toBeLessThanOrEqual(d.height + .1);
     expect(last.y + last.height).toBeLessThan(submit.y - 12);
     expect(button.height).toBeGreaterThanOrEqual(44);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(d.width);
@@ -57,7 +58,7 @@ for (const d of devices) {
         : `<div class="conversation"><div style="height:900px"></div><div class="message">最后一条消息仍可滚动查看</div></div>`;
       await page.setContent(`<style>${styles("pages/agent/index.wxss")} .chat-scroll:not(.agent-skeleton){overflow-y:auto}</style>
         <div style="height:${d.nav}px">Agent</div><div class="agent-page" style="--nav-bottom:${d.nav}px">
-        <div class="chat-scroll ${loading ? 'agent-skeleton' : ''}">${history}</div><div class="composer"><textarea style="height:${multiline ? 120 : 40}px" placeholder="说说你的创作想法…"></textarea>${multiline ? '<span class="composer-count">450/500</span>' : ''}<div class="send">↑</div></div></div>${bar}`);
+        <div class="chat-scroll ${loading ? 'agent-skeleton' : ''}">${history}</div><div class="composer"><div class="composer-tools"><div class="attach-btn">图片</div><div class="attach-btn">视频</div></div><div class="composer-row"><textarea style="height:${multiline ? 120 : 40}px" placeholder="说说你的创作想法…"></textarea>${multiline ? '<span class="composer-count">450/500</span>' : ''}<div class="send">↑</div></div></div></div>${bar}`);
       const tab = (await page.locator(".tabbar").boundingBox())!;
       const composer = (await page.locator(".composer").boundingBox())!;
       const send = (await page.locator(".send").boundingBox())!;

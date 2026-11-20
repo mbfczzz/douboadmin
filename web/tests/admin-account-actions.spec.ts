@@ -22,11 +22,13 @@ test("admin account row actions each do one thing", async ({ page }) => {
   await expect(form).toHaveCount(0);
 
   const row = page.locator("tbody tr").filter({ hasText: username });
+  // 关联用户 sits in the phone column; 归档 was renamed 删除 (af8c271).
   await expect(row.getByRole("button")).toHaveText([
+    "关联用户",
     "编辑",
     "重置密码",
     "停用",
-    "归档",
+    "删除",
   ]);
   await expect(row).toContainText("尚未登录");
 
@@ -40,7 +42,7 @@ test("admin account row actions each do one thing", async ({ page }) => {
   await confirmSubmission(page);
   await expect(row).toContainText("正常");
 
-  await row.getByRole("button", { name: "归档", exact: true }).click();
+  await row.getByRole("button", { name: "删除", exact: true }).click();
   await answerAsk(page, true);
   await expect(row).toHaveCount(0);
 });

@@ -9,7 +9,7 @@ test("templates load server pages, keep global categories and reset search", asy
   await page.route("**/api/admin/templates?*",r=>{
     const q=new URL(r.request().url()).searchParams;calls.push(q);
     return r.fulfill({json:{page:Number(q.get("page")),size:12,total:521,items:[{
-      id:"t"+q.get("page"),version:1,createdAt:"2026-11-10",data:{title:"模板第"+q.get("page")+"页",kind:"image",category:"其他",cover:"",published:true,sort:0},
+      id:"t"+q.get("page"),version:1,createdAt:"2026-11-10",data:{title:"模板第"+q.get("page")+"页",kind:"video",category:"其他",cover:"",published:true,sort:0},
     }]}});
   });
   await page.getByRole("button",{name:"创作模板",exact:true}).click();

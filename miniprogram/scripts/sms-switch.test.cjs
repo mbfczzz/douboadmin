@@ -5,6 +5,8 @@ const { harness } = require("./harness.cjs");
 test("disabled SMS policy prevents stale send actions without disabling basic registration", async () => {
   const h = harness();
   const page = h.page("activate");
+  await h.api.signIn();
+  page.owner = h.service("session").sessionUserId(); // the page's own user, as on a real visit
   page.setData({ logged: true, status: { smsRequired: false }, phone: "13900139000", name: "用户" });
   let sends = 0, submitted;
   h.api.request = async (path, method, body) => {

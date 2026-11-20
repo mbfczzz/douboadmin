@@ -9,7 +9,13 @@ test("provider login: open, role, password and status are separate actions", asy
   const name = "登录账号验收" + Date.now();
   const created = await page.request.post("/api/admin/partners", {
     headers: { "Idempotency-Key": crypto.randomUUID() },
-    data: { parentId: "root", name, role: "branch" },
+    // A branch is created with its responsible person's phone (af8c271).
+    data: {
+      parentId: "root",
+      name,
+      role: "branch",
+      phone: "139" + String(Math.floor(Math.random() * 1e8)).padStart(8, "0"),
+    },
   });
   expect(created.status()).toBe(200);
   await page.getByRole("button", { name: "服务商管理", exact: true }).click();
@@ -24,6 +30,7 @@ test("provider login: open, role, password and status are separate actions", asy
   await expect(dialog).toContainText(username);
   await expect(dialog).toContainText("尚未登录");
   await expect(dialog.locator(".modal-actions button")).toHaveText([
+    "删除账号",
     "停用登录",
     "修改角色",
     "重置密码",

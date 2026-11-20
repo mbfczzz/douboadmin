@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { openCodes, titles, codes } from "./provider-code-fixture";
+import { mockCodes, openCodes, titles, codes } from "./provider-code-fixture";
 
 for (const width of [1440, 390, 320]) {
   test(`a branch has three distinct business codes at ${width}px`, async ({
@@ -81,8 +81,15 @@ test("owner binding is a separate management section and is not fetched until op
 test("a provider account cannot open its own responsible-person binding code", async ({
   page,
 }) => {
-  const { dialog, requests } = await openCodes(page, "branch", true, true);
-  await expect(dialog.getByRole("tab")).toHaveCount(3);
-  await expect(dialog.locator(".owner-bind")).toHaveCount(0);
-  expect(requests).toEqual(["GET:s1"]);
+  // Share codes are super-administrator only (docs/account-authority.md), so
+  // a provider login has no 分享码 dialog and never requests any code.
+  const { requests } = await mockCodes(page, "branch", true, true);
+  const row = page
+    .locator(".provider-tree-row")
+    .filter({ hasText: "华东分公司" });
+  await expect(row.getByRole("button", { name: "查看分佣" })).toBeVisible();
+  await expect(row.getByRole("button", { name: "分享码" })).toHaveCount(0);
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(page.locator(".owner-bind")).toHaveCount(0);
+  expect(requests).toEqual([]);
 });

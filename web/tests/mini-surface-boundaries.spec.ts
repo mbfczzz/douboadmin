@@ -9,8 +9,8 @@ for(const width of [320,390,430]) {
       <span class="section-title common-heading">常用功能</span><div class="menu-grid">${["服务商中心","充值订单","我的收藏","生成记录","消息通知","帮助与反馈"].map(label=>`<div class="menu">${glyph("image")}<span class="menu-label">${label}</span></div>`).join("")}</div></div>${tabs()}`);
     await expect(page.locator(".balance")).toHaveCSS("background-color","rgb(36, 37, 43)");
     await expect(page.locator(".balance")).toHaveCSS("border-top-color","rgba(0, 0, 0, 0)");
-    // The menu is a bare 3 × 2 grid of icon tiles, not a boxed card.
-    await expect(page.locator(".menu-grid")).toHaveCSS("background-color","rgba(0, 0, 0, 0)");
+    // 常用功能 sits in a card again (172d539): a 3 × 2 grid on the card surface.
+    await expect(page.locator(".menu-grid")).toHaveCSS("background-color","rgb(36, 37, 43)");
     const cells=await Promise.all((await page.locator(".menu").all()).map(m=>m.boundingBox()));
     expect(new Set(cells.map(c=>Math.round(c!.x))).size).toBe(3);
     expect(new Set(cells.map(c=>Math.round(c!.y))).size).toBe(2);
