@@ -24,8 +24,7 @@ export const TOOLS: Entry[] = [
   { key: "extract", title: "文案提取", art: "toolExtract", url: "/pages/extract/index" },
   { key: "idphoto", title: "AI证件照", art: "toolIdphoto", url: create("idphoto") },
   { key: "comic", title: "漫画推文", art: "toolComic", url: preview("comic") },
-  { key: "works", title: "我的作品", art: "toolWorks", url: "/pages/works/index" },
-  { key: "tasks", title: "生成记录", art: "toolTasks", url: "/pages/tasks/index" },
+  { key: "tryon", title: "AI试衣", art: "toolTryon", url: "/pages/tryon/index" },
 ];
 
 export const ENTRIES = [...CARDS, ...TOOLS];

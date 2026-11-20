@@ -20,7 +20,7 @@ const (
 )
 
 // AdminMenus lists every admin page that can be granted to a role.
-var AdminMenus = []string{"overview", "templates", "jobs", "works", "users", "partners", "orders", "payments", "accounts", "roles", "models", "monitor", "logs", "feedback", "settings"}
+var AdminMenus = []string{"overview", "templates", "outfits", "jobs", "works", "users", "partners", "orders", "payments", "accounts", "roles", "models", "monitor", "logs", "feedback", "settings"}
 
 // PartnerMenus are the only menus a provider role may hold; platform-wide data
 // such as all users or orders must never be granted to a provider account.

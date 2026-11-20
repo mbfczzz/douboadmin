@@ -5,10 +5,15 @@ export default function CoverUpload({
   value,
   onChange,
   onBusy,
+  label = "模板封面",
+  allowUrl = true,
 }: {
   value: string;
   onChange: (url: string, id: string) => void;
   onBusy: (v: boolean) => void;
+  label?: string;
+  // false: an upload is required (no HTTPS address field).
+  allowUrl?: boolean;
 }) {
   const [busy, setBusy] = useState(false),
     [error, setError] = useState("");
@@ -49,23 +54,27 @@ export default function CoverUpload({
   }
   return (
     <div className="cover-field">
-      <label>
-        模板封面
-        <input
-          disabled={busy}
-          value={value}
-          onChange={(e) => onChange(e.target.value, "")}
-          placeholder="填写 HTTPS 地址，或上传图片"
-          maxLength={3000}
-        />
-      </label>
+      {allowUrl ? (
+        <label>
+          {label}
+          <input
+            disabled={busy}
+            value={value}
+            onChange={(e) => onChange(e.target.value, "")}
+            placeholder="填写 HTTPS 地址，或上传图片"
+            maxLength={3000}
+          />
+        </label>
+      ) : (
+        <span className="field-label">{label}</span>
+      )}
       <div className="cover-upload">
-        {value ? <img src={value} alt="模板封面预览" /> : <Image size={25} />}
+        {value ? <img src={value} alt={label + "预览"} /> : <Image size={25} />}
         <label className="upload-control">
           <Upload size={15} />
-          {busy ? "上传中…" : "上传封面"}
+          {busy ? "上传中…" : "上传" + (allowUrl ? "封面" : "图片")}
           <input
-            aria-label="上传封面"
+            aria-label={"上传" + (allowUrl ? "封面" : label)}
             type="file"
             accept="image/png,image/jpeg,image/webp"
             disabled={busy}

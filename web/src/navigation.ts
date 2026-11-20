@@ -14,6 +14,7 @@ import {
   Settings2,
   KeyRound,
   ScrollText,
+  Shirt,
 } from "lucide-react";
 import type { Config } from "./api";
 export const pageInfo = {
@@ -22,6 +23,11 @@ export const pageInfo = {
     "创作模板",
     "管理视频创作模板与展示效果，配置后上架到小程序。",
     Layers,
+  ],
+  outfits: [
+    "试衣服装",
+    "管理小程序 AI试衣的服装库，上架后用户可选来试穿。",
+    Shirt,
   ],
   jobs: ["生成任务", "查看任务进度、生成结果与失败原因。", Film],
   works: ["作品管理", "预览、管理作品与公开分享状态。", Image],
@@ -59,7 +65,7 @@ export type Notify = (message: string, tone?: NoticeTone) => void;
 export const navGroups: { label: string; pages: PageId[] }[] = [
   {
     label: "内容与创作",
-    pages: ["overview", "templates", "jobs", "works"],
+    pages: ["overview", "templates", "outfits", "jobs", "works"],
   },
   {
     label: "用户与交易",

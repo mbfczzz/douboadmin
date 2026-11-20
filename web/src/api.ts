@@ -11,6 +11,15 @@ export interface Row<T = Record<string, unknown>> {
   data: T;
   createdAt: string;
 }
+// AI试衣 clothing library (后台 → 试衣服装).
+export interface Outfit {
+  title: string;
+  category: string;
+  description: string;
+  imageAssetId: string;
+  published: boolean;
+  sort: number;
+}
 export interface Template {
   imageSlots?: { label: string; optional: boolean }[];
   selectableModels?: string[];

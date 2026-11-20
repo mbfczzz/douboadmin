@@ -247,7 +247,10 @@ console.log(
 // Page loading as a shimmering outline of the page (media / list / grid) instead of a lone icon; 豆包 watches videos (能看视频 tag); smaller sent-file thumbnails: 1,001,480 B. 975 -> 979 KiB.
 // 一键复刻 subject swaps: pick which picture replaces which subject on the task page: 1,009,264 B. 979 -> 986 KiB.
 // 一键复刻 from an uploaded video, hot videos to remake on the empty page, gl-12 glyph size; 创作 grid trimmed: 1,015,671 B. 986 -> 992 KiB.
-const budget = 992 * 1024;
+// AI试衣 page (clothing library: categories, 默认排序 / 最新上架, 随机一个,
+// 收藏 on the phone; 试穿: person photo + outfit handed to the image editor)
+// and its editor preset; 创作 grid without 我的作品 / 生成记录: 1,039,734 B. 992 -> 1016 KiB.
+const budget = 1016 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

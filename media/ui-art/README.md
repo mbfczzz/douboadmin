@@ -42,7 +42,7 @@ Codex 生成的实拍风格深色图片，用于小程序界面装饰。所有�
 | hub-image.jpg | 480 | 创作入口：图片创作卡片 |
 | hub-mix.jpg | 480 | 创作入口：AI混剪卡片 |
 | hub-remake.jpg | 480 | 创作入口：一键复刻卡片 |
-| tool-*.jpg | 132 | 创作入口功能图标（底色与页面同为 #0f0f11）：ad 剧情带货、shop 探店视频、avatar 数字人、article 图文成片、sing 视频唱歌、remix 视频二创、extract 文案提取、idphoto AI证件照、desub 视频去字幕、more 展开、comic 漫画推文、hot 热门视频、library 素材库、works 我的作品、tasks 生成记录 |
+| tool-*.jpg | 132 | 创作入口功能图标（底色与页面同为 #0f0f11）：ad 剧情带货、shop 探店视频、avatar 数字人、article 图文成片、sing 视频唱歌、remix 视频二创、extract 文案提取、idphoto AI证件照、comic 漫画推文、tryon AI试衣（desub、more、hot、library、works、tasks 已不在创作页使用） |
 | style-*.jpg | 240 | 图文成片、漫画推文的画面风格卡片：general 通用、romance 都市言情、xianxia 仙侠古风、suspense 悬疑惊悚、guoman 国漫 |
 
 ## 目前的加载方式

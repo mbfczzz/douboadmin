@@ -27,8 +27,8 @@ test("创作 is a tab page of entry cards; the editor and 混剪 are subpages", 
   assert.ok(!tabs.includes("pages/create/index") && !tabs.includes("pages/mix/index"));
   const { h, page } = studio();
   const open = (key) => { page.open({ currentTarget: { dataset: { key } } }); h.api.resetNavigation(page); };
-  for (const key of ["video", "image", "mix", "remake", "ad", "idphoto", "extract", "remix", "works"]) open(key);
-  assert.deepEqual(h.nav.map((n) => n.url), ["/pages/create/index?kind=video", "/pages/create/index?kind=image", "/pages/mix/index", "/pages/remake/index", "/pages/create/index?feature=ad", "/pages/create/index?feature=idphoto", "/pages/extract/index", "/pages/feature/index?key=remix", "/pages/works/index"]);
+  for (const key of ["video", "image", "mix", "remake", "ad", "idphoto", "extract", "remix", "tryon"]) open(key);
+  assert.deepEqual(h.nav.map((n) => n.url), ["/pages/create/index?kind=video", "/pages/create/index?kind=image", "/pages/mix/index", "/pages/remake/index", "/pages/create/index?feature=ad", "/pages/create/index?feature=idphoto", "/pages/extract/index", "/pages/feature/index?key=remix", "/pages/tryon/index"]);
 });
 
 test("the feed lists the first keyword's videos without saving search history", async () => {

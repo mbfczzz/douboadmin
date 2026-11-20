@@ -1,0 +1,108 @@
+<template name="outfit">
+  <view class="outfit" data-id="{{item.id}}" bindtap="openPreview" hover-class="card-pressed" aria-role="button" aria-label="{{item.title}}">
+    <view class="outfit-photo">
+      <image wx:if="{{item.image}}" src="{{item.image}}" mode="aspectFill" lazy-load />
+      <view class="outfit-heart" data-id="{{item.id}}" catchtap="favorite" aria-role="button" aria-label="{{favored[item.id]?'取消收藏':'收藏'}}">
+        <image class="gl gl-16" src="/assets/glyphs/{{favored[item.id]?'heart-filled-pink':'favorites'}}.png" />
+      </view>
+    </view>
+    <text class="outfit-title">{{item.title}}</text>
+    <text wx:if="{{item.description}}" class="outfit-desc">{{item.description}}</text>
+  </view>
+</template>
+
+<nav-bar title="AI试衣" back />
+<view class="subpage tryon-page">
+  <view class="tryon-tabs">
+    <view wx:for="{{tabs}}" wx:key="key" class="tryon-tab {{tab===item.key?'on':''}}" data-key="{{item.key}}" bindtap="switchTab" aria-role="tab">{{item.label}}</view>
+  </view>
+
+  <block wx:if="{{tab==='gallery'}}">
+    <scroll-view wx:if="{{categories.length}}" scroll-x enhanced show-scrollbar="{{false}}" class="tryon-chips">
+      <view class="chip-row">
+        <view class="chip {{category===''?'on':''}}" data-name="" bindtap="chooseCategory">全部</view>
+        <view wx:for="{{categories}}" wx:key="name" class="chip {{category===item.name?'on':''}}" data-name="{{item.name}}" bindtap="chooseCategory">{{item.name}}</view>
+      </view>
+    </scroll-view>
+    <view class="tryon-bar">
+      <text class="tryon-count">共{{total}}项</text>
+      <view class="tryon-tool" bindtap="chooseSort" aria-role="button">{{sortLabel}}<text class="tryon-caret">▾</text></view>
+      <view class="tryon-tool {{randomBusy?'is-busy':''}}" bindtap="random" aria-role="button">随机一个</view>
+    </view>
+    <view wx:if="{{galleryError}}" class="biz-error" bindtap="retryGallery">{{galleryError}} · 点击重试</view>
+    <view class="outfit-grid">
+      <template wx:for="{{outfits}}" wx:key="id" is="outfit" data="{{item, favored}}" />
+      <block wx:if="{{galleryLoading&&!outfits.length}}">
+        <view wx:for="{{[0,1,2,3]}}" wx:key="*this" class="outfit"><view class="outfit-photo skeleton" /></view>
+      </block>
+    </view>
+    <text wx:if="{{!galleryLoading&&!galleryError&&!outfits.length}}" class="biz-note tryon-empty">暂无服装，也可以在「试穿」里上传自己的服装图</text>
+    <text wx:elif="{{outfits.length&&galleryLoading}}" class="biz-note tryon-more">加载中…</text>
+    <text wx:elif="{{outfits.length&&outfits.length>=total}}" class="biz-note tryon-more">已经到底了</text>
+  </block>
+
+  <block wx:elif="{{tab==='fit'}}">
+    <view class="biz-card fit-step">
+      <text class="fit-label">1 人物照片</text>
+      <view wx:if="{{person}}" class="fit-slot">
+        <image class="fit-photo" src="{{person.url}}" mode="aspectFill" />
+        <view wx:if="{{!starting}}" class="fit-remove" catchtap="removePerson" aria-role="button" aria-label="删除人物照片">×</view>
+      </view>
+      <view wx:else class="fit-slot fit-add {{personBusy?'is-busy':''}}" bindtap="choosePerson" aria-role="button">
+        <image class="gl gl-24" src="/assets/glyphs/{{personBusy?'clock':'add'}}-muted.png" />
+        <text>{{personBusy?'上传中…':'上传人物照'}}</text>
+      </view>
+      <text class="biz-note">正面、全身或半身、光线清晰的照片效果更好</text>
+    </view>
+    <view class="biz-card fit-step">
+      <text class="fit-label">2 服装</text>
+      <view wx:if="{{garment}}" class="fit-slot">
+        <image class="fit-photo" src="{{garment.url}}" mode="aspectFill" />
+        <view wx:if="{{!starting}}" class="fit-remove" catchtap="removeGarment" aria-role="button" aria-label="移除服装">×</view>
+      </view>
+      <view wx:else class="fit-slot fit-add {{garmentBusy?'is-busy':''}}" bindtap="browse" aria-role="button">
+        <image class="gl gl-24" src="/assets/glyphs/{{garmentBusy?'clock':'add'}}-muted.png" />
+        <text>{{garmentBusy?'上传中…':'从库中选'}}</text>
+      </view>
+      <text wx:if="{{garment.title}}" class="fit-name">{{garment.title}}</text>
+      <view class="fit-actions">
+        <text class="fit-link" bindtap="browse">从库中选</text>
+        <text class="fit-link {{garmentBusy?'is-busy':''}}" bindtap="uploadGarment">上传图</text>
+      </view>
+    </view>
+    <view class="biz-card fit-option">
+      <text>保留原照片背景与光线</text>
+      <switch checked="{{keepBackground}}" color="#00c8dc" disabled="{{starting}}" bindchange="toggleBackground" />
+    </view>
+    <button class="biz-action" loading="{{starting}}" disabled="{{starting||personBusy||garmentBusy}}" bindtap="startFitting">开始试穿</button>
+    <text class="biz-note fit-note">下一步选择模型和画幅后生成</text>
+  </block>
+
+  <block wx:else>
+    <view class="outfit-grid">
+      <template wx:for="{{favorites}}" wx:key="id" is="outfit" data="{{item, favored}}" />
+      <block wx:if="{{favoritesLoading&&!favorites.length}}">
+        <view wx:for="{{[0,1]}}" wx:key="*this" class="outfit"><view class="outfit-photo skeleton" /></view>
+      </block>
+    </view>
+    <view wx:if="{{!favoritesLoading&&!favorites.length}}" class="tryon-empty">
+      <text class="biz-note">还没有收藏的服装，点服装图上的 ♡ 收藏</text>
+      <text class="fit-link" bindtap="browse">去逛逛</text>
+    </view>
+  </block>
+</view>
+
+<view wx:if="{{preview}}" class="outfit-mask" bindtap="closePreview">
+  <view class="outfit-sheet" catchtap="noop">
+    <image class="outfit-big" src="{{preview.image}}" mode="aspectFit" />
+    <view class="sheet-head">
+      <text class="sheet-title">{{preview.title}}</text>
+      <text wx:if="{{preview.category}}" class="sheet-tag">{{preview.category}}</text>
+    </view>
+    <text wx:if="{{preview.description}}" class="sheet-desc">{{preview.description}}</text>
+    <view class="sheet-actions">
+      <button class="biz-action biz-secondary sheet-fav" data-id="{{preview.id}}" bindtap="favorite">{{favored[preview.id]?'已收藏':'收藏'}}</button>
+      <button class="biz-action sheet-wear" data-id="{{preview.id}}" bindtap="wear">试穿这件</button>
+    </view>
+  </view>
+</view>

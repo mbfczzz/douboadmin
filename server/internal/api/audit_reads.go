@@ -34,4 +34,5 @@ var reads = map[string]string{
 	"GET /api/wallet":                           "查看积分余额",
 	"GET /api/wallet/ledger":                    "查看积分明细",
 	"GET /api/works":                            "查看作品",
+	"GET /api/outfits":                          "浏览试衣服装",
 }

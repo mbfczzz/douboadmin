@@ -1,0 +1,140 @@
+@import "../../styles/business.wxss";
+@import "./fit.wxss";
+/* 服装 / 试穿 / 收藏, then the library: chips, count and tools, two columns. */
+.tryon-tabs {
+  display: flex;
+  gap: 8px;
+  padding: 4px;
+  margin-bottom: 14px;
+  border-radius: var(--ui-radius-pill);
+  background: var(--ui-surface);
+}
+.tryon-tab {
+  flex: 1;
+  padding: 8px 0;
+  border-radius: var(--ui-radius-pill);
+  text-align: center;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--ui-muted);
+}
+.tryon-tab.on {
+  color: var(--ui-on-brand);
+  font-weight: 600;
+  background: var(--ui-primary);
+}
+.tryon-chips {
+  margin: 0 -20px 10px;
+  white-space: nowrap;
+}
+.chip-row {
+  display: inline-flex;
+  gap: 8px;
+  padding: 0 20px;
+}
+.chip {
+  padding: 6px 14px;
+  border-radius: var(--ui-radius-pill);
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--ui-muted);
+  background: var(--ui-surface);
+}
+.chip.on {
+  color: var(--ui-text);
+  background: var(--ui-selected);
+}
+.tryon-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.tryon-count {
+  flex: 1;
+  font-size: 13px;
+  color: var(--ui-muted);
+}
+.tryon-tool {
+  padding: 6px 12px;
+  border-radius: var(--ui-radius-pill);
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--ui-text);
+  background: var(--ui-field);
+}
+.tryon-tool.is-busy {
+  opacity: 0.5;
+}
+.tryon-caret {
+  margin-left: 4px;
+  font-size: 10px;
+  color: var(--ui-muted);
+}
+.outfit-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px 12px;
+}
+.outfit {
+  min-width: 0;
+}
+.outfit-photo {
+  position: relative;
+  padding-top: 133%;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--ui-field);
+}
+.outfit-photo > image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+.outfit-heart {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 15px;
+  background: #00000066;
+}
+.outfit-title {
+  display: block;
+  margin-top: 8px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+}
+.outfit-desc {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  margin-top: 2px;
+  font-size: 12px;
+  line-height: 17px;
+  color: var(--ui-muted);
+}
+.tryon-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-top: 40px;
+  text-align: center;
+}
+.tryon-more {
+  display: block;
+  margin: 16px 0 8px;
+  text-align: center;
+}

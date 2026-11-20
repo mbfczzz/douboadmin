@@ -48,7 +48,7 @@ const NAMES = {
   hubImage: "hub-image",
   hubMix: "hub-mix",
   hubRemake: "hub-remake",
-  // feature tiles (two rows of five, then the rest behind 展开)
+  // feature tiles
   toolAd: "tool-ad",
   toolShop: "tool-shop",
   toolAvatar: "tool-avatar",
@@ -58,8 +58,7 @@ const NAMES = {
   toolExtract: "tool-extract",
   toolIdphoto: "tool-idphoto",
   toolComic: "tool-comic",
-  toolWorks: "tool-works",
-  toolTasks: "tool-tasks",
+  toolTryon: "tool-tryon",
   // 图文成片 / 漫画推文 picture-style cards
   styleGeneral: "style-general",
   styleRomance: "style-romance",

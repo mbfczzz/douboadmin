@@ -15,4 +15,12 @@ func (a *Server) contentRoutes() {
 	m.HandleFunc("GET /api/featured-works", a.featuredWorks)
 	m.HandleFunc("GET /api/featured-works/{id}", a.featuredWork)
 	m.HandleFunc("DELETE /api/admin/works/{id}", a.auth("admin", a.deleteWork))
+	m.HandleFunc("GET /api/outfits", a.auth("user", a.outfits))
+	m.HandleFunc("GET /api/outfits/random", a.auth("user", a.randomOutfit))
+	m.HandleFunc("GET /api/outfits/categories", a.auth("user", a.outfitCategories))
+	m.HandleFunc("POST /api/outfits/{id}/use", a.auth("user", a.useOutfit))
+	m.HandleFunc("GET /api/admin/outfits", a.auth("admin", a.adminOutfits))
+	m.HandleFunc("GET /api/admin/outfits/categories", a.auth("admin", a.outfitCategories))
+	m.HandleFunc("PUT /api/admin/outfits/{id}", a.auth("admin", a.saveOutfit))
+	m.HandleFunc("DELETE /api/admin/outfits/{id}", a.auth("admin", a.deleteRecord("outfits")))
 }

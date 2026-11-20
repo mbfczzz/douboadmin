@@ -1,0 +1,133 @@
+/* 试穿: two steps, the background switch, the start button; the preview sheet. */
+.fit-label {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 15px;
+  font-weight: 600;
+}
+.fit-slot {
+  position: relative;
+  width: 132px;
+  height: 176px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--ui-field);
+}
+.fit-photo {
+  width: 100%;
+  height: 100%;
+}
+.fit-add {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--ui-muted);
+}
+.fit-add.is-busy,
+.fit-link.is-busy {
+  opacity: 0.5;
+}
+.fit-remove {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 22px;
+  height: 22px;
+  border-radius: 11px;
+  line-height: 20px;
+  text-align: center;
+  font-size: 15px;
+  color: #fff;
+  background: #000000a0;
+}
+.fit-name {
+  display: block;
+  margin-top: 8px;
+  font-size: 13px;
+}
+.fit-actions {
+  display: flex;
+  gap: 20px;
+  margin-top: 12px;
+}
+.fit-link {
+  font-size: 14px;
+  color: var(--ui-link);
+}
+.fit-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 14px;
+  padding-bottom: 14px;
+  font-size: 14px;
+}
+.fit-note {
+  text-align: center;
+}
+.outfit-mask {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 50;
+  display: flex;
+  align-items: flex-end;
+  background: #000000b3;
+}
+.outfit-sheet {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 16px 20px calc(16px + env(safe-area-inset-bottom));
+  border-radius: 20px 20px 0 0;
+  background: var(--ui-sheet);
+}
+.outfit-big {
+  display: block;
+  width: 100%;
+  height: 56vh;
+  border-radius: 12px;
+  background: var(--ui-field);
+}
+.sheet-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+}
+.sheet-title {
+  flex: 1;
+  font-size: 16px;
+  line-height: 22px;
+  font-weight: 600;
+}
+.sheet-tag {
+  flex: none;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  color: var(--ui-muted);
+  background: var(--ui-field);
+}
+.sheet-desc {
+  display: block;
+  margin-top: 6px;
+  font-size: 13px;
+  line-height: 19px;
+  color: var(--ui-muted);
+}
+.sheet-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 4px;
+}
+button.sheet-fav {
+  flex: 1;
+}
+button.sheet-wear {
+  flex: 2;
+}

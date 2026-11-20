@@ -18,6 +18,11 @@ func init() {
 			c("requiredImages", Int), c("published", Bool), c("deleted", Bool), c("sort", Int),
 			c("imageSlots", JSON), c("selectableModels", JSON), c("inputHint", Text),
 		}},
+		Table{Name: "outfits", Comment: "AI试衣服装库", Cols: []Col{
+			c("title", Short), c("category", Key), c("description", Text), c("imageAssetId", Key),
+			c("imageKey", Text), c("imageType", Short), c("imageSize", Int),
+			c("published", Bool), c("deleted", Bool), c("sort", Int),
+		}},
 		Table{Name: "assets", Comment: "上传文件与生成结果文件", Owner: "上传者或任务所属用户", Cols: []Col{
 			c("name", Short), c("url", Text), c("key", Text), c("type", Short), c("size", Int),
 			c("sourceUrl", Text), c("sourceVideoId", Key),

@@ -22,6 +22,7 @@ import { confirmationPending } from "./confirmation/request";
 const routes = {
   overview: lazy(() => import("./pages/Overview")),
   templates: lazy(() => import("./pages/Templates")),
+  outfits: lazy(() => import("./pages/Outfits")),
   jobs: lazy(() => import("./pages/Jobs")),
   users: lazy(() => import("./pages/Users")),
   partners: lazy(() => import("./partners/Hub")),

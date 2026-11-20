@@ -27,7 +27,8 @@
     "pages/provider/index",
     "pages/remake/index",
     "pages/extract/index",
-    "pages/feature/index"
+    "pages/feature/index",
+    "pages/tryon/index"
   ],
   "window": {
     "navigationStyle": "custom",

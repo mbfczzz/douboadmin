@@ -36,6 +36,8 @@ func (a *Server) auditName(ctx context.Context, kind, id string) string {
 		return field("models", "name")
 	case "template":
 		return field("templates", "title")
+	case "outfit":
+		return field("outfits", "title")
 	case "role":
 		if role, ok := core.BuiltinAdminRoles()[id]; ok {
 			return role.Name

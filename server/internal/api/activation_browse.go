@@ -38,6 +38,9 @@ var browseReads = map[string]bool{
 	"GET /api/hot/discovery":       true,
 	"GET /api/hot/history":         true,
 	"GET /api/shares/{token}":      true,
+	"GET /api/outfits":             true,
+	"GET /api/outfits/random":      true,
+	"GET /api/outfits/categories":  true,
 }
 
 func browseOnly(r *http.Request) bool {

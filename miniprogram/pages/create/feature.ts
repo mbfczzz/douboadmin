@@ -17,8 +17,9 @@ import type { VisibleEditor } from "./editor-types";
 // pricing and generation stay the editor's own.
 type Choice = { label: string; text: string };
 type Option = { key: string; label: string; values: Choice[] };
-// upload: the big picture entry's label; cases: the keyword of its 热门案例.
-type Feature = { title: string; kind: "video" | "image"; placeholder: string; tip: string; script?: string; ratio?: string; options?: Option[]; uses?: "image" | "video"; needs?: string; upload?: string; cases?: string };
+// upload: the big picture entry's label; cases: the keyword of its 热门案例;
+// least: references of its kind it needs (1 when `needs` is set).
+type Feature = { title: string; kind: "video" | "image"; placeholder: string; tip: string; script?: string; ratio?: string; options?: Option[]; uses?: "image" | "video"; needs?: string; least?: number; upload?: string; cases?: string };
 
 const ID_OPTIONS: Option[] = [
   { key: "bg", label: "背景", values: [{ label: "白底", text: "白色" }, { label: "蓝底", text: "蓝色" }, { label: "红底", text: "红色" }] },
@@ -30,6 +31,8 @@ export const FEATURES: Record<string, Feature> = {
   ad: { title: "剧情带货", kind: "video", uses: "image", upload: "上传商品图", cases: "剧情带货", script: "剧情带货短视频", tip: "建议上传清晰完整的商品图", placeholder: "描述剧情或商品卖点，\n也可以写个想法，点「AI写剧本」。" },
   shop: { title: "探店视频", kind: "video", uses: "image", upload: "上传门店图", cases: "探店", script: "探店打卡短视频", tip: "按描述顺序上传门店、菜品图", placeholder: "介绍门店和想拍的画面，\n例如：拍一个女生在我的奶茶店打卡。" },
   idphoto: { title: "AI证件照", kind: "image", ratio: "3:4", uses: "image", upload: "上传照片", needs: "请先上传一张本人照片", options: ID_OPTIONS, tip: "上传一张正脸清晰的照片", placeholder: "选好背景和服装后自动生成描述，也可以修改。" },
+  // From AI试衣 (pages/tryon): @图片1 the person, @图片2 the outfit, prompt written there.
+  tryon: { title: "AI试衣", kind: "image", ratio: "3:4", uses: "image", least: 2, needs: "请放入人物照片和服装图各一张", tip: "@图片1 是人物，@图片2 是服装", placeholder: "描述试穿效果，例如保留原背景、换成全身照。" },
   remake: { title: "一键复刻", kind: "video", uses: "video", needs: "请先带入要复刻的视频", script: "同款复刻短视频", tip: "已带入无水印原视频作为参考", placeholder: "描述想怎么复刻，例如换成自己的产品或人物。" },
 };
 
@@ -78,7 +81,8 @@ export function featureModel<T extends Model>(list: T[], feature: string) {
 export function featureProblem(data: { feature: string; assets: { isImage?: boolean; isVideo?: boolean }[] }) {
   const f = FEATURES[data.feature];
   if (!f?.needs) return "";
-  return data.assets.some((a) => (f.uses === "video" ? a.isVideo : a.isImage)) ? "" : f.needs;
+  const count = data.assets.filter((a) => (f.uses === "video" ? a.isVideo : a.isImage)).length;
+  return count >= (f.least || 1) ? "" : f.needs;
 }
 
 export const featureHandlers = {
