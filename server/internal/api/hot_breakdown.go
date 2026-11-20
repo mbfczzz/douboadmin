@@ -23,8 +23,13 @@ func (a *Server) hotBreakdown(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	id := r.PathValue("id")
-	if !videoID.MatchString(id) {
+	// A Douyin video's breakdown is shared; an uploaded one ("u" + asset id)
+	// is its owner's alone.
+	if upload := uploadID.MatchString(id); !videoID.MatchString(id) && !upload {
 		fail(w, 400, "视频标识无效")
+		return
+	} else if _, problem := a.breakdownAsset(r.Context(), id[1:], identity(r).ID); upload && problem != "" {
+		fail(w, 404, "视频不存在")
 		return
 	}
 	rec, _, err := a.Hot.ReadBreakdown(r.Context(), a.Vision.Model, id)

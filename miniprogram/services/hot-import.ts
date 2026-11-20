@@ -34,6 +34,17 @@ export function startRemake(videoId: string, original: RemakeOriginal, pictures:
   }, uid());
 }
 
+// 一键复刻 from the user's own uploaded video (instead of a Douyin one): the
+// same preparation task, without the download.
+export function startUploadRemake(videoAssetId: string, original: { title: string; duration: number }, pictures: string[]) {
+  return request<Job>("/remake/upload", "POST", {
+    video: videoAssetId,
+    assets: pictures,
+    title: original.title,
+    duration: Math.round(original.duration) || 0,
+  }, uid());
+}
+
 // The task keeps "一键复刻：title" then the caption in its prompt.
 export function remakeOriginal(job: Job): RemakeOriginal {
   const [first, ...rest] = (job.input.prompt || "").split("\n");

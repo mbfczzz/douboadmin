@@ -119,6 +119,7 @@ var ops = map[string]op{
 	"POST /api/agent/sessions":               {label: "新建创作项目", summary: func(q, _ map[string]any) string { return str(q, "skill") }},
 	"PUT /api/agent/sessions/{id}":           {label: "修改创作项目"},
 	"POST /api/hot/videos/{id}/breakdown":    {label: "拆解复刻视频", target: "video"},
+	"POST /api/remake/upload":                {label: "上传视频复刻"},
 	"DELETE /api/works/{id}":                 {label: "删除作品", target: "job"},
 	"POST /api/shares":                       {label: "创建分享"},
 	"PUT /api/favorites/{id}": {label: "收藏模板", target: "template", summary: func(q, _ map[string]any) string {

@@ -4,6 +4,10 @@
   display: block;
   flex-shrink: 0;
 }
+.gl-12 {
+  width: 12px;
+  height: 12px;
+}
 .gl-14 {
   width: 14px;
   height: 14px;

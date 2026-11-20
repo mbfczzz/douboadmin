@@ -7,15 +7,16 @@
     <image wx:else class="biz-image" src="{{video.cover}}" mode="aspectFill" />
     <text class="biz-heading remake-title">{{video.title}}</text>
     <view class="remake-meta">
-      <text class="biz-small">{{video.author}} · {{video.dateText}}<block wx:if="{{seconds}}"> · {{seconds}} 秒</block></text>
+      <text class="biz-small">{{video.uploaded?'来自手机相册':video.author+' · '+video.dateText}}<block wx:if="{{seconds}}"> · {{seconds}} 秒</block></text>
       <text wx:if="{{!busy}}" class="remake-change" bindtap="change">换一个</text>
     </view>
   </view>
   <view wx:else class="biz-card remake-link">
     <text class="remake-label">要复刻的视频</text>
-    <textarea class="remake-input" always-embed disable-default-padding value="{{link}}" maxlength="500" placeholder="粘贴抖音分享的链接或整段分享文字；也可以在创作页的热门视频点「做同款」" placeholder-class="remake-placeholder" bindinput="input" />
+    <textarea class="remake-input" always-embed disable-default-padding value="{{link}}" maxlength="500" placeholder="粘贴抖音分享的链接或整段分享文字，也可以上传手机里的视频" placeholder-class="remake-placeholder" bindinput="input" />
     <view class="remake-actions">
       <text class="remake-paste" bindtap="paste">粘贴</text>
+      <text class="remake-paste {{uploadingVideo?'is-busy':''}}" bindtap="uploadVideo" aria-role="button">{{uploadingVideo?'上传中…':'上传视频'}}</text>
       <button class="biz-secondary remake-read" loading="{{loading}}" disabled="{{loading}}" bindtap="readLink">读取视频</button>
     </view>
   </view>
@@ -33,6 +34,19 @@
     </view>
   </view>
   <text wx:if="{{video&&tooLong}}" class="biz-note remake-long">原视频 {{seconds}} 秒，多数模型的参考视频限 15 秒左右，较长时可能无法直接生成</text>
-  <button wx:if="{{!(loading&&!video)}}" class="biz-action remake-start" loading="{{busy}}" disabled="{{!video||busy||picturing}}" bindtap="start">开始复刻</button>
+  <view wx:if="{{!video&&!loading&&pickWords.length}}" class="remake-picks">
+    <text class="remake-label">热门同款，点一下就能复刻</text>
+    <scroll-view scroll-x enhanced show-scrollbar="{{false}}" class="pick-words">
+      <view class="pick-word-row"><view wx:for="{{pickWords}}" wx:key="*this" class="pick-word {{item===pickWord?'on':''}}" data-word="{{item}}" bindtap="choosePickWord" aria-role="button">{{item}}</view></view>
+    </scroll-view>
+    <view class="pick-grid">
+      <view wx:for="{{picks}}" wx:key="id" class="pick" data-id="{{item.id}}" bindtap="usePick" hover-class="card-pressed" aria-role="button" aria-label="{{'复刻 '+item.title}}">
+        <view class="pick-cover"><image src="{{item.cover}}" mode="aspectFill" lazy-load /><view class="pick-likes"><image class="gl gl-12" src="/assets/glyphs/favorites.png" /><text>{{item.likesText}}</text></view></view>
+        <text class="pick-title">{{item.title}}</text>
+      </view>
+      <block wx:if="{{picksLoading&&!picks.length}}"><view wx:for="{{[0,1,2,3]}}" wx:key="*this" class="pick"><view class="pick-cover skeleton" /></view></block>
+    </view>
+  </view>
+  <button wx:if="{{video}}" class="biz-action remake-start" loading="{{busy}}" disabled="{{!video||busy||picturing}}" bindtap="start">开始复刻</button>
   <text wx:if="{{video}}" class="biz-note remake-note">开始后在任务队列里准备原视频和拆解，可以先离开</text>
 </view>

@@ -65,6 +65,7 @@ export async function chooseReferenceFile(kind: "image" | "video" | "audio") {
     path: file.tempFilePath,
     name: kind === "video" ? "参考视频.mp4" : "参考图片.jpg",
     size: file.size,
+    duration: (file as { duration?: number }).duration || 0, // seconds, for videos
   };
 }
 

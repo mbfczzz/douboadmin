@@ -1,0 +1,64 @@
+/* 热门同款 while nothing is chosen: keyword chips and a two-column grid. */
+.remake-picks {
+  margin-top: 20px;
+}
+.pick-words {
+  margin: 10px -20px 12px;
+  white-space: nowrap;
+}
+.pick-word-row {
+  display: inline-flex;
+  gap: 8px;
+  padding: 0 20px;
+}
+.pick-word {
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  color: var(--ui-muted);
+  background: var(--ui-surface);
+}
+.pick-word.on {
+  color: var(--ui-on-brand);
+  background: var(--ui-primary);
+}
+.pick-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 12px;
+}
+.pick-cover {
+  position: relative;
+  padding-top: 133%;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--ui-field);
+}
+.pick-cover > image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+.pick-likes {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  color: #fff;
+  text-shadow: 0 1px 2px #00000099;
+}
+.pick-title {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  height: 36px;
+  margin-top: 8px;
+  font-size: 13px;
+  line-height: 18px;
+}

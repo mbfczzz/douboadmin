@@ -246,7 +246,8 @@ console.log(
 // Bug pass: new projects remembered, polling resumes on switch, clean drafts per project, 去编辑页精调 renumbers, price retried, abandoned uploads leave the project: 997,883 B. 973 -> 975 KiB.
 // Page loading as a shimmering outline of the page (media / list / grid) instead of a lone icon; 豆包 watches videos (能看视频 tag); smaller sent-file thumbnails: 1,001,480 B. 975 -> 979 KiB.
 // 一键复刻 subject swaps: pick which picture replaces which subject on the task page: 1,009,264 B. 979 -> 986 KiB.
-const budget = 986 * 1024;
+// 一键复刻 from an uploaded video, hot videos to remake on the empty page, gl-12 glyph size; 创作 grid trimmed: 1,015,671 B. 986 -> 992 KiB.
+const budget = 992 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

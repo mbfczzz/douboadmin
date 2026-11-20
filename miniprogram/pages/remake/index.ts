@@ -1,13 +1,14 @@
 import { request, error, enterPage, openTask } from "../../utils/api";
 import { hotView } from "../../services/hot-video";
-import { startRemake } from "../../services/hot-import";
+import { startRemake, startUploadRemake } from "../../services/hot-import";
 import { pictureHandlers } from "./pictures";
+import { uploadHandlers, REFERENCE_SECONDS } from "./upload";
+import { pickHandlers } from "./picks";
 import type { Picture } from "./pictures";
 import type { HotVideo } from "../../services/hot-video";
 
-// Reference videos past this length are refused by most models (Seedance's
-// 全能参考 takes about 15 s), so the page says so before starting.
-const REFERENCE_SECONDS = 15;
+// Reference videos past REFERENCE_SECONDS are refused by most models
+// (Seedance's 全能参考 takes about 15 s), so the page says so before starting.
 
 // 一键复刻 (after Clipcat's flow): a hot video (做同款) or a pasted Douyin link,
 // optionally the user's own product / person pictures. Starting adds a task
@@ -15,6 +16,8 @@ const REFERENCE_SECONDS = 15;
 // watermark and breaks it down; its task page then opens the editor.
 Page({
   ...pictureHandlers,
+  ...uploadHandlers,
+  ...pickHandlers,
   data: {
     video: null as ReturnType<typeof hotView> | null,
     seconds: 0,
@@ -25,8 +28,15 @@ Page({
     busy: false,
     pictures: [] as Picture[],
     picturing: false,
+    uploadingVideo: false,
+    pickWords: [] as string[], // remake ideas while nothing is chosen (picks.ts)
+    pickWord: "",
+    picks: [] as ReturnType<typeof hotView>[],
+    picksLoading: false,
   },
   id: "",
+  uploadId: "", // a video uploaded from the phone (upload.ts)
+  pickRevision: 0,
   revision: 0,
   visible: true,
   destroyed: false,
@@ -37,6 +47,7 @@ Page({
     this.visible = true;
     enterPage(this);
     if (this.id && !this.data.video) void this.load();
+    void this.loadPicks();
   },
   onHide() {
     this.visible = false;
@@ -77,6 +88,7 @@ Page({
   },
   change() {
     this.id = "";
+    this.uploadId = "";
     this.revision++;
     this.setData({ video: null, seconds: 0, tooLong: false, link: "", loadError: "", loading: false });
   },
@@ -86,7 +98,9 @@ Page({
     this.setData({ busy: true });
     try {
       const pictures = this.data.pictures.map((p: Picture) => p.id);
-      const job = await startRemake(video.id, { title: video.title, text: video.text, duration: video.duration }, pictures);
+      const job = this.uploadId
+        ? await startUploadRemake(this.uploadId, { title: video.title, duration: this.data.seconds }, pictures)
+        : await startRemake(video.id, { title: video.title, text: video.text, duration: video.duration }, pictures);
       if (!this.destroyed) openTask(job.id, this);
     } catch (e) {
       if (!this.destroyed) error(e);

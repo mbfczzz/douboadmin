@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log/slog"
+	"strings"
 )
 
 type Importer struct {
@@ -21,7 +22,27 @@ type Importer struct {
 // RemakePurpose marks an import that prepares a 一键复刻.
 const RemakePurpose = "remake"
 
+// UploadSource is the source of a 一键复刻 from the user's own uploaded video.
+func UploadSource(assetID string) string { return "u" + assetID }
+
+// uploaded: the user's own video, kept as it is and broken down.
+func (p Importer) uploaded(ctx context.Context, j core.Job) (string, error) {
+	assetID := strings.TrimPrefix(j.Input.SourceID, "u")
+	row, err := p.Service.Store.Get(ctx, "assets", assetID)
+	var data map[string]any
+	if err != nil || row.Owner != j.UserID || json.Unmarshal(row.Data, &data) != nil {
+		return "", fmt.Errorf("上传的视频不可用")
+	}
+	if p.Vision.Ready() {
+		p.breakdown(ctx, j, j.Input.SourceID, data)
+	}
+	return "asset:" + assetID, nil
+}
+
 func (p Importer) Generate(ctx context.Context, j core.Job) (string, error) {
+	if j.Input.Purpose == RemakePurpose && strings.HasPrefix(j.Input.SourceID, "u") {
+		return p.uploaded(ctx, j)
+	}
 	id := core.Digest(j.ID + ":result")[:32]
 	if _, e := p.Service.Store.Get(ctx, "assets", id); e == nil {
 		return "asset:" + id, nil

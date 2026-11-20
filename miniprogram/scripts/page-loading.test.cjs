@@ -12,8 +12,8 @@ test("detail pages wait on the loading page, with what is being loaded", () => {
     assert.match(wxml, new RegExp(`<page-loading [^>]*text="[^"]*${words}`), page);
     assert.doesNotMatch(wxml, /class="skeleton skel-hero"|class="hero skeleton"/, page);
   }
-  // 一键复刻: nothing to start while the video is still being read.
-  assert.match(read("pages/remake/index.wxml"), /<button wx:if="\{\{!\(loading&&!video\)\}\}" class="biz-action remake-start"/);
+  // 一键复刻: nothing to start until a video is chosen (so not while it is read).
+  assert.match(read("pages/remake/index.wxml"), /<button wx:if="\{\{video\}\}" class="biz-action remake-start"/);
 });
 
 test("list skeletons carry the slow-network line; both appear late", () => {
