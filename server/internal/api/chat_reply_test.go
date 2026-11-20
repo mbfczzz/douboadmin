@@ -1,8 +1,11 @@
 package api
 
 import (
+	"bufio"
 	"doubo/server/internal/core"
 	"doubo/server/internal/provider"
+	"net/http"
+	"net/http/httptest"
 	"strings"
 	"testing"
 	"time"
@@ -84,5 +87,35 @@ func TestStopReplyMarksTheTurn(t *testing.T) {
 	}
 	if _, err := a.Store.Get(t.Context(), "chat_stops", j.ID); err != nil {
 		t.Fatal("no stop marker", err)
+	}
+}
+
+// Through the real HTTP stack (middleware included) each event arrives as it
+// is sent, not when the reply ends.
+func TestChatStreamIsFlushedThroughTheServer(t *testing.T) {
+	a, one, _ := setup(t)
+	j := runningChat(t, a)
+	partial(t, a, j.ID, "镜头1", 0)
+	srv := httptest.NewServer(a.Handler())
+	defer srv.Close()
+	req, _ := http.NewRequestWithContext(t.Context(), "GET", srv.URL+"/api/jobs/"+j.ID+"/stream", nil)
+	req.Header.Set("Authorization", "Bearer "+one)
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer res.Body.Close()
+	got := make(chan string, 1)
+	go func() {
+		line, _ := bufio.NewReader(res.Body).ReadString('\n')
+		got <- line
+	}()
+	select {
+	case line := <-got:
+		if line != "data: {\"text\":\"镜头1\"}\n" {
+			t.Fatal(line)
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatal("the first event was held back")
 	}
 }
