@@ -206,7 +206,9 @@ console.log(
 // Agent 创作项目: project bar and sheet, materials, the 创作方案 card and
 // generation cards, project-scoped history (pages/agent/*, services/agent.ts,
 // utils/agent-plan.ts): 936,004 B. 889 -> 915 KiB.
-const budget = 915 * 1024;
+// Agent review: plan text for 复制, per-skill guidance in an empty project,
+// keeping signed material links across visits: 937,175 B. 915 -> 916 KiB.
+const budget = 916 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

@@ -31,6 +31,9 @@ test("a reply's plan block becomes a card; only the newest plan can generate", (
   const messages = plain(chatMessages(jobs));
   const plans = messages.filter((m) => m.plan);
   assert.deepEqual(plans.map((m) => [m.plan.title, !!m.latest]), [["春日咖啡", false], ["第二版", true]]);
+  // 复制 gives the plan as lines, not JSON; a reply with nothing to copy has no button.
+  assert.equal(plans[1].copy, "给你一版方案：\n\n【第二版】视频 · 12 秒 · 9:16\n0-3秒 推门 “周末好去处” （图片2）");
+  assert.match(require("node:fs").readFileSync("pages/agent/parts/messages.wxml", "utf8"), /wx:if="\{\{item\.copy\}\}" class="reply-icon"/);
   assert.deepEqual(messages.at(-1).gen, { status: "running", progress: 40, kind: "video", thumb: "", error: "" });
 });
 

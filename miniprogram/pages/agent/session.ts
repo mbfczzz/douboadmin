@@ -13,7 +13,7 @@ const remembered = () => (wx.getStorageSync(KEY) as { user?: string; id?: string
 const remember = (id: string) => wx.setStorageSync(KEY, { user: sessionUserId(), id });
 
 type Page = {
-  data: { session: SessionDetail | null; skills: Skill[]; projects: SessionRow[]; projectsOpen: boolean; prompt: string };
+  data: { session: SessionDetail | null; skills: Skill[]; projects: SessionRow[]; projectsOpen: boolean; prompt: string; materials: ReturnType<typeof editorAsset>[] };
   destroyed: boolean;
   setData(data: Record<string, unknown>): void;
   load(force?: boolean): Promise<void>;
@@ -36,7 +36,10 @@ export const sessionHandlers = {
     const detail = await sessionDetail(id);
     if (this.destroyed) return;
     remember(id);
-    this.setData({ session: detail, materials: materialLabels(detail.assets.map(editorAsset)) });
+    // Re-signed links for the same files would reload every picture on each visit.
+    const shown = new Map(this.data.materials.map((m) => [m.id, m]));
+    const materials = materialLabels(detail.assets.map((a) => shown.get(a.id) || editorAsset(a)));
+    this.setData({ session: detail, materials });
   },
   openProjects(this: Page) {
     this.setData({ projectsOpen: true });
@@ -63,8 +66,9 @@ export const sessionHandlers = {
       const row = await createSession(skill.id);
       if (this.destroyed) return;
       remember(row.id);
-      this.setData({ session: { ...row, assets: [] }, materials: [], messages: [], prompt: skill.starter || this.data.prompt, focus: true });
+      this.setData({ session: { ...row, assets: [] }, materials: [], prompt: skill.starter || this.data.prompt, focus: true });
       this.setData({ projects: [row, ...this.data.projects] });
+      await this.load(true);
     } catch (err) {
       error(err);
     }

@@ -37,7 +37,7 @@
         <text wx:else class="plan-old">已有更新的方案</text>
       </view>
       <view class="reply-actions">
-        <view class="reply-icon" data-text="{{item.text}}" bindtap="copy" hover-class="icon-pressed" aria-role="button" aria-label="复制"><image class="gl gl-18" src="/assets/glyphs/copy-muted.png" /></view>
+        <view wx:if="{{item.copy}}" class="reply-icon" data-text="{{item.copy}}" bindtap="copy" hover-class="icon-pressed" aria-role="button" aria-label="复制"><image class="gl gl-18" src="/assets/glyphs/copy-muted.png" /></view>
         <view wx:if="{{!item.plan}}" class="use-script" data-index="{{index}}" data-text="{{item.text}}" bindtap="use" hover-class="starter-pressed" aria-role="button"><image class="gl gl-16" src="/assets/glyphs/video.png" /><text>带到创作</text></view>
       </view>
       <scroll-view wx:if="{{index===messages.length-1&&!busy}}" scroll-x class="follow-ups">

@@ -110,6 +110,7 @@ Page({
       if (!this.data.session) {
         const row = await createSession("general"); // a first message starts a free project
         this.setData({ session: { ...row, assets: [] }, projects: [row, ...this.data.projects] });
+        await this.load(true); // adopt the new project before its first turn shows
       }
       // Pictures go to models that read them; others work from the names.
       const sees = (model.referenceTypes || []).includes("image");

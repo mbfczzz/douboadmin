@@ -9,6 +9,12 @@ const str = (v: unknown, n: number) => (typeof v === "string" ? v.trim().slice(0
 
 export const planMeta = (p: Plan) => [p.kind === "image" ? "图片" : "视频", p.kind === "video" ? p.duration + " 秒" : "", p.ratio].filter(Boolean).join(" · ");
 
+// What 复制 copies: the plan as plain lines, not JSON.
+export function planText(p: Plan) {
+  const shots = p.shots.map((s) => [s.time, s.scene, s.line && `“${s.line}”`, s.asset && `（${s.asset}）`].filter(Boolean).join(" "));
+  return [`【${p.title}】${planMeta(p)}`, ...(shots.length ? shots : [p.prompt])].join("\n");
+}
+
 export function splitReply(text: string): { text: string; plan?: PlanView } {
   const m = fence.exec(text);
   if (!m) return { text };

@@ -1,5 +1,5 @@
 import type { Job, ChatMessage } from "../services/types";
-import { splitReply } from "./agent-plan";
+import { splitReply, planText } from "./agent-plan";
 export type { ChatMessage } from "../services/types";
 
 // "镜头 1（0–3 秒）：…" or "【开场】…" become a highlighted label and its text,
@@ -40,6 +40,7 @@ export function chatMessages(jobs: Job[]): ChatMessage[] {
           failed,
           lines: job.status === "succeeded" ? scriptLines(reply.text) : [],
           pending: job.status === "queued" || job.status === "running",
+          copy: [reply.text, reply.plan && planText(reply.plan)].filter(Boolean).join("\n\n"),
           ...(reply.plan ? { plan: reply.plan } : {}),
         },
       ];

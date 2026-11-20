@@ -17,7 +17,7 @@
   gap: 6px;
 }
 .model-chip {
-  max-width: 150px;
+  max-width: 96px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -41,5 +41,8 @@
   color: #ff8a94;
 }
 .composer.has-bar {
-  margin-top: 8px;
+  margin-top: 10px;
+}
+.agent-bar {
+  margin-top: 10px;
 }

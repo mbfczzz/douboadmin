@@ -12,7 +12,7 @@
     <view class="agent-hello">
       <view class="agent-mark"><image class="gl gl-30" src="/assets/glyphs/ai-pen-dark.png" /></view>
       <text class="headline">{{session?'说说这次想做什么':'选一个开始创作'}}</text>
-      <text class="intro-sub">素材、方案、修改和生成，都在这一段对话里完成。</text>
+      <text class="intro-sub">{{!session?'素材、方案、修改和生成，都在这一段对话里完成。':session.data.skill==='product'?'先在下方添加商品图，再说说想突出的卖点':session.data.skill==='store'?'先在下方添加门头、环境、菜品照片，再说说店名和特色':session.data.skill==='image'?'说说想要的画面，也可以在下方添加参考图':'说说你的想法，素材可以随时在下方添加'}}</text>
     </view>
     <view wx:if="{{!session}}" class="starters">
       <view wx:for="{{skills}}" wx:key="id" class="starter" data-id="{{item.id}}" bindtap="newProject" hover-class="starter-pressed" aria-role="button">
@@ -50,8 +50,8 @@
     <text wx:if="{{prompt.length>400}}" class="bar-note {{prompt.length>=500?'full':''}}">{{prompt.length}}/500</text>
     <text wx:elif="{{priceHint}}" class="bar-note">{{priceHint}}</text>
   </view>
-  <view class="composer {{focus?'is-focus':''}} {{models.length>1||priceHint?'has-bar':''}}">
-    <textarea auto-height maxlength="500" focus="{{focus}}" placeholder="{{messages.length?'继续说，例如：第二镜换成特写':'说说你的创作想法…'}}" placeholder-class="composer-placeholder" value="{{prompt}}" bindinput="input" bindblur="blur" cursor-spacing="24" show-confirm-bar="{{false}}" />
+  <view class="composer {{focus?'is-focus':''}} {{models.length>1||priceHint||session?'has-bar':''}}">
+    <textarea auto-height maxlength="500" focus="{{focus}}" placeholder="{{messages.length?'继续说说要怎么改…':'说说你的创作想法…'}}" placeholder-class="composer-placeholder" value="{{prompt}}" bindinput="input" bindblur="blur" cursor-spacing="24" show-confirm-bar="{{false}}" />
     <text wx:if="{{prompt.length>400&&!(models.length>1||priceHint)}}" class="composer-count {{prompt.length>=500?'full':''}}">{{prompt.length}}/500</text>
     <view class="send {{prompt&&!busy?'ready':''}}" bindtap="send" hover-class="icon-pressed" aria-role="button" aria-label="发送">
       <t-loading wx:if="{{busy}}" size="18px" /><image wx:else class="gl gl-20" src="/assets/glyphs/send-{{prompt&&!busy?'dark':'muted'}}.png" />

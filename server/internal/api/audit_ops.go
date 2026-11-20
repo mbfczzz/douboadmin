@@ -116,6 +116,8 @@ var ops = map[string]op{
 	"POST /api/jobs/{id}/retry":              {label: "重试生成任务", target: "job"},
 	"POST /api/hot/videos/{id}/import":       {label: "导入热门视频", target: "video"},
 	"POST /api/hot/link":                     {label: "提取视频文案"},
+	"POST /api/agent/sessions":               {label: "新建创作项目", summary: func(q, _ map[string]any) string { return str(q, "skill") }},
+	"PUT /api/agent/sessions/{id}":           {label: "修改创作项目"},
 	"POST /api/hot/videos/{id}/breakdown":    {label: "拆解复刻视频", target: "video"},
 	"DELETE /api/works/{id}":                 {label: "删除作品", target: "job"},
 	"POST /api/shares":                       {label: "创建分享"},

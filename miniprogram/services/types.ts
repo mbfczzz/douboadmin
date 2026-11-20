@@ -20,6 +20,7 @@ export interface ChatMessage {
   plan?: PlanView; // the reply's 创作方案 card
   gen?: { status: string; progress: number; kind: string; thumb: string; error: string }; // a generation from a plan
   latest?: boolean; // the newest plan, the one that can still generate
+  copy?: string; // what 复制 puts on the clipboard
 }
 export interface JobPage {
   items: Job[];

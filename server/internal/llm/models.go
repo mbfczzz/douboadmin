@@ -77,7 +77,11 @@ func ensure(ctx context.Context, s store.Store, p Provider, key, id string, orde
 	if p.Name == "ark" {
 		refs = []string{"image"} // 豆包 reads pictures; DeepSeek does not
 	}
-	m := core.Model{ID: modelID, Key: key, Name: p.Label + " " + id, Kind: "chat", Published: true, Available: ready, Sort: 900 + order,
+	name := p.Label // the first listed model carries just the provider's name
+	if order > 0 {
+		name += " " + id
+	}
+	m := core.Model{ID: modelID, Key: key, Name: name, Kind: "chat", Published: true, Available: ready, Sort: 900 + order,
 		ReferenceTypes: refs, Resolutions: []string{}, Ratios: []string{}, Durations: []int{}, Qualities: []string{}, Modes: []string{}, Operations: []string{},
 		Settings: core.ModelSettings{TokenInputPrice: p.InputPrice, TokenOutputPrice: p.OutputPrice, Description: p.Label + " 对话模型，按 token 计费"}}
 	_, err = s.Put(ctx, "models", core.Record{ID: modelID, Data: core.Data(m)}, 0)

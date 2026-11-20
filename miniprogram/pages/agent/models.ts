@@ -19,7 +19,7 @@ async function priceHint(model: string): Promise<string> {
   try {
     const q = await request<Quote>("/jobs/quote", "POST", { kind: "chat", model, prompt: "预估本轮积分", resolution: "", ratio: "", duration: 0, assets: [], purpose: "agent" });
     if (!q.billingEnabled || !q.units) return "";
-    return q.perToken ? `按量计费 · 本轮最多约 ${points(q.units)} 积分` : `每次 ${points(q.units)} 积分`;
+    return q.perToken ? `按量 · 最多约 ${points(q.units)} 积分` : `每次 ${points(q.units)} 积分`;
   } catch {
     return ""; // preview accounts cannot quote; the hint is optional
   }

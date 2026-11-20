@@ -31,7 +31,7 @@ test("Agent switches between chat models and shows the per-turn price", async ()
   await page.loadModels();
   assert.deepEqual(page.data.models.map((m) => m.id), ["ds", "db"]);
   assert.equal(page.data.model, "ds");
-  assert.equal(page.data.priceHint, "按量计费 · 本轮最多约 0.43 积分");
+  assert.equal(page.data.priceHint, "按量 · 最多约 0.43 积分");
   await page.pickModel({ currentTarget: { dataset: { id: "db" } } });
   assert.equal(page.data.priceHint, "每次 0.43 积分");
   assert.equal(h.wx.getStorageSync("agent-model"), "db");

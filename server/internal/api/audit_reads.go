@@ -5,6 +5,9 @@ package api
 var reads = map[string]string{
 	"GET /api/access":                           "查询授权状态",
 	"GET /api/config":                           "读取应用配置",
+	"GET /api/agent/skills":                     "查看 Agent 技能",
+	"GET /api/agent/sessions":                   "查看创作项目",
+	"GET /api/agent/sessions/{id}":              "打开创作项目",
 	"GET /api/favorites":                        "查看收藏",
 	"GET /api/hot/discovery":                    "浏览热门发现",
 	"GET /api/hot/history":                      "查看热门搜索记录",
