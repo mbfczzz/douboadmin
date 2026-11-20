@@ -3,14 +3,15 @@ import { request } from "../../services/request";
 import { points } from "../../services/business";
 import { hasSession } from "../../utils/api";
 import type { Config } from "../../services/types";
+import { CHAT_CHOICE, preferredChat } from "../../services/chat-model";
 
 // Which chat model the Agent talks to (DeepSeek / 豆包 / relay chat models),
 // remembered across visits, and what one turn costs on it.
-export type ChatModel = { id: string; name: string; sees: boolean }; // sees: reads pictures
-const STORE = "agent-model";
+export type ChatModel = { id: string; name: string; sees: boolean; key?: string }; // sees: reads pictures
+const STORE = CHAT_CHOICE;
 
 export const chatModels = (config: Config): ChatModel[] =>
-  config.models.filter((m) => m.kind === "chat").map((m) => ({ id: m.id, name: m.name, sees: (m.referenceTypes || []).includes("image") }));
+  config.models.filter((m) => m.kind === "chat").map((m) => ({ id: m.id, name: m.name, key: m.key, sees: (m.referenceTypes || []).includes("image") }));
 
 type Quote = { units: number; billingEnabled: boolean; perToken?: boolean };
 // 按量 models: the most one turn can hold; settled on the tokens used.
@@ -36,7 +37,7 @@ export const agentModels = {
     const models = chatModels(await loadConfig());
     if (this.destroyed) return;
     const saved = wx.getStorageSync(STORE) as string;
-    const model = models.find((m) => m.id === saved)?.id || models[0]?.id || "";
+    const model = preferredChat(models, saved)?.id || "";
     this.setData({ models, model, sees: !!models.find((m) => m.id === model)?.sees });
     if (model) {
       const hint = await priceHint(model);

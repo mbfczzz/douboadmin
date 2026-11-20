@@ -235,7 +235,8 @@ console.log(
 // a reply is coming, waiting seconds shown: 965,950 B. 942 -> 944 KiB.
 // Agent replies stream (shown as written, caret, plan placeholder): 971,032 B. 944 -> 949 KiB.
 // Chunked reply stream (UTF-8 piece decoder, SSE reader) and 停止回复: 977,488 B. 949 -> 955 KiB.
-const budget = 955 * 1024;
+// One chat-model picker (DeepSeek Flash by default) for Agent and AI写剧本: 978,518 B. 955 -> 956 KiB.
+const budget = 956 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

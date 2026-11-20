@@ -11,6 +11,7 @@ import type { ProjectView } from "./session";
 import { agentModels } from "./models";
 import type { ChatModel } from "./models";
 import { historyHandlers } from "./history";
+import { chatOf } from "../../services/chat-model";
 import { streamHandlers } from "./stream";
 import { sessionHandlers, projectView } from "./session";
 import { materialHandlers, materialLabels } from "./materials";
@@ -138,7 +139,7 @@ Page({
     try {
       const config = await loadConfig();
       if (this.destroyed) return;
-      const model = config.models.find((m) => m.kind === "chat" && m.id === this.data.model) || config.models.find((m) => m.kind === "chat");
+      const model = config.models.find((m) => m.kind === "chat" && m.id === this.data.model) || chatOf(config);
       if (!model) throw new Error("创作助手暂未开放，请稍后再试");
       if (!this.data.session) {
         const row = await createSession("general"); // a first message starts a free project

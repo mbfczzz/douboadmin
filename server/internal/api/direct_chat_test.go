@@ -3,6 +3,7 @@ package api
 import (
 	"doubo/server/internal/core"
 	"doubo/server/internal/provider"
+	"doubo/server/internal/relay"
 	"encoding/json"
 	"testing"
 )
@@ -57,5 +58,23 @@ func TestChatReplySoFarIsShownToItsOwner(t *testing.T) {
 	}
 	if w = call(a, "GET", "/api/jobs/"+j.ID+"/reply", two, "", nil); w.Code != 404 {
 		t.Fatal("another user read the reply", w.Code)
+	}
+}
+
+// Without the relay, DeepSeek / 豆包 still appear (they are called directly);
+// relay models do not.
+func TestDirectChatModelsShowWithoutTheRelay(t *testing.T) {
+	a, _, _ := setup(t)
+	a.Relay = relay.New("", "")
+	m := core.Model{ID: "ds", Key: "deepseek:deepseek-flash", Name: "DeepSeek", Kind: "chat", Published: true, Available: true, ReferenceTypes: []string{"image"}}
+	if _, err := a.Store.Put(t.Context(), "models", core.Record{ID: "ds", Data: core.Data(m)}, 0); err != nil {
+		t.Fatal(err)
+	}
+	var cfg struct {
+		Models []core.Model `json:"models"`
+	}
+	w := call(a, "GET", "/api/config", "", "", nil)
+	if json.Unmarshal(w.Body.Bytes(), &cfg) != nil || len(cfg.Models) != 1 || cfg.Models[0].Key != "deepseek:deepseek-flash" {
+		t.Fatal(w.Body.String())
 	}
 }

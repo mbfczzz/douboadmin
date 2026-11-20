@@ -60,3 +60,21 @@ test("按量 elsewhere confirms the most a turn can cost; usage refunds read as 
   assert.equal(row.title, "按量结算退回");
   assert.equal(row.change, "+0.35");
 });
+
+test("without a saved choice the Agent starts on DeepSeek Flash", async () => {
+  const h = harness();
+  await h.api.signIn();
+  h.wx.request = (o) => {
+    const path = o.url.split("/api")[1];
+    const ok = (data) => o.success({ statusCode: 200, data });
+    if (path === "/config") return ok({ models: [{ id: "db", key: "ark:doubao-seed", name: "豆包", kind: "chat" }, { id: "fl", key: "deepseek:deepseek-flash", name: "DeepSeek", kind: "chat", referenceTypes: ["image"] }] });
+    return ok({ units: 0, billingEnabled: false });
+  };
+  const page = h.page("agent");
+  await page.loadModels();
+  assert.equal(page.data.model, "fl");
+  assert.equal(page.data.sees, true);
+  h.wx.setStorageSync("agent-model", "db"); // a choice the user made still wins
+  await page.loadModels();
+  assert.equal(page.data.model, "db");
+});

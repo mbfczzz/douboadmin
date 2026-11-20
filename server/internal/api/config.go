@@ -29,7 +29,7 @@ func (a *Server) config(w http.ResponseWriter, r *http.Request) {
 	models := []core.Model{}
 	for _, row := range rows {
 		var m core.Model
-		if json.Unmarshal(row.Data, &m) == nil && m.Usable() && a.Relay.Ready() {
+		if json.Unmarshal(row.Data, &m) == nil && m.Usable() && (a.Relay.Ready() || directChat(m)) {
 			m = m.Effective()
 			if !m.Usable() {
 				continue
@@ -75,4 +75,10 @@ func (a *Server) config(w http.ResponseWriter, r *http.Request) {
 	}
 	reply(w, 200, map[string]any{"brandIcon": a.brandIcon(r.Context()), "uiArt": a.uiArtURLs(r.Context()), "demo": false, "demoLogin": a.demoLoginEnabled(), "wechatLogin": a.Config.WeChatAppID != "" && a.Config.WeChatSecret != "", "wechatPhoneLogin": a.Config.WeChatAppID != "" && a.Config.WeChatSecret != "",
 		"activationRequired": a.Config.RequireActivation, "storage": a.Config.Storage, "models": models, "categories": categories, "relayConfigured": a.Relay.Ready(), "mixAvailable": false, "mixMessage": "混剪功能暂未开放", "completionTemplateId": completion})
+}
+
+// DeepSeek / 豆包 chat models are called directly, relay or not.
+func directChat(m core.Model) bool {
+	_, _, ok := core.DirectChat(m.Key)
+	return ok
 }

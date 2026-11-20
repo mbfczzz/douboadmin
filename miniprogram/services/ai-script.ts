@@ -2,6 +2,7 @@ import { request } from "./request";
 import { submitInput } from "./jobs";
 import { loadConfig } from "../utils/config-cache";
 import type { Job } from "./types";
+import { chatOf } from "./chat-model";
 
 // "AI写剧本": asks the chat model (the one Agent uses) and waits for its
 // reply. It is an ordinary chat task, priced and confirmed like any other.
@@ -11,7 +12,7 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export async function writeScript(instruction: string, alive: () => boolean = () => true) {
   const config = await loadConfig();
-  const model = config.models.find((m) => m.kind === "chat");
+  const model = chatOf(config);
   if (!model) throw new Error("AI写剧本暂未开放，请稍后再试");
   let job = await submitInput({ kind: "chat", model: model.id, prompt: instruction, resolution: "", ratio: "", duration: 0, assets: [] }, "script");
   const started = Date.now();
