@@ -41,3 +41,14 @@ func TestPeakHoursAreBeijingWorkdayHours(t *testing.T) {
 		}
 	}
 }
+
+// A model that watches videos holds room for a video per material.
+func TestVideoWatchingModelsHoldMore(t *testing.T) {
+	in := core.JobInput{Kind: "chat", Prompt: "看视频", Assets: []string{"v1"}, Purpose: "agent"}
+	s := core.ModelSettings{TokenInputPrice: 0.008, TokenOutputPrice: 0.02}
+	seeing, _ := tokenHold(core.Model{Settings: s, ReferenceTypes: []string{"image"}}, in)
+	watching, _ := tokenHold(core.Model{Settings: s, ReferenceTypes: []string{"image", "video"}}, in)
+	if watching <= seeing {
+		t.Fatal(seeing, watching)
+	}
+}

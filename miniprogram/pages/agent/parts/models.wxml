@@ -10,6 +10,7 @@
             <text class="model-title-name">{{item.name}}</text>
             <text wx:if="{{item.rec}}" class="model-badge rec">推荐</text>
             <text class="model-badge {{item.sees?'see':''}}">{{item.sees?'能看图':'仅文字'}}</text>
+            <text wx:if="{{item.watches}}" class="model-badge see">能看视频</text>
           </view>
           <text wx:if="{{item.desc}}" class="model-desc">{{item.desc}}</text>
           <text wx:if="{{modelPrices[item.id]}}" class="model-price">{{modelPrices[item.id]}}</text>

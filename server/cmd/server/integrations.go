@@ -67,7 +67,7 @@ func chatModels(ctx context.Context, app *api.Server, values settings.Values) *p
 			ModelPrices: map[string][3]float64{"deepseek-v4-pro": {0.045, 0.0015, 0.135}}, Seeing: []string{"flash"},
 			Names:   map[string]string{"deepseek-flash": "DeepSeek", "deepseek-v4-pro": "DeepSeek Pro"},
 			Tagline: map[string]string{"deepseek-flash": "反应快、价格低，写脚本方案首选", "deepseek-v4-pro": "推理更强，适合复杂策划"}},
-		{Name: "ark", Label: "豆包", Client: &llm.Client{BaseURL: values.Get("CHAT_ARK_BASE_URL", "https://ark.cn-beijing.volces.com/api/v3"), Key: arkKey}, Models: arkModels, InputPrice: 0.008, OutputPrice: 0.02,
+		{Name: "ark", Label: "豆包", Client: &llm.Client{BaseURL: values.Get("CHAT_ARK_BASE_URL", "https://ark.cn-beijing.volces.com/api/v3"), Key: arkKey}, Models: arkModels, InputPrice: 0.008, OutputPrice: 0.02, Watches: true,
 			Tagline: map[string]string{"": "字节豆包，看图细致，中文表达自然"}},
 	}
 	if err := llm.EnsureModels(ctx, app.Store, providers); err != nil {

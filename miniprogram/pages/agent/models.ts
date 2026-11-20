@@ -8,13 +8,14 @@ import { CHAT_CHOICE, DEFAULT_CHAT, preferredChat } from "../../services/chat-mo
 // Which chat model the Agent talks to (DeepSeek / 豆包 / relay chat models),
 // remembered across visits, and what one turn costs on it.
 // sees: reads pictures; rec: the recommended default; desc: one line for the picker.
-export type ChatModel = { id: string; name: string; sees: boolean; key?: string; icon: string; desc: string; rec: boolean };
+// watches: takes videos itself (豆包); others hear about them from 视频理解.
+export type ChatModel = { id: string; name: string; sees: boolean; watches: boolean; key?: string; icon: string; desc: string; rec: boolean };
 const STORE = CHAT_CHOICE;
 
 export const chatModels = (config: Config): ChatModel[] =>
   config.models
     .filter((m) => m.kind === "chat")
-    .map((m) => ({ id: m.id, name: m.name, key: m.key, icon: m.icon || "", desc: m.settings?.description || "", rec: m.key === DEFAULT_CHAT, sees: (m.referenceTypes || []).includes("image") }));
+    .map((m) => ({ id: m.id, name: m.name, key: m.key, icon: m.icon || "", desc: m.settings?.description || "", rec: m.key === DEFAULT_CHAT, sees: (m.referenceTypes || []).includes("image"), watches: (m.referenceTypes || []).includes("video") }));
 
 type Quote = { units: number; billingEnabled: boolean; perToken?: boolean };
 // 按量 models: the most one turn can hold; settled on the tokens used.

@@ -21,7 +21,9 @@ test("list skeletons carry the slow-network line; both appear late", () => {
     assert.match(read(`pages/${page}/index.wxml`), /<page-loading show mode="hint" \/>/, page);
   const css = read("components/page-loading/index.wxss");
   assert.match(css, /\.page-loading \{[^}]*animation: pl-in 200ms ease 250ms both/); // no flash on a fast load
-  assert.match(css, /\.page-loading\.hint \{[^}]*position: fixed[^}]*animation: pl-in 300ms ease 4s both/); // takes no room, shows when slow
+  assert.match(css, /\.page-loading\.pl-hint \{[^}]*position: fixed[^}]*animation: pl-in 300ms ease 4s both/); // takes no room, shows when slow
+  // Mode classes are prefixed: the app's own .page (side padding) must not reach the component.
+  assert.doesNotMatch(read("components/page-loading/index.wxml"), /class="page-loading \{\{mode\}\}"/);
   assert.match(read("app.json"), /"page-loading": "\/components\/page-loading\/index"/);
 });
 
@@ -34,4 +36,13 @@ test("sign-in, activation, sharing, extraction and the Agent picker wait visibly
   const agent = read("pages/agent/index.wxml");
   assert.match(agent, /<page-loading wx:if="\{\{!session&&!projectsReady&&!projectsError\}\}"/);
   assert.match(agent, /wx:elif="\{\{!session&&projectsError\}\}" class="error-box" bindtap="retryProjects"/);
+});
+
+test("full-page loading outlines the page it loads", () => {
+  const wxml = read("components/page-loading/index.wxml");
+  for (const shape of ["list", "grid"]) assert.match(wxml, new RegExp(`shape==='${shape}'`));
+  assert.match(wxml, /class="pl-s pl-media"/); // the default: a detail page's picture or video
+  assert.doesNotMatch(read("components/page-loading/index.wxss"), /\.pl-dots view/, "tag selectors do not work in components");
+  for (const page of ["profile", "preferences", "provider"]) assert.match(read(`pages/${page}/index.wxml`), /<page-loading[^>]*shape="list"/, page);
+  assert.match(read("pages/hot-videos/index.wxml"), /<page-loading[^>]*shape="grid"/);
 });

@@ -95,9 +95,18 @@
   max-width: 80%;
   margin-bottom: 6px;
 }
+/* A sent message's files: small references, not the message itself. */
 .attach.sent {
-  width: 72px;
-  height: 72px;
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+}
+.attach.sent .attach-play {
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  margin: 0;
 }
 /* 编辑: under a sent question, and the note while one is being edited. */
 .ask-actions {

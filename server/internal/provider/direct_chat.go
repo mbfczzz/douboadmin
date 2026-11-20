@@ -183,6 +183,10 @@ func estimateTokens(messages []any) int {
 				n += 1500
 				return
 			}
+			if x["type"] == "video_url" {
+				n += billing.TokensPerVideo
+				return
+			}
 			count(x["content"])
 			count(x["text"])
 		}
@@ -201,6 +205,11 @@ func (p *DirectChat) messages(ctx context.Context, j core.Job, m core.Model, sum
 		text, pictures, names := j.Input.Prompt, []any{}, []string{}
 		for i, r := range refs {
 			switch {
+			case r.Type == "video" && slices.Contains(m.ReferenceTypes, "video"): // 豆包 watches it itself
+				pictures = append(pictures, map[string]any{"type": "video_url", "video_url": map[string]any{"url": r.URL, "fps": 1}})
+				if i < len(j.Input.Assets) {
+					names = append(names, materialLabel(ctx, p, j, j.Input.Assets[i]))
+				}
 			case r.Type == "video" && i < len(j.Input.Assets): // watched by 视频理解, told as text
 				text += "\n\n" + p.videoNote(ctx, j, j.Input.Assets[i], r.URL)
 			case r.Type != "image":
@@ -216,7 +225,7 @@ func (p *DirectChat) messages(ctx context.Context, j core.Job, m core.Model, sum
 		// The model sees the pictures but not their project names; plans must
 		// say @图片3 for the third picture, not count from this message.
 		if len(names) == len(pictures) && len(names) > 0 {
-			text += "\n\n（这条消息附带的图片依次是：" + strings.Join(names, "、") + "）"
+			text += "\n\n（这条消息附带的素材依次是：" + strings.Join(names, "、") + "）"
 		}
 		content = text
 		if len(pictures) > 0 {

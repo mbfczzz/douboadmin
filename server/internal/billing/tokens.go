@@ -3,6 +3,7 @@ package billing
 import (
 	"doubo/server/internal/core"
 	"math"
+	"slices"
 	"time"
 )
 
@@ -17,6 +18,8 @@ const (
 	SummaryInputChars = 12000
 	SummaryOutput     = 600
 	tokensPerImage    = 1500
+	// TokensPerVideo bounds a video a model watches itself (frames at 1 fps).
+	TokensPerVideo = 20000
 )
 
 // Tokens is one turn's usage; Cached is the part of Input the provider read
@@ -24,8 +27,12 @@ const (
 type Tokens struct{ Input, Cached, Output int }
 
 // ChatInputCap is the most input tokens one turn can send.
-func ChatInputCap(in core.JobInput) int {
-	n := len([]rune(in.Prompt)) + tokensPerImage*len(in.Assets)
+func ChatInputCap(in core.JobInput) int { return chatInputCap(in, tokensPerImage) }
+
+// chatInputCap with each material allowed perAsset tokens (more when the
+// model watches videos itself).
+func chatInputCap(in core.JobInput, perAsset int) int {
+	n := len([]rune(in.Prompt)) + perAsset*len(in.Assets)
 	if in.Purpose == "" || in.Purpose == "agent" {
 		n += chatHistoryChars
 	}
@@ -82,5 +89,9 @@ func tokenHold(m core.Model, in core.JobInput) (int64, error) {
 	if in.SessionID != "" {
 		out += SummaryOutput
 	}
-	return TokenUnits(s, Tokens{Input: ChatInputCap(in), Output: out}, s.PeakPriceRate > 1)
+	perAsset := tokensPerImage
+	if slices.Contains(m.ReferenceTypes, "video") {
+		perAsset = TokensPerVideo
+	}
+	return TokenUnits(s, Tokens{Input: chatInputCap(in, perAsset), Output: out}, s.PeakPriceRate > 1)
 }

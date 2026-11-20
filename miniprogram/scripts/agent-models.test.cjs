@@ -95,7 +95,7 @@ test("the model picker shows each model's logo, description and price, and close
   };
   const page = h.page("agent");
   await page.loadModels();
-  assert.deepEqual(JSON.parse(JSON.stringify(page.data.current)), { id: "fl", name: "DeepSeek", key: "deepseek:deepseek-flash", icon: "/i/ds.png", desc: "反应快", rec: true, sees: true });
+  assert.deepEqual(JSON.parse(JSON.stringify(page.data.current)), { id: "fl", name: "DeepSeek", key: "deepseek:deepseek-flash", icon: "/i/ds.png", desc: "反应快", rec: true, sees: true, watches: false });
   page.openModels();
   assert.equal(page.data.modelsOpen, true);
   for (let i = 0; i < 20 && !page.data.modelPrices.pro; i++) await new Promise((r) => setTimeout(r, 10));

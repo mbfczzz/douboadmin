@@ -7,7 +7,7 @@
 />
 <view class="subpage has-backdrop profile-page">
   <page-backdrop name="bgProfile" />
-  <page-loading wx:if="{{loading}}" show text="正在读取资料…" />
+  <page-loading wx:if="{{loading}}" show shape="list" text="正在读取资料…" />
   <view wx:elif="{{needsLogin}}" class="empty"
     ><image class="empty-photo" src="/assets/photos/empty-login.jpg" mode="aspectFill" aria-hidden="true"
     /><text class="title">登录后编辑你的个人资料</text

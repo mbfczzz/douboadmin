@@ -1,7 +1,20 @@
-<view wx:if="{{show}}" class="page-loading {{mode}}" aria-label="{{text}}">
-  <block wx:if="{{mode!=='hint'}}">
-    <view class="pl-ring"><view class="pl-arc" /><image class="gl gl-20 pl-mark" src="/assets/glyphs/ai-pen-dark.png" /></view>
-    <text class="pl-text">{{text}}</text>
-  </block>
+<view wx:if="{{show}}" class="page-loading pl-{{mode}}" aria-label="{{text}}">
+  <view wx:if="{{mode==='page'}}" class="pl-skeleton" aria-hidden="true">
+    <block wx:if="{{shape==='list'}}">
+      <view class="pl-card pl-head"><view class="pl-s pl-avatar" /><view class="pl-head-lines"><view class="pl-s pl-line w60 big" /><view class="pl-s pl-line w40" /></view></view>
+      <view class="pl-card"><view wx:for="{{rows}}" wx:key="*this" class="pl-row"><view class="pl-s pl-line w30" /><view class="pl-s pl-line w20" /></view></view>
+    </block>
+    <view wx:elif="{{shape==='grid'}}" class="pl-grid">
+      <view wx:for="{{cards}}" wx:key="*this" class="pl-tile"><view class="pl-s pl-cover" /><view class="pl-s pl-line w80" /><view class="pl-s pl-line w50" /></view>
+    </view>
+    <view wx:else class="pl-card">
+      <view class="pl-s pl-media" />
+      <view class="pl-s pl-line w70 big" />
+      <view class="pl-s pl-line w90" />
+      <view class="pl-s pl-line w60" />
+      <view class="pl-actions"><view class="pl-s pl-btn" /><view class="pl-s pl-btn" /></view>
+    </view>
+  </view>
+  <view wx:if="{{mode!=='hint'}}" class="pl-status"><view class="pl-dots"><view class="pl-dot" /><view class="pl-dot" /><view class="pl-dot" /></view><text class="pl-text">{{text}}</text></view>
   <text class="pl-slow">网络有点慢，还在努力加载…</text>
 </view>

@@ -4,24 +4,30 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 14px;
-  min-height: 60vh;
+  gap: 12px;
   opacity: 0;
   animation: pl-in 200ms ease 250ms both; /* a fast load never shows it */
 }
-/* inline: the same, sized to sit inside a card or under a page heading. */
-.page-loading.inline {
-  min-height: 0;
+/* page: the page's outline from the top, the status line under it. */
+.page-loading.pl-page {
+  align-items: stretch;
+  justify-content: flex-start;
+}
+.page-loading.pl-page .pl-status,
+.page-loading.pl-page .pl-slow {
+  align-self: center;
+}
+/* inline: just the status, sized to sit inside a card or under a heading. */
+.page-loading.pl-inline {
   padding: 40px 0;
 }
 /* hint: a small floating line that takes no room, so the skeleton under
    it does not move; it appears only once loading has been slow. */
-.page-loading.hint {
+.page-loading.pl-hint {
   position: fixed;
   left: 50%;
   bottom: calc(96px + env(safe-area-inset-bottom));
   z-index: 20;
-  min-height: 0;
   padding: 8px 14px;
   border-radius: 16px;
   transform: translateX(-50%);
@@ -30,39 +36,126 @@
   background: #000000c0;
   animation: pl-in 300ms ease 4s both; /* the whole pill, not just its text */
 }
-.page-loading.hint .pl-slow {
+.page-loading.pl-hint .pl-slow {
   color: var(--ui-text, #f5f5f7);
   opacity: 1;
   animation: none;
 }
-.pl-ring {
-  position: relative;
+/* Skeleton shapes with a light sweeping across them. */
+.pl-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.pl-s {
+  border-radius: 8px;
+  background: linear-gradient(90deg, #ffffff0d 25%, #ffffff1c 50%, #ffffff0d 75%);
+  background-size: 300% 100%;
+  animation: pl-sweep 1.4s ease-in-out infinite;
+}
+.pl-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px 16px;
+  border-radius: var(--ui-radius-card, 16px);
+  background: var(--ui-surface, #1c1d22);
+}
+.pl-media {
+  width: 100%;
+  height: 92vw;
+  max-height: 52vh;
+  border-radius: 10px;
+}
+.pl-line {
+  height: 12px;
+}
+.pl-line.big {
+  height: 18px;
+  margin-top: 4px;
+}
+.w20 { width: 20%; }
+.w30 { width: 30%; }
+.w40 { width: 40%; }
+.w50 { width: 50%; }
+.w60 { width: 60%; }
+.w70 { width: 70%; }
+.w80 { width: 80%; }
+.w90 { width: 90%; }
+.pl-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+.pl-btn {
+  flex: 1;
+  height: 44px;
+  border-radius: 22px;
+}
+.pl-head {
+  flex-direction: row;
+  align-items: center;
+  gap: 14px;
+}
+.pl-avatar {
   width: 52px;
   height: 52px;
+  flex-shrink: 0;
+  border-radius: 50%;
+}
+.pl-head-lines {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.pl-row {
   display: flex;
   align-items: center;
-  justify-content: center;
-  border-radius: 16px;
-  background: #ffffff;
+  justify-content: space-between;
+  height: 28px;
 }
-.pl-arc {
-  position: absolute;
-  left: -6px;
-  top: -6px;
-  width: 60px;
-  height: 60px;
-  box-sizing: border-box;
+.pl-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.pl-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.pl-cover {
+  height: 56vw;
+  border-radius: 12px;
+}
+/* The status: three dots that breathe, and what is being loaded. */
+.pl-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 8px;
+}
+.pl-dots {
+  display: flex;
+  gap: 4px;
+}
+.pl-dot {
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
-  border: 2px solid #ffffff1a;
-  border-top-color: var(--ui-primary, #00c8dc);
-  animation: pl-spin 900ms linear infinite;
+  background: var(--ui-primary, #00c8dc);
+  animation: pl-dot 1.2s ease-in-out infinite;
 }
-.pl-mark {
-  position: relative;
+.pl-dot:nth-child(2) {
+  animation-delay: 0.15s;
+}
+.pl-dot:nth-child(3) {
+  animation-delay: 0.3s;
 }
 .pl-text {
-  font-size: 14px;
-  color: var(--ui-text, #f5f5f7);
+  font-size: 13px;
+  color: var(--ui-muted, #8a8f98);
 }
 .pl-slow {
   font-size: 12px;
@@ -74,9 +167,14 @@
   from { opacity: 0; }
   to { opacity: 1; }
 }
-@keyframes pl-spin {
-  to { transform: rotate(360deg); }
+@keyframes pl-sweep {
+  from { background-position: 100% 0; }
+  to { background-position: 0 0; }
+}
+@keyframes pl-dot {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .pl-arc { animation-duration: 2400ms; }
+  .pl-s, .pl-dot { animation: none; }
 }
