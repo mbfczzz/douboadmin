@@ -2,6 +2,7 @@ package api
 
 import (
 	"doubo/server/internal/core"
+	"doubo/server/internal/store"
 	"encoding/json"
 	"net/http"
 	"slices"
@@ -30,6 +31,10 @@ func (a *Server) adminOutfits(w http.ResponseWriter, r *http.Request) {
 		q.Fields["published"] = map[bool]string{true: "true", false: "false"}[s == "published"]
 	}
 	page, err := a.Store.RecordPage(r.Context(), q)
+	// Without page (the editor's version-conflict check): every outfit.
+	if !r.URL.Query().Has("page") {
+		page.Items, err = store.AllRecords(r.Context(), a.Store, "outfits", "")
+	}
 	if err != nil {
 		dbError(w, err)
 		return
@@ -37,7 +42,7 @@ func (a *Server) adminOutfits(w http.ResponseWriter, r *http.Request) {
 	items := []adminOutfit{}
 	for _, row := range page.Items {
 		var o core.Outfit
-		if json.Unmarshal(row.Data, &o) == nil {
+		if json.Unmarshal(row.Data, &o) == nil && !o.Deleted {
 			items = append(items, adminOutfit{row.ID, row.Version, o, a.outfitImage(r.Context(), o.ImageKey)})
 		}
 	}

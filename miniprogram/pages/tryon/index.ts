@@ -1,5 +1,5 @@
 import { enterPage } from "../../utils/api";
-import { SORTS, loadCategories, loadOutfits, loadFavorites, toggleFavorite, initFavorites, randomOutfit } from "./gallery";
+import { SORTS, loadCategories, loadOutfits, loadFavorites, toggleFavorite, initFavorites, randomOutfit, refreshPictures } from "./gallery";
 import { fittingHandlers, wearOutfit } from "./fitting";
 import type { Outfit } from "./gallery";
 import type { Person, Garment } from "./fitting";
@@ -39,6 +39,8 @@ Page({
   },
   galleryRevision: 0,
   galleryPage: 1,
+  galleryAt: 0,
+  favoritesRevision: 0,
   destroyed: false,
   loaded: false,
   onLoad() {
@@ -46,7 +48,10 @@ Page({
   },
   onShow() {
     enterPage(this);
-    if (this.loaded) return;
+    if (this.loaded) {
+      void refreshPictures(this);
+      return;
+    }
     this.loaded = true;
     void loadCategories(this);
     void loadOutfits(this);
@@ -56,13 +61,15 @@ Page({
     this.galleryRevision++;
   },
   onReachBottom() {
-    if (this.data.tab === "gallery") void loadOutfits(this, true);
+    // Old addresses first (when due), then the next page.
+    if (this.data.tab === "gallery") void refreshPictures(this).then(() => loadOutfits(this, true));
   },
   switchTab(e: WechatMiniprogram.TouchEvent) {
     const tab = e.currentTarget.dataset.key as string;
     if (tab === this.data.tab) return;
     this.setData({ tab });
     if (tab === "favorites") void loadFavorites(this);
+    if (tab === "gallery") void refreshPictures(this);
   },
   chooseCategory(e: WechatMiniprogram.TouchEvent) {
     const category = e.currentTarget.dataset.name as string;

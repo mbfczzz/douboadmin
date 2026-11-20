@@ -12,6 +12,9 @@ export const SORTS = [
   { key: "newest", label: "最新上架" },
 ];
 const SIZE = 20;
+// Picture addresses are signed for 30 minutes (handed out with at least 10
+// left); a list older than this gets fresh ones before more is shown.
+export const FRESH_MS = 10 * 60 * 1000;
 const FAVORITES = "tryon-favorites";
 const MAX_FAVORITES = 100;
 
@@ -22,6 +25,8 @@ export type GalleryPage = {
   };
   galleryRevision: number;
   galleryPage: number;
+  galleryAt: number;
+  favoritesRevision: number;
   destroyed: boolean;
   setData(data: Record<string, unknown>): void;
 };
@@ -60,6 +65,7 @@ export async function loadOutfits(page: GalleryPage, more = false) {
     const r = await request<Reply>(q);
     if (revision !== page.galleryRevision || page.destroyed) return;
     page.galleryPage = next;
+    if (!more) page.galleryAt = Date.now();
     const seen = new Set(more ? page.data.outfits.map((o) => o.id) : []);
     const fresh = r.items.filter((o) => !seen.has(o.id)).map(shown);
     page.setData({ outfits: more ? [...page.data.outfits, ...fresh] : fresh, total: r.total });
@@ -77,18 +83,42 @@ export async function loadFavorites(page: GalleryPage) {
     page.setData({ favorites: [], favoritesLoading: false });
     return;
   }
+  const revision = ++page.favoritesRevision;
   page.setData({ favoritesLoading: true });
   try {
     const r = await request<Reply>(`/outfits?page=1&size=${MAX_FAVORITES}&ids=${ids.map(encodeURIComponent).join(",")}`);
-    if (page.destroyed) return;
+    if (page.destroyed || revision !== page.favoritesRevision) return;
     const byId = new Map(r.items.map((o) => [o.id, shown(o)]));
     const kept = ids.filter((id) => byId.has(id));
     if (kept.length !== ids.length) saveFavorites(page, kept);
     page.setData({ favorites: kept.map((id) => byId.get(id)) });
   } catch (e) {
-    if (!page.destroyed) error(e);
+    if (!page.destroyed && revision === page.favoritesRevision) error(e);
   } finally {
-    if (!page.destroyed) page.setData({ favoritesLoading: false });
+    if (!page.destroyed && revision === page.favoritesRevision) page.setData({ favoritesLoading: false });
+  }
+}
+
+// The shown list with fresh picture addresses, in place (the scroll stays).
+export async function refreshPictures(page: GalleryPage) {
+  const d = page.data;
+  if (d.galleryLoading || !d.outfits.length || Date.now() - page.galleryAt < FRESH_MS) return;
+  const revision = ++page.galleryRevision;
+  page.setData({ galleryLoading: true });
+  try {
+    const fresh = new Map<string, string>();
+    for (let p = 1; (p - 1) * 100 < d.outfits.length; p++) {
+      const r = await request<Reply>(`/outfits?page=${p}&size=100&sort=${d.sort}&category=${encodeURIComponent(d.category)}`);
+      for (const o of r.items) fresh.set(o.id, shown(o).image);
+    }
+    if (revision !== page.galleryRevision || page.destroyed) return;
+    page.galleryAt = Date.now();
+    // Taken-down outfits keep their place until the list is read again.
+    page.setData({ outfits: page.data.outfits.map((o) => ({ ...o, image: fresh.get(o.id) || o.image })) });
+  } catch {
+    // the old addresses stay; the next visit tries again
+  } finally {
+    if (revision === page.galleryRevision && !page.destroyed) page.setData({ galleryLoading: false });
   }
 }
 

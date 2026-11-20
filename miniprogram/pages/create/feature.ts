@@ -72,9 +72,11 @@ export function applyFeature(page: Page, key: string) {
 
 // Presets work from references: start on a model that takes their kind.
 export function featureModel<T extends Model>(list: T[], feature: string) {
-  const uses = FEATURES[feature]?.uses;
-  if (!uses) return undefined;
-  return list.find((m) => (uses === "video" ? referenceSettings(m).allowVideo : referenceSettings(m).allowImage));
+  const f = FEATURES[feature];
+  if (!f?.uses) return undefined;
+  const takes = (m: T) => (f.uses === "video" ? referenceSettings(m).allowVideo : referenceSettings(m).allowImage);
+  // AI试衣 sends two pictures: a model that takes both, else the first that takes pictures.
+  return list.find((m) => takes(m) && referenceSettings(m).maxReferences >= (f.least || 1)) || list.find(takes);
 }
 
 // A preset that works from a photo (or the remade video) cannot start without it.

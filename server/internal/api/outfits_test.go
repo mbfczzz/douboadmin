@@ -38,6 +38,11 @@ func TestOutfitLibraryAdminAndUser(t *testing.T) {
 	if w := call(a, "PUT", "/api/admin/outfits/o0", one, "", map[string]any{}); w.Code < 400 {
 		t.Fatal("a user saved an outfit")
 	}
+	// The editor's conflict check reads every outfit (no page): an array.
+	var all []adminOutfit
+	if w := call(a, "GET", "/api/admin/outfits", admin, "", nil); w.Code != 200 || json.Unmarshal(w.Body.Bytes(), &all) != nil || len(all) != 4 {
+		t.Fatal(w.Code, w.Body.String())
+	}
 	var page struct {
 		Items []outfitView `json:"items"`
 		Total int          `json:"total"`

@@ -25,7 +25,7 @@
       </view>
     </scroll-view>
     <view class="tryon-bar">
-      <text class="tryon-count">共{{total}}项</text>
+      <text class="tryon-count">{{galleryLoading&&!outfits.length?'':'共'+total+'项'}}</text>
       <view class="tryon-tool" bindtap="chooseSort" aria-role="button">{{sortLabel}}<text class="tryon-caret">▾</text></view>
       <view class="tryon-tool {{randomBusy?'is-busy':''}}" bindtap="random" aria-role="button">随机一个</view>
     </view>
@@ -61,13 +61,13 @@
         <view wx:if="{{!starting}}" class="fit-remove" catchtap="removeGarment" aria-role="button" aria-label="移除服装">×</view>
       </view>
       <view wx:else class="fit-slot fit-add {{garmentBusy?'is-busy':''}}" bindtap="browse" aria-role="button">
-        <image class="gl gl-24" src="/assets/glyphs/{{garmentBusy?'clock':'add'}}-muted.png" />
-        <text>{{garmentBusy?'上传中…':'从库中选'}}</text>
+        <image class="gl gl-24" src="/assets/glyphs/add-muted.png" />
+        <text>从库中选</text>
       </view>
       <text wx:if="{{garment.title}}" class="fit-name">{{garment.title}}</text>
       <view class="fit-actions">
-        <text class="fit-link" bindtap="browse">从库中选</text>
-        <text class="fit-link {{garmentBusy?'is-busy':''}}" bindtap="uploadGarment">上传图</text>
+        <text wx:if="{{garment}}" class="fit-link" bindtap="browse">从库中选</text>
+        <text class="fit-link {{garmentBusy?'is-busy':''}}" bindtap="uploadGarment">{{garmentBusy?'上传中…':'上传图'}}</text>
       </view>
     </view>
     <view class="biz-card fit-option">

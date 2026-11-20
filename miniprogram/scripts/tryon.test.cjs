@@ -143,3 +143,33 @@ test("the AI试衣 preset needs the person and the outfit", () => {
   assert.equal(featureProblem({ ...page.data, assets: [{ isImage: true }] }), "请放入人物照片和服装图各一张");
   assert.equal(featureProblem({ ...page.data, assets: [{ isImage: true }, { isImage: true }] }), "");
 });
+
+test("after ten minutes the shown pictures get fresh addresses in place, then more loads", async () => {
+  let sign = "a";
+  const { page, calls } = tryon((path) => {
+    if (path === "/outfits/categories") return [];
+    if (/page=2&size=20/.test(path)) return { items: [outfit("x")], total: 3 };
+    return { items: [outfit("1", { image: "https://oss/1.jpg?" + sign }), outfit("2", { image: "https://oss/2.jpg?" + sign })], total: 3 };
+  });
+  page.onShow();
+  await settle();
+  page.onShow(); // fresh: nothing asked
+  assert.equal(calls.length, 2);
+  sign = "b";
+  page.galleryAt -= 11 * 60 * 1000;
+  page.onReachBottom();
+  await settle();
+  await settle();
+  assert.match(calls[2][0], /^\/outfits\?page=1&size=100&/);
+  assert.match(calls[3][0], /^\/outfits\?page=2&size=20&/);
+  assert.deepEqual(plain(page.data.outfits.map((o) => o.image)), ["https://oss/1.jpg?b", "https://oss/2.jpg?b", "https://oss/x.jpg"]);
+});
+
+test("AI试衣 starts on a model that takes both pictures", () => {
+  const { featureModel } = harness().service("../pages/create/feature");
+  const one = { id: "one", kind: "image", referenceTypes: ["image"], settings: { maxRefImages: 1 } };
+  const two = { id: "two", kind: "image", referenceTypes: ["image"], settings: { maxRefImages: 4 } };
+  assert.equal(featureModel([one, two], "tryon").id, "two");
+  assert.equal(featureModel([one], "tryon").id, "one");
+  assert.equal(featureModel([one, two], "idphoto").id, "one");
+});

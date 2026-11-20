@@ -24,14 +24,17 @@ type outfitView struct {
 	Image       string `json:"image"`
 }
 
+// outfitImage: a resized copy whose signature is reused (30 min, handed out
+// for 20), like template covers, so phones cache the pictures; the page
+// refreshes its addresses after 10 minutes (pages/tryon/gallery.ts).
 func (a *Server) outfitImage(ctx context.Context, key string) string {
 	if a.Objects == nil {
 		return "/media/" + key
 	}
 	if s, ok := a.Objects.(interface {
-		Thumbnail(context.Context, string, string) (string, error)
+		ImageURL(context.Context, string, int) (string, error)
 	}); ok {
-		if u, err := s.Thumbnail(ctx, key, "image"); err == nil {
+		if u, err := s.ImageURL(ctx, key, 720); err == nil {
 			return u
 		}
 	}
