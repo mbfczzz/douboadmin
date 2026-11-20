@@ -1,12 +1,30 @@
 /* Project bar, materials, the 创作方案 card and generation cards. */
 .project-bar {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   gap: 8px;
   flex-shrink: 0;
   margin: 8px 16px 0;
+}
+.project-pick {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   padding: 8px 12px;
   border-radius: 12px;
+  background: var(--ui-surface);
+}
+.project-new {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  padding: 0 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  color: var(--ui-text);
   background: var(--ui-surface);
 }
 .project-title {

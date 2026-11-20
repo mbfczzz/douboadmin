@@ -216,3 +216,29 @@ test("an earlier plan opens and can be used; short screens fold the materials", 
   assert.equal(page.data.compact, false);
   page.onUnload();
 });
+
+test("新建 goes back to the skill picker and stays there on the next visit", async () => {
+  const h = harness();
+  await h.api.signIn();
+  const page = h.page("agent");
+  const list = [{ id: "s1", version: 1, data: { title: "春日咖啡", skill: "store", assets: [], activeAt: "2026-11-20T06:00:00Z" } }];
+  h.wx.request = (o) => {
+    const path = o.url.split("/api")[1];
+    const ok = (data) => o.success({ statusCode: 200, data });
+    if (path === "/agent/sessions") return ok(list);
+    if (path === "/agent/skills") return ok([{ id: "store", name: "探店视频" }]);
+    if (path === "/agent/sessions/s1") return ok({ ...list[0], assets: [] });
+    return ok({ items: [], total: 0 });
+  };
+  await page.loadSession();
+  assert.equal(page.data.session.id, "s1"); // the most recent project opens
+  await page.startOver();
+  assert.equal(page.data.session, null);
+  assert.equal(page.data.messages.length, 0);
+  await page.loadSession(); // e.g. back from another tab
+  assert.equal(page.data.session, null, "the picker is kept");
+  assert.equal(page.data.projects.length, 1, "the project is still in the list");
+  await page.switchProject({ currentTarget: { dataset: { id: "s1" } } });
+  assert.equal(page.data.session.id, "s1");
+  page.onUnload();
+});

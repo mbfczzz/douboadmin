@@ -1,10 +1,13 @@
 <nav-bar title="Agent" />
 <view class="agent-page" style="--nav-bottom:{{navBottom}}px">
-  <view class="project-bar" bindtap="openProjects" hover-class="starter-pressed" aria-role="button" aria-label="切换创作项目">
-    <image wx:if="{{session&&art[session.data.skill]}}" class="project-thumb" src="{{art[session.data.skill]}}" mode="aspectFill" />
-    <image wx:else class="gl gl-16" src="/assets/glyphs/history-muted.png" />
-    <text class="project-title">{{session?session.data.title:'新的创作'}}</text>
-    <text class="project-switch">项目 ›</text>
+  <view class="project-bar">
+    <view class="project-pick" bindtap="openProjects" hover-class="starter-pressed" aria-role="button" aria-label="切换创作项目">
+      <image wx:if="{{session&&art[session.data.skill]}}" class="project-thumb" src="{{art[session.data.skill]}}" mode="aspectFill" />
+      <image wx:else class="gl gl-16" src="/assets/glyphs/history-muted.png" />
+      <text class="project-title">{{session?session.data.title:'新的创作'}}</text>
+      <text class="project-switch">{{projects.length?'切换 ›':'项目 ›'}}</text>
+    </view>
+    <view wx:if="{{session}}" class="project-new" bindtap="startOver" hover-class="starter-pressed" aria-role="button" aria-label="新建创作"><image class="gl gl-14" src="/assets/glyphs/add.png" /><text>新建</text></view>
   </view>
   <view wx:if="{{!ready}}" class="chat-scroll agent-skeleton" aria-label="正在加载对话">
     <view class="skeleton skel-bubble mine" /><view class="skeleton skel-bubble" /><view class="skeleton skel-bubble short" />

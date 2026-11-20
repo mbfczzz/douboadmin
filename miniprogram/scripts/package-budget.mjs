@@ -223,7 +223,9 @@ console.log(
 // cards: 955,739 B. 930 -> 934 KiB.
 // Agent: earlier plans open and can be used (用这一版生成); short screens
 // fold the materials strip into one line: 958,405 B. 934 -> 937 KiB.
-const budget = 937 * 1024;
+// Agent: 新建 back to the skill picker beside 切换, empty project list hint:
+// 959,678 B. 937 -> 938 KiB.
+const budget = 938 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

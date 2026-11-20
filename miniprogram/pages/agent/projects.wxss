@@ -69,3 +69,9 @@
   padding: 12px;
   color: var(--ui-muted);
 }
+.projects-empty {
+  display: block;
+  padding: 12px 0 4px;
+  font-size: 13px;
+  color: var(--ui-muted);
+}

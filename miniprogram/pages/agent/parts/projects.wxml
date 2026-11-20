@@ -8,7 +8,8 @@
         <image wx:if="{{art[item.id]}}" class="chip-thumb" src="{{art[item.id]}}" mode="aspectFill" /><t-icon wx:else name="{{item.icon}}" size="18" /><text>{{item.name}}</text>
       </view>
     </view>
-    <text wx:if="{{projects.length}}" class="projects-label">最近</text>
+    <text class="projects-label">最近</text>
+    <text wx:if="{{!projects.length}}" class="projects-empty">还没有项目，选上面的一个开始</text>
     <scroll-view scroll-y class="project-list">
       <view wx:for="{{projects}}" wx:key="id" class="project-row {{session&&session.id===item.id?'on':''}}" data-id="{{item.id}}" bindtap="switchProject" hover-class="starter-pressed" aria-role="button">
         <image wx:if="{{art[item.data.skill]}}" class="row-thumb" src="{{art[item.data.skill]}}" mode="aspectFill" /><view wx:else class="row-thumb" />

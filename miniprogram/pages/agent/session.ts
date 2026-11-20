@@ -45,7 +45,9 @@ export const sessionHandlers = {
     const [list, all] = await Promise.all([sessions(), skills()]);
     if (this.destroyed) return;
     const saved = remembered();
-    const id = saved.user === sessionUserId() && list.some((s) => s.id === saved.id) ? saved.id! : list[0]?.id;
+    // "new": the user went back to the skill picker and stays there.
+    const mine = saved.user === sessionUserId();
+    const id = mine && saved.id === "new" ? "" : mine && list.some((s) => s.id === saved.id) ? saved.id! : list[0]?.id;
     this.setData({ projects: list.map((row) => projectView(row, all)), skills: all });
     await this.showSession(id || "");
   },
@@ -57,6 +59,13 @@ export const sessionHandlers = {
     // Re-signed links for the same files would reload every picture on each visit.
     const shown = new Map(this.data.materials.map((m) => [m.id, m]));
     this.setData({ session: detail, ...skillHints(this.data.skills, detail.data.skill), ...materialData(detail.assets.map((a) => shown.get(a.id) || editorAsset(a))) });
+  },
+  // 新建: back to the skill picker; the current project stays in the list.
+  async startOver(this: Page) {
+    remember("new");
+    await this.showSession("");
+    this.setData({ messages: [], prompt: "", projectsOpen: false });
+    await this.load(true);
   },
   openProjects(this: Page) {
     this.setData({ projectsOpen: true });
