@@ -14,6 +14,7 @@ import { historyHandlers } from "./history";
 import { sessionHandlers, projectView } from "./session";
 import { materialHandlers, materialLabels } from "./materials";
 import { generateHandlers } from "./generate";
+import { namedPictures } from "./named";
 
 // Agent: one 创作项目 at a time (session.ts). Replies end with a 创作方案
 // card that generates (generate.ts) from the project's materials.
@@ -127,9 +128,10 @@ Page({
         this.setData({ session: { ...row, assets: [] }, projects: [projectView(row, this.data.skills), ...this.data.projects] });
         await this.load(true); // adopt the new project before its first turn shows
       }
-      // Pictures go to models that read them; others work from the names.
+      // Pictures go to models that read them, and only those this message
+      // names: every extra picture is read again and slows the reply.
       const sees = (model.referenceTypes || []).includes("image");
-      const assets = sees ? this.data.materials.filter((m: { isImage: boolean }) => m.isImage).map((m: { id: string }) => m.id) : [];
+      const assets = sees ? namedPictures(submitted, this.data.materials) : [];
       const job = await submitInput(
         { kind: "chat", model: model.id, prompt: submitted, resolution: "", ratio: "", duration: 0, assets, sessionId: this.data.session!.id },
         "agent",

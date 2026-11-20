@@ -34,6 +34,12 @@ func (c *Client) Complete(ctx context.Context, model string, messages []any, max
 	if maxTokens > 0 {
 		body["max_tokens"] = maxTokens
 	}
+	// 豆包 Seed models think before answering by default, which adds tens of
+	// seconds; writing a creative plan does not need it. (Endpoint IDs
+	// "ep-…" are left as configured in 方舟.)
+	if strings.HasPrefix(model, "doubao-seed") {
+		body["thinking"] = map[string]string{"type": "disabled"}
+	}
 	raw, _ := json.Marshal(body)
 	r, err := http.NewRequestWithContext(ctx, "POST", strings.TrimRight(c.BaseURL, "/")+"/chat/completions", bytes.NewReader(raw))
 	if err != nil {

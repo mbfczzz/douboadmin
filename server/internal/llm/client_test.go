@@ -1,6 +1,7 @@
 package llm
 
 import (
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -22,5 +23,32 @@ func TestProviderErrorsAreExplainedInChinese(t *testing.T) {
 		if err == nil || !strings.Contains(err.Error(), want) || strings.ContainsAny(err.Error(), "abcdefghijklmnopqrstuvwxyz") {
 			t.Fatalf("%s -> %v", want, err)
 		}
+	}
+}
+
+// 豆包 Seed answers without deep thinking (much faster); others are untouched.
+func TestSeedModelsAnswerWithoutThinking(t *testing.T) {
+	var got []map[string]any
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var b map[string]any
+		_ = json.NewDecoder(r.Body).Decode(&b)
+		got = append(got, b)
+		_, _ = w.Write([]byte(`{"choices":[{"message":{"content":"好"}}]}`))
+	}))
+	defer srv.Close()
+	c := &Client{BaseURL: srv.URL, Key: "k"}
+	for _, m := range []string{"doubao-seed-2-1-lite-260915", "ep-20261120-abc", "deepseek-chat"} {
+		if _, _, err := c.Complete(t.Context(), m, nil, 0); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if th, ok := got[0]["thinking"].(map[string]any); !ok || th["type"] != "disabled" {
+		t.Fatal("seed model still thinks", got[0])
+	}
+	if _, ok := got[1]["thinking"]; ok {
+		t.Fatal("endpoint ids keep their own setting")
+	}
+	if _, ok := got[2]["thinking"]; ok {
+		t.Fatal("deepseek untouched")
 	}
 }

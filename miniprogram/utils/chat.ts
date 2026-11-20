@@ -15,6 +15,12 @@ export function scriptLines(text: string) {
   });
 }
 
+// How long a reply has been coming, so a slow one does not look stuck.
+function waiting(job: Job) {
+  const s = Math.round((Date.now() - new Date(job.createdAt || Date.now()).getTime()) / 1000);
+  return s >= 5 ? `正在构思… 已 ${s} 秒` : "正在构思…";
+}
+
 // A generation started from a plan shows in the conversation as its own card.
 function genMessage(job: Job): ChatMessage {
   const done = job.status === "succeeded";
@@ -30,7 +36,7 @@ export function chatMessages(jobs: Job[]): ChatMessage[] {
     .flatMap((job): ChatMessage[] => {
       if (job.input.kind !== "chat") return [genMessage(job)];
       const failed = job.status === "failed";
-      const split = job.status === "succeeded" ? splitReply(job.result || "") : { text: failed ? job.error || "回复失败" : "正在思考你的问题…" };
+      const split = job.status === "succeeded" ? splitReply(job.result || "") : { text: failed ? job.error || "回复失败" : waiting(job) };
       const reply = { ...split, text: job.status === "succeeded" ? plainReply(split.text) : split.text };
       return [
         { id: job.id + "u", role: "user", text: job.input.prompt },

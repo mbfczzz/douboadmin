@@ -19,7 +19,7 @@
   </view>
   <block wx:else>
     <view class="agent-name"><view class="agent-avatar"><image class="gl gl-14" src="/assets/glyphs/ai-pen-dark.png" /></view><text>豆播 Agent</text></view>
-    <view wx:if="{{item.pending}}" class="typing-row"><view class="typing" aria-label="正在回复"><view /><view /><view /></view><text class="typing-note">正在构思…</text></view>
+    <view wx:if="{{item.pending}}" class="typing-row"><view class="typing" aria-label="正在回复"><view /><view /><view /></view><text class="typing-note">{{item.text}}</text></view>
     <view wx:elif="{{item.failed}}" class="reply-failed">
       <t-icon name="error-circle" size="16" /><text>{{item.text}}</text>
       <text class="retry" data-prompt="{{item.prompt}}" bindtap="retry">重新编辑 ›</text>
@@ -35,13 +35,13 @@
         <text class="broken-retry" data-value="请把方案完整地重新输出一遍" bindtap="quick">重新整理 ›</text>
       </view>
       <view wx:if="{{item.plan&&!item.latest&&!expanded[item.id]}}" class="plan-old-row" data-id="{{item.id}}" bindtap="togglePlan" hover-class="starter-pressed" aria-role="button" aria-label="{{'展开第'+item.version+'版方案'}}">
-        <image wx:if="{{thumbs[item.plan.lead]||art[session.data.skill]}}" class="old-thumb" src="{{thumbs[item.plan.lead]||art[session.data.skill]}}" mode="aspectFill" />
+        <image wx:if="{{art[session.data.skill]}}" class="old-thumb" src="{{art[session.data.skill]}}" mode="aspectFill" />
         <view class="old-copy"><text class="old-title">第 {{item.version}} 版 · {{item.plan.title}}</text><text class="old-note">已有更新的方案 · 点开查看</text></view>
         <image class="gl gl-14" src="/assets/glyphs/open-muted.png" />
       </view>
       <view wx:elif="{{item.plan}}" class="plan-card {{item.latest?'':'is-earlier'}}">
         <view class="plan-cover">
-          <image wx:if="{{thumbs[item.plan.lead]||art[session.data.skill]}}" class="plan-cover-photo" src="{{thumbs[item.plan.lead]||art[session.data.skill]}}" mode="aspectFill" />
+          <image wx:if="{{art[session.data.skill]}}" class="plan-cover-photo" src="{{art[session.data.skill]}}" mode="aspectFill" />
           <view class="plan-cover-shade" />
           <view class="plan-kind"><image class="gl gl-14" src="/assets/glyphs/{{item.plan.kind==='image'?'image':'video'}}.png" /><text>{{item.plan.meta}}</text></view>
           <text wx:if="{{item.version>1||!item.latest}}" class="plan-version {{item.latest?'':'earlier'}}">第 {{item.version}} 版{{item.latest?'':' · 旧方案'}}</text>

@@ -231,7 +231,9 @@ console.log(
 // Loading on the remaining slow waits: 授权开通, 登录, 分享作品, 文案提取,
 // 优秀作品, the Agent picker (with retry; skills listed before sign-in):
 // 964,151 B. 940 -> 942 KiB.
-const budget = 942 * 1024;
+// Faster Agent replies: only named pictures are sent, 1.5 s checks while
+// a reply is coming, waiting seconds shown: 965,950 B. 942 -> 944 KiB.
+const budget = 944 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

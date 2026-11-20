@@ -12,6 +12,7 @@ import type { SessionDetail } from "../../services/agent";
 type Page = {
   data: { messages: ChatMessage[]; session: SessionDetail | null; ready: boolean; hasOlder: boolean; loadingOlder: boolean };
   timer: number;
+  pollMs?: number;
   fetching: boolean;
   failed: boolean;
   loadVersion: number;
@@ -28,9 +29,12 @@ const running = (jobs: Job[]) => jobs.some((j) => /queued|running/.test(j.status
 
 export const historyHandlers = {
   // Poll only while a reply or generation may still arrive.
+  // A reply being written is checked every 1.5 s; generations every 3 s.
   poll(this: Page & { load(): Promise<void> }) {
     clearInterval(this.timer);
-    this.timer = setInterval(() => void this.load(), 3000);
+    const replying = this.history.some((j) => j.input.kind === "chat" && /queued|running/.test(j.status));
+    this.pollMs = replying ? 1500 : 3000;
+    this.timer = setInterval(() => void this.load(), this.pollMs);
   },
   async load(this: Page, force = false) {
     const session = this.data.session;
@@ -62,9 +66,16 @@ export const historyHandlers = {
       this.history = jobs;
       this.setData({ hasOlder: jobs.length < result.total });
       if (!running(jobs)) clearInterval(this.timer);
+      else if (this.pollMs === 1500 && !jobs.some((j) => j.input.kind === "chat" && /queued|running/.test(j.status)))
+        (this as unknown as { poll(): void }).poll(); // the reply came: back to the slower pace
       const messages = chatMessages(jobs);
       const changed = JSON.stringify(messages) !== JSON.stringify(this.data.messages);
-      if (changed) this.setData({ messages, bottom: messages.length ? "m" + messages[messages.length - 1].id : "" });
+      // Scroll down only when a message arrives, not when a waiting reply's
+      // seconds tick (that would pull a reader back while scrolling up).
+      const tail = (list: ChatMessage[]) => (list.length ? list[list.length - 1].id + (list[list.length - 1].pending ? "…" : "") : "");
+      const last = messages.length ? "m" + messages[messages.length - 1].id : "";
+      const arrived = tail(messages) !== tail(this.data.messages); // a new message, or the reply finished
+      if (changed) this.setData(arrived ? { messages, bottom: last } : { messages });
       if (changed) void this.priceLatest?.();
       if (changed) void this.autoTitle?.();
       if (!this.data.ready) this.setData({ ready: true });

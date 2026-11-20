@@ -97,7 +97,7 @@ test("materials are numbered per type; tapping one mentions it; chat sends pictu
   };
   page.setData({ model: "ds" });
   await page.send();
-  page.setData({ model: "db", prompt: "再来一版" });
+  page.setData({ model: "db", prompt: "对比图片1和图片2" });
   await page.send();
   assert.deepEqual(plain(sent.map((s) => s.assets)), [[], ["p1", "p2"]]);
   assert.ok(sent.every((s) => s.sessionId === "s1"));
