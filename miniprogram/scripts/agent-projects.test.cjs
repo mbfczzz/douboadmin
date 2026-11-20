@@ -181,3 +181,38 @@ test("several pictures upload in one pick; a model that cannot see pictures says
   assert.match(wxml, /wx:if="\{\{session&&!sees&&materials\.length\}\}" class="blind-note"/);
   page.onUnload();
 });
+
+test("an earlier plan opens and can be used; short screens fold the materials", async () => {
+  const h = harness();
+  await h.api.signIn();
+  const page = h.page("agent");
+  const sent = [];
+  h.wx.showModal = async () => ({ confirm: true });
+  h.wx.request = (o) => {
+    const path = o.url.split("/api")[1];
+    const ok = (data, statusCode = 200) => o.success({ statusCode, data });
+    if (path === "/config") return ok({ models });
+    if (path === "/jobs/quote") return ok({ units: 100, billingEnabled: true, sufficient: true, availableUnits: 900 });
+    if (path === "/jobs" && o.method === "POST") return sent.push(o.data), ok({ id: "g", status: "queued", input: o.data }, 202);
+    return ok({ items: [], total: 0 });
+  };
+  page.setData({ session: { id: "s1", version: 1, data: { title: "店", skill: "store", assets: [] }, assets: [] }, materials });
+  page.setData({ messages: [{ id: "old", role: "assistant", plan: { ...PLAN, title: "初稿" }, latest: false }, { id: "new", role: "assistant", plan: PLAN, latest: true }] });
+  await page.generatePlan({ currentTarget: { dataset: { index: 0 } } });
+  assert.equal(sent.length, 0, "folded: not usable");
+  page.togglePlan({ currentTarget: { dataset: { id: "old" } } });
+  assert.equal(page.data.expanded.old, true);
+  await page.generatePlan({ currentTarget: { dataset: { index: 0 } } });
+  assert.equal(sent.length, 1, "opened: 用这一版生成");
+  page.togglePlan({ currentTarget: { dataset: { id: "old" } } });
+  assert.equal(page.data.expanded.old, false);
+
+  h.wx.getWindowInfo = () => ({ windowHeight: 640, windowWidth: 320, statusBarHeight: 20 });
+  page.onResize();
+  assert.equal(page.data.compact, true);
+  page.toggleMaterials();
+  h.wx.getWindowInfo = () => ({ windowHeight: 640, windowWidth: 320, statusBarHeight: 20 });
+  page.onResize(); // the user's choice survives a resize
+  assert.equal(page.data.compact, false);
+  page.onUnload();
+});

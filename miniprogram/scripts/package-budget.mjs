@@ -221,7 +221,9 @@ console.log(
 // malformed plans flagged with 重新整理, Chinese plan values, Markdown-free
 // prose, mentions renumbered to the materials sent, richer generation
 // cards: 955,739 B. 930 -> 934 KiB.
-const budget = 934 * 1024;
+// Agent: earlier plans open and can be used (用这一版生成); short screens
+// fold the materials strip into one line: 958,405 B. 934 -> 937 KiB.
+const budget = 937 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

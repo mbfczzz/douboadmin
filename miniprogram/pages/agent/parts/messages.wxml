@@ -34,16 +34,17 @@
         <t-icon name="error-circle" size="14" /><text>方案没有完整输出</text>
         <text class="broken-retry" data-value="请把方案完整地重新输出一遍" bindtap="quick">重新整理 ›</text>
       </view>
-      <view wx:if="{{item.plan&&!item.latest}}" class="plan-old-row">
+      <view wx:if="{{item.plan&&!item.latest&&!expanded[item.id]}}" class="plan-old-row" data-id="{{item.id}}" bindtap="togglePlan" hover-class="starter-pressed" aria-role="button" aria-label="{{'展开第'+item.version+'版方案'}}">
         <image wx:if="{{thumbs[item.plan.lead]||art[session.data.skill]}}" class="old-thumb" src="{{thumbs[item.plan.lead]||art[session.data.skill]}}" mode="aspectFill" />
-        <view class="old-copy"><text class="old-title">第 {{item.version}} 版 · {{item.plan.title}}</text><text class="old-note">已有更新的方案</text></view>
+        <view class="old-copy"><text class="old-title">第 {{item.version}} 版 · {{item.plan.title}}</text><text class="old-note">已有更新的方案 · 点开查看</text></view>
+        <image class="gl gl-14" src="/assets/glyphs/open-muted.png" />
       </view>
-      <view wx:elif="{{item.plan}}" class="plan-card">
+      <view wx:elif="{{item.plan}}" class="plan-card {{item.latest?'':'is-earlier'}}">
         <view class="plan-cover">
           <image wx:if="{{thumbs[item.plan.lead]||art[session.data.skill]}}" class="plan-cover-photo" src="{{thumbs[item.plan.lead]||art[session.data.skill]}}" mode="aspectFill" />
           <view class="plan-cover-shade" />
           <view class="plan-kind"><image class="gl gl-14" src="/assets/glyphs/{{item.plan.kind==='image'?'image':'video'}}.png" /><text>{{item.plan.meta}}</text></view>
-          <text wx:if="{{item.version>1}}" class="plan-version">第 {{item.version}} 版</text>
+          <text wx:if="{{item.version>1||!item.latest}}" class="plan-version {{item.latest?'':'earlier'}}">第 {{item.version}} 版{{item.latest?'':' · 旧方案'}}</text>
           <text class="plan-title">{{item.plan.title}}</text>
         </view>
         <view wx:for="{{item.plan.shots}}" wx:for-item="shot" wx:for-index="n" wx:key="n" class="plan-shot">
@@ -53,8 +54,9 @@
         </view>
         <text wx:if="{{!item.plan.shots.length}}" class="plan-prompt">{{item.plan.prompt}}</text>
         <view class="plan-actions">
-          <view class="plan-edit" data-index="{{index}}" bindtap="use" aria-role="button"><image class="gl gl-14" src="/assets/glyphs/edit.png" /><text>去编辑页精调</text></view>
-          <button class="plan-go" disabled="{{generating}}" data-index="{{index}}" bindtap="generatePlan">{{generating?'提交中…':'确认生成'}}<text wx:if="{{!generating&&planPrice.id===item.id&&planPrice.text}}" class="plan-price"> · {{planPrice.text}}</text></button>
+          <view wx:if="{{item.latest}}" class="plan-edit" data-index="{{index}}" bindtap="use" aria-role="button"><image class="gl gl-14" src="/assets/glyphs/edit.png" /><text>去编辑页精调</text></view>
+          <view wx:else class="plan-edit" data-id="{{item.id}}" bindtap="togglePlan" aria-role="button"><text>收起</text></view>
+          <button class="plan-go" disabled="{{generating}}" data-index="{{index}}" bindtap="generatePlan">{{generating?'提交中…':item.latest?'确认生成':'用这一版生成'}}<text wx:if="{{!generating&&planPrice.id===item.id&&planPrice.text}}" class="plan-price"> · {{planPrice.text}}</text></button>
         </view>
       </view>
       <view class="reply-actions">

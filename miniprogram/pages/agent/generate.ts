@@ -11,7 +11,7 @@ import type { Row, Asset } from "../../services/types";
 // the price confirmed once (the usual dialog), then the generation joins
 // the conversation as its own card.
 type Page = {
-  data: { messages: ChatMessage[]; session: SessionDetail | null; materials: Row<Asset>[]; generating: boolean; planPrice: { id: string; text: string } };
+  data: { messages: ChatMessage[]; session: SessionDetail | null; materials: Row<Asset>[]; generating: boolean; planPrice: { id: string; text: string }; expanded: Record<string, boolean> };
   destroyed: boolean;
   priceKey?: string;
   setData(data: Record<string, unknown>): void;
@@ -46,7 +46,8 @@ export const generateHandlers = {
   async generatePlan(this: Page, e: WechatMiniprogram.TouchEvent) {
     const message = this.data.messages[Number(e.currentTarget.dataset.index)];
     const session = this.data.session;
-    if (!message?.plan || !message.latest || !session || this.data.generating) return;
+    // The newest plan, or an earlier one the user opened to use instead.
+    if (!message?.plan || !(message.latest || this.data.expanded[message.id]) || !session || this.data.generating) return;
     this.setData({ generating: true });
     try {
       const config = await loadConfig();
@@ -60,6 +61,11 @@ export const generateHandlers = {
     } finally {
       if (!this.destroyed) this.setData({ generating: false });
     }
+  },
+  // An earlier plan opens to its full card (and can be used), or folds back.
+  togglePlan(this: Page, e: WechatMiniprogram.TouchEvent) {
+    const id = e.currentTarget.dataset.id as string;
+    this.setData({ expanded: { ...this.data.expanded, [id]: !this.data.expanded[id] } });
   },
   openGen(this: Page, e: WechatMiniprogram.TouchEvent) {
     openTask(e.currentTarget.dataset.id, this);

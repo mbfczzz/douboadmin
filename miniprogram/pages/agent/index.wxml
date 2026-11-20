@@ -35,7 +35,12 @@
       <include src="./parts/messages.wxml" />
     </view>
   </scroll-view>
-  <scroll-view wx:if="{{session}}" scroll-x enhanced show-scrollbar="{{false}}" class="material-strip">
+  <view wx:if="{{session&&compact&&materials.length}}" class="material-fold" bindtap="toggleMaterials" hover-class="starter-pressed" aria-role="button" aria-label="展开素材">
+    <block wx:for="{{materials}}" wx:key="id"><image wx:if="{{index<4}}" class="fold-thumb" src="{{item.isImage?item.data.url:item.data.thumbnailUrl}}" mode="aspectFill" /></block>
+    <text class="fold-text">{{materials.length}} 个素材</text>
+    <text class="fold-open">展开 · 添加</text>
+  </view>
+  <scroll-view wx:elif="{{session}}" scroll-x enhanced show-scrollbar="{{false}}" class="material-strip">
     <view class="material-row">
       <view wx:for="{{materials}}" wx:key="id" class="material" data-id="{{item.id}}" data-label="{{item.label}}" bindtap="mention" bindlongpress="previewMaterial" aria-role="button" aria-label="{{'引用'+item.label}}">
         <image class="material-photo" src="{{item.isImage?item.data.url:item.data.thumbnailUrl}}" mode="aspectFill" />
@@ -44,6 +49,7 @@
       </view>
       <view class="material add {{uploading?'busy':''}} {{!materials.length&&(session.data.skill==='product'||session.data.skill==='store')?'wanted':''}}" data-kind="image" bindtap="addMaterial" aria-role="button" aria-label="添加图片"><image class="gl gl-18" src="/assets/glyphs/{{uploading?'clock-muted':'image-muted-lg'}}.png" /><text>{{uploading?'上传中':'图片'}}</text></view>
       <view wx:if="{{!uploading}}" class="material add {{!materials.length&&session.data.skill==='store'?'wanted':''}}" data-kind="video" bindtap="addMaterial" aria-role="button" aria-label="添加视频"><image class="gl gl-18" src="/assets/glyphs/video-muted-lg.png" /><text>视频</text></view>
+      <view wx:if="{{materials.length&&(short||compactPicked)}}" class="material add" bindtap="toggleMaterials" aria-role="button" aria-label="收起素材"><image class="gl gl-18" src="/assets/glyphs/open-muted.png" /><text>收起</text></view>
     </view>
   </scroll-view>
   <text wx:if="{{session&&!sees&&materials.length}}" class="blind-note">当前模型看不到图片，只按「图片1」等名称引用</text>

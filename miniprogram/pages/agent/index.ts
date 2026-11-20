@@ -49,6 +49,10 @@ Page({
     followUps: ["缩短到 10 秒", "换一个开场", "改成横屏"], // per skill (session.ts)
     examples: [] as string[], // first messages to try in an empty project
     planPrice: { id: "", text: "" }, // the newest plan's points, on 确认生成
+    expanded: {} as Record<string, boolean>, // earlier plans opened to their full card
+    compact: false, // short screens fold the materials strip to one line
+    short: false,
+    compactPicked: false, // the user chose, so a resize does not override
     art: {} as Record<string, string>,
   },
   timer: 0,
@@ -70,7 +74,11 @@ Page({
       .then(() => this.poll());
   },
   onResize() {
-    this.setData({ navBottom: navBottom() });
+    const short = wx.getWindowInfo().windowHeight < 700;
+    this.setData({ navBottom: navBottom(), short, ...(this.data.compactPicked ? {} : { compact: short }) });
+  },
+  toggleMaterials() {
+    this.setData({ compact: !this.data.compact, compactPicked: true });
   },
   onHide() {
     this.loadVersion++;
