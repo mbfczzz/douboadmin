@@ -31,13 +31,16 @@ test("带到创作 carries a plan's materials, or what a plain reply's question 
   const page = h.page("agent");
   h.wx.navigateTo = () => {};
   const { materialLabels } = h.service("../pages/agent/materials");
-  const materials = materialLabels([{ id: "p1", isImage: true, data: {} }, { id: "p2", isImage: true, data: {} }, { id: "v1", isImage: false, data: {} }]);
+  const materials = materialLabels([{ id: "p1", isImage: true, data: { type: "image/png" } }, { id: "p2", isImage: true, data: { type: "image/png" } }, { id: "v1", isImage: false, data: { type: "video/mp4" } }]);
   const plan = { kind: "video", title: "t", duration: 10, ratio: "9:16", prompt: "开场@图片2", shots: [{ time: "0-3秒", scene: "推门", asset: "视频1", line: "" }] };
   page.history = [{ id: "c1", status: "succeeded", input: { kind: "chat", prompt: "分析", assets: ["p1"] } }];
   page.setData({ materials, messages: [{ id: "c1a", role: "assistant", text: "这是一张图" }, { id: "c2a", role: "assistant", plan, latest: true }] });
   page.use({ currentTarget: { dataset: { index: 0 } } });
   assert.deepEqual(JSON.parse(JSON.stringify(h.wx.getStorageSync("edit-draft").assets)), ["p1"]);
   page.use({ currentTarget: { dataset: { index: 1 } } });
-  assert.deepEqual(JSON.parse(JSON.stringify(h.wx.getStorageSync("edit-draft").assets)), ["p2", "v1"]);
+  // Only what the prompt mentions, renumbered as the editor numbers it.
+  const draft = h.wx.getStorageSync("edit-draft");
+  assert.deepEqual(JSON.parse(JSON.stringify(draft.assets)), ["p2"]);
+  assert.equal(draft.prompt, "开场@图片1");
   page.onUnload();
 });

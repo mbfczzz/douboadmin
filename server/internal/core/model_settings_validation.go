@@ -52,6 +52,11 @@ func (s ModelSettings) Validate(m Model) error {
 	if s.TokenPriced() && m.Kind != "chat" {
 		return fmt.Errorf("只有对话模型可以按 token 计费")
 	}
+	// Only directly called models report their usage; a relay chat model
+	// priced per token would be charged its whole hold every time.
+	if _, _, direct := DirectChat(m.Key); s.TokenPriced() && !direct {
+		return fmt.Errorf("只有直连的 DeepSeek、豆包对话模型可以按 token 计费，中转站模型请按次计费")
+	}
 	for i, b := range s.Badges {
 		if strings.TrimSpace(b.Text) == "" || len([]rune(b.Text)) > 16 {
 			return fmt.Errorf("第 %d 个模型标签需填写 1–16 个字，或删除该标签", i+1)

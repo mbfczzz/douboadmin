@@ -5,6 +5,8 @@ import (
 	"doubo/server/internal/billing"
 	"doubo/server/internal/core"
 	"doubo/server/internal/store"
+	"encoding/json"
+	"errors"
 	"log/slog"
 	"strings"
 )
@@ -38,10 +40,19 @@ func foldTurns(ctx context.Context, s store.Store, session *sessionRow, turns []
 		return after // sent as before; trimmed to the latest turns
 	}
 	session.Summary, session.SummaryUntil = strings.TrimSpace(text), fold[len(fold)-1].CreatedAt.UnixNano()
-	// Kept for the next turns; a project changed meanwhile is summarized again later.
+	// Kept for the next turns. Each new message also touches the project
+	// (its version moves), so a conflict is retried once on a fresh read.
 	row := session.row
 	row.Data = core.Data(session.AgentSession)
-	if _, err = s.Put(ctx, "agent_sessions", row, row.Version); err != nil {
+	if _, err = s.Put(ctx, "agent_sessions", row, row.Version); errors.Is(err, core.ErrConflict) {
+		var fresh core.AgentSession
+		if row, err = s.Get(ctx, "agent_sessions", row.ID); err == nil && json.Unmarshal(row.Data, &fresh) == nil {
+			fresh.Summary, fresh.SummaryUntil = session.Summary, session.SummaryUntil
+			row.Data = core.Data(fresh)
+			_, err = s.Put(ctx, "agent_sessions", row, row.Version)
+		}
+	}
+	if err != nil {
 		slog.Warn("chat summary not saved", "session", row.ID, "error", err)
 	}
 	return rest

@@ -67,3 +67,26 @@ func TestVideoAndLinkCacheFollowTheConfiguredWindow(t *testing.T) {
 		t.Fatal(d)
 	}
 }
+
+// A hot-list item (no play address) never stands in for a full detail.
+func TestHotListItemsDoNotReplaceDetails(t *testing.T) {
+	var detail atomic.Int32
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		detail.Add(1)
+		_, _ = w.Write([]byte(`{"code":200,"data":{"aweme_detail":{"aweme_id":"7301","desc":"文案","video":{"play_addr":{"url_list":["https://cdn.example/play/1.mp4"]}}}}}`))
+	}))
+	defer server.Close()
+	ctx := t.Context()
+	s := &Service{Client: &Client{BaseURL: server.URL, Key: "k"}, Store: store.NewMemory(), TTL: CacheTTL{Video: 10 * time.Minute}}
+	_, _ = s.Video(ctx, "7301")                                    // a full detail, cached
+	s.Remember(ctx, []Video{{ID: "7301", Text: "榜单"}}, time.Now()) // a hot-list item without a play address
+	if v, _ := s.Video(ctx, "7301"); v.URL == "" || detail.Load() != 1 {
+		t.Fatal("the hot-list item replaced the detail", v.URL, detail.Load())
+	}
+	// And a cached copy without a play address is read live.
+	s.Store = store.NewMemory()
+	_, _ = s.Store.Put(ctx, "hot_videos", core.Record{ID: "7301", Data: core.Data(cachedVideo{Video{ID: "7301"}, time.Now()})}, 0)
+	if v, err := s.Video(ctx, "7301"); err != nil || v.URL == "" || detail.Load() != 2 {
+		t.Fatal("served without a player", v.URL, err)
+	}
+}

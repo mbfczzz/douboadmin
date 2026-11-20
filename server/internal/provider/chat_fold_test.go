@@ -113,3 +113,20 @@ func TestEarlierTurnsNameTheirAttachments(t *testing.T) {
 		t.Fatal(names)
 	}
 }
+
+// The project moving on (a message touched it) does not lose a new summary.
+func TestSummarySurvivesAProjectTouch(t *testing.T) {
+	s, now := projectTurns(t, 9)
+	sum := func(context.Context, string) (string, error) {
+		row, _ := s.Get(t.Context(), "agent_sessions", "proj") // the API touches the project meanwhile
+		_, _ = s.Put(t.Context(), "agent_sessions", row, row.Version)
+		return "摘要", nil
+	}
+	history(t, s, now, sum)
+	row, _ := s.Get(t.Context(), "agent_sessions", "proj")
+	var session core.AgentSession
+	_ = json.Unmarshal(row.Data, &session)
+	if session.Summary != "摘要" {
+		t.Fatal("the summary was dropped on a version conflict")
+	}
+}

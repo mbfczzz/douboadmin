@@ -37,7 +37,7 @@
     <view wx:if="{{item.pending&&!item.streaming}}" class="typing-row"><view class="typing" aria-label="正在回复"><view /><view /><view /></view><text class="typing-note">{{item.text}}</text></view>
     <view wx:elif="{{item.failed}}" class="reply-failed">
       <t-icon name="error-circle" size="16" /><text>{{item.text}}</text>
-      <text class="retry" data-prompt="{{item.prompt}}" bindtap="retry">重新编辑 ›</text>
+      <text class="retry" data-prompt="{{item.prompt}}" bindtap="retry" aria-role="button">重新编辑 ›</text>
     </view>
     <block wx:else>
       <view wx:if="{{item.text}}" class="reply {{item.streaming&&!item.planning?'is-streaming':''}}">
@@ -57,7 +57,7 @@
       </view>
       <view wx:if="{{item.broken}}" class="plan-broken">
         <t-icon name="error-circle" size="14" /><text>方案没有完整输出</text>
-        <text class="broken-retry" data-value="请把方案完整地重新输出一遍" bindtap="quick">重新整理 ›</text>
+        <text class="broken-retry" data-value="请把方案完整地重新输出一遍" bindtap="quick" aria-role="button">重新整理 ›</text>
       </view>
       <view wx:if="{{item.plan&&!item.latest&&!expanded[item.id]}}" class="plan-old-row" data-id="{{item.id}}" bindtap="togglePlan" hover-class="starter-pressed" aria-role="button" aria-label="{{'展开第'+item.version+'版方案'}}">
         <image wx:if="{{art[session.data.skill]}}" class="old-thumb" src="{{art[session.data.skill]}}" mode="aspectFill" />
@@ -90,7 +90,7 @@
       </view>
       <scroll-view wx:if="{{index===messages.length-1&&!busy&&!item.streaming&&item.plan}}" scroll-x class="follow-ups">
         <view class="follow-row">
-          <view wx:for="{{followUps}}" wx:for-item="ask" wx:key="*this" class="follow" data-value="{{ask}}" bindtap="quick" hover-class="starter-pressed">{{ask}}</view>
+          <view wx:for="{{followUps}}" wx:for-item="ask" wx:key="*this" class="follow" aria-role="button" data-value="{{ask}}" bindtap="quick" hover-class="starter-pressed">{{ask}}</view>
         </view>
       </scroll-view>
     </block>

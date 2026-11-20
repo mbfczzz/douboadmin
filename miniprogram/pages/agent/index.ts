@@ -10,10 +10,12 @@ import type { ProjectView } from "./session";
 import { agentModels } from "./models";
 import type { ChatModel } from "./models";
 import { historyHandlers } from "./history";
+import { sentMaterials } from "./plan";
 import { editHandlers } from "./edit";
 import { chatModel } from "../../services/chat-model";
 import { streamHandlers } from "./stream";
 import { sessionHandlers, projectView } from "./session";
+import { remember } from "./remember";
 import { materialHandlers, materialLabels } from "./materials";
 import type { Labelled } from "./materials";
 import { generateHandlers } from "./generate";
@@ -146,6 +148,7 @@ Page({
       if (model.id !== this.data.model) void this.loadModels(); // signed in again: show the picker
       if (!this.data.session) {
         const row = await createSession("general"); // a first message starts a free project
+        remember(row.id); // and is the one shown next visit
         this.setData({ session: { ...row, assets: [] }, projects: [projectView(row, this.data.skills), ...this.data.projects] });
         await this.load(true); // adopt the new project before its first turn shows
       }
@@ -182,17 +185,17 @@ Page({
   use(e: WechatMiniprogram.TouchEvent) {
     const m = this.data.messages[Number(e.currentTarget.dataset.index)] as ChatMessage | undefined;
     const plan = m?.plan;
+    // The plan's materials, renumbered as the editor will number them (the
+    // project's 图片3 alone is the editor's @图片1); a plain reply takes
+    // what its question carried.
+    const sent = plan ? sentMaterials(plan.prompt, this.data.materials) : undefined;
     wx.setStorageSync("edit-draft", {
       kind: plan?.kind || "video",
-      prompt: (plan?.prompt || m?.text || e.currentTarget.dataset.text || "").slice(0, 2000),
+      prompt: (sent?.prompt || m?.text || e.currentTarget.dataset.text || "").slice(0, 2000),
       ratio: plan?.ratio || "9:16",
       resolution: "",
       duration: plan?.kind === "image" ? 0 : plan?.duration || 5,
-      // The materials the plan names (the project may hold many), or for
-      // a plain reply, what its question carried.
-      assets: plan
-        ? (this.data.materials as Labelled[]).filter((x) => new RegExp(x.label + "(?!\\d)").test(plan.prompt + plan.shots.map((s) => s.asset).join(" "))).map((x) => x.id)
-        : (this.history as Job[]).find((j) => m && j.id + "a" === m.id)?.input.assets || [],
+      assets: sent ? sent.assets.map((a) => a.id) : (this.history as Job[]).find((j) => m && j.id + "a" === m.id)?.input.assets || [],
     });
     openPage(this, { url: "/pages/create/index?kind=" + (plan?.kind || "video") });
   },

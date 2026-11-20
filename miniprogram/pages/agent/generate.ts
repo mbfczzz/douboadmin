@@ -33,15 +33,19 @@ export const generateHandlers = {
     const key = message.id + ":" + this.data.materials.map((m) => m.id).join(",");
     if (this.priceKey === key) return;
     this.priceKey = key;
-    let text = "";
+    let text = "", failed = false;
     try {
       const config = await loadConfig();
       const q = await request<Quote>("/jobs/quote", "POST", planInput(message.plan, config.models, this.data.materials, session.id));
       text = !q.billingEnabled || !q.units ? "不扣积分" : points(q.units) + " 积分";
     } catch {
       text = ""; // no model fits, or a preview account: the dialog still says it
+      failed = true;
     }
-    if (!this.destroyed && this.priceKey === key) this.setData({ planPrice: { id: message.id, text } });
+    if (!this.destroyed && this.priceKey === key) {
+      this.setData({ planPrice: { id: message.id, text } });
+      if (failed) this.priceKey = ""; // a network failure is tried again next time
+    }
   },
   async generatePlan(this: Page, e: WechatMiniprogram.TouchEvent) {
     const message = this.data.messages[Number(e.currentTarget.dataset.index)];

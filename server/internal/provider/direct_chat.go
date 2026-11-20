@@ -104,9 +104,16 @@ func (p *DirectChat) Generate(ctx context.Context, j core.Job) (string, error) {
 	if err = p.checkpoint(ctx, &row, e); err != nil {
 		return "", ErrPending // another worker owns this turn
 	}
+	// Recorded even when the turn's time ran out (ctx is done then): a turn
+	// left "submitting" would keep the user's points held instead of refunded.
 	fail := func(err error) (string, error) {
+		if ctx.Err() != nil {
+			err = errors.New("回复超时，请重新发送")
+		}
 		e.Phase, e.Error, e.Partial = "failed", err.Error(), ""
-		_ = p.checkpoint(ctx, &row, e)
+		done, cancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
+		defer cancel()
+		_ = p.checkpoint(done, &row, e)
 		return "", err
 	}
 	if stopAsked(ctx, p.Store, j.ID) { // stopped while the summary or a video was being read

@@ -6,13 +6,12 @@ import type { Skill, SessionRow, SessionDetail } from "../../services/agent";
 import type { ChatMessage } from "../../services/types";
 import { editorAsset } from "../../utils/editor-assets";
 import { materialData } from "./materials";
+import { remember, remembered } from "./remember";
 import { date } from "../../utils/ui";
 
 // The Agent's 创作项目: which one is open (remembered per account), the
 // project sheet, starting one from a skill, and deleting one.
-const KEY = "agent-session";
-const remembered = () => (wx.getStorageSync(KEY) as { user?: string; id?: string }) || {};
-const remember = (id: string) => wx.setStorageSync(KEY, { user: sessionUserId(), id });
+// (remember.ts keeps which one.)
 
 // A row in the project sheet: its skill (for the picture and name) and when it was last used.
 export type ProjectView = SessionRow & { skillName: string; when: string };
@@ -34,6 +33,7 @@ type Page = {
   destroyed: boolean;
   setData(data: Record<string, unknown>): void;
   load(force?: boolean): Promise<void>;
+  poll(): void;
   showSession(id: string): Promise<void>;
   loadSession(): Promise<void>;
   titling?: boolean;
@@ -82,6 +82,7 @@ export const sessionHandlers = {
     this.setData({ projectsError: "" });
     void this.loadSession()
       .then(() => this.load(true))
+      .then(() => this.poll())
       .catch((e: Error) => !this.destroyed && this.setData({ projectsError: e.message || "加载失败" }));
   },
   openProjects(this: Page) {
@@ -98,6 +99,7 @@ export const sessionHandlers = {
     try {
       await this.showSession(e.currentTarget.dataset.id);
       await this.load(true);
+      this.poll(); // its replies and generations may still be running
     } catch (err) {
       error(err);
     }
@@ -111,9 +113,11 @@ export const sessionHandlers = {
       const row = await createSession(skill.id);
       if (this.destroyed) return;
       remember(row.id);
-      this.setData({ session: { ...row, assets: [] }, materials: [], thumbs: {}, ...skillHints(this.data.skills, skill.id), prompt: skill.starter || this.data.prompt, focus: true });
+      // A new project starts with an empty draft (no attachments or edit from the last one).
+      this.setData({ session: { ...row, assets: [] }, materials: [], thumbs: {}, files: {}, attached: [], editing: "", ...skillHints(this.data.skills, skill.id), prompt: skill.starter || this.data.prompt, focus: true });
       this.setData({ projects: [projectView(row, this.data.skills), ...this.data.projects] });
       await this.load(true);
+      this.poll();
     } catch (err) {
       error(err);
     }
@@ -149,6 +153,7 @@ export const sessionHandlers = {
       if (this.data.session?.id === row.id) {
         await this.showSession(projects[0]?.id || "");
         await this.load(true);
+        this.poll();
       }
     } catch (err) {
       error(err);

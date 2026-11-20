@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"context"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -43,5 +44,27 @@ func TestStoppedBeforeStartIsNotCalled(t *testing.T) {
 	}
 	if _, err := p.Generate(t.Context(), j); err == nil || !strings.Contains(err.Error(), "已停止") || len(*bodies) != 0 {
 		t.Fatal(err, len(*bodies))
+	}
+}
+
+// A turn whose time runs out is still recorded as failed (so it is refunded).
+func TestTimedOutTurnIsRecordedFailed(t *testing.T) {
+	s, p, j, _ := directFixture(t, "", 200)
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/event-stream")
+		_, _ = io.WriteString(w, "data: {\"choices\":[{\"delta\":{\"content\":\"镜头\"}}]}\n\n")
+		w.(http.Flusher).Flush()
+		<-r.Context().Done()
+	}))
+	defer srv.Close()
+	p.Clients["deepseek"].BaseURL = srv.URL
+	ctx, cancel := context.WithTimeout(t.Context(), 200*time.Millisecond)
+	defer cancel()
+	if _, err := p.Generate(ctx, j); err == nil || !strings.Contains(err.Error(), "超时") {
+		t.Fatal(err)
+	}
+	row, _ := s.Get(t.Context(), "executions", j.ID)
+	if !strings.Contains(string(row.Data), `"phase":"failed"`) {
+		t.Fatal(string(row.Data))
 	}
 }

@@ -3,6 +3,7 @@ import { createSession, updateSession } from "../../services/agent";
 import type { SessionDetail } from "../../services/agent";
 import { editorAsset } from "../../utils/editor-assets";
 import { MAX_MATERIALS, MAX_ATTACHED } from "./constants";
+import { remember } from "./remember";
 
 // Pictures and videos are attached to the message being written and go
 // with that message only. Each upload is also kept on the project, numbered
@@ -59,6 +60,7 @@ export const materialHandlers = {
       const files = await chooseReferenceFiles(kind, room); // pictures several at a time
       if (!this.data.session) {
         const row = await createSession("general"); // a first upload starts a free project
+        remember(row.id); // and is the one shown next visit
         this.setData({ session: { ...row, assets: [] } });
         void this.load?.(true);
       }
@@ -97,3 +99,15 @@ export const materialHandlers = {
     else wx.previewMedia({ sources: [{ url: m.data.url, type: "video", poster: m.data.thumbnailUrl || "" }] });
   },
 };
+
+// A draft given up for 编辑 or 取消: files uploaded only for it leave the
+// project again (they would shift the numbering and fill the limit).
+export async function dropDraft(page: Page) {
+  const fresh = page.data.attached.filter((m) => m.fresh);
+  if (!fresh.length || !page.data.session) return;
+  try {
+    await save(page, page.data.session, page.data.materials.filter((m) => !fresh.some((f) => f.id === m.id)), page.data.attached.filter((m) => !m.fresh));
+  } catch {
+    // they stay in the project; nothing else is affected
+  }
+}

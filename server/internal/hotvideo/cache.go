@@ -42,10 +42,18 @@ func (s *Service) videoFresh() time.Duration  { return pick(s.TTL.Video, 30*time
 func (s *Service) Ready() bool { return s != nil && s.Client.Ready() }
 func (s *Service) Search(ctx context.Context, q Query) (Result, error) {
 	if q.Feed && s.Redis != nil {
-		if r, ok := s.feedGet(ctx, q); ok {
-			return r, nil
+		// Fresh pages come from Redis (first pages are refreshed in the
+		// background); an older one (a later page, a failed refresh) is
+		// fetched again, and served only if TikHub fails.
+		cached, ok := s.feedGet(ctx, q)
+		if ok && time.Since(cached.FetchedAt) < s.feedFresh() {
+			return cached, nil
 		}
-		return s.feedFetch(ctx, q)
+		r, err := s.feedFetch(ctx, q)
+		if err != nil && ok {
+			return cached, nil
+		}
+		return r, err
 	}
 	id := s.cacheID(q)
 	old, e := s.Store.Get(ctx, "hot_cache", id)

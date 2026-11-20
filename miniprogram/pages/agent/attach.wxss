@@ -78,12 +78,12 @@
   position: absolute;
   top: 2px;
   right: 2px;
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   text-align: center;
   font-size: 14px;
-  line-height: 19px;
+  line-height: 21px;
   color: #fff;
   background: #000000b3;
 }
@@ -170,4 +170,13 @@
   gap: 3px;
   font-size: 11px;
   color: var(--ui-muted);
+}
+/* A larger tap area around × than the dot it draws. */
+.attach-remove::after {
+  content: "";
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  bottom: -8px;
+  left: -8px;
 }

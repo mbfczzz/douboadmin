@@ -34,3 +34,14 @@ func TestErrorHintsUseCaseInsensitiveFirstMatch(t *testing.T) {
 		t.Fatal("fallback lost")
 	}
 }
+
+// Per-token prices only for directly called chat models (they report usage).
+func TestTokenPricingOnlyForDirectChatModels(t *testing.T) {
+	s := ModelSettings{TokenInputPrice: 0.01, TokenOutputPrice: 0.04}
+	if err := s.Validate(Model{Kind: "chat", Key: "deepseek:deepseek-flash"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.Validate(Model{Kind: "chat", Key: "gpt-4o-mini"}); err == nil {
+		t.Fatal("a relay chat model accepted token prices")
+	}
+}

@@ -80,8 +80,29 @@ func TestFeedRefreshLockAndFailureKeepsPage(t *testing.T) {
 	mr.Del(s.feedKey(q) + ":lock")
 	failing.Store(true)
 	s.refreshFeed(ctx, q)
-	if r, err := s.Search(ctx, q); err != nil || len(r.Items) != 1 || calls.Load() != 2 {
+	// The stale page is tried live once more; TikHub still failing, the old page is served.
+	if r, err := s.Search(ctx, q); err != nil || len(r.Items) != 1 || calls.Load() != 3 {
 		t.Fatalf("old page lost after a failed refresh: %+v %v", r, err)
+	}
+}
+
+// A later page (never refreshed in the background) is read again once it is
+// older than the configured feed time, instead of up to twice that.
+func TestStaleLaterFeedPagesAreReadAgain(t *testing.T) {
+	var failing atomic.Bool
+	s, _, calls := feedFixture(t, &failing)
+	ctx := context.Background()
+	q := Query{Keyword: "萌宠", Feed: true, Cursor: 20}
+	if _, err := s.Search(ctx, q); err != nil || calls.Load() != 1 {
+		t.Fatal(err, calls.Load())
+	}
+	_, _ = s.Search(ctx, q)
+	if calls.Load() != 1 {
+		t.Fatal("a fresh page went to TikHub")
+	}
+	age(t, s, q, 61*time.Minute)
+	if _, err := s.Search(ctx, q); err != nil || calls.Load() != 2 {
+		t.Fatal("a stale later page was served", calls.Load(), err)
 	}
 }
 

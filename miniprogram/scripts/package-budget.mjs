@@ -243,7 +243,8 @@ console.log(
 // 编辑 a sent question and ask again; 复制 chips for a reply's key lines: 992,383 B. 965 -> 970 KiB.
 // Review fixes: send waits for uploads; 编辑-restored files stay in the project; uploads stay in their project; edit and streams reset on switch; tighter copy chips; composer spacing: 994,594 B. 970 -> 972 KiB.
 // Replies as models really write them (tables, links, code, quotes, CRLF), emoji-safe typing, 带到创作 carries the question's files: 995,863 B. 972 -> 973 KiB.
-const budget = 973 * 1024;
+// Bug pass: new projects remembered, polling resumes on switch, clean drafts per project, 去编辑页精调 renumbers, price retried, abandoned uploads leave the project: 997,883 B. 973 -> 975 KiB.
+const budget = 975 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

@@ -22,7 +22,8 @@ type cachedVideo struct {
 func (s *Service) Video(ctx context.Context, id string) (Video, error) {
 	row, err := s.Store.Get(ctx, "hot_videos", id)
 	var c cachedVideo
-	if err == nil && json.Unmarshal(row.Data, &c) == nil && !c.CachedAt.IsZero() && time.Since(c.CachedAt) < s.videoFresh() {
+	// A copy without a play address (a hot-list item) is not a detail: read live.
+	if err == nil && json.Unmarshal(row.Data, &c) == nil && c.URL != "" && !c.CachedAt.IsZero() && time.Since(c.CachedAt) < s.videoFresh() {
 		return c.Video, nil
 	}
 	v, err := s.Client.Detail(ctx, id)
@@ -57,12 +58,16 @@ func (s *Service) VideoByLink(ctx context.Context, link string) (Video, error) {
 }
 
 // Remember keeps a freshly fetched search page's videos for the detail page.
+// Items without a play address (the hot list) are not kept: they would stand
+// in for a full detail and leave the page without a player.
 func (s *Service) Remember(ctx context.Context, items []Video, at time.Time) {
 	if at.IsZero() {
 		at = time.Now().UTC()
 	}
 	for _, v := range items {
-		s.keep(ctx, v, at)
+		if v.URL != "" {
+			s.keep(ctx, v, at)
+		}
 	}
 }
 
