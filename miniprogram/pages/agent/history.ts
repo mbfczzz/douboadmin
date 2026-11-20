@@ -20,6 +20,7 @@ type Page = {
   history: Job[];
   historyKey: string;
   setData(data: Record<string, unknown>): void;
+  priceLatest?(): Promise<void>;
 };
 const filter = (page: Page) => "&session=" + page.data.session!.id;
 const running = (jobs: Job[]) => jobs.some((j) => /queued|running/.test(j.status));
@@ -62,6 +63,7 @@ export const historyHandlers = {
       const messages = chatMessages(jobs);
       const changed = JSON.stringify(messages) !== JSON.stringify(this.data.messages);
       if (changed) this.setData({ messages, bottom: messages.length ? "m" + messages[messages.length - 1].id : "" });
+      if (changed) void this.priceLatest?.();
       if (!this.data.ready) this.setData({ ready: true });
       // Replies still being written are not cached.
       if (changed) writeView("agent:" + session.id, messages.filter((m) => !m.pending).slice(-30));

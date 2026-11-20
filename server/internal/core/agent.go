@@ -22,13 +22,15 @@ const MaxAgentAssets = 9
 // chat model; every skill ends a reply with the same ```plan contract so the
 // mini-program can show it as a card and generate from it.
 type AgentSkill struct {
-	ID          string `json:"id"`
-	Name        string `json:"name"`
-	Hint        string `json:"hint"`
-	Icon        string `json:"icon"`
-	Kind        string `json:"kind"` // what the plan generates: video or image
-	Starter     string `json:"starter"`
-	Instruction string `json:"-"`
+	ID          string   `json:"id"`
+	Name        string   `json:"name"`
+	Hint        string   `json:"hint"`
+	Icon        string   `json:"icon"`
+	Kind        string   `json:"kind"` // what the plan generates: video or image
+	Starter     string   `json:"starter"`
+	Examples    []string `json:"examples"`  // what to say first, in an empty project
+	FollowUps   []string `json:"followUps"` // quick revisions under the newest reply
+	Instruction string   `json:"-"`
 }
 
 var AgentSkills = []AgentSkill{

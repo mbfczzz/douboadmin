@@ -1,20 +1,23 @@
 <view wx:for="{{messages}}" wx:key="id" id="m{{item.id}}" class="message {{item.role}}">
   <view wx:if="{{item.role==='user'}}" class="bubble"><text selectable>{{item.text}}</text></view>
   <view wx:elif="{{item.role==='gen'}}" class="gen-card" data-id="{{item.text}}" bindtap="openGen" hover-class="starter-pressed" aria-role="button">
-    <image wx:if="{{item.gen.thumb}}" class="gen-thumb" src="{{item.gen.thumb}}" mode="aspectFill" />
+    <view wx:if="{{item.gen.thumb}}" class="gen-thumb gen-done">
+      <image class="gen-bg full" src="{{item.gen.thumb}}" mode="aspectFill" />
+      <view wx:if="{{item.gen.kind==='video'}}" class="gen-play"><image class="gl gl-14" src="/assets/glyphs/play-muted.png" /></view>
+    </view>
     <view wx:else class="gen-thumb gen-wait {{item.gen.status==='failed'?'is-failed':''}}">
       <image wx:if="{{art[session.data.skill]}}" class="gen-bg" src="{{art[session.data.skill]}}" mode="aspectFill" />
       <t-loading wx:if="{{item.gen.status==='queued'||item.gen.status==='running'}}" size="18px" /><t-icon wx:else name="error-circle" size="18" />
     </view>
     <view class="gen-copy">
-      <text class="gen-title">{{item.gen.kind==='image'?'图片':'视频'}}{{item.gen.status==='succeeded'?'已生成':item.gen.status==='failed'?'生成失败':'生成中'}}</text>
+      <view class="gen-head"><text class="gen-title">{{item.gen.kind==='image'?'图片':'视频'}}</text><text class="gen-state {{item.gen.status}}">{{item.gen.status==='succeeded'?'已生成':item.gen.status==='failed'?'生成失败':item.gen.status==='queued'?'排队中':'生成中'}}</text></view>
       <text class="gen-note">{{item.gen.status==='failed'?(item.gen.error||'积分已退回'):item.gen.status==='succeeded'?'点击查看、保存或分享':'进度 '+item.gen.progress+'%，可以先继续聊'}}</text>
     </view>
     <image class="gl gl-16" src="/assets/glyphs/open-muted.png" />
   </view>
   <block wx:else>
     <view class="agent-name"><view class="agent-avatar"><image class="gl gl-14" src="/assets/glyphs/ai-pen-dark.png" /></view><text>豆播 Agent</text></view>
-    <view wx:if="{{item.pending}}" class="typing" aria-label="正在回复"><view /><view /><view /></view>
+    <view wx:if="{{item.pending}}" class="typing-row"><view class="typing" aria-label="正在回复"><view /><view /><view /></view><text class="typing-note">正在写方案…</text></view>
     <view wx:elif="{{item.failed}}" class="reply-failed">
       <t-icon name="error-circle" size="16" /><text>{{item.text}}</text>
       <text class="retry" data-prompt="{{item.prompt}}" bindtap="retry">重新编辑 ›</text>
@@ -25,11 +28,16 @@
           <text wx:if="{{line.label}}" class="shot-label">{{line.label}}</text><text selectable>{{line.text}}</text>
         </view>
       </view>
-      <view wx:if="{{item.plan}}" class="plan-card {{item.latest?'':'is-old'}}">
+      <view wx:if="{{item.plan&&!item.latest}}" class="plan-old-row">
+        <image wx:if="{{thumbs[item.plan.lead]||art[session.data.skill]}}" class="old-thumb" src="{{thumbs[item.plan.lead]||art[session.data.skill]}}" mode="aspectFill" />
+        <view class="old-copy"><text class="old-title">第 {{item.version}} 版 · {{item.plan.title}}</text><text class="old-note">已有更新的方案</text></view>
+      </view>
+      <view wx:elif="{{item.plan}}" class="plan-card">
         <view class="plan-cover">
           <image wx:if="{{thumbs[item.plan.lead]||art[session.data.skill]}}" class="plan-cover-photo" src="{{thumbs[item.plan.lead]||art[session.data.skill]}}" mode="aspectFill" />
           <view class="plan-cover-shade" />
           <view class="plan-kind"><image class="gl gl-14" src="/assets/glyphs/{{item.plan.kind==='image'?'image':'video'}}.png" /><text>{{item.plan.meta}}</text></view>
+          <text wx:if="{{item.version>1}}" class="plan-version">第 {{item.version}} 版</text>
           <text class="plan-title">{{item.plan.title}}</text>
         </view>
         <view wx:for="{{item.plan.shots}}" wx:for-item="shot" wx:for-index="n" wx:key="n" class="plan-shot">
@@ -38,14 +46,13 @@
           <view wx:if="{{shot.asset}}" class="shot-asset"><image wx:if="{{thumbs[shot.asset]}}" class="shot-thumb" src="{{thumbs[shot.asset]}}" mode="aspectFill" /><text>{{shot.asset}}</text></view>
         </view>
         <text wx:if="{{!item.plan.shots.length}}" class="plan-prompt">{{item.plan.prompt}}</text>
-        <view wx:if="{{item.latest}}" class="plan-actions">
-          <text class="plan-edit" data-index="{{index}}" bindtap="use">去编辑页精调</text>
-          <button class="plan-go" disabled="{{generating}}" data-index="{{index}}" bindtap="generatePlan">{{generating?'提交中…':'确认生成'}}</button>
+        <view class="plan-actions">
+          <view class="plan-edit" data-index="{{index}}" bindtap="use" aria-role="button"><image class="gl gl-14" src="/assets/glyphs/edit.png" /><text>去编辑页精调</text></view>
+          <button class="plan-go" disabled="{{generating}}" data-index="{{index}}" bindtap="generatePlan">{{generating?'提交中…':'确认生成'}}<text wx:if="{{!generating&&planPrice.id===item.id&&planPrice.text}}" class="plan-price"> · {{planPrice.text}}</text></button>
         </view>
-        <text wx:else class="plan-old">已有更新的方案</text>
       </view>
       <view class="reply-actions">
-        <view wx:if="{{item.copy}}" class="reply-icon" data-text="{{item.copy}}" bindtap="copy" hover-class="icon-pressed" aria-role="button" aria-label="复制"><image class="gl gl-18" src="/assets/glyphs/copy-muted.png" /></view>
+        <view wx:if="{{item.copy&&(item.latest||!item.plan||item.text)}}" class="reply-icon" data-text="{{item.copy}}" bindtap="copy" hover-class="icon-pressed" aria-role="button" aria-label="复制"><image class="gl gl-18" src="/assets/glyphs/copy-muted.png" /></view>
         <view wx:if="{{!item.plan}}" class="use-script" data-index="{{index}}" data-text="{{item.text}}" bindtap="use" hover-class="starter-pressed" aria-role="button"><image class="gl gl-16" src="/assets/glyphs/video.png" /><text>带到创作</text></view>
       </view>
       <scroll-view wx:if="{{index===messages.length-1&&!busy}}" scroll-x class="follow-ups">

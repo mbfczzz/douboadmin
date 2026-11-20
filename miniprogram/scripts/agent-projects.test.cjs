@@ -30,10 +30,10 @@ test("a reply's plan block becomes a card; only the newest plan can generate", (
   ];
   const messages = plain(chatMessages(jobs));
   const plans = messages.filter((m) => m.plan);
-  assert.deepEqual(plans.map((m) => [m.plan.title, !!m.latest]), [["春日咖啡", false], ["第二版", true]]);
+  assert.deepEqual(plans.map((m) => [m.plan.title, !!m.latest, m.version]), [["春日咖啡", false, 1], ["第二版", true, 2]]);
   // 复制 gives the plan as lines, not JSON; a reply with nothing to copy has no button.
   assert.equal(plans[1].copy, "给你一版方案：\n\n【第二版】视频 · 12 秒 · 9:16\n0-3秒 推门 “周末好去处” （图片2）");
-  assert.match(require("node:fs").readFileSync("pages/agent/parts/messages.wxml", "utf8"), /wx:if="\{\{item\.copy\}\}" class="reply-icon"/);
+  assert.match(require("node:fs").readFileSync("pages/agent/parts/messages.wxml", "utf8"), /wx:if="\{\{item\.copy&&\(item\.latest\|\|!item\.plan\|\|item\.text\)\}\}" class="reply-icon"/);
   assert.deepEqual(messages.at(-1).gen, { status: "running", progress: 40, kind: "video", thumb: "", error: "" });
 });
 
@@ -100,5 +100,33 @@ test("materials are numbered per type; tapping one mentions it; chat sends pictu
   await page.send();
   assert.deepEqual(plain(sent.map((s) => s.assets)), [[], ["p1", "p2"]]);
   assert.ok(sent.every((s) => s.sessionId === "s1"));
+  page.onUnload();
+});
+
+test("the newest plan shows its points on 确认生成, quoted once per plan and materials", async () => {
+  const h = harness();
+  await h.api.signIn();
+  const page = h.page("agent");
+  let quotes = 0;
+  h.wx.request = (o) => {
+    const path = o.url.split("/api")[1];
+    const ok = (data) => o.success({ statusCode: 200, data });
+    if (path === "/config") return ok({ models });
+    if (path === "/jobs/quote") return quotes++, ok({ units: 3500, billingEnabled: true });
+    return ok({ items: [], total: 0 });
+  };
+  page.setData({ session: { id: "s1", version: 1, data: { title: "店", skill: "store", assets: [] }, assets: [] }, materials });
+  page.setData({ messages: [{ id: "old", role: "assistant", plan: PLAN, latest: false }, { id: "new", role: "assistant", plan: PLAN, latest: true }] });
+  await page.priceLatest();
+  await page.priceLatest();
+  assert.deepEqual(plain(page.data.planPrice), { id: "new", text: "35 积分" });
+  assert.equal(quotes, 1, "the same plan and materials are not quoted twice");
+  page.setData({ materials: materials.slice(0, 1) });
+  await page.priceLatest();
+  assert.equal(quotes, 2, "changing the materials quotes again (it can change the model)");
+  page.setData({ messages: [{ id: "x", role: "assistant", plan: PLAN, latest: true }] });
+  h.wx.request = (o) => (o.url.endsWith("/config") ? o.success({ statusCode: 200, data: { models: [] } }) : o.fail({ errMsg: "x" }));
+  await page.priceLatest();
+  assert.deepEqual(plain(page.data.planPrice), { id: "x", text: "" }, "no fitting model: the price hides");
   page.onUnload();
 });

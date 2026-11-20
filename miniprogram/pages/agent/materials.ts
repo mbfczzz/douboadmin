@@ -11,6 +11,7 @@ type Page = {
   data: { session: SessionDetail | null; materials: Material[]; prompt: string; uploading: boolean };
   destroyed: boolean;
   setData(data: Record<string, unknown>): void;
+  priceLatest?(): Promise<void>;
 };
 
 export function materialLabels(materials: Material[]) {
@@ -29,7 +30,9 @@ export function materialData(list: Material[]) {
 async function save(page: Page, ids: string[], materials: Material[]) {
   const s = page.data.session!;
   const row = await updateSession(s.id, s.version, { assets: ids });
-  if (!page.destroyed) page.setData({ session: { ...s, version: row.version, data: row.data }, ...materialData(materials) });
+  if (page.destroyed) return;
+  page.setData({ session: { ...s, version: row.version, data: row.data }, ...materialData(materials) });
+  void page.priceLatest?.(); // a material can change which model the plan uses
 }
 
 export const materialHandlers = {

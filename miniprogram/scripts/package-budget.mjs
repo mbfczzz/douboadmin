@@ -211,7 +211,10 @@ console.log(
 // Agent colour pass: skill photos on the project bar, sheet and empty
 // project, plan covers and shot thumbnails from the project's materials,
 // highlighted add buttons: 942,173 B. 916 -> 921 KiB.
-const budget = 921 * 1024;
+// Agent polish: plan versions with old ones collapsed, the points on
+// 确认生成, per-skill examples and follow-ups, generation status chips,
+// 正在写方案 hint: 947,762 B. 921 -> 926 KiB.
+const budget = 926 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

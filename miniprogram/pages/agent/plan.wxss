@@ -91,10 +91,6 @@
   background: var(--ui-surface);
   box-shadow: inset 0 0 0 1px #00c8dc33;
 }
-.plan-card.is-old {
-  opacity: 0.55;
-  box-shadow: none;
-}
 .plan-title {
   font-size: 15px;
   font-weight: 600;
@@ -144,10 +140,6 @@
   justify-content: space-between;
   margin-top: 12px;
 }
-.plan-edit {
-  font-size: 13px;
-  color: var(--ui-muted);
-}
 button.plan-go {
   width: auto;
   margin: 0;
@@ -164,12 +156,6 @@ button.plan-go[disabled] {
   opacity: 0.5;
   color: var(--ui-on-brand);
   background: var(--ui-primary);
-}
-.plan-old {
-  display: block;
-  margin-top: 10px;
-  font-size: 12px;
-  color: var(--ui-muted);
 }
 .gen-card {
   display: flex;

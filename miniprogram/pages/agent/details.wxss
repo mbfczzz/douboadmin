@@ -1,0 +1,123 @@
+/* Plan versions and price, generation status, the writing hint and the
+   example chips of an empty project. */
+.plan-old-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+  padding: 8px;
+  border-radius: 12px;
+  background: var(--ui-surface);
+  opacity: 0.7;
+}
+.old-thumb {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: 8px;
+}
+.old-copy {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.old-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+}
+.old-note {
+  font-size: 11px;
+  color: var(--ui-muted);
+}
+.plan-version {
+  position: absolute;
+  right: 12px;
+  top: 10px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--ui-on-brand);
+  background: var(--ui-primary);
+}
+.plan-edit {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 36px;
+  font-size: 13px;
+  color: var(--ui-muted);
+}
+.plan-price {
+  font-weight: 400;
+  opacity: 0.75;
+}
+.gen-done {
+  position: relative;
+  overflow: hidden;
+}
+.gen-bg.full {
+  opacity: 1;
+}
+.gen-play {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 24px;
+  height: 24px;
+  margin: -12px 0 0 -12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #00000080;
+}
+.gen-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.gen-state {
+  padding: 1px 8px;
+  border-radius: 9px;
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--ui-primary);
+  background: #00c8dc1f;
+}
+.gen-state.succeeded {
+  color: #4fd18b;
+  background: #4fd18b1f;
+}
+.gen-state.failed {
+  color: #ff8a94;
+  background: #ff4d5a1f;
+}
+.typing-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.typing-note {
+  font-size: 12px;
+  color: var(--ui-muted);
+}
+.example-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 20px;
+}
+.example-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  font-size: 13px;
+  background: var(--ui-surface);
+}

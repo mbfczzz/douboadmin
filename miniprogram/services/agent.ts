@@ -2,7 +2,7 @@ import { request } from "./request";
 import type { Row, Asset } from "./types";
 
 // Agent 创作项目: a skill, its materials, and the jobs carrying its id.
-export interface Skill { id: string; name: string; hint: string; icon: string; kind: string; starter: string }
+export interface Skill { id: string; name: string; hint: string; icon: string; kind: string; starter: string; examples?: string[]; followUps?: string[] }
 export interface Session { title: string; skill: string; assets: string[]; activeAt: string }
 export type SessionRow = { id: string; version: number; data: Session };
 export type SessionDetail = SessionRow & { assets: Row<Asset>[] };

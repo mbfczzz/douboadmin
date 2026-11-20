@@ -21,6 +21,13 @@ export const projectView = (row: SessionRow, skills: Skill[]): ProjectView => ({
   when: row.data.activeAt ? date(row.data.activeAt) : "",
 });
 
+const FOLLOW_UPS = ["缩短到 10 秒", "换一个开场", "改成横屏"];
+// What an open project suggests: first messages when empty, quick revisions after.
+const skillHints = (skills: Skill[], id?: string) => {
+  const skill = skills.find((s) => s.id === id);
+  return { examples: skill?.examples || [], followUps: skill?.followUps?.length ? skill.followUps : FOLLOW_UPS };
+};
+
 type Page = {
   data: { session: SessionDetail | null; skills: Skill[]; projects: ProjectView[]; projectsOpen: boolean; prompt: string; materials: ReturnType<typeof editorAsset>[] };
   destroyed: boolean;
@@ -41,13 +48,13 @@ export const sessionHandlers = {
     await this.showSession(id || "");
   },
   async showSession(this: Page, id: string) {
-    if (!id) return this.setData({ session: null, materials: [], thumbs: {} });
+    if (!id) return this.setData({ session: null, materials: [], thumbs: {}, ...skillHints([]) });
     const detail = await sessionDetail(id);
     if (this.destroyed) return;
     remember(id);
     // Re-signed links for the same files would reload every picture on each visit.
     const shown = new Map(this.data.materials.map((m) => [m.id, m]));
-    this.setData({ session: detail, ...materialData(detail.assets.map((a) => shown.get(a.id) || editorAsset(a))) });
+    this.setData({ session: detail, ...skillHints(this.data.skills, detail.data.skill), ...materialData(detail.assets.map((a) => shown.get(a.id) || editorAsset(a))) });
   },
   openProjects(this: Page) {
     this.setData({ projectsOpen: true });
@@ -76,7 +83,7 @@ export const sessionHandlers = {
       const row = await createSession(skill.id);
       if (this.destroyed) return;
       remember(row.id);
-      this.setData({ session: { ...row, assets: [] }, materials: [], thumbs: {}, prompt: skill.starter || this.data.prompt, focus: true });
+      this.setData({ session: { ...row, assets: [] }, materials: [], thumbs: {}, ...skillHints(this.data.skills, skill.id), prompt: skill.starter || this.data.prompt, focus: true });
       this.setData({ projects: [projectView(row, this.data.skills), ...this.data.projects] });
       await this.load(true);
     } catch (err) {

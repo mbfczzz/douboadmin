@@ -45,7 +45,9 @@ export function chatMessages(jobs: Job[]): ChatMessage[] {
         },
       ];
     });
-  // Only the newest plan can generate; earlier ones were revised.
+  // Plans are numbered 第 1 版, 第 2 版…; only the newest can generate.
+  let version = 0;
+  for (let i = 0; i < messages.length; i++) if (messages[i].plan) messages[i] = { ...messages[i], version: ++version };
   for (let i = messages.length - 1; i >= 0; i--)
     if (messages[i].plan) {
       messages[i] = { ...messages[i], latest: true };

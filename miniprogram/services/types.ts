@@ -21,6 +21,7 @@ export interface ChatMessage {
   gen?: { status: string; progress: number; kind: string; thumb: string; error: string }; // a generation from a plan
   latest?: boolean; // the newest plan, the one that can still generate
   copy?: string; // what 复制 puts on the clipboard
+  version?: number; // 第 N 版 among the conversation's plans
 }
 export interface JobPage {
   items: Job[];
