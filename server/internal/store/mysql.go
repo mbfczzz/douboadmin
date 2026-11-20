@@ -181,13 +181,17 @@ func (m *MySQL) Jobs(ctx context.Context, user string) ([]core.Job, error) {
 	}
 	return out, rows.Err()
 }
-func (m *MySQL) Claim(ctx context.Context) (core.Job, error) {
+func (m *MySQL) Claim(ctx context.Context) (core.Job, error) { return m.claim(ctx, "") }
+func (m *MySQL) ClaimChat(ctx context.Context) (core.Job, error) {
+	return m.claim(ctx, " AND input->>'$.kind'='chat'")
+}
+func (m *MySQL) claim(ctx context.Context, only string) (core.Job, error) {
 	tx, err := m.db.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelReadCommitted})
 	if err != nil {
 		return core.Job{}, err
 	}
 	defer tx.Rollback()
-	j, err := scanJob(tx.QueryRowContext(ctx, `SELECT `+jobCols+` FROM jobs WHERE status='queued' OR (status='running' AND lease_until<=UTC_TIMESTAMP(6)) ORDER BY updated_at LIMIT 1 FOR UPDATE SKIP LOCKED`))
+	j, err := scanJob(tx.QueryRowContext(ctx, `SELECT `+jobCols+` FROM jobs WHERE (status='queued' OR (status='running' AND lease_until<=UTC_TIMESTAMP(6)))`+only+` ORDER BY updated_at LIMIT 1 FOR UPDATE SKIP LOCKED`))
 	if err != nil {
 		return j, err
 	}

@@ -25,6 +25,8 @@ type Store interface {
 	JobModels(context.Context, string) ([]core.JobModelUse, error)
 	Job(context.Context, string) (core.Job, error)
 	Claim(context.Context) (core.Job, error)
+	// ClaimChat claims only chat turns (for workers kept free for replies).
+	ClaimChat(context.Context) (core.Job, error)
 	Hold(context.Context, core.Job, int, bool) error
 	Progress(context.Context, core.Job, int, string) error
 	Finish(context.Context, core.Job, string, string) error

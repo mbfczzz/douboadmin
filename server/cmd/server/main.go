@@ -139,6 +139,10 @@ func run() error {
 			for range min(envDays("WORKER_CONCURRENCY", 8), 32) {
 				go worker.Run(ctx, s, generator)
 			}
+			// Chat replies get workers of their own (CHAT_WORKERS, default 2).
+			for range min(envDays("CHAT_WORKERS", 2), 8) {
+				go worker.RunChat(ctx, s, generator)
+			}
 		}
 	}
 	if command == "worker" {

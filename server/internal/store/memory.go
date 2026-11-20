@@ -119,12 +119,19 @@ func (m *Memory) Job(_ context.Context, id string) (core.Job, error) {
 	}
 	return copyJob(j), nil
 }
-func (m *Memory) Claim(_ context.Context) (core.Job, error) {
+func (m *Memory) Claim(ctx context.Context) (core.Job, error) { return m.claim(false) }
+func (m *Memory) ClaimChat(ctx context.Context) (core.Job, error) {
+	return m.claim(true)
+}
+func (m *Memory) claim(chatOnly bool) (core.Job, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	now := time.Now().UTC()
 	var candidate *core.Job
 	for _, j := range m.jobs {
+		if chatOnly && j.Input.Kind != "chat" {
+			continue
+		}
 		if j.Status == "queued" || (j.Status == "running" && !j.LeaseUntil.After(now)) {
 			if candidate == nil || j.UpdatedAt.Before(candidate.UpdatedAt) {
 				c := j
