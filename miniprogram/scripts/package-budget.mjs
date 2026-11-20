@@ -241,7 +241,8 @@ console.log(
 // A forgotten login no longer reads as 创作助手暂未开放 (check it, sign in again, read config afresh): 986,522 B. 963 -> 964 KiB.
 // Videos a message names go along (watched by 视频理解); 正在观看视频… while waiting: 987,174 B. 964 -> 965 KiB.
 // 编辑 a sent question and ask again; 复制 chips for a reply's key lines: 992,383 B. 965 -> 970 KiB.
-const budget = 970 * 1024;
+// Review fixes: send waits for uploads; 编辑-restored files stay in the project; uploads stay in their project; edit and streams reset on switch; tighter copy chips; composer spacing: 994,594 B. 970 -> 972 KiB.
+const budget = 972 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

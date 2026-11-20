@@ -84,7 +84,7 @@ func ensure(ctx context.Context, s store.Store, p Provider, key, id string, orde
 		if json.Unmarshal(row.Data, &m) != nil {
 			return nil
 		}
-		repriced := reprice(&m.Settings, p)
+		repriced := reprice(&m.Settings, p, id)
 		// An earlier default, never edited, follows the current tagline.
 		if d := m.Settings.Description; d != tagline(p, id) && (d == p.Label+" 对话模型，按 token 计费" || d == "反应快、价格低，写脚本和方案的首选，也能看图" || d == "推理更强，适合复杂策划；不能看图") {
 			m.Settings.Description, repriced = tagline(p, id), true
@@ -125,11 +125,15 @@ func ensure(ctx context.Context, s store.Store, p Provider, key, id string, orde
 
 // reprice moves a model still at the previous default prices (and without
 // cache or peak prices, added later) to the current defaults.
-func reprice(s *core.ModelSettings, p Provider) bool {
+func reprice(s *core.ModelSettings, p Provider, id string) bool {
 	if p.Previous == [2]float64{} || s.TokenInputPrice != p.Previous[0] || s.TokenOutputPrice != p.Previous[1] || s.TokenCachedPrice != nil || s.PeakPriceRate != 0 {
 		return false
 	}
-	s.TokenInputPrice, s.TokenOutputPrice, s.TokenCachedPrice, s.PeakPriceRate = p.InputPrice, p.OutputPrice, p.CachedPrice, p.PeakRate
+	in, hit, out := p.InputPrice, p.CachedPrice, p.OutputPrice
+	if price, ok := p.ModelPrices[id]; ok { // e.g. deepseek-v4-pro costs more than Flash
+		in, hit, out = price[0], &price[1], price[2]
+	}
+	s.TokenInputPrice, s.TokenOutputPrice, s.TokenCachedPrice, s.PeakPriceRate = in, out, hit, p.PeakRate
 	return true
 }
 

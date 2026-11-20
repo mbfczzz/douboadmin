@@ -105,6 +105,7 @@ export const streamHandlers = {
   stream(this: Page) {
     const job = this.history.find(writing);
     if (!job || this.streamId === job.id) return;
+    if (this.streamId) this.stopStream(); // another reply's stream and typing end first
     // Just ended but the list still says writing: let the regular check catch up.
     if (this.streamEnded?.id === job.id && Date.now() - this.streamEnded.at < 2000) return;
     const id = (this.streamId = job.id);

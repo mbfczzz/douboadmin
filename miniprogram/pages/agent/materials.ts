@@ -8,7 +8,8 @@ import { MAX_MATERIALS, MAX_ATTACHED } from "./constants";
 // with that message only. Each upload is also kept on the project, numbered
 // per type (图片3, 视频1), so plans can still say @图片3 and generate with it.
 type Material = ReturnType<typeof editorAsset>;
-export type Labelled = Material & { label: string };
+// fresh: uploaded for the message being written (not yet named by any plan).
+export type Labelled = Material & { label: string; fresh?: boolean };
 type Page = {
   data: { session: SessionDetail | null; materials: Labelled[]; attached: Labelled[]; uploading: boolean; skills: unknown[] };
   destroyed: boolean;
@@ -36,14 +37,14 @@ export function materialData(list: Material[]) {
   return { materials, thumbs, files };
 }
 
-async function save(page: Page, materials: Material[]) {
-  const s = page.data.session!;
+// Saves the project's materials; attached is the draft's attachments after
+// the save (set only once it succeeded, with their labels).
+async function save(page: Page, s: SessionDetail, materials: Material[], attached: Labelled[]) {
   const row = await updateSession(s.id, s.version, { assets: materials.map((m) => m.id) });
-  if (page.destroyed) return;
+  if (page.destroyed || page.data.session?.id !== s.id) return; // switched project meanwhile
   const data = materialData(materials);
-  // The attached ones keep their (new) labels.
-  const attached = data.materials.filter((m) => page.data.attached.some((a) => a.id === m.id));
-  page.setData({ session: { ...page.data.session!, version: row.version, data: row.data }, ...data, attached });
+  const labelled = attached.map((a) => ({ ...data.materials.find((m) => m.id === a.id)!, fresh: a.fresh })).filter((m) => m.id);
+  page.setData({ session: { ...page.data.session!, version: row.version, data: row.data }, ...data, attached: labelled });
   void page.priceLatest?.(); // a material can change which model the plan uses
 }
 
@@ -61,23 +62,29 @@ export const materialHandlers = {
         this.setData({ session: { ...row, assets: [] } });
         void this.load?.(true);
       }
-      const added = [];
+      const session = this.data.session!; // the project the files are for, even if the user switches
+      const added: Material[] = [];
       for (const file of files) added.push(editorAsset(await upload(file.path)));
-      this.setData({ attached: [...this.data.attached, ...added.map((m) => ({ ...m, label: "" }))] });
-      await save(this, [...this.data.materials, ...added]);
+      if (this.destroyed || this.data.session?.id !== session.id) return;
+      const attached = [...this.data.attached, ...added.map((m) => ({ ...m, label: "", fresh: true }))];
+      await save(this, this.data.session!, [...this.data.materials, ...added], attached);
     } catch (err) {
       if (!cancelled(err) && !this.destroyed) error(err);
     } finally {
       if (!this.destroyed) this.setData({ uploading: false });
     }
   },
-  // × on an attachment: it leaves the message, and the project (it was only
-  // just added, so no plan names it yet).
+  // × on an attachment: it leaves the message. One uploaded for this draft
+  // also leaves the project; one an edited question brought back stays
+  // (plans may name it, and removing it would renumber the rest).
   async detach(this: Page, e: WechatMiniprogram.TouchEvent) {
     const id = e.currentTarget.dataset.id as string;
-    this.setData({ attached: this.data.attached.filter((m) => m.id !== id) });
+    const gone = this.data.attached.find((m) => m.id === id);
+    const attached = this.data.attached.filter((m) => m.id !== id);
+    this.setData({ attached });
+    if (!gone?.fresh || !this.data.session) return;
     try {
-      await save(this, this.data.materials.filter((m) => m.id !== id));
+      await save(this, this.data.session, this.data.materials.filter((m) => m.id !== id), attached);
     } catch (err) {
       error(err);
     }

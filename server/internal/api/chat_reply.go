@@ -85,7 +85,10 @@ func (a *Server) jobStream(w http.ResponseWriter, r *http.Request) {
 		}
 		runes := []rune(text)
 		switch {
-		case first || len(runes) < sent:
+		case len(runes) < sent && !first:
+			// The turn just ended (its partial is cleared before the job's
+			// status flips): keep what was shown; "done" follows.
+		case first:
 			if !send(map[string]string{"text": text}) {
 				return
 			}

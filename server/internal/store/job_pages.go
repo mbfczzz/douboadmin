@@ -26,6 +26,8 @@ func jobWhere(q core.JobQuery, referenceID string) (string, []any) {
 	}
 	if q.Session != "" {
 		add(" AND j.input->>'$.sessionId'=?", q.Session)
+	} else if q.NoSession {
+		w += " AND COALESCE(j.input->>'$.sessionId','')=''"
 	}
 	if q.Works {
 		w += " AND j.status='succeeded' AND j.input->>'$.kind' IN ('image','video','mix')"
@@ -95,7 +97,7 @@ func jobMatches(j core.Job, q core.JobQuery, deleted bool) bool {
 	if q.Kind != "" && j.Input.Kind != q.Kind && !(q.Kind == "video" && j.Input.Kind == "mix") {
 		return false
 	}
-	if q.Session != "" && j.Input.SessionID != q.Session {
+	if q.Session != "" && j.Input.SessionID != q.Session || q.NoSession && j.Input.SessionID != "" {
 		return false
 	}
 	if q.Works && (j.Status != "succeeded" || !core.IsWork(j.Input.Kind)) {

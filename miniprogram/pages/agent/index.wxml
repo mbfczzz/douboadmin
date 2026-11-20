@@ -17,7 +17,7 @@
       <image wx:if="{{session&&art[session.data.skill]}}" class="skill-hero" src="{{art[session.data.skill]}}" mode="aspectFill" />
       <view wx:else class="agent-mark"><image class="gl gl-30" src="/assets/glyphs/ai-pen-dark.png" /></view>
       <text class="headline">{{session?'说说这次想做什么':'选一个开始创作'}}</text>
-      <text class="intro-sub">{{!session?'素材、方案、修改和生成，都在这一段对话里完成。':session.data.skill==='product'?'先在下方添加商品图，再说说想突出的卖点':session.data.skill==='store'?'先在下方添加门头、环境、菜品照片，再说说店名和特色':session.data.skill==='image'?'说说想要的画面，也可以在下方添加参考图':'说说你的想法，素材可以随时在下方添加'}}</text>
+      <text class="intro-sub">{{!session?'素材、方案、修改和生成，都在这一段对话里完成。':session.data.skill==='product'?'点输入框里的「图片」加商品图，再说说想突出的卖点':session.data.skill==='store'?'点输入框里的「图片」加门头、环境、菜品照片，再说说店名和特色':session.data.skill==='image'?'说说想要的画面，也可以点「图片」加参考图':'说说你的想法，图片和视频点输入框里的按钮添加'}}</text>
     </view>
     <view wx:if="{{session&&examples.length}}" class="example-list">
       <view wx:for="{{examples}}" wx:key="*this" class="example-chip" data-value="{{item}}" bindtap="quick" hover-class="starter-pressed" aria-role="button"><image class="gl gl-14" src="/assets/glyphs/rewrite.png" /><text>{{item}}</text></view>
@@ -57,7 +57,7 @@
       <t-icon name="edit" size="14" /><text class="edit-note">编辑后重新发送，原来这一问不再算进对话</text>
       <text class="edit-cancel" bindtap="cancelEdit" aria-role="button">取消</text>
     </view>
-    <view class="composer-tools">
+    <view wx:if="{{session}}" class="composer-tools">
       <view class="attach-btn" data-kind="image" bindtap="addMaterial" hover-class="icon-pressed" aria-role="button" aria-label="添加图片"><image class="gl gl-16" src="/assets/glyphs/image-muted.png" /><text>图片</text></view>
       <view class="attach-btn" data-kind="video" bindtap="addMaterial" hover-class="icon-pressed" aria-role="button" aria-label="添加视频"><image class="gl gl-16" src="/assets/glyphs/video-muted.png" /><text>视频</text></view>
     </view>

@@ -119,3 +119,21 @@ func TestChatStreamIsFlushedThroughTheServer(t *testing.T) {
 		t.Fatal("the first event was held back")
 	}
 }
+
+// The turn ending (partial cleared before the status flips) never blanks
+// what the stream already sent.
+func TestChatStreamNeverSendsAShorterText(t *testing.T) {
+	a, one, _ := setup(t)
+	j := runningChat(t, a)
+	v := partial(t, a, j.ID, "镜头1：推门", 0)
+	go func() {
+		time.Sleep(150 * time.Millisecond)
+		_, _ = a.Store.Put(t.Context(), "executions", core.Record{ID: j.ID, Data: core.Data(provider.Execution{Phase: "succeeded", Result: "镜头1：推门"})}, v)
+		time.Sleep(600 * time.Millisecond)
+		_ = a.Store.Finish(t.Context(), j, "镜头1：推门", "")
+	}()
+	body := call(a, "GET", "/api/jobs/"+j.ID+"/stream", one, "", nil).Body.String()
+	if strings.Contains(body, `{"text":""}`) || !strings.Contains(body, `"done":true`) {
+		t.Fatal(body)
+	}
+}

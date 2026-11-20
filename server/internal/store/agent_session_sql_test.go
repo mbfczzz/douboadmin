@@ -39,4 +39,14 @@ func TestMySQLAgentSessionsAndSessionJobFilter(t *testing.T) {
 	if err != nil || page.Total != 1 || page.Items[0].Input.SessionID != row.ID {
 		t.Fatal(page, err)
 	}
+	// Chat outside projects: only jobs without a project.
+	page, err = m.JobPage(ctx, core.JobQuery{User: "sql-user", NoSession: true, Page: 1, Size: 100})
+	if err != nil || page.Total == 0 {
+		t.Fatal(page, err)
+	}
+	for _, j := range page.Items {
+		if j.Input.SessionID != "" {
+			t.Fatal("a project job in plain chat", j.Input.SessionID)
+		}
+	}
 }

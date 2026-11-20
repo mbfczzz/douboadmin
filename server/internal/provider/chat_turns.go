@@ -19,7 +19,7 @@ const (
 // recentTurns reads up to 30 turns before j in its project, oldest first,
 // from one page of the user's chat jobs rather than all of their jobs.
 func recentTurns(ctx context.Context, s store.Store, j core.Job) ([]core.Job, error) {
-	q := core.JobQuery{User: j.UserID, Kind: "chat", Status: "succeeded", Session: j.Input.SessionID, Page: 1, Size: 30}
+	q := core.JobQuery{User: j.UserID, Kind: "chat", Status: "succeeded", Session: j.Input.SessionID, NoSession: j.Input.SessionID == "", Page: 1, Size: 30}
 	page, err := s.JobPage(ctx, q)
 	if err != nil {
 		return nil, err
@@ -34,7 +34,6 @@ func recentTurns(ctx context.Context, s store.Store, j core.Job) ([]core.Job, er
 		if revised[old.ID] {
 			continue
 		}
-		// Session "" matches every project in the query; keep the exact one.
 		if old.Input.SessionID == j.Input.SessionID && old.ID != j.ID && old.CreatedAt.Before(j.CreatedAt) {
 			out = append(out, old)
 		}
@@ -51,6 +50,11 @@ var planTitle = regexp.MustCompile(`"title"\s*:\s*"([^"]{0,40})"`)
 // capped at keep characters, and the oldest turns go first when all of them
 // together are still too long.
 func trimTurns(turns []core.Job, keep int) []core.Job {
+	return trim(turns, keep, historyRunes)
+}
+
+// trim does the work; budget 0 keeps every turn (each still capped).
+func trim(turns []core.Job, keep, budget int) []core.Job {
 	newest := -1
 	for i := len(turns) - 1; i >= 0 && newest < 0; i-- {
 		if hasPlan(turns[i].Result) {
@@ -80,7 +84,7 @@ func trimTurns(turns []core.Job, keep int) []core.Job {
 		out[i] = t
 		total += len([]rune(t.Input.Prompt)) + len([]rune(t.Result))
 	}
-	for len(out) > 1 && total > historyRunes {
+	for budget > 0 && len(out) > 1 && total > budget {
 		total -= len([]rune(out[0].Input.Prompt)) + len([]rune(out[0].Result))
 		out = out[1:]
 	}

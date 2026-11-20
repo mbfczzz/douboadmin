@@ -10,7 +10,7 @@
       </block>
     </view>
     <view class="bubble"><text selectable>{{item.text}}</text></view>
-    <view wx:if="{{!busy}}" class="ask-actions">
+    <view class="ask-actions">
       <view class="ask-act" data-text="{{item.text}}" bindtap="copy" hover-class="icon-pressed" aria-role="button" aria-label="复制"><image class="gl gl-14" src="/assets/glyphs/copy-muted.png" /></view>
       <view class="ask-act" data-id="{{item.id}}" bindtap="editMessage" hover-class="icon-pressed" aria-role="button" aria-label="编辑后重新发送"><t-icon name="edit" size="14" /><text>编辑</text></view>
     </view>

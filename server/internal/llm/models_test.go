@@ -70,11 +70,17 @@ func TestOldDefaultPricesMoveToTheCurrentOnes(t *testing.T) {
 	hit := 0.0002
 	p := Provider{InputPrice: 0.01, OutputPrice: 0.04, CachedPrice: &hit, PeakRate: 2, Previous: [2]float64{0.02, 0.03}}
 	old := core.ModelSettings{TokenInputPrice: 0.02, TokenOutputPrice: 0.03}
-	if !reprice(&old, p) || old.TokenInputPrice != 0.01 || *old.TokenCachedPrice != hit || old.PeakPriceRate != 2 {
+	if !reprice(&old, p, "deepseek-flash") || old.TokenInputPrice != 0.01 || *old.TokenCachedPrice != hit || old.PeakPriceRate != 2 {
 		t.Fatal(old)
 	}
+	// A Pro row still at the old defaults gets Pro prices, not Flash ones.
+	p.ModelPrices = map[string][3]float64{"deepseek-v4-pro": {0.045, 0.0015, 0.135}}
+	pro := core.ModelSettings{TokenInputPrice: 0.02, TokenOutputPrice: 0.03}
+	if !reprice(&pro, p, "deepseek-v4-pro") || pro.TokenInputPrice != 0.045 || *pro.TokenCachedPrice != 0.0015 || pro.TokenOutputPrice != 0.135 {
+		t.Fatal(pro)
+	}
 	mine := core.ModelSettings{TokenInputPrice: 0.05, TokenOutputPrice: 0.03}
-	if reprice(&mine, p) || mine.TokenInputPrice != 0.05 {
+	if reprice(&mine, p, "deepseek-flash") || mine.TokenInputPrice != 0.05 {
 		t.Fatal(mine)
 	}
 }

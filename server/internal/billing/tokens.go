@@ -9,8 +9,9 @@ import (
 // Upper bounds for one chat turn. A token is at most one character for the
 // Chinese and English the models see, so characters bound tokens from above.
 const (
-	// provider.trimTurns: earlier turns (8000) + system prompt and summary (3000).
-	chatHistoryChars = 8000 + 3000
+	// provider.trimTurns: earlier turns (8000) + system prompt and summary
+	// (3000) + slack for labels and the summary instruction (1000).
+	chatHistoryChars = 8000 + 3000 + 1000
 	// provider.summarize: an earlier summary and the turns folded into it, and
 	// the summary it writes (charged at the output price).
 	SummaryInputChars = 12000

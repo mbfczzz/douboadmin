@@ -5,6 +5,7 @@ import "time"
 type JobQuery struct {
 	User, Search, Status, Kind, Deleted      string
 	Session                                  string // Agent project
+	NoSession                                bool   // only jobs outside projects
 	Works, ExcludeChat, ExcludeImport, Ended bool
 	Page, Size                               int
 }

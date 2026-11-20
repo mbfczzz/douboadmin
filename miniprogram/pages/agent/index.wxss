@@ -27,6 +27,7 @@
 }
 .agent-hello {
   flex: 1;
+  padding: 24px 0 20px; /* kept when the screen is tight */
   display: flex;
   flex-direction: column;
   align-items: center;

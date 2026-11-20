@@ -30,7 +30,9 @@ func (p *DirectChat) videoNote(ctx context.Context, j core.Job, assetID, url str
 	if !p.Vision.Ready() {
 		return "【" + label + "】视频理解未配置，看不到这个视频的画面；请如实告诉用户，并请用户描述视频内容。"
 	}
+	var version int64 // an older note (another 视频理解 model) is replaced
 	if row, err := p.Store.Get(ctx, "video_notes", assetID); err == nil {
+		version = row.Version
 		var n videoNote
 		if json.Unmarshal(row.Data, &n) == nil && n.Model == p.Vision.Model && n.Note != "" {
 			return "【" + label + " 的内容（由视频理解模型观看后整理）】\n" + n.Note
@@ -63,7 +65,7 @@ func (p *DirectChat) videoNote(ctx context.Context, j core.Job, assetID, url str
 		note = note[:videoNoteRunes]
 	}
 	n := videoNote{Model: p.Vision.Model, Note: string(note), At: time.Now().UTC()}
-	_, _ = p.Store.Put(ctx, "video_notes", core.Record{ID: assetID, Owner: j.UserID, Data: core.Data(n)}, 0)
+	_, _ = p.Store.Put(ctx, "video_notes", core.Record{ID: assetID, Owner: j.UserID, Data: core.Data(n)}, version)
 	_ = p.Store.Progress(ctx, j, 10, "")
 	return "【" + label + " 的内容（由视频理解模型观看后整理）】\n" + n.Note
 }

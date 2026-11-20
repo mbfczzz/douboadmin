@@ -30,7 +30,7 @@ const skillHints = (skills: Skill[], id?: string) => {
 };
 
 type Page = {
-  data: { session: SessionDetail | null; skills: Skill[]; projects: ProjectView[]; projectsOpen: boolean; prompt: string; materials: ReturnType<typeof editorAsset>[]; attached: { id: string }[]; messages: ChatMessage[] };
+  data: { session: SessionDetail | null; skills: Skill[]; projects: ProjectView[]; projectsOpen: boolean; prompt: string; materials: ReturnType<typeof editorAsset>[]; attached: { id: string; fresh?: boolean }[]; messages: ChatMessage[] };
   destroyed: boolean;
   setData(data: Record<string, unknown>): void;
   load(force?: boolean): Promise<void>;
@@ -58,16 +58,17 @@ export const sessionHandlers = {
     await this.showSession(id || "");
   },
   async showSession(this: Page, id: string) {
-    if (!id) return this.setData({ session: null, materials: [], thumbs: {}, files: {}, attached: [], ...skillHints([]) });
+    if (!id) return this.setData({ session: null, materials: [], thumbs: {}, files: {}, attached: [], editing: "", ...skillHints([]) });
     const detail = await sessionDetail(id);
     if (this.destroyed) return;
     remember(id);
     // Re-signed links for the same files would reload every picture on each visit.
     const shown = new Map(this.data.materials.map((m) => [m.id, m]));
     const data = materialData(detail.assets.map((a) => shown.get(a.id) || editorAsset(a)));
-    // Attachments being written stay only within their own project.
-    const attached = data.materials.filter((m) => this.data.attached.some((a) => a.id === m.id));
-    this.setData({ session: detail, ...skillHints(this.data.skills, detail.data.skill), ...data, attached });
+    // A draft (its attachments, an edit) stays only within its own project.
+    const same = this.data.session?.id === detail.id;
+    const attached = same ? this.data.attached.flatMap((a) => data.materials.filter((m) => m.id === a.id).map((m) => ({ ...m, fresh: a.fresh }))) : [];
+    this.setData({ session: detail, ...skillHints(this.data.skills, detail.data.skill), ...data, attached, ...(same ? {} : { editing: "" }) });
   },
   // 新建: back to the skill picker; the current project stays in the list.
   async startOver(this: Page) {

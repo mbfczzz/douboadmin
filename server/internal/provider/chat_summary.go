@@ -32,7 +32,7 @@ func foldTurns(ctx context.Context, s store.Store, session *sessionRow, turns []
 		return after
 	}
 	fold, rest := after[:len(after)-keepAfterFold], after[len(after)-keepAfterFold:]
-	text, err := summarize(ctx, summaryInput(session.Summary, trimTurns(fold, 2000)))
+	text, err := summarize(ctx, summaryInput(session.Summary, trim(fold, 2000, 0)))
 	if err != nil || strings.TrimSpace(text) == "" {
 		slog.Warn("chat summary failed", "session", session.row.ID, "error", err)
 		return after // sent as before; trimmed to the latest turns

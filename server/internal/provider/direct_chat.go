@@ -109,6 +109,9 @@ func (p *DirectChat) Generate(ctx context.Context, j core.Job) (string, error) {
 		_ = p.checkpoint(ctx, &row, e)
 		return "", err
 	}
+	if stopAsked(ctx, p.Store, j.ID) { // stopped while the summary or a video was being read
+		return fail(errors.New("已停止回复"))
+	}
 	call, cancel := context.WithCancel(ctx)
 	defer cancel()
 	Turns.start(j.ID, cancel)
@@ -146,11 +149,36 @@ func (p *DirectChat) Generate(ctx context.Context, j core.Job) (string, error) {
 	return text, nil
 }
 
-// estimateTokens bounds a request's tokens by its characters (and 1500 per
-// picture) when the provider reported none.
+// estimateTokens bounds a request's tokens by the characters of its
+// messages (and 1500 per picture) when the provider reported none: content
+// only, not JSON keys or picture addresses.
 func estimateTokens(messages []any) int {
-	raw, _ := json.Marshal(messages)
-	return len([]rune(string(raw))) + 1500*strings.Count(string(raw), `"image_url"`)
+	n := 0
+	var count func(v any)
+	count = func(v any) {
+		switch x := v.(type) {
+		case string:
+			n += len([]rune(x))
+		case []any:
+			for _, part := range x {
+				count(part)
+			}
+		case map[string]string:
+			if x["type"] != "image_url" {
+				count(x["content"])
+				count(x["text"])
+			}
+		case map[string]any:
+			if x["type"] == "image_url" {
+				n += 1500
+				return
+			}
+			count(x["content"])
+			count(x["text"])
+		}
+	}
+	count(messages)
+	return n
 }
 
 func (p *DirectChat) messages(ctx context.Context, j core.Job, m core.Model, summarize Summarizer) ([]any, error) {

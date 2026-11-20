@@ -162,7 +162,7 @@ test("a project named after its skill takes its first plan's title; an attachmen
   assert.equal(puts.length, 1);
   // × on a fresh attachment takes it off the message and the project.
   const labelled = h.service("../pages/agent/materials").materialLabels(materials);
-  page.setData({ materials: labelled, attached: [labelled[2]] });
+  page.setData({ materials: labelled, attached: [{ ...labelled[2], fresh: true }] });
   await page.detach({ currentTarget: { dataset: { id: "p2" } } });
   assert.deepEqual(plain(puts[1].assets), ["p1", "v1"]);
   assert.equal(page.data.attached.length, 0);

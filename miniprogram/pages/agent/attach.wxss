@@ -1,10 +1,11 @@
 /* The composer: 图片 / 视频 at its top left, this message's attachments
    under them, the text and 发送 below; and the attachments a sent message
    carried. */
+/* Tools, attachments and text share one left edge (12px in). */
 .composer-tools {
   display: flex;
   gap: 6px;
-  padding: 2px 4px 4px;
+  padding: 2px 6px 4px;
 }
 .composer-row {
   display: flex;
@@ -12,7 +13,7 @@
   gap: 8px;
 }
 .composer-row textarea {
-  margin-left: 8px;
+  margin-left: 6px;
 }
 .attach-btn {
   display: flex;
@@ -29,7 +30,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  padding: 4px 4px 8px;
+  padding: 4px 6px 8px;
 }
 .attach {
   position: relative;
@@ -103,7 +104,7 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  margin-top: 4px;
+  margin: 4px -8px 0 0; /* the last label lines up with the bubble's edge */
 }
 .ask-act {
   display: flex;
@@ -118,7 +119,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 8px 8px;
+  padding: 4px 6px 8px;
   font-size: 12px;
   color: var(--ui-brand);
 }
@@ -131,7 +132,8 @@
 }
 .edit-cancel {
   flex-shrink: 0;
-  padding: 2px 4px;
+  margin: -8px -6px -8px 0;
+  padding: 8px 10px;
   color: var(--ui-muted);
 }
 /* 可复制: key lines of a reply, each copied with one tap. */

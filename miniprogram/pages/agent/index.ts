@@ -131,6 +131,7 @@ Page({
       error(new Error("上一条还在回复，稍等一下再发"));
       return;
     }
+    if (this.data.uploading) return error(new Error("素材还在上传，稍等一下再发"));
     const attached = this.data.attached as Labelled[];
     // Attachments alone ask for an analysis of them.
     const submitted = this.data.prompt.trim() ? this.data.prompt : attached.length ? (attached.some((m) => !m.isImage) ? "分析这个视频" : "分析这张图片") : "";
