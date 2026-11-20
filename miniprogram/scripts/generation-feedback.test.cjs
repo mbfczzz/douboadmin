@@ -66,7 +66,8 @@ for (const [prompt, expected, emptyModels] of [
     page.setData({ prompt });
     await page.send();
     assert.deepEqual(messages, [expected]);
-    assert.equal(requests, emptyModels ? 1 : 0);
+    // No chat model: the login is checked and the config read afresh first.
+    assert.equal(requests, emptyModels ? 3 : 0);
     assert.equal(page.data.prompt, prompt);
     assert.equal(page.data.busy, false);
     assert.deepEqual(h.nav, []);

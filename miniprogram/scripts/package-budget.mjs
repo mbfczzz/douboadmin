@@ -238,7 +238,8 @@ console.log(
 // One chat-model picker (DeepSeek Flash by default) for Agent and AI写剧本: 978,518 B. 955 -> 956 KiB.
 // Model picker: pill with the model's logo, and a sheet of model cards (description, picture / text tags, price per turn): 983,698 B. 956 -> 961 KiB.
 // Smooth streaming (replies typed out evenly; only the reply being written re-renders): 985,603 B. 961 -> 963 KiB.
-const budget = 963 * 1024;
+// A forgotten login no longer reads as 创作助手暂未开放 (check it, sign in again, read config afresh): 986,522 B. 963 -> 964 KiB.
+const budget = 964 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

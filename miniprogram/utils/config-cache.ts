@@ -6,6 +6,10 @@ import type { Config } from "../services/types";
 // request, a fresh copy is reused for two minutes, and the last copy is kept
 // in storage so a cold start can paint before the network answers.
 const FRESH_MS = 2 * 60 * 1000;
+// A copy without models is the guest one (signed out, or a login the server
+// no longer knows): kept only briefly and never stored, so signing in again
+// shows the models at once.
+const GUEST_MS = 10 * 1000;
 const STORE = "config-cache";
 type Entry = { owner: string; at: number; value: Config };
 let memory: Entry | undefined;
@@ -29,13 +33,13 @@ export function peekConfig(maxAgeMs = Infinity): Config | undefined {
 
 export function loadConfig(force = false): Promise<Config> {
   const owner = sessionUserId();
-  if (!force && memory?.owner === owner && Date.now() - memory.at < FRESH_MS) return Promise.resolve(memory.value);
+  if (!force && memory?.owner === owner && Date.now() - memory.at < (memory.value.models?.length ? FRESH_MS : GUEST_MS)) return Promise.resolve(memory.value);
   if (!force && pending?.owner === owner) return pending.promise;
   const promise = request<Config>("/config", "GET", undefined, undefined, false).then((value) => {
     if (sessionUserId() === owner) {
       memory = { owner, at: Date.now(), value };
       try {
-        wx.setStorageSync(STORE, memory);
+        if (value.models?.length) wx.setStorageSync(STORE, memory);
       } catch {
         // storage full: memory copy still serves this session
       }

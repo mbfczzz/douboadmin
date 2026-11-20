@@ -106,3 +106,35 @@ test("the model picker shows each model's logo, description and price, and close
   assert.equal(page.data.sees, false);
   assert.equal(page.data.priceHint, "每轮最多约 0.74 积分");
 });
+
+test("a login the server forgot (guest config, no models) signs in again and sends", async () => {
+  const h = harness();
+  await h.api.signIn();
+  let valid = false;
+  const sent = [];
+  const original = h.wx.request;
+  h.wx.reLaunch = () => {};
+  h.wx.request = (o) => {
+    const path = o.url.split("/api")[1];
+    if (path.startsWith("/auth")) return original(o);
+    const ok = (data, statusCode = 200) => queueMicrotask(() => o.success({ statusCode, data }));
+    if (path === "/config") return ok({ models: valid ? [{ id: "fl", key: "deepseek:deepseek-flash", name: "DeepSeek", kind: "chat" }] : [], activationRequired: true });
+    if (path === "/me/identity") return valid ? ok({ id: "u" }) : ok({ error: "未登录" }, 401);
+    if (path === "/jobs" && o.method === "POST") return sent.push(o.data), ok({ id: "c1", status: "queued", input: o.data }, 202);
+    return ok({ items: [], total: 0 });
+  };
+  // The login page: signing in makes the session valid again.
+  h.wx.navigateTo = (o) => {
+    if (!String(o.url).startsWith("/pages/login")) return;
+    valid = true;
+    void h.api.signIn().then(() => h.api.completeLogin());
+  };
+  const page = h.page("agent");
+  await page.loadModels();
+  assert.equal(page.data.current, null); // the guest config has no models
+  page.setData({ session: { id: "s1", version: 1, data: { title: "店", skill: "general", assets: [] }, assets: [] }, prompt: "写个开场" });
+  await page.send();
+  assert.equal(sent.length, 1, "sent after signing in again");
+  assert.equal(sent[0].model, "fl");
+  page.onUnload();
+});

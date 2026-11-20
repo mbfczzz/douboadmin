@@ -1,5 +1,4 @@
 import { showArt } from "../../utils/ui-art";
-import { loadConfig } from "../../utils/config-cache";
 import { error, tab, submitInput, openPage } from "../../utils/api";
 import type { Job } from "../../services/types";
 import type { ChatMessage } from "../../utils/chat";
@@ -11,7 +10,7 @@ import type { ProjectView } from "./session";
 import { agentModels } from "./models";
 import type { ChatModel } from "./models";
 import { historyHandlers } from "./history";
-import { chatOf } from "../../services/chat-model";
+import { chatModel } from "../../services/chat-model";
 import { streamHandlers } from "./stream";
 import { sessionHandlers, projectView } from "./session";
 import { materialHandlers, materialLabels } from "./materials";
@@ -140,10 +139,9 @@ Page({
     this.setData({ busy: true });
     const submitted = this.data.prompt;
     try {
-      const config = await loadConfig();
+      const model = await chatModel(this.data.model);
       if (this.destroyed) return;
-      const model = config.models.find((m) => m.kind === "chat" && m.id === this.data.model) || chatOf(config);
-      if (!model) throw new Error("创作助手暂未开放，请稍后再试");
+      if (model.id !== this.data.model) void this.loadModels(); // signed in again: show the picker
       if (!this.data.session) {
         const row = await createSession("general"); // a first message starts a free project
         this.setData({ session: { ...row, assets: [] }, projects: [projectView(row, this.data.skills), ...this.data.projects] });
