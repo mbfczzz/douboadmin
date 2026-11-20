@@ -24,8 +24,16 @@ func recentTurns(ctx context.Context, s store.Store, j core.Job) ([]core.Job, er
 	if err != nil {
 		return nil, err
 	}
+	// Turns the user edited and asked again are left out.
+	revised := map[string]bool{j.Input.Revises: true}
+	for _, old := range page.Items {
+		revised[old.Input.Revises] = true
+	}
 	out := []core.Job{}
 	for _, old := range page.Items {
+		if revised[old.ID] {
+			continue
+		}
 		// Session "" matches every project in the query; keep the exact one.
 		if old.Input.SessionID == j.Input.SessionID && old.ID != j.ID && old.CreatedAt.Before(j.CreatedAt) {
 			out = append(out, old)

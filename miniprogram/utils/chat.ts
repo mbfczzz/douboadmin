@@ -1,5 +1,6 @@
 import type { Job, ChatMessage } from "../services/types";
 import { splitReply, planText, plainReply } from "./agent-plan";
+import { keyContent } from "./snippets";
 export type { ChatMessage } from "../services/types";
 
 // "镜头 1（0–3 秒）：…" or "【开场】…" become a highlighted label and its text,
@@ -50,6 +51,7 @@ export function chatMessages(jobs: Job[], partials: Record<string, string> = {})
       const failed = job.status === "failed";
       const split = job.status === "succeeded" ? splitReply(job.result || "") : { text: failed ? job.error || "回复失败" : waiting(job) };
       const reply = { ...split, text: job.status === "succeeded" ? plainReply(split.text) : split.text };
+      const snippets = job.status === "succeeded" ? keyContent(split.text) : [];
       return [
         asked,
         {
@@ -61,6 +63,7 @@ export function chatMessages(jobs: Job[], partials: Record<string, string> = {})
           lines: job.status === "succeeded" ? scriptLines(reply.text) : [],
           pending: job.status === "queued" || job.status === "running",
           copy: [reply.text, reply.plan && planText(reply.plan)].filter(Boolean).join("\n\n"),
+          ...(snippets.length ? { snippets } : {}),
           ...(reply.plan ? { plan: reply.plan } : {}),
           ...("broken" in reply && reply.broken ? { broken: true } : {}),
         },

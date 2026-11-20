@@ -60,6 +60,9 @@ type JobInput struct {
 	ParentID          string   `json:"parentId,omitempty"`
 	// SessionID ties chat and generation jobs to an Agent project.
 	SessionID string `json:"sessionId,omitempty"`
+	// Revises is the earlier chat turn this one edits and asks again; that
+	// turn leaves the conversation the model sees.
+	Revises string `json:"revises,omitempty"`
 }
 type Job struct {
 	ActivationRequired  bool      `json:"-"`

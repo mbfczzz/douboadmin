@@ -10,6 +10,10 @@
       </block>
     </view>
     <view class="bubble"><text selectable>{{item.text}}</text></view>
+    <view wx:if="{{!busy}}" class="ask-actions">
+      <view class="ask-act" data-text="{{item.text}}" bindtap="copy" hover-class="icon-pressed" aria-role="button" aria-label="复制"><image class="gl gl-14" src="/assets/glyphs/copy-muted.png" /></view>
+      <view class="ask-act" data-id="{{item.id}}" bindtap="editMessage" hover-class="icon-pressed" aria-role="button" aria-label="编辑后重新发送"><t-icon name="edit" size="14" /><text>编辑</text></view>
+    </view>
   </block>
   <view wx:elif="{{item.role==='gen'}}" class="gen-card" data-id="{{item.text}}" bindtap="openGen" hover-class="starter-pressed" aria-role="button">
     <view wx:if="{{item.gen.thumb}}" class="gen-thumb gen-done">
@@ -44,6 +48,12 @@
       <view wx:if="{{item.planning}}" class="plan-writing">
         <image wx:if="{{art[session.data.skill]}}" class="plan-writing-bg" src="{{art[session.data.skill]}}" mode="aspectFill" />
         <view class="typing" aria-label="正在整理方案"><view /><view /><view /></view><text>正在整理方案…</text>
+      </view>
+      <view wx:if="{{item.snippets.length}}" class="snippets">
+        <view wx:for="{{item.snippets}}" wx:for-item="snip" wx:for-index="k" wx:key="k" class="snippet" data-text="{{snip}}" bindtap="copy" hover-class="starter-pressed" aria-role="button" aria-label="{{'复制：'+snip}}">
+          <text class="snippet-text">{{snip}}</text>
+          <view class="snippet-copy"><image class="gl gl-14" src="/assets/glyphs/copy-muted.png" /><text>复制</text></view>
+        </view>
       </view>
       <view wx:if="{{item.broken}}" class="plan-broken">
         <t-icon name="error-circle" size="14" /><text>方案没有完整输出</text>

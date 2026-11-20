@@ -10,6 +10,7 @@ import type { ProjectView } from "./session";
 import { agentModels } from "./models";
 import type { ChatModel } from "./models";
 import { historyHandlers } from "./history";
+import { editHandlers } from "./edit";
 import { chatModel } from "../../services/chat-model";
 import { streamHandlers } from "./stream";
 import { sessionHandlers, projectView } from "./session";
@@ -23,6 +24,7 @@ import { generateHandlers } from "./generate";
 Page({
   ...agentModels,
   ...historyHandlers,
+  ...editHandlers,
   ...streamHandlers,
   ...sessionHandlers,
   ...materialHandlers,
@@ -61,6 +63,7 @@ Page({
     planPrice: { id: "", text: "" }, // the newest plan's points, on 确认生成
     expanded: {} as Record<string, boolean>, // earlier plans opened to their full card
     attached: [] as Labelled[], // go with the message being written only
+    editing: "", // the sent turn being edited (its job id), asked again on send
     files: {} as Record<string, { label: string; thumb: string; video: boolean }>, // sent messages' attachments
     art: {} as Record<string, string>,
   },
@@ -150,7 +153,7 @@ Page({
       if (attached.some((m) => m.isImage) && !(model.referenceTypes || []).includes("image")) throw new Error(`${model.name} 看不到图片，请换成能识图的模型`);
       const assets = attached.map((m) => m.id);
       const job = await submitInput(
-        { kind: "chat", model: model.id, prompt: submitted, resolution: "", ratio: "", duration: 0, assets, sessionId: this.data.session!.id },
+        { kind: "chat", model: model.id, prompt: submitted, resolution: "", ratio: "", duration: 0, assets, sessionId: this.data.session!.id, ...(this.data.editing ? { revises: this.data.editing } : {}) },
         "agent",
         true, // the composer already shows the price; no dialog per message
       );
@@ -163,7 +166,7 @@ Page({
         replying: true,
       });
       if (this.data.prompt === submitted || !this.data.prompt.trim()) this.setData({ prompt: "" });
-      this.setData({ attached: [] }); // the next message starts without them
+      this.setData({ attached: [], editing: "" }); // the next message starts without them
       await this.load(true);
       this.poll();
     } catch (e) {

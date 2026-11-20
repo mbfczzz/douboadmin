@@ -178,6 +178,9 @@ func (a *Server) checkSession(ctx context.Context, user string, in *core.JobInpu
 	if in.Kind == "chat" {
 		in.Purpose = "agent"
 	}
+	if len(in.Revises) > 64 || in.Revises != "" && in.Kind != "chat" {
+		return fmt.Errorf("要修改的消息无效")
+	}
 	return nil
 }
 

@@ -53,6 +53,10 @@
     <text wx:elif="{{priceHint}}" class="bar-note">{{priceHint}}</text>
   </view>
   <view class="composer {{focus?'is-focus':''}} {{models.length>1||priceHint||session?'has-bar':''}}">
+    <view wx:if="{{editing}}" class="edit-bar">
+      <t-icon name="edit" size="14" /><text class="edit-note">编辑后重新发送，原来这一问不再算进对话</text>
+      <text class="edit-cancel" bindtap="cancelEdit" aria-role="button">取消</text>
+    </view>
     <view wx:if="{{attached.length||uploading}}" class="attach-row">
       <view wx:for="{{attached}}" wx:key="id" class="attach" data-id="{{item.id}}" bindtap="previewMaterial" aria-role="button" aria-label="{{'查看'+item.label}}">
         <image class="attach-photo" src="{{item.isImage?item.data.url:item.data.thumbnailUrl}}" mode="aspectFill" />

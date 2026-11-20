@@ -81,3 +81,17 @@ func TestSummaryOnlyWhenNeeded(t *testing.T) {
 		t.Fatal(calls, len(msgs))
 	}
 }
+
+// A turn the user edited and asked again leaves the conversation, for the
+// new turn and every later one.
+func TestEditedTurnsLeaveTheConversation(t *testing.T) {
+	s, now := projectTurns(t, 3)
+	page, _ := s.JobPage(t.Context(), core.JobQuery{User: "u", Kind: "chat", Session: "proj", Page: 1, Size: 10})
+	second := page.Items[1] // 第2问 (newest first)
+	now.Input.Revises = second.ID
+	msgs := history(t, s, now, nil)
+	raw, _ := json.Marshal(msgs)
+	if strings.Contains(string(raw), "第2问") || !strings.Contains(string(raw), "第3问") {
+		t.Fatal(string(raw))
+	}
+}

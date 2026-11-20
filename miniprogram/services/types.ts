@@ -15,6 +15,7 @@ export interface ChatMessage {
   text: string;
   pending?: boolean;
   files?: string[]; // a user message's attachments (asset ids)
+  snippets?: string[]; // parts of a reply worth copying alone (utils/snippets)
   streaming?: boolean; // a reply shown as it is written
   planning?: boolean; // …and it has started writing a plan
   failed?: boolean;
@@ -79,6 +80,7 @@ export interface Asset {
 }
 export interface Input {
   sessionId?: string; // Agent 创作项目
+  revises?: string; // a chat turn this one edits and asks again
 	imageSlots?: number[];
   expectedCostUnits?: number;
   voice?: string;
