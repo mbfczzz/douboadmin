@@ -64,7 +64,8 @@
   "usingComponents": {
     "nav-bar": "/components/nav-bar/index",
     "ui-dialog": "/components/ui-dialog/index",
-    "t-icon": "tdesign-miniprogram/icon/icon"
+    "t-icon": "tdesign-miniprogram/icon/icon",
+    "page-loading": "/components/page-loading/index"
   },
   "style": "v2",
   "lazyCodeLoading": "requiredComponents",

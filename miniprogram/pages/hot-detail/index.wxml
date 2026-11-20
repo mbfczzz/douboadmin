@@ -2,7 +2,7 @@
   class="subpage"
   ><view wx:if="{{loadError}}" class="biz-error" bindtap="load"
     >{{loadError}} · 点击重试</view
-  ><view wx:if="{{loading&&!video}}" class="skel-list" aria-label="正在加载视频"><view class="skeleton skel-hero" /><view class="skeleton skel-card" /></view
+  ><page-loading show="{{loading&&!video}}" text="正在读取视频详情…"></page-loading
   ><block wx:if="{{video}}"
     ><view class="biz-card"
       ><video

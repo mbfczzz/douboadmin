@@ -1,0 +1,77 @@
+@import "../../styles/glyphs.wxss";
+.page-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  min-height: 60vh;
+  opacity: 0;
+  animation: pl-in 200ms ease 250ms both; /* a fast load never shows it */
+}
+/* hint: a small floating line that takes no room, so the skeleton under
+   it does not move; it appears only once loading has been slow. */
+.page-loading.hint {
+  position: fixed;
+  left: 50%;
+  bottom: calc(96px + env(safe-area-inset-bottom));
+  z-index: 20;
+  min-height: 0;
+  padding: 8px 14px;
+  border-radius: 16px;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  pointer-events: none;
+  background: #000000c0;
+  animation: pl-in 300ms ease 4s both; /* the whole pill, not just its text */
+}
+.page-loading.hint .pl-slow {
+  color: var(--ui-text, #f5f5f7);
+  opacity: 1;
+  animation: none;
+}
+.pl-ring {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+  background: #ffffff;
+}
+.pl-arc {
+  position: absolute;
+  left: -6px;
+  top: -6px;
+  width: 60px;
+  height: 60px;
+  box-sizing: border-box;
+  border-radius: 50%;
+  border: 2px solid #ffffff1a;
+  border-top-color: var(--ui-primary, #00c8dc);
+  animation: pl-spin 900ms linear infinite;
+}
+.pl-mark {
+  position: relative;
+}
+.pl-text {
+  font-size: 14px;
+  color: var(--ui-text, #f5f5f7);
+}
+.pl-slow {
+  font-size: 12px;
+  color: var(--ui-muted, #8a8f98);
+  opacity: 0;
+  animation: pl-in 300ms ease 4s both;
+}
+@keyframes pl-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes pl-spin {
+  to { transform: rotate(360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pl-arc { animation-duration: 2400ms; }
+}

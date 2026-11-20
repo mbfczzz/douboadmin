@@ -225,7 +225,10 @@ console.log(
 // fold the materials strip into one line: 958,405 B. 934 -> 937 KiB.
 // Agent: 新建 back to the skill picker beside 切换, empty project list hint:
 // 959,678 B. 937 -> 938 KiB.
-const budget = 938 * 1024;
+// Loading page for slow first loads (components/page-loading) on eight
+// detail pages and hot video search, slow-network line on list skeletons:
+// 962,454 B. 938 -> 940 KiB.
+const budget = 940 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

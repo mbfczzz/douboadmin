@@ -8,7 +8,7 @@
       ><view wx:if="{{unread}}" class="read-all" bindtap="readAll" hover-class="row-pressed"><image class="gl gl-14" src="/assets/glyphs/check-double-brand.png" /><text>全部已读</text></view></view
     ><view wx:if="{{loadError}}" class="biz-error" bindtap="load"
       >{{loadError}} · 重试</view
-    ><view wx:if="{{loading&&!items.length}}" class="skel-list" aria-label="正在加载消息"><view wx:for="{{[1,2,3]}}" wx:key="*this" class="skel-row"><view class="skeleton skel-dot" /><view class="skel-lines"><view class="skeleton skel-a" /><view class="skeleton skel-b" /></view></view></view
+    ><view wx:if="{{loading&&!items.length}}" class="skel-list" aria-label="正在加载消息"><page-loading show mode="hint" /><view wx:for="{{[1,2,3]}}" wx:key="*this" class="skel-row"><view class="skeleton skel-dot" /><view class="skel-lines"><view class="skeleton skel-a" /><view class="skeleton skel-b" /></view></view></view
     ><view wx:elif="{{!loadError&&!items.length}}" class="biz-empty"
       ><image class="empty-photo" src="/assets/photos/empty-notice.jpg" mode="aspectFill" aria-hidden="true" /><text>暂时没有新消息</text></view
     ><block wx:for="{{items}}" wx:key="id"><text wx:if="{{item.showDay}}" class="notice-day">{{item.day}}</text><view

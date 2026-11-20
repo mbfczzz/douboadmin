@@ -1,7 +1,7 @@
 <nav-bar title="作品分享" /><view class="subpage"
   ><view wx:if="{{loadError}}" class="biz-error" bindtap="load"
     >{{loadError}}</view
-  ><view wx:if="{{loading&&!work}}" class="skeleton skel-card" aria-label="正在加载作品" /><view wx:if="{{work}}" class="biz-card"
+  ><page-loading show="{{loading&&!work}}" text="正在打开作品…" /><view wx:if="{{work}}" class="biz-card"
     ><text class="biz-heading">{{work.title}}</text
     ><result-gallery
       wx:if="{{work.kind==='image'}}"

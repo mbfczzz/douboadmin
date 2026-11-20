@@ -1,11 +1,6 @@
 <nav-bar title="模板详情" back />
 <view class="subpage detail">
-  <view wx:if="{{loading}}" aria-label="正在加载模板详情">
-    <view class="hero skeleton" />
-    <view class="skeleton skeleton-line" />
-    <view class="skeleton skeleton-line short" />
-    <view class="slot-row loading-row"><view class="slot skeleton" /><view class="slot skeleton" /></view>
-  </view>
+  <page-loading wx:if="{{loading}}" show text="正在打开模板…" />
   <view wx:elif="{{loadError}}" class="empty">
     <image class="empty-photo" src="/assets/photos/empty-{{loadError==='模板已下架'?'frame':'offline'}}.jpg" mode="aspectFill" aria-hidden="true" />
     <text>{{loadError}}</text>

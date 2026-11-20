@@ -85,6 +85,7 @@
       ><view><image class="gl gl-14" src="/assets/glyphs/favorites-muted.png" /><text>{{item.likesText}}</text></view
       ><view><image class="gl gl-14" src="/assets/glyphs/play-muted.png" /><text>{{item.viewsText}}</text></view></view
     ></view
+  ><page-loading show="{{searched&&loading&&!items.length}}" text="正在搜索抖音视频…"></page-loading
   ><view
     wx:if="{{searched&&!loading&&!items.length&&!loadError}}"
     class="biz-empty"

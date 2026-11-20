@@ -1,0 +1,7 @@
+<view wx:if="{{show}}" class="page-loading {{mode}}" aria-label="{{text}}">
+  <block wx:if="{{mode!=='hint'}}">
+    <view class="pl-ring"><view class="pl-arc" /><image class="gl gl-20 pl-mark" src="/assets/glyphs/ai-pen-dark.png" /></view>
+    <text class="pl-text">{{text}}</text>
+  </block>
+  <text class="pl-slow">网络有点慢，还在努力加载…</text>
+</view>

@@ -67,7 +67,7 @@
           <view class="video-same" data-id="{{item.id}}" catchtap="remake" hover-class="tool-pressed" hover-stop-propagation aria-role="button">做同款</view>
         </view>
       </view>
-      <block wx:if="{{loading&&!videos.length}}">
+      <block wx:if="{{loading&&!videos.length}}"><page-loading show mode="hint" />
         <view wx:for="{{[0,1,2,3]}}" wx:key="*this" class="studio-video"><view class="video-cover skeleton" /></view>
       </block>
     </view>

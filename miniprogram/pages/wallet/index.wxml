@@ -7,7 +7,7 @@
     <view wx:if="{{error}}" class="biz-error" bindtap="load"
       >{{error}} · 点击重试</view
     >
-    <view wx:if="{{loading&&!info}}" class="skel-list" aria-label="正在读取积分余额"><view class="skeleton skel-hero" /><view class="skeleton skel-card" /></view>
+    <view wx:if="{{loading&&!info}}" class="skel-list" aria-label="正在读取积分余额"><page-loading show mode="hint" /><view class="skeleton skel-hero" /><view class="skeleton skel-card" /></view>
     <view wx:if="{{pendingOrderId}}" class="biz-card payment-status">
       <view class="payment-head"><view class="payment-ring"><t-loading wx:if="{{!paymentWaiting}}" size="20px" /><image wx:else class="gl gl-20" src="/assets/glyphs/clock-brand.png" /></view><text class="biz-heading">{{paymentWaiting?'到账待确认':'正在确认到账'}}</text></view>
       <text class="biz-note" aria-role="status">{{paymentNotice}}</text>
@@ -83,7 +83,7 @@
     >
     <view class="biz-card"
       ><text class="biz-heading">积分明细</text
-      ><view wx:if="{{loading&&!ledger.length}}" class="skel-list" aria-label="正在读取积分明细"><view wx:for="{{[1,2,3]}}" wx:key="*this" class="skel-row"><view class="skeleton skel-dot" /><view class="skel-lines"><view class="skeleton skel-a" /><view class="skeleton skel-b" /></view></view></view>
+      ><view wx:if="{{loading&&!ledger.length}}" class="skel-list" aria-label="正在读取积分明细"><page-loading show mode="hint" /><view wx:for="{{[1,2,3]}}" wx:key="*this" class="skel-row"><view class="skeleton skel-dot" /><view class="skel-lines"><view class="skeleton skel-a" /><view class="skeleton skel-b" /></view></view></view>
       <view wx:elif="{{!error&&!ledger.length}}" class="biz-empty"><image class="empty-photo" src="/assets/photos/empty-orders.jpg" mode="aspectFill" aria-hidden="true" /><text>暂无积分变动，充值或创作后会记录在这里</text></view
       ><block wx:for="{{ledger}}" wx:key="id"
         ><text wx:if="{{item.showDay}}" class="ledger-day">{{item.day}}</text

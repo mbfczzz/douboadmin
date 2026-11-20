@@ -3,7 +3,7 @@
   <page-backdrop name="bgOrders" />
   <view wx:if="{{needsLogin}}" class="biz-empty"><image class="empty-photo" src="/assets/photos/empty-login.jpg" mode="aspectFill" aria-hidden="true" /><text>登录后查看充值订单</text><text class="empty-link" bindtap="signIn">去登录 ›</text></view>
   <view wx:if="{{loadError}}" class="biz-error" bindtap="load">{{loadError}} · 重试</view>
-  <view wx:if="{{loading&&!needsLogin&&!rows.length}}" class="skel-list" aria-label="正在加载充值订单"><view wx:for="{{[1,2]}}" wx:key="*this" class="skeleton skel-card" /></view>
+  <view wx:if="{{loading&&!needsLogin&&!rows.length}}" class="skel-list" aria-label="正在加载充值订单"><page-loading show mode="hint" /><view wx:for="{{[1,2]}}" wx:key="*this" class="skeleton skel-card" /></view>
   <view wx:elif="{{!needsLogin&&!loadError&&!rows.length}}" class="biz-empty"><image class="empty-photo" src="/assets/photos/empty-orders.jpg" mode="aspectFill" aria-hidden="true" /><text>暂无充值订单</text><text class="empty-link" bindtap="wallet">去充值 ›</text></view>
   <view wx:if="{{rows.length}}" class="orders-top">
     <view><text class="orders-total">{{total}}</text><text class="orders-label"> 笔充值订单</text></view>

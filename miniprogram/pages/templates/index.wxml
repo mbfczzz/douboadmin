@@ -29,7 +29,7 @@
       </view>
     </scroll-view>
   </view>
-  <view wx:if="{{loading&&!items.length}}" class="waterfall" aria-label="正在加载模板">
+  <view wx:if="{{loading&&!items.length}}" class="waterfall" aria-label="正在加载模板"><page-loading show mode="hint" />
     <view class="column" wx:for="{{[0,1]}}" wx:for-item="column" wx:key="*this">
       <view class="template" wx:for="{{[0,1]}}" wx:key="*this">
         <view class="cover skeleton" style="padding-top:{{column===item?'150%':'110%'}}" />

@@ -1,7 +1,7 @@
 <nav-bar title="一键复刻" back />
 <view class="subpage remake-page">
   <view wx:if="{{loadError}}" class="biz-error" bindtap="load">{{loadError}} · 点击重试</view>
-  <view wx:if="{{loading&&!video}}" class="skel-list" aria-label="正在读取视频"><view class="skeleton skel-hero" /></view>
+  <page-loading wx:if="{{loading&&!video}}" show text="正在读取抖音视频…" />
   <view wx:elif="{{video}}" class="biz-card remake-source">
     <video wx:if="{{video.url}}" class="biz-preview" src="{{video.url}}" poster="{{video.cover}}" controls />
     <image wx:else class="biz-image" src="{{video.cover}}" mode="aspectFill" />
@@ -33,6 +33,6 @@
     </view>
   </view>
   <text wx:if="{{video&&tooLong}}" class="biz-note remake-long">原视频 {{seconds}} 秒，多数模型的参考视频限 15 秒左右，较长时可能无法直接生成</text>
-  <button class="biz-action remake-start" loading="{{busy}}" disabled="{{!video||busy||picturing}}" bindtap="start">开始复刻</button>
+  <button wx:if="{{!(loading&&!video)}}" class="biz-action remake-start" loading="{{busy}}" disabled="{{!video||busy||picturing}}" bindtap="start">开始复刻</button>
   <text wx:if="{{video}}" class="biz-note remake-note">开始后在任务队列里准备原视频和拆解，可以先离开</text>
 </view>
