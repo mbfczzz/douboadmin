@@ -1,36 +1,61 @@
-/* Model chips and the per-turn price, just above the composer. */
+/* The model pill and the per-turn price above the composer, and the
+   model picker sheet. */
 .agent-bar {
   display: flex;
   align-items: center;
   gap: 10px;
   flex-shrink: 0;
-  margin: 16px 16px 0;
-  min-height: 28px;
+  margin: 10px 16px 0;
+  min-height: 30px;
 }
-.model-strip {
+.bar-gap {
   flex: 1;
-  width: 0;
-  white-space: nowrap;
 }
-.model-row {
+.model-pill {
   display: inline-flex;
+  align-items: center;
   gap: 6px;
+  max-width: 62%;
+  height: 30px;
+  padding: 0 10px 0 4px;
+  border-radius: 15px;
+  font-size: 13px;
+  color: var(--ui-text);
+  background: linear-gradient(135deg, #00c8dc1f, #ffffff0a 60%);
+  box-shadow: inset 0 0 0 1px #00c8dc40;
 }
-.model-chip {
-  max-width: 96px;
+.model-pill.solo {
+  padding-right: 12px;
+}
+.model-dot {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: #0f0f11;
+  background: #fff;
+}
+.model-dot-img {
+  width: 16px;
+  height: 16px;
+}
+.model-name {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  padding: 4px 10px;
-  border-radius: 14px;
-  font-size: 12px;
-  line-height: 18px;
-  color: var(--ui-muted);
-  background: var(--ui-surface);
+  font-weight: 600;
 }
-.model-chip.on {
-  color: var(--ui-text);
-  box-shadow: inset 0 0 0 1px #ffffff47;
+.model-tag {
+  flex-shrink: 0;
+  padding: 0 5px;
+  border-radius: 6px;
+  font-size: 10px;
+  line-height: 16px;
+  color: #3ee0a0;
+  background: #3ee0a01f;
 }
 .bar-note {
   flex-shrink: 0;
@@ -43,6 +68,105 @@
 .composer.has-bar {
   margin-top: 10px;
 }
-.agent-bar {
-  margin-top: 10px;
+/* Picker: one card per model. */
+.model-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+.model-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 14px;
+  background: var(--ui-field);
+}
+.model-card.on {
+  background: linear-gradient(135deg, #00c8dc24, var(--ui-field) 70%);
+  box-shadow: inset 0 0 0 1.5px #00c8dccc;
+}
+.model-logo {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  color: #0f0f11;
+  background: #fff;
+}
+.model-logo-img {
+  width: 30px;
+  height: 30px;
+}
+.model-copy {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.model-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.model-title-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 15px;
+  font-weight: 600;
+}
+.model-badge {
+  flex-shrink: 0;
+  padding: 0 6px;
+  border-radius: 6px;
+  font-size: 10px;
+  line-height: 17px;
+  color: var(--ui-muted);
+  background: #ffffff14;
+}
+.model-badge.see {
+  color: #3ee0a0;
+  background: #3ee0a01f;
+}
+.model-badge.rec {
+  color: #ffb347;
+  background: #ffb3471f;
+}
+.model-desc {
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--ui-muted);
+}
+.model-price {
+  font-size: 11px;
+  color: var(--ui-brand);
+}
+.model-check {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: #0f0f11;
+  box-shadow: inset 0 0 0 1.5px #ffffff33;
+}
+.model-card.on .model-check {
+  background: var(--ui-brand);
+  box-shadow: none;
+}
+.models-note {
+  display: block;
+  margin-top: 12px;
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--ui-muted);
+  text-align: center;
 }

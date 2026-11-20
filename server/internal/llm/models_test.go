@@ -84,6 +84,7 @@ func TestDeepSeekModelsGetTheirOwnPicturesAndPrices(t *testing.T) {
 	s := store.NewMemory()
 	hit := 0.0002
 	p := Provider{Name: "deepseek", Label: "DeepSeek", Client: &Client{BaseURL: "https://api.deepseek.com", Key: "k"}, Models: []string{"deepseek-flash", "deepseek-v4-pro"},
+		Names:      map[string]string{"deepseek-v4-pro": "DeepSeek Pro"},
 		InputPrice: 0.01, CachedPrice: &hit, OutputPrice: 0.04, PeakRate: 2, Seeing: []string{"flash"},
 		ModelPrices: map[string][3]float64{"deepseek-v4-pro": {0.045, 0.0015, 0.135}}}
 	if err := EnsureModels(t.Context(), s, []Provider{p}); err != nil {
@@ -94,7 +95,26 @@ func TestDeepSeekModelsGetTheirOwnPicturesAndPrices(t *testing.T) {
 	if len(flash.ReferenceTypes) != 1 || flash.Settings.TokenOutputPrice != 0.04 || *flash.Settings.TokenCachedPrice != hit {
 		t.Fatal(flash)
 	}
-	if len(pro.ReferenceTypes) != 0 || pro.Settings.TokenInputPrice != 0.045 || *pro.Settings.TokenCachedPrice != 0.0015 || pro.Settings.TokenOutputPrice != 0.135 || pro.Settings.PeakPriceRate != 2 {
+	if pro.Name != "DeepSeek Pro" || flash.Name != "DeepSeek" || len(pro.ReferenceTypes) != 0 || pro.Settings.TokenInputPrice != 0.045 || *pro.Settings.TokenCachedPrice != 0.0015 || pro.Settings.TokenOutputPrice != 0.135 || pro.Settings.PeakPriceRate != 2 {
 		t.Fatal(pro)
+	}
+}
+
+// The picker's description: the model's own tagline, else the provider's;
+// an old generic description moves to it, an operator's stays.
+func TestTaglinesDescribeModels(t *testing.T) {
+	p := Provider{Name: "ark", Label: "豆包", Tagline: map[string]string{"": "看图细致"}}
+	if tagline(p, "doubao-x") != "看图细致" || tagline(Provider{Label: "DeepSeek"}, "x") != "DeepSeek 对话模型" {
+		t.Fatal("tagline")
+	}
+	s := store.NewMemory()
+	old := core.Model{ID: ModelID("ark", "d"), Key: "ark:d", Kind: "chat", Settings: core.ModelSettings{Description: "豆包 对话模型，按 token 计费"}}
+	_, _ = s.Put(t.Context(), "models", core.Record{ID: old.ID, Data: core.Data(old)}, 0)
+	p.Client, p.Models = &Client{}, []string{"d"}
+	if err := EnsureModels(t.Context(), s, []Provider{p}); err != nil {
+		t.Fatal(err)
+	}
+	if m, _ := model(t, s, old.ID); m.Settings.Description != "看图细致" {
+		t.Fatal(m.Settings.Description)
 	}
 }

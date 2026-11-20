@@ -26,6 +26,11 @@ type Provider struct {
 	// Seeing lists the model IDs (substrings) that read pictures, when not
 	// all of the provider's models do.
 	Seeing []string
+	// Names gives a listed model ID a readable name ("DeepSeek Pro").
+	Names map[string]string
+	// Tagline describes a model in the Agent's model picker (by model ID,
+	// "" for the provider's others).
+	Tagline map[string]string
 	// Previous are the input / output defaults before these: a model still
 	// at them (never repriced by an operator) moves to the new prices.
 	Previous [2]float64
@@ -80,6 +85,10 @@ func ensure(ctx context.Context, s store.Store, p Provider, key, id string, orde
 			return nil
 		}
 		repriced := reprice(&m.Settings, p)
+		// An earlier default, never edited, follows the current tagline.
+		if d := m.Settings.Description; d != tagline(p, id) && (d == p.Label+" 对话模型，按 token 计费" || d == "反应快、价格低，写脚本和方案的首选，也能看图" || d == "推理更强，适合复杂策划；不能看图") {
+			m.Settings.Description, repriced = tagline(p, id), true
+		}
 		if m.Available == ready && !repriced {
 			return nil
 		}
@@ -95,7 +104,7 @@ func ensure(ctx context.Context, s store.Store, p Provider, key, id string, orde
 		refs = []string{"image"}
 	}
 	settings := core.ModelSettings{TokenInputPrice: p.InputPrice, TokenOutputPrice: p.OutputPrice, TokenCachedPrice: p.CachedPrice, PeakPriceRate: p.PeakRate,
-		Description: p.Label + " 对话模型，按 token 计费"}
+		Description: tagline(p, id)}
 	if price, ok := p.ModelPrices[id]; ok {
 		hit := price[1]
 		settings.TokenInputPrice, settings.TokenCachedPrice, settings.TokenOutputPrice = price[0], &hit, price[2]
@@ -103,6 +112,9 @@ func ensure(ctx context.Context, s store.Store, p Provider, key, id string, orde
 	name := p.Label // the first listed model carries just the provider's name
 	if order > 0 {
 		name += " " + id
+	}
+	if n := p.Names[id]; n != "" {
+		name = n
 	}
 	m := core.Model{ID: modelID, Key: key, Name: name, Kind: "chat", Published: true, Available: ready, Sort: 900 + order,
 		ReferenceTypes: refs, Resolutions: []string{}, Ratios: []string{}, Durations: []int{}, Qualities: []string{}, Modes: []string{}, Operations: []string{},
@@ -132,4 +144,14 @@ func sees(p Provider, id string) bool {
 		}
 	}
 	return false
+}
+
+func tagline(p Provider, id string) string {
+	if t, ok := p.Tagline[id]; ok {
+		return t
+	}
+	if t := p.Tagline[""]; t != "" {
+		return t
+	}
+	return p.Label + " 对话模型"
 }

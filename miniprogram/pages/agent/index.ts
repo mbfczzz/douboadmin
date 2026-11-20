@@ -31,6 +31,9 @@ Page({
     navBottom: 68,
     models: [] as ChatModel[], // chat models to talk to (DeepSeek / 豆包)
     model: "",
+    current: null as ChatModel | null, // shown on the model pill
+    modelsOpen: false,
+    modelPrices: {} as Record<string, string>, // per model, filled when the picker opens
     sees: false, // the chosen chat model reads pictures
     priceHint: "",
     session: null as SessionDetail | null,

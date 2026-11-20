@@ -78,3 +78,31 @@ test("without a saved choice the Agent starts on DeepSeek Flash", async () => {
   await page.loadModels();
   assert.equal(page.data.model, "db");
 });
+
+test("the model picker shows each model's logo, description and price, and closes on a pick", async () => {
+  const h = harness();
+  await h.api.signIn();
+  h.wx.request = (o) => {
+    const path = o.url.split("/api")[1];
+    const ok = (data) => o.success({ statusCode: 200, data });
+    if (path === "/config")
+      return ok({ models: [
+        { id: "fl", key: "deepseek:deepseek-flash", name: "DeepSeek", kind: "chat", icon: "/i/ds.png", referenceTypes: ["image"], settings: { description: "反应快" } },
+        { id: "pro", key: "deepseek:deepseek-v4-pro", name: "DeepSeek Pro", kind: "chat", icon: "/i/ds.png", referenceTypes: [] },
+      ] });
+    if (path === "/jobs/quote") return ok({ units: o.data.model === "fl" ? 17 : 74, billingEnabled: true, perToken: true });
+    return ok({});
+  };
+  const page = h.page("agent");
+  await page.loadModels();
+  assert.deepEqual(JSON.parse(JSON.stringify(page.data.current)), { id: "fl", name: "DeepSeek", key: "deepseek:deepseek-flash", icon: "/i/ds.png", desc: "反应快", rec: true, sees: true });
+  page.openModels();
+  assert.equal(page.data.modelsOpen, true);
+  for (let i = 0; i < 20 && !page.data.modelPrices.pro; i++) await new Promise((r) => setTimeout(r, 10));
+  assert.deepEqual(JSON.parse(JSON.stringify(page.data.modelPrices)), { fl: "每轮最多约 0.17 积分", pro: "每轮最多约 0.74 积分" });
+  await page.pickModel({ currentTarget: { dataset: { id: "pro" } } });
+  assert.equal(page.data.modelsOpen, false);
+  assert.equal(page.data.current.name, "DeepSeek Pro");
+  assert.equal(page.data.sees, false);
+  assert.equal(page.data.priceHint, "每轮最多约 0.74 积分");
+});

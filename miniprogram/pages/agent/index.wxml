@@ -59,12 +59,14 @@
     </view>
   </scroll-view>
   <text wx:if="{{session&&!sees&&materials.length}}" class="blind-note">当前模型看不到图片，只按「图片1」等名称引用</text>
-  <view wx:if="{{models.length>1||priceHint}}" class="agent-bar">
-    <scroll-view scroll-x enhanced show-scrollbar="{{false}}" class="model-strip">
-      <view class="model-row">
-        <view wx:if="{{models.length>1}}" wx:for="{{models}}" wx:key="id" class="model-chip {{item.id===model?'on':''}}" data-id="{{item.id}}" bindtap="pickModel" aria-role="button" aria-label="{{'对话模型：'+item.name}}">{{item.name}}</view>
-      </view>
-    </scroll-view>
+  <view wx:if="{{current||priceHint}}" class="agent-bar">
+    <view wx:if="{{current}}" class="model-pill {{models.length>1?'':'solo'}}" bindtap="openModels" hover-class="{{models.length>1?'icon-pressed':''}}" aria-role="button" aria-label="{{'对话模型：'+current.name+(models.length>1?'，点按切换':'')}}">
+      <view class="model-dot"><image wx:if="{{current.icon}}" class="model-dot-img" src="{{current.icon}}" mode="aspectFit" /><t-icon wx:else name="chat" size="12" /></view>
+      <text class="model-name">{{current.name}}</text>
+      <text wx:if="{{current.sees}}" class="model-tag">识图</text>
+      <t-icon wx:if="{{models.length>1}}" name="chevron-down" size="14" />
+    </view>
+    <view class="bar-gap" />
     <text wx:if="{{prompt.length>400}}" class="bar-note {{prompt.length>=500?'full':''}}">{{prompt.length}}/500</text>
     <text wx:elif="{{priceHint}}" class="bar-note">{{priceHint}}</text>
   </view>
@@ -78,4 +80,5 @@
   </view>
 </view>
 <include src="./parts/projects.wxml" />
+<include src="./parts/models.wxml" />
 <ui-dialog id="ui-dialog" />

@@ -1,0 +1,22 @@
+<t-popup visible="{{modelsOpen}}" placement="bottom" bind:visible-change="closeModels">
+  <view class="projects-sheet">
+    <view class="sheet-grip" />
+    <view class="projects-head"><text>对话模型</text><view class="projects-close" bindtap="closeModels" aria-role="button" aria-label="关闭"><t-icon name="close" size="20" /></view></view>
+    <view class="model-list">
+      <view wx:for="{{models}}" wx:key="id" class="model-card {{item.id===model?'on':''}}" data-id="{{item.id}}" bindtap="pickModel" hover-class="starter-pressed" aria-role="button" aria-label="{{'使用 '+item.name}}">
+        <view class="model-logo"><image wx:if="{{item.icon}}" class="model-logo-img" src="{{item.icon}}" mode="aspectFit" /><t-icon wx:else name="chat" size="20" /></view>
+        <view class="model-copy">
+          <view class="model-title">
+            <text class="model-title-name">{{item.name}}</text>
+            <text wx:if="{{item.rec}}" class="model-badge rec">推荐</text>
+            <text class="model-badge {{item.sees?'see':''}}">{{item.sees?'能看图':'仅文字'}}</text>
+          </view>
+          <text wx:if="{{item.desc}}" class="model-desc">{{item.desc}}</text>
+          <text wx:if="{{modelPrices[item.id]}}" class="model-price">{{modelPrices[item.id]}}</text>
+        </view>
+        <view class="model-check"><t-icon wx:if="{{item.id===model}}" name="check" size="14" /></view>
+      </view>
+    </view>
+    <text class="models-note">按实际用量结算，多余积分自动退回；切换后从下一条消息生效。</text>
+  </view>
+</t-popup>
