@@ -71,6 +71,7 @@ func chatModels(ctx context.Context, app *api.Server, values settings.Values) *p
 	clients := map[string]*llm.Client{}
 	for _, p := range providers {
 		clients[p.Name] = p.Client
+		app.ChatReady = app.ChatReady || p.Client.Ready()
 	}
 	return &provider.DirectChat{Clients: clients, Store: app.Store, Assets: app.Media.Inputs}
 }

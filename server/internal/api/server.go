@@ -51,6 +51,7 @@ type Server struct {
 	Visits       *analytics.Visits
 	Hot          *hotvideo.Service
 	Vision       *vision.Client // 一键复刻's video breakdown (hot_breakdown.go)
+	ChatReady    bool           // a DeepSeek or 豆包 API Key is set (服务接入配置 → 对话模型)
 	Billing      *billing.Service
 	Pay          *payments.Client
 	Virtual      *virtualpay.Service

@@ -6,6 +6,8 @@ import {
   Flame,
   Globe,
   MessageCircle,
+  MessagesSquare,
+  ScanEye,
   Siren,
   Smartphone,
   type LucideIcon,
@@ -27,6 +29,16 @@ export const groupMeta: Record<
     capability: "payment",
   },
   hot: { icon: Flame, desc: "热门视频发现", capability: "hot" },
+  vision: {
+    icon: ScanEye,
+    desc: "一键复刻看懂原视频",
+    capability: "vision",
+  },
+  chat: {
+    icon: MessagesSquare,
+    desc: "Agent 与 AI 写剧本的 DeepSeek、豆包",
+    capability: "chat",
+  },
   notifications: {
     icon: Bell,
     desc: "生成完成的微信订阅消息",
