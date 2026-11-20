@@ -67,3 +67,11 @@ export async function chooseReferenceFile(kind: "image" | "video" | "audio") {
     size: file.size,
   };
 }
+
+// Several pictures (or one video) from the album at once, e.g. a shop's
+// photos for an Agent project. Files over 50 MB are refused as a whole.
+export async function chooseReferenceFiles(kind: "image" | "video", count: number) {
+  const res = await wx.chooseMedia({ count: kind === "video" ? 1 : Math.max(1, count), mediaType: [kind], sourceType: ["album"] });
+  if (res.tempFiles.some((f) => f.size > 50 * 1024 * 1024)) throw new Error("文件不能超过 50 MB");
+  return res.tempFiles.map((f) => ({ path: f.tempFilePath, name: kind === "video" ? "参考视频.mp4" : "参考图片.jpg", size: f.size }));
+}

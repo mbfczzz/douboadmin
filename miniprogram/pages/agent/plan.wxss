@@ -59,16 +59,16 @@
 }
 .material-remove {
   position: absolute;
-  top: 2px;
-  right: 2px;
-  width: 18px;
-  height: 18px;
+  top: 0;
+  right: 0;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   text-align: center;
-  font-size: 13px;
-  line-height: 17px;
+  font-size: 14px;
+  line-height: 21px;
   color: #fff;
-  background: #00000099;
+  background: #000000b3;
 }
 .material.add {
   display: flex;

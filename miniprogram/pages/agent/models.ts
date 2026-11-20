@@ -6,11 +6,11 @@ import type { Config } from "../../services/types";
 
 // Which chat model the Agent talks to (DeepSeek / 豆包 / relay chat models),
 // remembered across visits, and what one turn costs on it.
-export type ChatModel = { id: string; name: string };
+export type ChatModel = { id: string; name: string; sees: boolean }; // sees: reads pictures
 const STORE = "agent-model";
 
 export const chatModels = (config: Config): ChatModel[] =>
-  config.models.filter((m) => m.kind === "chat").map((m) => ({ id: m.id, name: m.name }));
+  config.models.filter((m) => m.kind === "chat").map((m) => ({ id: m.id, name: m.name, sees: (m.referenceTypes || []).includes("image") }));
 
 type Quote = { units: number; billingEnabled: boolean; perToken?: boolean };
 // 按量 models: the most one turn can hold; settled on the tokens used.
@@ -19,7 +19,7 @@ async function priceHint(model: string): Promise<string> {
   try {
     const q = await request<Quote>("/jobs/quote", "POST", { kind: "chat", model, prompt: "预估本轮积分", resolution: "", ratio: "", duration: 0, assets: [], purpose: "agent" });
     if (!q.billingEnabled || !q.units) return "";
-    return q.perToken ? `按量 · 最多约 ${points(q.units)} 积分` : `每次 ${points(q.units)} 积分`;
+    return q.perToken ? `每轮最多约 ${points(q.units)} 积分` : `每轮 ${points(q.units)} 积分`;
   } catch {
     return ""; // preview accounts cannot quote; the hint is optional
   }
@@ -37,7 +37,7 @@ export const agentModels = {
     if (this.destroyed) return;
     const saved = wx.getStorageSync(STORE) as string;
     const model = models.find((m) => m.id === saved)?.id || models[0]?.id || "";
-    this.setData({ models, model });
+    this.setData({ models, model, sees: !!models.find((m) => m.id === model)?.sees });
     if (model) {
       const hint = await priceHint(model);
       if (!this.destroyed && this.data.model === model) this.setData({ priceHint: hint });
@@ -47,7 +47,7 @@ export const agentModels = {
     const model = e.currentTarget.dataset.id as string;
     if (model === this.data.model) return;
     wx.setStorageSync(STORE, model);
-    this.setData({ model, priceHint: "" });
+    this.setData({ model, priceHint: "", sees: !!this.data.models.find((m) => m.id === model)?.sees });
     const hint = await priceHint(model);
     if (!this.destroyed && this.data.model === model) this.setData({ priceHint: hint });
   },

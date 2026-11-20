@@ -27,6 +27,7 @@ Page({
     navBottom: 68,
     models: [] as ChatModel[], // chat models to talk to (DeepSeek / 豆包)
     model: "",
+    sees: false, // the chosen chat model reads pictures
     priceHint: "",
     session: null as SessionDetail | null,
     projects: [] as ProjectView[],

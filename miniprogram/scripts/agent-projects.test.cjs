@@ -130,3 +130,53 @@ test("the newest plan shows its points on 确认生成, quoted once per plan and
   assert.deepEqual(plain(page.data.planPrice), { id: "x", text: "" }, "no fitting model: the price hides");
   page.onUnload();
 });
+
+test("a project named after its skill takes its first plan's title; removing a material asks first", async () => {
+  const h = harness();
+  await h.api.signIn();
+  const page = h.page("agent");
+  const puts = [];
+  let modals = 0, answer = false;
+  h.wx.showModal = async () => (modals++, { confirm: answer });
+  h.wx.request = (o) => {
+    const path = o.url.split("/api")[1];
+    if (o.method === "PUT") return puts.push(o.data), o.success({ statusCode: 200, data: { id: "s1", version: 2, data: { title: o.data.title || "店", skill: "store", assets: o.data.assets || [] } } });
+    o.success({ statusCode: 200, data: path === "/config" ? { models } : { items: [], total: 0 } });
+  };
+  page.setData({ skills: [{ id: "store", name: "探店视频" }], projects: [{ id: "s1", version: 1, data: { title: "探店视频", skill: "store" } }] });
+  page.setData({ session: { id: "s1", version: 1, data: { title: "探店视频", skill: "store", assets: [] }, assets: [] }, messages: [{ id: "a", role: "assistant", plan: PLAN, latest: true }] });
+  await page.autoTitle();
+  assert.equal(puts[0].title, "春日咖啡");
+  assert.equal(page.data.session.data.title, "春日咖啡");
+  assert.equal(page.data.projects[0].data.title, "春日咖啡");
+  await page.autoTitle(); // renamed already: no second request
+  assert.equal(puts.length, 1);
+  page.setData({ materials: h.service("../pages/agent/materials").materialLabels(materials) });
+  await page.removeMaterial({ currentTarget: { dataset: { id: "p1" } } });
+  assert.equal(modals, 1);
+  assert.equal(puts.length, 1, "declined: nothing removed");
+  answer = true;
+  await page.removeMaterial({ currentTarget: { dataset: { id: "p1" } } });
+  assert.deepEqual(plain(puts[1].assets), ["v1", "p2"]);
+  assert.deepEqual(page.data.materials.map((m) => m.label), ["视频1", "图片1"]);
+  page.onUnload();
+});
+
+test("several pictures upload in one pick; a model that cannot see pictures says so", async () => {
+  const h = harness();
+  await h.api.signIn();
+  const page = h.page("agent");
+  let picked;
+  h.wx.chooseMedia = async (o) => ((picked = o.count), { tempFiles: [{ tempFilePath: "a.jpg", size: 1 }, { tempFilePath: "b.jpg", size: 1 }] });
+  let n = 0;
+  h.api.upload = async () => ({ id: "u" + ++n, data: { type: "image/jpeg", url: "/m/u" + n + ".jpg" } });
+  const puts = [];
+  h.wx.request = (o) => (o.method === "PUT" && puts.push(o.data), o.success({ statusCode: 200, data: { id: "s1", version: 2, data: { title: "店", skill: "store", assets: (o.data || {}).assets || [] } } }));
+  page.setData({ session: { id: "s1", version: 1, data: { title: "店", skill: "store", assets: [] }, assets: [] }, materials: [] });
+  await page.addMaterial({ currentTarget: { dataset: { kind: "image" } } });
+  assert.equal(picked, 9);
+  assert.deepEqual(plain(puts[0].assets), ["u1", "u2"]);
+  const wxml = require("node:fs").readFileSync("pages/agent/index.wxml", "utf8");
+  assert.match(wxml, /wx:if="\{\{session&&!sees&&materials\.length\}\}" class="blind-note"/);
+  page.onUnload();
+});

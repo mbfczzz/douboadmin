@@ -3,6 +3,7 @@ import { sessionUserId } from "../../services/session";
 import { ask } from "../../services/dialog";
 import { skills, sessions, createSession, sessionDetail, updateSession } from "../../services/agent";
 import type { Skill, SessionRow, SessionDetail } from "../../services/agent";
+import type { ChatMessage } from "../../services/types";
 import { editorAsset } from "../../utils/editor-assets";
 import { materialData } from "./materials";
 import { date } from "../../utils/ui";
@@ -29,11 +30,12 @@ const skillHints = (skills: Skill[], id?: string) => {
 };
 
 type Page = {
-  data: { session: SessionDetail | null; skills: Skill[]; projects: ProjectView[]; projectsOpen: boolean; prompt: string; materials: ReturnType<typeof editorAsset>[] };
+  data: { session: SessionDetail | null; skills: Skill[]; projects: ProjectView[]; projectsOpen: boolean; prompt: string; materials: ReturnType<typeof editorAsset>[]; messages: ChatMessage[] };
   destroyed: boolean;
   setData(data: Record<string, unknown>): void;
   load(force?: boolean): Promise<void>;
   showSession(id: string): Promise<void>;
+  titling?: boolean;
 };
 
 export const sessionHandlers = {
@@ -88,6 +90,25 @@ export const sessionHandlers = {
       await this.load(true);
     } catch (err) {
       error(err);
+    }
+  },
+  // A project still named after its skill takes its first plan's title,
+  // so the project sheet does not fill with identical names.
+  async autoTitle(this: Page) {
+    const s = this.data.session;
+    const skill = this.data.skills.find((k) => k.id === s?.data.skill);
+    const plan = this.data.messages.find((m) => m.plan)?.plan;
+    if (!s || !plan || !skill || s.data.title !== skill.name || this.titling) return;
+    this.titling = true;
+    try {
+      const row = await updateSession(s.id, s.version, { title: plan.title });
+      if (this.destroyed || this.data.session?.id !== s.id) return;
+      this.setData({ session: { ...this.data.session, version: row.version, data: row.data } });
+      this.setData({ projects: this.data.projects.map((p) => (p.id === row.id ? projectView(row, this.data.skills) : p)) });
+    } catch {
+      // a rename race (version) is harmless: the next visit tries again
+    } finally {
+      this.titling = false;
     }
   },
   async removeProject(this: Page, e: WechatMiniprogram.TouchEvent) {

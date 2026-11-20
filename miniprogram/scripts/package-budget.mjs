@@ -214,7 +214,10 @@ console.log(
 // Agent polish: plan versions with old ones collapsed, the points on
 // 确认生成, per-skill examples and follow-ups, generation status chips,
 // 正在写方案 hint: 947,762 B. 921 -> 926 KiB.
-const budget = 926 * 1024;
+// Agent user pass: projects named after their first plan, confirm before
+// removing a material, several pictures per pick, long-press preview, a
+// note when the chat model cannot see pictures: 951,470 B. 926 -> 930 KiB.
+const budget = 930 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");
