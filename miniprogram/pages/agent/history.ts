@@ -28,14 +28,16 @@ type Page = {
   autoTitle?(): Promise<void>;
 };
 const filter = (page: Page) => "&session=" + page.data.session!.id;
+const SIZE = 12; // turns per page: the newest first, older ones on request
 const running = (jobs: Job[]) => jobs.some((j) => /queued|running/.test(j.status));
 
 export const historyHandlers = {
   // Poll only while a reply or generation may still arrive.
-  // A reply being written is checked every 1.5 s; generations every 3 s.
+  // A queued reply is checked every 1.5 s until it starts; once it is being
+  // written stream() reads it, so generations set the pace (3 s).
   poll(this: Page & { load(): Promise<void> }) {
     clearInterval(this.timer);
-    const replying = this.history.some((j) => j.input.kind === "chat" && /queued|running/.test(j.status));
+    const replying = this.history.some((j) => j.input.kind === "chat" && j.status === "queued");
     this.pollMs = replying ? 1500 : 3000;
     this.timer = setInterval(() => void this.load(), this.pollMs);
   },
@@ -63,7 +65,7 @@ export const historyHandlers = {
     const version = ++this.loadVersion;
     this.fetching = true;
     try {
-      const result = await jobPage(1, filter(this));
+      const result = await jobPage(1, filter(this), SIZE);
       if (version !== this.loadVersion) return;
       const fresh = result.items;
       const jobs = [...fresh, ...this.history.filter((j) => !fresh.some((n) => n.id === j.id))];
@@ -71,8 +73,8 @@ export const historyHandlers = {
       this.history = jobs;
       this.setData({ hasOlder: jobs.length < result.total });
       if (!running(jobs)) clearInterval(this.timer);
-      else if (this.pollMs === 1500 && !jobs.some((j) => j.input.kind === "chat" && /queued|running/.test(j.status)))
-        (this as unknown as { poll(): void }).poll(); // the reply came: back to the slower pace
+      else if (this.pollMs === 1500 && !jobs.some((j) => j.input.kind === "chat" && j.status === "queued"))
+        (this as unknown as { poll(): void }).poll(); // the reply started: back to the slower pace
       const messages = chatMessages(jobs, this.partials);
       const changed = JSON.stringify(messages) !== JSON.stringify(this.data.messages);
       // Scroll down only when a message arrives, not when a waiting reply's
@@ -101,7 +103,7 @@ export const historyHandlers = {
     const version = this.loadVersion;
     this.setData({ loadingOlder: true });
     try {
-      const result = await jobPage(this.historyPage + 1, filter(this));
+      const result = await jobPage(this.historyPage + 1, filter(this), SIZE);
       if (version !== this.loadVersion) return;
       this.historyPage++;
       this.history = [...this.history, ...result.items.filter((j) => !this.history.some((old) => old.id === j.id))];

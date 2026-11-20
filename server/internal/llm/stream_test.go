@@ -47,3 +47,18 @@ func TestStreamCutOffOrStoppedFails(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+// A provider that fails or filters mid-reply is explained, not shown half.
+func TestStreamErrorsMidReplyAreExplained(t *testing.T) {
+	for events, want := range map[string]string{
+		`{"error":{"code":"ServerOverloaded","message":"busy"}}`:                  "繁忙",
+		`{"choices":[{"delta":{"content":""},"finish_reason":"content_filter"}]}`: "安全审核",
+	} {
+		srv := httptest.NewServer(sse(`{"choices":[{"delta":{"content":"镜头"}}]}`, events, "[DONE]"))
+		_, _, err := (&Client{BaseURL: srv.URL, Key: "k"}).Complete(t.Context(), "m", nil, 0, nil)
+		srv.Close()
+		if err == nil || !strings.Contains(err.Error(), want) {
+			t.Fatal(want, err)
+		}
+	}
+}

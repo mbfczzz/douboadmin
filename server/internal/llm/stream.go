@@ -13,8 +13,10 @@ type chunk struct {
 		Delta struct {
 			Content string `json:"content"`
 		} `json:"delta"`
+		FinishReason string `json:"finish_reason"`
 	} `json:"choices"`
-	Usage *Usage `json:"usage"`
+	Usage *Usage          `json:"usage"`
+	Error json.RawMessage `json:"error"`
 }
 
 // readStream collects "data: {…}" events until "data: [DONE]".
@@ -36,8 +38,14 @@ func readStream(body io.Reader, onText func(string) error) (string, Usage, error
 		if json.Unmarshal([]byte(data), &c) != nil {
 			return "", Usage{}, &Error{Message: "对话模型返回格式无效"}
 		}
+		if len(c.Error) > 0 && string(c.Error) != "null" { // failed mid-reply
+			return "", Usage{}, upstream(502, []byte(data))
+		}
 		if c.Usage != nil {
 			usage = *c.Usage
+		}
+		if len(c.Choices) > 0 && c.Choices[0].FinishReason == "content_filter" {
+			return "", Usage{}, &Error{Message: "内容未通过安全审核，请换个说法再试"}
 		}
 		if len(c.Choices) == 0 || c.Choices[0].Delta.Content == "" {
 			continue

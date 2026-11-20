@@ -5,7 +5,6 @@ import (
 	"doubo/server/internal/core"
 	"doubo/server/internal/store"
 	"encoding/json"
-	"slices"
 	"strings"
 )
 
@@ -31,27 +30,13 @@ func chatHistory(ctx context.Context, s store.Store, j core.Job, body map[string
 		}
 		system, keep = prompt, 4000 // the last plan must reach the model whole
 	}
-	jobs, err := s.Jobs(ctx, j.UserID)
+	previous, err := recentTurns(ctx, s, j)
 	if err != nil {
 		return err
 	}
-	previous := []core.Job{}
-	for _, old := range jobs {
-		if old.Input.Kind == "chat" && old.Status == "succeeded" && old.Input.SessionID == j.Input.SessionID && old.CreatedAt.Before(j.CreatedAt) {
-			previous = append(previous, old)
-			if len(previous) == 6 {
-				break
-			}
-		}
-	}
-	slices.Reverse(previous)
 	messages := []any{map[string]string{"role": "system", "content": system}}
-	for _, old := range previous {
-		text := []rune(old.Result)
-		if len(text) > keep {
-			text = text[:keep]
-		}
-		messages = append(messages, map[string]string{"role": "user", "content": old.Input.Prompt}, map[string]string{"role": "assistant", "content": string(text)})
+	for _, old := range trimTurns(previous, keep) {
+		messages = append(messages, map[string]string{"role": "user", "content": old.Input.Prompt}, map[string]string{"role": "assistant", "content": old.Result})
 	}
 	if current, ok := body["messages"].([]any); ok {
 		messages = append(messages, current...)

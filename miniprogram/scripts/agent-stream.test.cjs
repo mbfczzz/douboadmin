@@ -60,3 +60,27 @@ test("leaving the page stops reading the reply", async () => {
   await wait(1200);
   assert.equal(reads, seen);
 });
+
+test("a new message waits for the reply being written, unless it is stuck", async () => {
+  const h = harness();
+  await h.api.signIn();
+  const page = h.page("agent");
+  const posts = [];
+  const toasts = [];
+  h.wx.showToast = (o) => toasts.push(o.title);
+  h.wx.request = (o) => {
+    const ok = (data) => o.success({ statusCode: 200, data });
+    if (o.method === "POST") posts.push(o.url);
+    return ok({ models: [] });
+  };
+  page.setData({ session: { id: "s1", version: 1, data: { title: "店", skill: "store", assets: [] }, assets: [] }, prompt: "再改改" });
+  page.history = [job("running", "")];
+  await page.send();
+  assert.equal(posts.length, 0);
+  assert.match(toasts.join(), /上一条还在回复/);
+  page.history = [{ ...job("running", ""), createdAt: new Date(Date.now() - 180000).toISOString() }];
+  toasts.length = 0;
+  await page.send();
+  assert.doesNotMatch(toasts.join(), /上一条还在回复/);
+  page.onUnload();
+});

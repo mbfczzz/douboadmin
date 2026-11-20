@@ -120,6 +120,13 @@ Page({
   },
   async send() {
     if (this.data.busy) return;
+    // The next turn is read with this reply as context, so wait for it
+    // (unless it has been stuck for two minutes).
+    const writing = (j: Job) => j.input.kind === "chat" && /queued|running/.test(j.status) && Date.now() - new Date(j.createdAt || 0).getTime() < 120000;
+    if (this.history.some(writing)) {
+      error(new Error("上一条还在回复，稍等一下再发"));
+      return;
+    }
     if (!this.data.prompt.trim()) {
       error(new Error("请输入要发送的内容"));
       return;
