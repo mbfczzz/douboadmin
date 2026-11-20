@@ -75,6 +75,7 @@ var ops = map[string]op{
 	"DELETE /api/admin/models/{id}":                       {label: "删除模型", target: "model"},
 	"PUT /api/admin/templates/{id}":                       {label: "保存模板", target: "template"},
 	"DELETE /api/admin/templates/{id}":                    {label: "删除模板", target: "template"},
+	"POST /api/admin/outfits/defaults":                    {label: "生成默认服装"},
 	"PUT /api/admin/outfits/{id}":                         {label: "保存试衣服装", target: "outfit"},
 	"DELETE /api/admin/outfits/{id}":                      {label: "删除试衣服装", target: "outfit"},
 	"POST /api/outfits/{id}/use":                          {label: "选用试衣服装", target: "outfit"},

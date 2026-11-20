@@ -30,6 +30,7 @@ func (a *Server) adminOutfits(w http.ResponseWriter, r *http.Request) {
 	if s := r.URL.Query().Get("status"); s == "published" || s == "draft" {
 		q.Fields["published"] = map[bool]string{true: "true", false: "false"}[s == "published"]
 	}
+	seeding := a.collectOutfitSeeds(r.Context())
 	page, err := a.Store.RecordPage(r.Context(), q)
 	// Without page (the editor's version-conflict check): every outfit.
 	if !r.URL.Query().Has("page") {
@@ -50,7 +51,7 @@ func (a *Server) adminOutfits(w http.ResponseWriter, r *http.Request) {
 		reply(w, 200, items)
 		return
 	}
-	reply(w, 200, map[string]any{"items": items, "page": page.Page, "size": page.Size, "total": page.Total})
+	reply(w, 200, map[string]any{"items": items, "page": page.Page, "size": page.Size, "total": page.Total, "seeding": seeding})
 }
 
 func (a *Server) saveOutfit(w http.ResponseWriter, r *http.Request) {
@@ -84,7 +85,8 @@ func (a *Server) saveOutfit(w http.ResponseWriter, r *http.Request) {
 		fail(w, 400, "服装图片仅支持 JPG、PNG 和 WebP")
 		return
 	}
-	o.ImageKey, o.ImageType, o.ImageSize, o.Deleted = file.Key, file.Type, file.Size, false
+	// A manual save wins over a default picture still being drawn.
+	o.ImageKey, o.ImageType, o.ImageSize, o.Deleted, o.SeedJob, o.SeedError = file.Key, file.Type, file.Size, false, "", ""
 	row, err := a.Store.Put(r.Context(), "outfits", core.Record{ID: id, Data: core.Data(o)}, v.Version)
 	if err != nil {
 		dbError(w, err)

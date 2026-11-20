@@ -28,6 +28,9 @@ type outfitView struct {
 // for 20), like template covers, so phones cache the pictures; the page
 // refreshes its addresses after 10 minutes (pages/tryon/gallery.ts).
 func (a *Server) outfitImage(ctx context.Context, key string) string {
+	if key == "" { // a default outfit still being drawn
+		return ""
+	}
 	if a.Objects == nil {
 		return "/media/" + key
 	}
@@ -129,10 +132,14 @@ func (a *Server) outfitCategories(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	admin := strings.Contains(r.URL.Path, "/admin/")
-	counts := map[string]int{}
+	// In the order of their first outfit (排序), so 春季 comes before 冬季.
+	counts, first := map[string]int{}, map[string]int{}
 	for _, row := range rows {
 		var o core.Outfit
 		if json.Unmarshal(row.Data, &o) == nil && !o.Deleted && (o.Published || admin) && o.Category != "" {
+			if n, seen := first[o.Category]; !seen || o.Sort < n {
+				first[o.Category] = o.Sort
+			}
 			counts[o.Category]++
 		}
 	}
@@ -140,7 +147,10 @@ func (a *Server) outfitCategories(w http.ResponseWriter, r *http.Request) {
 	for name, n := range counts {
 		out = append(out, outfitCategory{name, n})
 	}
-	sort.Slice(out, func(i, j int) bool { return out[i].Name < out[j].Name })
+	sort.Slice(out, func(i, j int) bool {
+		a, b := out[i], out[j]
+		return first[a.Name] < first[b.Name] || first[a.Name] == first[b.Name] && a.Name < b.Name
+	})
 	reply(w, 200, out)
 }
 

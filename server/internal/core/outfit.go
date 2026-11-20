@@ -20,6 +20,10 @@ type Outfit struct {
 	Published    bool   `json:"published"`
 	Deleted      bool   `json:"deleted,omitempty"`
 	Sort         int    `json:"sort"`
+	// Default outfits (后台 → 生成默认服装): the image job drawing it, and why it
+	// failed. The outfit is published once its picture is in.
+	SeedJob   string `json:"seedJob,omitempty"`
+	SeedError string `json:"seedError,omitempty"`
 }
 
 // Clean trims the text fields and checks their lengths.

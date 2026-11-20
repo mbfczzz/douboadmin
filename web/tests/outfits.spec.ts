@@ -33,3 +33,30 @@ test("an outfit is added with its picture, published and taken down", async ({
   await confirmSubmission(page);
   await expect(card.getByText("草稿")).toBeVisible();
 });
+
+// 生成默认服装: pick an image model; the defaults appear as drafts drawing.
+test("default outfits start drawing with the chosen image model", async ({
+  page,
+}) => {
+  await login(page);
+  expect(
+    (
+      await page.request.post("/api/admin/models/sync", {
+        headers: { "Content-Type": "application/json" },
+        data: {},
+      })
+    ).ok(),
+  ).toBeTruthy();
+  await page.getByRole("button", { name: "试衣服装", exact: true }).click();
+  await page.getByRole("button", { name: "生成默认服装" }).click();
+  const dialog = page.getByRole("dialog", { name: "生成默认服装" });
+  await expect(dialog.getByLabel("图片模型")).toBeEnabled();
+  await dialog.getByRole("button", { name: "开始生成" }).click();
+  await expect(dialog).toBeHidden();
+  await expect(page.getByText(/件生成中/)).toBeVisible();
+  await expect(
+    page
+      .locator("article.studio-card", { hasText: "风衣 + 直筒牛仔裤" })
+      .getByText("生成中"),
+  ).toBeVisible();
+});

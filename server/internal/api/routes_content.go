@@ -21,6 +21,7 @@ func (a *Server) contentRoutes() {
 	m.HandleFunc("POST /api/outfits/{id}/use", a.auth("user", a.useOutfit))
 	m.HandleFunc("GET /api/admin/outfits", a.auth("admin", a.adminOutfits))
 	m.HandleFunc("GET /api/admin/outfits/categories", a.auth("admin", a.outfitCategories))
+	m.HandleFunc("POST /api/admin/outfits/defaults", a.superAdmin(a.seedOutfits))
 	m.HandleFunc("PUT /api/admin/outfits/{id}", a.auth("admin", a.saveOutfit))
 	m.HandleFunc("DELETE /api/admin/outfits/{id}", a.auth("admin", a.deleteRecord("outfits")))
 }

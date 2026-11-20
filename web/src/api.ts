@@ -19,6 +19,9 @@ export interface Outfit {
   imageAssetId: string;
   published: boolean;
   sort: number;
+  // A default outfit still being drawn, or why drawing it failed.
+  seedJob?: string;
+  seedError?: string;
 }
 export interface Template {
   imageSlots?: { label: string; optional: boolean }[];

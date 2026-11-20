@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { Plus, Shirt, Pencil, Trash2, Eye, EyeOff } from "lucide-react";
-import { api, type Row, type Outfit } from "../api";
+import { Plus, Shirt, Sparkles } from "lucide-react";
+import { api, type Outfit } from "../api";
 import type { PageProps } from "../navigation";
 import { useResource } from "../hooks/useResource";
 import { useCachedRecordPage } from "../hooks/useRecordPage";
@@ -10,10 +10,11 @@ import CatalogResults from "../components/CatalogResults";
 import Empty from "../components/Empty";
 import Pagination from "../components/Pagination";
 import OutfitEditor from "../components/OutfitEditor";
+import OutfitCard, { type OutfitRow } from "../components/OutfitCard";
+import OutfitDefaults from "../components/OutfitDefaults";
 import { newId } from "../id";
 import { ask } from "../confirm/ask";
 
-type OutfitRow = Row<Outfit> & { image?: string };
 const blank: Outfit = {
   title: "",
   category: "",
@@ -30,7 +31,8 @@ export default function Outfits({ notify }: PageProps) {
     [category, setCategory] = useRememberedState("outfits.category", ""),
     [page, setPage] = useState(1),
     [edit, setEdit] = useState<OutfitRow | null>(null),
-    [busy, setBusy] = useState("");
+    [busy, setBusy] = useState(""),
+    [defaults, setDefaults] = useState(false);
   const resource = useCachedRecordPage<Outfit>(
     `/admin/outfits?${new URLSearchParams({ status, category })}`,
     page,
@@ -40,6 +42,17 @@ export default function Outfits({ notify }: PageProps) {
     "/admin/outfits/categories",
   );
   const rows = (resource.data?.items || []) as OutfitRow[];
+  // Default outfits still drawing: look again every 5 s until they are in.
+  const seeding =
+    (resource.data as { seeding?: number } | undefined)?.seeding || 0;
+  useEffect(() => {
+    if (!seeding) return;
+    const timer = setTimeout(() => {
+      void resource.reload();
+      void categories.reload();
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, [seeding, resource.data]);
   useEffect(() => {
     if (resource.data)
       setPage((p) =>
@@ -91,6 +104,10 @@ export default function Outfits({ notify }: PageProps) {
   return (
     <div className="catalog-page">
       <PageHeader page="outfits" loading={resource.loading} onRefresh={reload}>
+        <button className="secondary" onClick={() => setDefaults(true)}>
+          <Sparkles size={16} />
+          生成默认服装
+        </button>
         <button
           className="primary"
           onClick={() =>
@@ -132,7 +149,7 @@ export default function Outfits({ notify }: PageProps) {
         <span>
           {category || "全部分类"} ·{" "}
           {resource.data
-            ? `${resource.data.total} 件服装`
+            ? `${resource.data.total} 件服装${seeding ? `，${seeding} 件生成中` : ""}`
             : resource.loading
               ? "正在加载服装…"
               : "读取失败"}
@@ -146,52 +163,14 @@ export default function Outfits({ notify }: PageProps) {
       >
         <div className="studio-grid">
           {rows.map((r) => (
-            <article className="studio-card" key={r.id}>
-              <div className="studio-cover">
-                {r.image ? (
-                  <img src={r.image} alt={r.data.title} loading="lazy" />
-                ) : (
-                  <Shirt size={30} />
-                )}
-              </div>
-              <div className="studio-body">
-                <div className="caption">
-                  <span>{r.data.category || "未分类"}</span>
-                  <span
-                    className={
-                      "catalog-status " + (r.data.published ? "live" : "")
-                    }
-                  >
-                    {r.data.published ? "已上架" : "草稿"}
-                  </span>
-                </div>
-                <h3>{r.data.title}</h3>
-                <p>{r.data.description}</p>
-                <small>排序 {r.data.sort}</small>
-                <div className="studio-actions">
-                  <button onClick={() => setEdit(r)}>
-                    <Pencil size={13} />
-                    编辑
-                  </button>
-                  <button disabled={!!busy} onClick={() => void action(r)}>
-                    {r.data.published ? (
-                      <EyeOff size={13} />
-                    ) : (
-                      <Eye size={13} />
-                    )}
-                    {r.data.published ? "下架" : "上架"}
-                  </button>
-                  <button
-                    aria-label={`删除 ${r.data.title}`}
-                    className="danger-text"
-                    disabled={!!busy}
-                    onClick={() => void action(r, true)}
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                </div>
-              </div>
-            </article>
+            <OutfitCard
+              key={r.id}
+              r={r}
+              busy={busy}
+              onEdit={() => setEdit(r)}
+              onToggle={() => void action(r)}
+              onDelete={() => void action(r, true)}
+            />
           ))}
         </div>
         {!rows.length && !resource.loading && !resource.error && (
@@ -207,6 +186,13 @@ export default function Outfits({ notify }: PageProps) {
           onChange={setPage}
         />
       </CatalogResults>
+      {defaults && (
+        <OutfitDefaults
+          onClose={() => setDefaults(false)}
+          onStarted={reload}
+          notify={notify}
+        />
+      )}
       {edit && (
         <OutfitEditor
           initial={edit}
