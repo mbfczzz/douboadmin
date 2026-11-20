@@ -73,9 +73,9 @@ var definitions = []Group{
 	{ID: "hot", Name: "热门视频接口", Hint: "未填写 API Key 时，热门视频查询功能不可用。", Fields: []Field{
 		{Key: "TIKHUB_BASE_URL", Label: "TikHub API 地址", Kind: "url", Default: "https://api.tikhub.io"},
 		{Key: "TIKHUB_API_KEY", Label: "TikHub API Key", Kind: "secret"},
-		{Key: "HOT_FEED_SOURCE", Label: "创作页视频来源", Kind: "select", Default: "billboard", Options: []Option{{"billboard", "抖音视频热榜（按标签筛选，「热门」为整个榜单）"}, {"search", "关键词搜索"}}, Hint: "保存后重启服务生效。"},
+		{Key: "HOT_FEED_SOURCE", Label: "创作页视频来源", Kind: "select", Default: "search", Options: []Option{{"billboard", "抖音视频热榜（按标签筛选，「热门」为整个榜单）"}, {"search", "关键词搜索"}}, Hint: "保存后重启服务生效。"},
 		{Key: "HOT_FEED_KEYWORDS", Label: "创作页关键词", Kind: "text", Default: DefaultFeedKeywords, Hint: "创作页视频流的标签，按顺序显示，第一个默认选中；视频来源为热榜时按标签筛选近 7 天视频热榜（「热门」为整个榜单）；为关键词搜索时按标签搜索抖音视频。用逗号或顿号分隔，最多 12 个、每个不超过 20 字。保存后重启服务生效。"},
-		{Key: "HOT_CACHE_FEED_MINUTES", Label: "创作页视频流缓存（分钟）", Kind: "text", Default: "60", Hint: "所有人共用的创作页视频，到期前 1 分钟后台自动刷新。5–1440，保存后重启服务生效。"},
+		{Key: "HOT_CACHE_FEED_MINUTES", Label: "创作页视频流缓存（分钟）", Kind: "text", Default: "1440", Hint: "所有人共用的创作页视频，到期前 1 分钟后台自动刷新。5–1440，保存后重启服务生效。"},
 		{Key: "HOT_CACHE_SEARCH_MINUTES", Label: "搜索结果缓存（分钟）", Kind: "text", Default: "5", Hint: "同一关键词、排序和页码在这段时间内不再请求 TikHub。1–1440，保存后重启服务生效。"},
 		{Key: "HOT_CACHE_WORDS_MINUTES", Label: "热门搜索词缓存（分钟）", Kind: "text", Default: "10", Hint: "热门视频页的抖音热词。1–1440，保存后重启服务生效。"},
 		{Key: "HOT_CACHE_VIDEO_MINUTES", Label: "视频详情与链接解析缓存（分钟）", Kind: "text", Default: "30", Hint: "视频详情页和粘贴链接读取的视频；播放地址会过期，建议不超过 120。导入素材和一键复刻取原视频时总是实时读取。1–720，保存后重启服务生效。"},

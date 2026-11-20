@@ -37,7 +37,7 @@
 
 TikHub 适配已核对其 OpenAPI：搜索 `POST /api/v1/douyin/search/fetch_video_search_v2`，详情 `fetch_one_video`，热词 `fetch_hot_search_list`。后端缓存上游结果；播放量仅对返回页面内已提供数据排序。账号实际权限、数据字段与下载链接需要凭证到位后验证。
 
-创作页视频流：默认取抖音视频热榜 `POST /api/v1/douyin/billboard/fetch_hot_total_video_list`（近 7 天、视频总榜 `sub_type=1001`，每页 20 条，按标签关键词过滤，「热门」不过滤）；后台「创作页视频来源」可切回关键词搜索 `fetch_video_search_v2`（`HOT_FEED_SOURCE=search`，重启生效），两种来源分开缓存。TikHub 未写明返回格式，解析兼容 `objs` / `list` 等常见结构，读不懂时记 `tikhub billboard reply not understood` 警告并附返回开头。创作关键词在后台「服务接入配置 → 热门视频接口 → 创作页关键词」设置（`HOT_FEED_KEYWORDS`，保存后重启生效；经 `GET /api/hot/discovery?words=0` 下发）首页结果存 Redis（`doubo:hot:feed:*`），有效 1 小时；API 进程每分钟检查，结果满 59 分钟即提前刷新，多实例用 Redis 锁保证每个关键词只刷新一次；刷新失败保留旧数据（最长 2 小时）并在下一分钟重试，失败写入 `hot feed refresh failed` 警告日志。未配置 Redis 时退回数据库缓存（30 分钟）。
+创作页视频流：默认按关键词搜索 `POST /api/v1/douyin/search/fetch_video_search_v2`（每个创作页关键词一页一页取，「热门」也按这个词搜索）；后台「创作页视频来源」可改为抖音视频热榜 `POST /api/v1/douyin/billboard/fetch_hot_total_video_list`（`HOT_FEED_SOURCE=billboard`：近 7 天、视频总榜 `sub_type=1001`，每页 20 条，按标签关键词过滤，「热门」不过滤；重启生效），两种来源分开缓存。热榜接口 TikHub 未写明返回格式，解析兼容 `objs` / `list` 等常见结构，读不懂时记 `tikhub billboard reply not understood` 警告并附返回开头。创作关键词在后台「服务接入配置 → 热门视频接口 → 创作页关键词」设置（`HOT_FEED_KEYWORDS`，保存后重启生效；经 `GET /api/hot/discovery?words=0` 下发）。首页结果存 Redis（`doubo:hot:feed:*`），默认有效 1 天（`HOT_CACHE_FEED_MINUTES`）；API 进程每分钟检查，到期前 1 分钟提前刷新，多实例用 Redis 锁保证每个关键词只刷新一次；刷新失败保留旧数据（最长 2 倍时长）并在下一分钟重试，失败写入 `hot feed refresh failed` 警告日志。后面的页超过有效期会重新读取，TikHub 失败时才用旧页。封面是抖音 CDN 地址，若出现封面过期打不开，把这个时长调短。未配置 Redis 时退回数据库缓存。
 
 一键复刻视频拆解：后台「服务接入配置 → 视频理解」配置 OpenAI 兼容的视频理解接口（默认火山方舟 `https://ark.cn-beijing.volces.com/api/v3`，模型 `doubao-seed-2-1-lite-260915`（豆包 Seed 2.1 lite，原生支持视频理解；旧的 1.6 vision 已下线））。复刻在任务队列中进行：复刻页以 `POST /api/hot/videos/{id}/import`（`purpose=remake`，附用户替换图片、原视频标题/文案/时长）创建导入任务，Worker 先把无水印原视频存入用户素材，再以其 OSS 签名地址调用 `chat/completions`（`video_url`，fps=1，方舟要求 URL 方式视频 ≤50MB），输出可替换的主体（1–5 个人物或商品：名称、外观、出现时间）、钩子、结构、卖点、风格、音乐和 3–12 个分镜。视频理解模型未配置、未开通或无权限（401/403/404）时，自动改用后台已开通的豆包对话模型拆解（豆包能直接看视频）。结果按「模型 + 抖音视频 ID」存入 `hot_breakdowns` 表（v2 起含主体，旧结果会重新拆解一次）并全员共用；同一视频并发准备时只调用一次模型，其余等待其结果；失败或超过 5 分钟未完成的可重新发起。任务就绪后，任务详情「生成同款」读取 `GET /api/hot/videos/{id}/breakdown`，自动选支持参考视频的模型与最接近原视频的时长，按拆解结果拼出分时段描述，确认积分后直接提交视频生成。用户上传了图片时，任务页按拆解出的主体逐个选择「用哪张图替换 / 原样」（默认把图片按顺序配给人物和商品），描述里逐条写明「把【主角（长发女生）】换成 @图片1 中的人物」，只发送被选中的图片；「调整后再生成」打开编辑页复刻预设。未配置、失败或视频过大时复刻照常进行，只参考视频文案。拆解费用由平台承担。
 
@@ -54,7 +54,7 @@ TikHub 适配已核对其 OpenAPI：搜索 `POST /api/v1/douyin/search/fetch_vid
 
 | 配置项 | 默认 | 范围 | 用在 |
 | --- | --- | --- | --- |
-| `HOT_CACHE_FEED_MINUTES` 创作页视频流 | 60 | 5–1440 | 创作页视频流（Redis，到期前 1 分钟后台刷新，旧数据最多保留 2 倍时长；无 Redis 时存数据库） |
+| `HOT_CACHE_FEED_MINUTES` 创作页视频流 | 1440 | 5–1440 | 创作页视频流（Redis，到期前 1 分钟后台刷新，旧数据最多保留 2 倍时长；无 Redis 时存数据库） |
 | `HOT_CACHE_SEARCH_MINUTES` 搜索结果 | 5 | 1–1440 | 热门视频页的关键词搜索（按关键词、排序、翻页分开缓存） |
 | `HOT_CACHE_WORDS_MINUTES` 热门搜索词 | 10 | 1–1440 | 热门视频页的抖音热词 |
 | `HOT_CACHE_VIDEO_MINUTES` 视频详情与链接解析 | 30 | 1–720 | 视频详情页、文案提取和一键复刻粘贴链接读取视频（同一链接在时长内不再解析，表 `hot_links`） |

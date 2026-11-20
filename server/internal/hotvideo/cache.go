@@ -34,7 +34,7 @@ func pick(d, fallback time.Duration) time.Duration {
 	}
 	return fallback
 }
-func (s *Service) feedFresh() time.Duration   { return pick(s.TTL.Feed, time.Hour) }
+func (s *Service) feedFresh() time.Duration   { return pick(s.TTL.Feed, 24*time.Hour) }
 func (s *Service) searchFresh() time.Duration { return pick(s.TTL.Search, 5*time.Minute) }
 func (s *Service) wordsFresh() time.Duration  { return pick(s.TTL.Words, 10*time.Minute) }
 func (s *Service) videoFresh() time.Duration  { return pick(s.TTL.Video, 30*time.Minute) }

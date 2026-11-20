@@ -19,7 +19,7 @@ type HotCacheField struct {
 }
 
 var HotCacheFields = []HotCacheField{
-	{"HOT_CACHE_FEED_MINUTES", "创作页视频流缓存（分钟）", 60, 5, 1440, "所有人共用的创作页视频，到期前 1 分钟后台自动刷新。"},
+	{"HOT_CACHE_FEED_MINUTES", "创作页视频流缓存（分钟）", 1440, 5, 1440, "所有人共用的创作页视频，到期前 1 分钟后台自动刷新。"},
 	{"HOT_CACHE_SEARCH_MINUTES", "搜索结果缓存（分钟）", 5, 1, 1440, "同一关键词、排序和页码在这段时间内不再请求 TikHub。"},
 	{"HOT_CACHE_WORDS_MINUTES", "热门搜索词缓存（分钟）", 10, 1, 1440, "热门视频页的抖音热词。"},
 	{"HOT_CACHE_VIDEO_MINUTES", "视频详情与链接解析缓存（分钟）", 30, 1, 720, "视频详情页和粘贴链接读取的视频；播放地址会过期，建议不超过 120。导入素材和一键复刻取原视频时总是实时读取。"},

@@ -32,12 +32,13 @@ func (s *Service) FeedWords() []string {
 	return words
 }
 
-// FeedSource is "billboard" unless keyword search was chosen.
+// FeedSource is "search" (TikHub fetch_video_search_v2 per keyword) unless
+// the hot list ("billboard") was chosen.
 func (s *Service) FeedSource() string {
-	if s != nil && s.Source == "search" {
-		return "search"
+	if s != nil && s.Source == "billboard" {
+		return "billboard"
 	}
-	return "billboard"
+	return "search"
 }
 
 // fetch reads feed pages from the chosen source, everything else by search.

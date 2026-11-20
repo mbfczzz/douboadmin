@@ -63,7 +63,7 @@ func TestVideoAndLinkCacheFollowTheConfiguredWindow(t *testing.T) {
 	}
 	// Defaults when nothing is configured.
 	d := (&Service{}).CacheTTLs()
-	if d != (CacheTTL{Feed: time.Hour, Search: 5 * time.Minute, Words: 10 * time.Minute, Video: 30 * time.Minute}) {
+	if d != (CacheTTL{Feed: 24 * time.Hour, Search: 5 * time.Minute, Words: 10 * time.Minute, Video: 30 * time.Minute}) {
 		t.Fatal(d)
 	}
 }

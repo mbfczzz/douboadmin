@@ -34,7 +34,9 @@ func feedFixture(t *testing.T, failing *atomic.Bool) (*Service, *miniredis.Minir
 	mr := miniredis.RunT(t)
 	rc := redis.NewClient(&redis.Options{Addr: mr.Addr()})
 	t.Cleanup(func() { _ = rc.Close() })
-	return &Service{Client: &Client{BaseURL: server.URL, Key: "fixture"}, Store: store.NewMemory(), Redis: rc}, mr, &calls
+	// An hour and the hot list, as configured, so refresh and expiry are
+	// checked against a set window (the defaults are search and a day).
+	return &Service{Client: &Client{BaseURL: server.URL, Key: "fixture"}, Store: store.NewMemory(), Redis: rc, Source: "billboard", TTL: CacheTTL{Feed: time.Hour}}, mr, &calls
 }
 
 // Feed pages come from Redis; the refresher refetches only after 59 minutes.
@@ -128,9 +130,9 @@ func TestFeedWordsDefaultAndConfigured(t *testing.T) {
 	}
 }
 
-// The feed reads the hot list by default ("热门" = no filter, other chips
-// filter it; undocumented reply, both common shapes read, cursor = page);
-// HOT_FEED_SOURCE=search switches back to keyword search, cached separately.
+// HOT_FEED_SOURCE=billboard reads the hot list ("热门" = no filter, other
+// chips filter it; undocumented reply, both common shapes read, cursor =
+// page); search (the default) is keyword search, cached separately.
 func TestFeedSourceHotListAndSearchSwitch(t *testing.T) {
 	var bodies []map[string]any
 	var paths []string
@@ -147,7 +149,7 @@ func TestFeedSourceHotListAndSearchSwitch(t *testing.T) {
 	}))
 	defer server.Close()
 	ctx := context.Background()
-	s := &Service{Client: &Client{BaseURL: server.URL, Key: "fixture"}, Store: store.NewMemory()}
+	s := &Service{Client: &Client{BaseURL: server.URL, Key: "fixture"}, Store: store.NewMemory(), Source: "billboard"}
 	r, err := s.fetch(ctx, FeedQuery(AllKeyword))
 	if err != nil || len(r.Items) != 1 || r.Items[0].Cover != "https://p3.douyinpic.com/c.jpg" || r.Items[0].Author != "作者" || *r.Items[0].Likes != 5 || r.Cursor != 2 || r.HasMore {
 		t.Fatalf("%+v %v", r, err)
@@ -172,5 +174,10 @@ func TestFeedSourceHotListAndSearchSwitch(t *testing.T) {
 	}
 	if s.cacheID(FeedQuery("美食")) == hotKey {
 		t.Fatal("sources share a cache key")
+	}
+	// Nothing configured: keyword search (fetch_video_search_v2), kept a day.
+	unset := &Service{}
+	if unset.FeedSource() != "search" || unset.feedFresh() != 24*time.Hour {
+		t.Fatal(unset.FeedSource(), unset.feedFresh())
 	}
 }
