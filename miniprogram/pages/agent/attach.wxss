@@ -1,21 +1,29 @@
-/* The composer: 图片 / 视频 buttons inside it, this message's attachments
-   above the text, and the attachments a sent message carried. */
+/* The composer: 图片 / 视频 at its top left, this message's attachments
+   under them, the text and 发送 below; and the attachments a sent message
+   carried. */
+.composer-tools {
+  display: flex;
+  gap: 6px;
+  padding: 2px 4px 4px;
+}
 .composer-row {
   display: flex;
   align-items: flex-end;
-  gap: 2px;
+  gap: 8px;
 }
 .composer-row textarea {
-  margin-left: 4px;
+  margin-left: 8px;
 }
 .attach-btn {
-  width: 34px;
-  height: 40px;
-  flex-shrink: 0;
   display: flex;
   align-items: center;
-  justify-content: center;
-  border-radius: 12px;
+  gap: 4px;
+  height: 28px;
+  padding: 0 10px 0 8px;
+  border-radius: 14px;
+  font-size: 12px;
+  color: var(--ui-muted);
+  background: var(--ui-field);
 }
 .attach-row {
   display: flex;

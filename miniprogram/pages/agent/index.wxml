@@ -57,6 +57,10 @@
       <t-icon name="edit" size="14" /><text class="edit-note">编辑后重新发送，原来这一问不再算进对话</text>
       <text class="edit-cancel" bindtap="cancelEdit" aria-role="button">取消</text>
     </view>
+    <view class="composer-tools">
+      <view class="attach-btn" data-kind="image" bindtap="addMaterial" hover-class="icon-pressed" aria-role="button" aria-label="添加图片"><image class="gl gl-16" src="/assets/glyphs/image-muted.png" /><text>图片</text></view>
+      <view class="attach-btn" data-kind="video" bindtap="addMaterial" hover-class="icon-pressed" aria-role="button" aria-label="添加视频"><image class="gl gl-16" src="/assets/glyphs/video-muted.png" /><text>视频</text></view>
+    </view>
     <view wx:if="{{attached.length||uploading}}" class="attach-row">
       <view wx:for="{{attached}}" wx:key="id" class="attach" data-id="{{item.id}}" bindtap="previewMaterial" aria-role="button" aria-label="{{'查看'+item.label}}">
         <image class="attach-photo" src="{{item.isImage?item.data.url:item.data.thumbnailUrl}}" mode="aspectFill" />
@@ -67,8 +71,6 @@
       <view wx:if="{{uploading}}" class="attach attach-busy"><t-loading size="16px" /></view>
     </view>
     <view class="composer-row">
-      <view class="attach-btn" data-kind="image" bindtap="addMaterial" hover-class="icon-pressed" aria-role="button" aria-label="添加图片"><image class="gl gl-20" src="/assets/glyphs/image-muted.png" /></view>
-      <view class="attach-btn" data-kind="video" bindtap="addMaterial" hover-class="icon-pressed" aria-role="button" aria-label="添加视频"><image class="gl gl-20" src="/assets/glyphs/video-muted.png" /></view>
       <textarea auto-height maxlength="500" focus="{{focus}}" placeholder="{{attached.length?'说说想怎么分析，或直接发送':messages.length?'继续说说要怎么改…':'说说你的创作想法…'}}" placeholder-class="composer-placeholder" value="{{prompt}}" bindinput="input" bindblur="blur" cursor-spacing="24" show-confirm-bar="{{false}}" />
       <text wx:if="{{prompt.length>400&&!(models.length>1||priceHint)}}" class="composer-count {{prompt.length>=500?'full':''}}">{{prompt.length}}/500</text>
       <view wx:if="{{replying&&!busy&&!prompt&&!attached.length}}" class="send ready" bindtap="stopReply" hover-class="icon-pressed" aria-role="button" aria-label="停止回复"><view class="stop-mark" /></view>
