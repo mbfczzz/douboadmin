@@ -46,6 +46,19 @@ TikHub 适配已核对其 OpenAPI：搜索 `POST /api/v1/douyin/search/fetch_vid
 - 分享链接：链接里已带作品 ID 时直接用详情接口；短链接（`v.douyin.com`）交给 `GET /api/v1/douyin/app/v3/fetch_one_video_by_share_url`，返回空时按 TikHub 说明改用同参数的 `web/fetch_one_video_by_share_url`。服务端自身不打开用户粘贴的地址，只接受抖音域名。`filter_list[0].reason` 为 5 / 10 / 8 时分别提示私密、部分可见、删除或版权受限（不可用结果同样计费）。
 - 无水印原视频：导入素材（`POST /api/hot/videos/{id}/import`）先调 `GET /api/v1/douyin/app/v3/fetch_video_high_quality_play_url?aweme_id=…&region=CN` 取原始上传画质（每次约 0.005 美元，`region=CN` 返回国内 CDN）；蓝 V 账号与投流作品不支持原画，此时改用详情里的 `play_addr`（跳过带水印的 `playwm` 地址）。
 
+### TikHub 缓存（后台可配置）
+
+「服务接入配置 → 热门视频接口」里的四个时长（分钟，保存后重启生效）决定 TikHub 结果复用多久：
+
+| 配置项 | 默认 | 范围 | 用在 |
+| --- | --- | --- | --- |
+| `HOT_CACHE_FEED_MINUTES` 创作页视频流 | 60 | 5–1440 | 创作页视频流（Redis，到期前 1 分钟后台刷新，旧数据最多保留 2 倍时长；无 Redis 时存数据库） |
+| `HOT_CACHE_SEARCH_MINUTES` 搜索结果 | 5 | 1–1440 | 热门视频页的关键词搜索（按关键词、排序、翻页分开缓存） |
+| `HOT_CACHE_WORDS_MINUTES` 热门搜索词 | 10 | 1–1440 | 热门视频页的抖音热词 |
+| `HOT_CACHE_VIDEO_MINUTES` 视频详情与链接解析 | 30 | 1–720 | 视频详情页、文案提取和一键复刻粘贴链接读取视频（同一链接在时长内不再解析，表 `hot_links`） |
+
+始终实时调用、不走缓存的：导入素材和一键复刻准备时读取视频详情（要新鲜的播放地址下载）、取无水印原画（签名地址会过期）。搜索新拉到的结果会顺便存下每条视频，点进详情页时在有效期内不再请求 TikHub；命中缓存的搜索页不再重复写库。
+
 ## 混剪界面与通知
 
 小程序混剪界面保留，生成服务暂未开放。后台音乐管理、混剪专用配置及服务器视频合成代码已移除。

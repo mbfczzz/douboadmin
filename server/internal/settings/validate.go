@@ -68,6 +68,11 @@ func validate(g Group, v Values, production bool) error {
 		if _, err := FeedKeywords(v["HOT_FEED_KEYWORDS"]); err != nil {
 			return invalid("HOT_FEED_KEYWORDS", err.Error())
 		}
+		for _, f := range HotCacheFields {
+			if _, err := HotCacheMinutes(f, v[f.Key]); err != nil {
+				return invalid(f.Key, err.Error())
+			}
+		}
 	}
 	if g.ID == "chat" {
 		for _, key := range []string{"CHAT_DEEPSEEK_MODELS", "CHAT_ARK_MODELS"} {

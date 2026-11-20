@@ -43,7 +43,7 @@ func TestFeedServedFromRedisAndRefreshedBeforeAnHour(t *testing.T) {
 	ctx := context.Background()
 	q := FeedQuery("美食")
 	s.refreshFeed(ctx, q) // cold: fills Redis
-	if calls.Load() != 1 || mr.TTL(s.feedKey(q)) != feedKeep {
+	if calls.Load() != 1 || mr.TTL(s.feedKey(q)) != s.feedKeep() {
 		t.Fatalf("calls %d ttl %v", calls.Load(), mr.TTL(s.feedKey(q)))
 	}
 	r, err := s.Search(ctx, q)
@@ -93,7 +93,7 @@ func age(t *testing.T, s *Service, q Query, by time.Duration) {
 	}
 	r.FetchedAt = r.FetchedAt.Add(-by)
 	raw, _ := json.Marshal(r)
-	if err := s.Redis.Set(context.Background(), s.feedKey(q), raw, feedKeep).Err(); err != nil {
+	if err := s.Redis.Set(context.Background(), s.feedKey(q), raw, s.feedKeep()).Err(); err != nil {
 		t.Fatal(err)
 	}
 }

@@ -17,12 +17,11 @@ import (
 // hour old, so visitors are served from Redis and TikHub is called about once
 // an hour per keyword. A failed refresh keeps the old page (kept up to two
 // hours) and is retried the next minute.
-const (
-	feedFresh   = time.Hour
-	feedRefresh = feedFresh - time.Minute
-	feedKeep    = 2 * time.Hour
-	feedLock    = 2 * time.Minute
-)
+// The hour is the default; 服务接入配置 sets it (CacheTTL.Feed).
+const feedLock = 2 * time.Minute
+
+func (s *Service) feedRefresh() time.Duration { return s.feedFresh() - time.Minute }
+func (s *Service) feedKeep() time.Duration    { return 2 * s.feedFresh() }
 
 // FeedWords are the configured keywords, or the defaults.
 func (s *Service) FeedWords() []string {
@@ -81,7 +80,7 @@ func (s *Service) feedFetch(ctx context.Context, q Query) (Result, error) {
 	}
 	r.FetchedAt = time.Now().UTC()
 	if raw, e := json.Marshal(r); e == nil {
-		_ = s.Redis.Set(ctx, s.feedKey(q), raw, feedKeep).Err()
+		_ = s.Redis.Set(ctx, s.feedKey(q), raw, s.feedKeep()).Err()
 	}
 	return r, nil
 }
@@ -109,7 +108,7 @@ func (s *Service) RunFeedRefresh(ctx context.Context) {
 }
 
 func (s *Service) refreshFeed(ctx context.Context, q Query) {
-	if r, ok := s.feedGet(ctx, q); ok && time.Since(r.FetchedAt) < feedRefresh {
+	if r, ok := s.feedGet(ctx, q); ok && time.Since(r.FetchedAt) < s.feedRefresh() {
 		return
 	}
 	got, err := s.Redis.SetNX(ctx, s.feedKey(q)+":lock", "1", feedLock).Result()

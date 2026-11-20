@@ -15,7 +15,7 @@ func (s *Service) Hotwords(ctx context.Context) ([]string, error) {
 		FetchedAt time.Time `json:"fetchedAt"`
 	}
 	_ = json.Unmarshal(old.Data, &saved)
-	if len(saved.Words) > 0 && time.Since(saved.FetchedAt) < 10*time.Minute {
+	if len(saved.Words) > 0 && time.Since(saved.FetchedAt) < s.wordsFresh() {
 		return saved.Words, nil
 	}
 	words, err := s.Client.Hotwords(ctx)

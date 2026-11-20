@@ -41,9 +41,8 @@ func (a *Server) hotSearch(w http.ResponseWriter, r *http.Request) {
 	if cursor == 0 && !feed {
 		_, _ = a.Store.Put(r.Context(), "search_history", core.Record{ID: core.NewID(), Owner: user, Data: core.Data(map[string]any{"keyword": keyword, "searchedAt": time.Now().UTC()})}, 0)
 	}
-	for _, item := range result.Items {
-		old, _ := a.Store.Get(r.Context(), "hot_videos", item.ID)
-		_, _ = a.Store.Put(r.Context(), "hot_videos", core.Record{ID: item.ID, Data: core.Data(item)}, old.Version)
+	if !result.Cached { // a page served from cache was remembered when fetched
+		a.Hot.Remember(r.Context(), result.Items, result.FetchedAt)
 	}
 	reply(w, 200, result)
 }
@@ -57,13 +56,11 @@ func (a *Server) hotDetail(w http.ResponseWriter, r *http.Request) {
 		fail(w, 400, "视频标识无效")
 		return
 	}
-	v, e := a.Hot.Client.Detail(r.Context(), id)
+	v, e := a.Hot.Video(r.Context(), id)
 	if e != nil {
 		hotFail(w, r, e)
 		return
 	}
-	old, _ := a.Store.Get(r.Context(), "hot_videos", id)
-	_, _ = a.Store.Put(r.Context(), "hot_videos", core.Record{ID: id, Data: core.Data(v)}, old.Version)
 	reply(w, 200, v)
 }
 func (a *Server) hotDiscovery(w http.ResponseWriter, r *http.Request) {
@@ -147,9 +144,9 @@ func (a *Server) hotLink(w http.ResponseWriter, r *http.Request) {
 	}
 	var video hotvideo.Video
 	if id != "" {
-		video, e = a.Hot.Client.Detail(r.Context(), id)
+		video, e = a.Hot.Video(r.Context(), id)
 	} else {
-		video, e = a.Hot.Client.ShareVideo(r.Context(), link)
+		video, e = a.Hot.VideoByLink(r.Context(), link)
 	}
 	if e != nil {
 		hotFail(w, r, e)
