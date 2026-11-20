@@ -12,6 +12,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 )
 
 // A chat turn on a token-priced DeepSeek model: hold the most it can cost,
@@ -158,5 +159,30 @@ func TestDeepSeekRejectsPictures(t *testing.T) {
 	j.Input.Assets = []string{"asset-1"}
 	if _, err := p.Generate(t.Context(), j); err == nil || !strings.Contains(err.Error(), "不能识别图片") || len(*bodies) != 0 {
 		t.Fatal(err)
+	}
+}
+
+// A streamed reply is saved as it grows (for the page), then kept whole.
+func TestDirectChatSavesTheReplySoFar(t *testing.T) {
+	s, p, j, _ := directFixture(t, "", 200)
+	var mid string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/event-stream")
+		_, _ = io.WriteString(w, "data: {\"choices\":[{\"delta\":{\"content\":\"镜头1\"}}]}\n\n")
+		w.(http.Flusher).Flush()
+		for i := 0; i < 100 && mid == ""; i++ {
+			mid = Partial(r.Context(), s, j.ID)
+			time.Sleep(10 * time.Millisecond)
+		}
+		_, _ = io.WriteString(w, "data: {\"choices\":[{\"delta\":{\"content\":\"：推门\"}}]}\n\ndata: [DONE]\n\n")
+	}))
+	defer srv.Close()
+	p.Clients["deepseek"].BaseURL = srv.URL
+	text, err := p.Generate(t.Context(), j)
+	if err != nil || text != "镜头1：推门" || mid != "镜头1" {
+		t.Fatal(text, err, mid)
+	}
+	if Partial(t.Context(), s, j.ID) != "" {
+		t.Fatal("a finished reply still shows as partial")
 	}
 }

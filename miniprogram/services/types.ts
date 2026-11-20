@@ -14,6 +14,8 @@ export interface ChatMessage {
   role: string;
   text: string;
   pending?: boolean;
+  streaming?: boolean; // a reply shown as it is written
+  planning?: boolean; // …and it has started writing a plan
   failed?: boolean;
   prompt?: string; // the question a reply answers, for "重新编辑"
   lines?: { label: string; text: string }[];

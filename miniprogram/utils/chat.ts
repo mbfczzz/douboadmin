@@ -29,12 +29,22 @@ function genMessage(job: Job): ChatMessage {
   return { id: job.id + "g", role: "gen", text: job.id, gen: { status: job.status, progress: job.progress || 0, kind: job.input.kind, thumb, error: job.error || "", count } };
 }
 
-export function chatMessages(jobs: Job[]): ChatMessage[] {
+// A reply still being written: its prose so far; a plan block being written
+// shows as "正在整理方案" until the whole reply arrives as a card.
+function streaming(job: Job, partial: string): ChatMessage {
+  const fence = partial.indexOf("```");
+  const text = plainReply(fence >= 0 ? partial.slice(0, fence) : partial);
+  return { id: job.id + "a", role: "assistant", text, prompt: job.input.prompt, lines: scriptLines(text), pending: true, streaming: true, ...(fence >= 0 ? { planning: true } : {}) };
+}
+
+export function chatMessages(jobs: Job[], partials: Record<string, string> = {}): ChatMessage[] {
   const messages = jobs
     .filter((job) => job.input.kind === "chat" || (job.input.sessionId && (job.input.kind === "image" || job.input.kind === "video")))
     .reverse()
     .flatMap((job): ChatMessage[] => {
       if (job.input.kind !== "chat") return [genMessage(job)];
+      const partial = job.status === "running" ? partials[job.id] : "";
+      if (partial) return [{ id: job.id + "u", role: "user", text: job.input.prompt }, streaming(job, partial)];
       const failed = job.status === "failed";
       const split = job.status === "succeeded" ? splitReply(job.result || "") : { text: failed ? job.error || "回复失败" : waiting(job) };
       const reply = { ...split, text: job.status === "succeeded" ? plainReply(split.text) : split.text };

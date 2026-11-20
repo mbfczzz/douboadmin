@@ -19,16 +19,20 @@
   </view>
   <block wx:else>
     <view class="agent-name"><view class="agent-avatar"><image class="gl gl-14" src="/assets/glyphs/ai-pen-dark.png" /></view><text>豆播 Agent</text></view>
-    <view wx:if="{{item.pending}}" class="typing-row"><view class="typing" aria-label="正在回复"><view /><view /><view /></view><text class="typing-note">{{item.text}}</text></view>
+    <view wx:if="{{item.pending&&!item.streaming}}" class="typing-row"><view class="typing" aria-label="正在回复"><view /><view /><view /></view><text class="typing-note">{{item.text}}</text></view>
     <view wx:elif="{{item.failed}}" class="reply-failed">
       <t-icon name="error-circle" size="16" /><text>{{item.text}}</text>
       <text class="retry" data-prompt="{{item.prompt}}" bindtap="retry">重新编辑 ›</text>
     </view>
     <block wx:else>
-      <view wx:if="{{item.text}}" class="reply">
+      <view wx:if="{{item.text}}" class="reply {{item.streaming&&!item.planning?'is-streaming':''}}">
         <view wx:for="{{item.lines}}" wx:for-item="line" wx:for-index="n" wx:key="n" class="line {{line.label?'shot':''}} {{line.text||line.label?'':'gap'}}">
           <text wx:if="{{line.label}}" class="shot-label">{{line.label}}</text><text selectable>{{line.text}}</text>
         </view>
+      </view>
+      <view wx:if="{{item.planning}}" class="plan-writing">
+        <image wx:if="{{art[session.data.skill]}}" class="plan-writing-bg" src="{{art[session.data.skill]}}" mode="aspectFill" />
+        <view class="typing" aria-label="正在整理方案"><view /><view /><view /></view><text>正在整理方案…</text>
       </view>
       <view wx:if="{{item.broken}}" class="plan-broken">
         <t-icon name="error-circle" size="14" /><text>方案没有完整输出</text>
@@ -59,11 +63,11 @@
           <button class="plan-go" disabled="{{generating}}" data-index="{{index}}" bindtap="generatePlan">{{generating?'提交中…':item.latest?'确认生成':'用这一版生成'}}<text wx:if="{{!generating&&planPrice.id===item.id&&planPrice.text}}" class="plan-price"> · {{planPrice.text}}</text></button>
         </view>
       </view>
-      <view class="reply-actions">
+      <view wx:if="{{!item.streaming}}" class="reply-actions">
         <view wx:if="{{item.copy&&(item.latest||!item.plan||item.text)}}" class="reply-icon" data-text="{{item.copy}}" bindtap="copy" hover-class="icon-pressed" aria-role="button" aria-label="复制"><image class="gl gl-18" src="/assets/glyphs/copy-muted.png" /></view>
         <view wx:if="{{!item.plan&&!item.broken}}" class="use-script" data-index="{{index}}" data-text="{{item.text}}" bindtap="use" hover-class="starter-pressed" aria-role="button"><image class="gl gl-16" src="/assets/glyphs/video.png" /><text>带到创作</text></view>
       </view>
-      <scroll-view wx:if="{{index===messages.length-1&&!busy}}" scroll-x class="follow-ups">
+      <scroll-view wx:if="{{index===messages.length-1&&!busy&&!item.streaming}}" scroll-x class="follow-ups">
         <view class="follow-row">
           <view wx:for="{{followUps}}" wx:for-item="ask" wx:key="*this" class="follow" data-value="{{ask}}" bindtap="quick" hover-class="starter-pressed">{{ask}}</view>
         </view>

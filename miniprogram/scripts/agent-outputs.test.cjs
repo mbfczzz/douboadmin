@@ -96,3 +96,18 @@ test("a message sends only the pictures it names; a waiting reply shows its seco
   const [, waiting] = chatMessages([{ id: "w", status: "running", createdAt: new Date(Date.now() - 12000).toISOString(), input: { kind: "chat", prompt: "做" } }]);
   assert.equal(waiting.text, "正在构思… 已 12 秒");
 });
+
+test("a reply being written shows its prose so far, then a plan placeholder", () => {
+  const job = { id: "s", status: "running", input: { kind: "chat", prompt: "做" } };
+  const [, early] = plain(chatMessages([job], { s: "好的，**开场**先推门" }));
+  assert.equal(early.text, "好的，开场先推门");
+  assert.equal(early.streaming, true);
+  assert.equal(early.pending, true);
+  assert.equal(early.planning, undefined);
+  const [, planning] = plain(chatMessages([job], { s: "好的。\n```plan\n{\"kind\":\"vi" }));
+  assert.equal(planning.text, "好的。");
+  assert.equal(planning.planning, true);
+  assert.equal(planning.plan, undefined);
+  const [, done] = plain(chatMessages([{ ...job, status: "succeeded", result: "好的" }], { s: "好" }));
+  assert.equal(done.streaming, undefined); // the finished reply replaces the partial
+});

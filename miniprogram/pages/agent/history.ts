@@ -20,8 +20,11 @@ type Page = {
   historyPage: number;
   history: Job[];
   historyKey: string;
+  partials: Record<string, string>;
   setData(data: Record<string, unknown>): void;
   priceLatest?(): Promise<void>;
+  stream(): void;
+  stopStream(): void;
   autoTitle?(): Promise<void>;
 };
 const filter = (page: Page) => "&session=" + page.data.session!.id;
@@ -41,6 +44,8 @@ export const historyHandlers = {
     const key = sessionToken() + ":" + (session?.id || "");
     if (key !== this.historyKey) {
       this.historyKey = key;
+      this.stopStream();
+      this.partials = {};
       this.history = [];
       this.historyPage = 1;
       // Until history arrives, show this project's last conversation.
@@ -68,7 +73,7 @@ export const historyHandlers = {
       if (!running(jobs)) clearInterval(this.timer);
       else if (this.pollMs === 1500 && !jobs.some((j) => j.input.kind === "chat" && /queued|running/.test(j.status)))
         (this as unknown as { poll(): void }).poll(); // the reply came: back to the slower pace
-      const messages = chatMessages(jobs);
+      const messages = chatMessages(jobs, this.partials);
       const changed = JSON.stringify(messages) !== JSON.stringify(this.data.messages);
       // Scroll down only when a message arrives, not when a waiting reply's
       // seconds tick (that would pull a reader back while scrolling up).
@@ -79,6 +84,7 @@ export const historyHandlers = {
       if (changed) void this.priceLatest?.();
       if (changed) void this.autoTitle?.();
       if (!this.data.ready) this.setData({ ready: true });
+      this.stream();
       // Replies still being written are not cached.
       if (changed) writeView("agent:" + session.id, messages.filter((m) => !m.pending).slice(-30));
     } catch (e) {
@@ -99,7 +105,7 @@ export const historyHandlers = {
       if (version !== this.loadVersion) return;
       this.historyPage++;
       this.history = [...this.history, ...result.items.filter((j) => !this.history.some((old) => old.id === j.id))];
-      this.setData({ messages: chatMessages(this.history), hasOlder: this.history.length < result.total });
+      this.setData({ messages: chatMessages(this.history, this.partials), hasOlder: this.history.length < result.total });
     } catch (e) {
       if (version === this.loadVersion) error(e);
     } finally {

@@ -11,6 +11,7 @@ import type { ProjectView } from "./session";
 import { agentModels } from "./models";
 import type { ChatModel } from "./models";
 import { historyHandlers } from "./history";
+import { streamHandlers } from "./stream";
 import { sessionHandlers, projectView } from "./session";
 import { materialHandlers, materialLabels } from "./materials";
 import { generateHandlers } from "./generate";
@@ -21,6 +22,7 @@ import { namedPictures } from "./named";
 Page({
   ...agentModels,
   ...historyHandlers,
+  ...streamHandlers,
   ...sessionHandlers,
   ...materialHandlers,
   ...generateHandlers,
@@ -66,6 +68,10 @@ Page({
   historyPage: 1,
   history: [] as Job[],
   historyKey: "",
+  partials: {} as Record<string, string>,
+  streamId: "",
+  streamTimer: 0,
+  follow: true,
   onShow() {
     this.onResize();
     showArt(this, (art) => ({ art: { product: art.skillProduct, store: art.skillStore, image: art.skillImage, general: art.skillGeneral } }));
@@ -88,11 +94,13 @@ Page({
     this.fetching = false;
     this.setData({ loadingOlder: false });
     clearInterval(this.timer);
+    this.stopStream();
   },
   onUnload() {
     this.destroyed = true;
     this.loadVersion++;
     clearInterval(this.timer);
+    this.stopStream();
   },
   input(e: WechatMiniprogram.Input) {
     this.setData({ prompt: e.detail.value });
@@ -139,6 +147,7 @@ Page({
       );
       if (this.destroyed) return;
       const added = chatMessages([job]);
+      this.follow = true; // a new question follows its reply down
       this.setData({
         messages: [...this.data.messages.filter((m: ChatMessage) => !added.some((item) => item.id === m.id)), ...added],
         bottom: "m" + job.id + "a",

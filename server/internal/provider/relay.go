@@ -53,6 +53,8 @@ type Execution struct {
 	// Tokens a directly-called chat model reported (按量计费).
 	InputTokens  int `json:"inputTokens,omitempty"`
 	OutputTokens int `json:"outputTokens,omitempty"`
+	// Partial is a direct chat reply so far, while it is being written.
+	Partial string `json:"partial,omitempty"`
 }
 
 func (p *Relay) checkpoint(ctx context.Context, row *core.Record, e Execution) error {

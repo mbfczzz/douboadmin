@@ -2,6 +2,7 @@ package api
 
 import (
 	"doubo/server/internal/core"
+	"doubo/server/internal/provider"
 	"errors"
 	"net/http"
 )
@@ -39,6 +40,25 @@ func (a *Server) job(w http.ResponseWriter, r *http.Request) {
 	}
 	a.presentJob(r.Context(), &j)
 	reply(w, 200, j)
+}
+
+// jobReply is the reply so far of the user's chat turn, polled often while it
+// is being written so the page can show it as it grows.
+func (a *Server) jobReply(w http.ResponseWriter, r *http.Request) {
+	j, e := a.Store.Job(r.Context(), r.PathValue("id"))
+	if e != nil {
+		dbError(w, e)
+		return
+	}
+	if j.UserID != identity(r).ID || j.Input.Kind != "chat" {
+		fail(w, 404, "任务不存在")
+		return
+	}
+	text := ""
+	if j.Status == "running" {
+		text = provider.Partial(r.Context(), a.Store, j.ID)
+	}
+	reply(w, 200, map[string]string{"status": j.Status, "text": text})
 }
 
 func (a *Server) submit(w http.ResponseWriter, r *http.Request, in core.JobInput) {

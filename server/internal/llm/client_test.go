@@ -18,7 +18,7 @@ func TestProviderErrorsAreExplainedInChinese(t *testing.T) {
 	}
 	for body, want := range cases {
 		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(404); _, _ = w.Write([]byte(body)) }))
-		_, _, err := (&Client{BaseURL: srv.URL, Key: "k"}).Complete(t.Context(), "m", nil, 0)
+		_, _, err := (&Client{BaseURL: srv.URL, Key: "k"}).Complete(t.Context(), "m", nil, 0, nil)
 		srv.Close()
 		if err == nil || !strings.Contains(err.Error(), want) || strings.ContainsAny(err.Error(), "abcdefghijklmnopqrstuvwxyz") {
 			t.Fatalf("%s -> %v", want, err)
@@ -38,7 +38,7 @@ func TestSeedModelsAnswerWithoutThinking(t *testing.T) {
 	defer srv.Close()
 	c := &Client{BaseURL: srv.URL, Key: "k"}
 	for _, m := range []string{"doubao-seed-2-1-lite-260915", "ep-20261120-abc", "deepseek-chat"} {
-		if _, _, err := c.Complete(t.Context(), m, nil, 0); err != nil {
+		if _, _, err := c.Complete(t.Context(), m, nil, 0, nil); err != nil {
 			t.Fatal(err)
 		}
 	}

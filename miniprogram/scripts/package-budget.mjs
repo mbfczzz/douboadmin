@@ -233,7 +233,8 @@ console.log(
 // 964,151 B. 940 -> 942 KiB.
 // Faster Agent replies: only named pictures are sent, 1.5 s checks while
 // a reply is coming, waiting seconds shown: 965,950 B. 942 -> 944 KiB.
-const budget = 944 * 1024;
+// Agent replies stream (shown as written, caret, plan placeholder): 971,032 B. 944 -> 949 KiB.
+const budget = 949 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

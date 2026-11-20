@@ -29,8 +29,11 @@ type Usage struct {
 }
 
 // Complete sends messages (OpenAI shape) and returns the reply text and usage.
-func (c *Client) Complete(ctx context.Context, model string, messages []any, maxTokens int) (string, Usage, error) {
-	body := map[string]any{"model": model, "messages": messages, "stream": false}
+// The reply is streamed: onText (when set) gets the text so far as it grows,
+// and an error from it stops the reply.
+func (c *Client) Complete(ctx context.Context, model string, messages []any, maxTokens int, onText func(string) error) (string, Usage, error) {
+	body := map[string]any{"model": model, "messages": messages, "stream": true,
+		"stream_options": map[string]bool{"include_usage": true}}
 	if maxTokens > 0 {
 		body["max_tokens"] = maxTokens
 	}
@@ -56,28 +59,22 @@ func (c *Client) Complete(ctx context.Context, model string, messages []any, max
 		return "", Usage{}, &Error{Message: "对话模型连接失败，请稍后重试", Retry: true}
 	}
 	defer res.Body.Close()
-	data, _ := io.ReadAll(io.LimitReader(res.Body, 4<<20))
 	if res.StatusCode != 200 {
+		data, _ := io.ReadAll(io.LimitReader(res.Body, 1<<20))
 		return "", Usage{}, upstream(res.StatusCode, data)
 	}
-	var reply struct {
-		Choices []struct {
-			Message struct {
-				Content string `json:"content"`
-			} `json:"message"`
-		} `json:"choices"`
-		Usage *Usage `json:"usage"`
+	var text string
+	var usage Usage
+	if strings.HasPrefix(res.Header.Get("Content-Type"), "text/event-stream") {
+		text, usage, err = readStream(res.Body, onText)
+	} else { // a provider that ignored "stream" answers in one piece
+		text, usage, err = readWhole(res.Body)
 	}
-	if json.Unmarshal(data, &reply) != nil || len(reply.Choices) == 0 {
-		return "", Usage{}, &Error{Message: "对话模型返回格式无效"}
+	if err != nil {
+		return "", Usage{}, err
 	}
-	text := strings.TrimSpace(reply.Choices[0].Message.Content)
-	if text == "" {
+	if text = strings.TrimSpace(text); text == "" {
 		return "", Usage{}, &Error{Message: "对话模型没有返回内容，请换个说法重试"}
-	}
-	usage := Usage{}
-	if reply.Usage != nil {
-		usage = *reply.Usage
 	}
 	return text, usage, nil
 }

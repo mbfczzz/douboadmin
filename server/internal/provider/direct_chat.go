@@ -89,7 +89,10 @@ func (p *DirectChat) Generate(ctx context.Context, j core.Job) (string, error) {
 	if err = p.checkpoint(ctx, &row, e); err != nil {
 		return "", ErrPending // another worker owns this turn
 	}
-	text, usage, err := client.Complete(ctx, key, messages, m.Settings.OutputTokens())
+	text, usage, err := client.Complete(ctx, key, messages, m.Settings.OutputTokens(), p.partial(ctx, &row, &e))
+	if errors.Is(err, errTurnTaken) {
+		return "", ErrPending
+	}
 	if err != nil {
 		e.Phase, e.Error = "failed", err.Error()
 		_ = p.checkpoint(ctx, &row, e)
@@ -98,6 +101,7 @@ func (p *DirectChat) Generate(ctx context.Context, j core.Job) (string, error) {
 	if usage.Input+usage.Output == 0 { // provider omitted usage: count characters instead
 		usage = llm.Usage{Input: len([]rune(j.Input.Prompt)), Output: len([]rune(text))}
 	}
+	e.Partial = ""
 	e.Phase, e.Result, e.InputTokens, e.OutputTokens = "succeeded", text, usage.Input, usage.Output
 	if err = p.checkpoint(ctx, &row, e); err != nil {
 		return "", ErrPending // the next attempt sees "submitting" and ends the turn

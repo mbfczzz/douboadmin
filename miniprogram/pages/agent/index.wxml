@@ -32,12 +32,13 @@
       </view>
     </view>
   </view></scroll-view>
-  <scroll-view wx:else scroll-y class="chat-scroll" scroll-into-view="{{bottom}}" scroll-with-animation>
+  <scroll-view wx:else scroll-y class="chat-scroll" scroll-into-view="{{bottom}}" scroll-with-animation bindscroll="chatScroll" bindscrolltolower="chatBottom" lower-threshold="60">
     <view class="conversation">
       <view wx:if="{{hasOlder}}" class="older" bindtap="older">
         <t-loading wx:if="{{loadingOlder}}" size="14px" /><image wx:else class="gl gl-14" src="/assets/glyphs/history-muted.png" /><text>{{loadingOlder?'正在加载…':'查看更早对话'}}</text>
       </view>
       <include src="./parts/messages.wxml" />
+      <view id="end-a" /><view id="end-b" />
     </view>
   </scroll-view>
   <view wx:if="{{session&&compact&&materials.length}}" class="material-fold" bindtap="toggleMaterials" hover-class="starter-pressed" aria-role="button" aria-label="展开素材">

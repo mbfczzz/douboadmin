@@ -68,6 +68,7 @@ func (a *Server) routes() {
 	m.HandleFunc("GET /api/jobs", a.auth("user", a.jobs))
 	m.HandleFunc("POST /api/jobs", a.auth("user", a.createJob))
 	m.HandleFunc("GET /api/jobs/{id}", a.auth("user", a.job))
+	m.HandleFunc("GET /api/jobs/{id}/reply", a.auth("user", a.jobReply))
 	m.HandleFunc("POST /api/jobs/{id}/retry", a.auth("user", a.retry))
 	m.HandleFunc("POST /api/assets", a.auth("user", a.upload))
 	m.HandleFunc("GET /api/assets/{id}", a.auth("user", a.asset))
