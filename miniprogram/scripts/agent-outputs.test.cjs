@@ -68,7 +68,7 @@ test("generation cards: status, picture count and a finished video without a cov
     ["vid", "succeeded", "", 1],
     ["img", "succeeded", "/m/1.png", 4],
   ]);
-  const wxml = require("node:fs").readFileSync("pages/agent/parts/messages.wxml", "utf8");
+  const wxml = require("node:fs").readFileSync("pages/agent/index.wxml", "utf8");
   assert.match(wxml, /wx:elif="\{\{item\.gen\.status==='succeeded'\}\}" class="gl gl-20"/); // a kind icon, not the error mark
 });
 
@@ -111,7 +111,7 @@ test("a reply being written shows its prose so far, then a plan placeholder", ()
 });
 
 test("plan revisions (缩短到 10 秒…) are offered only under a plan", () => {
-  const wxml = require("node:fs").readFileSync("pages/agent/parts/messages.wxml", "utf8");
+  const wxml = require("node:fs").readFileSync("pages/agent/index.wxml", "utf8");
   assert.match(wxml, /index===messages\.length-1&&!busy&&!item\.streaming&&item\.plan\}\}" scroll-x class="follow-ups"/);
 });
 

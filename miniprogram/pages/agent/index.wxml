@@ -1,3 +1,5 @@
+<wxs module="refs" src="../../utils/mentions.wxs" />
+<import src="../../utils/prompt-text.wxml" />
 <nav-bar title="Agent" />
 <view class="agent-page" style="--nav-bottom:{{navBottom}}px">
   <view class="project-bar">
@@ -37,7 +39,105 @@
       <view wx:if="{{hasOlder}}" class="older" bindtap="older" aria-role="button">
         <t-loading wx:if="{{loadingOlder}}" size="14px" /><image wx:else class="gl gl-14" src="/assets/glyphs/history-muted.png" /><text>{{loadingOlder?'正在加载…':'查看更早对话'}}</text>
       </view>
-      <include src="./parts/messages.wxml" />
+      <view wx:for="{{messages}}" wx:key="id" id="m{{item.id}}" class="message {{item.role}}">
+        <block wx:if="{{item.role==='user'}}">
+          <view wx:if="{{item.files.length}}" class="sent-files">
+            <block wx:for="{{item.files}}" wx:for-item="fid" wx:key="*this">
+              <view wx:if="{{files[fid]}}" class="attach sent" data-id="{{fid}}" bindtap="previewMaterial" aria-role="button" aria-label="{{'查看'+files[fid].label}}">
+                <image class="attach-photo" src="{{files[fid].thumb}}" mode="aspectFill" />
+                <view wx:if="{{files[fid].video}}" class="attach-play"><image class="gl gl-12" src="/assets/glyphs/play-muted.png" /></view>
+                <text class="attach-label">{{files[fid].label}}</text>
+              </view>
+            </block>
+          </view>
+          <view class="bubble"><text selectable>{{item.text}}</text></view>
+          <view class="ask-actions">
+            <view class="ask-act" data-text="{{item.text}}" bindtap="copy" hover-class="icon-pressed" aria-role="button" aria-label="复制"><image class="gl gl-14" src="/assets/glyphs/copy-muted.png" /></view>
+            <view class="ask-act" data-id="{{item.id}}" bindtap="editMessage" hover-class="icon-pressed" aria-role="button" aria-label="编辑后重新发送"><t-icon name="edit" size="14" /><text>编辑</text></view>
+          </view>
+        </block>
+        <view wx:elif="{{item.role==='gen'}}" class="gen-card" data-id="{{item.text}}" bindtap="openGen" hover-class="starter-pressed" aria-role="button">
+          <view wx:if="{{item.gen.thumb}}" class="gen-thumb gen-done">
+            <image class="gen-bg full" src="{{item.gen.thumb}}" mode="aspectFill" />
+            <view wx:if="{{item.gen.kind==='video'}}" class="gen-play"><image class="gl gl-14" src="/assets/glyphs/play-muted.png" /></view>
+          </view>
+          <view wx:else class="gen-thumb gen-wait {{item.gen.status==='failed'?'is-failed':''}}">
+            <image wx:if="{{art[session.data.skill]}}" class="gen-bg" src="{{art[session.data.skill]}}" mode="aspectFill" />
+            <t-loading wx:if="{{item.gen.status==='queued'||item.gen.status==='running'}}" size="18px" />
+            <image wx:elif="{{item.gen.status==='succeeded'}}" class="gl gl-20" src="/assets/glyphs/{{item.gen.kind==='image'?'image':'video'}}.png" />
+            <t-icon wx:else name="error-circle" size="18" />
+          </view>
+          <view class="gen-copy">
+            <view class="gen-head"><text class="gen-title">{{item.gen.kind==='image'?'图片':'视频'}}{{item.gen.count>1?' · '+item.gen.count+' 张':''}}</text><text class="gen-state {{item.gen.status}}">{{item.gen.status==='succeeded'?'已生成':item.gen.status==='failed'?'生成失败':item.gen.status==='queued'?'排队中':'生成中'}}</text></view>
+            <text class="gen-note">{{item.gen.status==='failed'?(item.gen.error||'生成失败')+'；点开可重新生成':item.gen.status==='succeeded'?'点击查看、保存或分享':item.gen.status==='queued'?'排队中，可以先继续聊':'进度 '+item.gen.progress+'%，可以先继续聊'}}</text>
+          </view>
+          <image class="gl gl-16" src="/assets/glyphs/open-muted.png" />
+        </view>
+        <block wx:else>
+          <view class="agent-name"><view class="agent-avatar"><image class="gl gl-14" src="/assets/glyphs/ai-pen-dark.png" /></view><text>豆播 Agent</text></view>
+          <view wx:if="{{item.pending&&!item.streaming}}" class="typing-row"><view class="typing" aria-label="正在回复"><view /><view /><view /></view><text class="typing-note">{{item.text}}</text></view>
+          <view wx:elif="{{item.failed}}" class="reply-failed">
+            <t-icon name="error-circle" size="16" /><text>{{item.text}}</text>
+            <text class="retry" data-prompt="{{item.prompt}}" bindtap="retry" aria-role="button">重新编辑 ›</text>
+          </view>
+          <block wx:else>
+            <view wx:if="{{item.text}}" class="reply {{item.streaming&&!item.planning?'is-streaming':''}}">
+              <view wx:for="{{item.lines}}" wx:for-item="line" wx:for-index="n" wx:key="n" class="line {{line.label?'shot':''}} {{line.text||line.label?'':'gap'}}">
+                <text wx:if="{{line.label}}" class="shot-label">{{line.label}}</text><text wx:if="{{!refs.marks}}" selectable>{{line.text}}</text><template wx:else is="prompt-text" data="{{parts:refs.marks(line.text,thumbs)}}" />
+              </view>
+            </view>
+            <view wx:if="{{item.planning}}" class="plan-writing">
+              <image wx:if="{{art[session.data.skill]}}" class="plan-writing-bg" src="{{art[session.data.skill]}}" mode="aspectFill" />
+              <view class="typing" aria-label="正在整理方案"><view /><view /><view /></view><text>正在整理方案…</text>
+            </view>
+            <view wx:if="{{item.snippets.length}}" class="snippets">
+              <view wx:for="{{item.snippets}}" wx:for-item="snip" wx:for-index="k" wx:key="k" class="snippet" data-text="{{snip}}" bindtap="copy" hover-class="starter-pressed" aria-role="button" aria-label="{{'复制：'+snip}}">
+                <text class="snippet-text">{{snip}}</text>
+                <view class="snippet-copy"><image class="gl gl-14" src="/assets/glyphs/copy-muted.png" /><text>复制</text></view>
+              </view>
+            </view>
+            <view wx:if="{{item.broken}}" class="plan-broken">
+              <t-icon name="error-circle" size="14" /><text>方案没有完整输出</text>
+              <text class="broken-retry" data-value="请把方案完整地重新输出一遍" bindtap="quick" aria-role="button">重新整理 ›</text>
+            </view>
+            <view wx:if="{{item.plan&&!item.latest&&!expanded[item.id]}}" class="plan-old-row" data-id="{{item.id}}" bindtap="togglePlan" hover-class="starter-pressed" aria-role="button" aria-label="{{'展开第'+item.version+'版方案'}}">
+              <image wx:if="{{art[session.data.skill]}}" class="old-thumb" src="{{art[session.data.skill]}}" mode="aspectFill" />
+              <view class="old-copy"><text class="old-title">第 {{item.version}} 版 · {{item.plan.title}}</text><text class="old-note">已有更新的方案 · 点开查看</text></view>
+              <image class="gl gl-14" src="/assets/glyphs/open-muted.png" />
+            </view>
+            <view wx:elif="{{item.plan}}" class="plan-card {{item.latest?'':'is-earlier'}}">
+              <view class="plan-cover">
+                <image wx:if="{{art[session.data.skill]}}" class="plan-cover-photo" src="{{art[session.data.skill]}}" mode="aspectFill" />
+                <view class="plan-cover-shade" />
+                <view class="plan-kind"><image class="gl gl-14" src="/assets/glyphs/{{item.plan.kind==='image'?'image':'video'}}.png" /><text>{{item.plan.meta}}</text></view>
+                <text wx:if="{{item.version>1||!item.latest}}" class="plan-version {{item.latest?'':'earlier'}}">第 {{item.version}} 版{{item.latest?'':' · 旧方案'}}</text>
+                <text class="plan-title">{{item.plan.title}}</text>
+              </view>
+              <view wx:for="{{item.plan.shots}}" wx:for-item="shot" wx:for-index="n" wx:key="n" class="plan-shot">
+                <text class="shot-time">{{shot.time}}</text>
+                <view class="shot-copy"><view><text wx:if="{{!refs.marks}}" selectable>{{shot.scene}}</text><template wx:else is="prompt-text" data="{{parts:refs.marks(shot.scene,thumbs)}}" /></view><text wx:if="{{shot.line}}" class="shot-line">“{{shot.line}}”</text></view>
+                <view wx:if="{{shot.asset}}" class="shot-asset"><image wx:if="{{thumbs[shot.asset]}}" class="shot-thumb" src="{{thumbs[shot.asset]}}" mode="aspectFill" /><text>{{shot.asset}}</text></view>
+              </view>
+              <view wx:if="{{!item.plan.shots.length}}" class="plan-prompt"><text wx:if="{{!refs.marks}}" selectable>{{item.plan.prompt}}</text><template wx:else is="prompt-text" data="{{parts:refs.marks(item.plan.prompt,thumbs)}}" /></view>
+              <view wx:if="{{item.latest&&planModels.length}}" class="plan-model"><model-picker models="{{planModels}}" value="{{planModel}}" title="确认生成用的模型" disabled="{{generating}}" bind:change="choosePlanModel" /></view>
+              <view class="plan-actions">
+                <view wx:if="{{item.latest}}" class="plan-edit" data-index="{{index}}" bindtap="use" aria-role="button"><image class="gl gl-14" src="/assets/glyphs/edit.png" /><text>去编辑页精调</text></view>
+                <view wx:else class="plan-edit" data-id="{{item.id}}" bindtap="togglePlan" aria-role="button"><text>收起</text></view>
+                <button class="plan-go" disabled="{{generating}}" data-index="{{index}}" bindtap="generatePlan">{{generating?'提交中…':item.latest?'确认生成':'用这一版生成'}}<text wx:if="{{!generating&&planPrice.id===item.id&&planPrice.text}}" class="plan-price"> · {{planPrice.text}}</text></button>
+              </view>
+            </view>
+            <view wx:if="{{!item.streaming}}" class="reply-actions">
+              <view wx:if="{{item.copy&&(item.latest||!item.plan||item.text)}}" class="reply-icon" data-text="{{item.copy}}" bindtap="copy" hover-class="icon-pressed" aria-role="button" aria-label="复制"><image class="gl gl-18" src="/assets/glyphs/copy-muted.png" /></view>
+              <view wx:if="{{!item.plan&&!item.broken}}" class="use-script" data-index="{{index}}" data-text="{{item.text}}" bindtap="use" hover-class="starter-pressed" aria-role="button"><image class="gl gl-16" src="/assets/glyphs/video.png" /><text>带到创作</text></view>
+            </view>
+            <scroll-view wx:if="{{index===messages.length-1&&!busy&&!item.streaming&&item.plan}}" scroll-x class="follow-ups">
+              <view class="follow-row">
+                <view wx:for="{{item.plan.kind==='video'&&followUps.length?followUps:item.plan.asks}}" wx:for-item="ask" wx:key="*this" class="follow" aria-role="button" data-value="{{ask}}" bindtap="quick" hover-class="starter-pressed">{{ask}}</view>
+              </view>
+            </scroll-view>
+          </block>
+        </block>
+      </view>
       <view id="end-a" /><view id="end-b" />
     </view>
   </scroll-view>

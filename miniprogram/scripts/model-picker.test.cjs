@@ -15,7 +15,7 @@ test("each generation page shows the picker", () => {
   const read = (f) => fs.readFileSync(f, "utf8");
   for (const [page, handler] of [["task-detail", "chooseRemakeModel"], ["tryon", "aiModel"], ["extract", "chooseReadModel"], ["agent", "choosePlanModel"], ["create", "chooseScriptModel"]]) {
     assert.match(read(`pages/${page}/index.json`), /"model-picker": "\/components\/model-picker\/index"/, page);
-    const wxml = page === "agent" ? read("pages/agent/parts/messages.wxml") : page === "create" ? read("pages/create/parts/feature.wxml") : read(`pages/${page}/index.wxml`);
+    const wxml = page === "agent" ? read("pages/agent/index.wxml") : page === "create" ? read("pages/create/parts/feature.wxml") : read(`pages/${page}/index.wxml`);
     assert.ok(wxml.includes(`bind:change="${handler}"`), page);
   }
 });

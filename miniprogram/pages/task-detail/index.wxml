@@ -103,7 +103,7 @@
     <view wx:elif="{{job.status==='failed'&&!job.deleted}}" class="failed-actions">
       <button wx:if="{{job.input.purpose==='remake'}}" class="retry-pill" bindtap="remakeAgain"><image class="gl gl-18" src="/assets/glyphs/refresh-dark.png" />重新复刻</button>
       <button wx:elif="{{job.retryable}}" class="retry-pill" loading="{{busy}}" disabled="{{busy}}" bindtap="retry"><image wx:if="{{!busy}}" class="gl gl-18" src="/assets/glyphs/refresh-dark.png" />重新生成</button>
-      <text wx:if="{{job.editable&&job.input.kind!=='import'}}" class="edit-link" bindtap="edit">修改后再试 ›</text>
+      <text wx:if="{{job.input.kind!=='import'}}" class="edit-link" bindtap="edit" aria-role="button">{{job.editable?'修改后再试':'重新编辑'}} ›</text>
     </view>
     <view wx:if="{{!job.input.prompt&&job.input.templateId}}" class="prompt-card template-card" bindtap="openTemplate" hover-class="card-pressed" aria-role="button" aria-label="{{'查看模板 '+(job.templateTitle||'')}}">
       <view class="prompt-head"><text>创作模板</text><text class="template-go">查看模板 ›</text></view>

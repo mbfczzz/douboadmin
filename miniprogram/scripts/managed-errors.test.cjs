@@ -45,6 +45,9 @@ test("task detail renders handling guidance; queue cards stay short", () => {
   const list = fs.readFileSync("pages/tasks/index.wxml","utf8");
   assert.match(detail,/job\.errorAction/);
   assert.match(detail,/job\.editable/);
+  // Any failed generation can be opened again in the editor, whatever the cause
+  // (a timeout says 重新编辑; a failure caused by the input says 修改后再试).
+  assert.match(detail,/<text wx:if="\{\{job\.input\.kind!=='import'\}\}" class="edit-link" bindtap="edit"[^>]*>\{\{job\.editable\?'修改后再试':'重新编辑'\}\}/);
   assert.match(detail,/class="muted small"/);
   // The reason lives on task detail; queue cards only link to it.
   assert.doesNotMatch(list,/item\.error/);

@@ -42,7 +42,7 @@ test("every screen that shows @图片 / @视频 draws them as chips", () => {
   const read = (f) => fs.readFileSync(f, "utf8");
   for (const f of ["pages/task-detail/index.wxml", "pages/shared-work/index.wxml", "pages/template-detail/index.wxml"])
     assert.match(read(f), /^<wxs module="(refs|chips)" src="..\/..\/utils\/mentions.wxs" \/>/, f);
-  const agent = read("pages/agent/parts/messages.wxml");
+  const agent = read("pages/agent/index.wxml");
   for (const text of ["line.text", "shot.scene", "item.plan.prompt"]) assert.ok(agent.includes(`refs.marks(${text},thumbs)`), text);
   assert.match(read("pages/tryon/index.wxml"), /<prompt-editor class="ai-prompt" value="\{\{aiSheet.prompt\}\}" assets="\{\{aiSheet.refs\}\}"/);
 });
@@ -97,15 +97,19 @@ test("each reference tile is numbered the way @ mentions count it", () => {
   assert.match(wxml, /class="reference-no">\{\{refs\.label\(assets,index\)\}\}/);
 });
 
-// An <include>d file sees only its own wxs modules and imported templates:
-// declared in agent/index.wxml, the reply lines found no prompt-text template
-// and every Agent reply showed empty on phones.
-test("Agent's included messages bind the mention module and the chip template themselves", () => {
+// The Agent conversation lives in agent/index.wxml itself (an <include>d
+// file sees neither the page's wxs modules nor its imported templates; that
+// left every reply blank on phones), and each line falls back to plain text
+// if the chip module is unavailable.
+test("Agent reply lines bind the chip template and module in the page itself, with a text fallback", () => {
   const { wxmlToJs } = require("miniprogram-compiler");
-  const code = wxmlToJs(process.cwd(), { wxmlList: ["pages/agent/index.wxml", "pages/agent/parts/messages.wxml", "pages/agent/parts/projects.wxml", "pages/agent/parts/models.wxml", "utils/prompt-text.wxml"], wxsList: ["utils/mentions.wxs"] });
-  assert.match(code, /f_\['pages\/agent\/parts\/messages\.wxml'\]\['refs'\]/);
+  const wxml = fs.readFileSync("pages/agent/index.wxml", "utf8");
+  assert.doesNotMatch(wxml, /parts\/messages\.wxml/);
+  for (const text of ["line.text", "shot.scene", "item.plan.prompt"])
+    assert.ok(wxml.includes(`<text wx:if="{{!refs.marks}}" selectable>{{${text}}}</text><template wx:else is="prompt-text" data="{{parts:refs.marks(${text},thumbs)}}" />`), text);
+  const code = wxmlToJs(process.cwd(), { wxmlList: ["pages/agent/index.wxml", "pages/agent/parts/projects.wxml", "pages/agent/parts/models.wxml", "utils/prompt-text.wxml"], wxsList: ["utils/mentions.wxs"] });
+  assert.match(code, /f_\['pages\/agent\/index\.wxml'\]\['refs'\]/);
   const files = Function(`return ${code.match(/var x=(\[[^\]]*\])/)[1]}`)();
-  const entry = code.match(new RegExp(`e_\\[x\\[${files.indexOf("pages/agent/parts/messages.wxml")}\\]\\]=\\{f:m\\d+,j:\\[\\],i:\\[\\],ti:\\[([^\\]]*)\\]`));
-  assert.ok(entry && /prompt-text/.test(files[Number(entry[1].match(/\d+/)[0])]), "messages.wxml imports prompt-text");
+  const entry = code.match(new RegExp(`e_\\[x\\[${files.indexOf("pages/agent/index.wxml")}\\]\\]=\\{f:m\\d+,j:\\[\\],i:\\[\\],ti:\\[([^\\]]*)\\]`));
+  assert.ok(entry && /prompt-text/.test(files[Number(entry[1].match(/\d+/)[0])]), "the page imports prompt-text");
 });
-
