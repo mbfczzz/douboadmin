@@ -154,62 +154,40 @@ test("the remake brief follows the video breakdown and swaps in the user's pictu
   assert.match(plain, /未能拆解画面[^]*文案：文案[^]*不要照搬原作者/);
 });
 
-test("剧情带货 shows template cases (generated samples) for its keyword; a case opens 做同款 with the user's pictures", async () => {
+test("剧情带货 shows template cases; 做同款 fills this editor (description, sample picture, settings) instead of leaving it", async () => {
   const h = harness(), calls = [];
-  const t = (id, cover, title) => ({ id, data: { kind: "video", cover, title, duration: 5 } });
-  h.api.request = async (path) => { calls.push(path); return { items: [t("tpl-1", "https://c/1.jpg", "洗衣机广告"), t("tpl-2", "", "无封面")] }; };
+  const t = (id, cover, title, extra = {}) => ({ id, data: { kind: "video", cover, title, duration: 5, ratio: "9:16", model: "", description: "", prompt: "", ...extra } });
+  h.api.request = async (path, method) => {
+    calls.push([path, method || "GET"]);
+    if (path.startsWith("/templates/tpl-1/sample")) return { id: "own-sample", data: { url: "https://oss/s.jpg", type: "image/jpeg" } };
+    return { items: [t("tpl-1", "https://c/1.jpg", "洗衣机广告", { prompt: "女主穿越到浣衣院，发现@图片1里的洗衣机" }), t("tpl-2", "", "无封面")] };
+  };
   const page = h.page("create");
   page.onLoad({ feature: "ad" });
   await new Promise((resolve) => setTimeout(resolve, 0));
-  assert.match(calls[0], /^\/templates\?kind=video&page=1&size=10&q=%E5%B8%A6%E8%B4%A7$/);
+  assert.match(calls[0][0], /^\/templates\?kind=video&page=1&size=10&q=%E5%B8%A6%E8%B4%A7$/);
   assert.deepEqual(JSON.parse(JSON.stringify(page.data.featureCases)), [{ id: "tpl-1", cover: "https://c/1.jpg", title: "洗衣机广告", seconds: 5 }]);
-  assert.equal(page.data.featureUpload, "上传商品图");
-  // No picture yet: just the template.
-  page.openCase({ currentTarget: { dataset: { id: "tpl-1" } } });
-  assert.equal(h.nav[0].url, "/pages/template-detail/index?id=tpl-1");
-  assert.equal(h.storage.get("template-prefill"), undefined);
-  // With the product picture uploaded here it goes along (images only).
-  const pic = { id: "a1", isImage: true, data: { type: "image/jpeg", url: "https://u/1.jpg" } };
-  page.setData({ assets: [pic, { id: "v1", isVideo: true, data: { type: "video/mp4", url: "" } }] });
-  page.openCase({ currentTarget: { dataset: { id: "tpl-1" } } });
-  const handed = h.storage.get("template-prefill");
-  assert.equal(handed.templateId, "tpl-1");
-  assert.deepEqual(handed.assets.map((a) => a.id), ["a1"]);
+  // No picture yet: the description and the case's sample picture go in; no new page.
+  await page.openCase({ currentTarget: { dataset: { id: "tpl-1" } } });
+  assert.equal(h.nav.length, 0);
+  assert.equal(page.data.prompt, "女主穿越到浣衣院，发现@图片1里的洗衣机");
+  assert.deepEqual(calls.at(-1), ["/templates/tpl-1/sample", "POST"]);
+  assert.equal(page.data.assets[0].id, "own-sample");
+  assert.equal(page.data.caseFilling, false);
+  // With the user's own picture already there it stays; only the text changes.
+  const asked = calls.length;
+  page.setData({ assets: [{ id: "mine", isImage: true, data: { type: "image/jpeg", url: "https://u/1.jpg" } }], prompt: "" });
+  await page.openCase({ currentTarget: { dataset: { id: "tpl-1" } } });
+  assert.equal(calls.length, asked);
+  assert.deepEqual(page.data.assets.map((a) => a.id), ["mine"]);
+  assert.match(page.data.prompt, /洗衣机/);
+  // The separate upload box is gone; the editor's own entry carries its label.
+  const wxml = require("node:fs").readFileSync("pages/create/parts/feature.wxml", "utf8");
+  assert.doesNotMatch(wxml, /feature-upload/);
+  assert.match(require("node:fs").readFileSync("pages/create/index.wxml", "utf8"), /featureUpload\|\|'添加参考'/);
   page.setData({ prompt: "写好的剧本", hasPrompt: true });
   page.clearPrompt();
   assert.equal(page.data.prompt, "");
-  // Nothing matches the keyword: the newest templates instead.
-  const other = harness(), asked = [];
-  other.api.request = async (path) => { asked.push(path); return { items: path.endsWith("q=") ? [t("tpl-9", "https://c/9.jpg", "最新模板")] : [] }; };
-  const shop = other.page("create");
-  shop.onLoad({ feature: "shop" });
-  await new Promise((resolve) => setTimeout(resolve, 0));
-  assert.equal(asked.length, 2);
-  assert.equal(shop.data.featureCases[0].id, "tpl-9");
-  assert.equal(shop.data.featureUpload, "上传门店图");
-});
-
-test("a template opened from 模板案例 starts with the handed-over pictures in its slots, once", async () => {
-  const h = harness();
-  const a1 = { id: "a1", data: { type: "image/jpeg", url: "https://u/1.jpg" } }, a2 = { id: "a2", data: { type: "image/jpeg", url: "https://u/2.jpg" } };
-  h.storage.set("template-prefill", { templateId: "t", assets: [a1, a2] });
-  h.api.request = async (p) => {
-    if (p.startsWith("/templates/")) return { id: "t", data: { kind: "video", cover: "/cover.jpg", title: "template", requiredImages: 1, mode: "i2v", duration: 5 } };
-    if (p === "/config") return { models: [] };
-    throw new Error("unexpected " + p);
-  };
-  const page = h.page("template-detail");
-  page.onLoad({ id: "t" });
-  assert.equal(h.storage.get("template-prefill"), undefined);
-  await page.load();
-  assert.deepEqual(page.data.assets.map((a) => a.id), ["a1"]); // as many as it takes
-  page.setData({ assets: [] });
-  await page.load(); // a refresh does not put them back
-  assert.equal(page.data.assets.length, 0);
-  // Another template's hand-over is not taken.
-  h.storage.set("template-prefill", { templateId: "other", assets: [a1] });
-  page.onLoad({ id: "t" });
-  assert.equal(h.storage.get("template-prefill").templateId, "other");
 });
 
 test("story pages: style cards, examples that fill the text, 清空 and switches", () => {

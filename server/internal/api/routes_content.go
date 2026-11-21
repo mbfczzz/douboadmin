@@ -18,6 +18,7 @@ func (a *Server) contentRoutes() {
 	m.HandleFunc("POST /api/features/{key}/click", a.featureClick)
 	m.HandleFunc("POST /api/features/{key}/use", a.auth("user", a.featureUse))
 	m.HandleFunc("GET /api/admin/feature-stats", a.auth("admin", a.featureStats))
+	m.HandleFunc("POST /api/templates/{id}/sample", a.auth("user", a.templateSample))
 	m.HandleFunc("GET /api/outfits", a.auth("user", a.outfits))
 	m.HandleFunc("GET /api/outfits/random", a.auth("user", a.randomOutfit))
 	m.HandleFunc("GET /api/outfits/categories", a.auth("user", a.outfitCategories))

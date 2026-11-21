@@ -78,6 +78,7 @@ var ops = map[string]op{
 	"POST /api/admin/outfits/defaults":                    {label: "生成默认服装"},
 	"PUT /api/admin/outfits/{id}":                         {label: "保存试衣服装", target: "outfit"},
 	"DELETE /api/admin/outfits/{id}":                      {label: "删除试衣服装", target: "outfit"},
+	"POST /api/templates/{id}/sample":                     {label: "做同款取示例图", target: "template"},
 	"POST /api/outfits/{id}/use":                          {label: "选用试衣服装", target: "outfit"},
 	"POST /api/admin/assets":                              {label: "上传素材"},
 	"DELETE /api/admin/works/{id}":                        {label: "删除作品", target: "job"},

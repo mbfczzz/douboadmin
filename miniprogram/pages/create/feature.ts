@@ -89,7 +89,7 @@ export function featureProblem(data: { feature: string; assets: { isImage?: bool
 
 export const featureHandlers = {
   openCase(this: Page, e: WechatMiniprogram.TouchEvent) {
-    openCase(this, e.currentTarget.dataset.id);
+    return openCase(this, e.currentTarget.dataset.id);
   },
   clearPrompt(this: Page) {
     if (!this.data.busy && !this.data.scriptBusy) this.setData({ prompt: "", hasPrompt: false });

@@ -37,7 +37,7 @@
           aria-label="添加参考素材"
         >
           <image class="gl gl-20" src="/assets/glyphs/{{uploading?'clock':'add'}}-muted.png" />
-          <text class="add-label">{{uploading?'上传中':'添加参考'}}</text>
+          <text class="add-label">{{uploading?'上传中':(featureUpload||'添加参考')}}</text>
         </view>
         <view class="reference" wx:for="{{assets}}" wx:key="id">
           <image

@@ -71,6 +71,7 @@ export const creationData = {
   featureChoice: {} as Record<string, number>,
   scriptBusy: false,
   featureUpload: "", // the big picture entry's label (剧情带货 / 探店 / 证件照)
-  featureCases: [] as { id: string; cover: string; title: string }[], // 热门案例
+  featureCases: [] as { id: string; cover: string; title: string; seconds: number }[], // 模板案例
+  caseFilling: false, // 做同款 is fetching the case's picture
   remakeSource: null as { title: string; text: string; duration: number } | null, // 一键复刻's original
 };
