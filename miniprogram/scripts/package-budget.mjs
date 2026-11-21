@@ -233,63 +233,10 @@ console.log(
 // 964,151 B. 940 -> 942 KiB.
 // Faster Agent replies: only named pictures are sent, 1.5 s checks while
 // a reply is coming, waiting seconds shown: 965,950 B. 942 -> 944 KiB.
-// Agent replies stream (shown as written, caret, plan placeholder): 971,032 B. 944 -> 949 KiB.
-// Chunked reply stream (UTF-8 piece decoder, SSE reader) and 停止回复: 977,488 B. 949 -> 955 KiB.
-// One chat-model picker (DeepSeek Flash by default) for Agent and AI写剧本: 978,518 B. 955 -> 956 KiB.
-// Model picker: pill with the model's logo, and a sheet of model cards (description, picture / text tags, price per turn): 983,698 B. 956 -> 961 KiB.
-// Smooth streaming (replies typed out evenly; only the reply being written re-renders): 985,603 B. 961 -> 963 KiB.
-// A forgotten login no longer reads as 创作助手暂未开放 (check it, sign in again, read config afresh): 986,522 B. 963 -> 964 KiB.
-// Videos a message names go along (watched by 视频理解); 正在观看视频… while waiting: 987,174 B. 964 -> 965 KiB.
-// 编辑 a sent question and ask again; 复制 chips for a reply's key lines: 992,383 B. 965 -> 970 KiB.
-// Review fixes: send waits for uploads; 编辑-restored files stay in the project; uploads stay in their project; edit and streams reset on switch; tighter copy chips; composer spacing: 994,594 B. 970 -> 972 KiB.
-// Replies as models really write them (tables, links, code, quotes, CRLF), emoji-safe typing, 带到创作 carries the question's files: 995,863 B. 972 -> 973 KiB.
-// Bug pass: new projects remembered, polling resumes on switch, clean drafts per project, 去编辑页精调 renumbers, price retried, abandoned uploads leave the project: 997,883 B. 973 -> 975 KiB.
-// Page loading as a shimmering outline of the page (media / list / grid) instead of a lone icon; 豆包 watches videos (能看视频 tag); smaller sent-file thumbnails: 1,001,480 B. 975 -> 979 KiB.
-// 一键复刻 subject swaps: pick which picture replaces which subject on the task page: 1,009,264 B. 979 -> 986 KiB.
-// 一键复刻 from an uploaded video, hot videos to remake on the empty page, gl-12 glyph size; 创作 grid trimmed: 1,015,671 B. 986 -> 992 KiB.
-// AI试衣 page (clothing library: categories, 默认排序 / 最新上架, 随机一个,
-// 收藏 on the phone; 试穿: person photo + outfit handed to the image editor)
-// and its editor preset; 创作 grid without 我的作品 / 生成记录: 1,039,734 B. 992 -> 1016 KiB.
-// AI试衣 review: picture addresses refreshed in place after 10 minutes, 收藏
-// replies in order, the preset starts on a model taking both pictures: 1,041,825 B. 1016 -> 1018 KiB.
-// AI试衣 UI pass: person and outfit side by side (开始试穿 above the fold),
-// outfit name on its picture, grab handle on the preview: 1,042,744 B. 1018 -> 1019 KiB.
-// AI试衣 as a user sees it: 试穿 on each card, the picked count on the tab,
-// icons on sort / random / steps / slots / background, what is missing
-// under 开始试穿, heart on 收藏, empty states with an action: 1,045,726 B. 1019 -> 1022 KiB.
-// 功能使用 statistics: anonymous taps on 创作 entries, hot videos, templates
-// and the Agent tab; tasks name their preset; 文案提取 reports a use: 1,046,603 B. 1022 -> 1023 KiB.
-// Pictures over words: AI试衣 tab icons, category chips with their first
-// outfit, icons on 更换 / 服装库 / 上传; editor reference tiles numbered 图1 /
-// 视频1 as @ mentions count them: 1,048,307 B. 1023 -> 1024 KiB.
-// AI试衣 with Codex art (loaded from OSS, not packaged): 3D tab / chip /
-// action icons, slot illustrations, empty-state pictures, boutique backdrop;
-// each spot keeps its icon until its picture arrives: 1,051,687 B. 1024 -> 1028 KiB.
-// Codex 3D icons across the app via components/art-icon (pictures from OSS,
-// bundled glyph / vector icon until they arrive): 我的 menus and 推广码,
-// 设置 rows, 我的积分 rows and ledger, 任务队列 states, 消息通知 kinds,
-// 邀请码激活 and 隐私保护指引 links: 1,055,951 B. 1028 -> 1032 KiB.
-// The remaining text-only spots get Codex icons: 文案提取 sources, 一键复刻
-// (要复刻的视频, 粘贴, 上传视频), 视频文案, 包含创作描述, 去豆播找灵感,
-// 先浏览小程序 / 刷新授权状态 / 退出登录: 1,057,688 B. 1032 -> 1033 KiB.
-// 剧情带货 / 探店视频 cases are templates (their generated samples) instead
-// of Douyin videos; a case opens 做同款 with the user's pictures in its
-// slots (template-detail/prefill.ts): 1,061,159 B. 1033 -> 1037 KiB.
-// 一键复刻 video upload shows 读取中 / 上传中 N% and may take five minutes
-// (was 90 s, too short for a long phone video on a slow uplink); a note
-// suggests videos under 15 s: 1,062,010 B. 1037 -> 1038 KiB.
-// Fill-in examples on the feature pages: sample face photos for 视频唱歌
-// (art from OSS), 口播文案 examples for 数字人, real hot videos whose link
-// fills 视频二创 (pages/feature/examples.ts): 1,067,649 B. 1038 -> 1043 KiB.
-// 视频二创's 二创方式 / 画面特效 as picture cards (Codex art from OSS); the
-// feature page loads only the art its sections name: 1,068,508 B. 1043 -> 1044 KiB.
-// d4cc87f (remake swap card: picture upload when no subjects are listed)
-// came in at 1,071,775 B over the 1044 KiB budget; reference tiles on the
-// task page show a video's first frame (not a stretched icon): 1,072,456 B. 1044 -> 1048 KiB.
-// AI试衣 我的服装: own outfits uploaded as they are or drawn by AI from a
-// photo of a whole outfit (default prompt, editable; priced like any
-// task), shown while drawing, tried on like library ones (pages/tryon/mine.*):
-// 1,082,877 B. 1048 -> 1058 KiB.
+// Raises from 944 KiB on (Agent streaming, 一键复刻, AI试衣, Codex art,
+// 功能使用, feature examples …) are listed one by one, each with its
+// reason and measured size, in docs/miniprogram-invite-code-budget.md.
+// Latest: AI试衣 我的服装 (pages/tryon/mine.*): 1,082,877 B. 1048 -> 1058 KiB.
 const budget = 1058 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
