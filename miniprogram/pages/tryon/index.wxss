@@ -1,5 +1,6 @@
 @import "../../styles/business.wxss";
 @import "./fit.wxss";
+@import "./mine.wxss";
 /* 服装 / 试穿 / 收藏, then the library: chips, count and tools, two columns. */
 .tryon-tabs {
   display: flex;
@@ -113,6 +114,10 @@
 }
 .tryon-count {
   flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
   font-size: 13px;
   color: var(--ui-muted);
 }

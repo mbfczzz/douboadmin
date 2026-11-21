@@ -2,6 +2,7 @@
   "backgroundColorContent": "#0f0f11ff",
   "backgroundColor": "#0f0f11",
   "usingComponents": {
-    "page-backdrop": "/components/page-backdrop/index"
+    "page-backdrop": "/components/page-backdrop/index",
+    "t-loading": "tdesign-miniprogram/loading/loading"
   }
 }

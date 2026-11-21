@@ -2,6 +2,8 @@ import { enterPage } from "../../utils/api";
 import { showArt } from "../../utils/ui-art";
 import { SORTS, loadCategories, loadOutfits, loadFavorites, toggleFavorite, initFavorites, randomOutfit, refreshPictures } from "./gallery";
 import { fittingHandlers, wearOutfit } from "./fitting";
+import { mineHandlers } from "./mine";
+import type { MyOutfit } from "./mine";
 import type { Outfit } from "./gallery";
 import type { Person, Garment } from "./fitting";
 
@@ -10,6 +12,7 @@ import type { Person, Garment } from "./fitting";
 // Tapping an outfit previews it; 试穿这件 takes it to 试穿.
 Page({
   ...fittingHandlers,
+  ...mineHandlers,
   data: {
     tab: "gallery",
     tabs: [
@@ -37,6 +40,10 @@ Page({
     garmentBusy: false,
     keepBackground: true,
     starting: false,
+    mine: false, // 服装 shows 我的服装 (mine.ts)
+    myOutfits: [] as MyOutfit[],
+    myLoading: false,
+    myBusy: "", // "upload" | "ai" while a picture is being added
     // Codex pictures (media/ui-art/tryon-*); each spot keeps its icon until one arrives.
     art: {} as Record<string, string>,
   },
@@ -65,7 +72,9 @@ Page({
     void loadCategories(this);
     void loadOutfits(this);
   },
+  mineTimer: 0,
   onUnload() {
+    clearTimeout(this.mineTimer);
     this.destroyed = true;
     this.galleryRevision++;
   },

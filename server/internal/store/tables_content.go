@@ -23,6 +23,10 @@ func init() {
 			c("imageKey", Text), c("imageType", Short), c("imageSize", Int),
 			c("published", Bool), c("deleted", Bool), c("sort", Int), c("seedJob", Key), c("seedError", Text),
 		}},
+		Table{Name: "user_outfits", Comment: "用户自己的试衣服装（上传或 AI 生成）", Owner: "用户", Cols: []Col{
+			c("title", Short), c("assetId", Key), c("jobId", Key), c("source", Key), c("status", Key),
+			c("error", Text), c("deleted", Bool),
+		}},
 		Table{Name: "assets", Comment: "上传文件与生成结果文件", Owner: "上传者或任务所属用户", Cols: []Col{
 			c("name", Short), c("url", Text), c("key", Text), c("type", Short), c("size", Int),
 			c("sourceUrl", Text), c("sourceVideoId", Key),

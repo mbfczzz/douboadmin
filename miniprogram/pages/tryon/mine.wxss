@@ -1,0 +1,69 @@
+/* 我的服装: two adding tiles, then the user's own outfits. */
+.mine-tool.on {
+  color: var(--ui-on-brand);
+  background: var(--ui-primary);
+}
+.art-44 {
+  width: 44px;
+  height: 44px;
+}
+/* 3:4 like the outfit pictures (padding, not aspect-ratio: iOS < 15). */
+.mine-add {
+  position: relative;
+  padding-top: 133%;
+  border-radius: 12px;
+  text-align: center;
+  background: var(--ui-surface);
+  box-shadow: inset 0 0 0 1px #ffffff1f;
+}
+.mine-add-inner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 12px;
+}
+.mine-add.ai {
+  background: linear-gradient(160deg, #3a2350, #1d2a44);
+}
+.mine-add.is-busy {
+  opacity: 0.6;
+}
+.mine-add-art {
+  display: flex;
+  margin-bottom: 4px;
+  color: var(--ui-muted);
+}
+.mine-add-title {
+  font-size: 15px;
+  font-weight: 600;
+}
+.mine-add-note {
+  font-size: 12px;
+  line-height: 17px;
+  color: var(--ui-muted);
+}
+.mine-state {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--ui-muted);
+  background: #00000066;
+}
+.mine-state.failed {
+  color: var(--ui-danger);
+}

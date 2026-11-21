@@ -286,7 +286,11 @@ console.log(
 // d4cc87f (remake swap card: picture upload when no subjects are listed)
 // came in at 1,071,775 B over the 1044 KiB budget; reference tiles on the
 // task page show a video's first frame (not a stretched icon): 1,072,456 B. 1044 -> 1048 KiB.
-const budget = 1048 * 1024;
+// AI试衣 我的服装: own outfits uploaded as they are or drawn by AI from a
+// photo of a whole outfit (default prompt, editable; priced like any
+// task), shown while drawing, tried on like library ones (pages/tryon/mine.*):
+// 1,082,877 B. 1048 -> 1058 KiB.
+const budget = 1058 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");
