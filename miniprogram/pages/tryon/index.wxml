@@ -26,7 +26,7 @@
       </view>
     </scroll-view>
     <view class="tryon-bar">
-      <text class="tryon-count">{{galleryLoading&&!outfits.length?'':'共'+total+'项'}}</text>
+      <text class="tryon-count">{{galleryError||galleryLoading&&!outfits.length?'':'共'+total+'项'}}</text>
       <view class="tryon-tool" bindtap="chooseSort" aria-role="button"><t-icon name="order-descending" size="14" />{{sortLabel}}<view class="tryon-caret"><t-icon name="chevron-down" size="12" /></view></view>
       <view class="tryon-tool {{randomBusy?'is-busy':''}}" bindtap="random" aria-role="button"><t-icon name="refresh" size="14" />随机一个</view>
     </view>
