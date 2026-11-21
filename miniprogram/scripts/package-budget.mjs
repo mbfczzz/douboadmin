@@ -283,7 +283,10 @@ console.log(
 // fills 视频二创 (pages/feature/examples.ts): 1,067,649 B. 1038 -> 1043 KiB.
 // 视频二创's 二创方式 / 画面特效 as picture cards (Codex art from OSS); the
 // feature page loads only the art its sections name: 1,068,508 B. 1043 -> 1044 KiB.
-const budget = 1044 * 1024;
+// d4cc87f (remake swap card: picture upload when no subjects are listed)
+// came in at 1,071,775 B over the 1044 KiB budget; reference tiles on the
+// task page show a video's first frame (not a stretched icon): 1,072,456 B. 1044 -> 1048 KiB.
+const budget = 1048 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

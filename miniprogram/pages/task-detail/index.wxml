@@ -82,7 +82,7 @@
         </view>
       </block>
       <view wx:else class="asset-grid swap-upload-row">
-        <block wx:for="{{assets}}" wx:for-item="pic" wx:key="id"><view wx:if="{{pic.isImage}}" class="asset-row" data-url="{{pic.data.url}}" bindtap="previewAsset"><image src="{{pic.data.url}}" mode="aspectFill" /><view class="swap-remove" data-id="{{pic.id}}" catchtap="removeGenericPicture" aria-role="button" aria-label="删除替换图片">×</view></view></block>
+        <block wx:for="{{assets}}" wx:for-item="pic" wx:key="id"><view wx:if="{{pic.isImage}}" class="asset-row" data-url="{{pic.data.url}}" bindtap="previewAsset"><image class="asset-thumb" src="{{pic.data.url}}" mode="aspectFill" /><view class="swap-remove" data-id="{{pic.id}}" catchtap="removeGenericPicture" aria-role="button" aria-label="删除替换图片">×</view></view></block>
         <view wx:if="{{assets.length<3}}" class="swap-add {{genericUploading||busy?'is-busy':''}}" bindtap="addGenericPicture" aria-role="button" aria-label="上传替换图片"><t-loading wx:if="{{genericUploading}}" size="20px" /><art-icon wx:else name="tryonUpload" size="20" icon="add" /><text>{{genericUploading?'上传中':'上传图片'}}</text></view>
       </view>
     </view>
@@ -128,7 +128,8 @@
       <view wx:elif="{{!assets.length}}" class="detail-empty">未添加参考素材</view>
       <view class="asset-grid">
         <view class="asset-row" wx:for="{{assets}}" wx:key="id" data-url="{{item.data.url}}" bindtap="previewAsset" aria-role="button" aria-label="{{item.label}}">
-          <image wx:if="{{item.isImage}}" src="{{item.data.url}}" mode="aspectFill" lazy-load />
+          <image wx:if="{{item.isImage}}" class="asset-thumb" src="{{item.data.url}}" mode="aspectFill" lazy-load />
+          <view wx:elif="{{item.isVideo&&item.data.thumbnailUrl}}" class="asset-video"><image class="asset-thumb" src="{{item.data.thumbnailUrl}}" mode="aspectFill" lazy-load /><image class="gl gl-20 asset-play" src="/assets/glyphs/play-muted.png" /></view>
           <view wx:else class="asset-file"><image class="gl gl-24" src="/assets/glyphs/{{item.kind==='video'?'video-muted':'file-muted'}}.png" /></view>
           <text>{{item.label}}</text>
         </view>

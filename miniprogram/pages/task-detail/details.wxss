@@ -25,7 +25,9 @@
   position: relative;
   min-width: 0;
 }
-.asset-row image,
+/* Only the tile's picture fills it; icons inside keep their glyph size. */
+.asset-thumb,
+.asset-video,
 .asset-file {
   display: block;
   width: 100%;
@@ -37,6 +39,21 @@
   align-items: center;
   justify-content: center;
   background: var(--ui-field);
+}
+/* A video shows its first frame with a play mark. */
+.asset-video {
+  position: relative;
+  overflow: hidden;
+  background: var(--ui-field);
+}
+.asset-play {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin: -14px 0 0 -14px;
+  padding: 4px;
+  border-radius: 50%;
+  background: #00000080;
 }
 /* The 图片N label sits on the tile, matching @图片N in prompts. */
 .asset-row > text {
