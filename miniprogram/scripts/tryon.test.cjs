@@ -57,7 +57,7 @@ test("a failed page says so and retries; an empty library points to uploading", 
   assert.equal(page.data.galleryError, "");
   assert.equal(page.data.outfits.length, 0);
   const wxml = require("node:fs").readFileSync("pages/tryon/index.wxml", "utf8");
-  assert.match(wxml, /暂无服装，也可以在「试穿」里上传自己的服装图/);
+  assert.match(wxml, /暂无服装，可以上传自己的服装图试穿[^]*data-key="fit" bindtap="switchTab">去试穿/);
 });
 
 test("收藏 keeps ids on the phone, reads them back in order and drops removed outfits", async () => {

@@ -254,7 +254,10 @@ console.log(
 // replies in order, the preset starts on a model taking both pictures: 1,041,825 B. 1016 -> 1018 KiB.
 // AI试衣 UI pass: person and outfit side by side (开始试穿 above the fold),
 // outfit name on its picture, grab handle on the preview: 1,042,744 B. 1018 -> 1019 KiB.
-const budget = 1019 * 1024;
+// AI试衣 as a user sees it: 试穿 on each card, the picked count on the tab,
+// icons on sort / random / steps / slots / background, what is missing
+// under 开始试穿, heart on 收藏, empty states with an action: 1,045,726 B. 1019 -> 1022 KiB.
+const budget = 1022 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

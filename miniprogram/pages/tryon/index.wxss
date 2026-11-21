@@ -18,6 +18,15 @@
   line-height: 20px;
   color: var(--ui-muted);
 }
+.tab-count {
+  margin-left: 4px;
+  padding: 0 6px;
+  border-radius: var(--ui-radius-pill);
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--ui-on-brand);
+  background: var(--ui-brand);
+}
 .tryon-tab.on {
   color: var(--ui-on-brand);
   font-weight: 600;
@@ -56,6 +65,9 @@
   color: var(--ui-muted);
 }
 .tryon-tool {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   padding: 6px 12px;
   border-radius: var(--ui-radius-pill);
   font-size: 13px;
@@ -67,8 +79,7 @@
   opacity: 0.5;
 }
 .tryon-caret {
-  margin-left: 4px;
-  font-size: 10px;
+  display: flex;
   color: var(--ui-muted);
 }
 .outfit-grid {
@@ -92,6 +103,22 @@
   left: 0;
   width: 100%;
   height: 100%;
+}
+/* 试穿 at once, without opening the preview. */
+.outfit-wear {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 4px 10px;
+  border-radius: var(--ui-radius-pill);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  color: var(--ui-on-brand);
+  background: var(--ui-primary);
 }
 .outfit-heart {
   position: absolute;
@@ -130,8 +157,27 @@
   flex-direction: column;
   align-items: center;
   gap: 8px;
-  margin-top: 40px;
+  margin-top: 48px;
   text-align: center;
+}
+.empty-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 4px;
+  border-radius: 32px;
+  color: var(--ui-brand);
+  background: var(--ui-surface);
+}
+.empty-action {
+  margin-top: 8px;
+  padding: 8px 22px;
+  border-radius: var(--ui-radius-pill);
+  font-size: 14px;
+  color: var(--ui-text);
+  background: var(--ui-field);
 }
 .tryon-more {
   display: block;

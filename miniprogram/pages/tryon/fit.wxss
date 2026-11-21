@@ -8,11 +8,23 @@
   min-width: 0;
 }
 .fit-label {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 6px;
   margin-bottom: 10px;
   font-size: 15px;
   line-height: 21px;
   font-weight: 600;
+}
+.step {
+  width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  text-align: center;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--ui-on-brand);
+  background: var(--ui-brand);
 }
 .fit-slot {
   position: relative;
@@ -28,16 +40,18 @@
   width: 100%;
   height: 100%;
 }
-.fit-add > image,
-.fit-add > text {
+.slot-icon,
+.slot-text {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
 }
-.fit-add > image {
-  top: calc(50% - 22px);
+.slot-icon {
+  top: calc(50% - 26px);
+  display: flex;
+  color: var(--ui-muted);
 }
-.fit-add > text {
+.slot-text {
   top: calc(50% + 8px);
   white-space: nowrap;
   font-size: 13px;
@@ -93,13 +107,38 @@
 .fit-option {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 12px;
   padding-top: 14px;
   padding-bottom: 14px;
   font-size: 14px;
 }
+.option-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  color: var(--ui-brand);
+  background: var(--ui-field);
+}
+.option-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.option-note {
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--ui-muted);
+}
 .fit-note {
   text-align: center;
+}
+.fit-note.is-todo {
+  color: var(--ui-warning);
 }
 .outfit-mask {
   position: fixed;
@@ -162,6 +201,16 @@
 }
 button.sheet-fav {
   flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.fav-icon {
+  display: flex;
+}
+.fav-icon.on {
+  color: #ff5c7c;
 }
 button.sheet-wear {
   flex: 2;
