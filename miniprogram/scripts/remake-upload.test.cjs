@@ -20,13 +20,17 @@ test("an uploaded video is remade through /remake/upload with its length", async
     if (o.method === "POST") posts.push({ path, data: o.data });
     o.success({ statusCode: path === "/remake/upload" ? 202 : 200, data: path === "/remake/upload" ? { id: "job1", status: "queued", input: o.data } : { enabled: false, keywords: [] } });
   };
+  const replaced = [];
+  h.wx.redirectTo = (o) => replaced.push(o.url);
   await page.uploadVideo();
   assert.equal(during, 40);
   assert.equal(page.data.uploadingVideo, false);
   assert.equal(page.data.video.uploaded, true);
   assert.equal(page.data.seconds, 18);
   assert.equal(page.data.tooLong, true); // over the ~15 s most models take
-  await page.start();
+  await new Promise((resolve) => setTimeout(resolve, 0)); // it starts by itself
+  assert.equal(posts.filter((p) => p.path === "/remake/upload").length, 1);
+  assert.deepEqual(replaced, ["/pages/task-detail/index?id=job1"]);
   assert.deepEqual(JSON.parse(JSON.stringify(posts.find((p) => p.path === "/remake/upload").data)), { video: "a".repeat(32), assets: [], title: "我上传的视频", duration: 18 });
   page.change();
   assert.equal(page.uploadId, "");

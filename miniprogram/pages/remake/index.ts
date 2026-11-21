@@ -1,4 +1,4 @@
-import { request, error, enterPage, openTask } from "../../utils/api";
+import { request, error, enterPage, replacePage } from "../../utils/api";
 import { hotView } from "../../services/hot-video";
 import { startRemake, startUploadRemake } from "../../services/hot-import";
 import { uploadHandlers, REFERENCE_SECONDS } from "./upload";
@@ -64,6 +64,7 @@ Page({
       this.id = video.id;
       const seconds = Math.round(video.duration) || 0;
       this.setData({ video: hotView(video), seconds, tooLong: seconds > REFERENCE_SECONDS });
+      void this.start(); // no confirmation step: straight to the breakdown
     } catch (e) {
       if (version === this.revision) this.setData({ loadError: (e as Error).message });
     } finally {
@@ -97,7 +98,8 @@ Page({
       const job = this.uploadId
         ? await startUploadRemake(this.uploadId, { title: video.title, duration: this.data.seconds }, pictures)
         : await startRemake(video.id, { title: video.title, text: video.text, duration: video.duration }, pictures);
-      if (!this.destroyed) openTask(job.id, this);
+      // The task page replaces this one, so Back does not return here.
+      if (!this.destroyed) replacePage(this, "/pages/task-detail/index?id=" + job.id);
     } catch (e) {
       if (!this.destroyed) error(e);
     } finally {

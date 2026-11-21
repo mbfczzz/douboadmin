@@ -64,15 +64,18 @@ test("做同款 opens 一键复刻; starting queues the preparation task and ope
   const { h, page } = studio();
   page.remake({ currentTarget: { dataset: { id: "v1" } } });
   assert.equal(h.nav[0].url, "/pages/remake/index?id=v1");
-  const remake = h.page("remake"), started = [];
+  const remake = h.page("remake"), started = [], replaced = [];
+  h.wx.redirectTo = (o) => replaced.push(o.url);
   h.service("hot-import").startRemake = async (id, original, pictures) => { started.push([id, original.title, Array.from(pictures)]); return { id: "job-9" }; };
   remake.onLoad({ id: "v1" });
   remake.onShow();
   await settle();
   assert.equal(remake.data.video.id, "v1");
-  await remake.start(); // pictures are chosen per subject on the task page
+  // No confirmation step: reading the video starts the remake (pictures are
+  // chosen per subject on the task page), and the task page replaces this one.
+  await settle();
   assert.deepEqual(started, [["v1", "视频v1", []]]);
-  assert.equal(h.nav[1].url, "/pages/task-detail/index?id=job-9");
+  assert.deepEqual(replaced, ["/pages/task-detail/index?id=job-9"]);
   assert.equal(remake.data.busy, false);
 });
 

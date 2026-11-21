@@ -10,6 +10,7 @@ type Page = {
   revision: number;
   destroyed: boolean;
   setData(data: Record<string, unknown>): void;
+  start(): Promise<void>;
 };
 
 export const uploadHandlers = {
@@ -30,6 +31,7 @@ export const uploadHandlers = {
       const seconds = Math.round(file.duration || 0);
       const video = { id: "", uploaded: true, title: "我上传的视频", url: media(row.data.url), cover: row.data.thumbnailUrl ? media(row.data.thumbnailUrl) : "", author: "", dateText: "" };
       this.setData({ video, seconds, tooLong: seconds > REFERENCE_SECONDS, loadError: "" });
+      void this.start(); // no confirmation step: straight to the breakdown
     } catch (e) {
       if (!this.destroyed && !cancelled(e)) error(e);
     } finally {

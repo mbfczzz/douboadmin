@@ -18,6 +18,12 @@ export function openPage(
   return startNavigation(page, (fail) => wx.navigateTo({ ...options, fail }), options.fail);
 }
 
+// The current page gives way to the next (Back skips it), e.g. 一键复刻 →
+// its task once the preparation has started.
+export function replacePage(page: object, url: string) {
+  return startNavigation(page, (fail) => wx.redirectTo({ url, fail }));
+}
+
 // wallet ⇄ orders: go back when the target is the page underneath instead
 // of stacking another copy of it.
 export function openOrBack(page: object, url: string) {
