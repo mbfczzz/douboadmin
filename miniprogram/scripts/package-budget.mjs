@@ -272,7 +272,10 @@ console.log(
 // The remaining text-only spots get Codex icons: 文案提取 sources, 一键复刻
 // (要复刻的视频, 粘贴, 上传视频), 视频文案, 包含创作描述, 去豆播找灵感,
 // 先浏览小程序 / 刷新授权状态 / 退出登录: 1,057,688 B. 1032 -> 1033 KiB.
-const budget = 1033 * 1024;
+// 剧情带货 / 探店视频 cases are templates (their generated samples) instead
+// of Douyin videos; a case opens 做同款 with the user's pictures in its
+// slots (template-detail/prefill.ts): 1,061,159 B. 1033 -> 1037 KiB.
+const budget = 1037 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

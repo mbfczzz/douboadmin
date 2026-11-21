@@ -150,29 +150,62 @@ test("the remake brief follows the video breakdown and swaps in the user's pictu
   assert.match(plain, /未能拆解画面[^]*文案：文案[^]*不要照搬原作者/);
 });
 
-test("剧情带货 shows real hot cases for its keyword, an upload entry and 清空", async () => {
+test("剧情带货 shows template cases (generated samples) for its keyword; a case opens 做同款 with the user's pictures", async () => {
   const h = harness(), calls = [];
-  h.api.hasSession = () => true;
-  h.api.request = async (path) => { calls.push(path); return { items: [{ id: "7301", cover: "https://c/1.jpg", title: "洗衣机广告：一洗就干净的秘密" }, { id: "7302", cover: "", title: "无封面" }] }; };
+  const t = (id, cover, title) => ({ id, data: { kind: "video", cover, title, duration: 5 } });
+  h.api.request = async (path) => { calls.push(path); return { items: [t("tpl-1", "https://c/1.jpg", "洗衣机广告"), t("tpl-2", "", "无封面")] }; };
   const page = h.page("create");
   page.onLoad({ feature: "ad" });
   await new Promise((resolve) => setTimeout(resolve, 0));
-  assert.match(calls[0], /^\/hot\/videos\?q=%E5%89%A7%E6%83%85%E5%B8%A6%E8%B4%A7&cursor=0.*&history=0$/);
-  assert.deepEqual(JSON.parse(JSON.stringify(page.data.featureCases)), [{ id: "7301", cover: "https://c/1.jpg", title: "洗衣机广告：一洗" }]);
+  assert.match(calls[0], /^\/templates\?kind=video&page=1&size=10&q=%E5%B8%A6%E8%B4%A7$/);
+  assert.deepEqual(JSON.parse(JSON.stringify(page.data.featureCases)), [{ id: "tpl-1", cover: "https://c/1.jpg", title: "洗衣机广告", seconds: 5 }]);
   assert.equal(page.data.featureUpload, "上传商品图");
-  page.openCase({ currentTarget: { dataset: { id: "7301" } } });
-  assert.equal(h.nav[0].url, "/pages/remake/index?id=7301");
+  // No picture yet: just the template.
+  page.openCase({ currentTarget: { dataset: { id: "tpl-1" } } });
+  assert.equal(h.nav[0].url, "/pages/template-detail/index?id=tpl-1");
+  assert.equal(h.storage.get("template-prefill"), undefined);
+  // With the product picture uploaded here it goes along (images only).
+  const pic = { id: "a1", isImage: true, data: { type: "image/jpeg", url: "https://u/1.jpg" } };
+  page.setData({ assets: [pic, { id: "v1", isVideo: true, data: { type: "video/mp4", url: "" } }] });
+  page.openCase({ currentTarget: { dataset: { id: "tpl-1" } } });
+  const handed = h.storage.get("template-prefill");
+  assert.equal(handed.templateId, "tpl-1");
+  assert.deepEqual(handed.assets.map((a) => a.id), ["a1"]);
   page.setData({ prompt: "写好的剧本", hasPrompt: true });
   page.clearPrompt();
   assert.equal(page.data.prompt, "");
-  const visitor = harness();
-  visitor.api.hasSession = () => false;
-  visitor.api.request = async () => { throw new Error("must not ask"); };
-  const quiet = visitor.page("create");
-  quiet.onLoad({ feature: "shop" });
+  // Nothing matches the keyword: the newest templates instead.
+  const other = harness(), asked = [];
+  other.api.request = async (path) => { asked.push(path); return { items: path.endsWith("q=") ? [t("tpl-9", "https://c/9.jpg", "最新模板")] : [] }; };
+  const shop = other.page("create");
+  shop.onLoad({ feature: "shop" });
   await new Promise((resolve) => setTimeout(resolve, 0));
-  assert.equal(quiet.data.featureCases.length, 0);
-  assert.equal(quiet.data.featureUpload, "上传门店图");
+  assert.equal(asked.length, 2);
+  assert.equal(shop.data.featureCases[0].id, "tpl-9");
+  assert.equal(shop.data.featureUpload, "上传门店图");
+});
+
+test("a template opened from 模板案例 starts with the handed-over pictures in its slots, once", async () => {
+  const h = harness();
+  const a1 = { id: "a1", data: { type: "image/jpeg", url: "https://u/1.jpg" } }, a2 = { id: "a2", data: { type: "image/jpeg", url: "https://u/2.jpg" } };
+  h.storage.set("template-prefill", { templateId: "t", assets: [a1, a2] });
+  h.api.request = async (p) => {
+    if (p.startsWith("/templates/")) return { id: "t", data: { kind: "video", cover: "/cover.jpg", title: "template", requiredImages: 1, mode: "i2v", duration: 5 } };
+    if (p === "/config") return { models: [] };
+    throw new Error("unexpected " + p);
+  };
+  const page = h.page("template-detail");
+  page.onLoad({ id: "t" });
+  assert.equal(h.storage.get("template-prefill"), undefined);
+  await page.load();
+  assert.deepEqual(page.data.assets.map((a) => a.id), ["a1"]); // as many as it takes
+  page.setData({ assets: [] });
+  await page.load(); // a refresh does not put them back
+  assert.equal(page.data.assets.length, 0);
+  // Another template's hand-over is not taken.
+  h.storage.set("template-prefill", { templateId: "other", assets: [a1] });
+  page.onLoad({ id: "t" });
+  assert.equal(h.storage.get("template-prefill").templateId, "other");
 });
 
 test("story pages: style cards, examples that fill the text, 清空 and switches", () => {

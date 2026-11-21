@@ -1,10 +1,10 @@
 <view wx:if="{{featureCases.length}}" class="feature-cases">
-  <text class="feature-section">热门案例</text>
+  <view class="feature-section-row"><text class="feature-section">模板案例</text><text class="feature-section-hint">点一下做同款，已上传的图会自动放入</text></view>
   <scroll-view scroll-x enhanced show-scrollbar="{{false}}" class="cases-strip">
     <view class="cases-row">
       <view wx:for="{{featureCases}}" wx:key="id" class="case" data-id="{{item.id}}" bindtap="openCase" hover-class="card-pressed" aria-role="button" aria-label="{{'做同款：'+item.title}}">
-        <image src="{{item.cover}}" mode="aspectFill" lazy-load />
-        <text>{{item.title}}</text>
+        <view class="case-cover"><image src="{{item.cover}}" mode="aspectFill" lazy-load /><text wx:if="{{item.seconds}}" class="case-time">{{item.seconds}}秒</text><text class="case-same">做同款</text></view>
+        <text class="case-title">{{item.title}}</text>
       </view>
     </view>
   </scroll-view>

@@ -19,6 +19,7 @@ import {
 import type { Template, Row, Asset } from "../../services/types";
 import { loadQuote } from "./quote";
 import { loadRecipe, recipeAsset, recipeHandlers } from "./recipe";
+import { takePrefill, applyPrefill } from "./prefill";
 Page({
   ...recipeHandlers,
   data: {
@@ -47,6 +48,7 @@ Page({
     ],
   },
   id: "",
+  prefill: [] as Row<Asset>[],
   favoriteRevision: 0,
   visible: true,
   destroyed: false,
@@ -61,6 +63,7 @@ Page({
   },
   onLoad(o: Record<string, string>) {
     this.id = o.id;
+    this.prefill = takePrefill(o.id); // pictures from a 创作 preset's 模板案例
     showArt(this, (art) => ({ uploadExample: art.uploadExample, "sources[0].image": art.srcImage, "sources[1].image": art.srcCamera, "sources[2].image": art.srcChat }));
     // Opened from a list that already holds this template: show it now.
     const known = recallRow<Row<Template>>(o.id);
@@ -103,6 +106,10 @@ Page({
       else {
         this.setData({ recipeModel: "", recipeResolution: "", recipeQuality: "", recipeError: "", ...(hadRecipe ? { assets: [], recipePositions: [], recipeSlots: [] } : {}) });
         loadQuote(this, t);
+      }
+      if (this.prefill.length) {
+        applyPrefill(this, this.prefill);
+        this.prefill = [];
       }
       if (!hasSession()) {
         this.setData({ favorite: false, favoriteVersion: 0 });

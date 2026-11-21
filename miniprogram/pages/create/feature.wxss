@@ -56,11 +56,19 @@
 .feature-cases {
   margin-bottom: 14px;
 }
-.feature-section {
-  display: block;
+.feature-section-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
   margin-bottom: 10px;
+}
+.feature-section {
   font-size: 15px;
   font-weight: 600;
+}
+.feature-section-hint {
+  font-size: 12px;
+  color: var(--ui-muted);
 }
 .cases-strip {
   margin: 0 -20px;
@@ -73,24 +81,54 @@
 }
 .case {
   flex: none;
-  width: 84px;
+  width: 96px;
   display: flex;
   flex-direction: column;
   gap: 6px;
-  font-size: 12px;
-  color: var(--ui-link);
 }
-.case image {
-  width: 84px;
-  height: 112px;
+/* The template's generated sample, its length and a 做同款 tag. */
+.case-cover {
+  position: relative;
+  width: 96px;
+  height: 128px;
   border-radius: 10px;
+  overflow: hidden;
   background: var(--ui-field);
 }
-.case text {
+.case-cover image {
+  width: 100%;
+  height: 100%;
+}
+.case-time {
+  position: absolute;
+  left: 6px;
+  top: 6px;
+  padding: 0 5px;
+  border-radius: 6px;
+  font-size: 10px;
+  line-height: 16px;
+  color: #fff;
+  background: #00000080;
+}
+.case-same {
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  bottom: 6px;
+  border-radius: var(--ui-radius-pill);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 20px;
+  text-align: center;
+  color: var(--ui-on-brand);
+  background: var(--ui-primary);
+}
+.case-title {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-  text-align: center;
+  font-size: 12px;
+  color: var(--ui-link);
 }
 /* The picture entry, until the first one is added. */
 .feature-upload {
