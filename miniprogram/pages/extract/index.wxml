@@ -14,10 +14,10 @@
         <button class="biz-action link-go" loading="{{busy}}" disabled="{{busy}}" bindtap="extract">提取文案</button>
       </view>
     </view>
-    <page-loading wx:if="{{busy&&!video&&item.key==='link'}}" show mode="inline" text="正在读取视频文案…" />
-    <view wx:if="{{video&&item.key==='link'}}" class="biz-card result-card">
+    <page-loading wx:if="{{busy&&!video&&item.key===working}}" show mode="inline" text="{{item.key==='link'?'正在读取视频文案…':'正在识别文字…'}}" />
+    <view wx:if="{{video&&item.key===resultKey}}" class="biz-card result-card">
       <text class="biz-heading">{{video.title}}</text>
-      <text class="biz-small">{{video.author}}</text>
+      <text wx:if="{{video.author}}" class="biz-small">{{video.author}}</text>
       <text selectable="true" class="result-text">{{video.text||video.title}}</text>
       <view class="result-actions">
         <button class="biz-secondary" bindtap="copy">复制文案</button>

@@ -33,7 +33,7 @@ test("sign-in, activation, sharing, extraction and the Agent picker wait visibly
   assert.match(read("pages/activate/index.wxml"), /<page-loading wx:if="\{\{loading&&!status&&!loadError\}\}" show mode="inline"[^>]*\/>\s*<block wx:else>/);
   assert.match(read("pages/login/index.wxml"), /<page-loading wx:if="\{\{loading\}\}" show mode="inline" text="正在连接微信…"/);
   assert.match(read("pages/share/index.wxml"), /<page-loading show="\{\{!job&&!needsLogin&&!loadError\}\}"/);
-  assert.match(read("pages/extract/index.wxml"), /<page-loading wx:if="\{\{busy&&!video&&item\.key==='link'\}\}"/);
+  assert.match(read("pages/extract/index.wxml"), /<page-loading wx:if="\{\{busy&&!video&&item\.key===working\}\}"/);
   assert.match(read("components/featured-works/index.wxml"), /<page-loading show mode="hint" \/>/);
   const agent = read("pages/agent/index.wxml");
   assert.match(agent, /<page-loading wx:if="\{\{!session&&!projectsReady&&!projectsError\}\}"/);
