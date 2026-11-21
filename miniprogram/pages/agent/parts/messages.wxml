@@ -90,7 +90,7 @@
       </view>
       <scroll-view wx:if="{{index===messages.length-1&&!busy&&!item.streaming&&item.plan}}" scroll-x class="follow-ups">
         <view class="follow-row">
-          <view wx:for="{{followUps}}" wx:for-item="ask" wx:key="*this" class="follow" aria-role="button" data-value="{{ask}}" bindtap="quick" hover-class="starter-pressed">{{ask}}</view>
+          <view wx:for="{{item.plan.kind==='video'&&followUps.length?followUps:item.plan.asks}}" wx:for-item="ask" wx:key="*this" class="follow" aria-role="button" data-value="{{ask}}" bindtap="quick" hover-class="starter-pressed">{{ask}}</view>
         </view>
       </scroll-view>
     </block>

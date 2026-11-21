@@ -30,6 +30,15 @@ const ratioOf = (v: unknown) => {
   return /^\d{1,2}:\d{1,2}$/.test(s) ? s : RATIOS[s] || "9:16";
 };
 
+// Quick revisions under a plan, from what it is: a picture gets picture
+// changes (no 秒 or 开场), a video its length and opening; the orientation
+// offered is always the one it is not yet.
+export function planAsks(plan: Plan): string[] {
+  const wide = plan.ratio === "16:9" || plan.ratio === "4:3" || plan.ratio === "21:9";
+  if (plan.kind === "image") return ["换一个构图", "换一种画风", wide ? "改成竖版 9:16" : "改成横版 16:9"];
+  return [plan.duration > 10 ? "缩短到 10 秒" : "加长到 15 秒", "换一个开场", wide ? "改成竖屏" : "改成横屏"];
+}
+
 function parsePlan(body: string): PlanView | undefined {
   let v: Record<string, unknown>;
   try {
@@ -45,7 +54,7 @@ function parsePlan(body: string): PlanView | undefined {
   const kind = v.kind === "image" || v.kind === "图片" ? "image" : "video";
   const duration = Math.min(60, Math.max(1, parseInt(str(v.duration, 8), 10) || 15));
   const plan: Plan = { kind, title: str(v.title, 20) || "创作方案", duration, ratio: ratioOf(v.ratio), prompt, shots };
-  return { ...plan, meta: planMeta(plan), lead: shots.find((s) => s.asset)?.asset || "" };
+  return { ...plan, meta: planMeta(plan), lead: shots.find((s) => s.asset)?.asset || "", asks: planAsks(plan) };
 }
 
 export function splitReply(text: string): { text: string; plan?: PlanView; broken?: boolean } {

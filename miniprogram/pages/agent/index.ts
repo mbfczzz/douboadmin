@@ -60,7 +60,7 @@ Page({
     focus: false,
     ready: false, // first history load finished (or a cached copy shown)
     // Follow-ups under the latest reply; they fill the composer like starters.
-    followUps: ["缩短到 10 秒", "换一个开场", "改成横屏"], // per skill (session.ts)
+    followUps: [] as string[], // a skill's own revisions for video plans (session.ts)
     examples: [] as string[], // first messages to try in an empty project
     planPrice: { id: "", text: "" }, // the newest plan's points, on 确认生成
     expanded: {} as Record<string, boolean>, // earlier plans opened to their full card

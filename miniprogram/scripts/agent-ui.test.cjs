@@ -38,5 +38,18 @@ test("script replies split into shot labels; failures offer to edit the question
   page.retry({ currentTarget: { dataset: { prompt: failed.prompt } } });
   assert.equal(page.data.prompt, "写个脚本");
   assert.equal(page.data.focus, true);
-  assert.equal(page.data.followUps.length, 3);
+  assert.equal(page.data.followUps.length, 0); // no fixed video chips; they come from the plan
+});
+
+test("quick revisions fit the plan: no 秒 or 开场 for a picture, and never its current orientation", () => {
+  const { planAsks, splitReply } = harness().service("../utils/agent-plan");
+  const plain = (v) => JSON.parse(JSON.stringify(v));
+  const image = { kind: "image", title: "关羽动漫形象", duration: 5, ratio: "9:16", prompt: "p", shots: [] };
+  assert.deepEqual(plain(planAsks(image)), ["换一个构图", "换一种画风", "改成横版 16:9"]);
+  assert.deepEqual(plain(planAsks({ ...image, ratio: "16:9" })), ["换一个构图", "换一种画风", "改成竖版 9:16"]);
+  const video = { ...image, kind: "video", duration: 15 };
+  assert.deepEqual(plain(planAsks(video)), ["缩短到 10 秒", "换一个开场", "改成横屏"]);
+  assert.deepEqual(plain(planAsks({ ...video, duration: 8, ratio: "16:9" })), ["加长到 15 秒", "换一个开场", "改成竖屏"]);
+  const reply = splitReply('说明\n```plan\n{"kind":"image","title":"关羽","ratio":"9:16","prompt":"国风关羽半身像"}\n```');
+  assert.ok(!reply.plan.asks.some((a) => /秒|开场/.test(a)));
 });

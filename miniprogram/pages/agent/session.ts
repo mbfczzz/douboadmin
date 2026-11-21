@@ -21,11 +21,11 @@ export const projectView = (row: SessionRow, skills: Skill[]): ProjectView => ({
   when: row.data.activeAt ? date(row.data.activeAt) : "",
 });
 
-const FOLLOW_UPS = ["缩短到 10 秒", "换一个开场", "改成横屏"];
-// What an open project suggests: first messages when empty, quick revisions after.
+// What an open project suggests: first messages when empty; a skill's own
+// quick revisions for its video plans (others come from the plan, planAsks).
 const skillHints = (skills: Skill[], id?: string) => {
   const skill = skills.find((s) => s.id === id);
-  return { examples: skill?.examples || [], followUps: skill?.followUps?.length ? skill.followUps : FOLLOW_UPS };
+  return { examples: skill?.examples || [], followUps: skill?.followUps || [] };
 };
 
 type Page = {
