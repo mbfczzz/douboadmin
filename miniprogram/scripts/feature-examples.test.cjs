@@ -42,12 +42,13 @@ test("视频二创 shows each 二创方式 and 画面特效 as a picture card, a
   const page = h.page("feature");
   page.onLoad({ key: "remix" });
   const cards = page.data.sections.filter((s) => s.type === "styles");
-  assert.deepEqual(cards.map((s) => s.label), ["二创方式", "画面特效（单选）"]);
+  assert.deepEqual(JSON.parse(JSON.stringify(cards.map((s) => s.label))), ["二创方式", "画面特效（单选）"]);
   assert.ok(cards.every((s) => s.values.every((v) => v.art)));
   const setData = page.setData.bind(page);
   page.setData = (d) => { set.push(d); setData(d); };
   page.onShow();
   await new Promise((resolve) => setTimeout(resolve, 0));
   const art = set.map((d) => d.art).filter(Boolean).at(-1);
-  assert.deepEqual(Object.keys(art).sort(), cards.flatMap((s) => s.values.map((v) => v.art)).sort());
+  const named = JSON.parse(JSON.stringify(cards.flatMap((s) => s.values.map((v) => v.art)))).sort();
+  assert.deepEqual(Object.keys(art).sort(), named);
 });
