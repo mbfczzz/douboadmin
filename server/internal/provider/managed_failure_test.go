@@ -88,3 +88,27 @@ func TestManagedFailedTaskBodyAndPollingTimeoutAreTerminal(t *testing.T) {
 		t.Fatal(requests, e)
 	}
 }
+
+// Querying a task whose generation already failed content review, which the
+// relay answers as 503 / 5006 provider_unavailable, ends the task (safety
+// failure, no hour of retries) instead of waiting for the model to recover.
+func TestPollingAFinishedSafetyFailureLabelledUnavailableEndsTheTask(t *testing.T) {
+	p, job := fixture(t, func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == "POST" {
+			_, _ = w.Write([]byte(`{"id":"poll-task","status":"processing"}`))
+			return
+		}
+		w.WriteHeader(503)
+		_, _ = w.Write([]byte(`{"error":{"code":5006,"type":"provider_unavailable","message":"generation_failed: The generated audio did not pass the content safety review."}}`))
+	})
+	if _, err := p.Generate(context.Background(), job); !errors.Is(err, ErrPending) {
+		t.Fatal(err)
+	}
+	_, err := p.Generate(context.Background(), job)
+	if err == nil || errors.Is(err, ErrRetryLater) || !strings.Contains(err.Error(), "安全审核") {
+		t.Fatal(err)
+	}
+	if e := executionOf(t, p, job.ID); e.Phase != "failed" || e.ErrorCode != 5002 || e.ErrorRetryable {
+		t.Fatal(e)
+	}
+}

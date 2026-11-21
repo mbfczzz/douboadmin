@@ -105,6 +105,7 @@ func ParseManagedError(raw []byte) ManagedError {
 		return ManagedError{}
 	}
 	code, _ := strconv.Atoi(scalar(data.Code))
+	code = settledCode(code, data.Message)
 	out := ManagedError{Code: code, Message: clipManaged(data.Message, 500), UpstreamCode: clipManaged(scalar(data.UpstreamCode), 100), UpstreamType: clipManaged(data.UpstreamType, 100)}
 	if rule, ok := managedRules[code]; ok {
 		out.Type, out.UserMessage, out.Action = rule.typ, rule.message, rule.action
@@ -115,4 +116,23 @@ func ParseManagedError(raw []byte) ManagedError {
 		}
 	}
 	return out
+}
+
+// settledCode: a generic "unavailable / internal / network" code whose own
+// message says the generation already ended (failed, or blocked by content
+// review) is that ending. The relay has labelled a finished task's content
+// review failure as 5006 provider_unavailable, which kept a finished task
+// being queried as if the model were only down for a moment.
+func settledCode(code int, message string) int {
+	if code != 5006 && code != 5012 && code != 5202 {
+		return code
+	}
+	m := strings.ToLower(message)
+	switch {
+	case strings.Contains(m, "safety review") || strings.Contains(m, "content safety") || strings.Contains(m, "安全审核"):
+		return 5002
+	case strings.Contains(m, "generation_failed"):
+		return 5001
+	}
+	return code
 }

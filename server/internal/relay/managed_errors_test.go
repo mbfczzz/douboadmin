@@ -55,3 +55,24 @@ func TestHTTPErrorCarriesManagedFieldsWithoutLeakingKey(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+// A finished task's content review failure, labelled 5006 by the relay, is
+// read as the safety failure it is (and so ends the task), not as a model
+// that is only down for a moment.
+func TestManagedErrorSettlesAFinishedFailureLabelledUnavailable(t *testing.T) {
+	safety := ParseManagedError([]byte(`{"error":{"code":5006,"type":"provider_unavailable","message":"generation_failed: The generated audio did not pass the content safety review."}}`))
+	if safety.Code != 5002 || safety.Type != "safety_policy" || safety.Retryable || !safety.Editable {
+		t.Fatalf("%+v", safety)
+	}
+	failed := ParseManagedError([]byte(`{"error":{"code":5006,"message":"generation_failed: upstream error"}}`))
+	if failed.Code != 5001 || failed.Type != "task_failed" {
+		t.Fatalf("%+v", failed)
+	}
+	down := ParseManagedError([]byte(`{"error":{"code":5006,"message":"no channel available"}}`))
+	if down.Code != 5006 || !down.Retryable {
+		t.Fatalf("a real outage stays retryable: %+v", down)
+	}
+	if got := ParseManagedError([]byte(`{"error":{"code":5003,"message":"generation_failed: bad size"}}`)); got.Code != 5003 {
+		t.Fatalf("a specific code is kept: %+v", got)
+	}
+}
