@@ -72,12 +72,18 @@ func (a *Server) saveOutfit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	asset, err := a.Store.Get(r.Context(), "assets", o.ImageAssetID)
+	// The outfit's own picture (e.g. a built-in one) may be kept as it is.
+	kept := false
+	if old, e := a.Store.Get(r.Context(), "outfits", id); e == nil {
+		var prev core.Outfit
+		kept = json.Unmarshal(old.Data, &prev) == nil && prev.ImageAssetID == o.ImageAssetID
+	}
 	var file struct {
 		Key  string `json:"key"`
 		Type string `json:"type"`
 		Size int64  `json:"size"`
 	}
-	if err != nil || !a.adminAsset(r, asset.Owner) || json.Unmarshal(asset.Data, &file) != nil || file.Key == "" {
+	if err != nil || !(kept || a.adminAsset(r, asset.Owner)) || json.Unmarshal(asset.Data, &file) != nil || file.Key == "" {
 		fail(w, 400, "服装图片不可用，请重新上传")
 		return
 	}

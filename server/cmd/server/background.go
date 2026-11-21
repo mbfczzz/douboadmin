@@ -49,6 +49,7 @@ func background(ctx context.Context, app *api.Server, role string, values settin
 			go syncBuiltinIcons(ctx, app.Media.UIArt, "ui-art")
 		}
 		go app.Hot.RunFeedRefresh(ctx) // 创作 feed in Redis, refreshed hourly
+		go app.SeedBuiltinOutfits(ctx) // AI试衣 starts with the shipped outfits
 	}
 	go app.RunLogRetention(ctx, envDays("LOG_RETENTION_DAYS", 180), envDays("LOG_READ_RETENTION_DAYS", 14))
 	go metrics.Run(ctx)
