@@ -33,8 +33,8 @@
       </view>
     </view>
     <view wx:if="{{info}}" class="wallet-shortcuts">
-      <view bindtap="orders" aria-role="button" hover-class="row-pressed"><image class="gl gl-20" src="/assets/glyphs/orders-muted.png" /><text>充值订单</text><t-icon name="chevron-right" size="20" /></view>
-      <view bindtap="explain" aria-role="button" hover-class="row-pressed"><image class="gl gl-20" src="/assets/glyphs/help-muted.png" /><text>积分说明</text><t-icon name="chevron-right" size="20" /></view>
+      <view bindtap="orders" aria-role="button" hover-class="row-pressed"><art-icon name="icOrders" size="28" fallback-size="20" glyph="/assets/glyphs/orders-muted.png" /><text>充值订单</text><t-icon name="chevron-right" size="20" /></view>
+      <view bindtap="explain" aria-role="button" hover-class="row-pressed"><art-icon name="icInfo" size="28" fallback-size="20" glyph="/assets/glyphs/help-muted.png" /><text>积分说明</text><t-icon name="chevron-right" size="20" /></view>
     </view>
     <view class="wallet-purchase" wx:if="{{info&&!pendingOrderId}}"
       ><text class="biz-heading">购买积分</text
@@ -88,7 +88,7 @@
       ><block wx:for="{{ledger}}" wx:key="id"
         ><text wx:if="{{item.showDay}}" class="ledger-day">{{item.day}}</text
         ><view class="biz-row ledger-row"
-        ><view class="icon-tile {{item.tone}}"><image class="gl gl-20" src="{{item.glyph}}" /></view><view class="ledger-copy"
+        ><view class="icon-tile {{item.tone}}"><art-icon name="{{item.ic}}" size="32" fallback-size="20" glyph="{{item.glyph}}" /></view><view class="ledger-copy"
           ><text class="biz-list-title">{{item.title}}</text
           ><text wx:if="{{item.note}}" class="biz-small ledger-note">{{item.note}}</text
           ><text class="biz-small ledger-time">{{item.time}}</text></view

@@ -59,7 +59,7 @@ test("profile fields share explicit grouping while preserving form field names",
 
 test("the profile exposes recent media and icon-text navigation", () => {
   const mine = source("mine");
-  assert.match(mine, /class="menu-grid"[\s\S]*?name="{{item.icon}}"/);
+  assert.match(mine, /class="menu-grid"[\s\S]*?icon="{{item.icon}}"/);
   assert.ok(mine.includes('class="menu-label"'));
   assert.ok(mine.includes('class="completed-grid cover-grid"'));
   // A running tile leads the cover wall; the sixth cover yields to it.

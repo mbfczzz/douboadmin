@@ -1,0 +1,3 @@
+<image wx:if="{{src}}" class="art-icon" style="width:{{size}}px;height:{{size}}px;border-radius:{{size*0.28}}px" src="{{src}}" aria-hidden="true" />
+<image wx:elif="{{glyph}}" class="art-glyph" style="width:{{fallbackSize||size}}px;height:{{fallbackSize||size}}px" src="{{glyph}}" aria-hidden="true" />
+<t-icon wx:elif="{{icon}}" name="{{icon}}" size="{{fallbackSize||size}}" />

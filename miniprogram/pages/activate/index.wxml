@@ -50,7 +50,7 @@
               <text class="scan-title">{{busy?'正在登记…':'扫码登记'}}</text>
               <text class="scan-hint">扫码登记对应角色，审核开通后生效</text>
             </view>
-            <text class="mode-link" bindtap="useCode">邀请码激活</text>
+            <view class="mode-link" bindtap="useCode" aria-role="button"><art-icon name="icInvite" size="18" /><text>邀请码激活</text></view>
           </block>
           <block wx:else>
             <text class="code-title">输入邀请码</text>
@@ -75,5 +75,5 @@
     <view class="activation-links"><text bindtap="refresh">{{loading?'正在检查授权…':'刷新授权状态'}}</text><text class="sign-out" bindtap="signOut">退出登录</text></view>
   </block>
   </block>
-  <text class="activation-privacy" bindtap="privacy">隐私保护指引</text>
+  <view class="activation-privacy" bindtap="privacy" aria-role="button"><art-icon name="icPrivacy" size="16" /><text>隐私保护指引</text></view>
 </view>

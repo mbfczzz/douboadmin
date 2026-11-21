@@ -78,7 +78,9 @@ test("generated icon art is bundled and every tab glyph has both states", () => 
     for (const state of ["on", "off"]) assert.ok(fs.existsSync(path.join(root, "assets/tab", `${name}-${state}.png`)), `${name}-${state}`);
   // The vector icon stays as the fallback when an entry has no art.
   assert.match(read("custom-tab-bar/index.wxml"), /wx:if="\{\{item\.art\}\}"[^]*<t-icon wx:else/);
-  assert.match(read("pages/mine/index.wxml"), /wx:if="\{\{item\.art\}\}" class="menu-icon"[^]*<t-icon wx:else/);
+  // 我的 menus: the Codex 3D icon, then the bundled glyph, then the vector icon.
+  assert.match(read("pages/mine/index.wxml"), /<art-icon name="\{\{item\.ic\}\}"[^>]*glyph="\{\{item\.art\}\}" icon="\{\{item\.icon\}\}"/);
+  assert.match(read("components/art-icon/index.wxml"), /wx:if="\{\{src\}\}"[^]*wx:elif="\{\{glyph\}\}"[^]*<t-icon wx:elif/);
 });
 
 test("我的 subpages place a named backdrop inside a stacking layer", () => {

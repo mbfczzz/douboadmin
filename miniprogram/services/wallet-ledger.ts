@@ -22,7 +22,10 @@ const glyph = (name: string) => `/assets/glyphs/${name}.png`;
 // list (server-filtered) only holds changes to the spendable balance.
 export function ledgerView(row: Row<Ledger>) {
   const entry = row.data;
+  const returned = entry.kind.includes("release") || entry.kind.includes("refund");
   return {
+    // Codex 3D icon (components/art-icon); glyph until it loads.
+    ic: entry.kind === "topup" ? "icRecharge" : returned ? "icRefund" : entry.kind === "admin_adjust" ? "icSettings" : "icPoints",
     glyph: glyph(entry.kind === "topup" ? "add-success" : entry.kind.includes("release") || entry.kind.includes("refund") || entry.kind === "job_usage" ? "refresh-muted" : entry.kind === "admin_adjust" ? "settings-muted" : "image-muted"),
     id: row.id,
     title: labels[entry.kind] || entry.kind,

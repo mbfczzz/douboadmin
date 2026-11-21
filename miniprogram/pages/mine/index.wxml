@@ -36,7 +36,7 @@
       <view data-mode="favorites" bindtap="menu" aria-role="button" aria-label="查看收藏"><text>{{me.favorites}}</text><text>收藏</text></view>
     </view>
     <view class="mine-balance"><points-balance row /></view>
-    <view wx:if="{{roleMenu}}" class="role-link" data-mode="{{roleMenu.mode}}" bindtap="menu" aria-role="button" aria-label="{{roleMenu.label}}" hover-class="card-pressed"><view class="role-glyph {{roleMenu.art?'has-art':''}}"><image wx:if="{{roleMenu.art}}" class="glyph-art" src="{{roleMenu.art}}" /><image wx:elif="{{roleMenu.glyph}}" class="gl gl-22" src="{{roleMenu.glyph}}" /><t-icon wx:else name="{{roleMenu.icon}}" size="22" /></view><view class="role-copy"><text class="role-title">{{roleMenu.label}}</text><text class="role-hint">{{roleMenu.hint}}</text></view><t-icon name="chevron-right" size="18" /></view>
+    <view wx:if="{{roleMenu}}" class="role-link" data-mode="{{roleMenu.mode}}" bindtap="menu" aria-role="button" aria-label="{{roleMenu.label}}" hover-class="card-pressed"><view class="role-glyph {{roleMenu.art?'has-art':''}}"><image wx:if="{{roleMenu.art}}" class="glyph-art" src="{{roleMenu.art}}" /><art-icon wx:elif="{{roleMenu.ic}}" name="{{roleMenu.ic}}" size="40" fallback-size="22" glyph="{{roleMenu.glyph}}" icon="{{roleMenu.icon}}" /><t-icon wx:else name="{{roleMenu.icon}}" size="22" /></view><view class="role-copy"><text class="role-title">{{roleMenu.label}}</text><text class="role-hint">{{roleMenu.hint}}</text></view><t-icon name="chevron-right" size="18" /></view>
     <view class="row works-heading"><text class="section-title">最近作品</text><view class="row small muted profile-edit" data-mode="works" bindtap="menu">全部<t-icon name="chevron-right" size="16" /></view></view>
     <view wx:if="{{worksLoading&&!worksKnown}}" class="cover-grid"><view wx:for="{{[1,2,3]}}" wx:key="*this" class="cover-cell skeleton" /></view>
     <view wx:if="{{worksError}}" class="error-box" bindtap="load">{{worksError}}</view>
@@ -55,7 +55,7 @@
     </view>
     <text class="section-title common-heading">常用功能</text>
     <view class="menu-grid">
-      <view wx:for="{{menus}}" wx:key="mode" class="menu {{item.mode}}" data-mode="{{item.mode}}" bindtap="menu" aria-role="button" aria-label="{{item.label}}" hover-class="card-pressed"><view class="menu-glyph"><image wx:if="{{item.art}}" class="menu-icon" src="{{item.art}}" /><t-icon wx:else name="{{item.icon}}" size="22" /><text wx:if="{{item.mode==='notifications'&&unread}}" class="menu-badge">{{unread>99?'99+':unread}}</text></view><text class="menu-label">{{item.label}}</text></view>
+      <view wx:for="{{menus}}" wx:key="mode" class="menu {{item.mode}}" data-mode="{{item.mode}}" bindtap="menu" aria-role="button" aria-label="{{item.label}}" hover-class="card-pressed"><view class="menu-glyph"><art-icon name="{{item.ic}}" size="44" fallback-size="22" glyph="{{item.art}}" icon="{{item.icon}}" /><text wx:if="{{item.mode==='notifications'&&unread}}" class="menu-badge">{{unread>99?'99+':unread}}</text></view><text class="menu-label">{{item.label}}</text></view>
     </view>
   </view>
 </view>

@@ -68,7 +68,10 @@ button.phone-login[disabled] {
   font-size: 15px;
 }
 .privacy-link {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   margin-top: 8px;
   padding: 12px;
   font-size: 13px;

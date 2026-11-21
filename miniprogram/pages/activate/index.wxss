@@ -48,8 +48,10 @@
   padding: 12px 0;
 }
 .activation-privacy {
-  display: block;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   font-size: 13px;
   color: var(--ui-muted);
   margin-top: 18px;

@@ -22,12 +22,12 @@
   <view wx:else class="content-reveal">
     <view wx:if="{{loadError}}" class="error-box" bindtap="load">刷新失败，已保留上次结果 · 点击重试</view>
     <view class="queue-stats">
-      <view class="stat running {{filter==='running'?'on':''}}" data-filter="running" bindtap="pick" aria-role="button" aria-label="{{'只看处理中，'+runningCount+' 个'}}"><view class="stat-icon"><t-icon name="loading" size="16" /></view><text class="stat-num">{{runningCount}}</text><text class="stat-label">处理中</text></view>
-      <view class="stat failed {{failedCount?'has':''}} {{filter==='failed'?'on':''}}" data-filter="failed" bindtap="pick" aria-role="button" aria-label="{{'只看失败，'+failedCount+' 个'}}"><view class="stat-icon"><t-icon name="error-circle" size="16" /></view><text class="stat-num">{{failedCount}}</text><text class="stat-label">失败</text></view>
-      <view class="stat done {{filter==='done'?'on':''}}" data-filter="done" bindtap="pick" aria-role="button" aria-label="{{'只看已完成，'+doneCount+' 个'}}"><view class="stat-icon"><t-icon name="check-circle" size="16" /></view><text class="stat-num">{{doneCount}}</text><text class="stat-label">已完成</text></view>
+      <view class="stat running {{filter==='running'?'on':''}}" data-filter="running" bindtap="pick" aria-role="button" aria-label="{{'只看处理中，'+runningCount+' 个'}}"><view class="stat-icon"><art-icon name="icRunning" size="24" fallback-size="16" icon="loading" /></view><text class="stat-num">{{runningCount}}</text><text class="stat-label">处理中</text></view>
+      <view class="stat failed {{failedCount?'has':''}} {{filter==='failed'?'on':''}}" data-filter="failed" bindtap="pick" aria-role="button" aria-label="{{'只看失败，'+failedCount+' 个'}}"><view class="stat-icon"><art-icon name="icFailed" size="24" fallback-size="16" icon="error-circle" /></view><text class="stat-num">{{failedCount}}</text><text class="stat-label">失败</text></view>
+      <view class="stat done {{filter==='done'?'on':''}}" data-filter="done" bindtap="pick" aria-role="button" aria-label="{{'只看已完成，'+doneCount+' 个'}}"><view class="stat-icon"><art-icon name="icDone" size="24" fallback-size="16" icon="check-circle" /></view><text class="stat-num">{{doneCount}}</text><text class="stat-label">已完成</text></view>
     </view>
     <view wx:if="{{filter}}" class="filter-note"><text>只看{{filter==='failed'?'失败':filter==='done'?'已完成':'处理中'}}的任务</text><text class="filter-clear" data-filter="{{filter}}" bindtap="pick">显示全部</text></view>
-    <view wx:if="{{!runningCount&&!failedCount}}" class="all-done"><t-icon name="check-circle-filled" size="18" /><text>没有进行中的任务，全部都完成了</text></view>
+    <view wx:if="{{!runningCount&&!failedCount}}" class="all-done"><art-icon name="icDone" size="22" fallback-size="18" icon="check-circle-filled" /><text>没有进行中的任务，全部都完成了</text></view>
     <block wx:for="{{jobs}}" wx:key="id"><view wx:if="{{!filter||filter===item.group}}" class="task-card {{item.status}}" data-id="{{item.id}}" bindtap="detail" hover-class="card-pressed">
       <view class="task-thumb {{item.status}} {{refs[item.id]?'has-ref':''}}">
         <image wx:if="{{item.cover||refs[item.id]}}" src="{{item.cover||refs[item.id]}}" mode="aspectFill" lazy-load data-id="{{item.id}}" binderror="coverError" />

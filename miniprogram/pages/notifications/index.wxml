@@ -16,7 +16,7 @@
       data-id="{{item.id}}"
       bindtap="open"
       hover-class="notice-pressed"
-      ><view class="notice-icon tone-{{item.tone}}"><t-icon name="{{item.icon}}" size="20" /></view
+      ><view class="notice-icon tone-{{item.tone}}"><art-icon name="{{item.ic}}" size="40" fallback-size="20" icon="{{item.icon}}" /></view
       ><view class="notice-body"
         ><view class="notice-line"><text class="notice-title">{{item.data.title}}</text><text class="notice-time">{{item.clock||item.time}}</text></view
         ><text class="notice-text">{{item.data.content}}</text></view

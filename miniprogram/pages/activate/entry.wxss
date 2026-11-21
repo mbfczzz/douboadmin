@@ -105,7 +105,9 @@
 }
 /* Switching between scanning and typing a code: a quiet text link. */
 .mode-link {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 6px;
   margin: 14px auto 0;
   padding: 8px 12px;
   width: fit-content;

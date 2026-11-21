@@ -7,7 +7,7 @@
   ><block wx:if="{{row}}"
     ><view class="biz-card"
       ><view class="biz-row"
-        ><view class="pref-label"><image class="gl gl-20" src="/assets/glyphs/notifications-muted.png" /><text>作品完成站内通知</text></view
+        ><view class="pref-label"><art-icon name="icNotice" size="28" fallback-size="20" glyph="/assets/glyphs/notifications-muted.png" /><text>作品完成站内通知</text></view
         ><switch
           checked="{{row.data.inAppNotifications}}"
           disabled="{{busy}}"
@@ -15,7 +15,7 @@
           data-field="inAppNotifications"
           bindchange="change" /></view
       ><view class="biz-row"
-        ><view class="pref-label"><image class="gl gl-20" src="/assets/glyphs/play-muted.png" /><text>作品预览自动播放</text></view
+        ><view class="pref-label"><art-icon name="icPlay" size="28" fallback-size="20" glyph="/assets/glyphs/play-muted.png" /><text>作品预览自动播放</text></view
         ><switch
           checked="{{row.data.autoplay}}"
           disabled="{{busy}}"
@@ -23,7 +23,7 @@
           data-field="autoplay"
           bindchange="change" /></view
       ><view class="biz-row"
-        ><view class="pref-label"><image class="gl gl-20" src="/assets/glyphs/stats-muted.png" /><text>详细使用统计</text></view
+        ><view class="pref-label"><art-icon name="icStats" size="28" fallback-size="20" glyph="/assets/glyphs/stats-muted.png" /><text>详细使用统计</text></view
         ><switch
           checked="{{row.data.analytics}}"
           disabled="{{busy}}"
@@ -45,9 +45,9 @@
         授权订阅通知
       </button></view
     ><view class="biz-card general"
-      ><view class="general-row" bindtap="help" hover-class="row-pressed"><image class="gl gl-20" src="/assets/glyphs/help-muted.png" /><text>帮助与反馈</text><t-icon name="chevron-right" size="18" /></view
-      ><view class="general-row" bindtap="privacy" hover-class="row-pressed"><image class="gl gl-20" src="/assets/glyphs/shield-muted.png" /><text>隐私保护指引</text><t-icon name="chevron-right" size="18" /></view
-      ><view wx:if="{{version}}" class="general-row static" bindtap="version"><image class="gl gl-20" src="/assets/glyphs/info-muted.png" /><text>当前版本</text><text class="general-value">{{version}}</text></view
+      ><view class="general-row" bindtap="help" hover-class="row-pressed"><art-icon name="icHelp" size="28" fallback-size="20" glyph="/assets/glyphs/help-muted.png" /><text>帮助与反馈</text><t-icon name="chevron-right" size="18" /></view
+      ><view class="general-row" bindtap="privacy" hover-class="row-pressed"><art-icon name="icPrivacy" size="28" fallback-size="20" glyph="/assets/glyphs/shield-muted.png" /><text>隐私保护指引</text><t-icon name="chevron-right" size="18" /></view
+      ><view wx:if="{{version}}" class="general-row static" bindtap="version"><art-icon name="icInfo" size="28" fallback-size="20" glyph="/assets/glyphs/info-muted.png" /><text>当前版本</text><text class="general-value">{{version}}</text></view
     ></view
     ><view class="sign-out" bindtap="signOut" hover-class="sign-out-pressed" aria-role="button">退出登录</view></block
   ></view

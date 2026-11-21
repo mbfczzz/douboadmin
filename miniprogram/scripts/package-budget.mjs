@@ -265,7 +265,11 @@ console.log(
 // AI试衣 with Codex art (loaded from OSS, not packaged): 3D tab / chip /
 // action icons, slot illustrations, empty-state pictures, boutique backdrop;
 // each spot keeps its icon until its picture arrives: 1,051,687 B. 1024 -> 1028 KiB.
-const budget = 1028 * 1024;
+// Codex 3D icons across the app via components/art-icon (pictures from OSS,
+// bundled glyph / vector icon until they arrive): 我的 menus and 推广码,
+// 设置 rows, 我的积分 rows and ledger, 任务队列 states, 消息通知 kinds,
+// 邀请码激活 and 隐私保护指引 links: 1,055,951 B. 1028 -> 1032 KiB.
+const budget = 1032 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

@@ -21,20 +21,20 @@ import { jobPage } from "../../services/job-pages";
 import { dropCover } from "../../services/cover";
 
 const baseMenus = [
-  { icon: "star", art: ICON.featured, label: "优秀作品", mode: "featured-works" },
-  { icon: "order", art: ICON.orders, label: "充值订单", mode: "orders" },
-  { icon: "heart", art: ICON.favorites, label: "我的收藏", mode: "favorites" },
-  { icon: "history", art: ICON.history, label: "生成记录", mode: "tasks" },
-  { icon: "notification", art: ICON.notifications, label: "消息通知", mode: "notifications" },
-  { icon: "chat", art: ICON.help, label: "帮助与反馈", mode: "help" },
-  { icon: "setting", art: ICON.settings, label: "设置", mode: "settings" },
+  { icon: "star", art: ICON.featured, ic: "icFeatured", label: "优秀作品", mode: "featured-works" },
+  { icon: "order", art: ICON.orders, ic: "icOrders", label: "充值订单", mode: "orders" },
+  { icon: "heart", art: ICON.favorites, ic: "tryonFav", label: "我的收藏", mode: "favorites" },
+  { icon: "history", art: ICON.history, ic: "icHistory", label: "生成记录", mode: "tasks" },
+  { icon: "notification", art: ICON.notifications, ic: "icNotice", label: "消息通知", mode: "notifications" },
+  { icon: "chat", art: ICON.help, ic: "icHelp", label: "帮助与反馈", mode: "help" },
+  { icon: "setting", art: ICON.settings, ic: "icSettings", label: "设置", mode: "settings" },
 ];
 // Providers manage their codes in 服务商中心; members share their 推广码.
 // The role entry has its own row; shared discovery lives in the common grid.
-const roleMenus: Record<string, { icon: string; art?: string; glyph?: string; label: string; mode: string; hint: string }> =
+const roleMenus: Record<string, { icon: string; ic?: string; art?: string; glyph?: string; label: string; mode: string; hint: string }> =
   {
     provider: { icon: "cooperate", art: ICON.provider, label: "服务商中心", mode: "provider", hint: "邀请码 · 合伙人 · 后台登录" },
-    member: { icon: "qrcode", glyph: "/assets/glyphs/qrcode-brand.png", label: "我的推广码", mode: "promo", hint: "分享推广码，邀请好友加入" },
+    member: { icon: "qrcode", ic: "icQrcode", glyph: "/assets/glyphs/qrcode-brand.png", label: "我的推广码", mode: "promo", hint: "分享推广码，邀请好友加入" },
   };
 Page({
   data: {

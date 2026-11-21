@@ -15,9 +15,9 @@ import type { Notice } from "../../services/business";
 import { withDays } from "../../utils/day";
 // Orders get a wallet, failures a red mark, finished work a green check.
 function noticeIcon(n: Notice) {
-  if (n.kind === "order") return { icon: "wallet", tone: "info" };
-  if (/失败|退回/.test(n.title)) return { icon: "error-circle", tone: "danger" };
-  return { icon: "check-circle", tone: "ok" };
+  if (n.kind === "order") return { icon: "wallet", ic: "icRecharge", tone: "info" };
+  if (/失败|退回/.test(n.title)) return { icon: "error-circle", ic: "icFailed", tone: "danger" };
+  return { icon: "check-circle", ic: "icDone", tone: "ok" };
 }
 Page({
   data: {

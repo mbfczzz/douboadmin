@@ -59,6 +59,25 @@ const NAMES = {
   toolIdphoto: "tool-idphoto",
   toolComic: "tool-comic",
   toolTryon: "tool-tryon",
+  // 3D icons for rows, menus and states (components/art-icon), full-bleed tiles
+  icFeatured: "ic-featured", // 优秀作品
+  icOrders: "ic-orders", // 充值订单
+  icHistory: "ic-history", // 生成记录
+  icNotice: "ic-notice", // 消息通知
+  icHelp: "ic-help", // 帮助与反馈
+  icSettings: "ic-settings", // 设置
+  icQrcode: "ic-qrcode", // 推广码、扫码登记
+  icPlay: "ic-play", // 自动播放
+  icStats: "ic-stats", // 使用统计
+  icPrivacy: "ic-privacy", // 隐私保护指引
+  icInfo: "ic-info", // 积分说明、当前版本
+  icRunning: "ic-running", // 处理中
+  icFailed: "ic-failed", // 失败
+  icDone: "ic-done", // 已完成
+  icRecharge: "ic-recharge", // 充值到账
+  icInvite: "ic-invite", // 邀请码
+  icRefund: "ic-refund", // 积分退回
+  icPoints: "ic-points", // 积分使用
   // AI试衣 (pages/tryon): backdrop, 3D icons, slot and empty-state pictures
   bgTryon: "bg-tryon", // AI试衣 top
   tryonGallery: "tryon-gallery",

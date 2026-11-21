@@ -1,0 +1,5 @@
+.art-icon,
+.art-glyph {
+  display: block;
+  flex: none;
+}
