@@ -27,16 +27,6 @@
         ><view class="biz-heading script-heading"><art-icon name="icScript" size="22" /><text>视频文案</text></view
         ><view class="copy-chip" bindtap="copy"><image class="gl gl-14" src="/assets/glyphs/copy.png" /><text>复制</text></view></view
       ><text selectable="true" class="video-copy">{{video.text}}</text></view
-    ><text wx:if="{{busy}}" class="biz-note">{{progress}}</text
-    ><text wx:elif="{{!video.url}}" class="biz-note">该视频暂不支持导入混剪。</text
-    ><button
-      wx:if="{{video.url}}"
-      class="biz-action"
-      loading="{{busy}}"
-      disabled="{{busy}}"
-      bindtap="use"
-    >
-      导入素材并混剪
-    </button></block
+    ><button class="biz-action" bindtap="remake">一键复刻</button></block
   ></view
 >

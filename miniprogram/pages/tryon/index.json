@@ -4,6 +4,7 @@
   "usingComponents": {
     "page-backdrop": "/components/page-backdrop/index",
     "prompt-editor": "/components/prompt-editor/index",
+    "model-picker": "/components/model-picker/index",
     "t-loading": "tdesign-miniprogram/loading/loading"
   }
 }

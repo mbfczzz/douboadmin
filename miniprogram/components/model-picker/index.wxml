@@ -1,0 +1,20 @@
+<view wx:if="{{current}}" class="mp-row {{models.length>1?'':'mp-single'}}" bindtap="show" hover-class="{{models.length>1?'mp-pressed':''}}" aria-role="button" aria-label="{{'模型：'+current.label+(models.length>1?'，点按更换':'')}}">
+  <image wx:if="{{current.iconURL}}" class="mp-logo" src="{{current.iconURL}}" mode="aspectFit" />
+  <t-icon wx:else name="app" size="18" />
+  <text class="mp-name">{{current.label}}</text>
+  <text wx:if="{{models.length>1}}" class="mp-change">更换</text>
+  <t-icon wx:if="{{models.length>1}}" name="chevron-down" size="14" />
+</view>
+<t-popup visible="{{open}}" placement="bottom" bind:visible-change="hide">
+  <view class="mp-sheet">
+    <view class="mp-head"><text>{{title}}</text><view class="mp-close" bindtap="hide" aria-role="button" aria-label="关闭"><t-icon name="close" size="20" /></view></view>
+    <scroll-view scroll-y class="mp-list">
+      <view wx:for="{{models}}" wx:key="id" class="mp-option {{item.id===current.id?'on':''}}" data-id="{{item.id}}" bindtap="pick" hover-class="mp-pressed" aria-role="button" aria-label="{{'使用 '+item.label}}">
+        <image wx:if="{{item.iconURL}}" class="mp-logo" src="{{item.iconURL}}" mode="aspectFit" />
+        <t-icon wx:else name="app" size="20" />
+        <view class="mp-copy"><text class="mp-option-name">{{item.label}}</text><text wx:if="{{item.description}}" class="mp-desc">{{item.description}}</text></view>
+        <t-icon wx:if="{{item.id===current.id}}" name="check" size="18" />
+      </view>
+    </scroll-view>
+  </view>
+</t-popup>

@@ -1,5 +1,6 @@
 import { error } from "../../utils/api";
-import { writeScript } from "../../services/ai-script";
+import { writeScript, chatChoices } from "../../services/ai-script";
+import { pickerItems, savedModel, saveModel } from "../../utils/model-pick";
 import { loadConfig } from "../../utils/config-cache";
 import { remakeInstruction } from "./remake-brief";
 import { loadCases, openCase } from "./feature-cases";
@@ -32,7 +33,13 @@ export const FEATURES: Record<string, Feature> = {
 };
 
 
-type Page = VisibleEditor & { data: VisibleEditor["data"] & { feature: string; featureChoice: Record<string, number>; scriptBusy: boolean; remakeSource: RemakeSource | null } };
+type Page = VisibleEditor & { data: VisibleEditor["data"] & { feature: string; featureChoice: Record<string, number>; scriptBusy: boolean; remakeSource: RemakeSource | null; scriptModel: string } };
+
+// AI写剧本's chat model (model-picker under the bar), remembered.
+async function loadScriptModels(page: Page) {
+  const list = chatChoices((await loadConfig()).models);
+  if (!page.destroyed) page.setData({ scriptModels: pickerItems(list), scriptModel: savedModel("script", list)?.id || "" });
+}
 
 // Opening the 一键复刻 preset writes the detailed description once (quietly
 // skipped when no chat model is offered; AI写剧本 then says so on tap).
@@ -58,6 +65,7 @@ export function applyFeature(page: Page, key: string) {
     kind: f.kind, maxPromptChars: defaultPromptChars(f.kind), ratio: f.ratio || (f.kind === "image" ? "1:1" : "9:16"),
     prompt, hasPrompt: !!prompt,
   });
+  if (f.script) void loadScriptModels(page).catch(() => undefined);
   if (key === "idphoto") loadIdCases(page); // finished examples (id-photo.ts)
   else void loadCases(page, key, f.cases || "");
 }
@@ -80,6 +88,10 @@ export function featureProblem(data: { feature: string; assets: { isImage?: bool
 }
 
 export const featureHandlers = {
+  chooseScriptModel(this: Page, e: WechatMiniprogram.CustomEvent<{ id: string }>) {
+    saveModel("script", e.detail.id);
+    this.setData({ scriptModel: e.detail.id });
+  },
   openCase(this: Page, e: WechatMiniprogram.TouchEvent) {
     const id = e.currentTarget.dataset.id as string;
     if (applyIdCase(this, id)) return;
@@ -107,7 +119,7 @@ export const featureHandlers = {
     const instruction = source ? remakeInstruction(source, this.data.duration || 5, limit) : `你是短视频编剧。为一条 ${this.data.duration || 5} 秒的${f.script}写一段可直接用于 AI 视频生成的画面描述：按时间顺序写清场景、人物动作、镜头运动和要展示的重点，不超过 ${limit} 字。${refs}只输出画面描述本身，不要标题和解释。\n用户的想法：${idea}`;
     this.setData({ scriptBusy: true });
     try {
-      const script = await writeScript(instruction, () => this.visible && !this.destroyed);
+      const script = await writeScript(instruction, () => this.visible && !this.destroyed, this.data.scriptModel);
       if (script && !this.destroyed) {
         const prompt = Array.from(script).slice(0, this.data.maxPromptChars).join("");
         this.setData({ prompt, hasPrompt: true });

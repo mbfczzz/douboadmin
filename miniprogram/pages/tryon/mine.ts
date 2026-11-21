@@ -2,7 +2,8 @@ import { request, upload, media, error, cancelled, chooseMediaFile, submitInput 
 import { loadConfig } from "../../utils/config-cache";
 import { modelChoices, modelSettings } from "../create/models";
 import { referenceSettings, creationMode } from "../create/references";
-import type { Asset, Row } from "../../services/types";
+import { pickerItems, savedModel, saveModel } from "../../utils/model-pick";
+import type { Asset, Row, Config } from "../../services/types";
 
 // 我的服装 (服装 → 我的): the user's own outfits. 自己上传 keeps the picture as
 // it is; AI 生成 redraws a photo of a whole outfit in the library's look
@@ -18,7 +19,8 @@ export const OUTFIT_PROMPT =
   "正面全身，鞋子摆在下方，居中并四周留白；柔和的浅粉色纯色影棚背景，均匀柔光，面料纹理清晰，真实摄影质感；" +
   "服装的款式、颜色、图案和材质与@图片1 完全一致；画面中没有文字和水印。";
 // The AI sheet: the photo, a backdrop, the prompt (editable).
-export type AiSheet = { asset: Row<Asset>; url: string; refs: { id: string; isImage: boolean; data: { url: string } }[]; prompt: string; backdrop: number };
+// models / model: the image models that take a picture, the one picked.
+export type AiSheet = { asset: Row<Asset>; url: string; refs: { id: string; isImage: boolean; data: { url: string } }[]; prompt: string; backdrop: number; models: { id: string; label: string }[]; model: string };
 
 type Page = {
   data: { mine: boolean; myOutfits: MyOutfit[]; myBusy: string; starting: boolean; tab: string; aiSheet: AiSheet | null };
@@ -58,10 +60,12 @@ async function pickPicture(page: Page, busy: string): Promise<Row<Asset> | null>
   }
 }
 
-// The first image model that takes a reference picture, set to 3:4.
-async function outfitInput(asset: Row<Asset>, prompt: string) {
-  const config = await loadConfig();
-  const model = modelChoices(config.models, "image").find((m) => referenceSettings(m).allowImage);
+// The image models that take a reference picture; the chosen one (else the
+// first) set to 3:4.
+const outfitModels = (config: Config) => modelChoices(config.models, "image").filter((m) => referenceSettings(m).allowImage);
+async function outfitInput(asset: Row<Asset>, prompt: string, chosen: string) {
+  const list = outfitModels(await loadConfig());
+  const model = list.find((m) => m.id === chosen) || list[0];
   if (!model) throw new Error("暂无可参考图片的图片模型，请联系管理员");
   const rows = [asset];
   const s = modelSettings(model, { resolution: "", ratio: "3:4", duration: 0, assets: rows });
@@ -91,7 +95,14 @@ export const mineHandlers = {
     const row = await pickPicture(this, "ai");
     if (!row || this.destroyed) return;
     const url = media(row.data.url); // refs: the prompt box shows @图片1 as this photo
-    this.setData({ aiSheet: { asset: row, url, refs: [{ id: row.id, isImage: true, data: { url } }], prompt: OUTFIT_PROMPT, backdrop: 0 } });
+    const list = outfitModels(await loadConfig().catch(() => ({ models: [] }) as unknown as Config));
+    if (this.destroyed) return;
+    const models = pickerItems(list), model = savedModel("outfit-ai", list)?.id || "";
+    this.setData({ aiSheet: { asset: row, url, refs: [{ id: row.id, isImage: true, data: { url } }], prompt: OUTFIT_PROMPT, backdrop: 0, models, model } });
+  },
+  aiModel(this: Page, e: WechatMiniprogram.CustomEvent<{ id: string }>) {
+    saveModel("outfit-ai", e.detail.id);
+    this.setData({ "aiSheet.model": e.detail.id });
   },
   aiPrompt(this: Page, e: WechatMiniprogram.Input) {
     if (this.data.aiSheet) this.setData({ "aiSheet.prompt": e.detail.value });
@@ -113,7 +124,7 @@ export const mineHandlers = {
     const prompt = sheet.prompt.trim() || OUTFIT_PROMPT;
     this.setData({ myBusy: "ai" });
     try {
-      const job = await submitInput(await outfitInput(sheet.asset, prompt), "outfit-ai");
+      const job = await submitInput(await outfitInput(sheet.asset, prompt, sheet.model), "outfit-ai");
       await request("/my-outfits", "POST", { job: job.id });
       if (this.destroyed) return;
       this.setData({ aiSheet: null });

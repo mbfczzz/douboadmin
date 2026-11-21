@@ -4,6 +4,7 @@
   "usingComponents": {
     "result-gallery": "/components/result-gallery/index",
     "points-balance": "/components/points-balance/index",
+    "model-picker": "/components/model-picker/index",
     "t-loading": "tdesign-miniprogram/loading/loading"
   }
 }

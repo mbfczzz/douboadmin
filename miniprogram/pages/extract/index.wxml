@@ -1,6 +1,7 @@
 <nav-bar title="文案提取" back />
 <view class="subpage extract-page">
   <text class="extract-heading">选择提取方式</text>
+  <view wx:if="{{readModels.length}}" class="read-model"><text>图片、视频识别用</text><model-picker models="{{readModels}}" value="{{readModel}}" title="识别图片和视频的模型" disabled="{{busy}}" bind:change="chooseReadModel" /></view>
   <block wx:for="{{methods}}" wx:key="key">
     <view class="method {{linkOpen&&item.key==='link'?'open':''}}" data-key="{{item.key}}" bindtap="choose" hover-class="card-pressed" aria-role="button" aria-label="{{item.title}}">
       <view class="method-icon"><art-icon name="{{item.ic}}" size="44" fallback-size="24" glyph="/assets/glyphs/{{item.icon}}.png" /></view>

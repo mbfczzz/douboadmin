@@ -9,10 +9,11 @@ import (
 )
 
 // caseSample: 做同款 on a built-in 剧情带货 / 探店 案例 puts the case's product
-// or store photo (media/ui-art/case-*.jpg, drawn with Codex) into the editor
+// or store photo (media/ui-art/case-*.jpg, drawn with Codex; for AI证件照 the
+// example photo id-*.jpg, a fictional person) into the editor
 // as the user's own picture (the same asset each time), so they can generate
 // at once or replace it. With OSS it points at the synced UI art object.
-var caseName = regexp.MustCompile(`^case-(ad|shop)-[a-z0-9]{1,20}$`)
+var caseName = regexp.MustCompile(`^(case-(ad|shop)-[a-z0-9]{1,20}|id-[a-z]{1,10}-[a-z]{1,10})$`)
 
 func (a *Server) caseSample(w http.ResponseWriter, r *http.Request) {
 	ctx, user, name := r.Context(), identity(r).ID, r.PathValue("name")

@@ -7,6 +7,14 @@
   gap: 12px;
   margin-bottom: 12px;
 }
+.script-model {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: -4px 0 12px;
+  font-size: 13px;
+  color: var(--ui-muted);
+}
 .feature-tip {
   flex: 1;
   min-width: 0;

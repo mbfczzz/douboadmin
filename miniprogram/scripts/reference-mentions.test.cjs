@@ -151,7 +151,6 @@ test("the referenced row lists mentioned images and videos once each", () => {
   assert.deepEqual(Array.from(out, (o) => [o.id, o.label, o.url, o.video]), [
     ["clip", "视频1", "https://fixture.test/c.jpg", true],
     ["image-2", "图片2", "https://fixture.test/2", false],
-    ["图片9", "图片9", "", false], // not uploaded yet: 待上传
   ]);
   assert.equal(list("没有引用", assets).length, 0);
   const { any } = sandbox.module.exports;

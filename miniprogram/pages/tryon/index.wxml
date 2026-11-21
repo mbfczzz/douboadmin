@@ -176,6 +176,8 @@
     <view class="ai-chips">
       <text wx:for="{{backdrops}}" wx:key="*this" class="chip {{aiSheet.backdrop===index?'on':''}}" data-index="{{index}}" bindtap="aiBackdrop">{{item}}</text>
     </view>
+    <text class="ai-label">模型</text>
+    <model-picker models="{{aiSheet.models}}" value="{{aiSheet.model}}" title="生成服装用的模型" disabled="{{myBusy==='ai'}}" bind:change="aiModel" />
     <text class="ai-label">提示词（可修改）</text>
     <prompt-editor class="ai-prompt" value="{{aiSheet.prompt}}" assets="{{aiSheet.refs}}" max="{{800}}" bind:input="aiPrompt" />
     <view class="sheet-actions">

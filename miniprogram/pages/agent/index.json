@@ -3,6 +3,7 @@
   "backgroundColor": "#0f0f11",
   "usingComponents": {
     "t-loading": "tdesign-miniprogram/loading/loading",
-    "t-popup": "tdesign-miniprogram/popup/popup"
+    "t-popup": "tdesign-miniprogram/popup/popup",
+    "model-picker": "/components/model-picker/index"
   }
 }

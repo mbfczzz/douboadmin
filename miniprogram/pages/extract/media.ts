@@ -1,5 +1,7 @@
 import { upload, error, cancelled, chooseMediaFile, chooseReferenceFile, request } from "../../utils/api";
-import { askChat } from "../../services/ai-script";
+import { askChat, chatChoices } from "../../services/ai-script";
+import { loadConfig } from "../../utils/config-cache";
+import { pickerItems, savedModel, saveModel } from "../../utils/model-pick";
 import type { Asset, Row } from "../../services/types";
 
 // 文案提取 from a picture (图片提取), a phone video (本地视频) or a file sent
@@ -8,7 +10,8 @@ import type { Asset, Row } from "../../services/types";
 // order. Audio waits for a speech-to-text service.
 type Result = { title: string; author: string; text: string };
 type Page = {
-  data: { busy: boolean; working: string };
+  data: { busy: boolean; working: string; readModel: string };
+  destroyed?: boolean;
   revision: number;
   visible?: boolean;
   setData(data: Record<string, unknown>): void;
@@ -22,7 +25,7 @@ async function read(page: Page, key: string, row: Row<Asset>) {
   const revision = ++page.revision;
   page.setData({ busy: true, working: key, video: null, resultKey: "" });
   try {
-    const text = await askChat(video ? VIDEO : PICTURE, { assets: [row.id], needs: video ? "video" : "image", channel: "extract-" + key, alive: () => revision === page.revision });
+    const text = await askChat(video ? VIDEO : PICTURE, { assets: [row.id], needs: video ? "video" : "image", channel: "extract-" + key, alive: () => revision === page.revision, model: page.data.readModel });
     if (revision !== page.revision || !text) return;
     const result: Result = { title: video ? "视频中的文案" : "图片中的文字", author: "", text };
     page.setData({ video: result, resultKey: key });
@@ -47,7 +50,18 @@ async function pick(page: Page, key: string, choose: () => Promise<{ path: strin
   }
 }
 
+// The chat models that read pictures (the 识别模型 picker); one that cannot
+// take a video gives way to one that can (askChat).
+export async function loadReadModels(page: Page) {
+  const list = chatChoices((await loadConfig()).models, "image");
+  if (!page.destroyed) page.setData({ readModels: pickerItems(list), readModel: savedModel("extract", list)?.id || "" });
+}
+
 export const mediaHandlers = {
+  chooseReadModel(this: Page, e: WechatMiniprogram.CustomEvent<{ id: string }>) {
+    saveModel("extract", e.detail.id);
+    this.setData({ readModel: e.detail.id });
+  },
   extractImage(this: Page) {
     return pick(this, "image", () => chooseMediaFile(true));
   },

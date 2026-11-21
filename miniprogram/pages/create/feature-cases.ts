@@ -54,7 +54,7 @@ export async function loadCases(page: Page, feature: string, keyword: string) {
 }
 
 // The case's picture as the user's own 图1, replacing one an earlier case put in.
-async function fillPicture(page: Page, path: string) {
+export async function fillPicture(page: Page, path: string) {
   const kept = page.data.assets.filter((a) => !a.fromCase);
   if (kept.some((a) => a.isImage)) return false;
   page.setData({ caseFilling: true });

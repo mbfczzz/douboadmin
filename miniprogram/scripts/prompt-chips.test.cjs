@@ -20,8 +20,8 @@ test("a prompt splits into text runs and reference chips; one without its file i
     "这个人", ["图片1", "https://fixture.test/1", false, false], " 在", ["视频1", "https://fixture.test/c1", true, false], " 里跳舞", ["图片9", "", false, true],
   ]);
   assert.deepEqual(Array.from(segments("", []), (p) => p.text), []);
-  // The row under the editor lists a not-yet-uploaded picture too (待上传).
-  assert.equal(list("@图片1 在@图片1 和@视频2", []).map((p) => p.label).join(), "图片1,视频2");
+  // The row under the editor lists only references that are there.
+  assert.equal(list("@图片1 在@图片1 和@视频2", [image(1)]).map((p) => p.label).join(), "图片1");
   // Agent: by the project's labels; a video without a cover still counts.
   const agent = marks("用@图片3 和@视频1，再加@图片4", { 图片3: "https://t/3", 视频1: "" });
   assert.deepEqual(Array.from(agent, (p) => (p.chip ? [p.label, p.url, !!p.missing] : p.text)), [
@@ -45,7 +45,6 @@ test("every screen that shows @图片 / @视频 draws them as chips", () => {
   const agent = read("pages/agent/parts/messages.wxml");
   for (const text of ["line.text", "shot.scene", "item.plan.prompt"]) assert.ok(agent.includes(`refs.marks(${text},thumbs)`), text);
   assert.match(read("pages/tryon/index.wxml"), /<prompt-editor class="ai-prompt" value="\{\{aiSheet.prompt\}\}" assets="\{\{aiSheet.refs\}\}"/);
-  assert.match(read("pages/create/index.wxml"), /item\.missing\?'上传':'查看'/);
 });
 
 test("create: the prompt box is the thumbnail editor, fed and read as plain text", () => {

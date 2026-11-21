@@ -32,7 +32,7 @@ test("on the device runtime, @ references become chips and the referenced row", 
     { text: " 美女" },
     { chip: true, id: "clip", label: "视频1", url: "https://fixture.test/c.jpg", video: true },
   ]);
-  assert.deepEqual(call("list", ["@图片1 和 @图片1 @图片9", assets]).map((c) => c.id), ["img", "图片9"]);
+  assert.deepEqual(call("list", ["@图片1 和 @图片1 @图片9", assets]).map((c) => c.id), ["img"]);
   assert.equal(call("any", [assets]), true);
   assert.equal(call("any", [[{ id: "voice", isImage: false, isVideo: false, data: {} }]]), false);
 });

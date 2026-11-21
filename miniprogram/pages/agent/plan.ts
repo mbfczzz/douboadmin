@@ -40,17 +40,23 @@ export function sentMaterials(prompt: string, assets: Row<Asset>[]) {
 // The generation request for a plan: the first model (in the admin's order)
 // that takes the referenced materials, snapped to its nearest supported
 // length and ratio.
-export function planInput(plan: Plan, models: Model[], assets: Row<Asset>[], session: string): Input {
-  const sent = sentMaterials(planPrompt(plan), assets);
-  const used = sent.assets;
+// The models of the plan's kind that take the materials it uses (the 确认生成 choices).
+export function planModels(plan: Plan, models: Model[], assets: Row<Asset>[]) {
+  const used = sentMaterials(planPrompt(plan), assets).assets;
   const needs = { image: used.some((a) => a.data.type.startsWith("image/")), video: used.some((a) => a.data.type.startsWith("video/")) };
-  const choices = modelChoices(models, plan.kind);
-  const fits = (m: (typeof choices)[number]) => {
+  return modelChoices(models, plan.kind).filter((m) => {
     const r = referenceSettings(m);
     return (!needs.image || r.allowImage) && (!needs.video || r.allowVideo);
-  };
-  const model = choices.find(fits);
-  if (!model) throw new Error(choices.length ? "暂无支持这些素材的模型，请减少素材引用后再试" : "暂无可用的生成模型");
+  });
+}
+
+// chosen: the model picked on the plan card, else the first that fits.
+export function planInput(plan: Plan, models: Model[], assets: Row<Asset>[], session: string, chosen = ""): Input {
+  const sent = sentMaterials(planPrompt(plan), assets);
+  const used = sent.assets;
+  const fits = planModels(plan, models, assets);
+  const model = fits.find((m) => m.id === chosen) || fits[0];
+  if (!model) throw new Error(models.some((m) => m.kind === plan.kind) ? "暂无支持这些素材的模型，请减少素材引用后再试" : "暂无可用的生成模型");
   const s = modelSettings(model, { resolution: "", ratio: plan.ratio, duration: plan.kind === "video" ? plan.duration : 0, assets: used });
   return {
     kind: plan.kind, model: model.id, resolution: s.resolution, ratio: s.ratio, duration: plan.kind === "video" ? s.duration : 0,

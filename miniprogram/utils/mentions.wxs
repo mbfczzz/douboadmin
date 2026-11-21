@@ -57,11 +57,11 @@ function marks(text, thumbs) {
     return { chip: true, id: label, label: label, url: thumbs[label], video: kind === "视频" };
   });
 }
-// Each referenced item once, in first-mention order (the row under the editor).
+// Each attached item once, in first-mention order (the row under the editor).
 function list(prompt, assets) {
   var parts = segments(prompt, assets), out = [], seen = {};
   for (var i = 0; i < parts.length; i++) {
-    if (parts[i].chip && !seen[parts[i].id]) {
+    if (parts[i].chip && !parts[i].missing && !seen[parts[i].id]) {
       seen[parts[i].id] = true;
       out.push(parts[i]);
     }

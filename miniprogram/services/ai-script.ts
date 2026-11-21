@@ -16,6 +16,13 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const takes = (needs: "image" | "video" | "", m: Model) =>
   !needs || (m.referenceTypes || []).includes(needs) || (needs === "video" && /^(deepseek|doubao):/.test(m.key || ""));
 
+// The chat models offered for a step (model-picker), the usual one first.
+export function chatChoices(models: Model[], needs: "image" | "video" | "" = "") {
+  const list = models.filter((m) => m.kind === "chat" && takes(needs, m));
+  const first = preferredChat(list);
+  return first ? [first, ...list.filter((m) => m !== first)] : [];
+}
+
 async function waitFor(job: Job, alive: () => boolean, slow: string) {
   const started = Date.now();
   while (job.status === "queued" || job.status === "running") {
@@ -28,16 +35,17 @@ async function waitFor(job: Job, alive: () => boolean, slow: string) {
   return job.result.trim();
 }
 
-export async function askChat(instruction: string, opts: { assets?: string[]; needs?: "image" | "video"; channel?: string; alive?: () => boolean } = {}) {
-  const config = await loadConfig();
-  const model = preferredChat(config.models.filter((m) => m.kind === "chat" && takes(opts.needs || "", m)));
+// model: the one picked on the page; one that cannot take this file gives way to the usual.
+export async function askChat(instruction: string, opts: { assets?: string[]; needs?: "image" | "video"; channel?: string; alive?: () => boolean; model?: string } = {}) {
+  const list = chatChoices((await loadConfig()).models, opts.needs || "");
+  const model = list.find((m) => m.id === opts.model) || list[0];
   if (!model) throw new Error(opts.needs === "video" ? "暂无能看视频的对话模型" : "暂无能识别图片的对话模型");
   const job = await submitInput({ kind: "chat", model: model.id, prompt: instruction, resolution: "", ratio: "", duration: 0, assets: opts.assets || [] }, opts.channel || "ask");
   return waitFor(job, opts.alive || (() => true), "还在识别，可稍后在任务队列里查看");
 }
 
-export async function writeScript(instruction: string, alive: () => boolean = () => true) {
-  const model = await chatModel();
+export async function writeScript(instruction: string, alive: () => boolean = () => true, chosen?: string) {
+  const model = await chatModel(chosen);
   const job = await submitInput({ kind: "chat", model: model.id, prompt: instruction, resolution: "", ratio: "", duration: 0, assets: [] }, "script");
   return waitFor(job, alive, "剧本还在生成，可稍后在 Agent 里查看");
 }

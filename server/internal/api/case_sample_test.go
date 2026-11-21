@@ -14,7 +14,7 @@ func TestCaseSampleIsTheUsersOwnPicture(t *testing.T) {
 	a, one, two := setup(t)
 	dir := filepath.Join(a.Config.MediaDir, "ui-art")
 	_ = os.MkdirAll(dir, 0o755)
-	for _, name := range []string{"case-ad-pan", "mine-bg"} {
+	for _, name := range []string{"case-ad-pan", "id-blue-suit", "mine-bg"} {
 		_ = os.WriteFile(filepath.Join(dir, name+".jpg"), []byte("\xff\xd8 fixture"), 0o644)
 	}
 	use := func(token, name string) core.Record {
@@ -35,6 +35,9 @@ func TestCaseSampleIsTheUsersOwnPicture(t *testing.T) {
 	}
 	if use(one, "case-ad-pan").ID != first.ID || use(two, "case-ad-pan").ID == first.ID {
 		t.Fatal("asset not stable per user")
+	}
+	if use(one, "id-blue-suit").ID == "" {
+		t.Fatal("the AI证件照 example photo")
 	}
 	for _, name := range []string{"mine-bg", "case-ad-none", "case-ad-..%2Fx"} {
 		if use(one, name).ID != "" {

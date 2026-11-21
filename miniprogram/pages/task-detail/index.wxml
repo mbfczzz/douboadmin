@@ -89,6 +89,7 @@
     <view wx:if="{{job.status==='succeeded'&&!job.deleted&&job.input.purpose==='remake'}}" class="remake-ready">
       <view class="remake-copy">
         <text>原视频已拆解，确认积分后直接生成同款</text>
+        <model-picker models="{{remakeModels}}" value="{{remakeModel}}" title="生成同款用的模型" disabled="{{busy}}" bind:change="chooseRemakeModel" />
         <text class="remake-edit" bindtap="editRemake">调整后再生成 ›</text>
       </view>
       <button class="retry-pill remake-go" loading="{{busy}}" disabled="{{busy||genericUploading||swapUploading>=0||loadingAssets}}" bindtap="generateRemake">生成同款</button>

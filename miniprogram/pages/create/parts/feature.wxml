@@ -16,6 +16,7 @@
     <image class="gl gl-16" src="/assets/glyphs/ai-pen-dark.png" /><text>{{scriptBusy?'正在写剧本…':'AI写剧本'}}</text>
   </view>
 </view>
+<view wx:if="{{featureScript&&scriptModels.length}}" class="script-model"><text>AI写剧本用</text><model-picker models="{{scriptModels}}" value="{{scriptModel}}" title="AI写剧本用的模型" disabled="{{scriptBusy}}" bind:change="chooseScriptModel" /></view>
 <view wx:for="{{featureOptions}}" wx:key="key" class="feature-option">
   <text class="option-label">{{item.label}}</text>
   <text

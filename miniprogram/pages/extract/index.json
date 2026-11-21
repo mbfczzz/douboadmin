@@ -1,5 +1,5 @@
 {
   "backgroundColorContent": "#0f0f11ff",
   "backgroundColor": "#0f0f11",
-  "usingComponents": {}
+  "usingComponents": { "model-picker": "/components/model-picker/index" }
 }

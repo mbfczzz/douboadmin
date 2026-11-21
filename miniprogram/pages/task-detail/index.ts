@@ -30,6 +30,8 @@ Page({
     swapUrls: {} as Record<string, string>, // picture of each swap pick
     swapUploading: -1, // the subject whose picture is uploading
     swapLoaded: false,
+    remakeModels: [] as { id: string; label: string }[], // 生成同款 can use (model-picker)
+    remakeModel: "",
     genericUploading: false,
     needsLogin: false,
     signingIn: false,
@@ -124,6 +126,7 @@ Page({
       )
         await this.loadAssets();
       void this.loadSwaps(); // a ready 一键复刻 with pictures: match them to its subjects
+      void this.loadRemakeModels().catch(() => undefined); // its 生成同款 model choice
     } catch (e) {
       if (this.destroyed) return;
       if (!hasSession()) this.requireLogin();

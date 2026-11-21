@@ -1,9 +1,11 @@
 import { showArt } from "../../utils/ui-art";
+import { fillPicture } from "./feature-cases";
 import type { Art } from "../../utils/ui-art";
 
 // AI证件照: the 背景 / 服装 / 尺寸 chips write the prompt; 案例 are finished
 // examples (Codex pictures of fictional people, ui-art id-*) whose 做同款
-// sets those chips. The user's own face photo is never replaced by one.
+// sets those chips and puts the example photo in as @图片1, so the box shows
+// it; the user swaps in their own. Their own face photo is never replaced.
 export type Choice = { label: string; text: string };
 export type Option = { key: string; label: string; values: Choice[] };
 export type IdChoice = Record<string, number>;
@@ -26,23 +28,21 @@ export const ID_CASES: { id: string; title: string; art: keyof Art; choice: IdCh
   { id: "id:white-tee", title: "白底简约·一寸", art: "idWhiteTee", choice: { bg: 0, dress: 0, size: 0 } },
 ];
 
-type Page = {
-  data: { prompt: string; maxPromptChars: number; assets: { isImage?: boolean }[] };
-  setData(data: Record<string, unknown>): void;
-};
+type Page = Parameters<typeof fillPicture>[0];
 
 // The 案例 strip, its pictures from the decorative art.
 export function loadIdCases(page: Page) {
   showArt(page, (art) => ({ featureCases: ID_CASES.map((c) => ({ id: c.id, cover: art[c.art], title: c.title, seconds: 0 })) }));
 }
 
-// 做同款: the case's chips and their prompt; the photo stays the user's.
+// 做同款: the case's chips, their prompt and its photo (POST /cases/id-*/sample).
 export function applyIdCase(page: Page, id: string) {
   const c = ID_CASES.find((x) => x.id === id);
-  if (!c) return false;
-  const prompt = idPrompt(c.choice);
-  page.setData({ featureChoice: { ...c.choice }, prompt, hasPrompt: true });
-  const hasPhoto = page.data.assets.some((a) => a.isImage);
-  wx.showToast({ title: hasPhoto ? "已填入同款设置" : "已填入同款设置，上传你的正脸照片即可生成", icon: "none" });
+  if (!c || page.data.busy || page.data.uploading || page.data.caseFilling) return !!c;
+  page.setData({ featureChoice: { ...c.choice }, prompt: idPrompt(c.choice), hasPrompt: true });
+  void fillPicture(page, `/cases/${id.replace(":", "-")}/sample`).then((added) => {
+    if (page.destroyed) return;
+    wx.showToast({ title: added ? "已填入同款，换成你的正脸照片即可生成" : "已填入同款设置", icon: "none" });
+  });
   return true;
 }

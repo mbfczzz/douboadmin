@@ -63,6 +63,8 @@ Page({
     followUps: [] as string[], // a skill's own revisions for video plans (session.ts)
     examples: [] as string[], // first messages to try in an empty project
     planPrice: { id: "", text: "" }, // the newest plan's points, on 确认生成
+    planModels: [] as { id: string; label: string }[], // models that fit it (model-picker)
+    planModel: "",
     expanded: {} as Record<string, boolean>, // earlier plans opened to their full card
     attached: [] as Labelled[], // go with the message being written only
     editing: "", // the sent turn being edited (its job id), asked again on send

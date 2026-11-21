@@ -5,6 +5,14 @@
   font-size: 15px;
   font-weight: 600;
 }
+.read-model {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  color: var(--ui-muted);
+}
 .method {
   display: flex;
   align-items: center;

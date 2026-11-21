@@ -78,6 +78,7 @@
           <view wx:if="{{shot.asset}}" class="shot-asset"><image wx:if="{{thumbs[shot.asset]}}" class="shot-thumb" src="{{thumbs[shot.asset]}}" mode="aspectFill" /><text>{{shot.asset}}</text></view>
         </view>
         <view wx:if="{{!item.plan.shots.length}}" class="plan-prompt"><template is="prompt-text" data="{{parts:refs.marks(item.plan.prompt,thumbs)}}" /></view>
+        <view wx:if="{{item.latest&&planModels.length}}" class="plan-model"><model-picker models="{{planModels}}" value="{{planModel}}" title="确认生成用的模型" disabled="{{generating}}" bind:change="choosePlanModel" /></view>
         <view class="plan-actions">
           <view wx:if="{{item.latest}}" class="plan-edit" data-index="{{index}}" bindtap="use" aria-role="button"><image class="gl gl-14" src="/assets/glyphs/edit.png" /><text>去编辑页精调</text></view>
           <view wx:else class="plan-edit" data-id="{{item.id}}" bindtap="togglePlan" aria-role="button"><text>收起</text></view>

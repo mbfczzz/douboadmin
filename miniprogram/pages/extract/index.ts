@@ -1,5 +1,5 @@
 import { request, error, enterPage, openPage } from "../../utils/api";
-import { mediaHandlers } from "./media";
+import { mediaHandlers, loadReadModels } from "./media";
 type Result = { title: string; author: string; text: string };
 
 // 文案提取: a Douyin share link gives the video's caption; a picture, a phone
@@ -16,12 +16,18 @@ const METHODS = [
 Page({
   ...mediaHandlers,
   // video: the result shown (a link's caption, a picture's or video's text), under resultKey's row.
-  data: { methods: METHODS, linkOpen: false, link: "", busy: false, working: "", video: null as Result | null, resultKey: "" },
+  // readModels / readModel: the chat models that read pictures and videos, the one picked.
+  data: { methods: METHODS, linkOpen: false, link: "", busy: false, working: "", video: null as Result | null, resultKey: "", readModels: [] as { id: string; label: string }[], readModel: "" },
   revision: 0,
+  destroyed: false,
+  onLoad() {
+    void loadReadModels(this).catch(() => undefined);
+  },
   onShow() {
     enterPage(this);
   },
   onUnload() {
+    this.destroyed = true;
     this.revision++;
   },
   choose(e: WechatMiniprogram.TouchEvent) {

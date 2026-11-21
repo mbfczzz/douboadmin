@@ -91,6 +91,9 @@
   line-height: 20px;
   color: var(--ui-muted);
 }
+.plan-model {
+  margin-top: 12px;
+}
 .plan-actions {
   display: flex;
   align-items: center;

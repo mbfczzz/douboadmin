@@ -25,8 +25,7 @@ export const referenceHandlers = {
   // Images open the in-page viewer (引用 / 删除); videos play full screen.
   previewReference(this: Editor, e: Tap) {
     const asset = this.data.assets.find((a) => a.id === e.currentTarget.dataset.id);
-    if (!asset) return (this as unknown as { showAssets?(): void }).showAssets?.(); // 待上传: add it
-    if (asset.isVideo) wx.previewMedia({ sources: [{ url: asset.data.url, type: "video", poster: asset.data.thumbnailUrl || undefined }], fail() {} });
+    if (asset?.isVideo) wx.previewMedia({ sources: [{ url: asset.data.url, type: "video", poster: asset.data.thumbnailUrl || undefined }], fail() {} });
     else void openReferencePreview(this, e.currentTarget.dataset.id);
   },
   pickMention(this: Editor, e: Tap) {
