@@ -43,10 +43,11 @@ test("a plan generates on the first model taking its materials, sending only the
   const input = plain(planInput(PLAN, models, materials, "s1"));
   assert.equal(input.model, "omni"); // 只文生 cannot take @图片2
   assert.deepEqual(input.assets, ["p2"]); // 图片2 is the second picture, not the third material
-  assert.equal(input.prompt, "开场@图片1推门进店，特写拉花"); // renumbered: it is the only picture sent
+  // renumbered (it is the only picture sent); the shot and its 台词 go along
+  assert.equal(input.prompt, "开场@图片1推门进店，特写拉花\n分镜：\n0-3秒：推门（用@图片1），台词：“周末好去处”");
   assert.equal(input.duration, 10); // 12 s snaps to the nearest supported length
   assert.equal(input.sessionId, "s1");
-  assert.equal(plain(planInput({ ...PLAN, prompt: "纯文字" }, models, materials, "s1")).model, "t2v");
+  assert.equal(plain(planInput({ ...PLAN, prompt: "纯文字", shots: [] }, models, materials, "s1")).model, "t2v");
   assert.throws(() => planInput(PLAN, [models[0]], materials, "s1"), /暂无支持这些素材的模型/);
 });
 

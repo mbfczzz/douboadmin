@@ -38,9 +38,10 @@ test("带到创作 carries a plan's materials, or what a plain reply's question 
   page.use({ currentTarget: { dataset: { index: 0 } } });
   assert.deepEqual(JSON.parse(JSON.stringify(h.wx.getStorageSync("edit-draft").assets)), ["p1"]);
   page.use({ currentTarget: { dataset: { index: 1 } } });
-  // Only what the prompt mentions, renumbered as the editor numbers it.
+  // What the prompt and its shots mention, renumbered as the editor numbers it;
+  // a short prompt carries the shots along (planPrompt).
   const draft = h.wx.getStorageSync("edit-draft");
-  assert.deepEqual(JSON.parse(JSON.stringify(draft.assets)), ["p2"]);
-  assert.equal(draft.prompt, "开场@图片1");
+  assert.deepEqual(JSON.parse(JSON.stringify(draft.assets)), ["p2", "v1"]);
+  assert.equal(draft.prompt, "开场@图片1\n分镜：\n0-3秒：推门（用@视频1）");
   page.onUnload();
 });

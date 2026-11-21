@@ -5,6 +5,18 @@ import type { Model, Row, Asset, Input } from "../../services/types";
 
 const labelOf = (type: string) => (type.startsWith("image/") ? "图片" : "视频");
 
+// The text a plan generates from (and 去编辑页精调 shows): its prompt, plus
+// the shots — time, scene, material, 台词 — when the prompt does not already
+// carry them (models often keep it short and leave the lines to the shots).
+export function planPrompt(plan: Plan): string {
+  if (!plan.shots.length) return plan.prompt;
+  const covered = plan.shots.every((s) => !s.time || plan.prompt.includes(s.time.replace(/秒$/, "")));
+  const spoken = plan.shots.every((s) => !s.line || plan.prompt.includes(s.line));
+  if (covered && spoken) return plan.prompt;
+  const shots = plan.shots.map((s) => `${s.time ? s.time + "：" : ""}${s.scene}${s.asset ? `（用@${s.asset}）` : ""}${s.line ? `，台词：“${s.line}”` : ""}`);
+  return `${plan.prompt}\n分镜：\n${shots.join("\n")}`;
+}
+
 // Only the materials the prompt mentions are sent, and a model numbers its
 // references by what it receives. So the mentions are renumbered to match
 // (the project's 图片2 alone becomes @图片1), and a mention of a material the
@@ -29,7 +41,7 @@ export function sentMaterials(prompt: string, assets: Row<Asset>[]) {
 // that takes the referenced materials, snapped to its nearest supported
 // length and ratio.
 export function planInput(plan: Plan, models: Model[], assets: Row<Asset>[], session: string): Input {
-  const sent = sentMaterials(plan.prompt, assets);
+  const sent = sentMaterials(planPrompt(plan), assets);
   const used = sent.assets;
   const needs = { image: used.some((a) => a.data.type.startsWith("image/")), video: used.some((a) => a.data.type.startsWith("video/")) };
   const choices = modelChoices(models, plan.kind);

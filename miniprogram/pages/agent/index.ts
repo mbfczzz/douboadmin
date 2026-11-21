@@ -10,7 +10,7 @@ import type { ProjectView } from "./session";
 import { agentModels } from "./models";
 import type { ChatModel } from "./models";
 import { historyHandlers } from "./history";
-import { sentMaterials } from "./plan";
+import { sentMaterials, planPrompt } from "./plan";
 import { editHandlers } from "./edit";
 import { chatModel } from "../../services/chat-model";
 import { streamHandlers } from "./stream";
@@ -188,7 +188,7 @@ Page({
     // The plan's materials, renumbered as the editor will number them (the
     // project's 图片3 alone is the editor's @图片1); a plain reply takes
     // what its question carried.
-    const sent = plan ? sentMaterials(plan.prompt, this.data.materials) : undefined;
+    const sent = plan ? sentMaterials(planPrompt(plan), this.data.materials) : undefined;
     wx.setStorageSync("edit-draft", {
       kind: plan?.kind || "video",
       prompt: (sent?.prompt || m?.text || e.currentTarget.dataset.text || "").slice(0, 2000),

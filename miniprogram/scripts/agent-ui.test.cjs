@@ -53,3 +53,23 @@ test("quick revisions fit the plan: no 秒 or 开场 for a picture, and never it
   const reply = splitReply('说明\n```plan\n{"kind":"image","title":"关羽","ratio":"9:16","prompt":"国风关羽半身像"}\n```');
   assert.ok(!reply.plan.asks.some((a) => /秒|开场/.test(a)));
 });
+
+test("去编辑页精调 and 确认生成 carry the plan's shots and 台词 when its prompt is only a summary", () => {
+  const h = harness();
+  const { planPrompt, sentMaterials } = h.service("../pages/agent/plan");
+  const plan = { kind: "video", title: "宝藏小馆", duration: 15, ratio: "9:16", prompt: "探店短视频，暖色调。", shots: [
+    { time: "0-3秒", scene: "展示小店门头，镜头推入", asset: "图片2", line: "谁懂啊！藏在巷子里的宝藏小馆" },
+    { time: "3-6秒", scene: "店内环境与明档", asset: "", line: "" },
+  ] };
+  const text = planPrompt(plan);
+  assert.match(text, /^探店短视频，暖色调。\n分镜：\n0-3秒：展示小店门头，镜头推入（用@图片2），台词：“谁懂啊！藏在巷子里的宝藏小馆”\n3-6秒：店内环境与明档$/);
+  // The project's 图片2 alone is the editor's @图片1.
+  const pic = (id) => ({ id, data: { type: "image/jpeg", url: "u" } });
+  const sent = sentMaterials(text, [pic("p1"), pic("p2")]);
+  assert.deepEqual(sent.assets.map((a) => a.id), ["p2"]);
+  assert.match(sent.prompt, /（用@图片1）/);
+  // A prompt that already walks through the shots and lines is left as it is.
+  const full = { ...plan, prompt: "0-3秒 门头，台词谁懂啊！藏在巷子里的宝藏小馆；3-6秒 店内" };
+  assert.equal(planPrompt(full), full.prompt);
+  assert.equal(planPrompt({ ...plan, shots: [] }), plan.prompt);
+});
