@@ -145,7 +145,7 @@ export interface Model {
   resolutionByMode?: Record<string, string[]>;
   referenceRules?: Record<
     string,
-    Record<string, { minCount?: number; maxCount: number; maxSizeMB: number }>
+    Record<string, { minCount?: number; maxCount: number; maxSizeMB: number; maxSeconds?: number }>
   >;
   icon?: string;
   settings?: {

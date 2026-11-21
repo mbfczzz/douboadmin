@@ -136,3 +136,18 @@ test("upstream-constrained limits supplied by the backend take precedence", asyn
   assert.equal(page.data.maxReferences, 2);
   assert.equal(pickers, 0);
 });
+
+// 一键复刻 opened in the editor (调整后再生成): the original video goes cut to
+// the model's reference limit and without sound; pictures go as they are.
+test("the 一键复刻 preset sends the original as its reference clip", async () => {
+  const model = { ...base, kind: "video", modes: ["t2v", "omni_ref"], durations: [10], referenceTypes: ["image", "video"], referenceRules: { omni_ref: { video: { maxCount: 3, maxSizeMB: 50, maxSeconds: 30 } } } };
+  const { h, page } = await editor(model);
+  let input;
+  const clipped = [];
+  h.service("reference-clip").referenceClip = async (id, m) => { clipped.push([id, m.referenceRules.omni_ref.video.maxSeconds]); return id + "-clip"; };
+  h.api.submitInput = async (value) => { input = value; return { id: "job" }; };
+  page.setData({ feature: "remake", assets: [{ ...asset("orig", "video"), isVideo: true }, { ...asset("pic"), isImage: true }], prompt: "复刻", hasPrompt: true });
+  await page.generate();
+  assert.deepEqual(Array.from(input.assets), ["orig-clip", "pic"]);
+  assert.deepEqual(clipped, [["orig", 30]]);
+});

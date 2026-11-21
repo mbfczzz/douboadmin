@@ -26,6 +26,7 @@ test("生成同款 offers the models that take the original video and uses the p
   h.service("../utils/config-cache").loadConfig = async () => ({ models: [video("text-only", []), video("video-only", ["video"]), video("both", ["image", "video"])] });
   h.api.submitInput = async (input) => { submitted.push(input); return { id: "gen", input, status: "queued" }; };
   h.wx.showToast = (o) => toasts.push(o.title);
+  h.service("reference-clip").referenceClip = async (id) => id + "-clip";
   const page = h.page("task-detail");
   page.setData({ job: { id: "job", status: "succeeded", resultAssetId: "src", input: { kind: "import", purpose: "remake", sourceId: "7301", prompt: "一键复刻：t", duration: 10, assets: [] } } });
   await page.loadRemakeModels();
@@ -84,4 +85,10 @@ test("文案提取 and AI写剧本 read with the chosen chat model; one that can
   await writeScript("写剧本", () => true, "text");
   assert.deepEqual(sent.map((i) => i.model), ["seer", "flash", "text"]);
   await settle();
+});
+
+test("the reference clip length is the model's limit (15 s when unknown)", () => {
+  const { clipSeconds } = harness().service("reference-clip");
+  assert.equal(clipSeconds({ referenceRules: { omni_ref: { video: { maxCount: 3, maxSizeMB: 50, maxSeconds: 30 } } } }), 30);
+  assert.equal(clipSeconds({}), 15);
 });

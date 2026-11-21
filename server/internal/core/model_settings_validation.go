@@ -83,6 +83,12 @@ func (s ModelSettings) Validate(m Model) error {
 				}
 			}
 		}
+		if key == "omniRef.videoSeconds" { // 1–60 whole seconds
+			if !validRate(n) || n > 60 || math.Trunc(n) != n {
+				return fmt.Errorf("参考视频时长限制无效")
+			}
+			continue
+		}
 		if !allowed || !validRate(n) || n > 50 || (strings.HasSuffix(key, "Count") && (n > 20 || math.Trunc(n) != n)) {
 			return fmt.Errorf("素材限制字段无效")
 		}

@@ -59,6 +59,9 @@ func publicReferenceRules(m core.Model) map[string]map[string]core.ReferenceRule
 			if size > 0 {
 				rule.MaxSizeMB = math.Min(rule.MaxSizeMB, size)
 			}
+			if mode == "omni_ref" && typ == "video" {
+				rule.MaxSeconds = core.RefVideoSeconds(m)
+			}
 			rules[typ] = rule
 		}
 		out[mode] = rules

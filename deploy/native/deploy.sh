@@ -11,6 +11,10 @@ release_root=/srv/doubo
 for command in systemctl curl flock; do
   command -v "$command" >/dev/null || die "Missing command: $command"
 done
+# 一键复刻 cuts the original to the model's reference limit, without sound,
+# with ffmpeg; without it the whole original is sent (works, but long videos
+# can exceed the model's limit).
+command -v ffmpeg >/dev/null || echo "Warning: ffmpeg is not installed (apt-get install -y ffmpeg); 一键复刻 will send whole original videos." >&2
 
 mkdir -p "$base/shared/media" "$base/shared/web/assets" /etc/doubo
 exec 9> "$base/deploy.lock"

@@ -109,6 +109,8 @@ test("生成同款 picks a fitting model, writes from the breakdown and submits 
   const video = (id, refs) => ({ id, kind: "video", name: id, referenceTypes: refs, modes: ["t2v", "omni_ref"], durations: [5, 10, 15], resolutions: ["480p", "720p"], ratios: ["9:16", "16:9"], settings: {} });
   h.service("../utils/config-cache").loadConfig = async () => ({ models: [video("text-only", []), video("video-only", ["video"]), video("both", ["image", "video"])] });
   h.api.submitInput = async (input, channel) => { submitted.push([input, channel]); return { id: "gen-1", input, status: "queued" }; };
+  const clips = [];
+  h.service("reference-clip").referenceClip = async (id, model) => { clips.push([id, model.id]); return id + "-clip"; };
   const detail = h.page("task-detail");
   detail.setData({ job: { id: "job-1", status: "succeeded", resultAssetId: "asset-1", input: { kind: "import", purpose: "remake", sourceId: "7301", prompt: "一键复刻：开箱口红", duration: 18, assets: [] } } });
   detail.setData({ assets: [{ id: "pic-1", isImage: true, data: { type: "image/jpeg", size: 10 } }] });
@@ -118,7 +120,9 @@ test("生成同款 picks a fitting model, writes from the breakdown and submits 
   assert.equal(input.model, "both", "a model taking the video and the picture");
   assert.equal(input.duration, 15);
   assert.equal(input.mode, "omni_ref");
-  assert.deepEqual(Array.from(input.assets), ["asset-1", "pic-1"]);
+  // The original goes cut to the chosen model's limit and without sound (reference-clip).
+  assert.deepEqual(Array.from(input.assets), ["asset-1-clip", "pic-1"]);
+  assert.deepEqual(clips, [["asset-1", "both"]]);
   assert.match(input.prompt, /^参考@视频1[^]*15 秒的同款视频[^]*换成@图片1[^]*开头 3 秒保留钩子：撕快递[^]*\n0–5秒：卧室，撕开快递，手持，台词“终于到了”\n5–15秒：镜前，试色，特写$/);
   assert.equal(h.nav[0].url, "/pages/task-detail/index?id=gen-1");
   assert.equal(detail.data.busy, false);
@@ -131,6 +135,7 @@ test("生成同款 never sends pictures to a model that only accepts video", asy
   h.wx.showToast = (o) => messages.push(o.title);
   let submitted = 0;
   h.api.submitInput = async () => { submitted++; };
+  h.service("reference-clip").referenceClip = async (id) => id + "-clip";
   const page = h.page("task-detail");
   page.setData({ job: { id: "job", status: "succeeded", resultAssetId: "source-video", input: { kind: "import", purpose: "remake", sourceId: "7301", prompt: "一键复刻：标题", duration: 10, assets: [] } }, assets: [{ id: "picture", isImage: true, data: { type: "image/jpeg", size: 10 } }] });
   await page.generateRemake();

@@ -71,6 +71,17 @@ function ReferenceLimits({
                     value={limits[prefix + "." + typ + "SizeMB"] || 0}
                     onChange={(n) => set(prefix + "." + typ + "SizeMB", n)}
                   />
+                  {prefix === "omniRef" && typ === "video" && (
+                    <NumberField
+                      label="全能参考 · 参考视频时长（秒）"
+                      span={2}
+                      integer
+                      max={60}
+                      hint="一键复刻按此截取原视频开头并去掉原声；0 按官方上限（Seedance 2.5 为 30 秒，其他 15 秒）"
+                      value={limits["omniRef.videoSeconds"] || 0}
+                      onChange={(n) => set("omniRef.videoSeconds", n)}
+                    />
+                  )}
                 </div>
               )}
             </div>
