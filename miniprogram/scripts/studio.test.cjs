@@ -77,6 +77,11 @@ test("做同款 opens 一键复刻; starting queues the preparation task and ope
   assert.deepEqual(started, [["v1", "视频v1", []]]);
   assert.deepEqual(replaced, ["/pages/task-detail/index?id=job-9"]);
   assert.equal(remake.data.busy, false);
+  const entry = require("node:fs").readFileSync("pages/remake/index.wxml", "utf8");
+  assert.doesNotMatch(entry, /添加图片|换成我的商品或人物/);
+  assert.match(entry, /开始复刻/);
+  const detail = require("node:fs").readFileSync("pages/task-detail/index.wxml", "utf8");
+  assert.match(detail, /在主体右侧上传图片替换/);
 });
 
 test("a finished 一键复刻 task hands video, pictures and breakdown to the editor", async () => {
@@ -105,7 +110,8 @@ test("生成同款 picks a fitting model, writes from the breakdown and submits 
   h.service("../utils/config-cache").loadConfig = async () => ({ models: [video("text-only", []), video("video-only", ["video"]), video("both", ["image", "video"])] });
   h.api.submitInput = async (input, channel) => { submitted.push([input, channel]); return { id: "gen-1", input, status: "queued" }; };
   const detail = h.page("task-detail");
-  detail.setData({ job: { id: "job-1", status: "succeeded", resultAssetId: "asset-1", input: { kind: "import", purpose: "remake", sourceId: "7301", prompt: "一键复刻：开箱口红", duration: 18, assets: ["pic-1"] } } });
+  detail.setData({ job: { id: "job-1", status: "succeeded", resultAssetId: "asset-1", input: { kind: "import", purpose: "remake", sourceId: "7301", prompt: "一键复刻：开箱口红", duration: 18, assets: [] } } });
+  detail.setData({ assets: [{ id: "pic-1", isImage: true, data: { type: "image/jpeg", size: 10 } }] });
   await detail.generateRemake();
   const [input, channel] = submitted[0];
   assert.equal(channel, "remake");
@@ -116,6 +122,20 @@ test("生成同款 picks a fitting model, writes from the breakdown and submits 
   assert.match(input.prompt, /^参考@视频1[^]*15 秒的同款视频[^]*换成@图片1[^]*开头 3 秒保留钩子：撕快递[^]*\n0–5秒：卧室，撕开快递，手持，台词“终于到了”\n5–15秒：镜前，试色，特写$/);
   assert.equal(h.nav[0].url, "/pages/task-detail/index?id=gen-1");
   assert.equal(detail.data.busy, false);
+});
+
+test("生成同款 never sends pictures to a model that only accepts video", async () => {
+  const h = harness(), messages = [], video = { id: "video-only", kind: "video", name: "video-only", referenceTypes: ["video"], modes: ["omni_ref"], durations: [10], resolutions: ["720p"], ratios: ["9:16"], settings: {} };
+  h.service("../utils/config-cache").loadConfig = async () => ({ models: [video] });
+  h.service("hot-breakdown").readBreakdown = async () => ({ subjects: [], shots: [] });
+  h.wx.showToast = (o) => messages.push(o.title);
+  let submitted = 0;
+  h.api.submitInput = async () => { submitted++; };
+  const page = h.page("task-detail");
+  page.setData({ job: { id: "job", status: "succeeded", resultAssetId: "source-video", input: { kind: "import", purpose: "remake", sourceId: "7301", prompt: "一键复刻：标题", duration: 10, assets: [] } }, assets: [{ id: "picture", isImage: true, data: { type: "image/jpeg", size: 10 } }] });
+  await page.generateRemake();
+  assert.equal(submitted, 0);
+  assert.match(messages[0], /同时支持原视频和这些图片/);
 });
 
 test("调整后再生成 still opens the editor preset; labels say 一键复刻", async () => {

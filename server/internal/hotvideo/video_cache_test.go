@@ -12,7 +12,7 @@ import (
 )
 
 // A video read for display is reused for CacheTTL.Video; a pasted link is
-// resolved once in that window; the import path stays live.
+// resolved once in that window; importers use the same full detail cache.
 func TestVideoAndLinkCacheFollowTheConfiguredWindow(t *testing.T) {
 	var detail, share atomic.Int32
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -56,10 +56,11 @@ func TestVideoAndLinkCacheFollowTheConfiguredWindow(t *testing.T) {
 	if detail.Load() != 2 {
 		t.Fatal("stale copy served", detail.Load())
 	}
-	// Importing (Client.Detail) never reads the cache.
-	_, _ = s.Client.Detail(ctx, "7301")
-	if detail.Load() != 3 {
-		t.Fatal("import must read live")
+	// Importing through Service.Video reuses the playable detail. The importer
+	// separately asks for the original upload URL and falls back to this URL.
+	_, _ = s.Video(ctx, "7301")
+	if detail.Load() != 2 {
+		t.Fatal("import repeated the detail request", detail.Load())
 	}
 	// Defaults when nothing is configured.
 	d := (&Service{}).CacheTTLs()

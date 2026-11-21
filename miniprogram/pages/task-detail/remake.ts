@@ -4,19 +4,24 @@ import { rememberRows } from "../../utils/view-cache";
 import { readBreakdown } from "../../services/hot-breakdown";
 import { remakeHandoff, remakeOriginal } from "../../services/hot-import";
 import { modelChoices, modelSettings } from "../create/models";
-import { referenceSettings, creationMode } from "../create/references";
+import { referenceError, creationMode } from "../create/references";
 import { remakePrompt } from "../create/remake-brief";
 import type { Job, Row, Asset } from "../../services/types";
 import type { Breakdown } from "../../services/hot-breakdown";
 import { chosenSwaps } from "./swap";
 import type { SwapRow } from "./swap";
 
-// A finished 一键复刻 task (original saved and broken down) goes straight to
-// generation: 生成同款 picks a model that takes the reference video (and the
-// pictures), the length closest to the original, writes the description from
-// the breakdown, and asks once for the points. 调整后再生成 opens the editor.
+type AssetView = ReturnType<typeof import("./assets").assetViews>[number];
 type Page = {
-  data: { job: (Job & { status: string }) | null; busy: boolean; swaps: SwapRow[] };
+  data: {
+    job: (Job & { status: string }) | null;
+    busy: boolean;
+    swaps: SwapRow[];
+    assets: AssetView[];
+    loadingAssets: boolean;
+    swapUploading: number;
+    genericUploading: boolean;
+  };
   breakdown?: Breakdown | null;
   destroyed: boolean;
   visible: boolean;
@@ -25,27 +30,27 @@ type Page = {
 
 const ready = (page: Page) => {
   const job = page.data.job;
-  return job && !page.data.busy && job.status === "succeeded" && job.resultAssetId ? job : null;
+  return job && !page.data.busy && !page.data.loadingAssets && page.data.swapUploading < 0 && !page.data.genericUploading && job.status === "succeeded" && job.resultAssetId ? job : null;
 };
 
-// With subjects matched on the page, only the chosen pictures go, in the
-// order the swaps name them; without (an older breakdown, none listed) all
-// pictures go with the general instruction.
-function pictureSwaps(job: Job, rows: SwapRow[]) {
-  return rows.length ? chosenSwaps(rows) : { swaps: [], pictures: job.input.assets || [] };
+function pictureSwaps(job: Job, rows: SwapRow[], assets: AssetView[]) {
+  const pictures = assets.filter((a) => a.isImage).map((a) => a.id);
+  return rows.length ? chosenSwaps(rows) : { swaps: [], pictures: pictures.length ? pictures : job.input.assets || [] };
 }
 
-async function remakeInput(job: Job, swapRows: SwapRow[], known?: Breakdown | null) {
+async function remakeInput(job: Job, swapRows: SwapRow[], pictureAssets: AssetView[], known?: Breakdown | null) {
   const [breakdown, config] = await Promise.all([known !== undefined && known !== null ? known : readBreakdown(job.input.sourceId || ""), loadConfig()]);
-  const { swaps, pictures } = pictureSwaps(job, swapRows);
+  const { swaps, pictures } = pictureSwaps(job, swapRows, pictureAssets);
   const assets = [job.resultAssetId!, ...pictures];
   const models = modelChoices(config.models, "video");
-  const fits = (m: (typeof models)[number]) => referenceSettings(m).allowVideo && (!pictures.length || referenceSettings(m).allowImage);
-  const model = models.find(fits) || models.find((m) => referenceSettings(m).allowVideo);
-  if (!model) throw new Error("暂无支持参考视频的模型，无法生成同款");
+  const references = [
+    { id: job.resultAssetId!, data: { type: "video/mp4", size: 0 } } as Row<Asset>,
+    ...pictures.map((id) => pictureAssets.find((a) => a.id === id) || ({ id, data: { type: "image/jpeg", size: 0 } } as Row<Asset>)),
+  ] as Row<Asset>[];
+  const model = models.find((m) => !referenceError(m, references, true));
+  if (!model) throw new Error(pictures.length ? "暂无同时支持原视频和这些图片的模型，请减少图片或联系管理员" : "暂无支持参考视频的模型，无法生成同款");
   const original = remakeOriginal(job);
-  const rows = assets.map((id) => ({ id }) as Row<Asset>);
-  const s = modelSettings(model, { resolution: "", ratio: "9:16", duration: Math.round(original.duration) || 5, assets: rows });
+  const s = modelSettings(model, { resolution: "", ratio: "9:16", duration: Math.round(original.duration) || 5, assets: references });
   return {
     kind: "video",
     feature: "remake",
@@ -54,7 +59,7 @@ async function remakeInput(job: Job, swapRows: SwapRow[], known?: Breakdown | nu
     ratio: s.ratio,
     duration: s.duration,
     quality: s.quality,
-    mode: creationMode(model, rows),
+    mode: creationMode(model, references),
     prompt: remakePrompt({ ...original, breakdown, images: pictures.length, swaps }, s.duration, Math.min(s.maxPromptChars, 2000)),
     assets,
   };
@@ -71,7 +76,7 @@ export const remakeHandlers = {
     if (!job) return;
     this.setData({ busy: true });
     try {
-      const created = await submitInput(await remakeInput(job, this.data.swaps, this.breakdown), "remake"); // shows the points first
+      const created = await submitInput(await remakeInput(job, this.data.swaps, this.data.assets, this.breakdown), "remake"); // shows the points first
       rememberRows([created]);
       if (!this.destroyed) openTask(created.id, this);
     } catch (e) {
@@ -87,7 +92,7 @@ export const remakeHandlers = {
     try {
       const breakdown = await readBreakdown(job.input.sourceId || "");
       if (this.destroyed) return;
-      remakeHandoff(job, breakdown, pictureSwaps(job, this.data.swaps));
+      remakeHandoff(job, breakdown, pictureSwaps(job, this.data.swaps, this.data.assets));
       openPage(this, { url: "/pages/create/index?feature=remake" });
     } finally {
       if (!this.destroyed) this.setData({ busy: false });

@@ -31,7 +31,7 @@ Page({
     picksLoading: false,
   },
   id: "",
-  uploadId: "", // a video uploaded from the phone (upload.ts)
+  uploadId: "",
   pickRevision: 0,
   revision: 0,
   visible: true,
@@ -52,7 +52,6 @@ Page({
     this.destroyed = true;
     this.revision++;
   },
-  // From 做同款 (by ID) or the link box (by share text).
   async load() {
     const version = ++this.revision;
     this.setData({ loading: true, loadError: "" });

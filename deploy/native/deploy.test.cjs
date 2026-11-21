@@ -104,6 +104,7 @@ for (const name of [
       "media/model-icons/model.png",
       "media/brand/doubo.png",
       "media/ui-art/mine-bg.jpg",
+      "media/outfits/spring-shirt.jpg",
       "deploy/native/doubo@.service",
       "deploy/native/doubo-migrate.service",
       "deploy/native/doubo-sync-ui-art.service",
@@ -175,6 +176,7 @@ for (const name of [
         "project logo copied to " + icons,
       );
       assert.ok(fs.existsSync(path.join(local, icons, "ui-art/mine-bg.jpg")));
+      assert.ok(fs.existsSync(path.join(local, icons, "outfits/spring-shirt.jpg")));
       assert.equal(fs.readFileSync(targetFile, "utf8"), release);
       assert.ok(
         calls.indexOf("start doubo-migrate") <

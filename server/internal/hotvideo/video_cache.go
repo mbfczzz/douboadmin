@@ -8,10 +8,9 @@ import (
 	"time"
 )
 
-// Single videos for display (视频详情, 文案提取, 一键复刻 reading a link) are
-// reused for CacheTTL.Video. Play addresses expire, so anything that
-// downloads (importing a material, the remake original) reads live through
-// Client instead.
+// Single videos for display, 文案提取 and 一键复刻 are reused for
+// CacheTTL.Video. An import starts from the playable copy the user just saw;
+// it still asks TikHub for the original upload URL before falling back to it.
 
 type cachedVideo struct {
 	Video

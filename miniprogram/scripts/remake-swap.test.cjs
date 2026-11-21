@@ -58,6 +58,7 @@ test("each subject has its own slot: upload replaces it, × keeps the original; 
   h.api.upload = async () => ({ id: "cup", data: { url: "https://oss/cup.jpg", type: "image/jpeg" } });
   await page.uploadSwap({ currentTarget: { dataset: { index: 2 } } });
   assert.deepEqual(plain(page.data.swaps.map((r) => r.pick)), ["", "", "cup"]);
+  assert.deepEqual(plain(page.data.assets.map((a) => a.id)), ["cup"]);
   assert.equal(page.data.swapUrls.cup, "https://oss/cup.jpg");
   assert.equal(page.data.swapUploading, -1);
   page.clearSwap({ currentTarget: { dataset: { index: 2 } } });

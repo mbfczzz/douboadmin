@@ -69,15 +69,21 @@
         object-fit="contain"
       />
     </view>
-    <view wx:if="{{job.status==='succeeded'&&!job.deleted&&job.input.purpose==='remake'&&swaps.length}}" class="swap-list">
-      <view class="swap-head"><text class="swap-title">替换人物或商品（可选）</text><text class="swap-hint">在主体右侧上传图片替换，不传保持原样</text></view>
-      <view wx:for="{{swaps}}" wx:for-item="row" wx:for-index="i" wx:key="name" class="swap-row">
-        <view class="swap-copy"><text class="swap-name">{{row.name}}</text><text class="swap-look">{{row.look}}{{row.when?' · '+row.when:''}}</text></view>
-        <view class="swap-slot {{row.pick?'filled':''}} {{swapUploading===i?'is-busy':''}}" data-index="{{i}}" bindtap="uploadSwap" aria-role="button" aria-label="{{row.pick?'更换替换'+row.name+'的图片':'上传图片替换'+row.name}}">
-          <image wx:if="{{row.pick&&swapUrls[row.pick]}}" src="{{swapUrls[row.pick]}}" mode="aspectFill" />
-          <block wx:else><art-icon name="tryonUpload" size="20" icon="add" /><text>{{swapUploading===i?'上传中':'替换'}}</text></block>
-          <view wx:if="{{row.pick}}" class="swap-clear" data-index="{{i}}" catchtap="clearSwap" aria-role="button" aria-label="{{row.name+'保持原样'}}">×</view>
+    <view wx:if="{{job.status==='succeeded'&&!job.deleted&&job.input.purpose==='remake'&&swapLoaded}}" class="swap-list">
+      <view class="swap-head"><text class="swap-title">替换人物或商品（可选）</text><text class="swap-hint">{{swaps.length?'在主体右侧上传图片替换，不传保持原样':'未识别到明确主体，上传图片后将作为整体替换参考'}}</text></view>
+      <block wx:if="{{swaps.length}}">
+        <view wx:for="{{swaps}}" wx:for-item="row" wx:for-index="i" wx:key="name" class="swap-row">
+          <view class="swap-copy"><text class="swap-name">{{row.name}}</text><text class="swap-look">{{row.look}}{{row.when?' · '+row.when:''}}</text></view>
+          <view class="swap-slot {{row.pick?'filled':''}} {{swapUploading===i?'is-busy':''}}" data-index="{{i}}" bindtap="uploadSwap" aria-role="button" aria-label="{{row.pick?'更换替换'+row.name+'的图片':'上传图片替换'+row.name}}">
+            <image wx:if="{{row.pick&&swapUrls[row.pick]}}" src="{{swapUrls[row.pick]}}" mode="aspectFill" />
+            <block wx:else><art-icon name="tryonUpload" size="20" icon="add" /><text>{{swapUploading===i?'上传中':'替换'}}</text></block>
+            <view wx:if="{{row.pick}}" class="swap-clear" data-index="{{i}}" catchtap="clearSwap" aria-role="button" aria-label="{{row.name+'保持原样'}}">×</view>
+          </view>
         </view>
+      </block>
+      <view wx:else class="asset-grid swap-upload-row">
+        <block wx:for="{{assets}}" wx:for-item="pic" wx:key="id"><view wx:if="{{pic.isImage}}" class="asset-row" data-url="{{pic.data.url}}" bindtap="previewAsset"><image src="{{pic.data.url}}" mode="aspectFill" /><view class="swap-remove" data-id="{{pic.id}}" catchtap="removeGenericPicture" aria-role="button" aria-label="删除替换图片">×</view></view></block>
+        <view wx:if="{{assets.length<3}}" class="swap-add {{genericUploading||busy?'is-busy':''}}" bindtap="addGenericPicture" aria-role="button" aria-label="上传替换图片"><t-loading wx:if="{{genericUploading}}" size="20px" /><art-icon wx:else name="tryonUpload" size="20" icon="add" /><text>{{genericUploading?'上传中':'上传图片'}}</text></view>
       </view>
     </view>
     <view wx:if="{{job.status==='succeeded'&&!job.deleted&&job.input.purpose==='remake'}}" class="remake-ready">
@@ -85,7 +91,7 @@
         <text>原视频已拆解，确认积分后直接生成同款</text>
         <text class="remake-edit" bindtap="editRemake">调整后再生成 ›</text>
       </view>
-      <button class="retry-pill remake-go" loading="{{busy}}" disabled="{{busy}}" bindtap="generateRemake">生成同款</button>
+      <button class="retry-pill remake-go" loading="{{busy}}" disabled="{{busy||genericUploading||swapUploading>=0||loadingAssets}}" bindtap="generateRemake">生成同款</button>
     </view>
     <view wx:elif="{{job.status==='succeeded'&&!job.deleted}}" class="result-actions">
       <view class="act" bindtap="save" hover-class="act-pressed" aria-role="button"><view class="act-icon primary"><t-loading wx:if="{{busy}}" size="20px" /><image wx:else class="gl gl-22" src="/assets/glyphs/download-dark.png" /></view><text>{{job.results.length>1?'保存全部':'保存'}}</text></view>

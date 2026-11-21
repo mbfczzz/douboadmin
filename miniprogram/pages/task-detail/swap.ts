@@ -3,6 +3,10 @@ import { chooseReferenceFile, upload, media, cancelled, error } from "../../util
 import type { Breakdown, BreakdownSubject } from "../../services/hot-breakdown";
 import type { Swap } from "../../services/hot-import";
 import type { Job } from "../../services/types";
+import { assetViews } from "./assets";
+
+const MAX_PICTURES = 3;
+type AssetView = ReturnType<typeof assetViews>[number];
 
 // 一键复刻 with the user's own pictures: the breakdown lists the original's
 // subjects (主角、商品…); each one gets its own picture slot — upload there
@@ -13,7 +17,16 @@ import type { Job } from "../../services/types";
 export type SwapRow = BreakdownSubject & { pick: string }; // pick: picture asset id, "" = keep
 
 type Page = {
-  data: { job: Job | null; swaps: SwapRow[]; swapUrls: Record<string, string>; swapUploading: number; busy: boolean; assets: { id: string; isImage?: boolean; data: { url: string } }[] };
+  data: {
+    job: Job | null;
+    swaps: SwapRow[];
+    swapUrls: Record<string, string>;
+    swapUploading: number;
+    swapLoaded: boolean;
+    genericUploading: boolean;
+    busy: boolean;
+    assets: AssetView[];
+  };
   destroyed: boolean;
   breakdown?: Breakdown | null;
   setData(data: Record<string, unknown>): void;
@@ -49,11 +62,35 @@ export const swapHandlers = {
     const breakdown = await readBreakdown(job.input.sourceId || "");
     if (this.destroyed) return;
     this.breakdown = breakdown;
-    if (!breakdown?.subjects?.length) return;
     const urls: Record<string, string> = {};
     for (const a of this.data.assets) if (a.isImage) urls[a.id] = a.data.url;
     const pictures = (job.input.assets || []).filter((id) => urls[id]);
-    this.setData({ swaps: firstGuess(breakdown.subjects, pictures), swapUrls: urls });
+    this.setData({
+      swapLoaded: true,
+      swapUrls: urls,
+      swaps: breakdown?.subjects?.length ? firstGuess(breakdown.subjects, pictures) : [],
+    });
+  },
+  async addGenericPicture(this: Page) {
+    const pictures = this.data.assets.filter((a) => a.isImage);
+    if (this.data.genericUploading || this.data.busy || pictures.length >= MAX_PICTURES) return;
+    this.setData({ genericUploading: true });
+    try {
+      const file = await chooseReferenceFile("image");
+      const row = await upload(file.path);
+      if (this.destroyed) return;
+      const assets = [...this.data.assets, ...assetViews([row])];
+      this.setData({ assets, swapUrls: { ...this.data.swapUrls, [row.id]: media(row.data.url) } });
+    } catch (e) {
+      if (!cancelled(e) && !this.destroyed) error(e);
+    } finally {
+      if (!this.destroyed) this.setData({ genericUploading: false });
+    }
+  },
+  removeGenericPicture(this: Page, e: WechatMiniprogram.TouchEvent) {
+    if (this.data.busy || this.data.genericUploading) return;
+    const id = String(e.currentTarget.dataset.id || "");
+    this.setData({ assets: this.data.assets.filter((a) => a.id !== id) });
   },
   // The subject's slot: pick a picture from the phone; it replaces this subject.
   async uploadSwap(this: Page, e: WechatMiniprogram.TouchEvent) {
@@ -65,7 +102,8 @@ export const swapHandlers = {
       const row = await upload(file.path);
       if (this.destroyed) return;
       const rows = this.data.swaps.map((r, i) => (i === index ? { ...r, pick: row.id } : r));
-      this.setData({ swaps: rows, swapUrls: { ...this.data.swapUrls, [row.id]: media(row.data.url) } });
+      const assets = [...this.data.assets, ...assetViews([row])];
+      this.setData({ assets, swaps: rows, swapUrls: { ...this.data.swapUrls, [row.id]: media(row.data.url) } });
     } catch (err) {
       if (!this.destroyed && !cancelled(err)) error(err);
     } finally {

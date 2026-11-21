@@ -51,7 +51,10 @@ func (p Importer) Generate(ctx context.Context, j core.Job) (string, error) {
 		return "", fmt.Errorf("抖音数据接口尚未配置")
 	}
 	_ = p.Service.Store.Progress(ctx, j, 10, "获取无水印原视频")
-	v, e := p.Service.Client.Detail(ctx, j.Input.SourceID)
+	// The detail page has already resolved and cached this video. Reuse that
+	// copy: asking TikHub for the same detail again can fail independently
+	// (and would make a visible, playable video impossible to import).
+	v, e := p.Service.Video(ctx, j.Input.SourceID)
 	if e != nil {
 		return "", e
 	}

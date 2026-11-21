@@ -29,6 +29,8 @@ Page({
     swaps: [] as SwapRow[], // 一键复刻: which picture replaces which subject
     swapUrls: {} as Record<string, string>, // picture of each swap pick
     swapUploading: -1, // the subject whose picture is uploading
+    swapLoaded: false,
+    genericUploading: false,
     needsLogin: false,
     signingIn: false,
     assetError: "",
