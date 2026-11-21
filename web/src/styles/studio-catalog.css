@@ -37,6 +37,10 @@
   height: 100%;
   object-fit: cover;
 }
+/* Outfits are portrait flat-lays: the whole outfit, not a slice. */
+.outfit-cover img {
+  object-fit: contain;
+}
 .studio-body {
   display: flex;
   flex: 1;

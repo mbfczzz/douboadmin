@@ -252,7 +252,9 @@ console.log(
 // and its editor preset; 创作 grid without 我的作品 / 生成记录: 1,039,734 B. 992 -> 1016 KiB.
 // AI试衣 review: picture addresses refreshed in place after 10 minutes, 收藏
 // replies in order, the preset starts on a model taking both pictures: 1,041,825 B. 1016 -> 1018 KiB.
-const budget = 1018 * 1024;
+// AI试衣 UI pass: person and outfit side by side (开始试穿 above the fold),
+// outfit name on its picture, grab handle on the preview: 1,042,744 B. 1018 -> 1019 KiB.
+const budget = 1019 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

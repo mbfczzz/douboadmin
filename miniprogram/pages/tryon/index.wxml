@@ -42,32 +42,37 @@
   </block>
 
   <block wx:elif="{{tab==='fit'}}">
-    <view class="biz-card fit-step">
-      <text class="fit-label">1 人物照片</text>
-      <view wx:if="{{person}}" class="fit-slot">
-        <image class="fit-photo" src="{{person.url}}" mode="aspectFill" />
-        <view wx:if="{{!starting}}" class="fit-remove" catchtap="removePerson" aria-role="button" aria-label="删除人物照片">×</view>
+    <view class="biz-card fit-pair">
+      <view class="fit-col">
+        <text class="fit-label">1 人物照片</text>
+        <view wx:if="{{person}}" class="fit-slot">
+          <image class="fit-photo" src="{{person.url}}" mode="aspectFill" />
+          <view wx:if="{{!starting}}" class="fit-remove" catchtap="removePerson" aria-role="button" aria-label="删除人物照片">×</view>
+        </view>
+        <view wx:else class="fit-slot fit-add {{personBusy?'is-busy':''}}" bindtap="choosePerson" aria-role="button">
+          <image class="gl gl-24" src="/assets/glyphs/{{personBusy?'clock':'add'}}-muted.png" />
+          <text>{{personBusy?'上传中…':'上传人物照'}}</text>
+        </view>
+        <view class="fit-actions">
+          <text wx:if="{{person}}" class="fit-link {{personBusy?'is-busy':''}}" bindtap="choosePerson">{{personBusy?'上传中…':'更换'}}</text>
+          <text wx:else class="fit-tip">正面、光线清晰</text>
+        </view>
       </view>
-      <view wx:else class="fit-slot fit-add {{personBusy?'is-busy':''}}" bindtap="choosePerson" aria-role="button">
-        <image class="gl gl-24" src="/assets/glyphs/{{personBusy?'clock':'add'}}-muted.png" />
-        <text>{{personBusy?'上传中…':'上传人物照'}}</text>
-      </view>
-      <text class="biz-note">正面、全身或半身、光线清晰的照片效果更好</text>
-    </view>
-    <view class="biz-card fit-step">
-      <text class="fit-label">2 服装</text>
-      <view wx:if="{{garment}}" class="fit-slot">
-        <image class="fit-photo" src="{{garment.url}}" mode="aspectFill" />
-        <view wx:if="{{!starting}}" class="fit-remove" catchtap="removeGarment" aria-role="button" aria-label="移除服装">×</view>
-      </view>
-      <view wx:else class="fit-slot fit-add {{garmentBusy?'is-busy':''}}" bindtap="browse" aria-role="button">
-        <image class="gl gl-24" src="/assets/glyphs/add-muted.png" />
-        <text>从库中选</text>
-      </view>
-      <text wx:if="{{garment.title}}" class="fit-name">{{garment.title}}</text>
-      <view class="fit-actions">
-        <text wx:if="{{garment}}" class="fit-link" bindtap="browse">从库中选</text>
-        <text class="fit-link {{garmentBusy?'is-busy':''}}" bindtap="uploadGarment">{{garmentBusy?'上传中…':'上传图'}}</text>
+      <view class="fit-col">
+        <text class="fit-label">2 服装</text>
+        <view wx:if="{{garment}}" class="fit-slot">
+          <image class="fit-photo" src="{{garment.url}}" mode="aspectFill" />
+          <view wx:if="{{!starting}}" class="fit-remove" catchtap="removeGarment" aria-role="button" aria-label="移除服装">×</view>
+          <text wx:if="{{garment.title}}" class="fit-name">{{garment.title}}</text>
+        </view>
+        <view wx:else class="fit-slot fit-add" bindtap="browse" aria-role="button">
+          <image class="gl gl-24" src="/assets/glyphs/add-muted.png" />
+          <text>从库中选</text>
+        </view>
+        <view class="fit-actions">
+          <text wx:if="{{garment}}" class="fit-link" bindtap="browse">从库中选</text>
+          <text class="fit-link {{garmentBusy?'is-busy':''}}" bindtap="uploadGarment">{{garmentBusy?'上传中…':'上传图'}}</text>
+        </view>
       </view>
     </view>
     <view class="biz-card fit-option">
@@ -94,6 +99,7 @@
 
 <view wx:if="{{preview}}" class="outfit-mask" bindtap="closePreview">
   <view class="outfit-sheet" catchtap="noop">
+    <view class="sheet-handle" bindtap="closePreview" aria-role="button" aria-label="关闭" />
     <image class="outfit-big" src="{{preview.image}}" mode="aspectFit" />
     <view class="sheet-head">
       <text class="sheet-title">{{preview.title}}</text>

@@ -20,11 +20,11 @@ export default function OutfitCard({
   const drawing = !!r.data.seedJob;
   return (
     <article className="studio-card">
-      <div className="studio-cover">
+      <div className="studio-cover outfit-cover">
         {r.image ? (
           <img src={r.image} alt={r.data.title} loading="lazy" />
         ) : drawing ? (
-          <Loader size={26} aria-label="生成中" />
+          <Loader size={26} className="spinning" aria-label="生成中" />
         ) : (
           <Shirt size={30} />
         )}
