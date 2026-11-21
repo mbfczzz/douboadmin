@@ -45,18 +45,37 @@ test("the description names each swap; nothing is left to guess", () => {
   assert.match(remakePrompt({ title: "t", text: "", duration: 10, breakdown, images: 2 }, 10, 2000), /换成@图片1、@图片2中的商品或人物/);
 });
 
-test("the task page loads the subjects and a tap changes or clears a match", async () => {
+test("each subject has its own slot: upload replaces it, × keeps the original; no pictures needed first", async () => {
   const h = harness();
   await h.api.signIn();
   const page = h.page("task-detail");
   h.wx.request = (o) => o.success({ statusCode: 200, data: { status: "done", result: { subjects, shots: [] } } });
-  page.setData({ job: { id: "j", status: "succeeded", input: { purpose: "remake", sourceId: "7301", assets: ["p1", "p2"] } } });
+  // A remake started without pictures still lists its subjects, all 原样.
+  page.setData({ job: { id: "j", status: "succeeded", input: { purpose: "remake", sourceId: "7301", assets: [] } } });
+  await page.loadSwaps();
+  assert.deepEqual(plain(page.data.swaps.map((r) => r.pick)), ["", "", ""]);
+  h.api.chooseReferenceFile = async () => ({ path: "tmp/cup.jpg" });
+  h.api.upload = async () => ({ id: "cup", data: { url: "https://oss/cup.jpg", type: "image/jpeg" } });
+  await page.uploadSwap({ currentTarget: { dataset: { index: 2 } } });
+  assert.deepEqual(plain(page.data.swaps.map((r) => r.pick)), ["", "", "cup"]);
+  assert.equal(page.data.swapUrls.cup, "https://oss/cup.jpg");
+  assert.equal(page.data.swapUploading, -1);
+  page.clearSwap({ currentTarget: { dataset: { index: 2 } } });
+  assert.equal(page.data.swaps[2].pick, "");
+  page.onUnload && page.onUnload();
+});
+
+test("pictures given with an older remake are the first guess, shown in their slots", async () => {
+  const h = harness();
+  await h.api.signIn();
+  const page = h.page("task-detail");
+  h.wx.request = (o) => o.success({ statusCode: 200, data: { status: "done", result: { subjects, shots: [] } } });
+  page.setData({
+    assets: [{ id: "p1", isImage: true, data: { url: "https://oss/p1.jpg" } }, { id: "p2", isImage: true, data: { url: "https://oss/p2.jpg" } }],
+    job: { id: "j", status: "succeeded", input: { purpose: "remake", sourceId: "7301", assets: ["p1", "p2"] } },
+  });
   await page.loadSwaps();
   assert.deepEqual(plain(page.data.swaps.map((r) => r.pick)), ["p1", "", "p2"]);
-  page.pickSwap({ currentTarget: { dataset: { index: 0, id: "p2" } } });
-  page.pickSwap({ currentTarget: { dataset: { index: 2, id: "" } } }); // 原样
-  assert.deepEqual(plain(page.data.swaps.map((r) => r.pick)), ["p2", "", ""]);
-  page.pickSwap({ currentTarget: { dataset: { index: 0, id: "p2" } } }); // tapping the chosen one again keeps the original
-  assert.equal(page.data.swaps[0].pick, "");
+  assert.equal(page.data.swapUrls.p2, "https://oss/p2.jpg");
   page.onUnload && page.onUnload();
 });

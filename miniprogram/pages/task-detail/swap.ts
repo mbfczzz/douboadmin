@@ -1,17 +1,19 @@
 import { readBreakdown } from "../../services/hot-breakdown";
+import { chooseReferenceFile, upload, media, cancelled, error } from "../../utils/api";
 import type { Breakdown, BreakdownSubject } from "../../services/hot-breakdown";
 import type { Swap } from "../../services/hot-import";
 import type { Job } from "../../services/types";
 
 // 一键复刻 with the user's own pictures: the breakdown lists the original's
-// subjects (主角、商品…) and each one is matched to a picture or kept as it
-// is, so the description says exactly what replaces what instead of leaving
-// the video model to guess. A first guess pairs pictures with people and
-// products in order; the user changes it on the task page.
+// subjects (主角、商品…); each one gets its own picture slot — upload there
+// to replace that subject, × to keep it as it is (原样) — so the description
+// says exactly what replaces what instead of leaving the model to guess.
+// Pictures given on older remake pages are a first guess (people and
+// products first, in order).
 export type SwapRow = BreakdownSubject & { pick: string }; // pick: picture asset id, "" = keep
 
 type Page = {
-  data: { job: Job | null; swaps: SwapRow[] };
+  data: { job: Job | null; swaps: SwapRow[]; swapUrls: Record<string, string>; swapUploading: number; busy: boolean; assets: { id: string; isImage?: boolean; data: { url: string } }[] };
   destroyed: boolean;
   breakdown?: Breakdown | null;
   setData(data: Record<string, unknown>): void;
@@ -47,13 +49,33 @@ export const swapHandlers = {
     const breakdown = await readBreakdown(job.input.sourceId || "");
     if (this.destroyed) return;
     this.breakdown = breakdown;
-    const pictures = job.input.assets || [];
-    if (pictures.length && breakdown?.subjects?.length) this.setData({ swaps: firstGuess(breakdown.subjects, pictures) });
+    if (!breakdown?.subjects?.length) return;
+    const urls: Record<string, string> = {};
+    for (const a of this.data.assets) if (a.isImage) urls[a.id] = a.data.url;
+    const pictures = (job.input.assets || []).filter((id) => urls[id]);
+    this.setData({ swaps: firstGuess(breakdown.subjects, pictures), swapUrls: urls });
   },
-  // Tapping a picture on a subject uses it there; tapping it again (or 原样) keeps the original.
-  pickSwap(this: Page, e: WechatMiniprogram.TouchEvent) {
-    const { index, id } = e.currentTarget.dataset as { index: number; id: string };
-    const rows = this.data.swaps.map((r, i) => (i === Number(index) ? { ...r, pick: r.pick === id ? "" : id || "" } : r));
-    this.setData({ swaps: rows });
+  // The subject's slot: pick a picture from the phone; it replaces this subject.
+  async uploadSwap(this: Page, e: WechatMiniprogram.TouchEvent) {
+    const index = Number(e.currentTarget.dataset.index);
+    if (this.data.busy || this.data.swapUploading >= 0 || !this.data.swaps[index]) return;
+    this.setData({ swapUploading: index });
+    try {
+      const file = await chooseReferenceFile("image");
+      const row = await upload(file.path);
+      if (this.destroyed) return;
+      const rows = this.data.swaps.map((r, i) => (i === index ? { ...r, pick: row.id } : r));
+      this.setData({ swaps: rows, swapUrls: { ...this.data.swapUrls, [row.id]: media(row.data.url) } });
+    } catch (err) {
+      if (!this.destroyed && !cancelled(err)) error(err);
+    } finally {
+      if (!this.destroyed) this.setData({ swapUploading: -1 });
+    }
+  },
+  // × on the slot: the subject stays as in the original.
+  clearSwap(this: Page, e: WechatMiniprogram.TouchEvent) {
+    const index = Number(e.currentTarget.dataset.index);
+    if (this.data.busy) return;
+    this.setData({ swaps: this.data.swaps.map((r, i) => (i === index ? { ...r, pick: "" } : r)) });
   },
 };

@@ -70,12 +70,13 @@
       />
     </view>
     <view wx:if="{{job.status==='succeeded'&&!job.deleted&&job.input.purpose==='remake'&&swaps.length}}" class="swap-list">
-      <text class="swap-title">用你的图片替换</text>
+      <view class="swap-head"><text class="swap-title">替换人物或商品（可选）</text><text class="swap-hint">在主体右侧上传图片替换，不传保持原样</text></view>
       <view wx:for="{{swaps}}" wx:for-item="row" wx:for-index="i" wx:key="name" class="swap-row">
         <view class="swap-copy"><text class="swap-name">{{row.name}}</text><text class="swap-look">{{row.look}}{{row.when?' · '+row.when:''}}</text></view>
-        <view class="swap-picks">
-          <block wx:for="{{assets}}" wx:for-item="pic" wx:key="id"><view wx:if="{{pic.isImage}}" class="swap-pick {{row.pick===pic.id?'on':''}}" data-index="{{i}}" data-id="{{pic.id}}" bindtap="pickSwap" aria-role="button" aria-label="{{'用'+pic.label+'替换'+row.name}}"><image src="{{pic.data.url}}" mode="aspectFill" /></view></block>
-          <view class="swap-keep {{row.pick?'':'on'}}" data-index="{{i}}" data-id="" bindtap="pickSwap" aria-role="button" aria-label="{{row.name+'保持原样'}}">原样</view>
+        <view class="swap-slot {{row.pick?'filled':''}} {{swapUploading===i?'is-busy':''}}" data-index="{{i}}" bindtap="uploadSwap" aria-role="button" aria-label="{{row.pick?'更换替换'+row.name+'的图片':'上传图片替换'+row.name}}">
+          <image wx:if="{{row.pick&&swapUrls[row.pick]}}" src="{{swapUrls[row.pick]}}" mode="aspectFill" />
+          <block wx:else><art-icon name="tryonUpload" size="20" icon="add" /><text>{{swapUploading===i?'上传中':'替换'}}</text></block>
+          <view wx:if="{{row.pick}}" class="swap-clear" data-index="{{i}}" catchtap="clearSwap" aria-role="button" aria-label="{{row.name+'保持原样'}}">×</view>
         </view>
       </view>
     </view>

@@ -1,21 +1,18 @@
 import { request, error, enterPage, openTask } from "../../utils/api";
 import { hotView } from "../../services/hot-video";
 import { startRemake, startUploadRemake } from "../../services/hot-import";
-import { pictureHandlers } from "./pictures";
 import { uploadHandlers, REFERENCE_SECONDS } from "./upload";
 import { pickHandlers } from "./picks";
-import type { Picture } from "./pictures";
 import type { HotVideo } from "../../services/hot-video";
 
 // Reference videos past REFERENCE_SECONDS are refused by most models
 // (Seedance's 全能参考 takes about 15 s), so the page says so before starting.
 
 // 一键复刻 (after Clipcat's flow): a hot video (做同款) or a pasted Douyin link,
-// optionally the user's own product / person pictures. Starting adds a task
+// Starting adds a task
 // to the queue (services/hot-import.ts) that saves the original without
 // watermark and breaks it down; its task page then opens the editor.
 Page({
-  ...pictureHandlers,
   ...uploadHandlers,
   ...pickHandlers,
   data: {
@@ -26,8 +23,6 @@ Page({
     loadError: "",
     link: "",
     busy: false,
-    pictures: [] as Picture[],
-    picturing: false,
     uploadingVideo: false,
     uploadPercent: -1, // upload progress of a video from the phone (upload.ts)
     pickWords: [] as string[], // remake ideas while nothing is chosen (picks.ts)
@@ -95,10 +90,10 @@ Page({
   },
   async start() {
     const video = this.data.video;
-    if (!video || this.data.busy || this.data.picturing) return;
+    if (!video || this.data.busy) return;
     this.setData({ busy: true });
     try {
-      const pictures = this.data.pictures.map((p: Picture) => p.id);
+      const pictures: string[] = []; // chosen per subject on the task page (task-detail/swap.ts)
       const job = this.uploadId
         ? await startUploadRemake(this.uploadId, { title: video.title, duration: this.data.seconds }, pictures)
         : await startRemake(video.id, { title: video.title, text: video.text, duration: video.duration }, pictures);

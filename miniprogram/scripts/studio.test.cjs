@@ -70,9 +70,8 @@ test("做同款 opens 一键复刻; starting queues the preparation task and ope
   remake.onShow();
   await settle();
   assert.equal(remake.data.video.id, "v1");
-  remake.setData({ pictures: [{ id: "pic-1", url: "u" }] });
-  await remake.start();
-  assert.deepEqual(started, [["v1", "视频v1", ["pic-1"]]]);
+  await remake.start(); // pictures are chosen per subject on the task page
+  assert.deepEqual(started, [["v1", "视频v1", []]]);
   assert.equal(h.nav[1].url, "/pages/task-detail/index?id=job-9");
   assert.equal(remake.data.busy, false);
 });

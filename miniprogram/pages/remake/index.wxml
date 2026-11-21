@@ -21,19 +21,6 @@
     </view>
     <text class="biz-note remake-tip">手机视频建议 15 秒以内，越短读取和上传越快</text>
   </view>
-  <view wx:if="{{video}}" class="biz-card remake-pictures">
-    <text class="remake-label">换成我的商品或人物（可选）</text>
-    <view class="picture-row">
-      <view wx:for="{{pictures}}" wx:key="id" class="picture">
-        <image class="picture-photo" src="{{item.url}}" mode="aspectFill" />
-        <view wx:if="{{!busy}}" class="picture-remove" data-id="{{item.id}}" catchtap="removePicture" aria-role="button" aria-label="删除图片">×</view>
-      </view>
-      <view wx:if="{{pictures.length<3}}" class="picture picture-add {{picturing||busy?'is-busy':''}}" bindtap="addPicture" aria-role="button" aria-label="添加商品或人物图片">
-        <image class="gl gl-20" src="/assets/glyphs/{{picturing?'clock':'add'}}-muted.png" />
-        <text>{{picturing?'上传中':'添加图片'}}</text>
-      </view>
-    </view>
-  </view>
   <text wx:if="{{video&&tooLong}}" class="biz-note remake-long">原视频 {{seconds}} 秒，多数模型的参考视频限 15 秒左右，较长时可能无法直接生成</text>
   <view wx:if="{{!video&&!loading&&pickWords.length}}" class="remake-picks">
     <text class="remake-label">热门同款，点一下就能复刻</text>
@@ -48,6 +35,6 @@
       <block wx:if="{{picksLoading&&!picks.length}}"><view wx:for="{{[0,1,2,3]}}" wx:key="*this" class="pick"><view class="pick-cover skeleton" /></view></block>
     </view>
   </view>
-  <button wx:if="{{video}}" class="biz-action remake-start" loading="{{busy}}" disabled="{{!video||busy||picturing}}" bindtap="start">开始复刻</button>
+  <button wx:if="{{video}}" class="biz-action remake-start" loading="{{busy}}" disabled="{{!video||busy}}" bindtap="start">开始复刻</button>
   <text wx:if="{{video}}" class="biz-note remake-note">开始后在任务队列里准备原视频和拆解，可以先离开</text>
 </view>

@@ -27,6 +27,8 @@ Page({
     busy: false,
     assets: [] as ReturnType<typeof assetViews>,
     swaps: [] as SwapRow[], // 一键复刻: which picture replaces which subject
+    swapUrls: {} as Record<string, string>, // picture of each swap pick
+    swapUploading: -1, // the subject whose picture is uploading
     needsLogin: false,
     signingIn: false,
     assetError: "",
