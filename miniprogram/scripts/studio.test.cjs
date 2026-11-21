@@ -156,3 +156,12 @@ test("图片创作 opens the editor on images", () => {
   assert.equal(editor.data.kind, "image");
   assert.equal(editor.data.ratio, "1:1");
 });
+
+test("taps on 创作 entries and hot videos are counted for 功能使用 (anonymously)", () => {
+  const h = harness(), page = h.page("studio");
+  page.open({ currentTarget: { dataset: { key: "tryon" } } });
+  page.detail({ currentTarget: { dataset: { id: "7301" } } });
+  const clicks = h.sent.filter((o) => o.url.includes("/api/features/"));
+  assert.deepEqual(clicks.map((o) => o.url.replace(/^.*\/api/, "/api")), ["/api/features/tryon/click", "/api/features/hot/click"]);
+  assert.ok(clicks.every((o) => !o.header?.Authorization));
+});

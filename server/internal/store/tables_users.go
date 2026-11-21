@@ -55,6 +55,9 @@ func init() {
 		Table{Name: "daily_activity", Comment: "每日活跃用户，每人每天一行；created_at 为当天首次活跃时间", Owner: "用户", Cols: []Col{
 			c("day", Key),
 		}, Indexes: []string{"day"}},
+		Table{Name: "feature_stats", Comment: "功能使用统计（每天每个功能的点击与使用次数，不含用户）；id = 日期:功能", Cols: []Col{
+			c("day", Key), c("feature", Key), c("clicks", Int), c("uses", Int),
+		}},
 		Table{Name: "analytics", Comment: "用户行为事件（仅同意统计的用户）", Owner: "用户", Cols: []Col{
 			c("name", Key), c("page", Short), c("targetId", Key),
 		}},

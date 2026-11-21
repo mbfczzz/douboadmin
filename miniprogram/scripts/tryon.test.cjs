@@ -173,3 +173,10 @@ test("AI试衣 starts on a model that takes both pictures", () => {
   assert.equal(featureModel([one], "tryon").id, "one");
   assert.equal(featureModel([one, two], "idphoto").id, "one");
 });
+
+test("a preset's task says which preset it came from (功能使用)", () => {
+  const { creationInput } = harness().service("../pages/create/input");
+  const data = { kind: "image", model: "m", resolution: "", quality: "", ratio: "3:4", duration: 0, prompt: "p", assets: [] };
+  assert.equal(creationInput({ ...data, feature: "tryon" }, { modes: [] }).feature, "tryon");
+  assert.equal(creationInput({ ...data, feature: "" }, { modes: [] }).feature, undefined);
+});

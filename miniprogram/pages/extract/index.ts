@@ -39,6 +39,7 @@ Page({
     try {
       const video = await request<HotVideo>("/hot/link", "POST", { text: this.data.link });
       if (revision === this.revision) this.setData({ video });
+      void request("/features/extract/use", "POST").catch(() => undefined); // 功能使用
     } catch (e) {
       if (revision === this.revision) error(e);
     } finally {

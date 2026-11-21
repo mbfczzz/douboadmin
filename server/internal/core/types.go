@@ -42,22 +42,25 @@ type Template struct {
 	RequiredImages   int                 `json:"requiredImages"`
 }
 type JobInput struct {
-	ImageSlots        []int    `json:"imageSlots,omitempty"`
-	ExpectedCostUnits *int64   `json:"expectedCostUnits,omitempty"`
-	SourceID          string   `json:"sourceId,omitempty"`
-	Voice             string   `json:"voice,omitempty"`
-	Purpose           string   `json:"purpose,omitempty"`
-	Quality           string   `json:"quality,omitempty"`
-	Mode              string   `json:"mode,omitempty"`
-	Kind              string   `json:"kind"`
-	Prompt            string   `json:"prompt"`
-	Model             string   `json:"model"`
-	Resolution        string   `json:"resolution"`
-	Ratio             string   `json:"ratio"`
-	Duration          int      `json:"duration"`
-	TemplateID        string   `json:"templateId,omitempty"`
-	Assets            []string `json:"assets"`
-	ParentID          string   `json:"parentId,omitempty"`
+	ImageSlots        []int  `json:"imageSlots,omitempty"`
+	ExpectedCostUnits *int64 `json:"expectedCostUnits,omitempty"`
+	SourceID          string `json:"sourceId,omitempty"`
+	Voice             string `json:"voice,omitempty"`
+	Purpose           string `json:"purpose,omitempty"`
+	Quality           string `json:"quality,omitempty"`
+	Mode              string `json:"mode,omitempty"`
+	Kind              string `json:"kind"`
+	Prompt            string `json:"prompt"`
+	Model             string `json:"model"`
+	Resolution        string `json:"resolution"`
+	Ratio             string `json:"ratio"`
+	Duration          int    `json:"duration"`
+	TemplateID        string `json:"templateId,omitempty"`
+	// Feature: the 创作 preset it came from (ad, idphoto, tryon, remake …),
+	// for 功能使用 statistics only.
+	Feature  string   `json:"feature,omitempty"`
+	Assets   []string `json:"assets"`
+	ParentID string   `json:"parentId,omitempty"`
 	// SessionID ties chat and generation jobs to an Agent project.
 	SessionID string `json:"sessionId,omitempty"`
 	// Revises is the earlier chat turn this one edits and asks again; that

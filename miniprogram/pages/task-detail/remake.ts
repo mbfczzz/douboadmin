@@ -48,6 +48,7 @@ async function remakeInput(job: Job, swapRows: SwapRow[], known?: Breakdown | nu
   const s = modelSettings(model, { resolution: "", ratio: "9:16", duration: Math.round(original.duration) || 5, assets: rows });
   return {
     kind: "video",
+    feature: "remake",
     model: model.id,
     resolution: s.resolution,
     ratio: s.ratio,

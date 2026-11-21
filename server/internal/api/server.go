@@ -68,6 +68,7 @@ type Server struct {
 	Audit      *audit.Writer
 	statsCache auditStatsCache
 	visitLimit visitLimit
+	clickLimit visitLimit // 功能使用 taps (clicksPerMinute)
 }
 type ctxKey int
 
@@ -80,6 +81,7 @@ func New(s store.Store, sessions *Sessions, c Config) *Server {
 	a.Partners = &partners.Service{Store: s}
 	a.Activity = &analytics.Recorder{Store: s}
 	a.Visits = &analytics.Visits{Store: s}
+	a.clickLimit.max = clicksPerMinute
 	if logs, ok := s.(store.AuditLogs); ok {
 		a.Audit = audit.NewWriter(logs, a.auditName)
 		a.Relay.Observe = a.modelLog

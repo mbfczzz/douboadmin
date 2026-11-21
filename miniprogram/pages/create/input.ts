@@ -19,5 +19,6 @@ export function creationInput(data: typeof creationData, model: Model): Input {
     prompt: data.prompt,
     mode: creationMode(model, data.assets),
     assets: data.assets.map((asset) => asset.id),
+    ...(data.feature ? { feature: data.feature } : {}),
   };
 }

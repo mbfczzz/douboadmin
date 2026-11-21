@@ -1,4 +1,5 @@
 import { loadConfig, peekConfig } from "../../utils/config-cache";
+import { featureClick } from "../../services/analytics";
 import { readView, writeView, rememberRows, VIEW_MAX_AGE, noteIssued } from "../../utils/view-cache";
 import { request, tab, media, error, openPage, openTab } from "../../utils/api";
 import type { Row, Template } from "../../services/types";
@@ -183,6 +184,7 @@ Page({
     openTab(this, "/pages/studio/index");
   },
   detail(e: WechatMiniprogram.TouchEvent) {
+    featureClick("template");
     openPage(this, {
       url: "/pages/template-detail/index?id=" + e.currentTarget.dataset.id,
     });

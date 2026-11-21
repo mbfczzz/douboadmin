@@ -63,3 +63,74 @@
 .log-filters .filter-grow input {
   max-width: none;
 }
+/* 功能使用 */
+.feature-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--line);
+}
+.feature-head .business-filters {
+  margin: 0;
+}
+.feature-tiles {
+  display: flex;
+  gap: 28px;
+}
+.feature-tiles div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.feature-tiles span {
+  color: var(--muted);
+  font-size: 12px;
+}
+.feature-tiles strong {
+  color: var(--ink);
+  font-size: 20px;
+  font-variant-numeric: tabular-nums;
+}
+.feature-rank {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.feature-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 160px;
+}
+.feature-track {
+  flex: 1;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--surface-subtle);
+  overflow: hidden;
+}
+.feature-track i {
+  display: block;
+  height: 100%;
+  border-radius: 0 4px 4px 0;
+}
+.feature-track i.clicks {
+  background: var(--info);
+}
+.feature-track i.uses {
+  background: var(--accent);
+}
+.feature-bar b {
+  min-width: 40px;
+  color: var(--ink);
+  font-weight: 600;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.feature-note {
+  margin: 0;
+  padding: 12px 20px 16px;
+  font-size: 12px;
+}

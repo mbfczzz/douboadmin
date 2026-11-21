@@ -1,4 +1,5 @@
 import { tab, openPage, openTab, login, error, isNavigating } from "../../utils/api";
+import { featureClick } from "../../services/analytics";
 import { showArt } from "../../utils/ui-art";
 import { pullRefresh } from "../../utils/refresh";
 import { CARDS, TOOLS, ENTRIES, entryArt } from "./entries";
@@ -43,6 +44,7 @@ Page({
   open(e: WechatMiniprogram.TouchEvent) {
     const entry = ENTRIES.find((item) => item.key === e.currentTarget.dataset.key);
     if (!entry || isNavigating(this)) return;
+    featureClick(entry.key);
     if (entry.tab) openTab(this, entry.url);
     else openPage(this, { url: entry.url });
   },
@@ -65,6 +67,7 @@ Page({
     }
   },
   detail(e: WechatMiniprogram.TouchEvent) {
+    featureClick("hot");
     openPage(this, { url: "/pages/hot-detail/index?id=" + e.currentTarget.dataset.id });
   },
   remake(e: WechatMiniprogram.TouchEvent) {

@@ -14,6 +14,15 @@ export function track(name: string, page: string, targetId = "") {
     timeout: 5000,
   });
 }
+// 功能使用 (后台 → 日志管理): one tap on a function's entry. Anonymous (no
+// token, no ids), like visits; never retried.
+export function featureClick(key: string) {
+  try {
+    wx.request({ url: API_BASE + "/api/features/" + key + "/click", method: "POST", data: {}, timeout: 3000, success() {}, fail() {} });
+  } catch {
+    // statistics never block a tap
+  }
+}
 // Anonymous visit statistics: no token, no account id, never retried.
 let visitId = "",
   scene = 0,

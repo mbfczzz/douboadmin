@@ -85,6 +85,7 @@ export interface Input {
   expectedCostUnits?: number;
   voice?: string;
   purpose?: string;
+  feature?: string; // the 创作 preset it came from, for 功能使用 statistics
   sourceId?: string;
   mix?: {
     autoScenes: boolean;

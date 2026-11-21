@@ -35,6 +35,7 @@ export const logTabs = [
   ["model", "模型调用", "向上游中转提交生成与查询结果的每一次调用"],
   ["points", "积分变动", "每一笔积分的增减、预留与退回"],
   ["auth", "登录日志", "管理员与用户的登录、退出"],
+  ["features", "功能使用", "小程序各功能的点击次数与使用次数，按使用排序"],
 ] as const;
 export type LogTab = (typeof logTabs)[number][0];
 

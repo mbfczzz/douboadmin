@@ -1,4 +1,5 @@
 import { TAB_ITEMS, tabTarget, tabIndexOf, switchInPlace } from "../utils/tab-transition";
+import { featureClick } from "../services/analytics";
 
 Component({
   data: {
@@ -33,6 +34,7 @@ Component({
       )
         return;
       this.setData({ switching: true });
+      if (this.data.items[i].path.includes("agent")) featureClick("agent");
       const fail = () => {
         this.setData({ switching: false });
         wx.showToast({ title: "切换失败，请重试", icon: "none" });

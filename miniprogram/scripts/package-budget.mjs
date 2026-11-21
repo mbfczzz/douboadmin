@@ -257,7 +257,9 @@ console.log(
 // AI试衣 as a user sees it: 试穿 on each card, the picked count on the tab,
 // icons on sort / random / steps / slots / background, what is missing
 // under 开始试穿, heart on 收藏, empty states with an action: 1,045,726 B. 1019 -> 1022 KiB.
-const budget = 1022 * 1024;
+// 功能使用 statistics: anonymous taps on 创作 entries, hot videos, templates
+// and the Agent tab; tasks name their preset; 文案提取 reports a use: 1,046,603 B. 1022 -> 1023 KiB.
+const budget = 1023 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

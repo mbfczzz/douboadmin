@@ -4,6 +4,7 @@ import { useRememberedState } from "../hooks/useRememberedState";
 import LogFilters from "../logs/LogFilters";
 import LogTable from "../logs/LogTable";
 import PointsLog from "../logs/PointsLog";
+import FeatureStats from "../logs/FeatureStats";
 import { logTabs, type LogTab } from "../logs/types";
 import { onPreset, takePreset } from "../logs/preset";
 import "../logs/logs.css";
@@ -47,17 +48,21 @@ export default function Logs() {
         ))}
       </div>
       <p className="quiet log-intro">{current[2]}</p>
-      <LogFilters
-        key={tab + actor}
-        tab={tab}
-        actor={tab === "business" && query.includes("actor=") ? actor : ""}
-        onSearch={(q) => {
-          setQuery(q);
-          setRevision((r) => r + 1);
-        }}
-      />
+      {tab !== "features" && (
+        <LogFilters
+          key={tab + actor}
+          tab={tab}
+          actor={tab === "business" && query.includes("actor=") ? actor : ""}
+          onSearch={(q) => {
+            setQuery(q);
+            setRevision((r) => r + 1);
+          }}
+        />
+      )}
       <section className="panel">
-        {tab === "points" ? (
+        {tab === "features" ? (
+          <FeatureStats revision={revision} />
+        ) : tab === "points" ? (
           <PointsLog key={query + revision} query={query} />
         ) : (
           <LogTable key={tab + query + revision} tab={tab} query={query} />

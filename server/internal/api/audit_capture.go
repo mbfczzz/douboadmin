@@ -35,11 +35,12 @@ func auditActor(r *http.Request, who Identity) {
 	}
 }
 
-// Requests not worth a log line: health probes, anonymous visit beacons and
-// the log viewer reading its own data.
+// Requests not worth a log line: health probes, anonymous visit and 功能使用
+// click beacons and the log viewer reading its own data.
 func audited(r *http.Request) bool {
 	p := r.URL.Path
 	return strings.HasPrefix(p, "/api/") && p != "/api/visits" && p != "/api/events" &&
+		!strings.HasPrefix(p, "/api/features/") &&
 		!(r.Method == "GET" && strings.HasPrefix(p, "/api/admin/audit"))
 }
 

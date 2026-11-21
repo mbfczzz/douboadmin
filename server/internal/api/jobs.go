@@ -89,6 +89,9 @@ func (a *Server) submit(w http.ResponseWriter, r *http.Request, in core.JobInput
 		dbError(w, e)
 		return
 	}
+	if identity(r).Role == "user" {
+		a.countFeature(r.Context(), core.JobFeature(j.Input), true)
+	}
 	a.hideTemplateRecipe(r.Context(), &j)
 	a.touchSession(r.Context(), j.Input.SessionID)
 	reply(w, 202, j)
