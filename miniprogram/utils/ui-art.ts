@@ -90,6 +90,11 @@ const NAMES = {
   icBrowse: "ic-browse", // 先浏览小程序
   icRefresh: "ic-refresh", // 刷新授权状态
   icLogout: "ic-logout", // 退出登录
+  // AI证件照 案例: finished ID photos of fictional people (pages/create/id-photo.ts)
+  idBlueSuit: "id-blue-suit",
+  idWhiteShirt: "id-white-shirt",
+  idRedCasual: "id-red-casual",
+  idWhiteTee: "id-white-tee",
   // 视频二创: what each 二创方式 / 画面特效 looks like (pages/feature)
   remixScene: "remix-scene",
   remixAudio: "remix-audio",

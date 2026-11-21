@@ -236,9 +236,9 @@ console.log(
 // Raises from 944 KiB on (Agent streaming, 一键复刻, AI试衣, Codex art,
 // 功能使用, feature examples …) are listed one by one, each with its
 // reason and measured size, in docs/miniprogram-invite-code-budget.md.
-// Latest: AI 生成服装 as a themed sheet (photo → example, backdrop colour,
-// editable prompt) instead of the system dialog: 1,084,642 B. 1058 -> 1060 KiB.
-const budget = 1060 * 1024;
+// Latest: AI证件照 案例 (finished examples whose 做同款 sets 背景 / 服装 /
+// 尺寸; pages/create/id-photo.ts): 1,087,146 B. 1060 -> 1062 KiB.
+const budget = 1062 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");
