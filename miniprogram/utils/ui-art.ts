@@ -78,6 +78,18 @@ const NAMES = {
   icInvite: "ic-invite", // 邀请码
   icRefund: "ic-refund", // 积分退回
   icPoints: "ic-points", // 积分使用
+  icLink: "ic-link", // 文案提取: 短视频链接
+  icPhotoText: "ic-phototext", // 图片提取
+  icAudio: "ic-audio", // 音频提取
+  icVideo: "ic-video", // 本地视频
+  icWxfile: "ic-wxfile", // 微信文件提取
+  icRemake: "ic-remake", // 一键复刻: 要复刻的视频
+  icPaste: "ic-paste", // 粘贴
+  icScript: "ic-script", // 视频文案、包含创作描述
+  icSpark: "ic-spark", // 去豆播找灵感
+  icBrowse: "ic-browse", // 先浏览小程序
+  icRefresh: "ic-refresh", // 刷新授权状态
+  icLogout: "ic-logout", // 退出登录
   // AI试衣 (pages/tryon): backdrop, 3D icons, slot and empty-state pictures
   bgTryon: "bg-tryon", // AI试衣 top
   tryonGallery: "tryon-gallery",

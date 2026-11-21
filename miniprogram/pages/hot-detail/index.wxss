@@ -29,3 +29,8 @@
   color: var(--ui-text);
   background: var(--ui-field);
 }
+.script-heading {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}

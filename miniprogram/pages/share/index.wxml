@@ -27,7 +27,7 @@
         maxlength="60"
         bindinput="input"
       /><view class="biz-row"
-        ><text>包含创作描述</text
+        ><view class="share-option"><art-icon name="icScript" size="24" /><text>包含创作描述</text></view
         ><switch
           color="#00c8dc"
           checked="{{showPrompt}}"

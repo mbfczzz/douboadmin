@@ -24,7 +24,7 @@
       ></view
     ><view class="biz-card"
       ><view class="row biz-title-row"
-        ><text class="biz-heading">视频文案</text
+        ><view class="biz-heading script-heading"><art-icon name="icScript" size="22" /><text>视频文案</text></view
         ><view class="copy-chip" bindtap="copy"><image class="gl gl-14" src="/assets/glyphs/copy.png" /><text>复制</text></view></view
       ><text selectable="true" class="video-copy">{{video.text}}</text></view
     ><text wx:if="{{busy}}" class="biz-note">{{progress}}</text

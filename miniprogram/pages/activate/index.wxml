@@ -71,8 +71,8 @@
         </view>
       </view>
     </block>
-    <button wx:if="{{status.canBrowse&&!status.active}}" class="text-button browse-link" disabled="{{busy||loading}}" bindtap="enter">先浏览小程序</button>
-    <view class="activation-links"><text bindtap="refresh">{{loading?'正在检查授权…':'刷新授权状态'}}</text><text class="sign-out" bindtap="signOut">退出登录</text></view>
+    <button wx:if="{{status.canBrowse&&!status.active}}" class="text-button browse-link" disabled="{{busy||loading}}" bindtap="enter"><art-icon name="icBrowse" size="18" /><text>先浏览小程序</text></button>
+    <view class="activation-links"><view class="activation-link" bindtap="refresh" aria-role="button"><art-icon name="icRefresh" size="16" /><text>{{loading?'正在检查授权…':'刷新授权状态'}}</text></view><view class="activation-link sign-out" bindtap="signOut" aria-role="button"><art-icon name="icLogout" size="16" /><text>退出登录</text></view></view>
   </block>
   </block>
   <view class="activation-privacy" bindtap="privacy" aria-role="button"><art-icon name="icPrivacy" size="16" /><text>隐私保护指引</text></view>

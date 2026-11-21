@@ -17,7 +17,9 @@
   color: var(--ui-link);
 }
 .remake-label {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 6px;
   margin-bottom: 10px;
   font-size: 15px;
   font-weight: 600;
@@ -39,6 +41,9 @@
 }
 .remake-paste {
   flex: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
   padding: 0 8px;
   font-size: 14px;
   color: var(--ui-link);

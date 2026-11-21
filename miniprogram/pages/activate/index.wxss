@@ -43,9 +43,14 @@
 .activation-links .sign-out {
   color: var(--ui-muted);
 }
-.activation-links text,
+.activation-link,
 .activation-privacy {
   padding: 12px 0;
+}
+.activation-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 .activation-privacy {
   display: flex;
@@ -78,7 +83,10 @@
   white-space: nowrap;
 }
 button.browse-link {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   margin: 16px auto 0;
 }
 .activation-status {

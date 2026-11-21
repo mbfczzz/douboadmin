@@ -1,1 +1,7 @@
 @import "../../styles/business.wxss";
+button.spark-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}

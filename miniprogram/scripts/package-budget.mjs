@@ -269,7 +269,10 @@ console.log(
 // bundled glyph / vector icon until they arrive): 我的 menus and 推广码,
 // 设置 rows, 我的积分 rows and ledger, 任务队列 states, 消息通知 kinds,
 // 邀请码激活 and 隐私保护指引 links: 1,055,951 B. 1028 -> 1032 KiB.
-const budget = 1032 * 1024;
+// The remaining text-only spots get Codex icons: 文案提取 sources, 一键复刻
+// (要复刻的视频, 粘贴, 上传视频), 视频文案, 包含创作描述, 去豆播找灵感,
+// 先浏览小程序 / 刷新授权状态 / 退出登录: 1,057,688 B. 1032 -> 1033 KiB.
+const budget = 1033 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

@@ -5,11 +5,11 @@ import type { HotVideo } from "../../services/hot-video";
 // (pictures, audio, local video, chat files) need speech/OCR models that are
 // not connected yet, so they only say so.
 const METHODS = [
-  { key: "link", title: "短视频链接", note: "抖音分享链接提取文案", icon: "link" },
-  { key: "image", title: "图片提取", note: "手机图片转文字", icon: "image" },
-  { key: "audio", title: "音频提取", note: "音频转文字", icon: "voice" },
-  { key: "video", title: "本地视频", note: "手机视频转文字", icon: "video" },
-  { key: "file", title: "微信文件提取", note: "聊天里的音频、文档转文字", icon: "file-muted" },
+  { key: "link", title: "短视频链接", note: "抖音分享链接提取文案", icon: "link", ic: "icLink" },
+  { key: "image", title: "图片提取", note: "手机图片转文字", icon: "image", ic: "icPhotoText" },
+  { key: "audio", title: "音频提取", note: "音频转文字", icon: "voice", ic: "icAudio" },
+  { key: "video", title: "本地视频", note: "手机视频转文字", icon: "video", ic: "icVideo" },
+  { key: "file", title: "微信文件提取", note: "聊天里的音频、文档转文字", icon: "file-muted", ic: "icWxfile" },
 ];
 
 Page({

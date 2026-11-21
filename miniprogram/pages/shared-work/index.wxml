@@ -12,7 +12,5 @@
       class="biz-note"
       >{{work.prompt}}</text
     ></view
-  ><button class="biz-action" bindtap="home">
-    去豆播找灵感
-  </button></view
+  ><button class="biz-action spark-action" bindtap="home"><art-icon name="icSpark" size="20" /><text>去豆播找灵感</text></button></view
 >
