@@ -1,0 +1,3 @@
+<!-- Prompt text with @图片N / @视频N as chips (parts from utils/mentions.wxs);
+  a reference without its file shows the picture / video glyph. -->
+<template name="prompt-text"><block wx:for="{{parts}}" wx:key="index"><text wx:if="{{!item.chip}}" selectable>{{item.text}}</text><view wx:else class="prompt-chip"><image src="{{item.url||'/assets/glyphs/'+(item.video?'video':'image')+'-muted.png'}}" class="{{item.url?'':'chip-glyph'}}" mode="aspectFill" /><text>{{item.label}}</text></view></block></template>

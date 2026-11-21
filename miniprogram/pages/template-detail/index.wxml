@@ -1,3 +1,5 @@
+<wxs module="refs" src="../../utils/mentions.wxs" />
+<import src="../../utils/prompt-text.wxml" />
 <nav-bar title="模板详情" back />
 <view class="subpage detail">
   <page-loading wx:if="{{loading}}" show text="正在打开模板…" />
@@ -22,7 +24,7 @@
         <text class="detail-title">{{template.data.title}}</text>
       </view>
     </view>
-    <text wx:if="{{template.data.description}}" class="template-description">{{template.data.description}}</text>
+    <view wx:if="{{template.data.description}}" class="template-description"><template is="prompt-text" data="{{parts:refs.segments(template.data.description,[])}}" /></view>
     <include src="./recipe.wxml" />
     <block wx:if="{{!template.data.imageSlots.length}}">
     <view class="section-head">

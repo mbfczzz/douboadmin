@@ -177,7 +177,7 @@
       <text wx:for="{{backdrops}}" wx:key="*this" class="chip {{aiSheet.backdrop===index?'on':''}}" data-index="{{index}}" bindtap="aiBackdrop">{{item}}</text>
     </view>
     <text class="ai-label">提示词（可修改）</text>
-    <textarea class="ai-prompt" always-embed disable-default-padding value="{{aiSheet.prompt}}" maxlength="800" bindinput="aiPrompt" />
+    <prompt-editor class="ai-prompt" value="{{aiSheet.prompt}}" assets="{{aiSheet.refs}}" max="{{800}}" bind:input="aiPrompt" />
     <view class="sheet-actions">
       <button class="biz-action biz-secondary sheet-fav" bindtap="aiCancel">取消</button>
       <button class="biz-action sheet-wear" loading="{{myBusy==='ai'}}" disabled="{{myBusy==='ai'}}" bindtap="aiGenerate">生成</button>

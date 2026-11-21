@@ -15,20 +15,25 @@ function pick(assets, kind, number) {
 function chip(a, label) {
   return { chip: true, id: a.id, label: label, url: a.isImage ? a.data.url : a.data.thumbnailUrl, video: !a.isImage };
 }
-// The prompt as text runs and reference chips, in order. Plain string scanning
-// (no RegExp: WXS regex support differs on devices); "@" or "＠", then 图片/视频
-// and digits.
-function segments(prompt, assets) {
+// A mention whose picture or video is not there (not uploaded yet, or a page
+// without the files): still a chip, with the picture / video glyph.
+function missing(kind, label) {
+  return { chip: true, missing: true, id: label, label: label, url: "", video: kind === "视频" };
+}
+// Text runs and chips, in order; find(kind, number, label) gives the chip.
+// Plain string scanning (no RegExp: WXS regex support differs on devices);
+// "@" or "＠", then 图片/视频 and digits.
+function scan(prompt, find) {
   prompt = prompt || "";
   var out = [], last = 0, i = 0;
   while (i < prompt.length) {
     var c = prompt.charAt(i), kind = prompt.substring(i + 1, i + 3), j = i + 3;
     if ((c === "@" || c === "＠") && (kind === "图片" || kind === "视频")) {
       while (j < prompt.length && "0123456789".indexOf(prompt.charAt(j)) >= 0) j++;
-      var a = j > i + 3 ? pick(assets, kind, parseInt(prompt.substring(i + 3, j))) : null;
-      if (a) {
+      if (j > i + 3) {
+        var label = kind + prompt.substring(i + 3, j);
         if (i > last) out.push({ text: prompt.substring(last, i) });
-        out.push(chip(a, kind + prompt.substring(i + 3, j)));
+        out.push(find(kind, parseInt(prompt.substring(i + 3, j)), label) || missing(kind, label));
         last = i = j;
         continue;
       }
@@ -37,6 +42,20 @@ function segments(prompt, assets) {
   }
   if (last < prompt.length) out.push({ text: prompt.substring(last) });
   return out;
+}
+// Against the attached references (numbered per kind, in strip order).
+function segments(prompt, assets) {
+  return scan(prompt, function (kind, number, label) {
+    var a = pick(assets || [], kind, number);
+    return a ? chip(a, label) : null;
+  });
+}
+// Against a label -> picture map ("图片3" -> url; a video's cover or "").
+function marks(text, thumbs) {
+  return scan(text, function (kind, number, label) {
+    if (!thumbs || thumbs[label] === undefined) return null;
+    return { chip: true, id: label, label: label, url: thumbs[label], video: kind === "视频" };
+  });
 }
 // Each referenced item once, in first-mention order (the row under the editor).
 function list(prompt, assets) {
@@ -61,4 +80,4 @@ function label(assets, index) {
   for (var i = 0; i <= index; i++) if (a.isImage ? assets[i].isImage : assets[i].isVideo) n++;
   return (a.isImage ? "图" : "视频") + n;
 }
-module.exports = { segments: segments, list: list, any: any, label: label };
+module.exports = { segments: segments, marks: marks, list: list, any: any, label: label };

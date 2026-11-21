@@ -1,3 +1,5 @@
+<wxs module="refs" src="../../utils/mentions.wxs" />
+<import src="../../utils/prompt-text.wxml" />
 <nav-bar title="作品分享" /><view class="subpage"
   ><view wx:if="{{loadError}}" class="biz-error" bindtap="load"
     >{{loadError}}</view
@@ -7,10 +9,10 @@
       wx:if="{{work.kind==='image'}}"
       images="{{work.results}}"
       bind:preview="preview"
-    /><video wx:else class="biz-preview" src="{{work.result}}" controls /><text
+    /><video wx:else class="biz-preview" src="{{work.result}}" controls /><view
       wx:if="{{work.prompt}}"
       class="biz-note"
-      >{{work.prompt}}</text
+      ><template is="prompt-text" data="{{parts:refs.segments(work.prompt,[])}}" /></view
     ></view
   ><button class="biz-action spark-action" bindtap="home"><art-icon name="icSpark" size="20" /><text>去豆播找灵感</text></button></view
 >

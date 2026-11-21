@@ -145,12 +145,12 @@ function signedUrl(name: string, url: string | undefined) {
   return url;
 }
 
-function resolve(signed: Record<string, string> | undefined): Art {
+type Signed = Record<string, string> | undefined;
+const artUrl = (name: string, signed: Signed) => signedUrl(name, signed?.[name]) || media(`/api/ui-art/${name}?v=${ART_VERSION}`);
+
+function resolve(signed: Signed): Art {
   const art = {} as Art;
-  for (const key of Object.keys(NAMES) as (keyof Art)[]) {
-    const name = NAMES[key];
-    art[key] = signedUrl(name, signed?.[name]) || media(`/api/ui-art/${name}?v=${ART_VERSION}`);
-  }
+  for (const key of Object.keys(NAMES) as (keyof Art)[]) art[key] = artUrl(NAMES[key], signed);
   return art;
 }
 
@@ -160,14 +160,22 @@ function resolve(signed: Record<string, string> | undefined): Art {
 // when the stored copy is over 30 min old (replaced pictures then show up),
 // or when there is none.
 const RECHECK_MS = 30 * 60 * 1000;
-export function showArt(page: { setData(data: Record<string, unknown>): void }, pick: (art: Art) => Record<string, unknown>) {
+type Target = { setData(data: Record<string, unknown>): void };
+function showSigned(page: Target, fill: (signed: Signed) => Record<string, unknown>) {
   const seen = peekConfig(SIGNED_MS)?.uiArt;
-  if (seen) page.setData(pick(resolve(seen)));
+  if (seen) page.setData(fill(seen));
   if (seen && peekConfig(RECHECK_MS)) return;
   loadConfig().then(
-    (config) => page.setData(pick(resolve(config.uiArt))),
-    () => !seen && page.setData(pick(resolve(undefined))),
+    (config) => page.setData(fill(config.uiArt)),
+    () => !seen && page.setData(fill(undefined)),
   );
+}
+export function showArt(page: Target, pick: (art: Art) => Record<string, unknown>) {
+  showSigned(page, (signed) => pick(resolve(signed)));
+}
+// Pictures by file name, for sets kept outside NAMES (built-in 案例 covers).
+export function showArtFiles(page: Target, pick: (url: (name: string) => string) => Record<string, unknown>) {
+  showSigned(page, (signed) => pick((name) => artUrl(name, signed)));
 }
 
 // Small art bundled in the package so it paints with the page instead of

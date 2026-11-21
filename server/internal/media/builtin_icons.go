@@ -168,3 +168,11 @@ func (m *BuiltinIcons) URLs(ctx context.Context) map[string]string {
 	}
 	return urls
 }
+
+// Key is the confirmed OSS object of a built-in picture ("" until synced), so
+// a shipped picture can also serve as a generation reference.
+func (m *BuiltinIcons) Key(icon string) string {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	return m.keys[icon]
+}

@@ -5,9 +5,11 @@
 type Ref = { id: string; isImage: boolean; isVideo?: boolean; data: { url: string; thumbnailUrl?: string } };
 type Op = { insert?: unknown; attributes?: Record<string, unknown> };
 const VIDEO_GLYPH = "/assets/glyphs/video-muted.png";
+const IMAGE_GLYPH = "/assets/glyphs/image-muted.png"; // a mention whose picture is not uploaded yet
 const SIZE = "22px";
 
-// "@图片1" → its thumbnail, numbered per kind in strip order.
+// "@图片1" → its thumbnail, numbered per kind in strip order; one not
+// uploaded yet shows the picture / video glyph in its place.
 function thumbnails(assets: Ref[]) {
   const map: Record<string, string> = {};
   let image = 0, video = 0;
@@ -24,10 +26,11 @@ export function toDelta(prompt: string, assets: Ref[]): Op[] {
   for (let i = 0; i < prompt.length; ) {
     const match = /^[@＠](图片|视频)\d+/.exec(prompt.slice(i, i + 12));
     const label = match ? "@" + match[0].slice(1) : "";
-    if (match && thumbs[label]) {
+    if (match) {
       if (text) ops.push({ insert: text });
       text = "";
-      ops.push({ insert: { image: thumbs[label] }, attributes: { alt: label, width: SIZE, height: SIZE } });
+      const src = thumbs[label] || (match[1] === "图片" ? IMAGE_GLYPH : VIDEO_GLYPH);
+      ops.push({ insert: { image: src }, attributes: { alt: label, width: SIZE, height: SIZE } });
       i += match[0].length;
     } else text += prompt[i++];
   }

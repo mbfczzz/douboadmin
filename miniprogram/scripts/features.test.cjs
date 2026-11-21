@@ -165,8 +165,12 @@ test("剧情带货 shows template cases; 做同款 fills this editor (descriptio
   const page = h.page("create");
   page.onLoad({ feature: "ad" });
   await new Promise((resolve) => setTimeout(resolve, 0));
-  assert.match(calls[0][0], /^\/templates\?kind=video&page=1&size=10&q=%E5%B8%A6%E8%B4%A7$/);
-  assert.deepEqual(JSON.parse(JSON.stringify(page.data.featureCases)), [{ id: "tpl-1", cover: "https://c/1.jpg", title: "洗衣机广告", seconds: 5 }]);
+  assert.ok(calls.some(([p]) => /^\/templates\?kind=video&page=1&size=10&q=%E5%B8%A6%E8%B4%A7$/.test(p)));
+  // Built-in cases first (their covers from the UI art), then the templates.
+  const cases = JSON.parse(JSON.stringify(page.data.featureCases));
+  assert.equal(cases.length, 9);
+  assert.match(cases[0].cover, /\/api\/ui-art\/case-ad-lipstick-cover\?v=\d+$/);
+  assert.deepEqual(cases.at(-1), { id: "tpl-1", cover: "https://c/1.jpg", title: "洗衣机广告", seconds: 5 });
   // No picture yet: the description and the case's sample picture go in; no new page.
   await page.openCase({ currentTarget: { dataset: { id: "tpl-1" } } });
   assert.equal(h.nav.length, 0);

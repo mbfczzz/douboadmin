@@ -42,7 +42,7 @@
     <block wx:else>
       <view wx:if="{{item.text}}" class="reply {{item.streaming&&!item.planning?'is-streaming':''}}">
         <view wx:for="{{item.lines}}" wx:for-item="line" wx:for-index="n" wx:key="n" class="line {{line.label?'shot':''}} {{line.text||line.label?'':'gap'}}">
-          <text wx:if="{{line.label}}" class="shot-label">{{line.label}}</text><text selectable>{{line.text}}</text>
+          <text wx:if="{{line.label}}" class="shot-label">{{line.label}}</text><template is="prompt-text" data="{{parts:refs.marks(line.text,thumbs)}}" />
         </view>
       </view>
       <view wx:if="{{item.planning}}" class="plan-writing">
@@ -74,10 +74,10 @@
         </view>
         <view wx:for="{{item.plan.shots}}" wx:for-item="shot" wx:for-index="n" wx:key="n" class="plan-shot">
           <text class="shot-time">{{shot.time}}</text>
-          <view class="shot-copy"><text>{{shot.scene}}</text><text wx:if="{{shot.line}}" class="shot-line">“{{shot.line}}”</text></view>
+          <view class="shot-copy"><view><template is="prompt-text" data="{{parts:refs.marks(shot.scene,thumbs)}}" /></view><text wx:if="{{shot.line}}" class="shot-line">“{{shot.line}}”</text></view>
           <view wx:if="{{shot.asset}}" class="shot-asset"><image wx:if="{{thumbs[shot.asset]}}" class="shot-thumb" src="{{thumbs[shot.asset]}}" mode="aspectFill" /><text>{{shot.asset}}</text></view>
         </view>
-        <text wx:if="{{!item.plan.shots.length}}" class="plan-prompt">{{item.plan.prompt}}</text>
+        <view wx:if="{{!item.plan.shots.length}}" class="plan-prompt"><template is="prompt-text" data="{{parts:refs.marks(item.plan.prompt,thumbs)}}" /></view>
         <view class="plan-actions">
           <view wx:if="{{item.latest}}" class="plan-edit" data-index="{{index}}" bindtap="use" aria-role="button"><image class="gl gl-14" src="/assets/glyphs/edit.png" /><text>去编辑页精调</text></view>
           <view wx:else class="plan-edit" data-id="{{item.id}}" bindtap="togglePlan" aria-role="button"><text>收起</text></view>

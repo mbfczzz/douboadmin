@@ -18,7 +18,9 @@ test("the prompt turns into text and inline thumbnails, and back into the same t
     { insert: { image: "https://fixture.test/1.png" }, attributes: { alt: "@图片1", width: "22px", height: "22px" } },
     { insert: " 在" },
     { insert: { image: "https://fixture.test/c1.jpg" }, attributes: { alt: "@视频1", width: "22px", height: "22px" } },
-    { insert: " 里跳舞，@图片9 不存在\n" },
+    { insert: " 里跳舞，" },
+    { insert: { image: "/assets/glyphs/image-muted.png" }, attributes: { alt: "@图片9", width: "22px", height: "22px" } },
+    { insert: " 不存在\n" },
   ]);
   assert.equal(fromDelta(ops, assets), prompt);
   // Spaces the editor keeps as non-breaking come back as plain spaces.

@@ -109,8 +109,8 @@
   </view>
   <view class="creation-hint">
     <view wx:if="{{refs.list(prompt,assets).length}}" class="mentioned">
-      <view wx:for="{{refs.list(prompt,assets)}}" wx:key="id" class="mentioned-item" data-id="{{item.id}}" bindtap="previewReference" hover-class="card-pressed" aria-role="button" aria-label="{{'查看'+item.label}}">
-        <view class="mentioned-thumb"><image wx:if="{{item.url}}" src="{{item.url}}" mode="aspectFill" /><image wx:if="{{item.video}}" class="gl gl-14 mentioned-play" src="/assets/glyphs/play-muted.png" /></view><text>{{item.label}}</text>
+      <view wx:for="{{refs.list(prompt,assets)}}" wx:key="id" class="mentioned-item" data-id="{{item.id}}" bindtap="previewReference" hover-class="card-pressed" aria-role="button" aria-label="{{(item.missing?'上传':'查看')+item.label}}">
+        <view class="mentioned-thumb {{item.missing?'is-missing':''}}"><image wx:if="{{item.url}}" src="{{item.url}}" mode="aspectFill" /><image wx:elif="{{item.missing}}" class="gl gl-14" src="/assets/glyphs/{{item.video?'video':'image'}}-muted.png" /><image wx:if="{{item.video&&!item.missing}}" class="gl gl-14 mentioned-play" src="/assets/glyphs/play-muted.png" /></view><text>{{item.label}}</text><text wx:if="{{item.missing}}" class="mentioned-wait">待上传</text>
       </view>
     </view>
     <block wx:elif="{{refs.any(assets)}}"><image class="gl gl-16" src="/assets/glyphs/at-muted.png" /><text>输入 @ 可引用已上传的图片或视频</text></block>

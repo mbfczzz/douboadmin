@@ -13,13 +13,39 @@ function wxs() {
 const image = (n) => ({ id: "img" + n, isImage: true, data: { url: "https://fixture.test/" + n } });
 const video = (n) => ({ id: "vid" + n, isVideo: true, data: { url: "https://fixture.test/v" + n, thumbnailUrl: "https://fixture.test/c" + n } });
 
-test("a prompt splits into text runs and reference chips; unknown references stay text", () => {
-  const { segments } = wxs();
+test("a prompt splits into text runs and reference chips; one without its file is a placeholder chip", () => {
+  const { segments, marks, list } = wxs();
   const parts = segments("这个人@图片1 在@视频1 里跳舞@图片9", [image(1), video(1)]);
-  assert.deepEqual(Array.from(parts, (p) => (p.chip ? [p.label, p.url, p.video] : p.text)), [
-    "这个人", ["图片1", "https://fixture.test/1", false], " 在", ["视频1", "https://fixture.test/c1", true], " 里跳舞@图片9",
+  assert.deepEqual(Array.from(parts, (p) => (p.chip ? [p.label, p.url, p.video, !!p.missing] : p.text)), [
+    "这个人", ["图片1", "https://fixture.test/1", false, false], " 在", ["视频1", "https://fixture.test/c1", true, false], " 里跳舞", ["图片9", "", false, true],
   ]);
   assert.deepEqual(Array.from(segments("", []), (p) => p.text), []);
+  // The row under the editor lists a not-yet-uploaded picture too (待上传).
+  assert.equal(list("@图片1 在@图片1 和@视频2", []).map((p) => p.label).join(), "图片1,视频2");
+  // Agent: by the project's labels; a video without a cover still counts.
+  const agent = marks("用@图片3 和@视频1，再加@图片4", { 图片3: "https://t/3", 视频1: "" });
+  assert.deepEqual(Array.from(agent, (p) => (p.chip ? [p.label, p.url, !!p.missing] : p.text)), [
+    "用", ["图片3", "https://t/3", false], " 和", ["视频1", "", false], "，再加", ["图片4", "", true],
+  ]);
+});
+
+test("the editor shows a glyph for a mention whose picture is not uploaded yet, and reads it back", () => {
+  const h = harness();
+  const { toDelta, fromDelta } = h.service("../utils/prompt-delta");
+  const ops = toDelta("将@图片1中的人物和@视频1", []);
+  assert.equal(ops[1].insert.image, "/assets/glyphs/image-muted.png");
+  assert.equal(ops[3].insert.image, "/assets/glyphs/video-muted.png");
+  assert.equal(fromDelta(ops, []), "将@图片1中的人物和@视频1");
+});
+
+test("every screen that shows @图片 / @视频 draws them as chips", () => {
+  const read = (f) => fs.readFileSync(f, "utf8");
+  for (const f of ["pages/task-detail/index.wxml", "pages/shared-work/index.wxml", "pages/template-detail/index.wxml", "pages/agent/index.wxml"])
+    assert.match(read(f), /^<wxs module="(refs|chips)" src="..\/..\/utils\/mentions.wxs" \/>/, f);
+  const agent = read("pages/agent/parts/messages.wxml");
+  for (const text of ["line.text", "shot.scene", "item.plan.prompt"]) assert.ok(agent.includes(`refs.marks(${text},thumbs)`), text);
+  assert.match(read("pages/tryon/index.wxml"), /<prompt-editor class="ai-prompt" value="\{\{aiSheet.prompt\}\}" assets="\{\{aiSheet.refs\}\}"/);
+  assert.match(read("pages/create/index.wxml"), /item\.missing\?'上传':'查看'/);
 });
 
 test("create: the prompt box is the thumbnail editor, fed and read as plain text", () => {

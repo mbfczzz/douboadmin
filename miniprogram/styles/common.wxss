@@ -289,3 +289,8 @@ button.phone-alternative {
   border-radius: 4px;
   background: var(--ui-surface);
 }
+/* A reference without its file (not uploaded, or not shared): the glyph. */
+.prompt-chip image.chip-glyph {
+  box-sizing: border-box;
+  padding: 3px;
+}

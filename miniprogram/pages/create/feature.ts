@@ -59,7 +59,7 @@ export function applyFeature(page: Page, key: string) {
     prompt, hasPrompt: !!prompt,
   });
   if (key === "idphoto") loadIdCases(page); // finished examples (id-photo.ts)
-  else void loadCases(page, f.cases || "");
+  else void loadCases(page, key, f.cases || "");
 }
 
 // Presets work from references: start on a model that takes their kind.
