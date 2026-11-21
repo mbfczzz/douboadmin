@@ -162,3 +162,25 @@
     </view>
   </view>
 </view>
+
+<view wx:if="{{aiSheet}}" class="outfit-mask" bindtap="aiCancel">
+  <view class="outfit-sheet ai-sheet" catchtap="noop">
+    <view class="sheet-handle" bindtap="aiCancel" aria-role="button" aria-label="关闭" />
+    <text class="ai-title">AI 生成服装图</text>
+    <view class="ai-flow">
+      <view class="ai-pic"><image src="{{aiSheet.url}}" mode="aspectFill" /><text>你的照片</text></view>
+      <view class="ai-arrow"><t-icon name="chevron-right" size="20" /></view>
+      <view class="ai-pic"><image wx:if="{{outfits[0].image}}" src="{{outfits[0].image}}" mode="aspectFill" /><text>生成效果示例</text></view>
+    </view>
+    <text class="ai-label">背景颜色</text>
+    <view class="ai-chips">
+      <text wx:for="{{backdrops}}" wx:key="*this" class="chip {{aiSheet.backdrop===index?'on':''}}" data-index="{{index}}" bindtap="aiBackdrop">{{item}}</text>
+    </view>
+    <text class="ai-label">提示词（可修改）</text>
+    <textarea class="ai-prompt" always-embed disable-default-padding value="{{aiSheet.prompt}}" maxlength="800" bindinput="aiPrompt" />
+    <view class="sheet-actions">
+      <button class="biz-action biz-secondary sheet-fav" bindtap="aiCancel">取消</button>
+      <button class="biz-action sheet-wear" loading="{{myBusy==='ai'}}" disabled="{{myBusy==='ai'}}" bindtap="aiGenerate">生成</button>
+    </view>
+  </view>
+</view>

@@ -3,7 +3,8 @@ import { showArt } from "../../utils/ui-art";
 import { SORTS, loadCategories, loadOutfits, loadFavorites, toggleFavorite, initFavorites, randomOutfit, refreshPictures } from "./gallery";
 import { fittingHandlers, wearOutfit } from "./fitting";
 import { mineHandlers } from "./mine";
-import type { MyOutfit } from "./mine";
+import { BACKDROPS } from "./mine";
+import type { MyOutfit, AiSheet } from "./mine";
 import type { Outfit } from "./gallery";
 import type { Person, Garment } from "./fitting";
 
@@ -44,6 +45,8 @@ Page({
     myOutfits: [] as MyOutfit[],
     myLoading: false,
     myBusy: "", // "upload" | "ai" while a picture is being added
+    aiSheet: null as AiSheet | null, // AI 生成: photo, backdrop, prompt (mine.ts)
+    backdrops: BACKDROPS,
     // Codex pictures (media/ui-art/tryon-*); each spot keeps its icon until one arrives.
     art: {} as Record<string, string>,
   },

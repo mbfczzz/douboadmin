@@ -44,19 +44,26 @@ test("自己上传 adds the picture as it is; AI 生成 submits an image task wi
   assert.deepEqual(plain(calls.find((c) => c[1] === "POST")), ["/my-outfits", "POST", { asset: "look" }]);
   const sent = [];
   h.api.submitInput = async (input, channel) => { sent.push([input, channel]); return { id: "job-1" }; };
-  h.wx.showModal = async (o) => ({ confirm: true, content: o.content });
+  // AI 生成: the photo opens the themed sheet; 生成 submits the task.
   await page.aiMine();
+  assert.equal(page.data.aiSheet.asset.id, "look");
+  assert.match(page.data.aiSheet.prompt, /柔和的浅粉色纯色影棚背景/);
+  page.aiBackdrop({ currentTarget: { dataset: { index: 1 } } }); // 浅蓝色
+  assert.match(page.data.aiSheet.prompt, /柔和的浅蓝色纯色影棚背景/);
+  await page.aiGenerate();
   const [input, channel] = sent[0];
   assert.equal(channel, "outfit-ai");
   assert.equal(input.kind, "image");
   assert.equal(input.ratio, "3:4");
   assert.deepEqual(plain(input.assets), ["look"]);
-  assert.match(input.prompt, /^参考@图片1 中的整套穿搭[^]*隐形人台[^]*不出现人物/);
+  assert.match(input.prompt, /^参考@图片1 中的整套穿搭[^]*隐形人台[^]*不出现人物[^]*浅蓝色/);
   assert.deepEqual(plain(calls.filter((c) => c[1] === "POST").at(-1)), ["/my-outfits", "POST", { job: "job-1" }]);
+  assert.equal(page.data.aiSheet, null);
   assert.equal(page.data.myBusy, "");
-  // Cancelling the prompt dialog submits nothing.
-  h.wx.showModal = async () => ({ confirm: false });
+  // 取消 closes the sheet and submits nothing.
   await page.aiMine();
+  page.aiCancel();
+  assert.equal(page.data.aiSheet, null);
   assert.equal(sent.length, 1);
   page.onUnload();
 });

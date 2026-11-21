@@ -67,3 +67,72 @@
 .mine-state.failed {
   color: var(--ui-danger);
 }
+/* AI 生成 sheet: photo → example, backdrop colour, editable prompt. */
+.ai-sheet {
+  padding-top: 0;
+}
+.ai-title {
+  display: block;
+  margin: 6px 0 14px;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 600;
+}
+.ai-flow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+.ai-pic {
+  position: relative;
+  width: 108px;
+  height: 144px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--ui-field);
+}
+.ai-pic image {
+  width: 100%;
+  height: 100%;
+}
+.ai-pic text {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 14px 0 6px;
+  text-align: center;
+  font-size: 11px;
+  color: #fff;
+  background: linear-gradient(transparent, #000000a0);
+}
+.ai-arrow {
+  display: flex;
+  color: var(--ui-muted);
+}
+.ai-label {
+  display: block;
+  margin: 16px 0 8px;
+  font-size: 13px;
+  color: var(--ui-muted);
+}
+.ai-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.ai-prompt {
+  box-sizing: border-box;
+  width: 100%;
+  height: 112px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  line-height: 19px;
+  color: var(--ui-text);
+  background: var(--ui-field);
+}
+.ai-chips .chip {
+  padding: 6px 14px;
+}

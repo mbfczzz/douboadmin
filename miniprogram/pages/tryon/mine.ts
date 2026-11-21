@@ -10,13 +10,18 @@ import type { Asset, Row } from "../../services/types";
 // like any task; it shows 生成中 until done (/api/my-outfits settles it).
 export type MyOutfit = { id: string; title: string; assetId?: string; image?: string; source: string; status: "ready" | "drawing" | "failed"; error?: string };
 
+// Backdrop colours offered on the AI sheet; a pick swaps the colour in the prompt.
+export const BACKDROPS = ["浅粉色", "浅蓝色", "米白色", "浅灰色"];
+const BACKDROP = /柔和的(\S{1,4}?)纯色影棚背景/;
 export const OUTFIT_PROMPT =
   "参考@图片1 中的整套穿搭，生成一张服装电商产品图：整套服装完整地穿在隐形人台上，保持衣服自然的立体穿着形态，不出现人物、脸、皮肤、手和人台；" +
   "正面全身，鞋子摆在下方，居中并四周留白；柔和的浅粉色纯色影棚背景，均匀柔光，面料纹理清晰，真实摄影质感；" +
   "服装的款式、颜色、图案和材质与@图片1 完全一致；画面中没有文字和水印。";
+// The AI sheet: the photo, a backdrop, the prompt (editable).
+export type AiSheet = { asset: Row<Asset>; url: string; prompt: string; backdrop: number };
 
 type Page = {
-  data: { mine: boolean; myOutfits: MyOutfit[]; myBusy: string; starting: boolean; tab: string };
+  data: { mine: boolean; myOutfits: MyOutfit[]; myBusy: string; starting: boolean; tab: string; aiSheet: AiSheet | null };
   destroyed: boolean;
   mineTimer: number;
   setData(data: Record<string, unknown>): void;
@@ -81,16 +86,36 @@ export const mineHandlers = {
       if (!this.destroyed) error(e);
     }
   },
-  // A photo of the whole outfit, the default prompt (editable), then the task.
+  // A photo of the whole outfit opens the AI sheet (themed, not a system dialog).
   async aiMine(this: Page) {
     const row = await pickPicture(this, "ai");
     if (!row || this.destroyed) return;
+    this.setData({ aiSheet: { asset: row, url: media(row.data.url), prompt: OUTFIT_PROMPT, backdrop: 0 } });
+  },
+  aiPrompt(this: Page, e: WechatMiniprogram.Input) {
+    if (this.data.aiSheet) this.setData({ "aiSheet.prompt": e.detail.value });
+  },
+  aiBackdrop(this: Page, e: WechatMiniprogram.TouchEvent) {
+    const sheet = this.data.aiSheet;
+    const i = Number(e.currentTarget.dataset.index);
+    if (!sheet || !BACKDROPS[i]) return;
+    const prompt = BACKDROP.test(sheet.prompt) ? sheet.prompt.replace(BACKDROP, `柔和的${BACKDROPS[i]}纯色影棚背景`) : sheet.prompt;
+    this.setData({ "aiSheet.backdrop": i, "aiSheet.prompt": prompt });
+  },
+  aiCancel(this: Page) {
+    if (this.data.myBusy !== "ai") this.setData({ aiSheet: null });
+  },
+  // 生成: an ordinary image task (the points are confirmed first), registered as 生成中.
+  async aiGenerate(this: Page) {
+    const sheet = this.data.aiSheet;
+    if (!sheet || this.data.myBusy) return;
+    const prompt = sheet.prompt.trim() || OUTFIT_PROMPT;
+    this.setData({ myBusy: "ai" });
     try {
-      const answer = await wx.showModal({ title: "AI 生成服装图", content: OUTFIT_PROMPT, editable: true, confirmText: "生成" });
-      if (!answer.confirm || this.destroyed) return;
-      this.setData({ myBusy: "ai" });
-      const job = await submitInput(await outfitInput(row, (answer.content || OUTFIT_PROMPT).trim()), "outfit-ai"); // shows the points first
+      const job = await submitInput(await outfitInput(sheet.asset, prompt), "outfit-ai");
       await request("/my-outfits", "POST", { job: job.id });
+      if (this.destroyed) return;
+      this.setData({ aiSheet: null });
       wx.showToast({ title: "开始生成，完成后出现在这里", icon: "none" });
       await loadMine(this);
     } catch (e) {
