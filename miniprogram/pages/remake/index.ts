@@ -29,6 +29,7 @@ Page({
     pictures: [] as Picture[],
     picturing: false,
     uploadingVideo: false,
+    uploadPercent: -1, // upload progress of a video from the phone (upload.ts)
     pickWords: [] as string[], // remake ideas while nothing is chosen (picks.ts)
     pickWord: "",
     picks: [] as ReturnType<typeof hotView>[],

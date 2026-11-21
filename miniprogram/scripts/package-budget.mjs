@@ -275,7 +275,10 @@ console.log(
 // 剧情带货 / 探店视频 cases are templates (their generated samples) instead
 // of Douyin videos; a case opens 做同款 with the user's pictures in its
 // slots (template-detail/prefill.ts): 1,061,159 B. 1033 -> 1037 KiB.
-const budget = 1037 * 1024;
+// 一键复刻 video upload shows 读取中 / 上传中 N% and may take five minutes
+// (was 90 s, too short for a long phone video on a slow uplink); a note
+// suggests videos under 15 s: 1,062,010 B. 1037 -> 1038 KiB.
+const budget = 1038 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

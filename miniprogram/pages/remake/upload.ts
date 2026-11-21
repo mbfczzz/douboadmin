@@ -4,7 +4,7 @@ import { chooseReferenceFile, upload, media, cancelled, error } from "../../util
 // the user's material, then remade like any other (services/hot-import.ts).
 export const REFERENCE_SECONDS = 15;
 type Page = {
-  data: { loading: boolean; busy: boolean; uploadingVideo: boolean };
+  data: { loading: boolean; busy: boolean; uploadingVideo: boolean; uploadPercent: number };
   id: string;
   uploadId: string;
   revision: number;
@@ -15,10 +15,14 @@ type Page = {
 export const uploadHandlers = {
   async uploadVideo(this: Page) {
     if (this.data.loading || this.data.busy || this.data.uploadingVideo) return;
-    this.setData({ uploadingVideo: true });
+    this.setData({ uploadingVideo: true, uploadPercent: -1 });
     try {
       const file = await chooseReferenceFile("video");
-      const row = await upload(file.path);
+      // The button shows how far the upload is (a long video takes a while).
+      let shown = -1;
+      const row = await upload(file.path, false, undefined, (p) => {
+        if (!this.destroyed && p !== shown) this.setData({ uploadPercent: (shown = p) });
+      });
       if (this.destroyed) return;
       this.revision++; // a link being read meanwhile no longer applies
       this.id = "";

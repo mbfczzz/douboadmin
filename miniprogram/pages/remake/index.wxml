@@ -16,9 +16,10 @@
     <textarea class="remake-input" always-embed disable-default-padding value="{{link}}" maxlength="500" placeholder="粘贴抖音分享的链接或整段分享文字，也可以上传手机里的视频" placeholder-class="remake-placeholder" bindinput="input" />
     <view class="remake-actions">
       <view class="remake-paste" bindtap="paste" aria-role="button"><art-icon name="icPaste" size="18" /><text>粘贴</text></view>
-      <view class="remake-paste {{uploadingVideo?'is-busy':''}}" bindtap="uploadVideo" aria-role="button"><art-icon name="tryonUpload" size="18" /><text>{{uploadingVideo?'上传中…':'上传视频'}}</text></view>
+      <view class="remake-paste {{uploadingVideo?'is-busy':''}}" bindtap="uploadVideo" aria-role="button"><art-icon name="tryonUpload" size="18" /><text>{{uploadingVideo?(uploadPercent>=0?'上传中 '+uploadPercent+'%':'读取中…'):'上传视频'}}</text></view>
       <button class="biz-secondary remake-read" loading="{{loading}}" disabled="{{loading}}" bindtap="readLink">读取视频</button>
     </view>
+    <text class="biz-note remake-tip">手机视频建议 15 秒以内，越短读取和上传越快</text>
   </view>
   <view wx:if="{{video}}" class="biz-card remake-pictures">
     <text class="remake-label">换成我的商品或人物（可选）</text>

@@ -8,7 +8,12 @@ test("an uploaded video is remade through /remake/upload with its length", async
   await h.api.signIn();
   const page = h.page("remake");
   h.wx.chooseMedia = async () => ({ tempFiles: [{ tempFilePath: "v.mp4", size: 1024, duration: 18.4 }] });
-  h.api.upload = async () => ({ id: "a".repeat(32), data: { url: "/m/v.mp4", thumbnailUrl: "/m/v.jpg", type: "video/mp4" } });
+  let during;
+  h.api.upload = async (path, avatar, token, onProgress) => {
+    onProgress(40); // the button follows the upload
+    during = page.data.uploadPercent;
+    return { id: "a".repeat(32), data: { url: "/m/v.mp4", thumbnailUrl: "/m/v.jpg", type: "video/mp4" } };
+  };
   const posts = [];
   h.wx.request = (o) => {
     const path = o.url.split("/api")[1];
@@ -16,6 +21,8 @@ test("an uploaded video is remade through /remake/upload with its length", async
     o.success({ statusCode: path === "/remake/upload" ? 202 : 200, data: path === "/remake/upload" ? { id: "job1", status: "queued", input: o.data } : { enabled: false, keywords: [] } });
   };
   await page.uploadVideo();
+  assert.equal(during, 40);
+  assert.equal(page.data.uploadingVideo, false);
   assert.equal(page.data.video.uploaded, true);
   assert.equal(page.data.seconds, 18);
   assert.equal(page.data.tooLong, true); // over the ~15 s most models take
@@ -47,4 +54,20 @@ test("hot videos are offered while nothing is chosen; a tap loads one", async ()
   page.usePick({ currentTarget: { dataset: { id: "703" } } });
   for (let i = 0; i < 20 && !page.data.video; i++) await new Promise((r) => setTimeout(r, 5));
   assert.equal(page.data.video.id, "703");
+});
+
+test("a video upload reports its progress and may take five minutes; other uploads keep 90 s", async () => {
+  const h = harness();
+  await h.api.signIn();
+  const sent = [], seen = [];
+  h.wx.uploadFile = (o) => {
+    sent.push(o);
+    queueMicrotask(() => o.success({ statusCode: 201, data: JSON.stringify({ id: "a1", data: { url: "/m/a.mp4", type: "video/mp4" } }) }));
+    return { onProgressUpdate: (cb) => cb({ progress: 55 }) };
+  };
+  await h.api.upload("v.mp4", false, undefined, (p) => seen.push(p));
+  await h.api.upload("p.jpg");
+  assert.deepEqual(seen, [55]);
+  assert.equal(sent[0].timeout, 300000);
+  assert.equal(sent[1].timeout, 90000);
 });

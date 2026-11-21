@@ -108,10 +108,13 @@ export function request<T>(
       })),
   );
 }
+// onProgress (0–100) is for large files such as videos; they also get five
+// minutes instead of ninety seconds, enough for ~50 MB on a slow uplink.
 export function upload(
   path: string,
   avatar = false,
   expectedToken?: string,
+  onProgress?: (percent: number) => void,
 ): Promise<Row<Asset>> {
   return login(avatar ? "profile" : "upload").then(
     () =>
@@ -129,12 +132,12 @@ export function upload(
           );
           return;
         }
-        wx.uploadFile({
+        const task = wx.uploadFile({
           url: API_BASE + "/api/assets" + (avatar ? "?purpose=avatar" : ""),
           filePath: path,
           name: "file",
           header: { Authorization: "Bearer " + sentToken },
-          timeout: 90000,
+          timeout: onProgress ? 300000 : 90000,
           success(r) {
             try {
               if (storedToken() !== sentToken) throw new AuthCancelledError();
@@ -165,6 +168,7 @@ export function upload(
             reject(new Error("上传失败，请检查网络"));
           },
         });
+        if (onProgress) task?.onProgressUpdate?.((p) => onProgress(p.progress));
       })),
   );
 }
