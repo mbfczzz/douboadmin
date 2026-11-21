@@ -57,6 +57,10 @@ test("文案提取 turns a share link into its caption and can start a video fro
   const page = h.page("extract");
   page.choose({ currentTarget: { dataset: { key: "link" } } });
   assert.equal(page.data.linkOpen, true);
+  page.choose({ currentTarget: { dataset: { key: "link" } } }); // a second tap folds it away
+  assert.equal(page.data.linkOpen, false);
+  page.choose({ currentTarget: { dataset: { key: "link" } } });
+  assert.equal(page.data.linkOpen, true);
   page.input({ detail: { value: "复制打开抖音 https://v.douyin.com/abc/" } });
   await page.extract();
   assert.deepEqual(calls[0].slice(0, 2), ["/hot/link", "POST"]);

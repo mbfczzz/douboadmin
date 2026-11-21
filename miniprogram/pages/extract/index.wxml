@@ -5,7 +5,7 @@
     <view class="method {{linkOpen&&item.key==='link'?'open':''}}" data-key="{{item.key}}" bindtap="choose" hover-class="card-pressed" aria-role="button" aria-label="{{item.title}}">
       <view class="method-icon"><art-icon name="{{item.ic}}" size="44" fallback-size="24" glyph="/assets/glyphs/{{item.icon}}.png" /></view>
       <view class="method-copy"><text class="method-title">{{item.title}}</text><text class="method-note">{{item.note}}</text></view>
-      <text class="method-go">›</text>
+      <text class="method-go {{linkOpen&&item.key==='link'?'open':''}}">›</text>
     </view>
     <view wx:if="{{linkOpen&&item.key==='link'}}" class="biz-card link-card">
       <textarea class="link-input" always-embed disable-default-padding value="{{link}}" maxlength="500" placeholder="粘贴抖音分享的链接或整段分享文字" placeholder-class="link-placeholder" bindinput="input" auto-height />

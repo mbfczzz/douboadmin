@@ -45,6 +45,11 @@
 .method-go {
   font-size: 20px;
   color: var(--ui-muted);
+  transition: transform 0.2s;
+}
+/* Open: the arrow points down; tapping the row again folds the box away. */
+.method-go.open {
+  transform: rotate(90deg);
 }
 .link-input {
   width: 100%;

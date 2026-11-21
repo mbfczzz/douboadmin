@@ -22,7 +22,10 @@ Page({
     this.revision++;
   },
   choose(e: WechatMiniprogram.TouchEvent) {
-    if (e.currentTarget.dataset.key === "link") this.setData({ linkOpen: true });
+    // 短视频链接 opens and closes its box (the typed link stays); not while reading.
+    if (e.currentTarget.dataset.key === "link") {
+      if (!this.data.busy) this.setData({ linkOpen: !this.data.linkOpen });
+    }
     else wx.showToast({ title: "该提取方式即将开放", icon: "none" });
   },
   input(e: WechatMiniprogram.Input) {
