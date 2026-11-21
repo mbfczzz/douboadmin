@@ -4,7 +4,7 @@ import { request, media, error } from "../../utils/api";
 // (by category and order), 随机一个, and favourites kept on the phone
 // (ids only; 收藏 reads those outfits again so pictures stay signed).
 export type Outfit = { id: string; title: string; category: string; description: string; image: string };
-type Category = { name: string; count: number };
+type Category = { name: string; count: number; image?: string };
 type Reply = { items: Outfit[]; total: number };
 
 export const SORTS = [
@@ -46,7 +46,7 @@ function saveFavorites(page: GalleryPage, ids: string[]) {
 
 export async function loadCategories(page: GalleryPage) {
   try {
-    const list = await request<Category[]>("/outfits/categories");
+    const list = (await request<Category[]>("/outfits/categories")).map((c) => ({ ...c, image: c.image ? media(c.image) : "" }));
     if (!page.destroyed) page.setData({ categories: list, allCount: list.reduce((n, c) => n + c.count, 0) });
   } catch {
     // the chips are a filter; 全部 still lists everything
@@ -113,6 +113,7 @@ export async function refreshPictures(page: GalleryPage) {
     }
     if (revision !== page.galleryRevision || page.destroyed) return;
     page.galleryAt = Date.now();
+    void loadCategories(page); // chip pictures are signed too
     // Taken-down outfits keep their place until the list is read again.
     page.setData({ outfits: page.data.outfits.map((o) => ({ ...o, image: fresh.get(o.id) || o.image })) });
   } catch {

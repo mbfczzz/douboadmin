@@ -259,7 +259,10 @@ console.log(
 // under 开始试穿, heart on 收藏, empty states with an action: 1,045,726 B. 1019 -> 1022 KiB.
 // 功能使用 statistics: anonymous taps on 创作 entries, hot videos, templates
 // and the Agent tab; tasks name their preset; 文案提取 reports a use: 1,046,603 B. 1022 -> 1023 KiB.
-const budget = 1023 * 1024;
+// Pictures over words: AI试衣 tab icons, category chips with their first
+// outfit, icons on 更换 / 服装库 / 上传; editor reference tiles numbered 图1 /
+// 视频1 as @ mentions count them: 1,048,307 B. 1023 -> 1024 KiB.
+const budget = 1024 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

@@ -122,6 +122,8 @@ func (a *Server) randomOutfit(w http.ResponseWriter, r *http.Request) {
 type outfitCategory struct {
 	Name  string `json:"name"`
 	Count int    `json:"count"`
+	// Image: the category's first outfit, shown on its chip (users only).
+	Image string `json:"image,omitempty"`
 }
 
 // outfitCategories counts outfits per category (published ones for users).
@@ -133,19 +135,24 @@ func (a *Server) outfitCategories(w http.ResponseWriter, r *http.Request) {
 	}
 	admin := strings.Contains(r.URL.Path, "/admin/")
 	// In the order of their first outfit (排序), so 春季 comes before 冬季.
-	counts, first := map[string]int{}, map[string]int{}
+	counts, first, cover := map[string]int{}, map[string]int{}, map[string]string{}
 	for _, row := range rows {
 		var o core.Outfit
 		if json.Unmarshal(row.Data, &o) == nil && !o.Deleted && (o.Published || admin) && o.Category != "" {
-			if n, seen := first[o.Category]; !seen || o.Sort < n {
+			if n, seen := first[o.Category]; !seen || o.Sort < n || o.Sort == n && cover[o.Category] == "" {
 				first[o.Category] = o.Sort
+				cover[o.Category] = o.ImageKey
 			}
 			counts[o.Category]++
 		}
 	}
 	out := []outfitCategory{}
 	for name, n := range counts {
-		out = append(out, outfitCategory{name, n})
+		c := outfitCategory{Name: name, Count: n}
+		if !admin {
+			c.Image = a.outfitImage(r.Context(), cover[name])
+		}
+		out = append(out, c)
 	}
 	sort.Slice(out, func(i, j int) bool {
 		a, b := out[i], out[j]

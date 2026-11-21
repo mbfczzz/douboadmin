@@ -54,4 +54,11 @@ function any(assets) {
   for (var i = 0; i < assets.length; i++) if (assets[i].isImage || assets[i].isVideo) return true;
   return false;
 }
-module.exports = { segments: segments, list: list, any: any };
+// "图N" / "视频N" for the reference at index, as @ mentions number it.
+function label(assets, index) {
+  var a = assets[index], n = 0;
+  if (!a || !(a.isImage || a.isVideo)) return "";
+  for (var i = 0; i <= index; i++) if (a.isImage ? assets[i].isImage : assets[i].isVideo) n++;
+  return (a.isImage ? "图" : "视频") + n;
+}
+module.exports = { segments: segments, list: list, any: any, label: label };

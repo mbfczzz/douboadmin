@@ -49,6 +49,7 @@
           />
           <view wx:elif="{{item.isVideo}}" class="reference-video" data-id="{{item.id}}" bindtap="previewReference"><image wx:if="{{item.data.thumbnailUrl}}" src="{{item.data.thumbnailUrl}}" mode="aspectFill" /><image class="gl gl-20 reference-play" src="/assets/glyphs/play-muted.png" /></view>
           <image wx:else class="gl gl-24" src="/assets/glyphs/file-muted.png" />
+          <text wx:if="{{item.isImage||item.isVideo}}" class="reference-no">{{refs.label(assets,index)}}</text>
           <view class="reference-remove" data-id="{{item.id}}" catchtap="remove" aria-role="button" aria-label="删除参考素材"
             ><t-icon name="close" size="16"
           /></view>

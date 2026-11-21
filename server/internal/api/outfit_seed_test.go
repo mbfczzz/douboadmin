@@ -85,7 +85,7 @@ func TestDefaultOutfitsAreDrawnThenPublished(t *testing.T) {
 	_ = call(a, "GET", "/api/admin/outfits?page=1", admin, "", nil)
 	var cats []outfitCategory
 	_ = json.Unmarshal(call(a, "GET", "/api/outfits/categories", one, "", nil).Body.Bytes(), &cats)
-	if len(cats) != 2 || cats[0].Name != "春季" || cats[1].Name != "冬季" {
+	if len(cats) != 2 || cats[0].Name != "春季" || cats[1].Name != "冬季" || cats[0].Image != "/media/results/t.png" || cats[1].Image != "/media/results/coat.png" {
 		t.Fatal(cats)
 	}
 	var page struct{ Total int }

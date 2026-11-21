@@ -11,6 +11,10 @@
 }
 .tryon-tab {
   flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
   padding: 8px 0;
   border-radius: var(--ui-radius-pill);
   text-align: center;
@@ -42,12 +46,28 @@
   padding: 0 20px;
 }
 .chip {
-  padding: 6px 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 14px 4px 4px;
   border-radius: var(--ui-radius-pill);
   font-size: 13px;
   line-height: 18px;
   color: var(--ui-muted);
   background: var(--ui-surface);
+}
+/* The category's first outfit (or a grid for 全部) on its chip. */
+.chip-art {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 11px;
+  overflow: hidden;
+  color: var(--ui-muted);
+  background: var(--ui-field);
 }
 .chip.on {
   color: var(--ui-text);

@@ -160,8 +160,10 @@ test("after ten minutes the shown pictures get fresh addresses in place, then mo
   page.onReachBottom();
   await settle();
   await settle();
-  assert.match(calls[2][0], /^\/outfits\?page=1&size=100&/);
-  assert.match(calls[3][0], /^\/outfits\?page=2&size=20&/);
+  const later = calls.slice(2).map((c) => c[0]);
+  assert.match(later[0], /^\/outfits\?page=1&size=100&/);
+  assert.ok(later.includes("/outfits/categories")); // chip pictures refreshed too
+  assert.ok(later.some((p) => /^\/outfits\?page=2&size=20&/.test(p)));
   assert.deepEqual(plain(page.data.outfits.map((o) => o.image)), ["https://oss/1.jpg?b", "https://oss/2.jpg?b", "https://oss/x.jpg"]);
 });
 

@@ -12,11 +12,11 @@ Page({
   data: {
     tab: "gallery",
     tabs: [
-      { key: "gallery", label: "服装" },
-      { key: "fit", label: "试穿" },
-      { key: "favorites", label: "收藏" },
+      { key: "gallery", label: "服装", icon: "image" },
+      { key: "fit", label: "试穿", icon: "user" },
+      { key: "favorites", label: "收藏", icon: "heart" },
     ],
-    categories: [] as { name: string; count: number }[],
+    categories: [] as { name: string; count: number; image?: string }[],
     allCount: 0,
     category: "",
     sort: "",

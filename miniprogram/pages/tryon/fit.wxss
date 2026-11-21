@@ -90,12 +90,16 @@
 }
 .fit-actions {
   display: flex;
-  gap: 16px;
+  gap: 12px;
   height: 20px;
   margin-top: 10px;
 }
 .fit-link {
-  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  white-space: nowrap;
+  font-size: 13px;
   line-height: 20px;
   color: var(--ui-link);
 }

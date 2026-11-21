@@ -61,3 +61,11 @@ test("picking after a full-width ＠ writes a standard @", () => {
   page.pickMention({ currentTarget: { dataset: { index: 0 } } });
   assert.equal(page.data.prompt, "这个@图片1 ");
 });
+
+test("each reference tile is numbered the way @ mentions count it", () => {
+  const { label } = wxs();
+  const assets = [image(1), video(1), image(2), { id: "a", data: { type: "audio/mpeg" } }];
+  assert.deepEqual([0, 1, 2, 3].map((i) => label(assets, i)), ["图1", "视频1", "图2", ""]);
+  const wxml = fs.readFileSync("pages/create/index.wxml", "utf8");
+  assert.match(wxml, /class="reference-no">\{\{refs\.label\(assets,index\)\}\}/);
+});
