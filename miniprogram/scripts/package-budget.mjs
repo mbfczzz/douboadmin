@@ -278,7 +278,10 @@ console.log(
 // 一键复刻 video upload shows 读取中 / 上传中 N% and may take five minutes
 // (was 90 s, too short for a long phone video on a slow uplink); a note
 // suggests videos under 15 s: 1,062,010 B. 1037 -> 1038 KiB.
-const budget = 1038 * 1024;
+// Fill-in examples on the feature pages: sample face photos for 视频唱歌
+// (art from OSS), 口播文案 examples for 数字人, real hot videos whose link
+// fills 视频二创 (pages/feature/examples.ts): 1,067,649 B. 1038 -> 1043 KiB.
+const budget = 1043 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

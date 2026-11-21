@@ -5,11 +5,12 @@ import type { Section } from "./configs";
 // The working parts of an interface-first feature page: real uploads into
 // the user's materials, option sheets, and the checks the final action runs
 // before saying the feature is coming.
-export type Upload = { id: string; url: string; cover: string; isImage: boolean; name: string };
+export type Upload = { id: string; url: string; cover: string; isImage: boolean; name: string; sample?: boolean };
 export type View = Section & {
   value?: string;
   picks?: { label: string; on: boolean; art?: string }[];
   target?: number;
+  links?: { id: string; cover: string; title: string; link: string }[];
   file?: Upload | null;
   uploading?: boolean;
 };

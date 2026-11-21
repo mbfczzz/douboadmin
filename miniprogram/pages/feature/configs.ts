@@ -10,9 +10,11 @@ type Base = { tab?: number };
 type Pick = { label: string; art?: keyof Art };
 export type Section = Base & (
   | { type: "tabs"; values: string[] }
-  | { type: "upload"; label?: string; media: "image" | "video"; hint: string; required?: string }
+  // samples: example pictures that fill the upload when tapped (examples.ts)
+  | { type: "upload"; label?: string; media: "image" | "video"; hint: string; required?: string; samples?: Pick[] }
   | { type: "text"; label?: string; placeholder: string; max: number; required?: string }
   | { type: "examples"; label: string; values: { label: string; text: string }[] } // fill the text above
+  | { type: "hotlinks"; label: string; keyword: string } // real hot videos; a tap fills the link above
   | { type: "chips"; label: string; values: string[]; multi?: boolean }
   | { type: "styles"; label: string; values: Pick[] } // picture cards
   | { type: "rows"; items: { label: string; value: string; options: string[]; icon?: string }[]; grid?: boolean }
@@ -55,6 +57,15 @@ export const CONFIGS: Record<string, FeatureConfig> = {
     sections: [
       { type: "upload", label: "形象视频", media: "video", hint: "上传一段正脸、对着镜头说话的视频", required: "请先上传形象视频" },
       { type: "text", label: "口播文案", placeholder: "输入要说的话，数字人会用你的形象说出来", max: 1000, required: "请先输入口播文案" },
+      {
+        type: "examples",
+        label: "文案示例",
+        values: [
+          { label: "店铺开业", text: "大家好，我们的新店今天正式开业啦！进店就送一杯招牌奶茶，前一百名还能抽免单，快带上朋友来打卡吧。" },
+          { label: "好物推荐", text: "这款保温杯我已经用了半年，早上倒的热水到下午还是烫的，杯身轻、不漏水，上班通勤真的太方便了。" },
+          { label: "知识分享", text: "很多人喝水只在口渴的时候喝，其实这时候身体已经缺水了。建议每隔一小时喝几口，一天喝够一千五百毫升。" },
+        ],
+      },
       { type: "chips", label: "声音", values: ["原声", "男声", "女声"] },
     ],
   },
@@ -62,7 +73,10 @@ export const CONFIGS: Record<string, FeatureConfig> = {
     title: "视频唱歌",
     action: "立即生成",
     sections: [
-      { type: "upload", media: "image", hint: "点击上传一张正脸照片", required: "请先上传一张照片" },
+      {
+        type: "upload", media: "image", hint: "点击上传一张正脸照片", required: "请先上传一张照片",
+        samples: [{ label: "示例一", art: "sampleFace1" }, { label: "示例二", art: "sampleFace2" }, { label: "示例三", art: "sampleFace3" }],
+      },
       { type: "chips", label: "曲风", values: ["全部", "流行歌曲", "经典老歌", "古风歌曲", "乐器弹奏"] },
     ],
   },
@@ -91,6 +105,7 @@ export const CONFIGS: Record<string, FeatureConfig> = {
     sections: [
       { type: "tabs", values: ["短视频链接", "本地视频"] },
       { type: "text", placeholder: "粘贴视频链接，支持抖音等主流平台", max: 500, tab: 0, required: "请先粘贴视频链接" },
+      { type: "hotlinks", label: "热门视频示例，点一下填入链接", keyword: "热门", tab: 0 },
       { type: "upload", media: "video", hint: "点击上传本地视频（50MB 以内）", tab: 1, required: "请先上传本地视频" },
       { type: "chips", label: "二创方式", values: ["视频画面二创", "提取音频二创", "提取文案二创"] },
       { type: "chips", label: "画面特效（单选）", values: ["光线扫描", "左右开幕", "下降开幕", "上升开幕", "书单模式", "溶图模式", "横版三屏"] },

@@ -4,6 +4,7 @@ import { CONFIGS } from "./configs";
 import type { Section } from "./configs";
 import { featureActions } from "./actions";
 import type { View } from "./actions";
+import { exampleHandlers, loadHotLinks } from "./examples";
 
 // Interface-first feature page (see configs.ts): everything up to the final
 // action works (actions.ts); that one checks the inputs, then says it is
@@ -18,11 +19,13 @@ function views(sections: Section[]): View[] {
     if (s.type === "text") return { ...s, value: "" };
     if (s.type === "upload") return { ...s, file: null, uploading: false };
     if (s.type === "examples") return { ...s, target: text }; // examples fill the page's text box
+    if (s.type === "hotlinks") return { ...s, target: text, links: [] };
     return s;
   });
 }
 Page({
   ...featureActions,
+  ...exampleHandlers,
   destroyed: false,
   data: { title: "", action: "", tab: 0, sections: [] as View[], art: {} as Record<string, string> },
   onLoad(query: Record<string, string>) {
@@ -31,8 +34,12 @@ Page({
   },
   onShow() {
     enterPage(this);
-    if (this.data.sections.some((s: View) => s.type === "styles"))
-      showArt(this, (art) => ({ art: { styleGeneral: art.styleGeneral, styleRomance: art.styleRomance, styleXianxia: art.styleXianxia, styleSuspense: art.styleSuspense, styleGuoman: art.styleGuoman } }));
+    // Style cards and sample pictures come from the decorative art.
+    showArt(this, (art) => ({
+      art: { styleGeneral: art.styleGeneral, styleRomance: art.styleRomance, styleXianxia: art.styleXianxia, styleSuspense: art.styleSuspense, styleGuoman: art.styleGuoman,
+        sampleFace1: art.sampleFace1, sampleFace2: art.sampleFace2, sampleFace3: art.sampleFace3 },
+    }));
+    void loadHotLinks(this);
   },
   pick(e: WechatMiniprogram.TouchEvent) {
     const { section, index } = e.currentTarget.dataset as { section: number; index: number };

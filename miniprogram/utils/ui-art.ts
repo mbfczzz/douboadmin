@@ -90,6 +90,10 @@ const NAMES = {
   icBrowse: "ic-browse", // 先浏览小程序
   icRefresh: "ic-refresh", // 刷新授权状态
   icLogout: "ic-logout", // 退出登录
+  // 视频唱歌: example face photos that fill the upload (pages/feature)
+  sampleFace1: "sample-face-1",
+  sampleFace2: "sample-face-2",
+  sampleFace3: "sample-face-3",
   // AI试衣 (pages/tryon): backdrop, 3D icons, slot and empty-state pictures
   bgTryon: "bg-tryon", // AI试衣 top
   tryonGallery: "tryon-gallery",

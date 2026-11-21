@@ -44,6 +44,7 @@ Codex 生成的实拍风格深色图片，用于小程序界面装饰。所有�
 | hub-remake.jpg | 480 | 创作入口：一键复刻卡片 |
 | tool-*.jpg | 132 | 创作入口功能图标（底色与页面同为 #0f0f11）：ad 剧情带货、shop 探店视频、avatar 数字人、article 图文成片、sing 视频唱歌、remix 视频二创、extract 文案提取、idphoto AI证件照、comic 漫画推文、tryon AI试衣（desub、more、hot、library、works、tasks 已不在创作页使用） |
 | ic-*.jpg | 96 | 全局 3D 图标（整张为渐变底，`components/art-icon` 里圆角，图片未到前显示原图标）：featured 优秀作品、orders 充值订单、history 生成记录、notice 消息通知、help 帮助与反馈、settings 设置、qrcode 推广码、play 自动播放、stats 使用统计、privacy 隐私保护指引、info 积分说明 / 当前版本、running 处理中、failed 失败、done 已完成、recharge 充值到账、invite 邀请码激活、refund 积分退回、points 积分使用、link / phototext / audio / video / wxfile 文案提取方式、remake 要复刻的视频、paste 粘贴、script 视频文案与包含创作描述、spark 去豆播找灵感、browse 先浏览小程序、refresh 刷新授权状态、logout 退出登录（我的收藏、上传视频用 tryon-fav / tryon-upload） |
+| sample-face-1 / 2 / 3.jpg | 360 | 视频唱歌的示例正脸照片（虚构人物，Codex 生成），点一下填入上传位 |
 | bg-tryon.jpg | 750 | AI试衣页顶部背景（服装店里的彩色衣架） |
 | tryon-gallery / tryon-fit / tryon-fav / tryon-all / tryon-dice / tryon-upload / tryon-keep-bg.jpg | 96 | AI试衣的 3D 图标（整张为渐变底，代码里圆角）：服装、试穿、收藏标签，「全部」分类，随机一个，上传 / 更换，保留原背景 |
 | tryon-person / tryon-outfit.jpg | 360 | AI试衣「试穿」空位的示意插画：人物照片、服装 |

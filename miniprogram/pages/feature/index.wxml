@@ -4,7 +4,7 @@
     <view wx:if="{{s.type==='tabs'}}" class="feature-tabs">
       <text wx:for="{{s.picks}}" wx:key="label" class="{{item.on?'on':''}}" data-section="{{si}}" data-index="{{index}}" bindtap="pick">{{item.label}}</text>
     </view>
-    <view wx:elif="{{s.tab===undefined||s.tab===tab}}" class="biz-card feature-card">
+    <view wx:elif="{{(s.tab===undefined||s.tab===tab)&&(s.type!=='hotlinks'||s.links.length)}}" class="biz-card feature-card">
       <text wx:if="{{s.label}}" class="feature-label">{{s.label}}</text>
       <block wx:if="{{s.type==='upload'}}">
         <view wx:if="{{s.file}}" class="upload-done">
@@ -20,6 +20,14 @@
           <image class="gl gl-24" src="/assets/glyphs/{{s.uploading?'clock-muted':(s.media==='video'?'video-muted-lg':'image-muted-lg')}}.png" />
           <text>{{s.uploading?'上传中…':s.hint}}</text>
         </view>
+        <view wx:if="{{!s.file&&s.samples.length&&art[s.samples[0].art]}}" class="sample-row">
+          <text class="sample-label">没有合适的照片？用示例试试</text>
+          <view class="sample-list">
+            <view wx:for="{{s.samples}}" wx:key="label" class="sample" data-section="{{si}}" data-index="{{index}}" bindtap="sample" hover-class="card-pressed" aria-role="button" aria-label="{{'使用'+item.label}}">
+              <image src="{{art[item.art]}}" mode="aspectFill" />
+            </view>
+          </view>
+        </view>
       </block>
       <block wx:elif="{{s.type==='text'}}">
         <textarea class="feature-text" always-embed disable-default-padding value="{{s.value}}" maxlength="{{s.max}}" placeholder="{{s.placeholder}}" placeholder-class="feature-placeholder" data-section="{{si}}" bindinput="input" />
@@ -31,6 +39,14 @@
       <view wx:elif="{{s.type==='examples'}}" class="feature-chips">
         <text wx:for="{{s.values}}" wx:key="label" class="chip example" data-section="{{si}}" data-index="{{index}}" bindtap="example">{{item.label}}</text>
       </view>
+      <scroll-view wx:elif="{{s.type==='hotlinks'}}" scroll-x enhanced show-scrollbar="{{false}}" class="hot-strip">
+        <view class="hot-row">
+          <view wx:for="{{s.links}}" wx:key="id" class="hot-case" data-section="{{si}}" data-index="{{index}}" bindtap="useHotLink" hover-class="card-pressed" aria-role="button" aria-label="{{'填入链接：'+item.title}}">
+            <image src="{{item.cover}}" mode="aspectFill" lazy-load />
+            <text>{{item.title}}</text>
+          </view>
+        </view>
+      </scroll-view>
       <scroll-view wx:elif="{{s.type==='styles'}}" scroll-x enhanced show-scrollbar="{{false}}" class="style-strip">
         <view class="style-row">
           <view wx:for="{{s.picks}}" wx:key="label" class="style-card {{item.on?'on':''}}" data-section="{{si}}" data-index="{{index}}" bindtap="pick" aria-role="button" aria-label="{{item.label}}">
