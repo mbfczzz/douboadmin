@@ -4,7 +4,7 @@
     <view wx:if="{{s.type==='tabs'}}" class="feature-tabs">
       <text wx:for="{{s.picks}}" wx:key="label" class="{{item.on?'on':''}}" data-section="{{si}}" data-index="{{index}}" bindtap="pick">{{item.label}}</text>
     </view>
-    <view wx:elif="{{(s.tab===undefined||s.tab===tab)&&(s.type!=='hotlinks'||s.links.length)}}" class="biz-card feature-card">
+    <view wx:elif="{{(s.tab===undefined||s.tab===tab)}}" class="biz-card feature-card">
       <text wx:if="{{s.label}}" class="feature-label">{{s.label}}</text>
       <block wx:if="{{s.type==='upload'}}">
         <view wx:if="{{s.file}}" class="upload-done">
@@ -39,14 +39,6 @@
       <view wx:elif="{{s.type==='examples'}}" class="feature-chips">
         <text wx:for="{{s.values}}" wx:key="label" class="chip example" data-section="{{si}}" data-index="{{index}}" bindtap="example">{{item.label}}</text>
       </view>
-      <scroll-view wx:elif="{{s.type==='hotlinks'}}" scroll-x enhanced show-scrollbar="{{false}}" class="hot-strip">
-        <view class="hot-row">
-          <view wx:for="{{s.links}}" wx:key="id" class="hot-case" data-section="{{si}}" data-index="{{index}}" bindtap="useHotLink" hover-class="card-pressed" aria-role="button" aria-label="{{'填入链接：'+item.title}}">
-            <image src="{{item.cover}}" mode="aspectFill" lazy-load />
-            <text>{{item.title}}</text>
-          </view>
-        </view>
-      </scroll-view>
       <scroll-view wx:elif="{{s.type==='styles'}}" scroll-x enhanced show-scrollbar="{{false}}" class="style-strip">
         <view class="style-row">
           <view wx:for="{{s.picks}}" wx:key="label" class="style-card {{item.on?'on':''}}" data-section="{{si}}" data-index="{{index}}" bindtap="pick" aria-role="button" aria-label="{{item.label}}">

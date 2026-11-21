@@ -14,7 +14,6 @@ export type Section = Base & (
   | { type: "upload"; label?: string; media: "image" | "video"; hint: string; required?: string; samples?: Pick[] }
   | { type: "text"; label?: string; placeholder: string; max: number; required?: string }
   | { type: "examples"; label: string; values: { label: string; text: string }[] } // fill the text above
-  | { type: "hotlinks"; label: string; keyword: string } // real hot videos; a tap fills the link above
   | { type: "chips"; label: string; values: string[]; multi?: boolean }
   | { type: "styles"; label: string; values: Pick[] } // picture cards
   | { type: "rows"; items: { label: string; value: string; options: string[]; icon?: string }[]; grid?: boolean }
@@ -105,7 +104,6 @@ export const CONFIGS: Record<string, FeatureConfig> = {
     sections: [
       { type: "tabs", values: ["短视频链接", "本地视频"] },
       { type: "text", placeholder: "粘贴视频链接，支持抖音等主流平台", max: 500, tab: 0, required: "请先粘贴视频链接" },
-      { type: "hotlinks", label: "热门视频示例，点一下填入链接", keyword: "热门", tab: 0 },
       { type: "upload", media: "video", hint: "点击上传本地视频（50MB 以内）", tab: 1, required: "请先上传本地视频" },
       // Picture cards showing what each option does (Codex art), not bare words.
       { type: "styles", label: "二创方式", values: [{ label: "视频画面二创", art: "remixScene" }, { label: "提取音频二创", art: "remixAudio" }, { label: "提取文案二创", art: "remixText" }] },

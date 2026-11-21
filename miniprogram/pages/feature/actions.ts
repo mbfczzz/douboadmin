@@ -10,7 +10,6 @@ export type View = Section & {
   value?: string;
   picks?: { label: string; on: boolean; art?: string }[];
   target?: number;
-  links?: { id: string; cover: string; title: string; link: string }[];
   file?: Upload | null;
   uploading?: boolean;
 };

@@ -3,7 +3,7 @@ const assert = require("node:assert/strict");
 const { harness } = require("./harness.cjs");
 
 // Interface-first feature pages (pages/feature): fill-in examples.
-test("视频唱歌 / 数字人 / 视频二创 offer examples that fill what the user would give", async () => {
+test("视频唱歌 and 数字人 offer examples that fill what the user would give; 视频二创 has no hot-video strip", async () => {
   // 视频唱歌: a sample face photo fills the upload.
   const h = harness();
   h.api.request = async (p) => (p === "/config" ? { models: [], uiArt: {} } : {});
@@ -22,18 +22,10 @@ test("视频唱歌 / 数字人 / 视频二创 offer examples that fill what the 
   const ex = avatar.data.sections.findIndex((s) => s.type === "examples");
   avatar.example({ currentTarget: { dataset: { section: ex, index: 1 } } });
   assert.match(avatar.data.sections.find((s) => s.type === "text").value, /保温杯/);
-  // 视频二创: real hot videos; a tap fills the link box.
-  const r = harness();
-  await r.api.signIn();
-  r.api.request = async (p) => (p.startsWith("/hot/videos?") ? { items: [{ id: "7301", cover: "https://c/1.jpg", title: "热门一", sourceUrl: "https://www.douyin.com/video/7301" }, { id: "7302", cover: "", title: "无封面" }] } : { models: [], uiArt: {} });
-  const remix = r.page("feature");
+  // 视频二创: no hot-video strip under the link box.
+  const remix = harness().page("feature");
   remix.onLoad({ key: "remix" });
-  remix.onShow();
-  await new Promise((resolve) => setTimeout(resolve, 0));
-  const hot = remix.data.sections.findIndex((s) => s.type === "hotlinks");
-  assert.deepEqual(remix.data.sections[hot].links.map((l) => l.id), ["7301"]);
-  remix.useHotLink({ currentTarget: { dataset: { section: hot, index: 0 } } });
-  assert.equal(remix.data.sections.find((s) => s.type === "text").value, "https://www.douyin.com/video/7301");
+  assert.ok(!remix.data.sections.some((s) => s.type === "hotlinks"));
 });
 
 test("视频二创 shows each 二创方式 and 画面特效 as a picture card, and loads just those pictures", async () => {

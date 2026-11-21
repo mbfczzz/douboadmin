@@ -5,7 +5,7 @@ import { CONFIGS } from "./configs";
 import type { Section } from "./configs";
 import { featureActions } from "./actions";
 import type { View } from "./actions";
-import { exampleHandlers, loadHotLinks } from "./examples";
+import { exampleHandlers } from "./examples";
 
 // Interface-first feature page (see configs.ts): everything up to the final
 // action works (actions.ts); that one checks the inputs, then says it is
@@ -20,7 +20,6 @@ function views(sections: Section[]): View[] {
     if (s.type === "text") return { ...s, value: "" };
     if (s.type === "upload") return { ...s, file: null, uploading: false };
     if (s.type === "examples") return { ...s, target: text }; // examples fill the page's text box
-    if (s.type === "hotlinks") return { ...s, target: text, links: [] };
     return s;
   });
 }
@@ -42,7 +41,6 @@ Page({
       if (s.type === "upload") s.samples?.forEach((v) => v.art && names.add(v.art));
     }
     if (names.size) showArt(this, (art) => ({ art: Object.fromEntries([...names].map((n) => [n, art[n as keyof Art]])) }));
-    void loadHotLinks(this);
   },
   pick(e: WechatMiniprogram.TouchEvent) {
     const { section, index } = e.currentTarget.dataset as { section: number; index: number };
