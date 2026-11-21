@@ -1,4 +1,5 @@
 import { enterPage } from "../../utils/api";
+import { showArt } from "../../utils/ui-art";
 import { SORTS, loadCategories, loadOutfits, loadFavorites, toggleFavorite, initFavorites, randomOutfit, refreshPictures } from "./gallery";
 import { fittingHandlers, wearOutfit } from "./fitting";
 import type { Outfit } from "./gallery";
@@ -12,9 +13,9 @@ Page({
   data: {
     tab: "gallery",
     tabs: [
-      { key: "gallery", label: "服装", icon: "image" },
-      { key: "fit", label: "试穿", icon: "user" },
-      { key: "favorites", label: "收藏", icon: "heart" },
+      { key: "gallery", label: "服装", icon: "image", art: "gallery" },
+      { key: "fit", label: "试穿", icon: "user", art: "fit" },
+      { key: "favorites", label: "收藏", icon: "heart", art: "fav" },
     ],
     categories: [] as { name: string; count: number; image?: string }[],
     allCount: 0,
@@ -36,6 +37,8 @@ Page({
     garmentBusy: false,
     keepBackground: true,
     starting: false,
+    // Codex pictures (media/ui-art/tryon-*); each spot keeps its icon until one arrives.
+    art: {} as Record<string, string>,
   },
   galleryRevision: 0,
   galleryPage: 1,
@@ -48,6 +51,12 @@ Page({
   },
   onShow() {
     enterPage(this);
+    showArt(this, (a) => ({
+      art: {
+        gallery: a.tryonGallery, fit: a.tryonFit, fav: a.tryonFav, all: a.tryonAll, dice: a.tryonDice, upload: a.tryonUpload,
+        keepBg: a.tryonKeepBg, person: a.tryonPerson, outfit: a.tryonOutfit, emptyFav: a.tryonEmptyFav, emptyRack: a.tryonEmptyRack,
+      },
+    }));
     if (this.loaded) {
       void refreshPictures(this);
       return;

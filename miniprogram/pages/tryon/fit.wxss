@@ -40,6 +40,26 @@
   width: 100%;
   height: 100%;
 }
+/* The slot's picture: a soft illustration of what goes there, text on top. */
+.slot-art {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+.has-art .slot-icon {
+  display: none;
+}
+.has-art .slot-text {
+  top: auto;
+  bottom: 12px;
+  padding: 4px 12px;
+  border-radius: var(--ui-radius-pill);
+  font-weight: 600;
+  color: #fff;
+  background: #00000080;
+}
 .slot-icon,
 .slot-text {
   position: absolute;

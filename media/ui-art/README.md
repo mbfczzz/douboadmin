@@ -43,6 +43,10 @@ Codex 生成的实拍风格深色图片，用于小程序界面装饰。所有�
 | hub-mix.jpg | 480 | 创作入口：AI混剪卡片 |
 | hub-remake.jpg | 480 | 创作入口：一键复刻卡片 |
 | tool-*.jpg | 132 | 创作入口功能图标（底色与页面同为 #0f0f11）：ad 剧情带货、shop 探店视频、avatar 数字人、article 图文成片、sing 视频唱歌、remix 视频二创、extract 文案提取、idphoto AI证件照、comic 漫画推文、tryon AI试衣（desub、more、hot、library、works、tasks 已不在创作页使用） |
+| bg-tryon.jpg | 750 | AI试衣页顶部背景（服装店里的彩色衣架） |
+| tryon-gallery / tryon-fit / tryon-fav / tryon-all / tryon-dice / tryon-upload / tryon-keep-bg.jpg | 96 | AI试衣的 3D 图标（整张为渐变底，代码里圆角）：服装、试穿、收藏标签，「全部」分类，随机一个，上传 / 更换，保留原背景 |
+| tryon-person / tryon-outfit.jpg | 360 | AI试衣「试穿」空位的示意插画：人物照片、服装 |
+| tryon-empty-fav / tryon-empty-rack.jpg | 264 | AI试衣空状态插画（底色 #0f0f11）：没有收藏、暂无服装 |
 | style-*.jpg | 240 | 图文成片、漫画推文的画面风格卡片：general 通用、romance 都市言情、xianxia 仙侠古风、suspense 悬疑惊悚、guoman 国漫 |
 
 ## 目前的加载方式

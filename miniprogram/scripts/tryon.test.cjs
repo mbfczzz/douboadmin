@@ -9,6 +9,7 @@ const outfit = (id, extra = {}) => ({ id, title: "服装" + id, category: "春�
 function tryon(reply) {
   const h = harness(), calls = [];
   h.api.request = async (path, method) => {
+    if (path === "/config") return { models: [], uiArt: {} }; // the page's pictures
     calls.push([path, method || "GET"]);
     return reply(path, method);
   };

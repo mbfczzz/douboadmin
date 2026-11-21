@@ -262,7 +262,10 @@ console.log(
 // Pictures over words: AI试衣 tab icons, category chips with their first
 // outfit, icons on 更换 / 服装库 / 上传; editor reference tiles numbered 图1 /
 // 视频1 as @ mentions count them: 1,048,307 B. 1023 -> 1024 KiB.
-const budget = 1024 * 1024;
+// AI试衣 with Codex art (loaded from OSS, not packaged): 3D tab / chip /
+// action icons, slot illustrations, empty-state pictures, boutique backdrop;
+// each spot keeps its icon until its picture arrives: 1,051,687 B. 1024 -> 1028 KiB.
+const budget = 1028 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

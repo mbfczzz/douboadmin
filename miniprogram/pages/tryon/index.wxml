@@ -2,7 +2,7 @@
   <view class="outfit" data-id="{{item.id}}" bindtap="openPreview" hover-class="card-pressed" aria-role="button" aria-label="{{item.title}}">
     <view class="outfit-photo">
       <image wx:if="{{item.image}}" src="{{item.image}}" mode="aspectFill" lazy-load />
-      <view class="outfit-wear" data-id="{{item.id}}" catchtap="wear" aria-role="button" aria-label="试穿这件"><t-icon name="user-add" size="14" />试穿</view>
+      <view class="outfit-wear" data-id="{{item.id}}" catchtap="wear" aria-role="button" aria-label="试穿这件"><image wx:if="{{art.fit}}" class="art-icon art-14" src="{{art.fit}}" /><t-icon wx:else name="user-add" size="14" />试穿</view>
       <view class="outfit-heart" data-id="{{item.id}}" catchtap="favorite" aria-role="button" aria-label="{{favored[item.id]?'取消收藏':'收藏'}}">
         <image class="gl gl-16" src="/assets/glyphs/{{favored[item.id]?'heart-filled-pink':'favorites'}}.png" />
       </view>
@@ -13,32 +13,34 @@
 </template>
 
 <nav-bar title="AI试衣" back />
-<view class="subpage tryon-page">
+<view class="subpage has-backdrop tryon-page">
+  <page-backdrop name="bgTryon" />
   <view class="tryon-tabs">
-    <view wx:for="{{tabs}}" wx:key="key" class="tryon-tab {{tab===item.key?'on':''}}" data-key="{{item.key}}" bindtap="switchTab" aria-role="tab"><t-icon name="{{item.icon}}" size="16" />{{item.label}}<text wx:if="{{item.key==='fit'&&tab!=='fit'&&(person||garment)}}" class="tab-count">{{(person?1:0)+(garment?1:0)}}/2</text></view>
+    <view wx:for="{{tabs}}" wx:key="key" class="tryon-tab {{tab===item.key?'on':''}}" data-key="{{item.key}}" bindtap="switchTab" aria-role="tab"><image wx:if="{{art[item.art]}}" class="art-icon art-20" src="{{art[item.art]}}" /><t-icon wx:else name="{{item.icon}}" size="16" />{{item.label}}<text wx:if="{{item.key==='fit'&&tab!=='fit'&&(person||garment)}}" class="tab-count">{{(person?1:0)+(garment?1:0)}}/2</text></view>
   </view>
 
   <block wx:if="{{tab==='gallery'}}">
     <scroll-view wx:if="{{categories.length}}" scroll-x enhanced show-scrollbar="{{false}}" class="tryon-chips">
       <view class="chip-row">
-        <view class="chip {{category===''?'on':''}}" data-name="" bindtap="chooseCategory"><view class="chip-art"><t-icon name="app" size="14" /></view>全部</view>
+        <view class="chip {{category===''?'on':''}}" data-name="" bindtap="chooseCategory"><image wx:if="{{art.all}}" class="chip-art" src="{{art.all}}" mode="aspectFill" /><view wx:else class="chip-art"><t-icon name="app" size="14" /></view>全部</view>
         <view wx:for="{{categories}}" wx:key="name" class="chip {{category===item.name?'on':''}}" data-name="{{item.name}}" bindtap="chooseCategory"><image wx:if="{{item.image}}" class="chip-art" src="{{item.image}}" mode="aspectFill" />{{item.name}}</view>
       </view>
     </scroll-view>
     <view class="tryon-bar">
       <text class="tryon-count">{{galleryError||galleryLoading&&!outfits.length?'':'共'+total+'项'}}</text>
-      <view class="tryon-tool" bindtap="chooseSort" aria-role="button"><t-icon name="order-descending" size="14" />{{sortLabel}}<view class="tryon-caret"><t-icon name="chevron-down" size="12" /></view></view>
-      <view class="tryon-tool {{randomBusy?'is-busy':''}}" bindtap="random" aria-role="button"><t-icon name="refresh" size="14" />随机一个</view>
+      <view class="tryon-tool" bindtap="chooseSort" aria-role="button">{{sortLabel}}<view class="tryon-caret"><t-icon name="chevron-down" size="12" /></view></view>
+      <view class="tryon-tool {{randomBusy?'is-busy':''}}" bindtap="random" aria-role="button"><image wx:if="{{art.dice}}" class="art-icon art-18" src="{{art.dice}}" /><t-icon wx:else name="refresh" size="14" />随机一个</view>
     </view>
     <view wx:if="{{galleryError}}" class="biz-error" bindtap="retryGallery">{{galleryError}} · 点击重试</view>
     <view class="outfit-grid">
-      <template wx:for="{{outfits}}" wx:key="id" is="outfit" data="{{item, favored}}" />
+      <template wx:for="{{outfits}}" wx:key="id" is="outfit" data="{{item, favored, art}}" />
       <block wx:if="{{galleryLoading&&!outfits.length}}">
         <view wx:for="{{[0,1,2,3]}}" wx:key="*this" class="outfit"><view class="outfit-photo skeleton" /></view>
       </block>
     </view>
     <view wx:if="{{!galleryLoading&&!galleryError&&!outfits.length}}" class="tryon-empty">
-      <view class="empty-icon"><t-icon name="image" size="28" /></view>
+      <image wx:if="{{art.emptyRack}}" class="empty-art" src="{{art.emptyRack}}" mode="aspectFit" />
+      <view wx:else class="empty-icon"><t-icon name="image" size="28" /></view>
       <text class="biz-note">暂无服装，可以上传自己的服装图试穿</text>
       <text class="empty-action" data-key="fit" bindtap="switchTab">去试穿</text>
     </view>
@@ -54,12 +56,13 @@
           <image class="fit-photo" src="{{person.url}}" mode="aspectFill" />
           <view wx:if="{{!starting}}" class="fit-remove" catchtap="removePerson" aria-role="button" aria-label="删除人物照片">×</view>
         </view>
-        <view wx:else class="fit-slot fit-add {{personBusy?'is-busy':''}}" bindtap="choosePerson" aria-role="button">
+        <view wx:else class="fit-slot fit-add {{art.person?'has-art':''}} {{personBusy?'is-busy':''}}" bindtap="choosePerson" aria-role="button">
+          <image wx:if="{{art.person}}" class="slot-art" src="{{art.person}}" mode="aspectFill" />
           <view class="slot-icon"><t-icon name="{{personBusy?'time':'user-add'}}" size="28" /></view>
           <text class="slot-text">{{personBusy?'上传中…':'上传人物照'}}</text>
         </view>
         <view class="fit-actions">
-          <text wx:if="{{person}}" class="fit-link {{personBusy?'is-busy':''}}" bindtap="choosePerson"><t-icon name="refresh" size="14" />{{personBusy?'上传中':'更换'}}</text>
+          <text wx:if="{{person}}" class="fit-link {{personBusy?'is-busy':''}}" bindtap="choosePerson"><image wx:if="{{art.upload}}" class="art-icon art-16" src="{{art.upload}}" /><t-icon wx:else name="refresh" size="14" />{{personBusy?'上传中':'更换'}}</text>
           <text wx:else class="fit-tip">正面、光线清晰</text>
         </view>
       </view>
@@ -70,18 +73,20 @@
           <view wx:if="{{!starting}}" class="fit-remove" catchtap="removeGarment" aria-role="button" aria-label="移除服装">×</view>
           <text wx:if="{{garment.title}}" class="fit-name">{{garment.title}}</text>
         </view>
-        <view wx:else class="fit-slot fit-add" bindtap="browse" aria-role="button">
+        <view wx:else class="fit-slot fit-add {{art.outfit?'has-art':''}}" bindtap="browse" aria-role="button">
+          <image wx:if="{{art.outfit}}" class="slot-art" src="{{art.outfit}}" mode="aspectFill" />
           <view class="slot-icon"><t-icon name="image" size="28" /></view>
           <text class="slot-text">从库中选</text>
         </view>
         <view class="fit-actions">
-          <text wx:if="{{garment}}" class="fit-link" bindtap="browse"><t-icon name="image" size="14" />服装库</text>
-          <text class="fit-link {{garmentBusy?'is-busy':''}}" bindtap="uploadGarment"><t-icon name="upload" size="14" />{{garmentBusy?'上传中':'上传'}}</text>
+          <text wx:if="{{garment}}" class="fit-link" bindtap="browse"><image wx:if="{{art.gallery}}" class="art-icon art-16" src="{{art.gallery}}" /><t-icon wx:else name="image" size="14" />服装库</text>
+          <text class="fit-link {{garmentBusy?'is-busy':''}}" bindtap="uploadGarment"><image wx:if="{{art.upload}}" class="art-icon art-16" src="{{art.upload}}" /><t-icon wx:else name="upload" size="14" />{{garmentBusy?'上传中':'上传'}}</text>
         </view>
       </view>
     </view>
     <view class="biz-card fit-option">
-      <view class="option-icon"><t-icon name="image" size="20" /></view>
+      <image wx:if="{{art.keepBg}}" class="option-icon" src="{{art.keepBg}}" mode="aspectFill" />
+      <view wx:else class="option-icon"><t-icon name="image" size="20" /></view>
       <view class="option-text">
         <text>保留原背景与光线</text>
         <text class="option-note">{{keepBackground?'只换衣服，场景不变':'换成干净的影棚背景'}}</text>
@@ -94,13 +99,14 @@
 
   <block wx:else>
     <view class="outfit-grid">
-      <template wx:for="{{favorites}}" wx:key="id" is="outfit" data="{{item, favored}}" />
+      <template wx:for="{{favorites}}" wx:key="id" is="outfit" data="{{item, favored, art}}" />
       <block wx:if="{{favoritesLoading&&!favorites.length}}">
         <view wx:for="{{[0,1]}}" wx:key="*this" class="outfit"><view class="outfit-photo skeleton" /></view>
       </block>
     </view>
     <view wx:if="{{!favoritesLoading&&!favorites.length}}" class="tryon-empty">
-      <view class="empty-icon"><t-icon name="heart" size="28" /></view>
+      <image wx:if="{{art.emptyFav}}" class="empty-art" src="{{art.emptyFav}}" mode="aspectFit" />
+      <view wx:else class="empty-icon"><t-icon name="heart" size="28" /></view>
       <text class="biz-note">还没有收藏，点服装图上的 ♡ 收藏</text>
       <text class="empty-action" bindtap="browse">去逛逛</text>
     </view>
@@ -117,7 +123,7 @@
     </view>
     <text wx:if="{{preview.description}}" class="sheet-desc">{{preview.description}}</text>
     <view class="sheet-actions">
-      <button class="biz-action biz-secondary sheet-fav" data-id="{{preview.id}}" bindtap="favorite"><view class="fav-icon {{favored[preview.id]?'on':''}}"><t-icon name="{{favored[preview.id]?'heart-filled':'heart'}}" size="18" /></view>{{favored[preview.id]?'已收藏':'收藏'}}</button>
+      <button class="biz-action biz-secondary sheet-fav" data-id="{{preview.id}}" bindtap="favorite"><image wx:if="{{art.fav}}" class="art-icon art-20 {{favored[preview.id]?'':'is-off'}}" src="{{art.fav}}" /><view wx:else class="fav-icon {{favored[preview.id]?'on':''}}"><t-icon name="{{favored[preview.id]?'heart-filled':'heart'}}" size="18" /></view>{{favored[preview.id]?'已收藏':'收藏'}}</button>
       <button class="biz-action sheet-wear" data-id="{{preview.id}}" bindtap="wear">试穿这件</button>
     </view>
   </view>

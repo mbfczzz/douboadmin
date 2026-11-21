@@ -22,6 +22,38 @@
   line-height: 20px;
   color: var(--ui-muted);
 }
+/* Codex 3D icons (full-bleed tiles, rounded here). */
+.art-icon {
+  flex: none;
+  border-radius: 28%;
+}
+.art-14 {
+  width: 14px;
+  height: 14px;
+}
+.art-16 {
+  width: 16px;
+  height: 16px;
+}
+.art-18 {
+  width: 18px;
+  height: 18px;
+}
+.art-20 {
+  width: 20px;
+  height: 20px;
+}
+.art-icon.is-off {
+  opacity: 0.45;
+  filter: grayscale(1);
+}
+/* Drawn on the page colour; the edge fades so no square shows over the backdrop. */
+.empty-art {
+  width: 132px;
+  height: 132px;
+  -webkit-mask-image: radial-gradient(circle, #000 52%, transparent 71%);
+  mask-image: radial-gradient(circle, #000 52%, transparent 71%);
+}
 .tab-count {
   margin-left: 4px;
   padding: 0 6px;
@@ -196,8 +228,9 @@
   padding: 8px 22px;
   border-radius: var(--ui-radius-pill);
   font-size: 14px;
-  color: var(--ui-text);
-  background: var(--ui-field);
+  font-weight: 600;
+  color: var(--ui-on-brand);
+  background: var(--ui-primary);
 }
 .tryon-more {
   display: block;

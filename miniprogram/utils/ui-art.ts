@@ -59,6 +59,19 @@ const NAMES = {
   toolIdphoto: "tool-idphoto",
   toolComic: "tool-comic",
   toolTryon: "tool-tryon",
+  // AI试衣 (pages/tryon): backdrop, 3D icons, slot and empty-state pictures
+  bgTryon: "bg-tryon", // AI试衣 top
+  tryonGallery: "tryon-gallery",
+  tryonFit: "tryon-fit",
+  tryonFav: "tryon-fav",
+  tryonAll: "tryon-all",
+  tryonDice: "tryon-dice",
+  tryonUpload: "tryon-upload",
+  tryonKeepBg: "tryon-keep-bg",
+  tryonPerson: "tryon-person",
+  tryonOutfit: "tryon-outfit",
+  tryonEmptyFav: "tryon-empty-fav",
+  tryonEmptyRack: "tryon-empty-rack",
   // 图文成片 / 漫画推文 picture-style cards
   styleGeneral: "style-general",
   styleRomance: "style-romance",
