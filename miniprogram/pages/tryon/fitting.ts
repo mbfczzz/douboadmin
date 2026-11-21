@@ -53,6 +53,18 @@ export const fittingHandlers = {
     const row = await pickImage(this, "garmentBusy");
     if (row) this.setData({ garment: { asset: row.id, url: media(row.data.url), title: "", description: "" } });
   },
+  // The outfit slot: one tap, two ways — the library (服装 tab) or a picture from the phone.
+  async chooseGarment(this: Page) {
+    if (this.data.starting || this.data.garmentBusy) return;
+    try {
+      const { tapIndex } = await wx.showActionSheet({ itemList: ["从服装库中选", "自己上传"] });
+      if (this.destroyed) return;
+      if (tapIndex === 0) this.setData({ tab: "gallery" });
+      else await fittingHandlers.uploadGarment.call(this);
+    } catch {
+      // closed without choosing
+    }
+  },
   removeGarment(this: Page) {
     if (!this.data.starting) this.setData({ garment: null });
   },

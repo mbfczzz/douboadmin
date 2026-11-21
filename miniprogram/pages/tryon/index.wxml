@@ -68,19 +68,19 @@
       </view>
       <view class="fit-col">
         <view class="fit-label"><text class="step">2</text>服装</view>
-        <view wx:if="{{garment}}" class="fit-slot">
+        <view wx:if="{{garment}}" class="fit-slot" bindtap="chooseGarment" aria-role="button" aria-label="更换服装">
           <image class="fit-photo" src="{{garment.url}}" mode="aspectFill" />
           <view wx:if="{{!starting}}" class="fit-remove" catchtap="removeGarment" aria-role="button" aria-label="移除服装">×</view>
           <text wx:if="{{garment.title}}" class="fit-name">{{garment.title}}</text>
         </view>
-        <view wx:else class="fit-slot fit-add {{art.outfit?'has-art':''}}" bindtap="browse" aria-role="button">
+        <view wx:else class="fit-slot fit-add {{art.outfit?'has-art':''}} {{garmentBusy?'is-busy':''}}" bindtap="chooseGarment" aria-role="button" aria-label="选择服装：从服装库中选或自己上传">
           <image wx:if="{{art.outfit}}" class="slot-art" src="{{art.outfit}}" mode="aspectFill" />
           <view class="slot-icon"><t-icon name="image" size="28" /></view>
-          <text class="slot-text">从库中选</text>
+          <text class="slot-text">{{garmentBusy?'上传中…':'选择服装'}}</text>
         </view>
         <view class="fit-actions">
-          <text wx:if="{{garment}}" class="fit-link" bindtap="browse"><image wx:if="{{art.gallery}}" class="art-icon art-16" src="{{art.gallery}}" /><t-icon wx:else name="image" size="14" />服装库</text>
-          <text class="fit-link {{garmentBusy?'is-busy':''}}" bindtap="uploadGarment"><image wx:if="{{art.upload}}" class="art-icon art-16" src="{{art.upload}}" /><t-icon wx:else name="upload" size="14" />{{garmentBusy?'上传中':'上传'}}</text>
+          <text wx:if="{{garment}}" class="fit-link {{garmentBusy?'is-busy':''}}" bindtap="chooseGarment"><image wx:if="{{art.upload}}" class="art-icon art-16" src="{{art.upload}}" /><t-icon wx:else name="refresh" size="14" />{{garmentBusy?'上传中':'更换'}}</text>
+          <text wx:else class="fit-tip">服装库或自己上传</text>
         </view>
       </view>
     </view>

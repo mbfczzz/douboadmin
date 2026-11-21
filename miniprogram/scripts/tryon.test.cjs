@@ -183,3 +183,25 @@ test("a preset's task says which preset it came from (功能使用)", () => {
   assert.equal(creationInput({ ...data, feature: "tryon" }, { modes: [] }).feature, "tryon");
   assert.equal(creationInput({ ...data, feature: "" }, { modes: [] }).feature, undefined);
 });
+
+test("the outfit slot offers both ways in one tap: the library or a picture from the phone", async () => {
+  const { h, page } = tryon(() => ({ items: [], total: 0 }));
+  let pick = 0;
+  h.wx.showActionSheet = async (o) => {
+    assert.deepEqual(plain(o.itemList), ["从服装库中选", "自己上传"]);
+    return { tapIndex: pick };
+  };
+  page.setData({ tab: "fit" });
+  await page.chooseGarment();
+  assert.equal(page.data.tab, "gallery");
+  page.setData({ tab: "fit" });
+  pick = 1;
+  h.api.chooseMediaFile = async () => ({ path: "tmp/dress.jpg", name: "dress.jpg" });
+  h.api.upload = async () => ({ id: "dress", data: { url: "https://oss/d.jpg", type: "image/jpeg" } });
+  await page.chooseGarment();
+  assert.equal(page.data.tab, "fit");
+  assert.equal(page.data.garment.asset, "dress");
+  h.wx.showActionSheet = async () => { throw { errMsg: "showActionSheet:fail cancel" }; };
+  await page.chooseGarment(); // closed: nothing changes
+  assert.equal(page.data.garment.asset, "dress");
+});
