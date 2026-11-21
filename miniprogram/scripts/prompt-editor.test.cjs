@@ -18,17 +18,15 @@ test("the prompt turns into text and inline thumbnails, and back into the same t
     { insert: { image: "https://fixture.test/1.png" }, attributes: { alt: "@图片1", width: "22px", height: "22px" } },
     { insert: " 在" },
     { insert: { image: "https://fixture.test/c1.jpg" }, attributes: { alt: "@视频1", width: "22px", height: "22px" } },
-    { insert: " 里跳舞，" },
-    { insert: { image: "/assets/glyphs/image-muted.png" }, attributes: { alt: "@图片9", width: "22px", height: "22px" } },
-    { insert: " 不存在\n" },
+    { insert: " 里跳舞，@图片9 不存在\n" },
   ]);
   assert.equal(fromDelta(ops, assets), prompt);
   // Spaces the editor keeps as non-breaking come back as plain spaces.
   assert.equal(fromDelta([{ insert: "@图片1\u00a02个人\n" }], assets), "@图片1 2个人");
-  // If the editor drops alt, the thumbnail address still identifies it;
-  // a video without a cover uses the video glyph.
+  // If the editor drops alt, the thumbnail address still identifies it.
+  // A video without a cover stays text: phones' <editor> cannot load package files.
   assert.equal(fromDelta([{ insert: "看" }, { insert: { image: "https://fixture.test/2.png" } }, { insert: "\n" }], assets), "看@图片2");
-  assert.equal(plain(toDelta("@视频1", [video(1)]))[0].insert.image, "/assets/glyphs/video-muted.png");
+  assert.deepEqual(plain(toDelta("@视频1", [video(1)])), [{ insert: "@视频1\n" }]);
   assert.equal(fromDelta(plain(toDelta("＠图片1", assets)), assets), "@图片1", "a full-width ＠ becomes @");
 });
 

@@ -29,13 +29,13 @@ test("a prompt splits into text runs and reference chips; one without its file i
   ]);
 });
 
-test("the editor shows a glyph for a mention whose picture is not uploaded yet, and reads it back", () => {
+test("the editor never inserts a package file (a broken box on phones): no picture yet stays text", () => {
   const h = harness();
   const { toDelta, fromDelta } = h.service("../utils/prompt-delta");
   const ops = toDelta("将@图片1中的人物和@视频1", []);
-  assert.equal(ops[1].insert.image, "/assets/glyphs/image-muted.png");
-  assert.equal(ops[3].insert.image, "/assets/glyphs/video-muted.png");
+  assert.equal(JSON.stringify(ops), JSON.stringify([{ insert: "将@图片1中的人物和@视频1\n" }]));
   assert.equal(fromDelta(ops, []), "将@图片1中的人物和@视频1");
+  assert.doesNotMatch(fs.readFileSync("utils/prompt-delta.ts", "utf8"), /\/assets\//);
 });
 
 test("every screen that shows @图片 / @视频 draws them as chips", () => {
