@@ -40,7 +40,7 @@ test("the editor never inserts a package file (a broken box on phones): no pictu
 
 test("every screen that shows @图片 / @视频 draws them as chips", () => {
   const read = (f) => fs.readFileSync(f, "utf8");
-  for (const f of ["pages/task-detail/index.wxml", "pages/shared-work/index.wxml", "pages/template-detail/index.wxml", "pages/agent/index.wxml"])
+  for (const f of ["pages/task-detail/index.wxml", "pages/shared-work/index.wxml", "pages/template-detail/index.wxml"])
     assert.match(read(f), /^<wxs module="(refs|chips)" src="..\/..\/utils\/mentions.wxs" \/>/, f);
   const agent = read("pages/agent/parts/messages.wxml");
   for (const text of ["line.text", "shot.scene", "item.plan.prompt"]) assert.ok(agent.includes(`refs.marks(${text},thumbs)`), text);
@@ -64,6 +64,8 @@ test("task detail: tapping a video chip plays it, an image chip opens the galler
   page.previewChip({ currentTarget: { dataset: { id: "img1" } } });
   assert.deepEqual(played, ["https://fixture.test/v1"]);
   assert.deepEqual(shown, ["https://fixture.test/1"]);
+  // The 参考素材 tiles use the same handler, so a video tile plays too.
+  assert.match(fs.readFileSync("pages/task-detail/index.wxml", "utf8"), /class="asset-row" wx:for="\{\{assets\}\}" wx:key="id" data-id="\{\{item.id\}\}" bindtap="previewChip"/);
 });
 
 // On devices WXS regex support differs; the parser must not need getRegExp,
@@ -94,3 +96,16 @@ test("each reference tile is numbered the way @ mentions count it", () => {
   const wxml = fs.readFileSync("pages/create/index.wxml", "utf8");
   assert.match(wxml, /class="reference-no">\{\{refs\.label\(assets,index\)\}\}/);
 });
+
+// An <include>d file sees only its own wxs modules and imported templates:
+// declared in agent/index.wxml, the reply lines found no prompt-text template
+// and every Agent reply showed empty on phones.
+test("Agent's included messages bind the mention module and the chip template themselves", () => {
+  const { wxmlToJs } = require("miniprogram-compiler");
+  const code = wxmlToJs(process.cwd(), { wxmlList: ["pages/agent/index.wxml", "pages/agent/parts/messages.wxml", "pages/agent/parts/projects.wxml", "pages/agent/parts/models.wxml", "utils/prompt-text.wxml"], wxsList: ["utils/mentions.wxs"] });
+  assert.match(code, /f_\['pages\/agent\/parts\/messages\.wxml'\]\['refs'\]/);
+  const files = Function(`return ${code.match(/var x=(\[[^\]]*\])/)[1]}`)();
+  const entry = code.match(new RegExp(`e_\\[x\\[${files.indexOf("pages/agent/parts/messages.wxml")}\\]\\]=\\{f:m\\d+,j:\\[\\],i:\\[\\],ti:\\[([^\\]]*)\\]`));
+  assert.ok(entry && /prompt-text/.test(files[Number(entry[1].match(/\d+/)[0])]), "messages.wxml imports prompt-text");
+});
+

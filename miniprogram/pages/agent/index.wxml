@@ -1,5 +1,3 @@
-<wxs module="refs" src="../../utils/mentions.wxs" />
-<import src="../../utils/prompt-text.wxml" />
 <nav-bar title="Agent" />
 <view class="agent-page" style="--nav-bottom:{{navBottom}}px">
   <view class="project-bar">

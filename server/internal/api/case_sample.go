@@ -17,9 +17,12 @@ var caseName = regexp.MustCompile(`^(case-(ad|shop)-[a-z0-9]{1,20}|id-[a-z]{1,10
 
 func (a *Server) caseSample(w http.ResponseWriter, r *http.Request) {
 	ctx, user, name := r.Context(), identity(r).ID, r.PathValue("name")
-	file := filepath.Join(a.Config.MediaDir, "ui-art", name+".jpg")
-	info, err := os.Stat(file)
-	if !caseName.MatchString(name) || err != nil {
+	if !caseName.MatchString(name) { // checked before the name touches a path
+		fail(w, 404, "这个案例没有示例图片")
+		return
+	}
+	info, err := os.Stat(filepath.Join(a.Config.MediaDir, "ui-art", name+".jpg"))
+	if err != nil {
 		fail(w, 404, "这个案例没有示例图片")
 		return
 	}

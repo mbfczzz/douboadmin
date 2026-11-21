@@ -1,3 +1,6 @@
+<!-- An included file sees only its own wxs modules and imported templates. -->
+<wxs module="refs" src="../../../utils/mentions.wxs" />
+<import src="../../../utils/prompt-text.wxml" />
 <view wx:for="{{messages}}" wx:key="id" id="m{{item.id}}" class="message {{item.role}}">
   <block wx:if="{{item.role==='user'}}">
     <view wx:if="{{item.files.length}}" class="sent-files">

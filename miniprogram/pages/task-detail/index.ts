@@ -197,7 +197,7 @@ Page({
     const current = String(e.currentTarget.dataset.url || "");
     if (urls.includes(current)) wx.previewImage({ urls, current });
   },
-  // A reference chip in the prompt: images open the gallery, videos play.
+  // A reference (a tile under 参考素材 or a chip in the prompt): images open the gallery, videos play.
   previewChip(e: WechatMiniprogram.TouchEvent) {
     const assets: ReturnType<typeof assetViews> = this.data.assets;
     const a = assets.find((x) => x.id === e.currentTarget.dataset.id);

@@ -90,7 +90,10 @@ Page({
     this.fetching = true;
     try {
       const result = await jobPage(this.data.page, "&excludeChat=true");
-      const jobs = keepImages(this.data.jobs, result.items.filter((j) => j.input.kind !== "chat").map((j) => row(jobView(j))));
+      // Keep the signed addresses already on screen before deriving each
+      // cover from them; a new signature for the same picture would reload
+      // (and blink) every thumbnail on every poll.
+      const jobs = keepImages(this.data.jobs, result.items.filter((j) => j.input.kind !== "chat").map((j) => jobView(j))).map(row);
       if (this.destroyed) return;
       // Nothing in progress: stop polling until the page is shown again.
       if (!jobs.some((j) => j.group === "running")) clearInterval(this.timer);

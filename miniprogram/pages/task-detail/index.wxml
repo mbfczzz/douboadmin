@@ -128,7 +128,7 @@
       <view wx:elif="{{assetError}}" class="error-box" bindtap="loadAssets">{{assetError}}</view>
       <view wx:elif="{{!assets.length}}" class="detail-empty">未添加参考素材</view>
       <view class="asset-grid">
-        <view class="asset-row" wx:for="{{assets}}" wx:key="id" data-url="{{item.data.url}}" bindtap="previewAsset" aria-role="button" aria-label="{{item.label}}">
+        <view class="asset-row" wx:for="{{assets}}" wx:key="id" data-id="{{item.id}}" bindtap="previewChip" aria-role="button" aria-label="{{(item.isVideo?'播放':'查看')+item.label}}">
           <image wx:if="{{item.isImage}}" class="asset-thumb" src="{{item.data.url}}" mode="aspectFill" lazy-load />
           <view wx:elif="{{item.isVideo&&item.data.thumbnailUrl}}" class="asset-video"><image class="asset-thumb" src="{{item.data.thumbnailUrl}}" mode="aspectFill" lazy-load /><image class="gl gl-20 asset-play" src="/assets/glyphs/play-muted.png" /></view>
           <view wx:else class="asset-file"><image class="gl gl-24" src="/assets/glyphs/{{item.kind==='video'?'video-muted':'file-muted'}}.png" /></view>
