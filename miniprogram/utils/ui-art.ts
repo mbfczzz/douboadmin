@@ -90,6 +90,17 @@ const NAMES = {
   icBrowse: "ic-browse", // 先浏览小程序
   icRefresh: "ic-refresh", // 刷新授权状态
   icLogout: "ic-logout", // 退出登录
+  // 视频二创: what each 二创方式 / 画面特效 looks like (pages/feature)
+  remixScene: "remix-scene",
+  remixAudio: "remix-audio",
+  remixText: "remix-text",
+  fxSweep: "fx-sweep",
+  fxCurtain: "fx-curtain",
+  fxDrop: "fx-drop",
+  fxRise: "fx-rise",
+  fxBook: "fx-book",
+  fxDissolve: "fx-dissolve",
+  fxTriple: "fx-triple",
   // 视频唱歌: example face photos that fill the upload (pages/feature)
   sampleFace1: "sample-face-1",
   sampleFace2: "sample-face-2",

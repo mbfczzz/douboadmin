@@ -35,3 +35,19 @@ test("视频唱歌 / 数字人 / 视频二创 offer examples that fill what the 
   remix.useHotLink({ currentTarget: { dataset: { section: hot, index: 0 } } });
   assert.equal(remix.data.sections.find((s) => s.type === "text").value, "https://www.douyin.com/video/7301");
 });
+
+test("视频二创 shows each 二创方式 and 画面特效 as a picture card, and loads just those pictures", async () => {
+  const h = harness(), set = [];
+  h.api.request = async (p) => (p === "/config" ? { models: [], uiArt: {} } : { items: [] });
+  const page = h.page("feature");
+  page.onLoad({ key: "remix" });
+  const cards = page.data.sections.filter((s) => s.type === "styles");
+  assert.deepEqual(cards.map((s) => s.label), ["二创方式", "画面特效（单选）"]);
+  assert.ok(cards.every((s) => s.values.every((v) => v.art)));
+  const setData = page.setData.bind(page);
+  page.setData = (d) => { set.push(d); setData(d); };
+  page.onShow();
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  const art = set.map((d) => d.art).filter(Boolean).at(-1);
+  assert.deepEqual(Object.keys(art).sort(), cards.flatMap((s) => s.values.map((v) => v.art)).sort());
+});

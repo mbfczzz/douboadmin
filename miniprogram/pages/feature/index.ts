@@ -1,5 +1,6 @@
 import { enterPage } from "../../utils/api";
 import { showArt } from "../../utils/ui-art";
+import type { Art } from "../../utils/ui-art";
 import { CONFIGS } from "./configs";
 import type { Section } from "./configs";
 import { featureActions } from "./actions";
@@ -34,11 +35,13 @@ Page({
   },
   onShow() {
     enterPage(this);
-    // Style cards and sample pictures come from the decorative art.
-    showArt(this, (art) => ({
-      art: { styleGeneral: art.styleGeneral, styleRomance: art.styleRomance, styleXianxia: art.styleXianxia, styleSuspense: art.styleSuspense, styleGuoman: art.styleGuoman,
-        sampleFace1: art.sampleFace1, sampleFace2: art.sampleFace2, sampleFace3: art.sampleFace3 },
-    }));
+    // Picture cards and sample pictures: only the art this page names.
+    const names = new Set<string>();
+    for (const s of this.data.sections as View[]) {
+      if (s.type === "styles") s.values.forEach((v) => v.art && names.add(v.art));
+      if (s.type === "upload") s.samples?.forEach((v) => v.art && names.add(v.art));
+    }
+    if (names.size) showArt(this, (art) => ({ art: Object.fromEntries([...names].map((n) => [n, art[n as keyof Art]])) }));
     void loadHotLinks(this);
   },
   pick(e: WechatMiniprogram.TouchEvent) {
