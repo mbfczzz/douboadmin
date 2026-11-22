@@ -140,7 +140,7 @@ func (c *Client) Detail(ctx context.Context, id string) (Video, error) {
 	}
 	v := video(item)
 	if v.ID != id {
-		return Video{}, fmt.Errorf("未找到指定视频")
+		return Video{}, UserError("未找到指定视频")
 	}
 	return v, nil
 }

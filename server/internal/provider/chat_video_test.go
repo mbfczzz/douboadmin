@@ -50,7 +50,7 @@ func TestNamedVideosAreWatchedAndRemembered(t *testing.T) {
 // Without 视频理解 the model is told it cannot see the video (no pretending).
 func TestUnwatchableVideosAreSaidSo(t *testing.T) {
 	_, p, j, _ := directFixture(t, `{}`, 200)
-	if note := p.videoNote(t.Context(), j, "v1", "https://x/v.mp4"); !strings.Contains(note, "视频理解未配置") {
+	if note := p.videoNote(t.Context(), j, "v1", "https://x/v.mp4"); !strings.Contains(note, "暂时看不到这个视频的画面") {
 		t.Fatal(note)
 	}
 }

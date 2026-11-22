@@ -132,7 +132,7 @@ export async function invokeVirtualPayment(
             orderId: row.id,
             platform,
           });
-          const error = virtualFailureError(failure, detail);
+          const error = virtualFailureError(failure);
           if (error) {
             clearPayment(row.id);
             reject(error);

@@ -121,7 +121,7 @@ func (a *Server) retry(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if !j.Retryable {
-		fail(w, 409, "当前任务需核实上游状态，请联系管理员恢复查询")
+		fail(w, 409, "该任务结果正在核实，请稍后查看或联系客服")
 		return
 	}
 	in := j.Input

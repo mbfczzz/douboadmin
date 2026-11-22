@@ -46,7 +46,7 @@ func (a *Server) sendPhoneLoginCode(w http.ResponseWriter, r *http.Request) {
 	}
 	// Authentication never inherits the optional profile-verification switch.
 	if !a.smsReady() {
-		fail(w, 503, "短信登录服务尚未配置，请联系管理员")
+		fail(w, 503, errNotReady.Error())
 		return
 	}
 	if !a.allowAll(w, r, "发送过于频繁，请60秒后再试", limit{"sms-ip:" + clientIP(r), 10}, limit{"sms-phone:" + v.Phone, 1}) {

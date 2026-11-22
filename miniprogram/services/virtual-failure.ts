@@ -18,20 +18,14 @@ const rejected: Record<number, string> = {
   [-15018]: "套餐审核未通过，请联系管理员",
 };
 
+// WeChat's own reason (errMsg) goes to vConsole only (virtual-payment.ts).
 export class VirtualPaymentRejectedError extends Error {
   constructor(
     public code: number,
     message: string,
-    reason = "",
   ) {
-    super(`${message}（错误码 ${code}${reason ? "：" + reason : ""}）`);
+    super(`${message}（错误码 ${code}）`);
   }
-}
-
-// WeChat's reason after the code (detail is already scrubbed of secrets).
-function shortReason(detail: string) {
-  const text = detail.replace(/^requestVirtualPayment:\s*fail\s*:?\s*/i, "").trim();
-  return text === "微信未返回错误说明" ? "" : text.slice(0, 80);
 }
 
 export function virtualFailureCode(failure: NativeFailure) {
@@ -51,10 +45,10 @@ export function virtualFailureCancelled(failure: NativeFailure) {
   );
 }
 
-export function virtualFailureError(failure: NativeFailure, detail = "") {
+export function virtualFailureError(failure: NativeFailure) {
   const code = virtualFailureCode(failure);
   return code !== undefined && rejected[code]
-    ? new VirtualPaymentRejectedError(code, rejected[code], shortReason(detail))
+    ? new VirtualPaymentRejectedError(code, rejected[code])
     : undefined;
 }
 

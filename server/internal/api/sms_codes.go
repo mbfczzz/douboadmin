@@ -118,7 +118,7 @@ func (a *Server) sendSMSCode(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if !a.smsReady() && !a.smsDebug() {
-		fail(w, 503, "短信服务尚未配置，请联系管理员")
+		fail(w, 503, errNotReady.Error())
 		return
 	}
 	if !a.allowAll(w, r, "发送过于频繁，请 60 秒后再试", limit{"sms-ip:" + clientIP(r), 10}, limit{"sms-user:" + user, 1}, limit{"sms-phone:" + phone, 1}) {

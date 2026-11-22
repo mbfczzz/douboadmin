@@ -19,7 +19,7 @@ const breakdownMaxSize = 50 << 20 // Ark takes video URLs up to 50 MB
 
 func (a *Server) hotBreakdown(w http.ResponseWriter, r *http.Request) {
 	if !a.Vision.Ready() {
-		fail(w, 503, "视频理解未配置")
+		fail(w, 503, "视频拆解暂未开放")
 		return
 	}
 	id := r.PathValue("id")
@@ -79,9 +79,14 @@ func (a *Server) breakdownAsset(ctx context.Context, assetID, user string) (stri
 	return asset.Key, ""
 }
 
+// The vision service's own words (keys, quota, upstream errors) stay in the
+// log ("video breakdown failed"); users see that it failed.
 func breakdownView(status string, active bool, result any, problem string) map[string]any {
 	if status == "running" && !active {
 		status = "failed"
+	}
+	if problem != "" {
+		problem = "视频拆解失败，请稍后重试"
 	}
 	return map[string]any{"status": status, "result": result, "error": problem}
 }

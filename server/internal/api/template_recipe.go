@@ -31,7 +31,7 @@ func (a *Server) bindTemplateRecipe(ctx context.Context, in *core.JobInput) erro
 		return nil
 	}
 	if err := t.ValidateRecipe(); err != nil {
-		return fmt.Errorf("模板配方无效，请联系管理员检查")
+		return fmt.Errorf("该模板暂不可用，请稍后再试")
 	}
 	m, err := a.model(ctx, in.Model)
 	if err != nil || !t.AcceptsModel(m) || in.Ratio != t.Ratio || in.Duration != t.Duration {

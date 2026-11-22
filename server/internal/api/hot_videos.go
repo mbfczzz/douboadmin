@@ -4,6 +4,7 @@ import (
 	"doubo/server/internal/core"
 	"doubo/server/internal/hotvideo"
 	"encoding/json"
+	"errors"
 	"io"
 	"log/slog"
 	"net/http"
@@ -19,7 +20,7 @@ var videoID = regexp.MustCompile(`^[0-9]{1,32}$`)
 
 func (a *Server) hotSearch(w http.ResponseWriter, r *http.Request) {
 	if !a.Hot.Ready() {
-		fail(w, 503, "抖音数据接口尚未配置，可以先上传自己的素材")
+		fail(w, 503, "抖音视频功能暂未开放，可以先上传自己的素材")
 		return
 	}
 	q := r.URL.Query()
@@ -48,7 +49,7 @@ func (a *Server) hotSearch(w http.ResponseWriter, r *http.Request) {
 }
 func (a *Server) hotDetail(w http.ResponseWriter, r *http.Request) {
 	if !a.Hot.Ready() {
-		fail(w, 503, "抖音数据接口尚未配置")
+		fail(w, 503, "抖音视频功能暂未开放")
 		return
 	}
 	id := r.PathValue("id")
@@ -127,7 +128,7 @@ func (a *Server) searchHistory(w http.ResponseWriter, r *http.Request) {
 // 文案提取 / 一键复刻: the video behind a pasted Douyin share link.
 func (a *Server) hotLink(w http.ResponseWriter, r *http.Request) {
 	if !a.Hot.Ready() {
-		fail(w, 503, "抖音数据接口尚未配置")
+		fail(w, 503, "抖音视频功能暂未开放")
 		return
 	}
 	var v struct {
@@ -157,7 +158,14 @@ func (a *Server) hotLink(w http.ResponseWriter, r *http.Request) {
 
 // hotFail answers a Douyin data failure and logs it, so the reason shows in
 // the service log and in 运行监控 → 错误日志 (WARN entries are kept there).
+// Users see only reasons they can act on (hotvideo.UserError); the data
+// provider's own words (keys, balance, HTTP status) stay in the log.
 func hotFail(w http.ResponseWriter, r *http.Request, e error) {
 	slog.Warn("hot video request failed", "path", r.URL.Path, "error", e.Error())
-	fail(w, 502, e.Error())
+	var mine hotvideo.UserError
+	if errors.As(e, &mine) {
+		fail(w, 502, mine.Error())
+		return
+	}
+	fail(w, 502, "抖音视频暂时读取不到，请稍后重试")
 }

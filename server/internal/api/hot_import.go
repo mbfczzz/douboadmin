@@ -16,7 +16,7 @@ import (
 // and the original's title, caption and length for the editor.
 func (a *Server) importHot(w http.ResponseWriter, r *http.Request) {
 	if !a.Hot.Ready() {
-		fail(w, 503, "抖音数据接口尚未配置")
+		fail(w, 503, "抖音视频功能暂未开放")
 		return
 	}
 	id := r.PathValue("id")

@@ -42,7 +42,7 @@ func (a *Server) createVirtualOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if !a.Virtual.Enabled() {
-		fail(w, 503, "虚拟支付尚未配置或开通")
+		fail(w, 503, "积分充值暂未开放")
 		return
 	}
 	key := r.Header.Get("Idempotency-Key")
@@ -133,7 +133,7 @@ func (a *Server) createVirtualOrder(w http.ResponseWriter, r *http.Request) {
 }
 func (a *Server) payVirtualOrder(w http.ResponseWriter, r *http.Request, row core.Record, o core.Order, code, platform string) {
 	if !a.Virtual.Enabled() {
-		fail(w, 503, "虚拟支付尚未配置或开通")
+		fail(w, 503, "积分充值暂未开放")
 		return
 	}
 	_, settings, e := a.platform(r.Context())
@@ -193,7 +193,7 @@ func (a *Server) payVirtualOrder(w http.ResponseWriter, r *http.Request, row cor
 	}
 	params, e := a.Virtual.Client.Parameters(row.ID, o, session.Key)
 	if e != nil {
-		fail(w, 503, e.Error())
+		payFail(w, r, e)
 		return
 	}
 	if e = a.Virtual.ClaimSignature(r.Context(), row.ID); e != nil {

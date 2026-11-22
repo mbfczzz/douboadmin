@@ -58,7 +58,7 @@ func (a *Server) presentJob(ctx context.Context, j *core.Job) {
 		// before offering 分享, so report every work as shareable.
 		j.ReviewStatus = "approved"
 	}
-	verifiedRefund := false
+	verifiedRefund, hinted := false, false
 	if row, e := a.Store.Get(ctx, "job_billing", j.ID); e == nil {
 		var bill core.JobBilling
 		if json.Unmarshal(row.Data, &bill) == nil {
@@ -113,7 +113,9 @@ func (a *Server) presentJob(ctx context.Context, j *core.Job) {
 			// An error hint must not hide the refund outcome shown above.
 			if e.ErrorCause != "" && !verifiedRefund && j.Error != (&core.JobTimeout{Kind: j.Input.Kind}).Error() {
 				if m, lookup := a.model(ctx, j.Input.Model); lookup == nil {
+					before := j.Error
 					j.Error = m.Settings.ErrorMessage(e.ErrorCause, j.Error)
+					hinted = j.Error != before // the operator's own wording for users
 				}
 			}
 		}
@@ -123,5 +125,8 @@ func (a *Server) presentJob(ctx context.Context, j *core.Job) {
 			j.Result = ""
 			j.Results = nil
 		}
+	}
+	if !isAdmin(ctx) {
+		publicFailure(j, hinted) // users see only what they can act on (job_error.go)
 	}
 }

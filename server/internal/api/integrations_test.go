@@ -108,7 +108,8 @@ func TestProductionWithoutOSSAllowsAdminConfigurationButBlocksMedia(t *testing.T
 		t.Fatal("production silently accepts local uploads", w.Code, w.Body.String())
 	}
 	input := core.JobInput{Kind: "image", Model: "demo-image", Prompt: "test", Resolution: "1K", Ratio: "1:1"}
-	if w := call(a, "POST", "/api/jobs", user, "missing-oss-test", input); w.Code != 400 || !strings.Contains(w.Body.String(), "OSS") {
+	// Users are not told which part is missing (the admin console says so).
+	if w := call(a, "POST", "/api/jobs", user, "missing-oss-test", input); w.Code != 400 || !strings.Contains(w.Body.String(), "服务暂未就绪") || strings.Contains(w.Body.String(), "OSS") {
 		t.Fatal("production media task starts before storage configuration", w.Code, w.Body.String())
 	}
 }

@@ -48,13 +48,13 @@ func shareResult(root map[string]any) (Video, error) {
 	}
 	switch reason {
 	case "5":
-		return Video{}, fmt.Errorf("该视频是私密内容，无法读取")
+		return Video{}, UserError("该视频是私密内容，无法读取")
 	case "10":
-		return Video{}, fmt.Errorf("该视频仅部分用户可见，无法读取")
+		return Video{}, UserError("该视频仅部分用户可见，无法读取")
 	case "8":
-		return Video{}, fmt.Errorf("视频不存在、已删除或受版权限制")
+		return Video{}, UserError("视频不存在、已删除或受版权限制")
 	}
-	return Video{}, fmt.Errorf("没有读取到这个视频，请确认链接完整")
+	return Video{}, UserError("没有读取到这个视频，请确认链接完整")
 }
 
 // OriginalURL is the original upload, without watermark (TikHub: not for

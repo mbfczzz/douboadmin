@@ -18,7 +18,8 @@ func TestManagedFailureFieldsReachUserJobWithoutOperatorDetails(t *testing.T) {
 		t.Fatal(err)
 	}
 	a.presentJob(t.Context(), &job)
-	if job.ErrorCode != 5002 || job.ErrorType != "safety_policy" || !strings.Contains(job.ErrorAction, "不要原样重试") || job.Retryable || !job.ErrorEditable {
+	// A user sees the safety failure in plain words with what to do, no code.
+	if job.Error != "内容未通过安全审核" || job.ErrorCode != 0 || job.ErrorType != "" || !strings.Contains(job.ErrorAction, "调整提示词") || job.Retryable || !job.ErrorEditable {
 		t.Fatal(job)
 	}
 	public := string(core.Data(job))
@@ -43,7 +44,8 @@ func TestModelErrorHintOverridesMessageButKeepsManagedCodeAndAction(t *testing.T
 	execution := provider.Execution{Phase: "failed", Error: "服务提示", ErrorCause: "managed code=5002 type=safety_policy", ErrorCode: 5002, ErrorType: "safety_policy", ErrorAction: "调整提示词或参考素材，不要原样重试。"}
 	_, _ = a.Store.Put(t.Context(), "executions", core.Record{ID: job.ID, Data: core.Data(execution)}, 0)
 	a.presentJob(t.Context(), &job)
-	if job.Error != "请删除敏感内容后重新描述" || job.ErrorCode != 5002 || job.ErrorAction == "" {
+	// The operator's own wording is kept for users, without the code.
+	if job.Error != "请删除敏感内容后重新描述" || job.ErrorCode != 0 {
 		t.Fatal(job)
 	}
 }
@@ -52,7 +54,7 @@ func TestInvalidInputGuidanceDistinguishesMissingRoute(t *testing.T) {
 	a, _, _ := setup(t)
 	for _, tc := range []struct{ id, cause, want string }{
 		{"route", "no provider route supports the requested parameters/input for model=private-key", "更换模型"},
-		{"other", "invalid image input", "调整输入"},
+		{"other", "invalid image input", "调整参数"},
 	} {
 		j := core.Job{ID: tc.id, Status: "failed", Input: core.JobInput{Kind: "video"}}
 		e := provider.Execution{Phase: "failed", ErrorCode: 5003, ErrorAction: "调整输入", ErrorCause: tc.cause}
@@ -76,7 +78,8 @@ func TestManagedFailureControlsRetryAndEditActions(t *testing.T) {
 		execution := provider.Execution{Phase: "failed", Error: job.Error, ErrorCause: "operator-only", ErrorCode: tc.code, ErrorRetryable: tc.retry, ErrorEditable: tc.edit}
 		_, _ = a.Store.Put(t.Context(), "executions", core.Record{ID: job.ID, Data: core.Data(execution)}, 0)
 		a.presentJob(t.Context(), &job)
-		if job.Retryable != tc.retry || job.ErrorEditable != tc.edit || job.ErrorCode != tc.code {
+		// Retry and edit follow the code; the code itself is not shown to users.
+		if job.Retryable != tc.retry || job.ErrorEditable != tc.edit || job.ErrorCode != 0 || job.Error != "系统异常，生成失败，请稍后重试" {
 			t.Fatal(tc, job)
 		}
 		if strings.Contains(string(core.Data(job)), "operator-only") {

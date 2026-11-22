@@ -66,8 +66,8 @@ test("native diagnostics retain the error reason while hiding signed data and cr
       "credential leaked into native diagnostics or the notice",
     );
   assert.ok(f.page.data.paymentNotice.includes("-15016"));
-  // WeChat's own reason shows on the phone, after the code.
-  assert.match(f.page.data.paymentNotice, /错误码 -15016：signData invalid/);
+  // WeChat's own reason goes to vConsole, not to the notice.
+  assert.doesNotMatch(f.page.data.paymentNotice, /signData invalid/);
 });
 
 for (const code of [-1, -15002, -15012, -999999]) {
@@ -97,12 +97,14 @@ test("snake-case string error fields are normalized without losing the failure r
   assert.match(f.page.data.paymentNotice, /价格/);
   assert.ok(f.page.data.paymentNotice.includes("-15013"));
   assert.equal(diagnostics[0][1].errMsg, "goodsPrice mismatch");
-  assert.match(f.page.data.paymentNotice, /（错误码 -15013：goodsPrice mismatch）/);
+  assert.doesNotMatch(f.page.data.paymentNotice, /goodsPrice mismatch/);
 });
 
-test("the shown reason drops WeChat's API prefix", async () => {
-  const f = await fixture("success");
+test("the notice shows the code and our words, WeChat's reason only in vConsole", async () => {
+  const logged = [];
+  const f = await fixture("success", { console: { warn: (...args) => logged.push(args) } });
   f.h.wx.requestVirtualPayment = (options) => options.fail({ errCode: -15001, errMsg: "requestVirtualPayment:fail INVALID_PARAMS" });
   await f.page.pay();
-  assert.match(f.page.data.paymentNotice, /支付参数校验未通过，请联系管理员（错误码 -15001：INVALID_PARAMS）/);
+  assert.match(f.page.data.paymentNotice, /支付参数校验未通过，请联系管理员（错误码 -15001）$/);
+  assert.match(JSON.stringify(logged), /INVALID_PARAMS/);
 });

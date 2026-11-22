@@ -5,6 +5,7 @@ import (
 	"doubo/server/internal/partners"
 	"doubo/server/internal/virtualpay"
 	"encoding/json"
+	"log/slog"
 	"net/http"
 	"strings"
 	"time"
@@ -146,7 +147,7 @@ func (a *Server) payOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if !a.Pay.Ready() {
-		fail(w, 503, "微信支付暂未配置")
+		fail(w, 503, "积分充值暂未开放")
 		return
 	}
 	_, settings, e := a.platform(r.Context())
@@ -175,7 +176,7 @@ func (a *Server) payOrder(w http.ResponseWriter, r *http.Request) {
 	}
 	id, e := a.Pay.Prepay(r.Context(), row.ID, o)
 	if e != nil {
-		fail(w, 502, e.Error())
+		payFail(w, r, e)
 		return
 	}
 	if e = a.Billing.SetPrepay(r.Context(), row.ID, id); e != nil {
@@ -184,7 +185,7 @@ func (a *Server) payOrder(w http.ResponseWriter, r *http.Request) {
 	}
 	params, e := a.Pay.Parameters(r.Context(), id)
 	if e != nil {
-		fail(w, 502, e.Error())
+		payFail(w, r, e)
 		return
 	}
 	reply(w, 200, params)
@@ -215,11 +216,11 @@ func (a *Server) refreshOrder(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if !a.Virtual.Ready() {
-			fail(w, 503, "虚拟支付尚未配置")
+			fail(w, 503, "积分充值暂未开放")
 			return
 		}
 		if e = a.Virtual.Refresh(r.Context(), row.ID); e != nil {
-			fail(w, 502, e.Error())
+			payFail(w, r, e)
 			return
 		}
 		a.order(w, r)
@@ -227,7 +228,7 @@ func (a *Server) refreshOrder(w http.ResponseWriter, r *http.Request) {
 	}
 	state, result, e := a.Pay.Query(r.Context(), row.ID)
 	if e != nil {
-		fail(w, 502, e.Error())
+		payFail(w, r, e)
 		return
 	}
 	if state == "SUCCESS" {
@@ -240,4 +241,15 @@ func (a *Server) refreshOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	a.order(w, r)
+}
+
+// payFail: a payment provider failure. Administrators see its words; users a
+// plain notice (provider codes, signatures and channel detail stay in the log).
+func payFail(w http.ResponseWriter, r *http.Request, e error) {
+	slog.Warn("payment request failed", "path", r.URL.Path, "error", e.Error())
+	if identity(r).Role == "admin" {
+		fail(w, 502, e.Error())
+		return
+	}
+	fail(w, 502, "支付服务暂时异常，请稍后重试或查看充值订单")
 }

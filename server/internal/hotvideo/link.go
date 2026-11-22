@@ -1,7 +1,6 @@
 package hotvideo
 
 import (
-	"errors"
 	"net/url"
 	"regexp"
 	"strings"
@@ -18,7 +17,7 @@ var (
 	douyinHosts = map[string]bool{"v.douyin.com": true, "douyin.com": true, "www.douyin.com": true, "m.douyin.com": true, "iesdouyin.com": true, "www.iesdouyin.com": true}
 )
 
-var ErrNotDouyin = errors.New("请粘贴抖音视频的分享链接")
+var ErrNotDouyin error = UserError("请粘贴抖音视频的分享链接")
 
 // ParseLink returns the video ID when the link carries it, otherwise the
 // cleaned Douyin link to resolve.

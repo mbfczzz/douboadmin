@@ -75,10 +75,7 @@ func (a *Server) settleMyOutfit(ctx context.Context, row *core.Record, o *myOutf
 	case err != nil:
 		o.Status, o.Error = "failed", "生成任务不存在"
 	case j.Status == "failed" || j.Status == "cancelled":
-		o.Status, o.Error = "failed", j.Error
-		if o.Error == "" {
-			o.Error = "生成失败"
-		}
+		o.Status, o.Error = "failed", a.publicMessage(ctx, j)
 	case j.Status != "succeeded":
 		return
 	default:

@@ -6,6 +6,13 @@ import (
 	"strings"
 )
 
+// UserError is a reason the user can act on (a private or deleted video, an
+// incomplete link); every other failure is shown to users as a generic
+// error and kept for the service log (upstream, keys, balance).
+type UserError string
+
+func (e UserError) Error() string { return string(e) }
+
 // upstreamError says why TikHub refused, in words an admin can act on: the
 // status class plus TikHub's own Chinese message (top level or "detail").
 func upstreamError(status int, body []byte) error {

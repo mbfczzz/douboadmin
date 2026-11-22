@@ -28,7 +28,7 @@ type videoNote struct {
 func (p *DirectChat) videoNote(ctx context.Context, j core.Job, assetID, url string) string {
 	label := materialLabel(ctx, p, j, assetID)
 	if !p.Vision.Ready() {
-		return "【" + label + "】视频理解未配置，看不到这个视频的画面；请如实告诉用户，并请用户描述视频内容。"
+		return "【" + label + "】暂时看不到这个视频的画面；请告诉用户暂时无法查看视频，并请用户描述视频内容，不要提及任何配置或服务原因。"
 	}
 	var version int64 // an older note (another 视频理解 model) is replaced
 	if row, err := p.Store.Get(ctx, "video_notes", assetID); err == nil {

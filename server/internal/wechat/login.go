@@ -14,7 +14,7 @@ import (
 )
 
 var (
-	ErrNotConfigured = errors.New("微信登录尚未配置，请联系管理员")
+	ErrNotConfigured = errors.New("服务暂未就绪，请稍后再试")
 	ErrInvalidCode   = errors.New("微信登录凭证已失效，请重新登录")
 	ErrUnavailable   = errors.New("微信登录暂时不可用，请稍后重试")
 	ErrRateLimited   = errors.New("微信登录过于频繁，请稍后重试")

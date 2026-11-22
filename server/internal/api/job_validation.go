@@ -5,10 +5,15 @@ import (
 	"doubo/server/internal/core"
 	"doubo/server/internal/relay"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"slices"
 	"strings"
 )
+
+// errNotReady: storage or the generation service is not configured. Users are
+// not told which part (the admin console's 系统检查 says so).
+var errNotReady = errors.New("服务暂未就绪，请稍后再试")
 
 func (a *Server) validateJob(ctx context.Context, user string, in *core.JobInput) error {
 	// Recipe prompts live on the server. Resolve them for both quote and submit.
@@ -19,7 +24,7 @@ func (a *Server) validateJob(ctx context.Context, user string, in *core.JobInput
 		return fmt.Errorf("该任务类型暂未开放")
 	}
 	if a.Config.Production && core.IsWork(in.Kind) && a.Objects == nil {
-		return fmt.Errorf("请先在后台系统设置中配置 OSS 存储")
+		return errNotReady
 	}
 	m, err := a.model(ctx, in.Model)
 	if err != nil || !m.Usable() || m.Kind != in.Kind {
@@ -27,7 +32,7 @@ func (a *Server) validateJob(ctx context.Context, user string, in *core.JobInput
 	}
 	// DeepSeek / 豆包 are called directly; everything else needs the relay.
 	if _, _, direct := core.DirectChat(m.Key); !direct && !a.Relay.Ready() {
-		return fmt.Errorf("生成服务尚未配置")
+		return errNotReady
 	}
 	if err = a.checkSession(ctx, user, in); err != nil {
 		return err
@@ -65,7 +70,7 @@ func (a *Server) validateJob(ctx context.Context, user string, in *core.JobInput
 		return fmt.Errorf("最多上传 20 个素材")
 	}
 	if len(in.Assets) > 0 && a.Objects == nil {
-		return fmt.Errorf("参考素材生成需要先配置 OSS 存储")
+		return errNotReady
 	}
 	counts := map[string]int{}
 	sizes := map[string][]int64{}

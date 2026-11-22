@@ -56,7 +56,8 @@ func TestHotBreakdownSharedAndRetryable(t *testing.T) {
 		t.Fatalf("never reached %s", want)
 		return nil
 	}
-	if v := wait("failed"); v["error"] != "视频理解 API Key 无效" {
+	// The vision service's own reason stays in the log; users see that it failed.
+	if v := wait("failed"); v["error"] != "视频拆解失败，请稍后重试" {
 		t.Fatal(v)
 	}
 	failing.Store(false)

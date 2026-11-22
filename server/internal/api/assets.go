@@ -16,7 +16,11 @@ import (
 
 func (a *Server) upload(w http.ResponseWriter, r *http.Request) {
 	if a.Config.Production && a.Objects == nil {
-		fail(w, 503, "请先在后台系统设置中配置 OSS 存储")
+		if identity(r).Role == "admin" {
+			fail(w, 503, "请先在后台系统设置中配置 OSS 存储")
+		} else {
+			fail(w, 503, errNotReady.Error())
+		}
 		return
 	}
 	avatar := r.URL.Query().Get("purpose") == "avatar" || r.URL.Query().Get("purpose") == "cover"
