@@ -34,11 +34,13 @@ export default function UserStatus({
       await api(`/admin/users/${user.id}${remove ? "" : "/status"}`, {
         method: remove ? "DELETE" : "PUT",
         confirmation: { before: user.data },
-        body: JSON.stringify({
-          version: user.version,
-          disabled: disabling,
-          reason,
-        }),
+        // Deleting takes only the version and reason (the server refuses
+        // unknown fields); enabling or disabling also says which.
+        body: JSON.stringify(
+          remove
+            ? { version: user.version, reason }
+            : { version: user.version, disabled: disabling, reason },
+        ),
       });
       await onSaved();
       onClose();
