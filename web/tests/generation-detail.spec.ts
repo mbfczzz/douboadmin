@@ -90,8 +90,10 @@ test("generation detail shows prompt, materials, parameters, error and model cal
             actorType: "user",
             method: "GET",
             path: "/v1/tasks/task-x",
-            status: 200,
+            status: 401,
             durationMs: 200,
+            error:
+              "中转服务 HTTP 401（业务码 4001，invalid_api_key）：封装层 API Key 无效或已停用",
             response: '{"status":"failed","error":"content_policy_violation"}',
           },
         ],
@@ -110,7 +112,8 @@ test("generation detail shows prompt, materials, parameters, error and model cal
   await expect(d.getByRole("region", { name: "失败原因" })).toContainText(
     "内容审核未通过",
   );
-  await expect(d.getByRole("region", { name: "失败原因" })).toContainText(
+  // Only the reason: the upstream reply stays under 模型调用.
+  await expect(d.getByRole("region", { name: "失败原因" })).not.toContainText(
     "content_policy_violation",
   );
   await expect(d.getByRole("region", { name: "提示词" })).toContainText(
@@ -127,8 +130,10 @@ test("generation detail shows prompt, materials, parameters, error and model cal
     "16分10秒",
   );
   const calls = d.getByRole("region", { name: "模型调用" });
-  await expect(calls.locator("details[open]")).toHaveCount(2);
+  await expect(calls.locator('[aria-expanded="true"]')).toHaveCount(2);
   await expect(calls).toContainText('"duration": 30');
+  await expect(calls).toContainText("封装层 API Key 无效或已停用");
+  await expect(calls).not.toContainText("invalid_api_key");
   await expect(calls).toContainText("共查询生成结果 42 次");
   expect(
     await d.evaluate((el) => el.scrollWidth <= el.clientWidth + 1),

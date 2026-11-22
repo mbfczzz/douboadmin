@@ -7,7 +7,7 @@ async function integration(page: Page) {
   await page.getByRole("button", { name: "系统设置", exact: true }).click();
   const card = page
     .locator("details.integration")
-    .filter({ has: page.locator("summary b", { hasText: "AI 中转站" }) });
+    .filter({ has: page.locator("summary b", { hasText: "视频站点配置" }) });
   await card.locator("summary").click();
   await card
     .getByLabel("API 基础地址", { exact: false })
@@ -18,7 +18,7 @@ async function integration(page: Page) {
   return card;
 }
 const confirmation = (page: Page) =>
-  page.getByRole("dialog", { name: "确认修改AI 中转站", exact: true });
+  page.getByRole("dialog", { name: "确认修改视频站点配置", exact: true });
 
 test("configuration cancel makes no request and preserves draft; approval submits once with secrets hidden", async ({
   page,

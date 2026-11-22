@@ -6,7 +6,7 @@
 }
 /* Long JSON lines and URLs wrap instead of widening the dialog. */
 .gen-detail > *,
-.gen-calls details {
+.gen-call {
   min-width: 0;
 }
 .gen-calls pre {
@@ -172,24 +172,47 @@
   display: grid;
   gap: 8px;
 }
-.gen-calls details {
+.gen-call {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: var(--surface);
 }
-.gen-calls summary {
+.gen-call-head {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   align-items: center;
+  width: 100%;
+  min-height: 44px;
   padding: 10px 12px;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  text-align: left;
   cursor: pointer;
 }
-.gen-calls summary .quiet {
+.gen-call-head .quiet {
   font-size: 12px;
 }
-.gen-calls details > :not(summary) {
-  margin: 0 12px 12px;
+.gen-call-head::after {
+  content: "";
+  flex-shrink: 0;
+  width: 7px;
+  height: 7px;
+  margin: -3px 2px 0 auto;
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  transform: rotate(45deg);
+}
+.gen-call.open > .gen-call-head {
+  border-bottom: 1px solid var(--line);
+}
+.gen-call.open > .gen-call-head::after {
+  margin-top: 3px;
+  transform: rotate(-135deg);
+}
+.gen-call-body {
+  margin: 12px;
 }
 .gen-endpoint {
   color: var(--muted);

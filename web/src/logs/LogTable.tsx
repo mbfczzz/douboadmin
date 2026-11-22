@@ -11,6 +11,7 @@ import {
   failed,
   methodTones,
   targetLabels,
+  visibleError,
   type LogEntry,
   type LogPage,
   type LogTab,
@@ -58,7 +59,7 @@ const action = (e: LogEntry) => (
     <b className="log-action">{e.action || e.route || "—"}</b>
     {(e.summary || e.error) && (
       <small className={"cell-note" + (e.error ? " danger-text" : "")}>
-        {e.error || e.summary}
+        {e.error ? visibleError(e) : e.summary}
       </small>
     )}
   </>

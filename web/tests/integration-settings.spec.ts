@@ -37,7 +37,7 @@ test("real API shows the saved secret and independent forms preserve drafts", as
   await oss
     .getByLabel("存储桶 Bucket", { exact: true })
     .fill("unsaved-fixture");
-  const relay = await group(page, "AI 中转站");
+  const relay = await group(page, "视频站点配置");
   await relay
     .getByLabel("API 基础地址", { exact: false })
     .fill("http://127.0.0.1:9");
@@ -96,15 +96,15 @@ test("a stale save retains the draft and rereading discards it explicitly", asyn
   page,
 }) => {
   await settings(page);
-  const card = await group(page, "热门视频接口");
-  const field = card.getByLabel("TikHub API 地址", { exact: true });
+  const card = await group(page, "视频站点配置");
+  const field = card.getByLabel("API 基础地址", { exact: true });
   await field.fill("https://draft.example");
   const data = await (await page.request.get("/api/admin/integrations")).json();
-  const current = data.groups.find((g: { id: string }) => g.id === "hot");
-  const saved = await page.request.put("/api/admin/integrations/hot", {
+  const current = data.groups.find((g: { id: string }) => g.id === "relay");
+  const saved = await page.request.put("/api/admin/integrations/relay", {
     data: {
       version: current.version,
-      values: { TIKHUB_BASE_URL: "https://newer.example" },
+      values: { RELAY_BASE_URL: "https://newer.example" },
     },
   });
   expect(saved.status()).toBe(200);

@@ -1,5 +1,5 @@
 import { Bot, Globe, LogIn, MousePointerClick } from "lucide-react";
-import { failed, type LogEntry } from "../logs/types";
+import { failed, visibleError, type LogEntry } from "../logs/types";
 
 const kinds: Record<string, [typeof Bot, string]> = {
   auth: [LogIn, "登录"],
@@ -66,7 +66,9 @@ export default function ActivityTimeline({
                       )}
                     </div>
                     {e.summary && <p>{e.summary}</p>}
-                    {e.error && <p className="timeline-error">{e.error}</p>}
+                    {e.error && (
+                      <p className="timeline-error">{visibleError(e)}</p>
+                    )}
                     <p className="timeline-meta quiet">
                       <span className="timeline-clock">
                         {local(e.at).slice(11)}

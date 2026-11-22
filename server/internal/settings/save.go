@@ -16,7 +16,7 @@ type Update struct {
 
 func (m *Manager) Save(ctx context.Context, id, actor string, input Update, production bool) error {
 	g, ok := group(id)
-	if !ok {
+	if !ok || g.FileOnly {
 		return core.ErrNotFound
 	}
 	allowed := map[string]Field{}

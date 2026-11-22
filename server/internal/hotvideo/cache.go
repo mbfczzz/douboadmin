@@ -20,7 +20,7 @@ type Service struct {
 	// Source of the 创作 feed (HOT_FEED_SOURCE): "billboard" (default, the
 	// video hot list) or "search" (keyword search).
 	Source string
-	// How long answers are reused (服务接入配置 → 热门视频接口); zero = default.
+	// How long answers are reused (doubo.env); zero = default.
 	TTL CacheTTL
 }
 

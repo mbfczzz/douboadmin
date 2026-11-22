@@ -42,7 +42,10 @@ func integrations(ctx context.Context, app *api.Server, values settings.Values) 
 	app.Config.SMSVerificationEnabled = &smsEnabled
 	ai := &provider.Relay{Client: app.Relay, Store: app.Store, Assets: app.Media.Inputs, SaveResult: app.Media.Save}
 	app.Vision = &vision.Client{BaseURL: values["VISION_BASE_URL"], Key: values["VISION_API_KEY"], Model: values["VISION_MODEL"]}
-	feedWords, _ := settings.FeedKeywords(values["HOT_FEED_KEYWORDS"]) // validated on save; bad values fall back to defaults
+	if err := settings.FileOnlyProblem(values); err != nil {
+		slog.Warn("doubo.env 热门视频配置无效，已用默认值", "error", err)
+	}
+	feedWords, _ := settings.FeedKeywords(values["HOT_FEED_KEYWORDS"]) // bad values fall back to defaults
 	app.Hot = &hotvideo.Service{Client: &hotvideo.Client{BaseURL: values["TIKHUB_BASE_URL"], Key: values["TIKHUB_API_KEY"]}, Store: app.Store, Redis: app.Sessions.Redis, Keywords: feedWords, Source: values["HOT_FEED_SOURCE"], TTL: hotCacheTTL(values)}
 	return provider.Router{AI: ai, Import: hotvideo.Importer{Service: app.Hot, Media: app.Media, Vision: app.Vision}, Chat: chatModels(ctx, app, values)}, nil
 }
@@ -86,7 +89,7 @@ func chatModels(ctx context.Context, app *api.Server, values settings.Values) *p
 	return &provider.DirectChat{Clients: clients, Store: app.Store, Assets: app.Media.Inputs, Vision: app.Vision}
 }
 
-// hotCacheTTL reads the TikHub cache durations (服务接入配置 → 热门视频接口).
+// hotCacheTTL reads the TikHub cache durations (doubo.env).
 func hotCacheTTL(values settings.Values) hotvideo.CacheTTL {
 	d := settings.HotCache(values)
 	return hotvideo.CacheTTL{Feed: d["HOT_CACHE_FEED_MINUTES"], Search: d["HOT_CACHE_SEARCH_MINUTES"], Words: d["HOT_CACHE_WORDS_MINUTES"], Video: d["HOT_CACHE_VIDEO_MINUTES"]}

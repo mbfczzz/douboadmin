@@ -1,7 +1,8 @@
+import { useState } from "react";
 import { date } from "../api";
 import Badge from "../components/Badge";
 import Tag from "../components/Tag";
-import { failed, pretty, type LogEntry } from "../logs/types";
+import { failed, pretty, visibleError, type LogEntry } from "../logs/types";
 
 function Body({ title, text }: { title: string; text?: string }) {
   return (
@@ -32,35 +33,57 @@ export default function Calls({
   return (
     <div className="gen-calls">
       {calls.map((c, i) => (
-        <details
+        <Call
           key={c.id}
-          open={c.method !== "GET" || failed(c) || i === calls.length - 1}
-        >
-          <summary>
-            <b>{c.action || "调用上游接口"}</b>
-            <Badge
-              state={failed(c) ? "failed" : "succeeded"}
-              label={c.status ? String(c.status) : failed(c) ? "失败" : "成功"}
-            />
-            <Tag tone={c.durationMs > 1000 ? "warning" : "muted"}>
-              {c.durationMs} ms
-            </Tag>
-            <span className="quiet">{date(c.at, true)}</span>
-          </summary>
-          <p className="mono gen-endpoint">
-            {c.method} {c.path}
-          </p>
-          {c.error && <p className="error">{c.error}</p>}
-          {/* Status queries carry no body; the URL above is the request. */}
-          {c.request && <Body title="请求参数" text={c.request} />}
-          <Body title="返回结果" text={c.response} />
-        </details>
+          c={c}
+          initiallyOpen={
+            c.method !== "GET" || failed(c) || i === calls.length - 1
+          }
+        />
       ))}
       {polls > 1 && (
         <p className="quiet">
           共查询生成结果 {more ? "100 次以上" : polls + " 次"}
           ；这里保留首次提交、失败的查询和最近一次查询的完整报文。
         </p>
+      )}
+    </div>
+  );
+}
+
+// One call, opened and closed by the page itself rather than a native
+// <details>: some in-app browsers (WeChat) left the native one closed and
+// would not open it.
+function Call({ c, initiallyOpen }: { c: LogEntry; initiallyOpen: boolean }) {
+  const [open, setOpen] = useState(initiallyOpen);
+  return (
+    <div className={"gen-call" + (open ? " open" : "")}>
+      <button
+        type="button"
+        className="gen-call-head"
+        aria-expanded={open}
+        onClick={() => setOpen(!open)}
+      >
+        <b>{c.action || "调用上游接口"}</b>
+        <Badge
+          state={failed(c) ? "failed" : "succeeded"}
+          label={c.status ? String(c.status) : failed(c) ? "失败" : "成功"}
+        />
+        <Tag tone={c.durationMs > 1000 ? "warning" : "muted"}>
+          {c.durationMs} ms
+        </Tag>
+        <span className="quiet">{date(c.at, true)}</span>
+      </button>
+      {open && (
+        <div className="gen-call-body">
+          <p className="mono gen-endpoint">
+            {c.method} {c.path}
+          </p>
+          {c.error && <p className="error">{visibleError(c)}</p>}
+          {/* Status queries carry no body; the URL above is the request. */}
+          {c.request && <Body title="请求参数" text={c.request} />}
+          <Body title="返回结果" text={c.response} />
+        </div>
       )}
     </div>
   );

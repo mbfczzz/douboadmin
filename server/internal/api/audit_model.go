@@ -6,6 +6,7 @@ import (
 	"doubo/server/internal/core"
 	"doubo/server/internal/relay"
 	"encoding/json"
+	"errors"
 	"strings"
 )
 
@@ -42,7 +43,18 @@ func (a *Server) modelLog(ctx context.Context, c relay.Call) {
 	}
 	e.Response = audit.Body(c.Response, false)
 	if c.Err != nil {
-		e.Error = c.Err.Error()
+		e.Error = modelCallError(c.Err)
 	}
 	a.Audit.Add(e)
+}
+
+// The status and full upstream response are logged separately. Keep the error
+// line focused on the final relay-layer reason instead of repeating HTTP and
+// business-code wrappers around it.
+func modelCallError(err error) string {
+	var httpErr *relay.HTTPError
+	if errors.As(err, &httpErr) && strings.TrimSpace(httpErr.Message) != "" {
+		return strings.TrimSpace(httpErr.Message)
+	}
+	return err.Error()
 }

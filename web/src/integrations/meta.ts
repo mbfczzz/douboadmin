@@ -3,7 +3,6 @@ import {
   Bot,
   Cloud,
   CreditCard,
-  Flame,
   Globe,
   MessageCircle,
   MessagesSquare,
@@ -28,7 +27,6 @@ export const groupMeta: Record<
     desc: "积分充值通道与商品",
     capability: "payment",
   },
-  hot: { icon: Flame, desc: "热门视频发现", capability: "hot" },
   vision: {
     icon: ScanEye,
     desc: "一键复刻看懂原视频",

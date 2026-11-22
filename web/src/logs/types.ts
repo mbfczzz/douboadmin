@@ -75,6 +75,16 @@ export const methodTones: Record<string, Tone> = {
 
 export const failed = (e: LogEntry) => e.status >= 400 || !!e.error;
 
+// Older model-call rows stored the relay HTTP wrapper ("中转服务 HTTP 402（业务码
+// 5004，…）：") before the reason. The status and raw response have their own
+// fields, so only that wrapper is dropped; a reason containing "：" is kept.
+const relayWrapper = /^中转服务 HTTP \d+(（[^）]*）)?：/;
+export function visibleError(e: LogEntry) {
+  const value = e.error?.trim() || "";
+  if (e.category !== "model") return value;
+  return value.replace(relayWrapper, "").trim() || value;
+}
+
 // Pretty-prints a logged JSON body; other text is shown as it is.
 export function pretty(text?: string) {
   if (!text) return "";

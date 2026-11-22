@@ -106,10 +106,8 @@ export default function GenerationDetail({
             {(j.error || cause) && (
               <section className="gen-error" aria-label="失败原因">
                 <h4>失败原因</h4>
-                {j.error && <p>{j.error}</p>}
-                {cause && cause !== j.error && (
-                  <p className="quiet">上游返回：{cause}</p>
-                )}
+                {/* Only the reason; the upstream reply is under 模型调用. */}
+                <p>{j.error || cause}</p>
               </section>
             )}
             <section aria-label="生成结果">

@@ -11,6 +11,7 @@ import {
   methodTones,
   pretty,
   targetLabels,
+  visibleError,
   type LogEntry,
 } from "./types";
 
@@ -69,7 +70,7 @@ export default function LogDetail({
           {e.summary && <Field label="内容">{e.summary}</Field>}
           {e.error && (
             <Field label="错误">
-              <span className="danger-text">{e.error}</span>
+              <span className="danger-text">{visibleError(e)}</span>
             </Field>
           )}
         </DetailCard>

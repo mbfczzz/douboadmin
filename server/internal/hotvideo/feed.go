@@ -11,7 +11,7 @@ import (
 )
 
 // The 创作 page's video feed: creative keywords shared by everyone (set in
-// 服务接入配置 → 热门视频接口 → 创作页关键词; Douyin's own hot words are news,
+// doubo.env HOT_FEED_KEYWORDS; Douyin's own hot words are news,
 // not things to remake). With Redis their pages live there for an hour; a
 // background loop refetches each first page one minute before it turns an
 // hour old, so visitors are served from Redis and TikHub is called about once

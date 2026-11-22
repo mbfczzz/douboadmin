@@ -28,6 +28,9 @@ type Group struct {
 	Name   string  `json:"name"`
 	Hint   string  `json:"hint"`
 	Fields []Field `json:"fields"`
+	// FileOnly: set only in the environment file (doubo.env), never shown in
+	// or saved from the admin console; a stored copy is ignored.
+	FileOnly bool `json:"-"`
 }
 
 var definitions = []Group{
@@ -35,7 +38,7 @@ var definitions = []Group{
 		{Key: "WECHAT_APP_ID", Label: "小程序 AppID", Kind: "text"},
 		{Key: "WECHAT_APP_SECRET", Label: "小程序密钥 AppSecret", Kind: "secret"},
 	}},
-	{ID: "relay", Name: "AI 中转站", Hint: "填写当前模型服务的地址和密钥。更换供应商前应先完成在途生成任务。", Fields: []Field{
+	{ID: "relay", Name: "视频站点配置", Hint: "填写当前模型服务的地址和密钥。更换供应商前应先完成在途生成任务。", Fields: []Field{
 		{Key: "RELAY_BASE_URL", Label: "API 基础地址", Kind: "url", Default: "https://relay.tcmzhan.com", Hint: "例如 https://relay.tcmzhan.com，不追加 /v1/models。"},
 		{Key: "RELAY_API_KEY", Label: "API Key", Kind: "secret"},
 	}},
@@ -70,7 +73,7 @@ var definitions = []Group{
 		{Key: "WECHAT_VIRTUAL_CUSTOM_PRODUCT_ID", Label: "自定义金额基础商品", Kind: "product", Hint: "留空只开放套餐购买；选择后按商品单价换算购买份数。"},
 		{Key: "WECHAT_VIRTUAL_IOS_ALLOWED", Label: "允许 iPhone 充值", Kind: "bool", Default: "false", Hint: "微信后台开通 IAP 并验收后启用。"},
 	}},
-	{ID: "hot", Name: "热门视频接口", Hint: "未填写 API Key 时，热门视频查询功能不可用。", Fields: []Field{
+	{ID: "hot", Name: "热门视频接口", FileOnly: true, Fields: []Field{
 		{Key: "TIKHUB_BASE_URL", Label: "TikHub API 地址", Kind: "url", Default: "https://api.tikhub.io"},
 		{Key: "TIKHUB_API_KEY", Label: "TikHub API Key", Kind: "secret"},
 		{Key: "HOT_FEED_SOURCE", Label: "创作页视频来源", Kind: "select", Default: "search", Options: []Option{{"billboard", "抖音视频热榜（按标签筛选，「热门」为整个榜单）"}, {"search", "关键词搜索"}}, Hint: "保存后重启服务生效。"},
