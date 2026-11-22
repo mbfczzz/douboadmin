@@ -48,6 +48,7 @@ type Order struct {
 	Virtual       *VirtualOrder         `json:"virtual,omitempty"`
 	Distribution  *DistributionSnapshot `json:"distribution,omitempty"`
 	UserID        string                `json:"userId"`
+	Phone         string                `json:"phone,omitempty"` // admin response only
 	AmountFen     int64                 `json:"amountFen"`
 	PointsUnits   int64                 `json:"pointsUnits"`
 	Status        string                `json:"status"`

@@ -26,6 +26,7 @@ export interface Order {
     issued?: boolean;
   };
   userId: string;
+  phone?: string;
   amountFen: number;
   pointsUnits: number;
   status: string;

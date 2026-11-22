@@ -44,6 +44,7 @@ export default function OrderSummary({ row }: { row: Row<Order> }) {
         <Field label="用户">
           <IdChip>{o.userId}</IdChip>
         </Field>
+        <Field label="手机号">{o.phone || "—"}</Field>
         <Field label="创建时间">{date(row.createdAt)}</Field>
         <Field label="支付时间">{o.paidAt ? date(o.paidAt) : "—"}</Field>
         {o.refundId && (

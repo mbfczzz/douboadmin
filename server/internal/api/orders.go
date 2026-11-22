@@ -21,6 +21,7 @@ func publicOrder(row core.Record) core.Record {
 	row.Data = core.Data(o)
 	return row
 }
+
 func (a *Server) orders(w http.ResponseWriter, r *http.Request) {
 	owner := identity(r).ID
 	if identity(r).Role == "admin" {
@@ -34,6 +35,12 @@ func (a *Server) orders(w http.ResponseWriter, r *http.Request) {
 	if e != nil {
 		dbError(w, e)
 		return
+	}
+	if identity(r).Role == "admin" {
+		if e = a.addOrderPhones(r.Context(), page.Items); e != nil {
+			dbError(w, e)
+			return
+		}
 	}
 	for i := range page.Items {
 		page.Items[i] = publicOrder(page.Items[i])
@@ -49,6 +56,14 @@ func (a *Server) order(w http.ResponseWriter, r *http.Request) {
 	if row.Owner != identity(r).ID && identity(r).Role != "admin" {
 		fail(w, 404, "订单不存在")
 		return
+	}
+	if identity(r).Role == "admin" {
+		rows := []core.Record{row}
+		if e = a.addOrderPhones(r.Context(), rows); e != nil {
+			dbError(w, e)
+			return
+		}
+		row = rows[0]
 	}
 	reply(w, 200, publicOrder(row))
 }

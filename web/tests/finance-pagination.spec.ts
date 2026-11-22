@@ -10,11 +10,17 @@ test("orders request later server pages and reset page when filtering", async ({
     const current = Number(query.get("page"));
     return route.fulfill({ json: { page: current, size: 20, total: 521, items: [{
       id: `order-page-${current}`, version: 1, createdAt: "2026-11-10T00:00:00Z",
-      data: { userId: "user-one", status: query.get("status") || "paid", amountFen: 100, pointsUnits: 10000 },
+      data: { userId: "user-one", phone: "13800138000", status: query.get("status") || "paid", amountFen: 100, pointsUnits: 10000 },
     }] } });
   });
   await page.getByRole("button", { name: "充值订单", exact: true }).click();
   await expect(page.getByText("order-page-1", { exact: true })).toBeVisible();
+  await expect(page.getByRole("columnheader", { name: "手机号" })).toBeVisible();
+  await expect(page.getByText("13800138000", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "详情", exact: true }).click();
+  const detail = page.getByRole("dialog", { name: "充值订单详情" });
+  await expect(detail).toContainText("13800138000");
+  await detail.getByRole("button", { name: "关闭" }).click();
   await page.getByRole("button", { name: "下一页", exact: true }).click();
   await expect(page.getByText("order-page-2", { exact: true })).toBeVisible();
   await expect(page.getByText("order-page-1", { exact: true })).toHaveCount(0);

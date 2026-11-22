@@ -103,3 +103,43 @@ func TestFinancePagesValidateAndFilterBeforePaging(t *testing.T) {
 		t.Fatal("user search could probe private payment fields", w.Code)
 	}
 }
+
+func TestAdminOrdersIncludePhoneWithoutExposingItToUsers(t *testing.T) {
+	a, user, _ := setup(t)
+	admin := adminLoginToken(t, a, "admin", "Tt661ea2")
+	if _, err := a.Store.Put(t.Context(), "users", core.Record{ID: "user-a", Owner: "user-a", Data: core.Data(map[string]string{"phone": "13900000001", "verifiedPhone": "13800138000"})}, 0); err != nil {
+		t.Fatal(err)
+	}
+	order := core.Record{ID: "phone-order", Owner: "user-a", Data: core.Data(core.Order{UserID: "user-a", Status: "paid"})}
+	if _, err := a.Store.Put(t.Context(), "orders", order, 0); err != nil {
+		t.Fatal(err)
+	}
+	read := func(path, token string) core.Order {
+		w := call(a, "GET", path, token, "", nil)
+		if w.Code != 200 {
+			t.Fatal(w.Code, w.Body.String())
+		}
+		var page core.RecordPage
+		if json.Unmarshal(w.Body.Bytes(), &page) == nil && len(page.Items) == 1 {
+			var got core.Order
+			_ = json.Unmarshal(page.Items[0].Data, &got)
+			return got
+		}
+		var row core.Record
+		if json.Unmarshal(w.Body.Bytes(), &row) != nil {
+			t.Fatal(w.Body.String())
+		}
+		var got core.Order
+		_ = json.Unmarshal(row.Data, &got)
+		return got
+	}
+	if got := read("/api/admin/orders?page=1&q=phone-order", admin); got.Phone != "13800138000" {
+		t.Fatal(got.Phone)
+	}
+	if got := read("/api/admin/orders/phone-order", admin); got.Phone != "13800138000" {
+		t.Fatal(got.Phone)
+	}
+	if got := read("/api/orders?page=1", user); got.Phone != "" {
+		t.Fatal("phone exposed to user", got.Phone)
+	}
+}

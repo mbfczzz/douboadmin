@@ -106,6 +106,10 @@ export default function Orders({ notify }: PageProps) {
             render: (r) => <IdChip>{r.data.userId}</IdChip>,
           },
           {
+            title: "手机号",
+            render: (r) => r.data.phone || "—",
+          },
+          {
             title: "金额 / 积分",
             align: "right",
             render: (r) => (
