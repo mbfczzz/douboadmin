@@ -3,7 +3,8 @@ import { error, isNavigating, openTask, submitInput } from "../../utils/api";
 import { referenceError, selectedModel } from "./references";
 import { creationInput } from "./input";
 import { featureProblem } from "./feature";
-import { referenceClip } from "../../services/reference-clip";
+import { referenceClip, lengthProblem } from "../../services/reference-clip";
+import { loadConfig } from "../../utils/config-cache";
 
 import type { SubmitEditor as Editor } from "./editor-types";
 export async function generate(page: Editor) {
@@ -39,9 +40,13 @@ export async function generate(page: Editor) {
   page.setData({ busy: true });
   try {
     const input = creationInput(data, model);
-    // 一键复刻: the original video goes cut to the model's limit, without sound.
-    if (data.feature === "remake")
+    // 一键复刻: an original longer than the model takes cannot be remade;
+    // otherwise it goes without its sound.
+    if (data.feature === "remake") {
+      const tooLong = lengthProblem(data.remakeSource?.duration || 0, model, (await loadConfig()).models);
+      if (tooLong) throw new Error(tooLong);
       input.assets = await Promise.all(input.assets.map((id) => (data.assets.find((a) => a.id === id)?.isVideo ? referenceClip(id, model) : id)));
+    }
     const job = await submitInput(input, "create");
     rememberRows([job]); // task detail paints it at once
     if (page.visible) openTask(job.id, page);

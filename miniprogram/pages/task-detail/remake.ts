@@ -9,7 +9,7 @@ import { remakePrompt } from "../create/remake-brief";
 import type { Job, Row, Asset } from "../../services/types";
 import type { Breakdown } from "../../services/hot-breakdown";
 import { chosenSwaps } from "./swap";
-import { referenceClip } from "../../services/reference-clip";
+import { referenceClip, lengthProblem } from "../../services/reference-clip";
 import { pickerItems, savedModel, saveModel } from "../../utils/model-pick";
 import type { Config } from "../../services/types";
 import type { SwapRow } from "./swap";
@@ -60,7 +60,9 @@ async function remakeInput(job: Job, swapRows: SwapRow[], pictureAssets: AssetVi
   const model = picked || models.find((m) => !referenceError(m, references, true));
   if (!model) throw new Error(pictures.length ? "暂无同时支持原视频和这些图片的模型，请减少图片或联系管理员" : "暂无支持参考视频的模型，无法生成同款");
   const original = remakeOriginal(job);
-  // The original goes as its first seconds the model takes, without sound.
+  const tooLong = lengthProblem(original.duration, model, config.models);
+  if (tooLong) throw new Error(tooLong);
+  // The original goes without its sound.
   const assets = [await referenceClip(job.resultAssetId!, model), ...pictures];
   const s = modelSettings(model, { resolution: "", ratio: "9:16", duration: Math.round(original.duration) || 5, assets: references });
   return {

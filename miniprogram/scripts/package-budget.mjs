@@ -236,10 +236,10 @@ console.log(
 // Raises from 944 KiB on (Agent streaming, 一键复刻, AI试衣, Codex art,
 // 功能使用, feature examples …) are listed one by one, each with its
 // reason and measured size, in docs/miniprogram-invite-code-budget.md.
-// Latest: a model choice on every generation that picked its own
-// (components/model-picker, utils/model-pick.ts: 生成同款, AI 生成服装,
-// Agent 确认生成, AI写剧本, 文案提取): 1,114,438 B. 1076 -> 1089 KiB.
-const budget = 1089 * 1024;
+// Latest: 一键复刻 refuses an original longer than the model's reference
+// limit and sends it without sound (services/reference-clip.ts): 1,116,786 B.
+// 1089 -> 1091 KiB.
+const budget = 1091 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

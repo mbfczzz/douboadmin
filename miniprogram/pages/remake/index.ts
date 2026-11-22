@@ -1,12 +1,13 @@
 import { request, error, enterPage, replacePage } from "../../utils/api";
 import { hotView } from "../../services/hot-video";
 import { startRemake, startUploadRemake } from "../../services/hot-import";
-import { uploadHandlers, REFERENCE_SECONDS } from "./upload";
+import { uploadHandlers } from "./upload";
+import { longestReference } from "../../services/reference-clip";
 import { pickHandlers } from "./picks";
 import type { HotVideo } from "../../services/hot-video";
 
-// Reference videos past REFERENCE_SECONDS are refused by most models
-// (Seedance's 全能参考 takes about 15 s), so the page says so before starting.
+// An original longer than any model takes as a reference (Seedance 2.5:
+// 30 s) cannot be remade: the page says so and does not start.
 
 // 一键复刻 (after Clipcat's flow): a hot video (做同款) or a pasted Douyin link,
 // Starting adds a task
@@ -19,6 +20,7 @@ Page({
     video: null as ReturnType<typeof hotView> | null,
     seconds: 0,
     tooLong: false,
+    limit: 0, // the longest reference any model takes, when tooLong
     loading: false,
     loadError: "",
     link: "",
@@ -62,8 +64,11 @@ Page({
       if (version !== this.revision) return;
       this.id = video.id;
       const seconds = Math.round(video.duration) || 0;
-      this.setData({ video: hotView(video), seconds, tooLong: seconds > REFERENCE_SECONDS });
-      void this.start(); // no confirmation step: straight to the breakdown
+      const limit = await longestReference().catch(() => 0);
+      if (version !== this.revision) return;
+      const tooLong = !!limit && seconds > limit;
+      this.setData({ video: hotView(video), seconds, tooLong, limit });
+      if (!tooLong) void this.start(); // no confirmation step: straight to the breakdown
     } catch (e) {
       if (version === this.revision) this.setData({ loadError: (e as Error).message });
     } finally {
@@ -90,7 +95,7 @@ Page({
   },
   async start() {
     const video = this.data.video;
-    if (!video || this.data.busy) return;
+    if (!video || this.data.busy || this.data.tooLong) return;
     this.setData({ busy: true });
     try {
       const pictures: string[] = []; // chosen per subject on the task page (task-detail/swap.ts)

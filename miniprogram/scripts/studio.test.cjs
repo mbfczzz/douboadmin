@@ -106,7 +106,7 @@ test("a finished 一键复刻 task hands video, pictures and breakdown to the ed
 test("生成同款 picks a fitting model, writes from the breakdown and submits after one confirmation", async () => {
   const h = harness(), submitted = [];
   h.service("hot-breakdown").readBreakdown = async () => ({ hook: "撕快递", style: "手持暖光", shots: [{ start: 0, end: 6, scene: "卧室", action: "撕开快递", camera: "手持", speech: "终于到了" }, { start: 6, end: 18, scene: "镜前", action: "试色", camera: "特写", speech: "" }] });
-  const video = (id, refs) => ({ id, kind: "video", name: id, referenceTypes: refs, modes: ["t2v", "omni_ref"], durations: [5, 10, 15], resolutions: ["480p", "720p"], ratios: ["9:16", "16:9"], settings: {} });
+  const video = (id, refs) => ({ id, kind: "video", name: id, referenceTypes: refs, modes: ["t2v", "omni_ref"], durations: [5, 10, 15], resolutions: ["480p", "720p"], ratios: ["9:16", "16:9"], settings: {}, referenceRules: { omni_ref: { video: { maxCount: 3, maxSizeMB: 50, maxSeconds: 30 } } } });
   h.service("../utils/config-cache").loadConfig = async () => ({ models: [video("text-only", []), video("video-only", ["video"]), video("both", ["image", "video"])] });
   h.api.submitInput = async (input, channel) => { submitted.push([input, channel]); return { id: "gen-1", input, status: "queued" }; };
   const clips = [];

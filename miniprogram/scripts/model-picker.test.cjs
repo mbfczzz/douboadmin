@@ -92,3 +92,23 @@ test("the reference clip length is the model's limit (15 s when unknown)", () =>
   assert.equal(clipSeconds({ referenceRules: { omni_ref: { video: { maxCount: 3, maxSizeMB: 50, maxSeconds: 30 } } } }), 30);
   assert.equal(clipSeconds({}), 15);
 });
+
+test("an original longer than the chosen model's reference limit is refused, naming a model that can take it", async () => {
+  const h = harness(), submitted = [], toasts = [];
+  const rules = (s) => ({ omni_ref: { video: { maxCount: 3, maxSizeMB: 50, maxSeconds: s } } });
+  h.service("hot-breakdown").readBreakdown = async () => ({ shots: [] });
+  h.service("../utils/config-cache").loadConfig = async () => ({ models: [{ ...video("sd20", ["video"]), name: "Seedance 2.0", referenceRules: rules(15) }, { ...video("sd25", ["video"]), name: "Seedance 2.5", referenceRules: rules(30) }] });
+  h.api.submitInput = async (input) => { submitted.push(input); return { id: "gen", input, status: "queued" }; };
+  h.service("reference-clip").referenceClip = async (id) => id + "-muted";
+  h.wx.showToast = (o) => toasts.push(o.title);
+  const page = h.page("task-detail");
+  page.setData({ job: { id: "job", status: "succeeded", resultAssetId: "src", input: { kind: "import", purpose: "remake", sourceId: "7301", prompt: "一键复刻：t", duration: 20, assets: [] } } });
+  page.chooseRemakeModel({ detail: { id: "sd20" } });
+  await page.generateRemake();
+  assert.equal(submitted.length, 0);
+  assert.match(toasts.at(-1), /原视频 20 秒，Seedance 2\.0 最长只能参考 15 秒的视频，生成不了，可换成 Seedance 2\.5/);
+  page.chooseRemakeModel({ detail: { id: "sd25" } });
+  await page.generateRemake();
+  assert.equal(submitted[0].model, "sd25");
+  assert.equal(submitted[0].assets[0], "src-muted");
+});

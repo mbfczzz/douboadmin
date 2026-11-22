@@ -1,8 +1,8 @@
 import { chooseReferenceFile, upload, media, cancelled, error } from "../../utils/api";
+import { longestReference } from "../../services/reference-clip";
 
 // 一键复刻 from a video on the phone (not only a Douyin link): uploaded as
 // the user's material, then remade like any other (services/hot-import.ts).
-export const REFERENCE_SECONDS = 15;
 type Page = {
   data: { loading: boolean; busy: boolean; uploadingVideo: boolean; uploadPercent: number };
   id: string;
@@ -19,6 +19,12 @@ export const uploadHandlers = {
     this.setData({ uploadingVideo: true, uploadPercent: -1 });
     try {
       const file = await chooseReferenceFile("video");
+      // Too long for any model: say so before spending the upload.
+      const limit = await longestReference().catch(() => 0);
+      if (limit && Math.round(file.duration || 0) > limit) {
+        if (!this.destroyed) error(new Error(`这个视频 ${Math.round(file.duration || 0)} 秒，参考视频最长只能 ${limit} 秒，生成不了，请换一条 ${limit} 秒以内的视频`));
+        return;
+      }
       // The button shows how far the upload is (a long video takes a while).
       let shown = -1;
       const row = await upload(file.path, false, undefined, (p) => {
@@ -30,7 +36,7 @@ export const uploadHandlers = {
       this.uploadId = row.id;
       const seconds = Math.round(file.duration || 0);
       const video = { id: "", uploaded: true, title: "我上传的视频", url: media(row.data.url), cover: row.data.thumbnailUrl ? media(row.data.thumbnailUrl) : "", author: "", dateText: "" };
-      this.setData({ video, seconds, tooLong: seconds > REFERENCE_SECONDS, loadError: "" });
+      this.setData({ video, seconds, tooLong: false, loadError: "" });
       void this.start(); // no confirmation step: straight to the breakdown
     } catch (e) {
       if (!this.destroyed && !cancelled(e)) error(e);

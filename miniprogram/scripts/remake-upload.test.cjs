@@ -27,13 +27,30 @@ test("an uploaded video is remade through /remake/upload with its length", async
   assert.equal(page.data.uploadingVideo, false);
   assert.equal(page.data.video.uploaded, true);
   assert.equal(page.data.seconds, 18);
-  assert.equal(page.data.tooLong, true); // over the ~15 s most models take
+  assert.equal(page.data.tooLong, false); // no model limit known here: it starts
   await new Promise((resolve) => setTimeout(resolve, 0)); // it starts by itself
   assert.equal(posts.filter((p) => p.path === "/remake/upload").length, 1);
   assert.deepEqual(replaced, ["/pages/task-detail/index?id=job1"]);
   assert.deepEqual(JSON.parse(JSON.stringify(posts.find((p) => p.path === "/remake/upload").data)), { video: "a".repeat(32), assets: [], title: "我上传的视频", duration: 18 });
   page.change();
   assert.equal(page.uploadId, "");
+});
+
+// A video longer than any model takes as a reference is refused before upload.
+test("a phone video longer than the longest reference is refused before uploading", async () => {
+  const h = harness();
+  await h.api.signIn();
+  const page = h.page("remake");
+  h.wx.chooseMedia = async () => ({ tempFiles: [{ tempFilePath: "v.mp4", size: 1024, duration: 41 }] });
+  let uploads = 0;
+  h.api.upload = async () => { uploads++; return { id: "x", data: {} }; };
+  const toasts = [];
+  h.wx.showToast = (o) => toasts.push(o.title);
+  h.wx.showModal = (o) => toasts.push(o.content);
+  h.wx.request = (o) => o.success({ statusCode: 200, data: { models: [{ id: "sd25", kind: "video", name: "Sd 2.5", referenceRules: { omni_ref: { video: { maxCount: 10, maxSizeMB: 50, maxSeconds: 30 } } } }] } });
+  await page.uploadVideo();
+  assert.equal(uploads, 0);
+  assert.match(toasts.join(), /41 秒，参考视频最长只能 30 秒，生成不了/);
 });
 
 test("hot videos are offered while nothing is chosen; a tap loads one", async () => {
@@ -74,4 +91,25 @@ test("a video upload reports its progress and may take five minutes; other uploa
   assert.deepEqual(seen, [55]);
   assert.equal(sent[0].timeout, 300000);
   assert.equal(sent[1].timeout, 90000);
+});
+
+test("a hot video longer than the longest reference says it cannot be remade and does not start", async () => {
+  const h = harness();
+  await h.api.signIn();
+  const page = h.page("remake");
+  const posts = [];
+  h.wx.request = (o) => {
+    const path = o.url.split("/api")[1].split("?")[0];
+    if (o.method === "POST") posts.push(path);
+    const models = [{ id: "sd25", kind: "video", name: "Sd 2.5", referenceRules: { omni_ref: { video: { maxCount: 10, maxSizeMB: 50, maxSeconds: 30 } } } }];
+    const data = path === "/config" ? { models } : path.startsWith("/hot/videos/") ? { id: "7301", title: "长视频", cover: "/c.jpg", duration: 48, likes: 0, views: 0, publishedAt: "2026-11-01T00:00:00Z", author: "a", text: "" } : { enabled: false, keywords: [] };
+    o.success({ statusCode: 200, data });
+  };
+  page.onLoad({ id: "7301" });
+  await page.load();
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.equal(page.data.tooLong, true);
+  assert.equal(page.data.limit, 30);
+  assert.equal(posts.filter((p) => p.startsWith("/remake") || p.startsWith("/hot/videos/7301/import")).length, 0, "nothing started");
+  assert.match(require("node:fs").readFileSync("pages/remake/index.wxml", "utf8"), /参考视频最长只能 \{\{limit\}\} 秒，这条视频生成不了/);
 });
