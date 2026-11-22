@@ -1,8 +1,10 @@
-import { error, cancelled } from "../../utils/api";
+import { error, cancelled, request } from "../../utils/api";
 import { PaymentCancelledError } from "../../services/errors";
 import { VirtualPaymentRejectedError } from "../../services/virtual-failure";
 import { recharge, amountFen } from "../../services/payment";
-import { pendingPayment, paymentMessage } from "../../services/payment-status";
+import { pendingPayment, paymentMessage, clearPayment } from "../../services/payment-status";
+import type { Row } from "../../services/types";
+import type { Order } from "../../services/business-types";
 import { sessionToken, sessionUserId } from "../../services/session";
 
 import type { WalletEditor as Editor } from "../../services/page-contracts";
@@ -51,3 +53,21 @@ export async function checkout(page: Editor) {
     }
   }
 }
+
+// While 到账待确认 (automatic checks have stopped), each load looks at the
+// order once, so a late confirmation ends the wait instead of leaving the
+// purchase section hidden. A failed lookup just keeps waiting.
+export async function recheckWaiting(page: Editor) {
+  const id = page.data.pendingOrderId;
+  if (!id || !page.data.paymentWaiting) return;
+  try {
+    const row = await request<Row<Order>>("/orders/" + id);
+    if (page.destroyed || page.data.pendingOrderId !== id || row.data.status === "created") return;
+    clearPayment(id);
+    page.trackPayment("");
+    page.setData({ paymentNotice: paymentMessage(row.data.status) });
+  } catch {
+    /* still waiting; 充值订单 can query it */
+  }
+}
+

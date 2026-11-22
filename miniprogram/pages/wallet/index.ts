@@ -24,7 +24,7 @@ import type { Ledger } from "../../services/wallet-ledger";
 import { financePage } from "../../services/finance-page";
 import type { FinancePage } from "../../services/finance-page";
 import { walletData, loggedOut } from "./state";
-import { checkout } from "./checkout";
+import { checkout, recheckWaiting } from "./checkout";
 import {
   estimateCheckout,
   confirmAdditionalPurchase,
@@ -123,6 +123,7 @@ Page({
       this.estimate();
       void loadInsights(this);
       this.trackPayment(pendingPayment(info.wallet.userId));
+      void recheckWaiting(this);
     } catch (e) {
       if (revision === this.revision) {
         this.setData({ ledgerPage: this.loadedLedgerPage });

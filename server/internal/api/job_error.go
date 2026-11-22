@@ -60,12 +60,23 @@ func failureFor(code int, action, kind string) userFailure {
 	return failSystem
 }
 
+// A failed job whose points were not returned automatically: the upstream
+// outcome was not confirmed, so an administrator verifies it and returns them
+// (后台 → 退回积分). Users are told plainly, in the 提交扣除 / 失败退回 terms they
+// know: no 预留 / 冻结 wording (commit a1725b2).
+const heldNote = "积分将在平台核实后退回，无需重复提交。"
+
 // publicFailure rewrites a failed job for its owner's eyes; hinted: the
 // message is the operator's own (模型配置 → 错误提示), kept as written.
 func publicFailure(j *core.Job, hinted bool) {
 	if j.Status != "failed" {
 		return
 	}
+	defer func() {
+		if j.BillingState == "reserved" {
+			j.ErrorAction = heldNote
+		}
+	}()
 	if hinted { // keep the operator's wording; guidance by category, not upstream's
 		j.ErrorAction = failureFor(j.ErrorCode, j.ErrorAction, j.Input.Kind).action
 		j.ErrorCode, j.ErrorType = 0, ""

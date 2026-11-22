@@ -220,3 +220,27 @@ func (s *Service) Close(ctx context.Context, id string) error {
 		return e
 	})
 }
+
+// ErrRefundNotFailed: only a refund WeChat reported as failed can be closed.
+var ErrRefundNotFailed = errors.New("只有微信判定为退款异常的退款单可以关闭")
+
+// CloseFailedRefund: WeChat reported the refund as failed (abnormal) and an
+// administrator confirmed in the merchant console that no money went back.
+// The refund closes like a CLOSED result: the held points return to the user
+// and the order is paid again. A refund that has meanwhile succeeded is left
+// alone (FinishRefund re-checks inside its transaction).
+func (s *Service) CloseFailedRefund(ctx context.Context, id string) error {
+	row, err := s.Store.Get(ctx, "refunds", id)
+	if err != nil {
+		return err
+	}
+	var refund core.Refund
+	if err = json.Unmarshal(row.Data, &refund); err != nil {
+		return err
+	}
+	if refund.Status != "abnormal" {
+		return ErrRefundNotFailed
+	}
+	return s.FinishRefund(ctx, RefundResult{Channel: refund.Channel, ID: id, OrderID: refund.OrderID, ProviderID: refund.ProviderID,
+		AmountFen: refund.AmountFen, Status: "CLOSED", CompletedAt: time.Now().UTC()})
+}

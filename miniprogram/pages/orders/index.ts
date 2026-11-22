@@ -229,11 +229,15 @@ Page({
         title: paymentMessage(row.data.status),
         icon: "none",
       });
-      await this.load();
     } catch (e) {
       if (!this.destroyed && !cancelled(e)) error(e);
     } finally {
-      if (!this.destroyed) this.setData({ busy: "" });
+      // Reload either way: a failed or cancelled attempt has changed the order
+      // (signed once), and a stale 继续支付 must not be tapped again.
+      if (!this.destroyed) {
+        this.setData({ busy: "" });
+        await this.load().catch(() => undefined);
+      }
     }
   },
   async refresh(e: WechatMiniprogram.TouchEvent) {

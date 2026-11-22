@@ -67,3 +67,9 @@ test("editing a failed recipe returns to its template with model selection", () 
   page.openTemplate();
   assert.equal(h.nav.at(-1).url, "/pages/template-detail/index?id=recipe-a");
 });
+
+// A failed task whose points were not returned yet reads 待退回, not 已扣除.
+test("a failed task with points still to return shows 待退回", () => {
+  const detail = fs.readFileSync("pages/task-detail/index.wxml", "utf8");
+  assert.match(detail, /job\.status==='failed'&&job\.billingState==='reserved'\?'待退回':'已扣除'/);
+});

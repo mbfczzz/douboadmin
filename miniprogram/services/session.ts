@@ -199,6 +199,8 @@ export function forgetDeletedAccount() {
   wx.setStorageSync("account-deleted", true);
 }
 
+const keptOnLogout = new Set(["pending-payments", "pending-recharge"]);
+
 function clearLocalAccount() {
   clearSession();
   cancelLogin();
@@ -207,6 +209,9 @@ function clearLocalAccount() {
   }
   for (const key of wx.getStorageInfoSync?.().keys || []) {
     // Last-seen page data (profile, works, tasks) and the cached config.
+    // Payment records stay: they are kept per user (payment-status.ts) and are
+    // what stops a second purchase while one is still being confirmed.
+    if (keptOnLogout.has(key)) continue;
     if (key.startsWith("pending-") || key.startsWith("retry-") || key.startsWith("view-cache:") || key === "config-cache")
       wx.removeStorageSync(key);
   }

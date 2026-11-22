@@ -6,6 +6,7 @@ import (
 	"doubo/server/internal/core"
 	"doubo/server/internal/store"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"time"
 )
@@ -32,6 +33,17 @@ func (s *Service) order(ctx context.Context, id string) (core.Record, core.Order
 	}
 	return row, o, e
 }
+
+// staleUnpaid: an order still unpaid a day after it expired (the payment
+// sheet was cancelled, rejected or never completed). It is closed instead of
+// being queried forever. Closing is safe: Settle still accepts a closed order,
+// so a payment notice that arrives later still credits it.
+const unpaidGrace = 24 * time.Hour
+
+func staleUnpaid(o core.Order) bool {
+	return o.Status == "created" && time.Now().After(o.ExpiresAt.Add(unpaidGrace))
+}
+
 func (s *Service) Refresh(ctx context.Context, id string) error {
 	if !s.Ready() {
 		return fmt.Errorf("虚拟支付尚未配置")
@@ -42,9 +54,13 @@ func (s *Service) Refresh(ctx context.Context, id string) error {
 	}
 	remote, e := s.Client.Query(ctx, id, o)
 	if e != nil {
+		var refused *APIError
+		if errors.As(e, &refused) && refused.Code == orderNotFound && staleUnpaid(o) {
+			return s.Billing.Close(ctx, id)
+		}
 		return e
 	}
-	if remote.Status == 6 {
+	if remote.Status == 6 || (remote.Status <= 1 && staleUnpaid(o)) {
 		return s.Billing.Close(ctx, id)
 	}
 	if remote.Status != 2 && remote.Status != 3 && remote.Status != 4 {

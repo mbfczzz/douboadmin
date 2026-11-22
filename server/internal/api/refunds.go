@@ -1,8 +1,10 @@
 package api
 
 import (
+	"doubo/server/internal/billing"
 	"doubo/server/internal/core"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strings"
 )
@@ -119,6 +121,37 @@ func (a *Server) refreshRefund(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	row, e = a.Store.Get(r.Context(), "refunds", row.ID)
+	if e != nil {
+		dbError(w, e)
+		return
+	}
+	reply(w, 200, row)
+}
+
+// closeFailedRefund (退款失败，退回积分): WeChat reported the refund failed and
+// the administrator confirmed in the merchant console that no money went back,
+// so the points held for it return to the user.
+func (a *Server) closeFailedRefund(w http.ResponseWriter, r *http.Request) {
+	var v struct {
+		Verified bool   `json:"verified"`
+		Reason   string `json:"reason"`
+	}
+	if !decode(w, r, &v) {
+		return
+	}
+	if !v.Verified || len([]rune(strings.TrimSpace(v.Reason))) < 5 {
+		fail(w, 400, "请先在微信商户后台核实退款未成功，并填写处理原因")
+		return
+	}
+	if e := a.Billing.CloseFailedRefund(r.Context(), r.PathValue("id")); e != nil {
+		if errors.Is(e, billing.ErrRefundNotFailed) {
+			fail(w, 409, e.Error())
+			return
+		}
+		dbError(w, e)
+		return
+	}
+	row, e := a.Store.Get(r.Context(), "refunds", r.PathValue("id"))
 	if e != nil {
 		dbError(w, e)
 		return

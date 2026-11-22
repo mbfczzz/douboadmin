@@ -21,4 +21,5 @@ func (a *Server) paymentRoutes() {
 	m.HandleFunc("POST /api/admin/orders/{id}/refund", a.auth("admin", a.createRefund))
 	m.HandleFunc("GET /api/admin/refunds", a.auth("admin", a.refunds))
 	m.HandleFunc("POST /api/admin/refunds/{id}/refresh", a.auth("admin", a.refreshRefund))
+	m.HandleFunc("POST /api/admin/refunds/{id}/close", a.auth("admin", a.closeFailedRefund))
 }

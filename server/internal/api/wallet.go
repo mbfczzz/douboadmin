@@ -4,6 +4,7 @@ import (
 	"doubo/server/internal/billing"
 	"doubo/server/internal/core"
 	"doubo/server/internal/partners"
+	"doubo/server/internal/store"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -85,6 +86,9 @@ func (a *Server) ledger(w http.ResponseWriter, r *http.Request) {
 			var entry core.LedgerEntry
 			if json.Unmarshal(page.Items[i].Data, &entry) == nil {
 				entry.Actor, entry.Reference = "", ""
+				if entry.Kind == "job_hold" { // older entries say 生成任务预留积分
+					entry.Note = store.HoldNote
+				}
 				page.Items[i].Data = core.Data(entry)
 			}
 		}

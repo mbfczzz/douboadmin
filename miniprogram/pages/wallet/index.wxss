@@ -90,7 +90,11 @@
 .summary-label {
   color: var(--ui-points-muted);
 }
+/* Its own bottom gap: while a payment is being confirmed the purchase block
+   (whose 28px margin normally separates them) is hidden, and 积分明细 sat
+   flush against this card. Block margins collapse, so the usual gap stays. */
 .wallet-shortcuts {
+  margin-bottom: 12px;
   padding: 0 16px;
   border-radius: var(--ui-radius-card);
   background: var(--ui-surface);

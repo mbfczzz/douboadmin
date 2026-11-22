@@ -91,6 +91,7 @@ var ops = map[string]op{
 	"POST /api/admin/orders/{id}/refund":                  {label: "订单退款", target: "order", summary: func(q, _ map[string]any) string { return reason(q, "reason") }},
 	"POST /api/admin/orders/{id}/refresh":                 {label: "订单查单", target: "order"},
 	"POST /api/admin/refunds/{id}/refresh":                {label: "退款查单", target: "refund"},
+	"POST /api/admin/refunds/{id}/close":                  {label: "关闭失败退款", target: "refund", summary: func(q, _ map[string]any) string { return reason(q, "reason") }},
 	"POST /api/admin/virtual-payments/events/{id}/retry":  {label: "重试虚拟支付通知", target: "event"},
 	"POST /api/admin/virtual-payments/events/{id}/review": {label: "人工核对虚拟支付", target: "event", summary: func(q, _ map[string]any) string { return reason(q, "note") }},
 	"PUT /api/admin/platform":                             {label: "修改平台设置"},

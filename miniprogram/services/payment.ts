@@ -40,11 +40,35 @@ export function canRecharge(info: WalletInfo) {
   );
 }
 
-export async function recharge(
+// One purchase at a time per session, across every page instance: leaving
+// the wallet while an order is being created or signed and buying again from a
+// new instance must not start a second order and a second payment sheet. A
+// new session (account switch) is not blocked: the old flow stops on its own.
+let purchasing = "";
+async function exclusive<T>(run: () => Promise<T>): Promise<T> {
+  const token = sessionToken();
+  if (purchasing && purchasing === token) throw new Error("上一笔支付正在处理，请稍候再试");
+  purchasing = token;
+  try {
+    return await run();
+  } finally {
+    if (purchasing === token) purchasing = "";
+  }
+}
+
+export function recharge(info: WalletInfo, fen: number, productId = "", mode: PurchaseMode = "package") {
+  return exclusive(() => startRecharge(info, fen, productId, mode));
+}
+
+export function payExisting(id: string, expectedToken?: string) {
+  return exclusive(() => payOrder(id, expectedToken));
+}
+
+async function startRecharge(
   info: WalletInfo,
   fen: number,
-  productId = "",
-  mode: PurchaseMode = "package",
+  productId: string,
+  mode: PurchaseMode,
 ) {
   const token = sessionToken();
   if (!token || sessionUserId() !== info.wallet.userId)
@@ -67,7 +91,7 @@ export async function recharge(
       fen,
       token,
     );
-    return payExisting(row.id, token);
+    return payOrder(row.id, token);
   }
   const owner = info.wallet.userId,
     hash = JSON.stringify({
@@ -100,10 +124,10 @@ export async function recharge(
     draft.id = row.id;
     wx.setStorageSync("pending-recharge", draft);
   }
-  return payExisting(draft.id, token);
+  return payOrder(draft.id, token);
 }
 
-export async function payExisting(id: string, expectedToken?: string) {
+async function payOrder(id: string, expectedToken?: string) {
   const info = await request<WalletInfo>(
     "/wallet",
     "GET",
@@ -123,7 +147,10 @@ export async function payExisting(id: string, expectedToken?: string) {
     throw new Error("此订单已结束或过期，请重新充值");
   }
   if (pendingPayments(info.wallet.userId).includes(id)) return row;
-  if (Date.parse(row.data.expiresAt) <= Date.now()) {
+  // Virtual orders: the server decides expiry when signing (a phone clock
+  // running fast made every fresh order look expired). The legacy draft keeps
+  // its local check so an expired draft is dropped and not reused.
+  if (row.data.channel !== "wechat_virtual" && Date.parse(row.data.expiresAt) <= Date.now()) {
     clearPayment(id);
     throw new Error("此订单已结束或过期，请重新充值");
   }

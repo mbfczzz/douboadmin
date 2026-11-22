@@ -9,6 +9,10 @@ import (
 	"time"
 )
 
+// HoldNote is the user's ledger note for points taken when a task is
+// submitted (users see 提交扣除 / 失败退回, never 预留 / 冻结).
+const HoldNote = "提交生成任务扣除积分"
+
 func createFundedJob(ctx context.Context, s Store, j core.Job) (out core.Job, err error) {
 	if j.CostUnits < 0 || j.CostUnits > core.MaxBalance {
 		return out, fmt.Errorf("任务积分价格无效")
@@ -33,7 +37,7 @@ func createFundedJob(ctx context.Context, s Store, j core.Job) (out core.Job, er
 		}
 		bill := core.JobBilling{Units: j.CostUnits, State: "free", EstimatedCostMicros: j.EstimatedCostMicros}
 		if j.CostUnits > 0 {
-			_, e := ApplyFunds(tx, core.LedgerEntry{UserID: j.UserID, Reference: "job:" + j.ID + ":hold", Kind: "job_hold", AvailableDelta: -j.CostUnits, HeldDelta: j.CostUnits, Note: "生成任务预留积分"})
+			_, e := ApplyFunds(tx, core.LedgerEntry{UserID: j.UserID, Reference: "job:" + j.ID + ":hold", Kind: "job_hold", AvailableDelta: -j.CostUnits, HeldDelta: j.CostUnits, Note: HoldNote})
 			if e != nil {
 				return e
 			}

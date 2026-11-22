@@ -70,3 +70,12 @@ test("work notices pick up the work's own thumbnail; orders and unknown jobs sta
   await loadThumbs(page);
   assert.deepEqual(Object.keys(page.data.thumbs), ["j1"]);
 });
+
+// While a payment is being confirmed the purchase block is hidden; the
+// shortcuts card keeps its own gap so 积分明细 does not sit flush against it.
+test("the 充值订单 / 积分说明 card keeps a gap above 积分明细", () => {
+  const css = require("node:fs").readFileSync("pages/wallet/index.wxss", "utf8");
+  assert.match(css, /\.wallet-shortcuts \{[^}]*margin-bottom: 12px/);
+  const wxml = require("node:fs").readFileSync("pages/wallet/index.wxml", "utf8");
+  assert.match(wxml, /class="wallet-purchase" wx:if="\{\{info&&!pendingOrderId\}\}"/);
+});

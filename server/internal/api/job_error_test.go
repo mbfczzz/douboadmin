@@ -66,3 +66,18 @@ func TestUsersSeeOnlyActionableFailures(t *testing.T) {
 		t.Fatal(note.Error)
 	}
 }
+
+// A failed job whose points were not returned yet says they will be, instead
+// of reading as charged for nothing (and without 预留 / 冻结 wording).
+func TestHeldFailureSaysThePointsAreFrozen(t *testing.T) {
+	held := core.Job{Status: "failed", BillingState: "reserved", Error: "提交结果待确认", Input: core.JobInput{Kind: "video"}}
+	publicFailure(&held, false)
+	if held.Error != "系统异常，生成失败，请稍后重试" || held.ErrorAction != heldNote {
+		t.Fatal(held.Error, held.ErrorAction)
+	}
+	released := core.Job{Status: "failed", BillingState: "released", Error: "x", Input: core.JobInput{Kind: "video"}}
+	publicFailure(&released, false)
+	if released.ErrorAction != "" {
+		t.Fatal(released.ErrorAction)
+	}
+}

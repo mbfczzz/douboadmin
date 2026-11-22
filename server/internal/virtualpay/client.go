@@ -117,7 +117,8 @@ func (c *Client) post(ctx context.Context, address string, body []byte) ([]byte,
 		return nil, fmt.Errorf("虚拟支付服务暂不可用")
 	}
 	var v struct {
-		Code int `json:"errcode"`
+		Code    int    `json:"errcode"`
+		Message string `json:"errmsg"`
 	}
 	if len(raw) == 0 {
 		return raw, nil
@@ -126,7 +127,28 @@ func (c *Client) post(ctx context.Context, address string, body []byte) ([]byte,
 		return nil, fmt.Errorf("虚拟支付响应格式异常")
 	}
 	if v.Code != 0 {
-		return nil, fmt.Errorf("虚拟支付请求未确认，错误码 %d", v.Code)
+		if runes := []rune(v.Message); len(runes) > 200 {
+			v.Message = string(runes[:200])
+		}
+		return nil, &APIError{Code: v.Code, Message: v.Message}
 	}
 	return raw, nil
 }
+
+// APIError is WeChat refusing a virtual payment request: its errcode and
+// errmsg, for the service log and administrators (users never see it).
+type APIError struct {
+	Code    int
+	Message string
+}
+
+func (e *APIError) Error() string {
+	if e.Message == "" {
+		return fmt.Sprintf("虚拟支付请求未确认，错误码 %d", e.Code)
+	}
+	return fmt.Sprintf("虚拟支付请求未确认，错误码 %d：%s", e.Code, e.Message)
+}
+
+// orderNotFound: query_order for an order WeChat has no record of (the payment
+// sheet was never completed); WeChat's generic parameter-error code.
+const orderNotFound = 268490002

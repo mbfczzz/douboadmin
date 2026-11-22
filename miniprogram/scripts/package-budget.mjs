@@ -236,10 +236,11 @@ console.log(
 // Raises from 944 KiB on (Agent streaming, 一键复刻, AI试衣, Codex art,
 // 功能使用, feature examples …) are listed one by one, each with its
 // reason and measured size, in docs/miniprogram-invite-code-budget.md.
-// Latest: 一键复刻 refuses an original longer than the model's reference
-// limit and sends it without sound (services/reference-clip.ts): 1,116,786 B.
-// 1089 -> 1091 KiB.
-const budget = 1091 * 1024;
+// Latest: payment safety review — logout keeps the per-user pending lock,
+// one purchase per session, signed orders are not reported as submitted, a
+// waiting order is re-checked, server-side expiry (services/payment.ts,
+// pages/wallet/checkout.ts): 1,120,074 B. 1091 -> 1094 KiB.
+const budget = 1094 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

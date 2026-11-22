@@ -54,6 +54,7 @@ type Event struct {
 	RetCode       *int   `json:"RetCode" xml:"RetCode"`
 	RefundTime    int64  `json:"RefundSuccTimestamp" xml:"RefundSuccTimestamp"`
 	IOSOrderID    string `json:"pay_order_id" xml:"pay_order_id"`
+	ComplaintID   string `json:"ComplaintId" xml:"ComplaintId"`
 }
 
 func digest(parts ...string) string {

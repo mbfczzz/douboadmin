@@ -77,10 +77,11 @@ export async function invokeVirtualPayment(
 ) {
   if (!supportsVirtualPayment(platform))
     throw new Error("请更新微信后重试，当前设备不支持虚拟支付");
-  if (row.data.virtual?.issued) {
-    rememberPayment(row.id, owner);
-    return;
-  }
+  // Signed once already (one-way; never signed again). Its sheet may have been
+  // cancelled or never shown, so it is not reported as submitted and does not
+  // lock the wallet; a payment it did take still arrives on its own.
+  if (row.data.virtual?.issued)
+    throw new Error("此支付单已拉起过支付，不能再次支付。已付款会自动到账，未付款请重新充值");
   const code = await new Promise<string>((resolve, reject) =>
     wx.login({
       success: (result) =>

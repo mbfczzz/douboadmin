@@ -57,7 +57,10 @@ func (s *Service) processEvent(ctx context.Context, event Event) error {
 	if event.Name == "xpay_complaint_notify" || event.Name == "xpay_wxpay_callback_notify" {
 		return s.audit(ctx, event, "needs_review")
 	}
-	return fmt.Errorf("未支持的虚拟支付事件")
+	// Events this service does not act on (other notices sharing the message
+	// URL, coin events) are acknowledged and kept for review: answering with an
+	// error made WeChat resend them and kept them pending forever.
+	return s.audit(ctx, event, "needs_review")
 }
 func (s *Service) handleRefund(ctx context.Context, event Event) error {
 	_, o, e := s.order(ctx, event.RefundOrderID)
@@ -114,6 +117,9 @@ func eventID(event Event) string {
 		return core.RefundSubmissionEventID(event.RefundOrderID, event.RefundID)
 	}
 	identity := event.Name + ":" + event.OrderID + ":" + event.RefundOrderID + ":" + event.RefundID
+	if event.ComplaintID != "" { // each complaint on an order is its own record
+		identity += ":complaint:" + event.ComplaintID
+	}
 	if event.OrderID == "" && event.RefundOrderID == "" && event.RefundID == "" {
 		identity += ":" + event.Fingerprint
 	}

@@ -93,10 +93,18 @@ func (s *Service) Reconcile(ctx context.Context) {
 				err = s.RetryEvent(ctx, row.ID, "reconcile")
 			case "orders":
 				var order core.Order
-				if json.Unmarshal(row.Data, &order) != nil || order.Channel != Channel || UnissuedPurchase(order) {
+				if json.Unmarshal(row.Data, &order) != nil || order.Channel != Channel {
 					continue
 				}
-				err = s.Refresh(ctx, row.ID)
+				if UnissuedPurchase(order) {
+					// Never signed, so WeChat cannot have it; once expired it can
+					// no longer be signed either (ClaimSignature), so it closes.
+					if time.Now().After(order.ExpiresAt) {
+						err = s.Billing.Close(ctx, row.ID)
+					}
+				} else {
+					err = s.Refresh(ctx, row.ID)
+				}
 			case "virtual_deliveries":
 				err = s.Refresh(ctx, row.ID)
 			case "refunds":
