@@ -6,6 +6,8 @@ import (
 	"doubo/server/internal/core"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"io"
 	"log/slog"
 	"net/http"
 	"os"
@@ -67,17 +69,20 @@ func (a *Server) cutClip(ctx context.Context, user, id, key string, seconds int)
 	if err != nil {
 		return core.Record{}, err
 	}
-	input := filepath.Join(a.Config.MediaDir, filepath.FromSlash(key))
-	if a.Objects != nil {
-		if input, err = a.Objects.URL(ctx, key); err != nil {
-			return core.Record{}, err
-		}
-	}
 	dir, err := os.MkdirTemp("", "reference-clip-")
 	if err != nil {
 		return core.Record{}, err
 	}
 	defer os.RemoveAll(dir)
+	input := filepath.Join(a.Config.MediaDir, filepath.FromSlash(key))
+	if a.Objects != nil {
+		// Fetched here, not by ffmpeg: a static ffmpeg build cannot resolve
+		// host names (it crashed reading the OSS link), and a local file needs
+		// no network or TLS support in ffmpeg at all.
+		if input, err = a.fetchOriginal(ctx, key, filepath.Join(dir, "source")); err != nil {
+			return core.Record{}, err
+		}
+	}
 	out := filepath.Join(dir, "clip.mp4")
 	run, cancel := context.WithTimeout(ctx, 2*time.Minute)
 	defer cancel()
@@ -111,4 +116,38 @@ func (a *Server) cutClip(ctx context.Context, user, id, key string, seconds int)
 		return a.Store.Get(ctx, "assets", id)
 	}
 	return rec, err
+}
+
+// fetchOriginal copies the stored video to path (at most 200 MB).
+func (a *Server) fetchOriginal(ctx context.Context, key, path string) (string, error) {
+	url, err := a.Objects.URL(ctx, key)
+	if err != nil {
+		return "", err
+	}
+	get, cancel := context.WithTimeout(ctx, 2*time.Minute)
+	defer cancel()
+	req, err := http.NewRequestWithContext(get, http.MethodGet, url, nil)
+	if err != nil {
+		return "", err
+	}
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer res.Body.Close()
+	if res.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("download original: HTTP %d", res.StatusCode)
+	}
+	out, err := os.Create(path)
+	if err != nil {
+		return "", err
+	}
+	n, err := io.Copy(out, io.LimitReader(res.Body, 200<<20+1))
+	if cerr := out.Close(); err == nil {
+		err = cerr
+	}
+	if err == nil && n > 200<<20 {
+		err = errors.New("original video is over 200 MB")
+	}
+	return path, err
 }

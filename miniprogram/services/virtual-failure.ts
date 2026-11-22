@@ -22,9 +22,16 @@ export class VirtualPaymentRejectedError extends Error {
   constructor(
     public code: number,
     message: string,
+    reason = "",
   ) {
-    super(`${message}（错误码 ${code}）`);
+    super(`${message}（错误码 ${code}${reason ? "：" + reason : ""}）`);
   }
+}
+
+// WeChat's reason after the code (detail is already scrubbed of secrets).
+function shortReason(detail: string) {
+  const text = detail.replace(/^requestVirtualPayment:\s*fail\s*:?\s*/i, "").trim();
+  return text === "微信未返回错误说明" ? "" : text.slice(0, 80);
 }
 
 export function virtualFailureCode(failure: NativeFailure) {
@@ -44,10 +51,10 @@ export function virtualFailureCancelled(failure: NativeFailure) {
   );
 }
 
-export function virtualFailureError(failure: NativeFailure) {
+export function virtualFailureError(failure: NativeFailure, detail = "") {
   const code = virtualFailureCode(failure);
   return code !== undefined && rejected[code]
-    ? new VirtualPaymentRejectedError(code, rejected[code])
+    ? new VirtualPaymentRejectedError(code, rejected[code], shortReason(detail))
     : undefined;
 }
 

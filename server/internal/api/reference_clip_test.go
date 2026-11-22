@@ -1,8 +1,12 @@
 package api
 
 import (
+	"context"
 	"doubo/server/internal/core"
 	"encoding/json"
+	"io"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -58,5 +62,55 @@ func TestReferenceClipIsTheFirstSecondsWithoutSound(t *testing.T) {
 	}
 	if _, code := clip(one, 0); code != 400 {
 		t.Fatal("bad length", code)
+	}
+}
+
+// With OSS the server downloads the original itself and gives ffmpeg a local
+// file (a static ffmpeg build crashed reading the signed OSS link).
+type linkedObjects struct {
+	link string
+	put  map[string][]byte
+}
+
+func (o *linkedObjects) Put(_ context.Context, key string, r io.Reader, _ string) error {
+	data, err := io.ReadAll(r)
+	o.put[key] = data
+	return err
+}
+func (o *linkedObjects) URL(_ context.Context, key string) (string, error) {
+	return o.link + "/" + key, nil
+}
+
+func TestReferenceClipDownloadsTheOriginalFromStorage(t *testing.T) {
+	if _, err := exec.LookPath("ffmpeg"); err != nil {
+		t.Skip("ffmpeg not installed")
+	}
+	a, one, _ := setup(t)
+	source := filepath.Join(t.TempDir(), "source.mp4")
+	gen := exec.Command("ffmpeg", "-nostdin", "-loglevel", "error", "-f", "lavfi", "-i", "testsrc=size=160x120:rate=10:duration=3",
+		"-f", "lavfi", "-i", "sine=duration=3", "-c:v", "libx264", "-c:a", "aac", "-shortest", source)
+	if out, err := gen.CombinedOutput(); err != nil {
+		t.Skip("cannot make a fixture video: ", string(out))
+	}
+	served := 0
+	oss := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		served++
+		http.ServeFile(w, r, source)
+	}))
+	defer oss.Close()
+	objects := &linkedObjects{link: oss.URL, put: map[string][]byte{}}
+	a.Objects = objects
+	_, _ = a.Store.Put(t.Context(), "assets", core.Record{ID: "stored", Owner: "user-a", Data: core.Data(map[string]any{"key": "uploads/user-a/stored.mp4", "type": "video/mp4", "size": 1})}, 0)
+	w := call(a, "POST", "/api/assets/stored/reference-clip", one, "", map[string]any{"seconds": 30})
+	if w.Code != 200 || served != 1 || len(objects.put) != 1 {
+		t.Fatal(w.Code, w.Body.String(), served, len(objects.put))
+	}
+	for _, data := range objects.put {
+		clip := filepath.Join(t.TempDir(), "clip.mp4")
+		_ = os.WriteFile(clip, data, 0o600)
+		probe, _ := exec.Command("ffprobe", "-v", "error", "-show_entries", "stream=codec_type", "-of", "csv=p=0", clip).Output()
+		if strings.Contains(string(probe), "audio") || !strings.Contains(string(probe), "video") {
+			t.Fatal("streams:", string(probe))
+		}
 	}
 }

@@ -121,17 +121,18 @@ export async function invokeVirtualPayment(
           clearPayment(row.id);
           reject(new PaymentCancelledError());
         } else {
+          const detail = virtualFailureDetail(failure, [
+            params.signData,
+            params.paySig,
+            params.signature,
+          ]);
           console.warn("[virtual-payment] 微信支付调用失败", {
             errCode: virtualFailureCode(failure),
-            errMsg: virtualFailureDetail(failure, [
-              params.signData,
-              params.paySig,
-              params.signature,
-            ]),
+            errMsg: detail,
             orderId: row.id,
             platform,
           });
-          const error = virtualFailureError(failure);
+          const error = virtualFailureError(failure, detail);
           if (error) {
             clearPayment(row.id);
             reject(error);

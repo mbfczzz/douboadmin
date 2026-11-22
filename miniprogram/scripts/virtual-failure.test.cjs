@@ -61,11 +61,13 @@ test("native diagnostics retain the error reason while hiding signed data and cr
     "private-access-value",
   ])
     assert.equal(
-      output.includes(value),
+      output.includes(value) || f.page.data.paymentNotice.includes(value),
       false,
-      "credential leaked into native diagnostics",
+      "credential leaked into native diagnostics or the notice",
     );
   assert.ok(f.page.data.paymentNotice.includes("-15016"));
+  // WeChat's own reason shows on the phone, after the code.
+  assert.match(f.page.data.paymentNotice, /错误码 -15016：signData invalid/);
 });
 
 for (const code of [-1, -15002, -15012, -999999]) {
@@ -95,4 +97,12 @@ test("snake-case string error fields are normalized without losing the failure r
   assert.match(f.page.data.paymentNotice, /价格/);
   assert.ok(f.page.data.paymentNotice.includes("-15013"));
   assert.equal(diagnostics[0][1].errMsg, "goodsPrice mismatch");
+  assert.match(f.page.data.paymentNotice, /（错误码 -15013：goodsPrice mismatch）/);
+});
+
+test("the shown reason drops WeChat's API prefix", async () => {
+  const f = await fixture("success");
+  f.h.wx.requestVirtualPayment = (options) => options.fail({ errCode: -15001, errMsg: "requestVirtualPayment:fail INVALID_PARAMS" });
+  await f.page.pay();
+  assert.match(f.page.data.paymentNotice, /支付参数校验未通过，请联系管理员（错误码 -15001：INVALID_PARAMS）/);
 });
