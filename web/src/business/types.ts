@@ -1,5 +1,6 @@
 import type { Tone } from "../components/Tag";
 import type { Traffic } from "./traffic";
+import type { PointStats } from "./point-stats";
 export interface Wallet {
   userId: string;
   availableUnits: number;
@@ -169,6 +170,7 @@ export interface PeriodTotals {
   spentUnits?: number;
 }
 export interface Dashboard {
+  points?: PointStats;
   breakdown?: Breakdown;
   days: Daily[];
   // Per hour (date "HH:00"), only for the 1-day view.

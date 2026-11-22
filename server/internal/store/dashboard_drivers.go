@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"database/sql"
 	"doubo/server/internal/core"
 	"strings"
 )
@@ -21,12 +22,20 @@ func (m *Memory) Dashboard(_ context.Context, days int) (core.Dashboard, error) 
 }
 func (m *MySQL) Dashboard(ctx context.Context, days int) (core.Dashboard, error) {
 	r := newReport(days)
+	// Billing, immutable ledger entries and job status must describe the same
+	// committed state while workers are settling jobs concurrently.
+	tx, err := m.db.BeginTx(ctx, &sql.TxOptions{ReadOnly: true, Isolation: sql.LevelRepeatableRead})
+	if err != nil {
+		return core.Dashboard{}, err
+	}
+	defer tx.Rollback()
 	// This period and the one before it (for 较上期), plus the small partners
 	// table for provider names. Builders ignore rows outside their window.
 	from := r.prev.from
 	scans := []struct{ ns, where string }{
 		{"users", "created_at>=?"}, {"daily_activity", "created_at>=?"}, {"analytics", "created_at>=?"},
-		{"executions", "created_at>=?"}, {"job_billing", "created_at>=?"}, {"visits", "created_at>=?"},
+		{"executions", "created_at>=?"}, {"job_billing", "created_at>=? OR state='reserved'"}, {"visits", "created_at>=?"},
+		{"wallet_ledger", "created_at>=? AND kind IN ('job_charge','job_usage','job_release')"},
 		{"visitors", "created_at>=?"}, {"partners", "1=1"},
 		{"orders", "created_at>=? OR paid_at>=?"}, {"refunds", "completed_at>=?"},
 		{"partner_audit", "created_at>=? AND kind='registration_approved'"},
@@ -40,7 +49,7 @@ func (m *MySQL) Dashboard(ctx context.Context, days int) (core.Dashboard, error)
 		for i := range args {
 			args[i] = from
 		}
-		rows, e := listRows(ctx, m.db, "SELECT "+t.selectList()+" FROM `"+t.Name+"` WHERE "+scan.where, t, args...)
+		rows, e := listRows(ctx, tx, "SELECT "+t.selectList()+" FROM `"+t.Name+"` WHERE "+scan.where, t, args...)
 		if e != nil {
 			return core.Dashboard{}, e
 		}
@@ -48,7 +57,10 @@ func (m *MySQL) Dashboard(ctx context.Context, days int) (core.Dashboard, error)
 			r.record(scan.ns, row)
 		}
 	}
-	jobs, e := m.db.QueryContext(ctx, `SELECT `+jobCols+` FROM jobs WHERE created_at>=?`, from)
+	if err = dashboardPointBills(ctx, tx, r); err != nil {
+		return core.Dashboard{}, err
+	}
+	jobs, e := tx.QueryContext(ctx, `SELECT `+jobCols+` FROM jobs WHERE created_at>=?`, from)
 	if e != nil {
 		return core.Dashboard{}, e
 	}
@@ -63,10 +75,14 @@ func (m *MySQL) Dashboard(ctx context.Context, days int) (core.Dashboard, error)
 	if e = jobs.Err(); e != nil {
 		return core.Dashboard{}, e
 	}
+	jobs.Close()
+	if err = dashboardPointJobs(ctx, tx, r); err != nil {
+		return core.Dashboard{}, err
+	}
 	out := r.result()
 	// The scan above only covers this period; total users are all-time.
-	if e = m.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM users`).Scan(&out.Breakdown.TotalUsers); e != nil {
+	if e = tx.QueryRowContext(ctx, `SELECT COUNT(*) FROM users`).Scan(&out.Breakdown.TotalUsers); e != nil {
 		return core.Dashboard{}, e
 	}
-	return out, nil
+	return out, tx.Commit()
 }

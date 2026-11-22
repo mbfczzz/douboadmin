@@ -3,9 +3,7 @@ package main
 import (
 	"context"
 	"doubo/server/internal/api"
-	"doubo/server/internal/core"
 	"doubo/server/internal/media"
-	"doubo/server/internal/passwordpolicy"
 	"doubo/server/internal/settings"
 	"doubo/server/internal/store"
 	"doubo/server/internal/worker"
@@ -78,17 +76,6 @@ func run() error {
 		}
 		return migrateDatabase(ctx, m)
 	}
-	// Bootstrap credentials are unused once database accounts exist. Do not lock
-	// existing installations out just because their old environment has a long password.
-	if production {
-		admins, e := s.RecordPage(check, core.RecordQuery{Namespace: "admin_accounts", Fields: map[string]string{"role": "super_admin"}, Page: 1, Size: 1})
-		if e != nil {
-			return fmt.Errorf("cannot check administrator bootstrap state")
-		}
-		if admins.Total == 0 && (!passwordpolicy.Valid(password) || password == "Doubo123") {
-			return fmt.Errorf("ADMIN_PASSWORD: %s（不可使用开发默认密码）", passwordpolicy.Message)
-		}
-	}
 	var rc *redis.Client
 	redisOptions, err := redisOptionsFromEnv()
 	if err != nil {
@@ -121,6 +108,15 @@ func run() error {
 	cfg.WeChatCodeVersion = env("WECHAT_CODE_VERSION", "trial")
 	cfg.RequireActivation = true
 	app := api.New(s, api.NewSessions(rc), cfg)
+	if command == "serve" {
+		bootstrapCtx, bootstrapCancel := context.WithTimeout(ctx, 10*time.Second)
+		changed, bootstrapErr := app.SyncInitialAdmin(bootstrapCtx)
+		bootstrapCancel()
+		if bootstrapErr != nil {
+			return fmt.Errorf("无法应用初始管理员配置: %w", bootstrapErr)
+		}
+		slog.Info("初始管理员账号已按环境配置校验", "account", strings.TrimSpace(cfg.AdminUser), "credentialsUpdated", changed)
+	}
 	app.Integrations = connections
 	app.Config.PublicBaseURL = values["PUBLIC_BASE_URL"]
 	app.Config.CompletionTemplateID = values["WECHAT_COMPLETION_TEMPLATE_ID"]

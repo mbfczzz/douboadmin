@@ -21,9 +21,6 @@ func (m *Manager) states(values Values, records map[string]core.Record, producti
 	defer m.mu.Unlock()
 	out := make([]State, 0, len(definitions))
 	for _, g := range definitions {
-		if g.FileOnly {
-			continue
-		}
 		s := State{Group: g, Values: Values{}, Secrets: map[string]bool{}, Version: records[g.ID].Version,
 			AppliedVersion: m.applied[g.ID], Source: "environment"}
 		if s.Version != 0 {

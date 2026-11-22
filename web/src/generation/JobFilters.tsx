@@ -1,8 +1,9 @@
-import { Bot, CalendarRange } from "lucide-react";
+import { Bot, CalendarRange, Layers } from "lucide-react";
 import type { Model, Row } from "../api";
 import DateField from "../components/DateField";
 
 export type JobPeriod = "all" | "today" | "7d" | "30d" | "custom";
+export type JobKind = "" | "image" | "video";
 
 // Beijing-time day, as the server reads the from/to dates.
 const beijingDay = (offset = 0) =>
@@ -29,25 +30,31 @@ export function jobDates(period: JobPeriod, from: string, to: string) {
 
 export default function JobFilters({
   period,
+  kind,
   model,
   from,
   to,
   models,
   onPeriod,
+  onKind,
   onModel,
   onFrom,
   onTo,
 }: {
   period: JobPeriod;
+  kind: JobKind;
   model: string;
   from: string;
   to: string;
   models: Row<Model>[];
   onPeriod(value: JobPeriod): void;
+  onKind(value: JobKind): void;
   onModel(value: string): void;
   onFrom(value: string): void;
   onTo(value: string): void;
 }) {
+  const visibleModels = models.filter((row) => !kind || row.data.kind === kind);
+  const category = kind === "image" ? "图片" : kind === "video" ? "视频" : "";
   return (
     <div className="jobs-extra-filters" aria-label="任务筛选">
       <label>
@@ -83,6 +90,19 @@ export default function JobFilters({
         </div>
       )}
       <label>
+        <Layers size={16} aria-hidden="true" />
+        <span>分类</span>
+        <select
+          aria-label="任务分类"
+          value={kind}
+          onChange={(e) => onKind(e.target.value as JobKind)}
+        >
+          <option value="">全部分类</option>
+          <option value="image">图片模型</option>
+          <option value="video">视频模型</option>
+        </select>
+      </label>
+      <label>
         <Bot size={16} aria-hidden="true" />
         <span>模型</span>
         <select
@@ -90,13 +110,13 @@ export default function JobFilters({
           value={model}
           onChange={(e) => onModel(e.target.value)}
         >
-          <option value="">全部模型</option>
+          <option value="">全部{category}模型</option>
           {model &&
             models.length > 0 &&
             !models.some((row) => row.id === model) && (
               <option value={model}>已移除的模型</option>
             )}
-          {models.map((row) => (
+          {visibleModels.map((row) => (
             <option key={row.id} value={row.id}>
               {row.data.name}
             </option>

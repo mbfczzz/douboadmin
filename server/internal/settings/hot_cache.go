@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-// How long TikHub answers are reused (doubo.env), in
+// How long TikHub answers are reused (console or environment settings), in
 // minutes. Only what must be live (the watermark-free original and the play
 // address a download uses) bypasses these.
 type HotCacheField struct {

@@ -6,6 +6,7 @@ import {
   Globe,
   MessageCircle,
   MessagesSquare,
+  Plug,
   ScanEye,
   Siren,
   Smartphone,
@@ -26,6 +27,11 @@ export const groupMeta: Record<
     icon: CreditCard,
     desc: "积分充值通道与商品",
     capability: "payment",
+  },
+  hot: {
+    icon: Plug,
+    desc: "热门视频、链接解析与素材资源接口",
+    capability: "hot",
   },
   vision: {
     icon: ScanEye,

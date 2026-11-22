@@ -65,6 +65,9 @@ func validate(g Group, v Values, production bool) error {
 		}
 	}
 	if g.ID == "hot" {
+		if v["TIKHUB_API_KEY"] != "" && v["TIKHUB_BASE_URL"] == "" {
+			return invalid("TIKHUB_BASE_URL", "填写 API Key 时须同时填写 API 地址")
+		}
 		if _, err := FeedKeywords(v["HOT_FEED_KEYWORDS"]); err != nil {
 			return invalid("HOT_FEED_KEYWORDS", err.Error())
 		}

@@ -9,7 +9,11 @@ import Empty from "../components/Empty";
 import JobTable, { type JobAction } from "../components/JobTable";
 import { releaseJob } from "../components/JobRecovery";
 import type { PageProps } from "../navigation";
-import JobFilters, { jobDates, type JobPeriod } from "../generation/JobFilters";
+import JobFilters, {
+  jobDates,
+  type JobKind,
+  type JobPeriod,
+} from "../generation/JobFilters";
 import "./jobs.css";
 
 // The detail view loads when a task is opened.
@@ -18,6 +22,7 @@ export default function Jobs({ notify }: PageProps) {
   const [filter, setFilter] = useRememberedState("jobs.status", "all"),
     [search, setSearch] = useRememberedState("jobs.query", ""),
     [period, setPeriod] = useRememberedState<JobPeriod>("jobs.period", "all"),
+    [kind, setKind] = useRememberedState<JobKind>("jobs.kind", ""),
     [model, setModel] = useRememberedState("jobs.model", ""),
     [from, setFrom] = useRememberedState("jobs.from", ""),
     [to, setTo] = useRememberedState("jobs.to", ""),
@@ -29,6 +34,7 @@ export default function Jobs({ notify }: PageProps) {
       page: String(page),
       status: filter === "all" ? "" : filter,
       q: search,
+      kind,
       model,
       from: dates[0],
       to: dates[1],
@@ -56,6 +62,8 @@ export default function Jobs({ notify }: PageProps) {
     }
   };
   const filteredJobs = jobs;
+  const hasFilters =
+    filter !== "all" || search || kind || model || period !== "all";
   return (
     <div className="catalog-page jobs-page">
       <PageHeader page="jobs" loading={resource.loading} onRefresh={refresh} />
@@ -79,12 +87,18 @@ export default function Jobs({ notify }: PageProps) {
         />
         <JobFilters
           period={period}
+          kind={kind}
           model={model}
           from={from}
           to={to}
           models={modelResource.data || []}
           onPeriod={(value) => {
             setPeriod(value);
+            setPage(1);
+          }}
+          onKind={(value) => {
+            setKind(value);
+            setModel("");
             setPage(1);
           }}
           onModel={(value) => {
@@ -119,13 +133,9 @@ export default function Jobs({ notify }: PageProps) {
             />
           ) : !resource.data || resource.error ? null : (
             <Empty
-              text={
-                filter !== "all" || search || model || period !== "all"
-                  ? "暂无匹配的任务"
-                  : "暂无生成任务"
-              }
+              text={hasFilters ? "暂无匹配的任务" : "暂无生成任务"}
               help={
-                filter !== "all" || search || model || period !== "all"
+                hasFilters
                   ? "请调整状态、时间、模型或搜索条件。"
                   : "用户开始创作后，内容会显示在这里。"
               }

@@ -9,7 +9,7 @@ import (
 
 func TestDashboardBreakdown(t *testing.T) {
 	r := newReport(30)
-	now := time.Now().UTC()
+	now := r.points.to
 	old := now.AddDate(0, 0, -60)
 	rec := func(ns, id, owner string, at time.Time, data any) {
 		r.record(ns, core.Record{ID: id, Owner: owner, CreatedAt: at, Data: core.Data(data)})
@@ -38,6 +38,9 @@ func TestDashboardBreakdown(t *testing.T) {
 		id := kind + "-" + status
 		state := map[string]string{"succeeded": "charged", "failed": "released"}[status]
 		rec("job_billing", id, "u1", now, core.JobBilling{Units: cost, State: state})
+		if state == "charged" {
+			rec("wallet_ledger", "settle-"+id, "u1", now, core.LedgerEntry{UserID: "u1", Reference: "job:" + id + ":settle", Kind: "job_charge", HeldDelta: -cost})
+		}
 		r.job(core.Job{ID: id, UserID: "u1", Input: core.JobInput{Kind: kind}, Status: status, CreatedAt: now.Add(-took), UpdatedAt: now})
 	}
 	job("image", "succeeded", 200, 20*time.Second)

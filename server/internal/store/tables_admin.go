@@ -33,6 +33,7 @@ func init() {
 		Table{Name: "instances", Comment: "服务进程心跳", Cols: []Col{
 			{Field: "id", Kind: Key, Name: "node_id"}, c("host", Short), c("role", Key), c("goVersion", Key),
 			c("startedAt", Time), c("seenAt", Time), c("heapBytes", Int), c("goroutines", Int), c("dbOpen", Int), c("dbInUse", Int),
+			c("mediaTools", JSON),
 		}},
 		Table{Name: "alerts", Comment: "后台告警；id = 摘要(类型:10 分钟时段)", Cols: []Col{
 			c("kind", Key), c("message", Text), c("acknowledged", Bool), c("actor", Key),

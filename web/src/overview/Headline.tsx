@@ -56,7 +56,8 @@ export default function Headline({
     p = data.previous,
     jobs = sum((d) => d.jobs),
     succeeded = sum((d) => d.succeeded),
-    spent = sum((d) => d.spentUnits || 0),
+    spent = data.points?.spentUnits ?? sum((d) => d.spentUnits || 0),
+    chargedJobs = data.points?.chargedJobs ?? succeeded,
     refund = sum((d) => d.refundFen),
     against = days === 1 ? "较昨日同时段" : `较前 ${days} 天`;
   const cards: Card[] = [
@@ -89,7 +90,7 @@ export default function Headline({
       value: spent,
       prev: p?.spentUnits,
       text: points,
-      note: `平均每次 ${points(succeeded ? spent / succeeded : 0)} 积分`,
+      note: `平均每次 ${points(chargedJobs ? spent / chargedJobs : 0)} 积分`,
       series: (d) => d.spentUnits || 0,
     },
     {

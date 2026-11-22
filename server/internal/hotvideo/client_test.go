@@ -52,7 +52,10 @@ func TestSearchBusinessDataShape(t *testing.T) {
 	if rows, _ := searchRows(root); len(rows) != 2 {
 		t.Fatal("business_data not found")
 	}
-	r := normalizeSearch(root)
+	r, err := normalizeSearch(root)
+	if err != nil {
+		t.Fatal(err)
+	}
 	if len(r.Items) != 1 || r.Items[0].ID != "7301" || r.Items[0].Author != "作者" || r.Cursor != 10 || !r.HasMore {
 		t.Fatalf("%+v", r)
 	}

@@ -47,8 +47,8 @@ func integrations(ctx context.Context, app *api.Server, values settings.Values) 
 		visionModel = ""
 	}
 	app.Vision = &vision.Client{BaseURL: values["VISION_BASE_URL"], Key: values["VISION_API_KEY"], Model: visionModel}
-	if err := settings.FileOnlyProblem(values); err != nil {
-		slog.Warn("doubo.env 热门视频配置无效，已用默认值", "error", err)
+	if err := settings.HotProblem(values); err != nil {
+		slog.Warn("第三方资源配置包含无效值", "error", err)
 	}
 	feedWords, _ := settings.FeedKeywords(values["HOT_FEED_KEYWORDS"]) // bad values fall back to defaults
 	app.Hot = &hotvideo.Service{Client: &hotvideo.Client{BaseURL: values["TIKHUB_BASE_URL"], Key: values["TIKHUB_API_KEY"]}, Store: app.Store, Redis: app.Sessions.Redis, Keywords: feedWords, Source: values["HOT_FEED_SOURCE"], TTL: hotCacheTTL(values)}
@@ -97,7 +97,7 @@ func chatModels(ctx context.Context, app *api.Server, values settings.Values) *p
 	return &provider.DirectChat{Clients: clients, Store: app.Store, Assets: app.Media.Inputs, Vision: app.Vision}
 }
 
-// hotCacheTTL reads the TikHub cache durations (doubo.env).
+// hotCacheTTL reads the effective console/environment resource cache durations.
 func hotCacheTTL(values settings.Values) hotvideo.CacheTTL {
 	d := settings.HotCache(values)
 	return hotvideo.CacheTTL{Feed: d["HOT_CACHE_FEED_MINUTES"], Search: d["HOT_CACHE_SEARCH_MINUTES"], Words: d["HOT_CACHE_WORDS_MINUTES"], Video: d["HOT_CACHE_VIDEO_MINUTES"]}

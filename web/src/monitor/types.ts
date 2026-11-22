@@ -1,6 +1,8 @@
 import type { Row } from "../api";
 import { date } from "../api";
+import type { MediaTools } from "../systemTools/types";
 export interface Node {
+  mediaTools?: MediaTools;
   host: string;
   role: string;
   seenAt: string;

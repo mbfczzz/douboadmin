@@ -7,7 +7,7 @@ import (
 )
 
 // DefaultFeedKeywords are the 创作 feed's chips until an operator sets
-// HOT_FEED_KEYWORDS (doubo.env). With keyword search (the
+// HOT_FEED_KEYWORDS in the console or environment file. With keyword search (the
 // default HOT_FEED_SOURCE) each chip is searched; with the hot list each
 // filters it and "热门" shows all of it.
 const DefaultFeedKeywords = "热门,剧情带货,探店,美食,好物推荐,穿搭,萌宠,旅行,家居"

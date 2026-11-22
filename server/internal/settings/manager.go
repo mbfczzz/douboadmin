@@ -65,11 +65,7 @@ func (m *Manager) resolve(r reader) (Values, map[string]core.Record, error) {
 	values := Values{}
 	records := map[string]core.Record{}
 	for _, g := range definitions {
-		var row core.Record
-		err := core.ErrNotFound
-		if !g.FileOnly {
-			row, err = r.Get(namespace, g.ID)
-		}
+		row, err := r.Get(namespace, g.ID)
 		if errors.Is(err, core.ErrNotFound) {
 			for _, field := range g.Fields {
 				values[field.Key] = m.base[field.Key]

@@ -4,6 +4,7 @@ func (a *Server) businessRoutes() {
 	m := a.Mux
 	m.HandleFunc("POST /api/admin/jobs/{id}/release", a.auth("admin", a.releaseJob))
 	m.HandleFunc("GET /api/admin/monitor", a.auth("admin", a.monitor))
+	m.HandleFunc("GET /api/admin/system-tools", a.superAdmin(a.systemTools))
 	m.HandleFunc("GET /api/admin/logs", a.auth("admin", a.operationalRecords("error_logs")))
 	m.HandleFunc("GET /api/admin/alerts", a.auth("admin", a.operationalRecords("alerts")))
 	m.HandleFunc("PUT /api/admin/alerts/{id}/ack", a.auth("admin", a.acknowledgeAlert))

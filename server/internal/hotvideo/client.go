@@ -112,10 +112,10 @@ func (c *Client) Search(ctx context.Context, q Query) (Result, error) {
 	if err != nil {
 		return Result{}, err
 	}
-	if rows, _ := searchRows(root); rows == nil {
-		return Result{}, fmt.Errorf("抖音接口未返回可识别的视频列表")
+	result, err := normalizeSearch(root)
+	if err != nil {
+		return Result{}, err
 	}
-	result := normalizeSearch(root)
 	if q.Sort == "views" {
 		result.SortScope = "page"
 		sort.SliceStable(result.Items, func(i, j int) bool {

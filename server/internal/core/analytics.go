@@ -11,7 +11,7 @@ type DailyMetric struct {
 	RefundFen   int64  `json:"refundFen"`
 	RevenueFen  int64  `json:"revenueFen"`
 	PaidOrders  int64  `json:"paidOrders"`
-	// Points (hundredths) charged for jobs that succeeded that day.
+	// Actual point charges (hundredths), by settlement day, for succeeded jobs.
 	SpentUnits int64 `json:"spentUnits"`
 	// Anonymous page views and distinct visitors, by visit start day.
 	PV int64 `json:"pv"`
@@ -24,7 +24,8 @@ type ModelCost struct {
 	EstimatedMicros int64  `json:"estimatedMicros"`
 }
 type Dashboard struct {
-	Days []DailyMetric `json:"days"`
+	Points PointStats    `json:"points"`
+	Days   []DailyMetric `json:"days"`
 	// Hours is the same series per hour (Date "HH:00"), for the 1-day view.
 	Hours     []DailyMetric    `json:"hours,omitempty"`
 	Models    []ModelCost      `json:"models"`

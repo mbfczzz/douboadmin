@@ -28,9 +28,6 @@ type Group struct {
 	Name   string  `json:"name"`
 	Hint   string  `json:"hint"`
 	Fields []Field `json:"fields"`
-	// FileOnly: set only in the environment file (doubo.env), never shown in
-	// or saved from the admin console; a stored copy is ignored.
-	FileOnly bool `json:"-"`
 }
 
 var definitions = []Group{
@@ -73,7 +70,7 @@ var definitions = []Group{
 		{Key: "WECHAT_VIRTUAL_CUSTOM_PRODUCT_ID", Label: "自定义金额基础商品", Kind: "product", Hint: "留空只开放套餐购买；选择后按商品单价换算购买份数。"},
 		{Key: "WECHAT_VIRTUAL_IOS_ALLOWED", Label: "允许 iPhone 充值", Kind: "bool", Default: "false", Hint: "微信后台开通 IAP 并验收后启用。"},
 	}},
-	{ID: "hot", Name: "热门视频接口", FileOnly: true, Fields: []Field{
+	{ID: "hot", Name: "第三方资源配置", Hint: "热门视频搜索、视频详情与分享链接解析等资源服务，使用 TikHub 接口。可设置接口地址、API Key、视频来源、关键词与缓存时长。保存后重启 API 和 Worker 生效。", Fields: []Field{
 		{Key: "TIKHUB_BASE_URL", Label: "TikHub API 地址", Kind: "url", Default: "https://api.tikhub.io"},
 		{Key: "TIKHUB_API_KEY", Label: "TikHub API Key", Kind: "secret"},
 		{Key: "HOT_FEED_SOURCE", Label: "创作页视频来源", Kind: "select", Default: "search", Options: []Option{{"billboard", "抖音视频热榜（按标签筛选，「热门」为整个榜单）"}, {"search", "关键词搜索"}}, Hint: "保存后重启服务生效。"},

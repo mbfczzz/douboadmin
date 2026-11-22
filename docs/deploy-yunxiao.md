@@ -151,7 +151,7 @@ sudo systemctl reload nginx
 curl --fail https://你的测试域名/health/ready
 ```
 
-后台地址：`https://你的测试域名`，账号为配置的 `ADMIN_USER` / `ADMIN_PASSWORD`。
+后台地址：`https://你的测试域名`，初始管理员使用配置的 `ADMIN_USER` / `ADMIN_PASSWORD`；API 每次启动创建或同步该账号的密码，其他管理账号继续使用数据库中的各自凭证。
 
 Nginx 将 `/api/`、`/media/`、`/s/`、`/health/` 原路径转给 Go；不把本地上传目录直接公开。静态文件启用 gzip，哈希资源长期缓存，HTML 每次重新验证。旧哈希资源保留在共享目录，防止已打开的网页在更新后加载子页面失败。部署脚本检查的是本机 API / Worker；HTTPS、证书和外部访问必须再按上面的命令验收。
 

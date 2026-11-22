@@ -42,7 +42,7 @@ export default function Monitor({ notify, navigate }: PageProps) {
     ["阿里云 OSS", h?.ossConfigured, "已配置", "未配置"],
     ["AI 中转", h?.relayConfigured, "已配置", "未配置"],
     ["微信支付", h?.paymentConfigured, "已配置", "未配置"],
-    ["热门视频接口", h?.hotConfigured, "已配置", "未配置"],
+    ["第三方资源配置", h?.hotConfigured, "已配置", "未配置"],
   ] as const;
   return (
     <div className="monitor-page">

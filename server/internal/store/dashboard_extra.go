@@ -93,7 +93,7 @@ func (b *breakdownBuilder) record(ns string, row core.Record) {
 	}
 }
 
-func (b *breakdownBuilder) job(j core.Job, day *core.DailyMetric) {
+func (b *breakdownBuilder) job(j core.Job) {
 	if j.Input.Kind == "import" || !b.inPeriod(&j.CreatedAt) {
 		return
 	}
@@ -111,9 +111,6 @@ func (b *breakdownBuilder) job(j core.Job, day *core.DailyMetric) {
 	case "succeeded":
 		k.Succeeded++
 		k.SpentUnits += b.charged[j.ID]
-		if day != nil {
-			day.SpentUnits += b.charged[j.ID]
-		}
 		if d := j.UpdatedAt.Sub(j.CreatedAt); d > 0 && d < 24*time.Hour {
 			k.DurationMs += d.Milliseconds()
 			k.Timed++

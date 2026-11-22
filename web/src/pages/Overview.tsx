@@ -5,13 +5,14 @@ import ResourcePage from "../business/ResourcePage";
 import type { Dashboard } from "../business/types";
 import Attention from "../overview/Attention";
 import Headline from "../overview/Headline";
+import PointsSummary from "../overview/PointsSummary";
 import OverviewTabs from "../overview/OverviewTabs";
 import "../overview/charts.css";
 import "../overview/tip.css";
 import "../overview/layout.css";
 
-// 工作概览: anything that needs attention, five headline figures with their
-// change, then 经营 / 创作 / 流量 one at a time.
+// 工作概览: attention, headline figures, settled-point statistics, then
+// 经营 / 创作 / 流量 one at a time.
 export default function Overview({ config, navigate }: PageProps) {
   const [days, setDays] = useState(1),
     resource = useResource<Dashboard>("/admin/dashboard?days=" + days, 30000),
@@ -36,6 +37,7 @@ export default function Overview({ config, navigate }: PageProps) {
       >
         <Attention data={data} config={config} navigate={navigate} />
         {data && <Headline data={data} days={days} />}
+        {data && <PointsSummary data={data} days={days} />}
         {data && <OverviewTabs data={data} days={days} navigate={navigate} />}
       </ResourcePage>
     </div>

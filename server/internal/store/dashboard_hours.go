@@ -75,7 +75,7 @@ func (h *hourSeries) record(ns string, row core.Record) {
 	}
 }
 
-func (h *hourSeries) job(j core.Job, charged int64) {
+func (h *hourSeries) job(j core.Job) {
 	b := h.at(j.CreatedAt)
 	if b == nil || j.Input.Kind == "import" {
 		return
@@ -84,7 +84,6 @@ func (h *hourSeries) job(j core.Job, charged int64) {
 	switch j.Status {
 	case "succeeded":
 		b.Succeeded++
-		b.SpentUnits += charged
 	case "failed":
 		b.Failed++
 	}

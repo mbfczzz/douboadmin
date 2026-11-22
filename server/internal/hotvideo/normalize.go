@@ -2,6 +2,7 @@ package hotvideo
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/url"
 	"strconv"
 	"strings"
@@ -76,44 +77,27 @@ func video(m map[string]any) Video {
 	}
 	return Video{ID: id, Title: string(runes), Text: text, Author: str(author["nickname"]), Cover: cover, URL: play, SourceURL: "https://www.douyin.com/video/" + id, Likes: integer(stats["digg_count"]), Views: integer(stats["play_count"]), Comments: integer(stats["comment_count"]), PublishedAt: time.Unix(number(m["create_time"]), 0).UTC(), Duration: float64(number(media["duration"])) / 1000}
 }
-
-// searchRows finds the result list and the object that holds it (with the
-// cursor fields). TikHub's search v2 now answers {data: {business_data:
-// [{data: {aweme_info}}]}}; older shapes used data[] or aweme_list[].
-func searchRows(root map[string]any) ([]any, map[string]any) {
-	m := root
-	for range 5 {
-		for _, key := range []string{"business_data", "aweme_list", "data"} {
-			if rows, ok := m[key].([]any); ok {
-				return rows, m
-			}
-		}
-		next := object(m["data"])
-		if next == nil {
-			break
-		}
-		m = next
-	}
-	return nil, m
-}
-
-func normalizeSearch(root map[string]any) Result {
+func normalizeSearch(root map[string]any) (Result, error) {
 	rows, data := searchRows(root)
-	result := Result{Items: []Video{}, Cursor: number(data["cursor"]), HasMore: number(data["has_more"]) > 0, SearchID: str(data["search_id"]), Backtrace: str(data["backtrace"]), SortScope: "upstream", FetchedAt: time.Now().UTC()}
-	if has, ok := data["has_more"].(bool); ok {
+	if code := integer(data["status_code"]); code != nil && *code != 0 {
+		return Result{}, fmt.Errorf("抖音上游暂未返回有效搜索结果，请稍后重试")
+	}
+	if rows == nil {
+		return Result{}, fmt.Errorf("抖音接口未返回可识别的视频列表")
+	}
+	meta := searchMetadata(data)
+	result := Result{Items: []Video{}, Cursor: number(meta["cursor"]), HasMore: number(meta["has_more"]) > 0, SearchID: str(meta["search_id"]), Backtrace: str(meta["backtrace"]), SortScope: "upstream", FetchedAt: time.Now().UTC()}
+	if has, ok := meta["has_more"].(bool); ok {
 		result.HasMore = has
 	}
 	if result.SearchID == "" {
-		result.SearchID = str(object(data["log_pb"])["impr_id"])
+		result.SearchID = str(object(meta["log_pb"])["impr_id"])
 	}
 	seen := map[string]bool{}
 	for _, row := range rows {
-		item := object(row)
-		if wrapped := object(item["data"]); wrapped != nil {
-			item = wrapped
-		}
-		if nested := object(item["aweme_info"]); nested != nil {
-			item = nested
+		item, valid := searchVideo(row)
+		if !valid {
+			return Result{}, fmt.Errorf("抖音搜索返回的视频条目格式无效，请稍后重试")
 		}
 		v := video(item)
 		if v.ID != "" && !seen[v.ID] {
@@ -121,5 +105,5 @@ func normalizeSearch(root map[string]any) Result {
 			seen[v.ID] = true
 		}
 	}
-	return result
+	return result, nil
 }

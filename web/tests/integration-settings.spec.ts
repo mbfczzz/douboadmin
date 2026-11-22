@@ -19,7 +19,7 @@ async function settings(page: Page) {
   await expect(
     page.getByRole("heading", { name: "服务接入配置" }),
   ).toBeVisible();
-  await expect(page.locator("details.integration")).toHaveCount(8);
+  await expect(page.locator("details.integration")).toHaveCount(11);
 }
 async function group(page: Page, name: string) {
   const card = page.locator("details.integration").filter({
