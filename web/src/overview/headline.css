@@ -1,7 +1,7 @@
-/* 工作概览: five headline figures with change and a small trend line. */
+/* 工作概览: six headline figures with change and a small trend line. */
 .headline {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 14px;
   margin-bottom: 20px;
 }
@@ -77,21 +77,14 @@
   .headline {
     grid-template-columns: repeat(6, minmax(0, 1fr));
   }
-  /* Three on the first row, two wider ones on the second. */
+  /* Three per row. */
   .headline-card {
     grid-column: span 2;
-  }
-  .headline-card:nth-child(n + 4) {
-    grid-column: span 3;
   }
 }
 @media (max-width: 760px) {
   .headline {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  /* Five cards in two columns: the last spans the row. */
-  .headline-card:last-child {
-    grid-column: 1 / -1;
   }
   .headline-card strong {
     font-size: 22px;

@@ -34,3 +34,24 @@ func ChatModels(value string) ([]string, error) {
 	}
 	return out, nil
 }
+
+// Ark chat/vision settings must name a text or multimodal understanding
+// model. Seedance and multi-* are media-generation endpoints; putting one in
+// Agent causes a full video generation/analysis charge on every chat turn.
+func ArkChatModels(value string) ([]string, error) {
+	models, err := ChatModels(value)
+	if err != nil {
+		return nil, err
+	}
+	for _, id := range models {
+		if IsMediaGenerationModel(id) {
+			return nil, errors.New("豆包对话模型不能填写 Seedance 或 multi- 视频生成接入点")
+		}
+	}
+	return models, nil
+}
+
+func IsMediaGenerationModel(id string) bool {
+	id = strings.ToLower(strings.TrimSpace(id))
+	return strings.Contains(id, "seedance") || strings.HasPrefix(id, "multi-")
+}

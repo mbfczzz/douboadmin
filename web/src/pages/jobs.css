@@ -2,3 +2,46 @@
   flex-wrap: wrap;
   gap: 0 18px;
 }
+.jobs-extra-filters {
+  display: flex;
+  align-items: center;
+  gap: 10px 18px;
+  padding: 12px 22px;
+  border-top: 1px solid var(--line);
+  flex-wrap: wrap;
+}
+.jobs-extra-filters > label,
+.jobs-date-range {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.jobs-extra-filters > label > span {
+  white-space: nowrap;
+}
+.jobs-extra-filters select {
+  min-width: 150px;
+  min-height: 36px;
+  padding: 6px 30px 6px 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  background: var(--surface-subtle);
+  color: var(--text);
+}
+.jobs-date-range .date-field {
+  width: 150px;
+}
+@media (max-width: 640px) {
+  .jobs-extra-filters > label,
+  .jobs-date-range {
+    width: 100%;
+  }
+  .jobs-extra-filters select,
+  .jobs-date-range .date-field {
+    flex: 1;
+    width: auto;
+    min-width: 0;
+  }
+}

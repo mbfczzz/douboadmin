@@ -87,6 +87,9 @@ func (p *Relay) Generate(ctx context.Context, j core.Job) (string, error) {
 		if json.Unmarshal(model.Data, &m) != nil || !m.Effective().Usable() {
 			return "", fmt.Errorf("生成模型已停用，请重新选择")
 		}
+		if _, _, direct := core.DirectChat(m.Key); direct {
+			return "", fmt.Errorf("生成模型配置无效")
+		}
 		assets, err := p.Assets(ctx, j)
 		if err != nil {
 			return "", err

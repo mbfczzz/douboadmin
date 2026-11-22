@@ -54,13 +54,14 @@ func (c *compareBuilder) record(ns string, row core.Record) {
 	}
 }
 
-func (c *compareBuilder) job(j core.Job) {
+func (c *compareBuilder) job(j core.Job, charged int64) {
 	if j.Input.Kind == "import" || !c.in(&j.CreatedAt) {
 		return
 	}
 	c.out.Jobs++
 	if j.Status == "succeeded" {
 		c.out.Succeeded++
+		c.out.SpentUnits += charged
 	}
 }
 

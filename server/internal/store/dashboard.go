@@ -102,7 +102,7 @@ func (r *reportBuilder) job(j core.Job) {
 	d := r.days[j.CreatedAt.In(reportZone).Format("2006-01-02")]
 	r.extra.job(j, d)
 	r.hours.job(j, r.extra.charged[j.ID])
-	r.prev.job(j)
+	r.prev.job(j, r.extra.charged[j.ID])
 	if d != nil && j.Input.Kind != "import" {
 		d.Jobs++
 		if j.Status == "succeeded" {

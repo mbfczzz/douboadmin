@@ -52,8 +52,9 @@ func (s *Service) ReadBreakdown(ctx context.Context, model, videoID string) (Bre
 // another run finishes meanwhile, or a new run here. link signs the user's
 // saved copy of the video only when a run is needed.
 func (s *Service) EnsureBreakdown(ctx context.Context, model *vision.Client, videoID string, link func() (string, error)) (*vision.Breakdown, error) {
+	modelID := model.ModelID()
 	for {
-		rec, version, err := s.ReadBreakdown(ctx, model.Model, videoID)
+		rec, version, err := s.ReadBreakdown(ctx, modelID, videoID)
 		if err != nil && !errors.Is(err, core.ErrNotFound) {
 			return nil, err
 		}
@@ -68,8 +69,8 @@ func (s *Service) EnsureBreakdown(ctx context.Context, model *vision.Client, vid
 			}
 			continue
 		}
-		claim := BreakdownRecord{VideoID: videoID, Model: model.Model, Status: "running", StartedAt: time.Now().UTC()}
-		if _, err := s.Store.Put(ctx, "hot_breakdowns", core.Record{ID: breakdownID(model.Model, videoID), Data: core.Data(claim)}, version); err != nil {
+		claim := BreakdownRecord{VideoID: videoID, Model: modelID, Status: "running", StartedAt: time.Now().UTC()}
+		if _, err := s.Store.Put(ctx, "hot_breakdowns", core.Record{ID: breakdownID(modelID, videoID), Data: core.Data(claim)}, version); err != nil {
 			if errors.Is(err, core.ErrConflict) {
 				continue // lost the race: wait for the winner
 			}
@@ -94,8 +95,8 @@ func (s *Service) runBreakdown(ctx context.Context, model *vision.Client, rec Br
 	// Saved even when the caller's context ended, so the claim does not linger.
 	save, cancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
 	defer cancel()
-	if _, version, e := s.ReadBreakdown(save, model.Model, rec.VideoID); e == nil {
-		_, _ = s.Store.Put(save, "hot_breakdowns", core.Record{ID: breakdownID(model.Model, rec.VideoID), Data: core.Data(rec)}, version)
+	if _, version, e := s.ReadBreakdown(save, rec.Model, rec.VideoID); e == nil {
+		_, _ = s.Store.Put(save, "hot_breakdowns", core.Record{ID: breakdownID(rec.Model, rec.VideoID), Data: core.Data(rec)}, version)
 	}
 	if err != nil {
 		return nil, err

@@ -57,7 +57,7 @@ export default function OverviewTabs({
           <Trend
             series={data.days}
             hours={hours}
-            only={["paid", "orders", "new", "active"]}
+            only={["paid", "orders", "spent", "new", "active"]}
           />
           <Business b={b} today={today} />
           <DetailList

@@ -117,6 +117,7 @@ test("headline figures compare with the previous period; costs stay honest", asy
           paidFen: i === 29 ? 20000 : 0,
           refundFen: i === 29 ? 5000 : 0,
           revenueFen: i === 29 ? 15000 : 0,
+          spentUnits: i === 29 ? 15000 : 0,
         })),
         previous: {
           newUsers: 6,
@@ -128,6 +129,7 @@ test("headline figures compare with the previous period; costs stay honest", asy
           revenueFen: 0,
           pv: 9,
           uv: 3,
+          spentUnits: 10000,
         },
         breakdown,
         models: [
@@ -144,6 +146,7 @@ test("headline figures compare with the previous period; costs stay honest", asy
     "¥200.00",
     "12",
     "8",
+    "150",
     "5",
     "3",
   ]);
@@ -151,7 +154,10 @@ test("headline figures compare with the previous period; costs stay honest", asy
   await expect(cards.nth(0)).toContainText("退款 ¥50.00");
   await expect(cards.nth(1).locator(".delta.up")).toContainText("100.0%");
   await expect(cards.nth(2)).toContainText("持平");
-  await expect(cards.nth(3).locator(".delta.down")).toContainText("50.0%");
+  // 积分消耗: 150 against 100, 25 per succeeded job.
+  await expect(cards.nth(3).locator(".delta.up")).toContainText("50.0%");
+  await expect(cards.nth(3)).toContainText("平均每次 25 积分");
+  await expect(cards.nth(4).locator(".delta.down")).toContainText("50.0%");
   // Service metrics moved to 运行监控.
   await expect(page.getByText("服务接口")).toHaveCount(0);
   await page.getByRole("tab", { name: "创作" }).click();

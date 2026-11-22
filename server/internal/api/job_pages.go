@@ -4,11 +4,21 @@ import (
 	"doubo/server/internal/core"
 	"net/http"
 	"strconv"
+	"time"
 )
+
+var jobFilterZone = time.FixedZone("CST", 8*60*60)
+
+func jobDay(value string) (time.Time, error) {
+	if value == "" {
+		return time.Time{}, nil
+	}
+	return time.ParseInLocation("2006-01-02", value, jobFilterZone)
+}
 
 func jobQuery(w http.ResponseWriter, r *http.Request) (core.JobQuery, bool) {
 	v := r.URL.Query()
-	q := core.JobQuery{Page: 1, Size: 20, Search: v.Get("q"), Status: v.Get("status"), Kind: v.Get("kind"), Deleted: v.Get("deleted"), Works: v.Get("works") == "true", ExcludeChat: v.Get("excludeChat") == "true", Ended: v.Get("ended") == "true"}
+	q := core.JobQuery{Page: 1, Size: 20, Search: v.Get("q"), Status: v.Get("status"), Kind: v.Get("kind"), Model: v.Get("model"), Deleted: v.Get("deleted"), Works: v.Get("works") == "true", ExcludeChat: v.Get("excludeChat") == "true", Ended: v.Get("ended") == "true"}
 	q.ExcludeImport = v.Get("excludeImport") == "true"
 	q.Session = v.Get("session")
 	if v.Has("page") {
@@ -16,6 +26,18 @@ func jobQuery(w http.ResponseWriter, r *http.Request) (core.JobQuery, bool) {
 	}
 	if v.Has("size") {
 		q.Size, _ = strconv.Atoi(v.Get("size"))
+	}
+	var err error
+	if q.CreatedFrom, err = jobDay(v.Get("from")); err != nil {
+		fail(w, 400, "时间筛选无效")
+		return q, false
+	}
+	if q.CreatedBefore, err = jobDay(v.Get("to")); err != nil {
+		fail(w, 400, "时间筛选无效")
+		return q, false
+	}
+	if !q.CreatedBefore.IsZero() {
+		q.CreatedBefore = q.CreatedBefore.AddDate(0, 0, 1)
 	}
 	if !q.Valid() {
 		fail(w, 400, "分页参数无效")

@@ -23,11 +23,12 @@ func TestPreviousPeriodTotals(t *testing.T) {
 	rec("daily_activity", "a2", "u-prev", before.Add(time.Hour), map[string]string{})
 	rec("orders", "o1", "u-prev", before, core.Order{AmountFen: 500, PaidAt: &before})
 	rec("visits", "v1", "", before, core.Visit{Visitor: "x", Pages: 3, FirstAt: before})
+	rec("job_billing", "j1", "u-prev", before, core.JobBilling{State: "charged", Units: 2600})
 	r.job(core.Job{ID: "j1", Status: "succeeded", Input: core.JobInput{Kind: "image"}, CreatedAt: before})
 	r.job(core.Job{ID: "j2", Status: "queued", Input: core.JobInput{Kind: "import"}, CreatedAt: before})
 	out := r.result()
 	p := out.Previous
-	if p == nil || p.NewUsers != 1 || p.ActiveUsers != 1 || p.PaidFen != 500 || p.RevenueFen != 500 || p.Jobs != 1 || p.Succeeded != 1 || p.PV != 3 || p.UV != 1 {
+	if p == nil || p.NewUsers != 1 || p.ActiveUsers != 1 || p.PaidFen != 500 || p.RevenueFen != 500 || p.Jobs != 1 || p.Succeeded != 1 || p.PV != 3 || p.UV != 1 || p.SpentUnits != 2600 {
 		t.Fatalf("previous %+v", p)
 	}
 	var current int64

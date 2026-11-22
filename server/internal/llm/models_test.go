@@ -125,17 +125,18 @@ func TestTaglinesDescribeModels(t *testing.T) {
 	}
 }
 
-// 豆包 takes videos itself: new rows list video, old ["image"] rows gain it.
-func TestArkModelsTakeVideos(t *testing.T) {
+// Agent never sends videos to a chat model: old rows lose that capability,
+// and the cached 视频理解 note is used instead.
+func TestArkModelsDoNotTakeVideosDirectly(t *testing.T) {
 	s := store.NewMemory()
-	old := core.Model{ID: ModelID("ark", "old"), Key: "ark:old", Kind: "chat", ReferenceTypes: []string{"image"}}
+	old := core.Model{ID: ModelID("ark", "old"), Key: "ark:old", Kind: "chat", ReferenceTypes: []string{"image", "video"}}
 	_, _ = s.Put(t.Context(), "models", core.Record{ID: old.ID, Data: core.Data(old)}, 0)
-	p := Provider{Name: "ark", Label: "豆包", Client: &Client{}, Models: []string{"old", "new"}, Watches: true}
+	p := Provider{Name: "ark", Label: "豆包", Client: &Client{}, Models: []string{"old", "new"}}
 	if err := EnsureModels(t.Context(), s, []Provider{p}); err != nil {
 		t.Fatal(err)
 	}
 	for _, id := range []string{"old", "new"} {
-		if m, _ := model(t, s, ModelID("ark", id)); len(m.ReferenceTypes) != 2 || m.ReferenceTypes[1] != "video" {
+		if m, _ := model(t, s, ModelID("ark", id)); len(m.ReferenceTypes) != 1 || m.ReferenceTypes[0] != "image" {
 			t.Fatal(id, m.ReferenceTypes)
 		}
 	}

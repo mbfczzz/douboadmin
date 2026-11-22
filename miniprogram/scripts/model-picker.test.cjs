@@ -65,7 +65,7 @@ test("确认生成 uses the model picked on the plan card, among those that take
   const { planInput, planModels } = h.service("../pages/agent/plan");
   const plan = { kind: "video", title: "t", prompt: "开场@图片1", ratio: "9:16", duration: 5, shots: [] };
   const materials = [{ id: "p1", data: { type: "image/jpeg", url: "u" } }];
-  const models = [video("v-text", []), video("v-a", ["image"]), video("v-b", ["image", "video"])];
+  const models = [video("v-text", []), video("v-a", ["image"]), video("v-b", ["image", "video"]), { ...video("direct", ["image", "video"]), key: "ark:doubao-seedance-direct" }];
   assert.equal(ids(planModels(plan, models, materials)), "v-a,v-b");
   assert.equal(planInput(plan, models, materials, "s", "v-b").model, "v-b");
   assert.equal(planInput(plan, models, materials, "s", "v-text").model, "v-a", "a pick that no longer fits gives way");

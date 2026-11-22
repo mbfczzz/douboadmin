@@ -30,8 +30,13 @@ func (a *Server) validateJob(ctx context.Context, user string, in *core.JobInput
 	if err != nil || !m.Usable() || m.Kind != in.Kind {
 		return fmt.Errorf("请选择已上架的有效模型")
 	}
-	// DeepSeek / 豆包 are called directly; everything else needs the relay.
-	if _, _, direct := core.DirectChat(m.Key); !direct && !a.Relay.Ready() {
+	// Direct providers are for Agent text only. Every media generation must use
+	// the site's relay-backed creation catalog, even if a model row is mis-set.
+	_, _, direct := core.DirectChat(m.Key)
+	if direct && in.Kind != "chat" {
+		return fmt.Errorf("请选择豆播创作中已上架的模型")
+	}
+	if !direct && !a.Relay.Ready() {
 		return errNotReady
 	}
 	if err = a.checkSession(ctx, user, in); err != nil {

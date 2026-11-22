@@ -41,7 +41,12 @@ func integrations(ctx context.Context, app *api.Server, values settings.Values) 
 	smsEnabled := values["SMS_VERIFICATION_ENABLED"] == "true"
 	app.Config.SMSVerificationEnabled = &smsEnabled
 	ai := &provider.Relay{Client: app.Relay, Store: app.Store, Assets: app.Media.Inputs, SaveResult: app.Media.Save}
-	app.Vision = &vision.Client{BaseURL: values["VISION_BASE_URL"], Key: values["VISION_API_KEY"], Model: values["VISION_MODEL"]}
+	visionModel := values["VISION_MODEL"]
+	if settings.IsMediaGenerationModel(visionModel) {
+		slog.Warn("已忽略误配的视频生成接入点", "setting", "VISION_MODEL", "model", visionModel)
+		visionModel = ""
+	}
+	app.Vision = &vision.Client{BaseURL: values["VISION_BASE_URL"], Key: values["VISION_API_KEY"], Model: visionModel}
 	if err := settings.FileOnlyProblem(values); err != nil {
 		slog.Warn("doubo.env 热门视频配置无效，已用默认值", "error", err)
 	}
@@ -63,14 +68,17 @@ func chatModels(ctx context.Context, app *api.Server, values settings.Values) *p
 		arkKey = values["VISION_API_KEY"]
 	}
 	deepseekModels, _ := settings.ChatModels(values.Get("CHAT_DEEPSEEK_MODELS", settings.DefaultDeepSeekModels))
-	arkModels, _ := settings.ChatModels(values.Get("CHAT_ARK_MODELS", settings.DefaultArkChatModels))
+	arkModels, arkErr := settings.ArkChatModels(values.Get("CHAT_ARK_MODELS", settings.DefaultArkChatModels))
+	if arkErr != nil {
+		slog.Warn("已忽略误配的豆包对话模型", "error", arkErr)
+	}
 	providers := []llm.Provider{
 		{Name: "deepseek", Label: "DeepSeek", Client: &llm.Client{BaseURL: values.Get("CHAT_DEEPSEEK_BASE_URL", "https://api.deepseek.com"), Key: values["CHAT_DEEPSEEK_API_KEY"]}, Models: deepseekModels,
 			InputPrice: 0.01, CachedPrice: ptr(0.0002), OutputPrice: 0.04, PeakRate: 2, Previous: [2]float64{0.02, 0.03},
 			ModelPrices: map[string][3]float64{"deepseek-v4-pro": {0.045, 0.0015, 0.135}}, Seeing: []string{"flash"},
 			Names:   map[string]string{"deepseek-flash": "DeepSeek", "deepseek-v4-pro": "DeepSeek Pro"},
 			Tagline: map[string]string{"deepseek-flash": "反应快、价格低，写脚本方案首选", "deepseek-v4-pro": "推理更强，适合复杂策划"}},
-		{Name: "ark", Label: "豆包", Client: &llm.Client{BaseURL: values.Get("CHAT_ARK_BASE_URL", "https://ark.cn-beijing.volces.com/api/v3"), Key: arkKey}, Models: arkModels, InputPrice: 0.008, OutputPrice: 0.027, Watches: true, Previous: [2]float64{0.008, 0.02},
+		{Name: "ark", Label: "豆包", Client: &llm.Client{BaseURL: values.Get("CHAT_ARK_BASE_URL", "https://ark.cn-beijing.volces.com/api/v3"), Key: arkKey}, Models: arkModels, InputPrice: 0.008, OutputPrice: 0.027, Previous: [2]float64{0.008, 0.02},
 			Tagline: map[string]string{"": "字节豆包，看图细致，中文表达自然"}},
 	}
 	if err := llm.EnsureModels(ctx, app.Store, providers); err != nil {
@@ -80,9 +88,9 @@ func chatModels(ctx context.Context, app *api.Server, values settings.Values) *p
 	for _, p := range providers {
 		clients[p.Name] = p.Client
 		app.ChatReady = app.ChatReady || p.Client.Ready()
-		// 豆包 watches videos itself: it stands in for 视频理解 (一键复刻's
-		// breakdown, videos in chats) when that model cannot be used.
-		if p.Watches && p.Client.Ready() && len(p.Models) > 0 && app.Vision != nil {
+		// Agent never sends the original video to the chat turn. The first Ark
+		// chat model may instead be the cached video-understanding fallback.
+		if p.Name == "ark" && p.Client.Ready() && len(p.Models) > 0 && app.Vision != nil {
 			app.Vision.Fallback = &vision.Client{BaseURL: p.Client.BaseURL, Key: p.Client.Key, Model: p.Models[0]}
 		}
 	}

@@ -75,11 +75,15 @@ func validate(g Group, v Values, production bool) error {
 		}
 	}
 	if g.ID == "chat" {
-		for _, key := range []string{"CHAT_DEEPSEEK_MODELS", "CHAT_ARK_MODELS"} {
-			if _, err := ChatModels(v[key]); err != nil {
-				return invalid(key, err.Error())
-			}
+		if _, err := ChatModels(v["CHAT_DEEPSEEK_MODELS"]); err != nil {
+			return invalid("CHAT_DEEPSEEK_MODELS", err.Error())
 		}
+		if _, err := ArkChatModels(v["CHAT_ARK_MODELS"]); err != nil {
+			return invalid("CHAT_ARK_MODELS", err.Error())
+		}
+	}
+	if g.ID == "vision" && IsMediaGenerationModel(v["VISION_MODEL"]) {
+		return invalid("VISION_MODEL", "视频理解不能使用 Seedance 或 multi- 视频生成接入点")
 	}
 	if g.ID == "wechat" && v["WECHAT_APP_ID"] != "" && !appIDPattern.MatchString(v["WECHAT_APP_ID"]) {
 		return invalid("WECHAT_APP_ID", "请填写有效的小程序 AppID")

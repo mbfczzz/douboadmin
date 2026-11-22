@@ -18,12 +18,17 @@ export default function DateField({
   name,
   label,
   defaultValue = "",
+  value: controlled,
+  onChange,
 }: {
   name: string;
   label: string;
   defaultValue?: string;
+  value?: string;
+  onChange?: (value: string) => void;
 }) {
-  const [value, setValue] = useState(defaultValue),
+  const [ownValue, setOwnValue] = useState(defaultValue),
+    value = controlled ?? ownValue,
     [open, setOpen] = useState(false),
     [month, setMonth] = useState(() => parse(defaultValue) || new Date()),
     box = useRef<HTMLDivElement>(null);
@@ -43,7 +48,9 @@ export default function DateField({
     setOpen(true);
   }
   function pick(d: Date | null) {
-    setValue(d ? format(d) : "");
+    const next = d ? format(d) : "";
+    setOwnValue(next);
+    onChange?.(next);
     setOpen(false);
   }
   const first = new Date(month.getFullYear(), month.getMonth(), 1),
@@ -79,7 +86,11 @@ export default function DateField({
         inputMode="numeric"
         autoComplete="off"
         maxLength={10}
-        onChange={(e) => setValue(e.target.value.trim())}
+        onChange={(e) => {
+          const next = e.target.value.trim();
+          setOwnValue(next);
+          onChange?.(next);
+        }}
         onClick={show}
       />
       <button

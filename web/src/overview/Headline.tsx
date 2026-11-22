@@ -1,5 +1,5 @@
 import { ArrowDownRight, ArrowUpRight } from "lucide-react";
-import { money, type Daily, type Dashboard } from "../business/types";
+import { money, points, type Daily, type Dashboard } from "../business/types";
 import { count, pct } from "./format";
 import Spark from "./Spark";
 import "./headline.css";
@@ -41,7 +41,7 @@ function Delta({
   );
 }
 
-// The five figures that tell at a glance whether the period went well.
+// The six figures that tell at a glance whether the period went well.
 export default function Headline({
   data,
   days,
@@ -55,6 +55,8 @@ export default function Headline({
     b = data.breakdown,
     p = data.previous,
     jobs = sum((d) => d.jobs),
+    succeeded = sum((d) => d.succeeded),
+    spent = sum((d) => d.spentUnits || 0),
     refund = sum((d) => d.refundFen),
     against = days === 1 ? "较昨日同时段" : `较前 ${days} 天`;
   const cards: Card[] = [
@@ -79,11 +81,16 @@ export default function Headline({
       value: jobs,
       prev: p?.jobs,
       text: count,
-      note: `成功率 ${pct(
-        sum((d) => d.succeeded),
-        jobs,
-      )}`,
+      note: `成功率 ${pct(succeeded, jobs)}`,
       series: (d) => d.jobs,
+    },
+    {
+      label: "积分消耗",
+      value: spent,
+      prev: p?.spentUnits,
+      text: points,
+      note: `平均每次 ${points(succeeded ? spent / succeeded : 0)} 积分`,
+      series: (d) => d.spentUnits || 0,
     },
     {
       label: "活跃用户",

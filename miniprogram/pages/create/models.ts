@@ -6,7 +6,10 @@ import type { ModelChoice } from "./editor-types";
 
 export function modelChoices(models: Model[], kind: string): ModelChoice[] {
   return models
-    .filter((model) => model.kind === kind)
+    .filter((model) =>
+      model.kind === kind &&
+      (kind === "chat" || !/^(ark|deepseek):/.test(model.key || "")),
+    )
     .map((model) => ({
       ...model,
       icon: model.icon && !/^(https?:|\/)/i.test(model.icon) ? model.icon : "",

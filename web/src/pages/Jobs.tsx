@@ -3,12 +3,13 @@ import CatalogResults from "../components/CatalogResults";
 import { useCachedResource } from "../hooks/useCachedResource";
 import { useRememberedState } from "../hooks/useRememberedState";
 import { lazy, Suspense, useState } from "react";
-import { stateText, type Job } from "../api";
+import { stateText, type Job, type Model, type Row } from "../api";
 import FilterBar from "../components/FilterBar";
 import Empty from "../components/Empty";
 import JobTable, { type JobAction } from "../components/JobTable";
 import { releaseJob } from "../components/JobRecovery";
 import type { PageProps } from "../navigation";
+import JobFilters, { jobDates, type JobPeriod } from "../generation/JobFilters";
 import "./jobs.css";
 
 // The detail view loads when a task is opened.
@@ -16,16 +17,28 @@ const GenerationDetail = lazy(() => import("../generation/GenerationDetail"));
 export default function Jobs({ notify }: PageProps) {
   const [filter, setFilter] = useRememberedState("jobs.status", "all"),
     [search, setSearch] = useRememberedState("jobs.query", ""),
+    [period, setPeriod] = useRememberedState<JobPeriod>("jobs.period", "all"),
+    [model, setModel] = useRememberedState("jobs.model", ""),
+    [from, setFrom] = useRememberedState("jobs.from", ""),
+    [to, setTo] = useRememberedState("jobs.to", ""),
     [detail, setDetail] = useState<Job | null>(null);
-  const [page, setPage] = useState(1), [refreshKey, setRefreshKey] = useState(0);
+  const [page, setPage] = useState(1),
+    [refreshKey, setRefreshKey] = useState(0);
+  const dates = jobDates(period, from, to),
+    query = new URLSearchParams({
+      page: String(page),
+      status: filter === "all" ? "" : filter,
+      q: search,
+      model,
+      from: dates[0],
+      to: dates[1],
+    });
   const resource = useCachedResource<{
     items: Job[];
     total: number;
     page: number;
-  }>(
-    `/admin/jobs?page=${page}&status=${filter === "all" ? "" : filter}&q=${encodeURIComponent(search)}`,
-    15000,
-  );
+  }>(`/admin/jobs?${query}`, 15000);
+  const modelResource = useCachedResource<Row<Model>[]>("/admin/models");
   const jobs = resource.data?.items || [];
   const refresh = () => {
     setRefreshKey((value) => value + 1);
@@ -45,11 +58,7 @@ export default function Jobs({ notify }: PageProps) {
   const filteredJobs = jobs;
   return (
     <div className="catalog-page jobs-page">
-      <PageHeader
-        page="jobs"
-        loading={resource.loading}
-        onRefresh={refresh}
-      />
+      <PageHeader page="jobs" loading={resource.loading} onRefresh={refresh} />
       <section className="panel">
         <FilterBar
           inside
@@ -67,6 +76,29 @@ export default function Jobs({ notify }: PageProps) {
             setPage(1);
           }}
           placeholder="搜索提示词或任务编号"
+        />
+        <JobFilters
+          period={period}
+          model={model}
+          from={from}
+          to={to}
+          models={modelResource.data || []}
+          onPeriod={(value) => {
+            setPeriod(value);
+            setPage(1);
+          }}
+          onModel={(value) => {
+            setModel(value);
+            setPage(1);
+          }}
+          onFrom={(value) => {
+            setFrom(value);
+            setPage(1);
+          }}
+          onTo={(value) => {
+            setTo(value);
+            setPage(1);
+          }}
         />
         <CatalogResults
           label="生成任务列表"
@@ -88,11 +120,13 @@ export default function Jobs({ notify }: PageProps) {
           ) : !resource.data || resource.error ? null : (
             <Empty
               text={
-                filter !== "all" || search ? "暂无匹配的任务" : "暂无生成任务"
+                filter !== "all" || search || model || period !== "all"
+                  ? "暂无匹配的任务"
+                  : "暂无生成任务"
               }
               help={
-                filter !== "all" || search
-                  ? "请调整状态或搜索条件。"
+                filter !== "all" || search || model || period !== "all"
+                  ? "请调整状态、时间、模型或搜索条件。"
                   : "用户开始创作后，内容会显示在这里。"
               }
             />

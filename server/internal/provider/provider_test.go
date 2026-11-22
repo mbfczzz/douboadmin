@@ -9,6 +9,7 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -72,6 +73,22 @@ func TestConcurrentWorkersNeverDuplicateSubmission(t *testing.T) {
 	group.Wait()
 	if calls.Load() != 1 {
 		t.Fatalf("duplicate generation calls: %d", calls.Load())
+	}
+}
+
+func TestRelayRejectsDirectProviderModelRows(t *testing.T) {
+	var calls atomic.Int32
+	p, j := fixture(t, func(http.ResponseWriter, *http.Request) { calls.Add(1) })
+	row, _ := p.Store.Get(t.Context(), "models", j.Input.Model)
+	var model core.Model
+	_ = json.Unmarshal(row.Data, &model)
+	model.Key = "ark:doubao-seedance-direct"
+	_, _ = p.Store.Put(t.Context(), "models", core.Record{ID: row.ID, Data: core.Data(model)}, row.Version)
+	if _, err := p.Generate(t.Context(), j); err == nil || !strings.Contains(err.Error(), "配置无效") {
+		t.Fatal(err)
+	}
+	if calls.Load() != 0 {
+		t.Fatal("direct provider media model reached the relay")
 	}
 }
 

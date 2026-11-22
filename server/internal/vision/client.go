@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"strings"
 	"time"
@@ -26,6 +27,19 @@ type Client struct {
 func (c *Client) own() bool { return c != nil && c.BaseURL != "" && c.Key != "" && c.Model != "" }
 
 func (c *Client) Ready() bool { return c.own() || c != nil && c.Fallback.own() }
+
+// ModelID identifies the model that will actually watch a video. It also
+// keeps cached notes/breakdowns separate when an invalid primary is replaced
+// by another fallback model.
+func (c *Client) ModelID() string {
+	if c.own() {
+		return c.Model
+	}
+	if c != nil && c.Fallback.own() {
+		return c.Fallback.Model
+	}
+	return ""
+}
 
 // Shot is one beat of the original, in seconds from the start.
 type Shot struct {
@@ -76,6 +90,7 @@ func (c *Client) Breakdown(ctx context.Context, videoURL string) (Breakdown, err
 }
 
 func (c *Client) watch(ctx context.Context, videoURL string) (Breakdown, error) {
+	started := time.Now()
 	body := map[string]any{
 		"model": c.Model,
 		"messages": []any{map[string]any{"role": "user", "content": []any{
@@ -101,11 +116,13 @@ func (c *Client) watch(ctx context.Context, videoURL string) (Breakdown, error) 
 	}
 	res, err := client.Do(r)
 	if err != nil {
+		slog.Warn("video understanding call", "model", c.Model, "duration_ms", time.Since(started).Milliseconds(), "error", err.Error())
 		return Breakdown{}, fmt.Errorf("视频理解服务连接失败")
 	}
 	defer res.Body.Close()
 	data, _ := io.ReadAll(io.LimitReader(res.Body, 4<<20))
 	if res.StatusCode != 200 {
+		slog.Warn("video understanding call", "model", c.Model, "status", res.StatusCode, "duration_ms", time.Since(started).Milliseconds())
 		return Breakdown{}, upstreamError(res.StatusCode, data)
 	}
 	var reply struct {
@@ -118,7 +135,13 @@ func (c *Client) watch(ctx context.Context, videoURL string) (Breakdown, error) 
 	if json.Unmarshal(data, &reply) != nil || len(reply.Choices) == 0 {
 		return Breakdown{}, fmt.Errorf("视频理解服务返回格式无效")
 	}
-	return Parse(reply.Choices[0].Message.Content)
+	result, err := Parse(reply.Choices[0].Message.Content)
+	if err != nil {
+		slog.Warn("video understanding call", "model", c.Model, "status", res.StatusCode, "duration_ms", time.Since(started).Milliseconds(), "error", err.Error())
+		return Breakdown{}, err
+	}
+	slog.Info("video understanding call", "model", c.Model, "status", res.StatusCode, "duration_ms", time.Since(started).Milliseconds())
+	return result, nil
 }
 
 // Parse reads the model's JSON (tolerating code fences and stray text) and

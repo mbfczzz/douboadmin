@@ -8,7 +8,7 @@ import { CHAT_CHOICE, DEFAULT_CHAT, preferredChat } from "../../services/chat-mo
 // Which chat model the Agent talks to (DeepSeek / 豆包 / relay chat models),
 // remembered across visits, and what one turn costs on it.
 // sees: reads pictures; rec: the recommended default; desc: one line for the picker.
-// watches: takes videos itself (豆包); others hear about them from 视频理解.
+// watches: no chat model takes videos itself any more; the server has 视频理解 watch each video once.
 export type ChatModel = { id: string; name: string; sees: boolean; watches: boolean; key?: string; icon: string; desc: string; rec: boolean };
 const STORE = CHAT_CHOICE;
 

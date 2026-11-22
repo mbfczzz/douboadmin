@@ -32,7 +32,7 @@ func (a *Server) hotBreakdown(w http.ResponseWriter, r *http.Request) {
 		fail(w, 404, "视频不存在")
 		return
 	}
-	rec, _, err := a.Hot.ReadBreakdown(r.Context(), a.Vision.Model, id)
+	rec, _, err := a.Hot.ReadBreakdown(r.Context(), a.Vision.ModelID(), id)
 	if err != nil && !errors.Is(err, core.ErrNotFound) {
 		dbError(w, err)
 		return

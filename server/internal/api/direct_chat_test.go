@@ -5,6 +5,7 @@ import (
 	"doubo/server/internal/provider"
 	"doubo/server/internal/relay"
 	"encoding/json"
+	"strings"
 	"testing"
 )
 
@@ -76,5 +77,22 @@ func TestDirectChatModelsShowWithoutTheRelay(t *testing.T) {
 	w := call(a, "GET", "/api/config", "", "", nil)
 	if json.Unmarshal(w.Body.Bytes(), &cfg) != nil || len(cfg.Models) != 1 || cfg.Models[0].Key != "deepseek:deepseek-flash" {
 		t.Fatal(w.Body.String())
+	}
+}
+
+// A direct-provider key is valid only for chat. Even a malformed model row
+// cannot make Agent or any client bypass the site's media-generation relay.
+func TestDirectChatModelCannotGenerateMedia(t *testing.T) {
+	a, user, _ := setup(t)
+	m := core.Model{
+		ID: "bad-video", Key: "ark:doubao-seedance-direct", Name: "Bad direct video",
+		Kind: "video", Published: true, Available: true, Modes: []string{"t2v"},
+		Durations: []int{5}, Resolutions: []string{"720p"}, Ratios: []string{"9:16"},
+	}
+	_, _ = a.Store.Put(t.Context(), "models", core.Record{ID: m.ID, Data: core.Data(m)}, 0)
+	in := core.JobInput{Kind: "video", Model: m.ID, Prompt: "test", Mode: "t2v", Duration: 5, Resolution: "720p", Ratio: "9:16", Assets: []string{}}
+	w := call(a, "POST", "/api/jobs", user, "direct-media-blocked", in)
+	if w.Code != 400 || !strings.Contains(w.Body.String(), "豆播创作") {
+		t.Fatal(w.Code, w.Body.String())
 	}
 }

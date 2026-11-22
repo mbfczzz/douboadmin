@@ -4,6 +4,7 @@ import (
 	"context"
 	"doubo/server/internal/core"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -16,12 +17,17 @@ import (
 const (
 	videoNoteRunes = 1500     // within billing's per-material allowance
 	videoMaxBytes  = 50 << 20 // 方舟 reads video URLs up to 50 MB
+	videoNoteStale = 5 * time.Minute
+	videoNotePoll  = 500 * time.Millisecond
 )
 
 type videoNote struct {
-	Model string    `json:"model"`
-	Note  string    `json:"note"`
-	At    time.Time `json:"at"`
+	Model     string    `json:"model"`
+	Status    string    `json:"status"` // running | done | failed
+	Note      string    `json:"note"`
+	Error     string    `json:"error"`
+	StartedAt time.Time `json:"startedAt"`
+	At        time.Time `json:"at"`
 }
 
 // videoNote is what the chat model is told about one video.
@@ -30,21 +36,52 @@ func (p *DirectChat) videoNote(ctx context.Context, j core.Job, assetID, url str
 	if !p.Vision.Ready() {
 		return "【" + label + "】暂时看不到这个视频的画面；请告诉用户暂时无法查看视频，并请用户描述视频内容，不要提及任何配置或服务原因。"
 	}
-	var version int64 // an older note (another 视频理解 model) is replaced
-	if row, err := p.Store.Get(ctx, "video_notes", assetID); err == nil {
-		version = row.Version
-		var n videoNote
-		if json.Unmarshal(row.Data, &n) == nil && n.Model == p.Vision.Model && n.Note != "" {
-			return "【" + label + " 的内容（由视频理解模型观看后整理）】\n" + n.Note
-		}
-	}
+	modelID := p.Vision.ModelID()
 	if size := assetSize(ctx, p, assetID); size > videoMaxBytes {
 		return "【" + label + "】视频超过 50MB，无法观看；请告诉用户剪短或压缩后重新上传。"
 	}
+	for {
+		row, err := p.Store.Get(ctx, "video_notes", assetID)
+		var n videoNote
+		if err == nil {
+			_ = json.Unmarshal(row.Data, &n)
+			// Notes saved before status existed are finished ones too.
+			if n.Model == modelID && (n.Status == "done" || n.Status == "") && n.Note != "" {
+				return videoNoteText(label, n.Note)
+			}
+			if n.Model == modelID && n.Status == "failed" && time.Since(n.At) < videoNoteStale {
+				return videoNoteFailure(label)
+			}
+			if n.Model == modelID && n.Status == "running" && time.Since(n.StartedAt) < videoNoteStale {
+				select {
+				case <-ctx.Done():
+					return videoNoteFailure(label)
+				case <-time.After(videoNotePoll):
+				}
+				continue
+			}
+		} else if !errors.Is(err, core.ErrNotFound) {
+			return videoNoteFailure(label)
+		}
+		claim := videoNote{Model: modelID, Status: "running", StartedAt: time.Now().UTC()}
+		claimed, err := p.Store.Put(ctx, "video_notes", core.Record{ID: assetID, Owner: j.UserID, Data: core.Data(claim)}, row.Version)
+		if errors.Is(err, core.ErrConflict) {
+			continue
+		}
+		if err != nil {
+			return videoNoteFailure(label)
+		}
+		return p.watchVideoNote(ctx, j, label, url, claimed, claim)
+	}
+}
+
+func (p *DirectChat) watchVideoNote(ctx context.Context, j core.Job, label, url string, row core.Record, n videoNote) string {
 	_ = p.Store.Progress(ctx, j, 5, "正在观看"+label+"…")
 	b, err := p.Vision.Breakdown(ctx, url)
 	if err != nil {
-		return "【" + label + "】这次没能看懂这个视频（" + err.Error() + "）；请如实告诉用户，可稍后重试。"
+		n.Status, n.Error, n.At = "failed", err.Error(), time.Now().UTC()
+		p.saveVideoNote(ctx, row, n)
+		return videoNoteFailure(label)
 	}
 	lines := []string{"概要：" + b.Summary, "开头：" + b.Hook, "结构：" + b.Structure, "风格：" + b.Style}
 	if b.Music != "" {
@@ -64,10 +101,25 @@ func (p *DirectChat) videoNote(ctx context.Context, j core.Job, assetID, url str
 	if len(note) > videoNoteRunes {
 		note = note[:videoNoteRunes]
 	}
-	n := videoNote{Model: p.Vision.Model, Note: string(note), At: time.Now().UTC()}
-	_, _ = p.Store.Put(ctx, "video_notes", core.Record{ID: assetID, Owner: j.UserID, Data: core.Data(n)}, version)
+	n.Status, n.Note, n.Error, n.At = "done", string(note), "", time.Now().UTC()
+	p.saveVideoNote(ctx, row, n)
 	_ = p.Store.Progress(ctx, j, 10, "")
-	return "【" + label + " 的内容（由视频理解模型观看后整理）】\n" + n.Note
+	return videoNoteText(label, n.Note)
+}
+
+func (p *DirectChat) saveVideoNote(ctx context.Context, row core.Record, n videoNote) {
+	done, cancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
+	defer cancel()
+	row.Data = core.Data(n)
+	_, _ = p.Store.Put(done, "video_notes", row, row.Version)
+}
+
+func videoNoteText(label, note string) string {
+	return "【" + label + " 的内容（由视频理解模型观看后整理）】\n" + note
+}
+
+func videoNoteFailure(label string) string {
+	return "【" + label + "】这次暂时没能读取视频画面；请如实告诉用户稍后再试，不要提及内部原因。"
 }
 
 // materialLabel is the name the user sees: 视频2 is the project's second

@@ -94,6 +94,11 @@ func TestDirectChatChargesTokensUsedAndReturnsTheRest(t *testing.T) {
 	if b["model"] != "deepseek-chat" || b["max_tokens"].(float64) != 1000 || len(b["messages"].([]any)) != 2 {
 		t.Fatal("request body", b) // system prompt + this turn
 	}
+	// Reading/recovering a completed execution before accounting is settled
+	// only records the same usage; it never calls the provider or charges again.
+	if again, err := p.Generate(t.Context(), j); err != nil || again != text || len(*bodies) != 1 {
+		t.Fatal("pre-settlement repeat", again, err, len(*bodies))
+	}
 	if err = s.Finish(t.Context(), j, text, ""); err != nil {
 		t.Fatal(err)
 	}
@@ -146,11 +151,13 @@ func TestDirectChatFailureReturnsEverything(t *testing.T) {
 	if w, bill := funds(t, s, j.ID); bill.State != "released" || w.Available != 100000 || w.Held != 0 {
 		t.Fatal(bill, w)
 	}
-	// An interrupted turn (still "submitting") ends instead of calling twice.
-	s2, p2, j2, bodies := directFixture(t, `{}`, 200)
-	_, _ = s2.Put(t.Context(), "executions", core.Record{ID: j2.ID, Data: core.Data(Execution{Phase: "submitting"})}, 0)
-	if _, err = p2.Generate(t.Context(), j2); err == nil || len(*bodies) != 0 {
-		t.Fatal("interrupted turn", err, len(*bodies))
+	// A crash during paid preparation or the reply ends instead of calling twice.
+	for _, phase := range []string{"preparing", "submitting"} {
+		s2, p2, j2, bodies := directFixture(t, `{}`, 200)
+		_, _ = s2.Put(t.Context(), "executions", core.Record{ID: j2.ID, Data: core.Data(Execution{Phase: phase})}, 0)
+		if _, err = p2.Generate(t.Context(), j2); err == nil || len(*bodies) != 0 {
+			t.Fatal("interrupted turn", phase, err, len(*bodies))
+		}
 	}
 }
 

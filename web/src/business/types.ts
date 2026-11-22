@@ -165,6 +165,7 @@ export interface PeriodTotals {
   revenueFen: number;
   pv: number;
   uv: number;
+  spentUnits?: number;
 }
 export interface Dashboard {
   breakdown?: Breakdown;

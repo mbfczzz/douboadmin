@@ -67,9 +67,23 @@ func TestJobPaginationFiltersBeforeLimitAndCountsAllHistory(t *testing.T) {
 
 func TestJobPageRejectsInvalidBoundaries(t *testing.T) {
 	m := NewMemory()
-	for _, q := range []core.JobQuery{{Page: 0, Size: 20}, {Page: 1, Size: 101}, {Page: 1, Size: 20, Deleted: "invalid"}} {
+	for _, q := range []core.JobQuery{{Page: 0, Size: 20}, {Page: 1, Size: 101}, {Page: 1, Size: 20, Deleted: "invalid"}, {Page: 1, Size: 20, CreatedFrom: time.Now(), CreatedBefore: time.Now().Add(-time.Hour)}} {
 		if _, e := m.JobPage(t.Context(), q); e == nil {
 			t.Fatal("invalid query accepted", q)
 		}
+	}
+}
+
+func TestJobPageFiltersByModelAndCreatedRange(t *testing.T) {
+	m := NewMemory()
+	start := time.Date(2026, 11, 20, 0, 0, 0, 0, time.UTC)
+	for i, model := range []string{"image-a", "video-b", "video-b"} {
+		j := core.NewJob("u", fmt.Sprintf("filtered-%d", i), core.JobInput{Kind: "video", Model: model, Prompt: "filter"})
+		j.CreatedAt = start.Add(time.Duration(i) * 24 * time.Hour)
+		m.jobs[j.ID] = j
+	}
+	page, err := m.JobPage(t.Context(), core.JobQuery{Page: 1, Size: 20, Model: "video-b", CreatedFrom: start.Add(12 * time.Hour), CreatedBefore: start.Add(36 * time.Hour)})
+	if err != nil || page.Total != 1 || len(page.Items) != 1 || page.Items[0].Input.Model != "video-b" {
+		t.Fatal(page, err)
 	}
 }

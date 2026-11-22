@@ -48,6 +48,8 @@ type PeriodTotals struct {
 	RevenueFen  int64 `json:"revenueFen"`
 	PV          int64 `json:"pv"`
 	UV          int64 `json:"uv"`
+	// Points (hundredths) charged for jobs that succeeded, as in DailyMetric.
+	SpentUnits int64 `json:"spentUnits"`
 }
 
 // KindStat summarises one generation type within the report period.

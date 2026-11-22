@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log/slog"
 	"slices"
 	"strings"
 	"time"
@@ -87,25 +88,14 @@ func (p *DirectChat) Generate(ctx context.Context, j core.Job) (string, error) {
 	if stopAsked(ctx, p.Store, j.ID) {
 		return "", errors.New("已停止回复")
 	}
-	// A long project's earlier turns are summarized first; that call is part
-	// of this turn's usage.
-	var spent llm.Usage
-	summarize := func(ctx context.Context, text string) (string, error) {
-		out, u, err := client.Complete(ctx, key, summaryMessages(text), billing.SummaryOutput, nil)
-		spent.Input, spent.Cached, spent.Output = spent.Input+u.Input, spent.Cached+u.Cached, spent.Output+u.Output
-		return out, err
-	}
-	messages, err := p.messages(ctx, j, m, summarize)
-	if err != nil {
-		return "", err
-	}
-	e := Execution{Phase: "submitting", ModelKey: m.Key, StartedAt: time.Now().UTC()}
+	// Win the durable right to run this turn before any paid operation
+	// (history summarization or video understanding). A crash after this point
+	// makes the next worker fail the interrupted turn instead of paying again.
+	e := Execution{Phase: "preparing", ModelKey: m.Key, StartedAt: time.Now().UTC()}
 	row = core.Record{ID: j.ID}
 	if err = p.checkpoint(ctx, &row, e); err != nil {
-		return "", ErrPending // another worker owns this turn
+		return "", ErrPending
 	}
-	// Recorded even when the turn's time ran out (ctx is done then): a turn
-	// left "submitting" would keep the user's points held instead of refunded.
 	fail := func(err error) (string, error) {
 		if ctx.Err() != nil {
 			err = errors.New("回复超时，请重新发送")
@@ -116,6 +106,24 @@ func (p *DirectChat) Generate(ctx context.Context, j core.Job) (string, error) {
 		_ = p.checkpoint(done, &row, e)
 		return "", err
 	}
+	// A long project's earlier turns are summarized first; that call is part
+	// of this turn's usage.
+	var spent llm.Usage
+	summarize := func(ctx context.Context, text string) (string, error) {
+		started := time.Now()
+		out, u, err := client.Complete(ctx, key, summaryMessages(text), billing.SummaryOutput, nil)
+		logDirectCall(j, key, "summary", started, u, err)
+		spent.Input, spent.Cached, spent.Output = spent.Input+u.Input, spent.Cached+u.Cached, spent.Output+u.Output
+		return out, err
+	}
+	messages, err := p.messages(ctx, j, m, summarize)
+	if err != nil {
+		return fail(err)
+	}
+	e.Phase = "submitting"
+	if err = p.checkpoint(ctx, &row, e); err != nil {
+		return fail(err) // e.g. the turn's time ran out while preparing
+	}
 	if stopAsked(ctx, p.Store, j.ID) { // stopped while the summary or a video was being read
 		return fail(errors.New("已停止回复"))
 	}
@@ -125,7 +133,9 @@ func (p *DirectChat) Generate(ctx context.Context, j core.Job) (string, error) {
 	defer Turns.finish(j.ID)
 	go watchStop(call, p.Store, j.ID, cancel)
 	written := ""
+	started := time.Now()
 	text, usage, err := client.Complete(call, key, messages, m.Settings.OutputTokens(), p.partial(ctx, j.ID, &row, &e, &written))
+	logDirectCall(j, key, "reply", started, usage, err)
 	if errors.Is(err, errTurnTaken) {
 		return "", ErrPending
 	}
@@ -157,6 +167,18 @@ func (p *DirectChat) Generate(ctx context.Context, j core.Job) (string, error) {
 		}
 	}
 	return text, nil
+}
+
+func logDirectCall(j core.Job, model, stage string, started time.Time, usage llm.Usage, err error) {
+	attrs := []any{"task", j.ID, "user", j.UserID, "model", model, "stage", stage,
+		"duration_ms", time.Since(started).Milliseconds(), "input_tokens", usage.Input,
+		"cached_tokens", usage.Cached, "output_tokens", usage.Output}
+	if err != nil {
+		attrs = append(attrs, "error", err.Error())
+		slog.Warn("direct chat model call", attrs...)
+		return
+	}
+	slog.Info("direct chat model call", attrs...)
 }
 
 // estimateTokens bounds a request's tokens by the characters of its
@@ -205,12 +227,7 @@ func (p *DirectChat) messages(ctx context.Context, j core.Job, m core.Model, sum
 		text, pictures, names := j.Input.Prompt, []any{}, []string{}
 		for i, r := range refs {
 			switch {
-			case r.Type == "video" && slices.Contains(m.ReferenceTypes, "video"): // 豆包 watches it itself
-				pictures = append(pictures, map[string]any{"type": "video_url", "video_url": map[string]any{"url": r.URL, "fps": 1}})
-				if i < len(j.Input.Assets) {
-					names = append(names, materialLabel(ctx, p, j, j.Input.Assets[i]))
-				}
-			case r.Type == "video" && i < len(j.Input.Assets): // watched by 视频理解, told as text
+			case r.Type == "video" && i < len(j.Input.Assets): // watched once, cached and told as text
 				text += "\n\n" + p.videoNote(ctx, j, j.Input.Assets[i], r.URL)
 			case r.Type != "image":
 			case !slices.Contains(m.ReferenceTypes, "image"): // e.g. deepseek-v4-pro

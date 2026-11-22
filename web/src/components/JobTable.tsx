@@ -4,8 +4,17 @@ import Badge from "./Badge";
 import Table from "../business/Table";
 import { releasable } from "./JobRecovery";
 import JobThumbnail from "./JobThumbnail";
+import { points } from "../business/types";
 
 export type JobAction = "detail" | "release";
+
+const spentPoints = (job: Job) => {
+  if (job.billingState === "reserved") return "待结算";
+  if (job.billingState === "released" || job.billingState === "free")
+    return "0";
+  if (!job.billingState) return "—";
+  return points(job.costUnits || 0);
+};
 
 // Shared record table: wraps text, and turns into cards when it cannot fit.
 export default function JobTable({
@@ -43,6 +52,11 @@ export default function JobTable({
               </div>
             );
           },
+        },
+        {
+          title: "消耗积分",
+          align: "right",
+          render: (j) => spentPoints(j),
         },
         { title: "类型", render: (j) => kindText[j.input.kind] },
         { title: "状态", render: (j) => <Badge state={j.status} /> },

@@ -11,10 +11,10 @@ const WAIT_MS = 2000;
 const GIVE_UP_MS = 3 * 60 * 1000;
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-// Pictures need a model that sees them; videos one that takes them (the
-// direct DeepSeek / 豆包 models: 豆包 watches, the others get 视频理解's notes).
+// Pictures need a model that sees them. Any direct chat model may receive a
+// video: the server watches it once with 视频理解 and reuses the text note.
 const takes = (needs: "image" | "video" | "", m: Model) =>
-  !needs || (m.referenceTypes || []).includes(needs) || (needs === "video" && /^(deepseek|doubao):/.test(m.key || ""));
+  !needs || (m.referenceTypes || []).includes(needs) || (needs === "video" && /^(deepseek|ark):/.test(m.key || ""));
 
 // The chat models offered for a step (model-picker), the usual one first.
 export function chatChoices(models: Model[], needs: "image" | "video" | "" = "") {

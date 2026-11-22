@@ -24,6 +24,15 @@ func jobWhere(q core.JobQuery, referenceID string) (string, []any) {
 	} else if q.Kind != "" {
 		add(" AND j.input->>'$.kind'=?", q.Kind)
 	}
+	if q.Model != "" {
+		add(" AND j.input->>'$.model'=?", q.Model)
+	}
+	if !q.CreatedFrom.IsZero() {
+		add(" AND j.created_at>=?", q.CreatedFrom.UTC())
+	}
+	if !q.CreatedBefore.IsZero() {
+		add(" AND j.created_at<?", q.CreatedBefore.UTC())
+	}
 	if q.Session != "" {
 		add(" AND j.input->>'$.sessionId'=?", q.Session)
 	} else if q.NoSession {
@@ -95,6 +104,9 @@ func jobMatches(j core.Job, q core.JobQuery, deleted bool) bool {
 		return false
 	}
 	if q.Kind != "" && j.Input.Kind != q.Kind && !(q.Kind == "video" && j.Input.Kind == "mix") {
+		return false
+	}
+	if q.Model != "" && j.Input.Model != q.Model || !q.CreatedFrom.IsZero() && j.CreatedAt.Before(q.CreatedFrom) || !q.CreatedBefore.IsZero() && !j.CreatedAt.Before(q.CreatedBefore) {
 		return false
 	}
 	if q.Session != "" && j.Input.SessionID != q.Session || q.NoSession && j.Input.SessionID != "" {

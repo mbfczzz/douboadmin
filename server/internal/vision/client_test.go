@@ -86,3 +86,15 @@ func TestFallbackWatchesWhenTheModelCannotBeUsed(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestModelIDUsesTheActiveWatcher(t *testing.T) {
+	fallback := &Client{BaseURL: "https://ark.example", Key: "k", Model: "doubao-seed-2-1-lite"}
+	c := &Client{Fallback: fallback}
+	if c.ModelID() != fallback.Model {
+		t.Fatal(c.ModelID())
+	}
+	c.BaseURL, c.Key, c.Model = "https://vision.example", "k", "vision-primary"
+	if c.ModelID() != "vision-primary" {
+		t.Fatal(c.ModelID())
+	}
+}

@@ -6,6 +6,7 @@ import (
 	"doubo/server/internal/store"
 	"encoding/json"
 	"errors"
+	"slices"
 	"strings"
 )
 
@@ -26,9 +27,6 @@ type Provider struct {
 	// Seeing lists the model IDs (substrings) that read pictures, when not
 	// all of the provider's models do.
 	Seeing []string
-	// Watches: the provider's models take videos themselves (豆包 Seed,
-	// video_url); others hear about videos from 视频理解.
-	Watches bool
 	// Names gives a listed model ID a readable name ("DeepSeek Pro").
 	Names map[string]string
 	// Tagline describes a model in the Agent's model picker (by model ID,
@@ -88,9 +86,11 @@ func ensure(ctx context.Context, s store.Store, p Provider, key, id string, orde
 			return nil
 		}
 		repriced := reprice(&m.Settings, p, id)
-		// Registered before 豆包 took videos itself (still just ["image"]).
-		if p.Watches && len(m.ReferenceTypes) == 1 && m.ReferenceTypes[0] == "image" {
-			m.ReferenceTypes, repriced = []string{"image", "video"}, true
+		// Agent videos are watched once by 视频理解 and cached as text;
+		// remove the old direct-video capability from already registered rows.
+		if slices.Contains(m.ReferenceTypes, "video") {
+			m.ReferenceTypes = slices.DeleteFunc(m.ReferenceTypes, func(v string) bool { return v == "video" })
+			repriced = true
 		}
 		// An earlier default, never edited, follows the current tagline.
 		if d := m.Settings.Description; d != tagline(p, id) && (d == p.Label+" 对话模型，按 token 计费" || d == "反应快、价格低，写脚本和方案的首选，也能看图" || d == "推理更强，适合复杂策划；不能看图") {
@@ -109,9 +109,6 @@ func ensure(ctx context.Context, s store.Store, p Provider, key, id string, orde
 	refs := []string{}
 	if sees(p, id) {
 		refs = []string{"image"}
-	}
-	if p.Watches {
-		refs = append(refs, "video")
 	}
 	settings := core.ModelSettings{TokenInputPrice: p.InputPrice, TokenOutputPrice: p.OutputPrice, TokenCachedPrice: p.CachedPrice, PeakPriceRate: p.PeakRate,
 		Description: tagline(p, id)}
