@@ -45,7 +45,7 @@ test("bundled legal documents stay complete when the production API is unavailab
   await privacy.load();
   assert.equal(privacy.data.loadError, "");
   const text = JSON.stringify(privacy.data.document);
-  for (const phrase of ["收集方式", "信息范围", "用途", "存储期限", "中华人民共和国境内", "删除个人信息", "注销账号"])
+  for (const phrase of ["收集方式", "信息范围", "用途", "存储期限", "中华人民共和国境内", "剪贴板", "扫码", "删除个人信息", "注销账号"])
     assert.match(text, new RegExp(phrase));
   const terms = harness().page("library");
   terms.onLoad({ mode: "terms" });

@@ -256,7 +256,7 @@ console.log(
 // 1,130,936 B. 1101 -> 1105 KiB. See docs/privacy-consent-budget.md.
 // Legal review availability: complete service agreement, privacy policy and
 // support contacts are bundled as an offline fallback, so a transient API
-// failure cannot render a blank legal page: 1,138,447 B. 1105 -> 1112 KiB.
+// failure cannot render a blank legal page: 1,138,567 B. 1105 -> 1112 KiB.
 // See docs/legal-offline-budget.md.
 const budget = 1112 * 1024;
 if (report.referencedSourceBytes > budget)

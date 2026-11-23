@@ -18,7 +18,7 @@ func TestLegalDocumentsArePublicAndComplete(t *testing.T) {
 		}
 	}
 	privacy, _ := json.Marshal(privacyDocument)
-	for _, phrase := range []string{"收集方式、信息范围与用途", "主动勾选同意", "中华人民共和国境内", "注销账号"} {
+	for _, phrase := range []string{"收集方式、信息范围与用途", "主动勾选同意", "剪贴板", "扫码", "中华人民共和国境内", "注销账号"} {
 		if !strings.Contains(string(privacy), phrase) {
 			t.Fatal("privacy policy missing", phrase)
 		}
