@@ -1,8 +1,12 @@
 import { API_BASE } from "../config";
 import { sessionToken } from "./session";
+function analyticsAllowed() {
+  try { return wx.getStorageSync("analytics-consent") === true; }
+  catch { return false; }
+}
 export function track(name: string, page: string, targetId = "") {
   const token = sessionToken();
-  if (!token || !wx.getStorageSync("analytics-consent")) return;
+  if (!token || !analyticsAllowed()) return;
   wx.request({
     url: API_BASE + "/api/events",
     method: "POST",
@@ -17,6 +21,7 @@ export function track(name: string, page: string, targetId = "") {
 // 功能使用 (后台 → 日志管理): one tap on a function's entry. Anonymous (no
 // token, no ids), like visits; never retried.
 export function featureClick(key: string) {
+  if (!analyticsAllowed()) return;
   try {
     wx.request({ url: API_BASE + "/api/features/" + key + "/click", method: "POST", data: {}, timeout: 3000, success() {}, fail() {} });
   } catch {
@@ -46,6 +51,7 @@ export function pauseVisit() {
   hiddenAt = Date.now();
 }
 export function trackVisit(page: { route?: string }) {
+  if (!analyticsAllowed()) return;
   const repeat = page === lastPage;
   lastPage = page;
   if (!visitId || !page.route || (repeat && !fresh)) return;

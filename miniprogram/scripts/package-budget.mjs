@@ -258,7 +258,10 @@ console.log(
 // support contacts are bundled as an offline fallback, so a transient API
 // failure cannot render a blank legal page: 1,138,567 B. 1105 -> 1112 KiB.
 // See docs/legal-offline-budget.md.
-const budget = 1112 * 1024;
+// Consent alignment: anonymous visit IDs, device platform and feature-click
+// beacons now stay off until the user enables detailed statistics:
+// 1,138,864 B. 1112 -> 1113 KiB. See docs/privacy-consent-budget.md.
+const budget = 1113 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

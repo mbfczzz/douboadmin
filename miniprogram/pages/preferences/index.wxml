@@ -31,7 +31,7 @@
           data-field="analytics"
           bindchange="change" /></view
       ><text class="biz-note"
-        >使用统计仅记录页面和操作类型，不上传创作描述、素材内容或手机号。</text
+        >开启后记录页面、操作类型、进入场景、设备平台和随机访客标识，不上传创作描述、素材内容或手机号。</text
       ></view
     ><view class="biz-card"
       ><text class="biz-heading">微信完成通知</text
