@@ -67,15 +67,24 @@ button.phone-login[disabled] {
   padding: 12px 18px;
   font-size: 15px;
 }
-.privacy-link {
+.legal-links {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  flex-wrap: wrap;
+  gap: 0;
   margin-top: 8px;
-  padding: 12px;
   font-size: 13px;
   color: var(--ui-muted);
+}
+.legal-link {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+}
+.legal-link.divided {
+  border-left: 1px solid var(--ui-border);
 }
 .login-page .loading {
   padding: 20px;

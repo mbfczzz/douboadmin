@@ -240,7 +240,11 @@ console.log(
 // one purchase per session, signed orders are not reported as submitted, a
 // waiting order is re-checked, server-side expiry (services/payment.ts,
 // pages/wallet/checkout.ts): 1,120,074 B. 1091 -> 1094 KiB.
-const budget = 1094 * 1024;
+// Release compliance: public user agreement / privacy policy rendered from
+// server data, real customer-service and complaint actions, and legal links
+// on login, activation and settings pages; the mini-program filing number is
+// shown in settings and legal contacts: 1,127,249 B. 1094 -> 1101 KiB.
+const budget = 1101 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

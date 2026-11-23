@@ -17,6 +17,7 @@ export const CARDS: Entry[] = [
 export const TOOLS: Entry[] = [
   { key: "ad", title: "剧情带货", art: "toolAd", url: create("ad") },
   { key: "shop", title: "探店视频", art: "toolShop", url: create("shop") },
+  { key: "tryon", title: "AI试衣", art: "toolTryon", url: "/pages/tryon/index" },
   { key: "avatar", title: "数字人", art: "toolAvatar", url: preview("avatar") },
   { key: "article", title: "图文成片", art: "toolArticle", url: preview("article") },
   { key: "sing", title: "视频唱歌", art: "toolSing", url: preview("sing") },
@@ -24,7 +25,6 @@ export const TOOLS: Entry[] = [
   { key: "extract", title: "文案提取", art: "toolExtract", url: "/pages/extract/index" },
   { key: "idphoto", title: "AI证件照", art: "toolIdphoto", url: create("idphoto") },
   { key: "comic", title: "漫画推文", art: "toolComic", url: preview("comic") },
-  { key: "tryon", title: "AI试衣", art: "toolTryon", url: "/pages/tryon/index" },
 ];
 
 export const ENTRIES = [...CARDS, ...TOOLS];

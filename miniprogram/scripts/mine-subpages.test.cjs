@@ -38,6 +38,11 @@ test("settings reads the real version and opens help and privacy", () => {
   h.wx.openPrivacyContract = () => opened++;
   page.privacy();
   assert.equal(opened, 1);
+  let filing = "";
+  h.wx.setClipboardData = ({ data, success }) => { filing = data; success?.(); };
+  h.wx.showToast = () => {};
+  page.filing();
+  assert.equal(filing, "鲁ICP备2022009868号-9X");
 });
 
 test("long-pressing a favorite confirms, switches it off and drops the card", async () => {

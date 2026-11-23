@@ -70,6 +70,30 @@
         <view class="feedback-foot"><text class="feedback-count">{{content.length}} / 1000</text><button class="feedback-send" disabled="{{!canSend||busy}}" loading="{{busy}}" bindtap="send">提交</button></view>
       </view>
     </block>
+    <block wx:elif="{{document}}">
+      <view class="legal-intro">
+        <text class="legal-title">{{document.title}}</text>
+        <text class="legal-date">{{mode==='support'?'服务时间':'生效日期'}} · {{document.effectiveDate}}</text>
+        <text class="legal-summary">{{document.summary}}</text>
+      </view>
+      <block wx:if="{{mode==='support'}}">
+        <button class="support-wechat" open-type="contact"><t-icon name="chat" size="20" />联系微信客服</button>
+        <view class="support-list">
+          <view wx:for="{{document.contacts}}" wx:key="label" class="support-row {{item.action?'actionable':''}}" data-action="{{item.action}}" data-value="{{item.value}}" bindtap="contact" aria-role="{{item.action?'button':''}}">
+            <view><text class="support-label">{{item.label}}</text><text class="support-value" selectable>{{item.value}}</text></view>
+            <t-icon wx:if="{{item.action}}" name="{{item.action==='phone'?'call':'copy'}}" size="18" />
+          </view>
+        </view>
+        <text class="support-note">非服务时间提交的问题，我们会在下一个服务时段处理。涉及订单时请同时提供订单号，不要发送密码、验证码或支付密钥。</text>
+      </block>
+      <block wx:else>
+        <view wx:for="{{document.sections}}" wx:key="title" class="legal-section">
+          <text class="legal-section-title">{{item.title}}</text>
+          <text wx:for="{{item.paragraphs}}" wx:for-item="paragraph" wx:key="*this" class="legal-paragraph" selectable>{{paragraph}}</text>
+        </view>
+        <button wx:if="{{mode==='privacy'}}" class="official-privacy" bindtap="officialPrivacy">查看微信小程序隐私保护指引</button>
+      </block>
+    </block>
   </block>
 <view wx:if="{{total>20}}" class="job-pagination">
 <button bindtap="previous" disabled="{{page<=1}}">上一页</button><text>第 {{page}} 页 · 共 {{total}} 条</text><button bindtap="next" disabled="{{page*20>=total}}">下一页</button>

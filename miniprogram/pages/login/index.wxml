@@ -45,5 +45,5 @@
   <button class="text-button browse" disabled="{{busy||returning}}" bindtap="back">
     {{activationRequired?'返回授权页':backLabel}}
   </button>
-  <view class="privacy-link" bindtap="privacy" aria-role="button"><art-icon name="icPrivacy" size="16" /><text>隐私保护指引</text></view>
+  <view class="legal-links"><navigator class="legal-link" url="/pages/library/index?mode=terms" hover-class="none">用户协议</navigator><navigator class="legal-link divided" url="/pages/library/index?mode=privacy" hover-class="none">隐私政策</navigator><text class="legal-link divided" bindtap="privacy">微信隐私指引</text></view>
 </view>

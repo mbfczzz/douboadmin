@@ -1,0 +1,84 @@
+package api
+
+import "net/http"
+
+type legalSection struct {
+	Title      string   `json:"title"`
+	Paragraphs []string `json:"paragraphs"`
+}
+
+type legalContact struct {
+	Label  string `json:"label"`
+	Value  string `json:"value"`
+	Action string `json:"action,omitempty"`
+}
+
+type legalDocument struct {
+	Title         string         `json:"title"`
+	EffectiveDate string         `json:"effectiveDate"`
+	Summary       string         `json:"summary"`
+	Sections      []legalSection `json:"sections,omitempty"`
+	Contacts      []legalContact `json:"contacts,omitempty"`
+}
+
+func section(title string, paragraphs ...string) legalSection {
+	return legalSection{Title: title, Paragraphs: paragraphs}
+}
+
+var termsDocument = legalDocument{
+	Title:         "豆播AI用户服务协议",
+	EffectiveDate: "2026年11月23日",
+	Summary:       "本协议由买吧易购（山东）网络科技有限公司与豆播AI用户共同遵守。请在注册、充值或使用创作服务前阅读。",
+	Sections: []legalSection{
+		section("服务内容", "豆播AI提供图片、视频及相关创作辅助服务，具体功能、模型、规格与价格以使用时页面展示为准。部分功能仅向完成登记并审核开通的用户提供。"),
+		section("账号与使用资格", "你应使用本人有权使用的微信账号或手机号注册，提供真实、准确的资料，并妥善保管账号。不得出借、出售账号或绕过开通、权限和计费规则。"),
+		section("使用规范", "不得利用服务制作、上传或传播违法违规、侵权、虚假、欺诈、色情、暴力或危害网络安全的内容，不得干扰平台、中转服务、模型服务或其他用户的正常使用。"),
+		section("素材与生成内容", "你应确保对上传的文字、图片、音视频和其他素材拥有合法权利。AI生成内容可能存在不准确、不完整或与他人内容相似的情况；用于发布、广告或商业活动前，应自行核验事实、权利和平台规则。"),
+		section("积分与支付", "生成服务按页面展示的模型和规格消耗积分。充值商品、到账积分、退款条件和实际支付结果以订单及微信支付记录为准。明确失败的生成任务按系统规则退回积分；状态未确认时需先核对，避免重复购买或提交。"),
+		section("知识产权", "平台软件、界面、品牌及平台提供的素材受法律保护。你保留对合法上传素材的权利；对生成内容可依法使用，但不得因此侵害第三方权利或主张平台对生成结果作出独占性、真实性保证。"),
+		section("服务变更与中断", "因维护、升级、网络、第三方模型或不可抗力，服务可能暂停、延迟或调整。我们会在合理范围内保障服务和数据安全，并对可恢复的异常提供重试、查询或积分处理。"),
+		section("账号处理", "违反本协议、法律法规或平台规则时，我们可限制功能、暂停或终止账号，并保留必要记录用于安全、审计、订单和争议处理。你可通过产品功能或联系客服申请更正、注销或处理账号问题。"),
+		section("联系我们", "客服电话：19953955305、15853929555；客服邮箱：564909176@qq.com；服务时间：每日9:00-21:00。投诉及个人信息保护联系电话：15853929555。小程序备案号：鲁ICP备2022009868号-9X。"),
+	},
+}
+
+var privacyDocument = legalDocument{
+	Title:         "豆播AI隐私政策",
+	EffectiveDate: "2026年11月23日",
+	Summary:       "买吧易购（山东）网络科技有限公司重视个人信息保护，仅在提供豆播AI服务所需范围内处理信息。",
+	Sections: []legalSection{
+		section("适用范围", "本政策适用于豆播AI小程序、管理后台及相关服务。微信平台提供的能力同时受微信规则和小程序用户隐私保护指引约束。"),
+		section("我们处理的信息", "为登录、注册和账号识别，我们可能处理微信登录标识、手机号、姓名和账号状态；为创作服务，我们处理你主动输入的提示词、选择的图片、视频、文件及生成结果；为计费与售后，我们处理积分、订单、支付和退款状态；经你同意后，我们记录必要的页面和操作类型用于统计，不上传创作描述、素材内容或手机号作为详细使用统计。"),
+		section("权限调用", "只有在你主动操作时，我们才调用手机号授权、相册或相机选择、微信文件选择、相册写入和订阅消息等能力。拒绝非必要权限不影响其他无关功能；必要权限缺失时，对应上传、保存或通知功能将无法完成。"),
+		section("处理目的", "相关信息用于完成登录与审核开通、提供AI创作和素材管理、计算积分与处理订单、保存作品与分享、发送你授权的通知、处理客服反馈，以及保障账号、支付和系统安全。"),
+		section("委托处理与第三方服务", "为完成上述目的，我们可能使用微信登录和支付、云数据库与对象存储、短信、AI模型及内容处理服务。我们仅发送完成具体功能所必要的信息，并要求服务提供方按照约定和法律要求处理。需要向其他个人信息处理者提供或发生其他依法需单独告知、同意的情形时，我们将另行履行相应程序。"),
+		section("存储与安全", "我们在实现处理目的所需的最短期限内保存信息；法律法规、订单、财务、安全和争议处理另有要求的除外。我们采用访问控制、加密存储、权限隔离、日志脱敏和备份等措施降低泄露、篡改和丢失风险。"),
+		section("你的权利", "你可以在小程序中查看或修改资料、管理偏好、删除作品，并可通过客服申请查询、更正、删除个人信息或注销账号。撤回同意不影响撤回前基于同意已经进行的处理；法律要求保留的信息将在期限届满后处理。"),
+		section("未成年人保护", "本服务主要面向具备相应民事行为能力的用户。不满十四周岁的未成年人应在监护人同意和指导下使用；如发现未经监护人同意处理相关信息，请联系我们。"),
+		section("政策更新", "功能、处理目的或信息类型发生重要变化时，我们会更新本政策，并通过页面提示或其他适当方式告知。重大变化依法需要重新取得同意的，我们将另行征得同意。"),
+		section("联系我们", "客服电话：19953955305、15853929555；客服邮箱：564909176@qq.com；服务时间：每日9:00-21:00。个人信息查询、更正、删除、注销或投诉联系电话：15853929555。小程序备案号：鲁ICP备2022009868号-9X。"),
+	},
+}
+
+var supportDocument = legalDocument{
+	Title:         "客服与投诉",
+	EffectiveDate: "每日9:00-21:00",
+	Summary:       "遇到登录、开通、创作、积分或订单问题，可通过微信客服、电话或邮箱联系我们。",
+	Contacts: []legalContact{
+		{Label: "客服电话一", Value: "19953955305", Action: "phone"},
+		{Label: "客服电话二", Value: "15853929555", Action: "phone"},
+		{Label: "客服邮箱", Value: "564909176@qq.com", Action: "copy"},
+		{Label: "服务时间", Value: "9:00-21:00"},
+		{Label: "投诉及个人信息保护", Value: "15853929555", Action: "phone"},
+		{Label: "小程序备案号", Value: "鲁ICP备2022009868号-9X", Action: "copy"},
+	},
+}
+
+func (a *Server) legal(w http.ResponseWriter, r *http.Request) {
+	document, ok := map[string]legalDocument{"terms": termsDocument, "privacy": privacyDocument, "support": supportDocument}[r.PathValue("document")]
+	if !ok {
+		fail(w, http.StatusNotFound, "文档不存在")
+		return
+	}
+	reply(w, http.StatusOK, document)
+}

@@ -161,6 +161,102 @@ button.feedback-send[disabled] {
   color: var(--ui-muted) !important;
   background: var(--ui-field) !important;
 }
+.legal-intro,
+.legal-section,
+.support-list {
+  padding: 18px 16px;
+  margin-bottom: 12px;
+  border-radius: 16px;
+  background: var(--ui-surface);
+}
+.legal-title,
+.legal-section-title,
+.support-label,
+.support-value {
+  display: block;
+}
+.legal-title {
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.legal-date {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--ui-muted);
+}
+.legal-summary,
+.legal-paragraph,
+.support-note {
+  display: block;
+  font-size: 14px;
+  line-height: 1.85;
+  color: var(--ui-muted);
+}
+.legal-summary {
+  margin-top: 12px;
+}
+.legal-section-title {
+  margin-bottom: 10px;
+  font-size: 16px;
+  font-weight: 600;
+}
+.legal-paragraph + .legal-paragraph {
+  margin-top: 10px;
+}
+button.support-wechat,
+button.official-privacy {
+  width: 100%;
+  min-height: 48px;
+  margin: 0 0 12px;
+  border-radius: var(--ui-radius-pill);
+  background: var(--ui-primary);
+  color: var(--ui-on-brand);
+  font-size: 15px;
+  font-weight: 600;
+}
+button.support-wechat::after,
+button.official-privacy::after {
+  border: 0;
+}
+.support-list {
+  padding-block: 4px;
+}
+.support-row {
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.support-row + .support-row {
+  border-top: 1px solid var(--ui-border);
+}
+.support-row > view {
+  min-width: 0;
+  flex: 1;
+}
+.support-row > t-icon {
+  flex: none;
+  color: var(--ui-link);
+}
+.support-label {
+  font-size: 12px;
+  color: var(--ui-muted);
+}
+.support-value {
+  margin-top: 4px;
+  font-size: 15px;
+  color: var(--ui-text);
+  overflow-wrap: anywhere;
+}
+.support-row.actionable:active {
+  opacity: 0.7;
+}
+.support-note {
+  padding: 4px 2px 20px;
+}
 .unavailable-favorite {
   display: flex;
   align-items: center;

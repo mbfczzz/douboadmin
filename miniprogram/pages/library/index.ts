@@ -16,6 +16,13 @@ import {
 } from "../../utils/api";
 import type { Template, Row } from "../../services/types";
 import { jobPage } from "../../services/job-pages";
+type LegalDocument = {
+  title: string;
+  effectiveDate: string;
+  summary: string;
+  sections?: { title: string; paragraphs: string[] }[];
+  contacts?: { label: string; value: string; action?: "phone" | "copy" }[];
+};
 Page({
   data: {
     mode: "favorites",
@@ -36,6 +43,7 @@ Page({
       { q: "生成失败怎么办？", a: "可以在任务详情重试，或重新编辑提示词后提交。失败的积分会自动退回。" },
       { q: "如何保存作品？", a: "打开已完成的任务，点击保存，并允许访问相册。" },
     ],
+    document: null as LegalDocument | null,
     busy: false,
     page: 1,
     total: 0,
@@ -51,6 +59,9 @@ Page({
       favorites: "我的收藏",
       notifications: "消息通知",
       help: "帮助与反馈",
+      terms: "用户协议",
+      privacy: "隐私政策",
+      support: "客服与投诉",
     };
     const mode = names[o.mode] ? o.mode : "help";
     this.setData({ mode, title: names[mode], backdrop: mode === "favorites" ? "bgFavorites" : mode === "notifications" ? "bgNotice" : "bgHelp" });
@@ -126,9 +137,14 @@ Page({
             .map(jobView),
         });
       }
+      if (["terms", "privacy", "support"].includes(this.data.mode)) {
+        const document = await request<LegalDocument>("/legal/" + this.data.mode, "GET", undefined, undefined, false);
+        if (version !== this.loadVersion) return;
+        this.setData({ document });
+      }
     } catch (e) {
       if (version !== this.loadVersion) return;
-      if (!hasSession())
+      if (["favorites", "notifications"].includes(this.data.mode) && !hasSession())
         this.setData({
           needsLogin: true,
           templates: [],
@@ -221,5 +237,16 @@ Page({
   faq(e: WechatMiniprogram.TouchEvent) {
     const index = Number(e.currentTarget.dataset.index);
     this.setData({ faqOpen: this.data.faqOpen === index ? -1 : index });
+  },
+  contact(e: WechatMiniprogram.TouchEvent) {
+    const { action, value } = e.currentTarget.dataset as { action?: string; value?: string };
+    if (!value) return;
+    if (action === "phone")
+      wx.makePhoneCall({ phoneNumber: value, fail: () => error(new Error("未能拨打电话，请稍后重试")) });
+    if (action === "copy")
+      wx.setClipboardData({ data: value, success: () => wx.showToast({ title: "已复制", icon: "success" }) });
+  },
+  officialPrivacy() {
+    wx.openPrivacyContract({ fail: () => error(new Error("微信隐私保护指引暂时无法打开")) });
   },
 });

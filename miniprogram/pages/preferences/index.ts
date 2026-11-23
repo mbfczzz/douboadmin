@@ -48,6 +48,18 @@ Page({
   help() {
     openPage(this, { url: "/pages/library/index?mode=help" });
   },
+  support() {
+    openPage(this, { url: "/pages/library/index?mode=support" });
+  },
+  terms() {
+    openPage(this, { url: "/pages/library/index?mode=terms" });
+  },
+  policy() {
+    openPage(this, { url: "/pages/library/index?mode=privacy" });
+  },
+  filing() {
+    wx.setClipboardData({ data: "鲁ICP备2022009868号-9X", success: () => wx.showToast({ title: "备案号已复制", icon: "success" }) });
+  },
   onShow() {
     enterPage(this);
     void this.load();

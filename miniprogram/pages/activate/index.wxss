@@ -43,8 +43,7 @@
 .activation-links .sign-out {
   color: var(--ui-muted);
 }
-.activation-link,
-.activation-privacy {
+.activation-link {
   padding: 12px 0;
 }
 .activation-link {
@@ -52,14 +51,23 @@
   align-items: center;
   gap: 6px;
 }
-.activation-privacy {
+.activation-legal {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  flex-wrap: wrap;
   font-size: 13px;
   color: var(--ui-muted);
   margin-top: 18px;
+}
+.activation-legal .legal-link {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+}
+.activation-legal .legal-link.divided {
+  border-left: 1px solid var(--ui-border);
 }
 .activation-path button.biz-action + .biz-input,
 .activation-path .biz-input + .biz-input {

@@ -3,6 +3,7 @@ import { ArrowUpRight } from "lucide-react";
 import { api } from "../api";
 import PasswordInput from "../components/PasswordInput";
 import BrandLogo from "../components/BrandLogo";
+import FilingFooter from "../components/FilingFooter";
 import "../components/account-menu.css";
 export default function Login({ onSuccess }: { onSuccess: () => void }) {
   const [saving, setSaving] = useState(false),
@@ -58,6 +59,7 @@ export default function Login({ onSuccess }: { onSuccess: () => void }) {
           <ArrowUpRight size={18} />
         </button>
       </form>
+      <FilingFooter />
     </div>
   );
 }

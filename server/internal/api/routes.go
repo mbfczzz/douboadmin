@@ -31,6 +31,7 @@ func (a *Server) routes() {
 		reply(w, 200, map[string]bool{"ok": true})
 	})
 	m.HandleFunc("GET /api/config", a.config)
+	m.HandleFunc("GET /api/legal/{document}", a.legal)
 	m.HandleFunc("GET /api/branding", a.branding)
 	m.HandleFunc("GET /api/brand-icon", a.brandIconFile)
 	m.HandleFunc("GET /api/ui-art/{name}", a.uiArtFile)

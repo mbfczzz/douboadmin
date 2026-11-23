@@ -46,8 +46,12 @@
       </button></view
     ><view class="biz-card general"
       ><view class="general-row" bindtap="help" hover-class="row-pressed"><art-icon name="icHelp" size="28" fallback-size="20" glyph="/assets/glyphs/help-muted.png" /><text>帮助与反馈</text><t-icon name="chevron-right" size="18" /></view
-      ><view class="general-row" bindtap="privacy" hover-class="row-pressed"><art-icon name="icPrivacy" size="28" fallback-size="20" glyph="/assets/glyphs/shield-muted.png" /><text>隐私保护指引</text><t-icon name="chevron-right" size="18" /></view
+      ><view class="general-row" bindtap="support" hover-class="row-pressed"><art-icon name="icHelp" size="28" fallback-size="20" glyph="/assets/glyphs/help-muted.png" /><text>客服与投诉</text><t-icon name="chevron-right" size="18" /></view
+      ><view class="general-row" bindtap="terms" hover-class="row-pressed"><art-icon name="icInfo" size="28" fallback-size="20" glyph="/assets/glyphs/info-muted.png" /><text>用户协议</text><t-icon name="chevron-right" size="18" /></view
+      ><view class="general-row" bindtap="policy" hover-class="row-pressed"><art-icon name="icPrivacy" size="28" fallback-size="20" glyph="/assets/glyphs/shield-muted.png" /><text>隐私政策</text><t-icon name="chevron-right" size="18" /></view
+      ><view class="general-row" bindtap="privacy" hover-class="row-pressed"><art-icon name="icPrivacy" size="28" fallback-size="20" glyph="/assets/glyphs/shield-muted.png" /><text>微信隐私保护指引</text><t-icon name="chevron-right" size="18" /></view
       ><view wx:if="{{version}}" class="general-row static" bindtap="version"><art-icon name="icInfo" size="28" fallback-size="20" glyph="/assets/glyphs/info-muted.png" /><text>当前版本</text><text class="general-value">{{version}}</text></view
+      ><view class="general-row filing-row" bindtap="filing" hover-class="row-pressed" aria-role="button" aria-label="复制小程序备案号"><art-icon name="icInfo" size="28" fallback-size="20" glyph="/assets/glyphs/info-muted.png" /><text>小程序备案号</text><text class="general-value">鲁ICP备2022009868号-9X</text></view
     ></view
     ><view class="sign-out" bindtap="signOut" hover-class="sign-out-pressed" aria-role="button">退出登录</view></block
   ></view

@@ -1,5 +1,5 @@
 @import "../../styles/business.wxss";
-/* 创作 entry: four photo cards, eight shortcut tiles, then hot videos. */
+/* 创作 entry: four photo cards, ten shortcut tiles, then hot videos. */
 .studio-cards {
   display: flex;
   flex-wrap: wrap;

@@ -16,6 +16,7 @@ import ConfirmationHost from "./confirmation/Host";
 import AskHost from "./confirm/AskHost";
 import AccountMenu from "./components/AccountMenu";
 import BrandLogo from "./components/BrandLogo";
+import FilingFooter from "./components/FilingFooter";
 import { presetActor } from "./logs/preset";
 import { MeContext, type Me } from "./session";
 import { confirmationPending } from "./confirmation/request";
@@ -235,6 +236,7 @@ export default function Workspace({
               </Suspense>
             </LoadBoundary>
           </div>
+          <FilingFooter />
         </main>
         {commandOpen && (
           <Suspense fallback={null}>
