@@ -4,9 +4,12 @@ import (
 	"bytes"
 	"doubo/server/internal/core"
 	"encoding/json"
+	"io"
 	"mime/multipart"
+	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 )
 
 var mp4Head = append([]byte("\x00\x00\x00\x18ftypmp42\x00\x00\x00\x00mp42isom"), make([]byte, 64)...)
@@ -79,5 +82,42 @@ func TestAdminUploadedWorkLooksLikeAFinishedVideo(t *testing.T) {
 	}
 	if call(a, "DELETE", "/api/works/"+job.ID, owner, "", nil).Code != 200 {
 		t.Fatal("owner cannot delete the uploaded work")
+	}
+}
+
+// A large upload outlasts the server-wide read timeout; the route extends it.
+func TestWorkUploadOutlastsServerReadTimeout(t *testing.T) {
+	a, _, _ := setup(t)
+	admin := adminLoginToken(t, a, "admin", "Tt661ea2")
+	_, _ = a.Store.Put(t.Context(), "users", core.Record{ID: "user-a", Data: core.Data(map[string]string{"name": "A"})}, 0)
+	srv := httptest.NewUnstartedServer(a.Handler())
+	srv.Config.ReadTimeout = 300 * time.Millisecond
+	srv.Start()
+	defer srv.Close()
+	pr, pw := io.Pipe()
+	mw := multipart.NewWriter(pw)
+	go func() {
+		_ = mw.WriteField("user", "user-a")
+		_ = mw.WriteField("title", "慢速上传")
+		part, _ := mw.CreateFormFile("file", "clip.mp4")
+		_, _ = part.Write(mp4Head)
+		for range 4 { // keep sending well past the 300 ms read timeout
+			time.Sleep(250 * time.Millisecond)
+			_, _ = part.Write(make([]byte, 1024))
+		}
+		_ = mw.Close()
+		_ = pw.Close()
+	}()
+	req, _ := http.NewRequest("POST", srv.URL+"/api/admin/works", pr)
+	req.Header.Set("Content-Type", mw.FormDataContentType())
+	req.Header.Set("Authorization", "Bearer "+admin)
+	res, err := srv.Client().Do(req)
+	if err != nil {
+		t.Fatal("slow upload was cut off", err)
+	}
+	defer res.Body.Close()
+	if res.StatusCode != 201 {
+		body, _ := io.ReadAll(res.Body)
+		t.Fatal(res.StatusCode, string(body))
 	}
 }

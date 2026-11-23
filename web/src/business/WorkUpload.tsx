@@ -4,7 +4,7 @@ import Modal from "../components/Modal";
 import { guardedClose } from "../hooks/unsaved";
 import type { Notify } from "../navigation";
 
-const limit = 50 << 20;
+const limit = 500 << 20;
 
 // Upload a finished MP4 into a user's 作品; it appears in the mini-program
 // like any generated video and can be shared, featured or deleted.
@@ -27,7 +27,7 @@ export default function WorkUpload({
     if (!(file instanceof File) || !file.size)
       return setError("请选择视频文件");
     if (file.size > limit || file.type !== "video/mp4")
-      return setError("仅支持 50 MB 以内的 MP4 视频");
+      return setError("仅支持 500 MB 以内的 MP4 视频");
     setBusy(true);
     setError("");
     try {
@@ -78,7 +78,7 @@ export default function WorkUpload({
                 aria-describedby="work-file-hint"
               />
               <small id="work-file-hint" className="quiet field-hint">
-                MP4，50 MB 以内；上传后用户可播放、保存、分享或删除
+                MP4，500 MB 以内；上传后用户可播放、保存、分享或删除
               </small>
             </label>
             {error && (

@@ -15,6 +15,20 @@ server {
   ssl_protocols TLSv1.2 TLSv1.3;
   server_tokens off;
   client_max_body_size 51m;
+  # 后台「上传作品」：最大 500 MB；边收边转给 API，等它把视频传完 OSS。
+  location = /api/admin/works {
+    proxy_pass http://127.0.0.1:8088;
+    proxy_http_version 1.1;
+    proxy_set_header Connection "";
+    proxy_set_header Host $http_host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-Proto https;
+    client_max_body_size 510m;
+    client_body_timeout 300s;
+    proxy_request_buffering off;
+    proxy_send_timeout 900s;
+    proxy_read_timeout 900s;
+  }
   location / {
     proxy_pass http://127.0.0.1:8088;
     proxy_http_version 1.1;

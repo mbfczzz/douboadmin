@@ -7,9 +7,14 @@ import (
 	"errors"
 	"net/http"
 	"strings"
+	"time"
 )
 
-const workUploadLimit = 50 << 20
+const workUploadLimit = 500 << 20
+
+// A 500 MB video can outlast the server-wide 90 s read/write timeouts, both
+// while it arrives and while it is copied to OSS; this route gets its own.
+const workUploadWindow = 20 * time.Minute
 
 // uploadWork stores a video an administrator uploads for a user as a finished
 // work. It reuses the ordinary job shape (kind video, succeeded, asset result)
@@ -19,12 +24,15 @@ func (a *Server) uploadWork(w http.ResponseWriter, r *http.Request) {
 		fail(w, 503, "请先在后台系统设置中配置 OSS 存储")
 		return
 	}
+	rc := http.NewResponseController(w)
+	_ = rc.SetReadDeadline(time.Now().Add(workUploadWindow))
+	_ = rc.SetWriteDeadline(time.Now().Add(workUploadWindow))
 	r.Body = http.MaxBytesReader(w, r.Body, workUploadLimit+(1<<20))
 	if e := r.ParseMultipartForm(2 << 20); e != nil {
 		if r.MultipartForm != nil {
 			_ = r.MultipartForm.RemoveAll()
 		}
-		fail(w, 400, "上传失败，视频不能超过 50 MB")
+		fail(w, 400, "上传失败，视频不能超过 500 MB")
 		return
 	}
 	defer r.MultipartForm.RemoveAll()
@@ -48,7 +56,7 @@ func (a *Server) uploadWork(w http.ResponseWriter, r *http.Request) {
 	n, _ := file.Read(head)
 	_, _ = file.Seek(0, 0)
 	if header.Size > workUploadLimit || http.DetectContentType(head[:n]) != "video/mp4" {
-		fail(w, 400, "作品仅支持 50 MB 以内的 MP4 视频")
+		fail(w, 400, "作品仅支持 500 MB 以内的 MP4 视频")
 		return
 	}
 	asset, e := a.saveAsset(r.Context(), owner, file, header.Filename, "video/mp4", header.Size)
