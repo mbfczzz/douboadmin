@@ -3,17 +3,9 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const { harness } = require("./harness.cjs");
 
-const document = (title) => ({
-  title,
-  effectiveDate: "2026年11月23日",
-  summary: "说明",
-  sections: [{ title: "内容", paragraphs: ["正文"] }],
-  contacts: [{ label: "客服电话", value: "19953955305", action: "phone" }],
-});
-
 test("legal and support documents are public modes with working contact actions", async () => {
   const h = harness(), calls = [];
-  h.api.request = async (path) => document(path.endsWith("privacy") ? "隐私政策" : "客服与投诉");
+  h.api.request = async () => { throw new Error("legal pages must not use the network"); };
   h.wx.makePhoneCall = ({ phoneNumber }) => calls.push(["phone", phoneNumber]);
   h.wx.setClipboardData = ({ data, success }) => { calls.push(["copy", data]); success?.(); };
   h.wx.showToast = () => {};
@@ -21,7 +13,7 @@ test("legal and support documents are public modes with working contact actions"
   privacy.onLoad({ mode: "privacy" });
   await privacy.load();
   assert.equal(privacy.data.title, "隐私政策");
-  assert.equal(privacy.data.document.title, "隐私政策");
+  assert.equal(privacy.data.document.title, "豆播AI隐私政策");
   const supportHarness = harness();
   supportHarness.api.request = h.api.request;
   supportHarness.wx.makePhoneCall = h.wx.makePhoneCall;

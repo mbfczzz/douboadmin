@@ -93,6 +93,11 @@ Page({
       });
       return;
     }
+    const legal = legalFallback(this.data.mode);
+    if (legal) {
+      this.setData({ document: legal, loading: false, loadError: "" });
+      return;
+    }
     this.setData({ loadError: "", needsLogin: false });
     try {
       if (this.data.mode === "favorites") {
@@ -133,12 +138,6 @@ Page({
             .map(jobView),
         });
       }
-      if (["terms", "privacy", "support"].includes(this.data.mode)) {
-        const document = await request<LegalDocument>("/legal/" + this.data.mode, "GET", undefined, undefined, false);
-        if (version !== this.loadVersion) return;
-        if (!document.title || (this.data.mode === "support" ? !document.contacts?.length : !document.sections?.length)) return;
-        this.setData({ document });
-      }
     } catch (e) {
       if (version !== this.loadVersion) return;
       if (["favorites", "notifications"].includes(this.data.mode) && !hasSession())
@@ -148,8 +147,7 @@ Page({
           unavailableFavorites: [],
           notifications: [],
         });
-      else if (!legalFallback(this.data.mode))
-        this.setData({ loadError: (e as Error).message });
+      else this.setData({ loadError: (e as Error).message });
     } finally {
       if (version === this.loadVersion) this.setData({ loading: false });
     }
