@@ -248,7 +248,10 @@ console.log(
 // switch and a session-safe direct-registration action while preserving
 // invite priority: 1,128,318 B. 1101 -> 1102 KiB. See
 // docs/open-signup-budget.md.
-const budget = 1102 * 1024;
+// Production review routing then removed the legacy automatic trial-debug
+// gate: trial/review and release use HTTPS production, development stays on
+// test. Combined size: 1,127,163 B. 1102 -> 1101 KiB.
+const budget = 1101 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");
