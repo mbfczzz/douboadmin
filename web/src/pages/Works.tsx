@@ -11,13 +11,16 @@ import MediaPreview from "../business/MediaPreview";
 import JobThumbnail from "../components/JobThumbnail";
 import { IdChip } from "../components/Tag";
 import { ask } from "../confirm/ask";
+import { Upload } from "lucide-react";
+import WorkUpload from "../business/WorkUpload";
 
-export default function Works({ notify }: PageProps) {
+export default function Works({ notify, config }: PageProps) {
   const [detail, setDetail] = useState<Job | null>(null),
     [query, setQuery] = useRememberedState("works.query", ""),
     [state, setState] = useRememberedState("works.state", "");
   const [page, setPage] = useState(1);
-  const [busy, setBusy] = useState("");
+  const [busy, setBusy] = useState(""),
+    [uploading, setUploading] = useState(false);
   const resource = useResource<{ items: Job[]; total: number }>(
     `/admin/works?page=${page}&q=${encodeURIComponent(query)}&deleted=${state}`,
   );
@@ -68,7 +71,19 @@ export default function Works({ notify }: PageProps) {
     }
   }
   return (
-    <ResourcePage page="works" resource={resource}>
+    <ResourcePage
+      page="works"
+      resource={resource}
+      actions={
+        // Only super admins receive config; the API enforces the same rule.
+        config ? (
+          <button className="primary" onClick={() => setUploading(true)}>
+            <Upload size={16} />
+            上传作品
+          </button>
+        ) : undefined
+      }
+    >
       <div className="business-filters">
         <input
           type="search"
@@ -110,7 +125,10 @@ export default function Works({ notify }: PageProps) {
               <div className="task-name">
                 <JobThumbnail job={j} />
                 <div>
-                  <b>{(j.templateTitle || j.input.prompt).slice(0, 30) || "混剪作品"}</b>
+                  <b>
+                    {(j.templateTitle || j.input.prompt).slice(0, 30) ||
+                      "混剪作品"}
+                  </b>
                   <small className="cell-note">
                     {j.modelName || j.input.kind}
                   </small>
@@ -154,6 +172,16 @@ export default function Works({ notify }: PageProps) {
           },
         ]}
       />
+      {uploading && (
+        <WorkUpload
+          onClose={() => setUploading(false)}
+          onSaved={() => {
+            setPage(1);
+            return resource.reload();
+          }}
+          notify={notify}
+        />
+      )}
       {detail && (
         <Modal title="作品预览" onClose={() => setDetail(null)}>
           <MediaPreview job={detail} />

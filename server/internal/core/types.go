@@ -66,7 +66,14 @@ type JobInput struct {
 	// Revises is the earlier chat turn this one edits and asks again; that
 	// turn leaves the conversation the model sees.
 	Revises string `json:"revises,omitempty"`
+	// Source "upload" marks a finished video an administrator uploaded for
+	// the user: a work, but never a generation (no model, billing or stats).
+	Source string `json:"source,omitempty"`
 }
+
+// Uploaded reports a work uploaded through 作品管理 rather than generated.
+func (in JobInput) Uploaded() bool { return in.Source == "upload" }
+
 type Job struct {
 	ActivationRequired  bool      `json:"-"`
 	ResultAssetID       string    `json:"resultAssetId,omitempty"`

@@ -16,6 +16,9 @@ type Transaction interface {
 	Put(string, core.Record, int64) (core.Record, error)
 	Job(string) (core.Job, error)
 	InsertJob(core.Job) error
+	// InsertFinishedJob stores an already-succeeded job (an uploaded work);
+	// it never enters the queue.
+	InsertFinishedJob(core.Job) error
 	CompleteJob(core.Job, string, string) error
 	ExpireJob(core.Job, time.Time) error
 	ResumeJob(string) error

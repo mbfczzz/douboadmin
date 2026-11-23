@@ -102,6 +102,9 @@ func (r *reportBuilder) record(ns string, row core.Record) {
 	}
 }
 func (r *reportBuilder) job(j core.Job) {
+	if j.Input.Uploaded() { // an uploaded work is not a generation
+		return
+	}
 	r.jobPoints(j)
 	d := r.days[j.CreatedAt.In(reportZone).Format("2006-01-02")]
 	r.extra.job(j)

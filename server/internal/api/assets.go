@@ -4,12 +4,9 @@ import (
 	"context"
 	"doubo/server/internal/core"
 	"encoding/json"
+	"errors"
 	"fmt"
-	"io"
-	"log/slog"
 	"net/http"
-	"os"
-	"path/filepath"
 	"slices"
 	"strings"
 )
@@ -57,43 +54,17 @@ func (a *Server) upload(w http.ResponseWriter, r *http.Request) {
 		fail(w, 400, "图片仅支持 JPG、PNG 和 WebP")
 		return
 	}
-	exts := map[string]string{"image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp", "video/mp4": ".mp4", "audio/mpeg": ".mp3", "audio/wave": ".wav", "audio/x-wav": ".wav"}
-	ext, ok := exts[typ]
-	if !ok {
+	if _, ok := assetExts[typ]; !ok {
 		fail(w, 400, "支持 JPG、PNG、WebP、MP4、MP3 和 WAV")
 		return
 	}
-	id := core.NewID()
-	key := "uploads/" + identity(r).ID + "/" + id + ext
-	assetURL := ""
-	if a.Objects != nil {
-		e = a.Objects.Put(r.Context(), key, file, typ)
-	} else if a.Config.Production {
-		fail(w, 503, "OSS 存储尚未配置")
-		return
-	} else {
-		full := filepath.Join(a.Config.MediaDir, filepath.FromSlash(key))
-		if e = os.MkdirAll(filepath.Dir(full), 0700); e == nil {
-			var out *os.File
-			out, e = os.OpenFile(full, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0600)
-			if e == nil {
-				_, e = io.Copy(out, file)
-				ce := out.Close()
-				if e == nil {
-					e = ce
-				}
-			}
+	row, e := a.saveAsset(r.Context(), identity(r).ID, file, header.Filename, typ, header.Size)
+	if e != nil {
+		if errors.Is(e, errSaveFile) {
+			fail(w, 503, "文件保存失败")
+		} else {
+			dbError(w, e)
 		}
-		assetURL = "/media/" + key
-	}
-	if e != nil {
-		slog.Error("upload failure", "error", e)
-		fail(w, 503, "文件保存失败")
-		return
-	}
-	row, e := a.Store.Put(r.Context(), "assets", core.Record{ID: id, Owner: identity(r).ID, Data: core.Data(map[string]any{"name": filepath.Base(header.Filename), "url": assetURL, "key": key, "type": typ, "size": header.Size})}, 0)
-	if e != nil {
-		dbError(w, e)
 		return
 	}
 	if row, e = a.signedAsset(r.Context(), row); e != nil {

@@ -59,6 +59,11 @@ func (t *mysqlTransaction) InsertJob(j core.Job) error {
 	_, err := t.tx.ExecContext(t.ctx, `INSERT INTO jobs(id,user_id,input,request_hash,status,result,error) VALUES(?,?,?,?,'queued','','')`, j.ID, j.UserID, string(b), j.Hash)
 	return err
 }
+func (t *mysqlTransaction) InsertFinishedJob(j core.Job) error {
+	b, _ := json.Marshal(j.Input)
+	_, err := t.tx.ExecContext(t.ctx, `INSERT INTO jobs(id,user_id,input,request_hash,status,progress,result,error) VALUES(?,?,?,?,'succeeded',100,?,'')`, j.ID, j.UserID, string(b), j.Hash, j.Result)
+	return err
+}
 func affected(result sql.Result, err error) error {
 	if err != nil {
 		return err

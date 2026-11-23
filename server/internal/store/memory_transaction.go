@@ -89,6 +89,15 @@ func (t *memoryTransaction) InsertJob(j core.Job) error {
 	t.jobs[j.ID] = copyJob(j)
 	return nil
 }
+func (t *memoryTransaction) InsertFinishedJob(j core.Job) error {
+	if _, ok := t.jobs[j.ID]; ok {
+		return core.ErrConflict
+	}
+	now := time.Now().UTC()
+	j.Status, j.Progress, j.Error, j.CreatedAt, j.UpdatedAt = "succeeded", 100, "", now, now
+	t.jobs[j.ID] = copyJob(j)
+	return nil
+}
 func (t *memoryTransaction) CompleteJob(j core.Job, result, failure string) error {
 	old, ok := t.jobs[j.ID]
 	if !ok || old.Status != "running" || old.LeaseToken != j.LeaseToken || !old.LeaseUntil.After(time.Now()) {

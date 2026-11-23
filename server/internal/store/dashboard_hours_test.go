@@ -23,6 +23,7 @@ func TestTodayReportHasHourlySeries(t *testing.T) {
 	rec("users", "u0", yesterday, map[string]string{})
 	r.job(core.Job{ID: "j1", Status: "failed", Input: core.JobInput{Kind: "image"}, CreatedAt: at})
 	r.job(core.Job{ID: "j2", Status: "queued", Input: core.JobInput{Kind: "import"}, CreatedAt: at})
+	r.job(core.Job{ID: "j3", Status: "succeeded", Input: core.JobInput{Kind: "video", Source: "upload"}, CreatedAt: at})
 	out := r.result()
 	if len(out.Hours) != 24 || out.Hours[0].Date != "00:00" {
 		t.Fatal("hours", len(out.Hours))

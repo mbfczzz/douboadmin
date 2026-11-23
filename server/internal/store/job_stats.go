@@ -22,7 +22,7 @@ func (m *MySQL) JobModels(ctx context.Context, user string) ([]core.JobModelUse,
 	if err != nil {
 		return nil, err
 	}
-	q := `SELECT COALESCE(j.input->>'$.model','') AS model_key, COALESCE(j.input->>'$.kind','') AS kind_key, COUNT(*), SUM(j.status='succeeded'), SUM(j.status IN ('failed','canceled')), SUM(j.status IN ('queued','running')), COALESCE(SUM(IF(b.state='charged',b.units,0)),0), MAX(j.created_at) FROM jobs j LEFT JOIN job_billing b ON b.id=` + referenceID + ` WHERE j.user_id=? AND j.input->>'$.kind'<>'import' GROUP BY model_key,kind_key ORDER BY COUNT(*) DESC,model_key,kind_key`
+	q := `SELECT COALESCE(j.input->>'$.model','') AS model_key, COALESCE(j.input->>'$.kind','') AS kind_key, COUNT(*), SUM(j.status='succeeded'), SUM(j.status IN ('failed','canceled')), SUM(j.status IN ('queued','running')), COALESCE(SUM(IF(b.state='charged',b.units,0)),0), MAX(j.created_at) FROM jobs j LEFT JOIN job_billing b ON b.id=` + referenceID + ` WHERE j.user_id=? AND j.input->>'$.kind'<>'import' AND COALESCE(j.input->>'$.source','')<>'upload' GROUP BY model_key,kind_key ORDER BY COUNT(*) DESC,model_key,kind_key`
 	rows, e := m.db.QueryContext(ctx, q, user)
 	if e != nil {
 		return nil, e
@@ -66,7 +66,7 @@ func (m *Memory) JobModels(_ context.Context, user string) ([]core.JobModelUse, 
 	defer m.mu.Unlock()
 	groups := map[string]*core.JobModelUse{}
 	for _, j := range m.jobs {
-		if j.UserID != user || j.Input.Kind == "import" {
+		if j.UserID != user || j.Input.Kind == "import" || j.Input.Uploaded() {
 			continue
 		}
 		key := j.Input.Model + ":" + j.Input.Kind

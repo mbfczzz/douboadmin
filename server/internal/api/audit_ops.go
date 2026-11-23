@@ -83,6 +83,7 @@ var ops = map[string]op{
 	"DELETE /api/my-outfits/{id}":                         {label: "删除我的服装"},
 	"POST /api/outfits/{id}/use":                          {label: "选用试衣服装", target: "outfit"},
 	"POST /api/admin/assets":                              {label: "上传素材"},
+	"POST /api/admin/works":                               {creates: "job", label: "为用户上传作品"},
 	"DELETE /api/admin/works/{id}":                        {label: "删除作品", target: "job"},
 	"PUT /api/admin/works/{id}/featured":                  {label: "设置优秀作品", target: "job"},
 	"POST /api/admin/jobs":                                {creates: "job", label: "后台提交生成任务"},

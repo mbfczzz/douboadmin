@@ -73,6 +73,9 @@ func (a *Server) presentJob(ctx context.Context, j *core.Job) {
 	if m, e := a.model(ctx, j.Input.Model); e == nil {
 		j.ModelName = m.Name
 	}
+	if j.Input.Uploaded() {
+		j.ModelName = "用户上传" // shown where generated works show their model
+	}
 	if j.Input.Kind != "chat" && a.Media != nil && j.Result != "" {
 		if u, e := a.Media.URL(ctx, j.Result); e == nil {
 			j.Result = u
