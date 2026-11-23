@@ -4,7 +4,6 @@ import { useResource } from "../hooks/useResource";
 import ResourcePage from "../business/ResourcePage";
 import type { Platform } from "../business/types";
 import IntegrationPanel from "../integrations/Panel";
-import SystemTools from "../systemTools/Panel";
 
 export default function Settings({ notify }: PageProps) {
   const resource = useResource<{
@@ -13,7 +12,6 @@ export default function Settings({ notify }: PageProps) {
   }>("/admin/platform");
   return (
     <ResourcePage page="settings" resource={resource}>
-      <SystemTools />
       <IntegrationPanel
         notify={notify}
         capabilities={resource.data?.capabilities}

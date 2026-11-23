@@ -4,6 +4,8 @@ import type { Notify } from "../navigation";
 import GroupForm from "./GroupForm";
 import Overview from "./Overview";
 import type { IntegrationState } from "./types";
+import Badge from "../components/Badge";
+import { Clapperboard } from "lucide-react";
 import "./integrations.css";
 
 export default function Panel({
@@ -47,6 +49,24 @@ export default function Panel({
                 <span className="mono">{data.keyFile}</span>
               </span>
             </p>
+            <section
+              className="panel integration integration-static"
+              aria-label="FFmpeg"
+            >
+              <span className="integration-icon" aria-hidden="true">
+                <Clapperboard size={18} />
+              </span>
+              <span className="integration-title">
+                <b>FFmpeg</b>
+                <small>视频处理工具</small>
+              </span>
+              <span className="integration-badges">
+                <Badge
+                  state={capabilities?.ffmpeg ? "succeeded" : "muted"}
+                  label={capabilities?.ffmpeg ? "可用" : "不可用"}
+                />
+              </span>
+            </section>
             {data.groups.map((group) => (
               <GroupForm
                 key={group.id}

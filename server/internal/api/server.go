@@ -7,7 +7,6 @@ import (
 	"doubo/server/internal/billing"
 	"doubo/server/internal/hotvideo"
 	"doubo/server/internal/media"
-	"doubo/server/internal/monitor"
 	"doubo/server/internal/partners"
 	"doubo/server/internal/payments"
 	"doubo/server/internal/relay"
@@ -46,7 +45,6 @@ type Objects interface {
 	URL(context.Context, string) (string, error)
 }
 type Server struct {
-	Runtime      *monitor.Service
 	Integrations *settings.Manager
 	Partners     *partners.Service
 	Activity     *analytics.Recorder
@@ -78,7 +76,6 @@ const identityKey ctxKey = 0
 
 func New(s store.Store, sessions *Sessions, c Config) *Server {
 	a := &Server{Store: s, Sessions: sessions, Config: c, Mux: http.NewServeMux(), WeChat: wechat.New(c.WeChatAppID, c.WeChatSecret)}
-	a.Runtime = monitor.New(s, "serve", "")
 	a.Relay = relay.New(c.RelayURL, c.RelayKey)
 	a.Billing = &billing.Service{Store: s, RequireActivation: c.RequireActivation, BeforePayment: a.paymentAdmission}
 	a.Partners = &partners.Service{Store: s}

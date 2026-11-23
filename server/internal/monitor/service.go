@@ -4,7 +4,6 @@ import (
 	"context"
 	"doubo/server/internal/core"
 	"doubo/server/internal/store"
-	"doubo/server/internal/systemtools"
 	"os"
 	"runtime"
 	"sync"
@@ -12,7 +11,6 @@ import (
 )
 
 type Service struct {
-	Tools                   *systemtools.Detector
 	Store                   store.Store
 	ID, Host, Role, Webhook string
 	Started                 time.Time
@@ -22,15 +20,12 @@ type Service struct {
 
 func New(s store.Store, role, webhook string) *Service {
 	host, _ := os.Hostname()
-	return &Service{Store: s, Tools: systemtools.New(), ID: core.NewID(), Host: host, Role: role, Webhook: webhook, Started: time.Now().UTC()}
+	return &Service{Store: s, ID: core.NewID(), Host: host, Role: role, Webhook: webhook, Started: time.Now().UTC()}
 }
 func (m *Service) Snapshot() core.NodeHealth {
 	var memory runtime.MemStats
 	runtime.ReadMemStats(&memory)
 	out := core.NodeHealth{ID: m.ID, Host: m.Host, Role: m.Role, StartedAt: m.Started, SeenAt: time.Now().UTC(), HeapBytes: memory.HeapAlloc, Goroutines: runtime.NumGoroutine(), GoVersion: runtime.Version()}
-	if m.Tools != nil {
-		out.MediaTools = m.Tools.Latest()
-	}
 	if db, ok := m.Store.(interface{ PoolInfo() (int, int) }); ok {
 		out.DBOpen, out.DBInUse = db.PoolInfo()
 	}
@@ -51,9 +46,6 @@ func (m *Service) Run(ctx context.Context) {
 func (m *Service) beat(ctx context.Context) {
 	ctx, cancel := context.WithTimeout(ctx, 8*time.Second)
 	defer cancel()
-	if m.Tools != nil {
-		_, _ = m.Tools.Check(ctx, false)
-	}
 	old, _ := m.Store.Get(ctx, "instances", m.ID)
 	_, _ = m.Store.Put(ctx, "instances", core.Record{ID: m.ID, Data: core.Data(m.Snapshot())}, old.Version)
 	settings := core.DefaultPlatform()

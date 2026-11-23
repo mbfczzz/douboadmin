@@ -72,7 +72,7 @@ for (const width of [1440, 390]) {
     await page.route("**/api/admin/platform", (route) =>
       route.fulfill({
         json: {
-          capabilities: { hot: false },
+          capabilities: { hot: false, ffmpeg: true },
           record: { id: "platform", version: 1, data: {} },
         },
       }),
@@ -111,6 +111,10 @@ for (const width of [1440, 390]) {
     await page.getByRole("button", { name: "系统设置", exact: true }).click();
     const pill = page.getByRole("button", { name: /第三方资源配置.*未配置/ });
     await expect(page.locator("details.integration")).toHaveCount(11);
+    const ffmpeg = page.getByRole("region", { name: "FFmpeg", exact: true });
+    await expect(ffmpeg).toContainText("视频处理工具");
+    await expect(ffmpeg).toContainText("可用");
+    await expect(ffmpeg.locator("button, summary")).toHaveCount(0);
     await expect(pill).toBeVisible();
     await expect(page.locator(".integration-score")).toContainText(
       "0 / 11 已配置",

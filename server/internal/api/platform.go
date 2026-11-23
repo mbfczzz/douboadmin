@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"doubo/server/internal/core"
+	"doubo/server/internal/systemtools"
 	"errors"
 	"net/http"
 )
@@ -21,7 +22,7 @@ func (a *Server) platformSettings(w http.ResponseWriter, r *http.Request) {
 	reply(w, 200, map[string]any{"record": row, "capabilities": map[string]bool{
 		"payment": a.rechargeReady(), "oss": a.Objects != nil, "hot": a.Hot.Ready(),
 		"subscription": a.Config.CompletionReady, "sms": a.SMS != nil && a.SMS.Ready(),
-		"vision": a.Vision.Ready(), "chat": a.ChatReady,
+		"vision": a.Vision.Ready(), "chat": a.ChatReady, "ffmpeg": systemtools.Available(r.Context()),
 	}})
 }
 func (a *Server) savePlatform(w http.ResponseWriter, r *http.Request) {

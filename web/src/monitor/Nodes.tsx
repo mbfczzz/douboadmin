@@ -5,7 +5,6 @@ import type { Node } from "./types";
 import { ago, online, timestamp } from "./types";
 import Badge from "../components/Badge";
 import Tag from "../components/Tag";
-import ToolStatus from "../systemTools/ToolStatus";
 
 const roles: Record<string, [string, "info" | "accent" | "muted"]> = {
   serve: ["API", "info"],
@@ -49,22 +48,6 @@ export default function Nodes({ nodes }: { nodes: Row<Node>[] }) {
                   <small className="cell-note">
                     {r.id.slice(0, 8)} · {r.data.goVersion}
                   </small>
-                  <div className="node-tools">
-                    <ToolStatus
-                      name="FFmpeg"
-                      tool={r.data.mediaTools?.ffmpeg}
-                      checkedAt={r.data.mediaTools?.checkedAt}
-                      online={online(r)}
-                      compact
-                    />
-                    <ToolStatus
-                      name="FFprobe"
-                      tool={r.data.mediaTools?.ffprobe}
-                      checkedAt={r.data.mediaTools?.checkedAt}
-                      online={online(r)}
-                      compact
-                    />
-                  </div>
                 </>
               );
             },
