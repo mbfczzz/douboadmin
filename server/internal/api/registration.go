@@ -46,6 +46,7 @@ type accessView struct {
 	core.Access
 	ProfileRequired           bool   `json:"profileRequired"`
 	CanBrowse                 bool   `json:"canBrowse"`
+	OpenSignup                bool   `json:"openSignup"`
 	PhoneVerificationRequired bool   `json:"smsRequired"`
 	Name                      string `json:"name,omitempty"`
 	Phone                     string `json:"phone,omitempty"`
@@ -71,8 +72,12 @@ func (a *Server) accessFor(ctx context.Context, id string) (accessView, error) {
 	if e != nil {
 		return accessView{}, e
 	}
+	_, signup, e := a.signup(ctx)
+	if e != nil {
+		return accessView{}, e
+	}
 	phoneRequired := a.registrationRequired()
-	v := accessView{Access: access, ProfileRequired: !flags.Registered, CanBrowse: canBrowse(access, flags.Registered), PhoneVerificationRequired: phoneRequired && !flags.PhoneVerified, PhoneVerified: flags.PhoneVerified}
+	v := accessView{Access: access, ProfileRequired: !flags.Registered, CanBrowse: canBrowse(access, flags.Registered), OpenSignup: signup.OpenSignup, PhoneVerificationRequired: phoneRequired && !flags.PhoneVerified, PhoneVerified: flags.PhoneVerified}
 	if v.ProfileRequired {
 		v.Active, v.Message, v.Name, v.Phone = false, a.profileRequiredMessage(), flags.Name, flags.Phone
 	}

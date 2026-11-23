@@ -244,7 +244,11 @@ console.log(
 // server data, real customer-service and complaint actions, and legal links
 // on login, activation and settings pages; the mini-program filing number is
 // shown in settings and legal contacts: 1,127,249 B. 1094 -> 1101 KiB.
-const budget = 1101 * 1024;
+// Reviewed ordinary-signup path: the activation page exposes the server
+// switch and a session-safe direct-registration action while preserving
+// invite priority: 1,128,318 B. 1101 -> 1102 KiB. See
+// docs/open-signup-budget.md.
+const budget = 1102 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

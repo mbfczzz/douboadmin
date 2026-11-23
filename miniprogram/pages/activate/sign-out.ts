@@ -15,3 +15,9 @@ export async function signOutActivation(page: Register & { load(): Promise<void>
   } catch (e) { if (!page.destroyed) error(e); }
   finally { if (!page.destroyed) page.setData({ busy: false }); }
 }
+
+export function openPrivacy() {
+  wx.openPrivacyContract({
+    fail: () => error(new Error("隐私保护指引暂时无法打开")),
+  });
+}

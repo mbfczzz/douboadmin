@@ -18,7 +18,7 @@ func tokenFrom(r *http.Request) string {
 
 // The registration and activation steps themselves stay reachable.
 var activationSteps = map[string]bool{"/api/access": true, "/api/access/sms": true, "/api/access/profile": true,
-	"/api/access/join": true, "/api/auth/logout": true}
+	"/api/access/direct": true, "/api/access/join": true, "/api/auth/logout": true}
 
 func activationExempt(path string) bool { return activationSteps[path] }
 func (a *Server) allowActivation(w http.ResponseWriter, r *http.Request, user string, registered bool) (bool, bool) {
@@ -124,6 +124,27 @@ func (a *Server) registeredOnly(w http.ResponseWriter, r *http.Request) bool {
 		return false
 	}
 	return true
+}
+
+func (a *Server) directAccess(w http.ResponseWriter, r *http.Request) {
+	if !a.registeredOnly(w, r) {
+		return
+	}
+	_, settings, err := a.signup(r.Context())
+	if err != nil {
+		dbError(w, err)
+		return
+	}
+	if !settings.OpenSignup {
+		fail(w, http.StatusForbidden, "当前未开放普通用户注册，请使用服务商邀请码登记")
+		return
+	}
+	access, err := a.Partners.ActivateDirect(r.Context(), identity(r).ID)
+	if err != nil {
+		partnerError(w, err)
+		return
+	}
+	reply(w, http.StatusOK, access)
 }
 func (a *Server) joinAccess(w http.ResponseWriter, r *http.Request) {
 	var input struct {

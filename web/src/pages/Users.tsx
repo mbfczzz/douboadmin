@@ -10,6 +10,7 @@ import ResourcePage from "../business/ResourcePage";
 import PageHeader from "../components/PageHeader";
 import ViewTabs from "../users/ViewTabs";
 import UserFilters from "../users/UserFilters";
+import SignupSwitch from "../users/SignupSwitch";
 import Table from "../business/Table";
 import UserDetails from "../business/UserDetails";
 import UserPoints from "../business/UserPoints";
@@ -99,20 +100,23 @@ function UserList({
       resource={resource}
       tabs={tabs}
       filters={
-        <UserFilters
-          search={typed}
-          onSearch={setTyped}
-          state={state}
-          onState={(v) => {
-            setState(v);
-            setPage(1);
-          }}
-          access={access}
-          onAccess={(v) => {
-            setAccess(v);
-            setPage(1);
-          }}
-        />
+        <div className="business-filters">
+          <UserFilters
+            search={typed}
+            onSearch={setTyped}
+            state={state}
+            onState={(v) => {
+              setState(v);
+              setPage(1);
+            }}
+            access={access}
+            onAccess={(v) => {
+              setAccess(v);
+              setPage(1);
+            }}
+          />
+          <SignupSwitch notify={notify} />
+        </div>
       }
     >
       <Table

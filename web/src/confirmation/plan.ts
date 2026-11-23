@@ -12,6 +12,7 @@ const names: Record<string, string> = {
   "partner-policy": "分销规则",
   "commission-payouts": "结算记录",
   registrations: "扫码登记",
+  signup: "普通用户注册",
   roles: "角色",
   jobs: "生成任务",
 };
@@ -44,6 +45,7 @@ const labels: Record<string, string> = {
   reference: "打款流水号 / 原因",
   parentId: "上级服务商",
   kind: "类型",
+  openSignup: "开放普通用户注册",
 };
 export function needsConfirmation(path: string, method: string, body: unknown) {
   if (!path.startsWith("/admin/")) return false;

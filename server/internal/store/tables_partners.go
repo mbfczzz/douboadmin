@@ -3,6 +3,12 @@ package store
 // Provider tree (分公司 → S1 → S2 → 会员), codes, registrations and commission.
 func init() {
 	register(
+		Table{Name: "signup_settings", Comment: "普通用户注册开关（单行 id = platform）", Cols: []Col{
+			c("openSignup", Bool),
+		}},
+		Table{Name: "direct_access", Comment: "开放注册时普通用户的平台直开权限；id = 用户 id", Owner: "用户", Cols: []Col{
+			c("activatedAt", Time),
+		}},
 		Table{Name: "branch_phones", Comment: "分公司预绑定手机号及验证认领记录", Cols: []Col{c("partnerId", Key), c("accountId", Key), c("userId", Key)}},
 		Table{Name: "partners", Comment: "服务商节点（分公司 / S1 / S2）", Owner: "上级服务商 id（顶层为 root）", Cols: []Col{
 			c("name", Short), c("role", Key), c("status", Key), c("parentId", Key), c("path", JSON),

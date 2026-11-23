@@ -8,7 +8,7 @@ export default function UserFilters(p: {
   onAccess: (value: string) => void;
 }) {
   return (
-    <div className="business-filters">
+    <>
       <input
         type="search"
         aria-label="搜索用户"
@@ -32,11 +32,12 @@ export default function UserFilters(p: {
         onChange={(e) => p.onAccess(e.target.value)}
       >
         <option value="">全部开通状态</option>
+        <option value="direct">普通注册</option>
         <option value="member">合伙人</option>
         <option value="owner">服务商负责人</option>
         <option value="review">待开通</option>
         <option value="none">未开通</option>
       </select>
-    </div>
+    </>
   );
 }

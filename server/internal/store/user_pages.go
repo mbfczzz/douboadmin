@@ -10,7 +10,8 @@ import (
 )
 
 // The admin user list pages and filters in the database. Access follows
-// partners.Access as the list labels it: a bound provider owner comes first
+// partners.Access as the list labels it: direct platform access comes first,
+// then a bound provider owner
 // (review while pending, owner while its provider chain is active), then
 // the membership (review while pending, member while active under an active
 // chain), else none. partners' tests hold both drivers to partners.Access.
@@ -29,6 +30,7 @@ func chainActive(partner string) string {
 }
 
 var userAccess = `CASE
+	WHEN d.id IS NOT NULL THEN 'direct'
 	WHEN o.id IS NOT NULL THEN IF(o.status='pending','review',IF(` + chainActive("o.partner_id") + `,'owner','none'))
 	WHEN m.status='pending' THEN 'review'
 	WHEN m.status='active' AND ` + chainActive("m.partner_id") + ` THEN 'member'
@@ -40,7 +42,7 @@ func (m *MySQL) UserPage(ctx context.Context, q core.UserQuery) (out core.Record
 	if err != nil || !q.Valid() {
 		return out, fmt.Errorf("invalid user page")
 	}
-	from := ` FROM users u LEFT JOIN partner_owners o ON o.id=u.id AND o.partner_id<>'' LEFT JOIN memberships m ON m.id=u.id WHERE 1=1`
+	from := ` FROM users u LEFT JOIN direct_access d ON d.id=u.id LEFT JOIN partner_owners o ON o.id=u.id AND o.partner_id<>'' LEFT JOIN memberships m ON m.id=u.id WHERE 1=1`
 	args := []any{}
 	if q.Search != "" {
 		from += ` AND LOCATE(?, CONCAT_WS(' ', u.id, u.nickname, u.name, u.phone))>0`
@@ -109,6 +111,9 @@ func (m *Memory) UserPage(_ context.Context, q core.UserQuery) (out core.RecordP
 }
 
 func (m *Memory) accessOf(user string) string {
+	if _, ok := m.records["direct_access:"+user]; ok {
+		return "direct"
+	}
 	if o := m.decode("partner_owners:" + user); o.PartnerID != "" {
 		if o.Status == "pending" {
 			return "review"

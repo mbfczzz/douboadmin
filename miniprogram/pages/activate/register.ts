@@ -94,3 +94,20 @@ export async function register(page: Register) {
     if (!page.destroyed) page.setData({ busy: false });
   }
 }
+
+type DirectPage = Register & {
+  data: Register["data"] & { loading: boolean; logged: boolean };
+};
+
+export async function directSignup(page: DirectPage, enter: () => void) {
+  if (page.data.busy || page.data.loading || !page.data.logged) return;
+  page.setData({ busy: true });
+  try {
+    const status = await registerRequest<AccessStatus>(page, "/access/direct", {});
+    if (status?.active && !page.destroyed) enter();
+  } catch (e) {
+    if (!page.destroyed) error(e);
+  } finally {
+    if (!page.destroyed) page.setData({ busy: false });
+  }
+}

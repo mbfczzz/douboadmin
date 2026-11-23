@@ -31,7 +31,9 @@ export const accessCell = (r: Row<Profile>) => {
   return (
     <>
       {a?.active ? (
-        a.status === "provider" ? (
+        a.status === "direct" ? (
+          <Tag tone="info">普通注册</Tag>
+        ) : a.status === "provider" ? (
           <Tag tone="info">服务商负责人</Tag>
         ) : (
           <Tag tone="accent">合伙人</Tag>

@@ -95,6 +95,7 @@ var ops = map[string]op{
 	"POST /api/admin/virtual-payments/events/{id}/retry":  {label: "重试虚拟支付通知", target: "event"},
 	"POST /api/admin/virtual-payments/events/{id}/review": {label: "人工核对虚拟支付", target: "event", summary: func(q, _ map[string]any) string { return reason(q, "note") }},
 	"PUT /api/admin/platform":                             {label: "修改平台设置"},
+	"PUT /api/admin/signup":                               {label: "修改普通用户注册开关"},
 	"PUT /api/admin/integrations/{group}":                 {label: "修改服务接入配置", target: "group"},
 	"PUT /api/admin/alerts/{id}/ack":                      {label: "确认告警", target: "alert"},
 	"POST /api/admin/partners": {creates: "partner", label: "创建服务商", summary: func(q, _ map[string]any) string {
@@ -116,6 +117,7 @@ var ops = map[string]op{
 	"PUT /api/admin/commission-payouts/{id}": {label: "处理提现", target: "payout", summary: func(q, _ map[string]any) string { return statusWords[str(q, "status")] + reason(q, "reference") }},
 	"POST /api/access/sms":                   {label: "发送短信验证码", summary: func(q, _ map[string]any) string { return "手机号 " + str(q, "phone") }},
 	"POST /api/access/profile":               {label: "完善注册信息", summary: func(q, _ map[string]any) string { return str(q, "name") + " · " + str(q, "phone") }},
+	"POST /api/access/direct":                {label: "普通用户直接注册"},
 	"POST /api/access/join":                  {label: "扫码登记"},
 	"PUT /api/me":                            {label: "修改个人资料"},
 	"PUT /api/preferences":                   {label: "修改偏好设置"},

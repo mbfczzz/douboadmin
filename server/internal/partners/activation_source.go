@@ -4,6 +4,7 @@ import (
 	"context"
 	"doubo/server/internal/core"
 	"errors"
+	"time"
 )
 
 // SourceNode is one provider on the chain from the platform to the user.
@@ -25,7 +26,8 @@ type SourceUser struct {
 // they sit: owner of a provider, a 会员 of one (with the referrer whose
 // promo code they used), or not registered.
 type ActivationSource struct {
-	Kind         string             `json:"kind"` // owner, member or none
+	Kind         string             `json:"kind"` // direct, owner, member or none
+	DirectAt     *time.Time         `json:"directAt,omitempty"`
 	OwnerOf      string             `json:"ownerOf,omitempty"`
 	Membership   *core.Membership   `json:"membership,omitempty"`
 	Registration *core.Registration `json:"registration,omitempty"`
@@ -36,6 +38,12 @@ type ActivationSource struct {
 func (s *Service) Source(ctx context.Context, user string) (ActivationSource, error) {
 	r := reader{ctx, s.Store}
 	out := ActivationSource{Kind: "none", Chain: []SourceNode{}}
+	if _, grant, e := get[core.DirectAccess](r, "direct_access", user); e == nil {
+		out.Kind, out.DirectAt = "direct", &grant.ActivatedAt
+		return out, nil
+	} else if !errors.Is(e, core.ErrNotFound) {
+		return out, e
+	}
 	if _, reg, e := get[core.Registration](r, "registrations", user); e == nil {
 		out.Registration = &reg
 	} else if !errors.Is(e, core.ErrNotFound) {

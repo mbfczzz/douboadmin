@@ -8,7 +8,8 @@ import { useBusinessRoleNames } from "../roles/business";
 import "./user-activation.css";
 
 interface Source {
-  kind: "owner" | "member" | "none";
+  kind: "direct" | "owner" | "member" | "none";
+  directAt?: string;
   ownerOf?: string;
   membership?: { status: string; activatedAt: string };
   registration?: {
@@ -61,7 +62,15 @@ export default function UserActivation({ userId }: { userId: string }) {
           尚未登记：用户需扫描服务商的二维码登记，审核开通后才能使用生成功能。
         </p>
       )}
-      {source && (reg || source.kind !== "none") && (
+      {source?.kind === "direct" && (
+        <div className="source-head">
+          <Tag tone="info">普通注册</Tag>
+          <span className="quiet">
+            {source.directAt ? `开通于 ${date(source.directAt)}` : "已直接开通"}
+          </span>
+        </div>
+      )}
+      {source && source.kind !== "direct" && (reg || source.kind !== "none") && (
         <>
           <div className="source-head">
             {source.kind !== "none" && (

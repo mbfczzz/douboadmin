@@ -4,7 +4,7 @@ import {
   clearInvite,
   scannedInvite,
 } from "../../services/invitation";
-import { signOutActivation } from "./sign-out";
+import { openPrivacy, signOutActivation } from "./sign-out";
 import { loadBrand } from "../../services/branding";
 import {
   request,
@@ -34,6 +34,7 @@ import {
   prefill,
   sendCode,
   register,
+  directSignup,
   stopCountdown,
   registerRequest,
 } from "./register";
@@ -177,6 +178,7 @@ Page({
     if (status?.active) this.enter();
     else if (status) await this.joinInvite();
   },
+  direct() { return directSignup(this, () => this.enter()); },
   async login() {
     await this.authenticate();
   },
@@ -293,8 +295,6 @@ Page({
     this.setData({ brandIcon: "" });
   },
   privacy() {
-    wx.openPrivacyContract({
-      fail: () => error(new Error("隐私保护指引暂时无法打开")),
-    });
+    openPrivacy();
   },
 });

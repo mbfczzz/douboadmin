@@ -7,6 +7,8 @@ export interface AccessStatus {
   message?: string;
   // Name and phone are required; SMS setup determines verification.
   profileRequired?: boolean;
+  // Platform switch: registered users may enter without a provider.
+  openSignup?: boolean;
   // Missing on older APIs: keep SMS validation unless explicitly disabled.
   smsRequired?: boolean;
   phoneVerified?: boolean;

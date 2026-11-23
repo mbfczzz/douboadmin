@@ -11,6 +11,11 @@ const reviewMessage = "已登记，等待审核开通"
 // access is what a mini-program user may do. Scanning only registers; the
 // super-administrator approval opens generation access.
 func access(r Reader, user string) (core.Access, error) {
+	if _, _, e := get[core.DirectAccess](r, "direct_access", user); e == nil {
+		return core.Access{Active: true, Status: "direct"}, nil
+	} else if !errors.Is(e, core.ErrNotFound) {
+		return core.Access{}, e
+	}
 	if out, ok, e := ownerAccess(r, user); ok || e != nil {
 		return out, e
 	}
