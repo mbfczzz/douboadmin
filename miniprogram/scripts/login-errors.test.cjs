@@ -26,6 +26,7 @@ test("activation login keeps a readable SDK failure on the page and allows retry
   const h = harness(),
     page = h.page("activate"),
     toasts = [];
+  page.setData({ legalAgreed: true });
   h.wx.showToast = (options) => toasts.push(options.title);
   h.api.signIn = async () => {
     throw { errMsg: "login:fail permission denied" };
@@ -68,6 +69,7 @@ test("cancelled authentication does not display an activation error", async () =
   const h = harness(),
     page = h.page("activate"),
     messages = [];
+  page.setData({ legalAgreed: true });
   h.wx.showToast = (options) => messages.push(options.title);
   h.api.signIn = async () => {
     throw new h.api.AuthCancelledError();

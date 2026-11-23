@@ -14,6 +14,7 @@ test('phone authorization sends distinct login and phone codes without storing t
 test('denied native authorization sends nothing and the manual login remains available',async()=>{
   const h=harness();
   const page=h.page('login');
+  page.setData({legalAgreed:true});
   let finished=0;page.finish=async()=>{finished++};
   await page.phoneLogin({detail:{errMsg:'getPhoneNumber:fail user deny'}});
   assert.equal(h.sent.length,0);

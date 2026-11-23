@@ -9,15 +9,9 @@ export async function signOutActivation(page: Register & { load(): Promise<void>
     await logout();
     if (!page.destroyed) {
       stopCountdown(page);
-      page.setData({ code: "", status: null, ...registerState });
+      page.setData({ code: "", status: null, legalAgreed: false, ...registerState });
       await page.load();
     }
   } catch (e) { if (!page.destroyed) error(e); }
   finally { if (!page.destroyed) page.setData({ busy: false }); }
-}
-
-export function openPrivacy() {
-  wx.openPrivacyContract({
-    fail: () => error(new Error("隐私保护指引暂时无法打开")),
-  });
 }

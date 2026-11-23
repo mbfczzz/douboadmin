@@ -39,7 +39,7 @@ test("disabled account presents a clear status without a network retry error", a
 test("disabled fresh login has the same explicit state and cannot create a session", async () => {
   const h = harness();
   h.wx.request = o => o.success({ statusCode: 403, data: { code: "ACCOUNT_DISABLED", error: "账号已停用，请联系管理员" } });
-  const page = h.page("activate"); await page.authenticate();
+  const page = h.page("activate"); page.setData({ legalAgreed: true }); await page.authenticate();
   assert.equal(page.data.status.status, "account_disabled");
   assert.equal(page.data.loadError, "");
   assert.equal(h.api.hasSession(), false);

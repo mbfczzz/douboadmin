@@ -16,6 +16,7 @@ test("other phone signs in by SMS with the WeChat code attached", async () => {
     o.success({ statusCode: 200, data });
   };
   const page = h.page("login");
+  page.setData({ legalAgreed: true });
   page.finish = async () => { page.finished = true; };
   page.otherPhone();
   assert.equal(page.data.smsOpen, true);
@@ -36,6 +37,7 @@ test("other phone validates input before sending", async () => {
   const toasts = [];
   h.wx.showToast = (o) => toasts.push(o.title);
   const page = h.page("login");
+  page.setData({ legalAgreed: true });
   page.smsPhoneInput({ detail: { value: "123" } });
   await page.sendCode();
   page.smsPhoneInput({ detail: { value: "13800138000" } });

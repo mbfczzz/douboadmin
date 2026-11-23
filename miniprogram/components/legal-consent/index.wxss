@@ -1,0 +1,28 @@
+.consent-row,
+.consent-group,
+.consent-label {
+  display: flex;
+  align-items: center;
+}
+.consent-row {
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 2px;
+  margin: 16px 0 10px;
+  color: var(--ui-muted);
+  font-size: 13px;
+  line-height: 1.7;
+}
+.consent-label {
+  min-height: 36px;
+}
+.consent-check {
+  margin-right: 3px;
+  transform: scale(.82);
+}
+.consent-link {
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  color: var(--ui-link);
+}

@@ -251,7 +251,10 @@ console.log(
 // Production review routing then removed the legacy automatic trial-debug
 // gate: trial/review and release use HTTPS production, development stays on
 // test. Combined size: 1,127,163 B. 1102 -> 1101 KiB.
-const budget = 1101 * 1024;
+// Privacy review correction: shared unchecked consent control, readable legal
+// links, and hard guards for WeChat phone, fallback WeChat and SMS login:
+// 1,130,936 B. 1101 -> 1105 KiB. See docs/privacy-consent-budget.md.
+const budget = 1105 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

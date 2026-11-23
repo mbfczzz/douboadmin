@@ -1,9 +1,10 @@
 import { sendPhoneCode, signIn, error, AuthCancelledError } from "../../utils/api";
+import { requireLegalConsent } from "../../services/legal-consent";
 
 // "使用其他手机号": sign in another phone's account with an SMS code, instead
 // of the account this WeChat is already linked to.
 type Page = {
-  data: { smsPhone: string; smsCode: string; smsChallenge: string; smsWait: number; busy: boolean };
+  data: { smsPhone: string; smsCode: string; smsChallenge: string; smsWait: number; busy: boolean; legalAgreed: boolean };
   destroyed: boolean;
   smsTimer: number;
   setData(v: Record<string, unknown>): void;
@@ -39,6 +40,7 @@ export const smsHandlers = {
   async sendCode(this: Page) {
     const phone = this.data.smsPhone;
     if (this.data.smsWait > 0 || this.data.busy) return;
+    if (!requireLegalConsent(this)) return;
     if (!validPhone(phone)) return error(new Error("请输入正确的手机号"));
     this.setData({ busy: true });
     try {
@@ -56,6 +58,7 @@ export const smsHandlers = {
   async smsLogin(this: Page) {
     const { smsPhone: phone, smsCode: code, smsChallenge: challenge } = this.data;
     if (this.data.busy) return;
+    if (!requireLegalConsent(this)) return;
     if (!validPhone(phone)) return error(new Error("请输入正确的手机号"));
     if (!challenge) return error(new Error("请先获取验证码"));
     if (!/^\d{6}$/.test(code)) return error(new Error("请输入 6 位验证码"));

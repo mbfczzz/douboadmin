@@ -1,0 +1,11 @@
+<view class="consent-row">
+  <checkbox-group class="consent-group" bindchange="change">
+    <label class="consent-label">
+      <checkbox class="consent-check" value="accepted" checked="{{checked}}" color="#006a73" />
+      <text>我已阅读并同意</text>
+    </label>
+  </checkbox-group>
+  <navigator class="consent-link" url="/pages/library/index?mode=terms" hover-class="none">《用户服务协议》</navigator>
+  <text>和</text>
+  <navigator class="consent-link" url="/pages/library/index?mode=privacy" hover-class="none">《隐私政策》</navigator>
+</view>

@@ -16,6 +16,13 @@ import { canEnter, activationRedirect } from "../../services/access";
 import { supportsPhoneLogin, authorizedPhoneCode } from "../../services/phone-login";
 import { showArt } from "../../utils/ui-art";
 import { smsState, smsHandlers } from "./sms";
+import {
+  legalConsent,
+  legalConsentState,
+  needConsent,
+  openPrivacy,
+  requireLegalConsent,
+} from "../../services/legal-consent";
 Page({
   data: {
     brandIcon: "",
@@ -23,6 +30,7 @@ Page({
     ...loginContext(),
     loading: true,
     busy: false,
+    ...legalConsentState,
     wechatReady: false,
     phoneReady: false,
     demoAllowed: false,
@@ -31,6 +39,9 @@ Page({
     activationRequired: false,
     ...smsState,
   },
+  legalConsent,
+  needConsent,
+  privacy: openPrivacy,
   ...smsHandlers,
   smsTimer: 0,
   completed: false,
@@ -111,6 +122,7 @@ Page({
   },
   async authenticate(mode: "wechat" | "demo", phoneCode?: string) {
     if (this.data.busy) return;
+    if (!requireLegalConsent(this)) return;
     this.setData({ busy: true, loadError: "" });
     try {
       if (!hasSession() || phoneCode) await signIn(mode, phoneCode);
@@ -162,10 +174,5 @@ Page({
   },
   brandError() {
     this.setData({ brandIcon: "" });
-  },
-  privacy() {
-    wx.openPrivacyContract({
-      fail: () => error(new Error("隐私保护指引暂时无法打开，请稍后重试")),
-    });
   },
 });

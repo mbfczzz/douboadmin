@@ -15,8 +15,11 @@
   <text wx:elif="{{status.status==='pending'||status.status==='unbound'||status.status==='rejected'}}" class="biz-note activation-intro">{{invite?'已识别邀请码，正在准备登记。':codeMode?'第 2 步：输入服务商或合伙人给你的邀请码。':'第 2 步：扫描服务商或合伙人给你的二维码登记。'}}</text>
   <view wx:if="{{loadError}}" class="biz-error" bindtap="refresh">{{loadError}} · {{loading?'正在检查…':'点击重试'}}</view>
   <block wx:if="{{!logged}}">
-    <button wx:if="{{phoneReady}}" class="biz-action" open-type="getPhoneNumber" bindgetphonenumber="phoneLogin" loading="{{busy}}" disabled="{{busy||loading||!wechatReady}}">{{accountDeleted?'手机号授权重新注册':'手机号授权登录'}}</button>
-    <button wx:else class="biz-action" loading="{{busy}}" disabled="{{busy||loading||!wechatReady}}" bindtap="login">微信登录</button>
+    <legal-consent checked="{{legalAgreed}}" bindchange="legalConsent" />
+    <button wx:if="{{phoneReady&&legalAgreed}}" class="biz-action" open-type="getPhoneNumber" bindgetphonenumber="phoneLogin" loading="{{busy}}" disabled="{{busy||loading||!wechatReady}}">{{accountDeleted?'手机号授权重新注册':'手机号授权登录'}}</button>
+    <button wx:elif="{{phoneReady}}" class="biz-action" disabled="{{busy||loading||!wechatReady}}" bindtap="needConsent">{{accountDeleted?'手机号授权重新注册':'手机号授权登录'}}</button>
+    <button wx:elif="{{legalAgreed}}" class="biz-action" loading="{{busy}}" disabled="{{busy||loading||!wechatReady}}" bindtap="login">微信登录</button>
+    <button wx:else class="biz-action" disabled="{{busy||loading||!wechatReady}}" bindtap="needConsent">微信登录</button>
     <navigator wx:if="{{phoneReady}}" url="/pages/login/index?sms=1" hover-class="none"><button class="text-button phone-alternative" disabled="{{busy||loading}}">使用其他手机号</button></navigator>
   </block>
   <block wx:else>

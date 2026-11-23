@@ -4,7 +4,8 @@ import {
   clearInvite,
   scannedInvite,
 } from "../../services/invitation";
-import { openPrivacy, signOutActivation } from "./sign-out";
+import { signOutActivation } from "./sign-out";
+import { entryHandlers } from "./entry-handlers";
 import { loadBrand } from "../../services/branding";
 import {
   request,
@@ -40,6 +41,7 @@ import {
 } from "./register";
 import { codeState, enterCode, clearCode, pasteCode } from "./code-entry";
 import { showArt } from "../../utils/ui-art";
+import { legalConsentState, requireLegalConsent } from "../../services/legal-consent";
 
 Page({
   data: {
@@ -48,6 +50,7 @@ Page({
     logged: false,
     loading: true,
     busy: false,
+    ...legalConsentState,
     ...codeState,
     loadError: "",
     accountDeleted: false,
@@ -56,6 +59,7 @@ Page({
     status: null as AccessStatus | null,
     ...registerState,
   },
+  ...entryHandlers,
   inviteAttempt: "",
   owner: "",
   onLoad(options: Record<string, string>) {
@@ -189,6 +193,7 @@ Page({
   },
   async authenticate(phoneCode?: string) {
     if (this.data.busy) return;
+    if (!requireLegalConsent(this)) return;
     this.setData({ busy: true, loadError: "" });
     try {
       await signIn("wechat", phoneCode);
@@ -290,11 +295,5 @@ Page({
   },
   signOut() {
     return signOutActivation(this);
-  },
-  brandError() {
-    this.setData({ brandIcon: "" });
-  },
-  privacy() {
-    openPrivacy();
   },
 });
