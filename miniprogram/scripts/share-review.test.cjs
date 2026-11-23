@@ -1,5 +1,6 @@
 const { test } = require("node:test");
 const assert = require("node:assert/strict");
+const fs = require("node:fs");
 const { harness } = require("./harness.cjs");
 
 test("changing prompt privacy while preparing a share discards the obsolete response", async () => {
@@ -41,4 +42,11 @@ test("a signed-out share page clears the previous private work and link", async 
   assert.equal(page.data.job, null);
   assert.equal(page.data.share, null);
   assert.equal(page.data.needsLogin, true);
+});
+
+test("public AI shares carry a generation label and complaint entry", () => {
+  const markup = fs.readFileSync("pages/shared-work/index.wxml", "utf8");
+  assert.match(markup, /AI生成内容/);
+  assert.match(markup, /举报或投诉/);
+  assert.match(markup, /mode=support/);
 });

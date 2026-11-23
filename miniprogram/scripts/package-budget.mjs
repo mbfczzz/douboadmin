@@ -261,6 +261,8 @@ console.log(
 // Consent alignment: anonymous visit IDs, device platform and feature-click
 // beacons now stay off until the user enables detailed statistics:
 // 1,138,864 B. 1112 -> 1113 KiB. See docs/privacy-consent-budget.md.
+// Public shared works add a visible AI-generated label and complaint entry:
+// 1,139,422 B, still within the reviewed 1113 KiB ceiling.
 const budget = 1113 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);

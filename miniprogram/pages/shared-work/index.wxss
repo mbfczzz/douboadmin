@@ -5,3 +5,22 @@ button.spark-action {
   justify-content: center;
   gap: 6px;
 }
+.shared-compliance {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 14px;
+  color: var(--ui-muted);
+  font-size: 13px;
+}
+.ai-label {
+  padding: 4px 8px;
+  border: 1px solid var(--ui-border);
+  border-radius: 6px;
+}
+.report-link {
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  color: var(--ui-link);
+}

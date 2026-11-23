@@ -13,6 +13,6 @@
       wx:if="{{work.prompt}}"
       class="biz-note"
       ><template is="prompt-text" data="{{parts:refs.segments(work.prompt,[])}}" /></view
-    ></view
+    ><view class="shared-compliance"><text class="ai-label">AI生成内容</text><navigator class="report-link" url="/pages/library/index?mode=support" hover-class="none">举报或投诉</navigator></view></view
   ><button class="biz-action spark-action" bindtap="home"><art-icon name="icSpark" size="20" /><text>去豆播找灵感</text></button></view
 >
