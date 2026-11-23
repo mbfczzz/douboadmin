@@ -36,6 +36,23 @@ test("legal and support documents are public modes with working contact actions"
   assert.match(fs.readFileSync("pages/library/index.wxml", "utf8"), /open-type="contact"/);
 });
 
+test("bundled legal documents stay complete when the production API is unavailable", async () => {
+  const h = harness();
+  h.api.request = async () => { throw new Error("连接失败"); };
+  const privacy = h.page("library");
+  privacy.onLoad({ mode: "privacy" });
+  assert.equal(privacy.data.document.title, "豆播AI隐私政策");
+  await privacy.load();
+  assert.equal(privacy.data.loadError, "");
+  const text = JSON.stringify(privacy.data.document);
+  for (const phrase of ["收集方式", "信息范围", "用途", "存储期限", "中华人民共和国境内", "删除个人信息", "注销账号"])
+    assert.match(text, new RegExp(phrase));
+  const terms = harness().page("library");
+  terms.onLoad({ mode: "terms" });
+  assert.equal(terms.data.document.title, "豆播AI用户服务协议");
+  assert.ok(terms.data.document.sections.length >= 8);
+});
+
 test("login, activation and settings expose both legal documents", () => {
   const h = harness(), preferences = h.page("preferences");
   preferences.terms();

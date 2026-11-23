@@ -16,13 +16,8 @@ import {
 } from "../../utils/api";
 import type { Template, Row } from "../../services/types";
 import { jobPage } from "../../services/job-pages";
-type LegalDocument = {
-  title: string;
-  effectiveDate: string;
-  summary: string;
-  sections?: { title: string; paragraphs: string[] }[];
-  contacts?: { label: string; value: string; action?: "phone" | "copy" }[];
-};
+import { legalFallback } from "./legal-documents";
+import type { LegalDocument } from "./legal-documents";
 Page({
   data: {
     mode: "favorites",
@@ -59,12 +54,13 @@ Page({
       favorites: "我的收藏",
       notifications: "消息通知",
       help: "帮助与反馈",
-      terms: "用户协议",
+      terms: "用户服务协议",
       privacy: "隐私政策",
       support: "客服与投诉",
     };
     const mode = names[o.mode] ? o.mode : "help";
-    this.setData({ mode, title: names[mode], backdrop: mode === "favorites" ? "bgFavorites" : mode === "notifications" ? "bgNotice" : "bgHelp" });
+    const document = legalFallback(mode);
+    this.setData({ mode, title: names[mode], document, loading: !document, backdrop: mode === "favorites" ? "bgFavorites" : mode === "notifications" ? "bgNotice" : "bgHelp" });
   },
   onShow() {
     enterPage(this);
@@ -140,6 +136,7 @@ Page({
       if (["terms", "privacy", "support"].includes(this.data.mode)) {
         const document = await request<LegalDocument>("/legal/" + this.data.mode, "GET", undefined, undefined, false);
         if (version !== this.loadVersion) return;
+        if (!document.title || (this.data.mode === "support" ? !document.contacts?.length : !document.sections?.length)) return;
         this.setData({ document });
       }
     } catch (e) {
@@ -151,7 +148,8 @@ Page({
           unavailableFavorites: [],
           notifications: [],
         });
-      else this.setData({ loadError: (e as Error).message });
+      else if (!legalFallback(this.data.mode))
+        this.setData({ loadError: (e as Error).message });
     } finally {
       if (version === this.loadVersion) this.setData({ loading: false });
     }

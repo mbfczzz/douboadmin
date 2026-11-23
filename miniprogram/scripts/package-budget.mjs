@@ -254,7 +254,11 @@ console.log(
 // Privacy review correction: shared unchecked consent control, readable legal
 // links, and hard guards for WeChat phone, fallback WeChat and SMS login:
 // 1,130,936 B. 1101 -> 1105 KiB. See docs/privacy-consent-budget.md.
-const budget = 1105 * 1024;
+// Legal review availability: complete service agreement, privacy policy and
+// support contacts are bundled as an offline fallback, so a transient API
+// failure cannot render a blank legal page: 1,138,447 B. 1105 -> 1112 KiB.
+// See docs/legal-offline-budget.md.
+const budget = 1112 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");
