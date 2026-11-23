@@ -3,15 +3,6 @@
   /* Keep the opened header clear of the sticky top bar. */
   scroll-margin-top: 80px;
 }
-.integration-static {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 18px 24px;
-}
-.integration-static .integration-badges {
-  margin-left: auto;
-}
 .integration fieldset {
   min-width: 0;
 }
@@ -98,9 +89,6 @@
   overflow-wrap: anywhere;
 }
 @media (max-width: 640px) {
-  .integration-static {
-    padding: 14px 16px;
-  }
   .integration > summary {
     position: relative;
     flex-wrap: wrap;
