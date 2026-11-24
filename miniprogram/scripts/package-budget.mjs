@@ -267,7 +267,12 @@ console.log(
 // Visitor admission keeps every page readable while write/paid operations
 // fail closed on the server: 1,139,269 B, still within 1113 KiB. See
 // docs/visitor-access.md.
-const budget = 1113 * 1024;
+// Test experience builds again isolate the HTTP test API and gate their first
+// requests on automatic trial debugging: 1,140,339 B. 1113 -> 1114 KiB. See
+// docs/trial-debug.md.
+// Activation polish groups consent and login in one compact surface, scales
+// the brand hero and adapts short/narrow phones: 1,141,829 B. 1114 -> 1116 KiB.
+const budget = 1116 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

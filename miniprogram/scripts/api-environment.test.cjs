@@ -12,9 +12,9 @@ function base(envVersion, fail = false) {
   return module.exports.API_BASE;
 }
 
-test("trial review and release use production while development stays isolated", () => {
+test("only the released mini-program uses the production HTTPS API", () => {
   assert.equal(base("release"), "https://mbygkj.com");
-  assert.equal(base("trial"), "https://mbygkj.com");
+  assert.equal(base("trial"), "http://106.15.92.153:8088");
   assert.equal(base("develop"), "http://106.15.92.153:8088");
   assert.equal(base(undefined, true), "http://106.15.92.153:8088");
 });

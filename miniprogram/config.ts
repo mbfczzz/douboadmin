@@ -1,10 +1,9 @@
-function productionConnected() {
+function released() {
   try {
-    const version = wx.getAccountInfoSync().miniProgram.envVersion;
-    return version === "trial" || version === "release";
+    return wx.getAccountInfoSync().miniProgram.envVersion === "release";
   } catch {
     return false;
   }
 }
 
-export const API_BASE = productionConnected() ? "https://mbygkj.com" : "http://106.15.92.153:8088";
+export const API_BASE = released() ? "https://mbygkj.com" : "http://106.15.92.153:8088";

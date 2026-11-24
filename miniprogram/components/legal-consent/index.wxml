@@ -5,7 +5,9 @@
       <text>我已阅读并同意</text>
     </label>
   </checkbox-group>
-  <navigator class="consent-link" url="/pages/library/index?mode=terms" hover-class="none">《用户服务协议》</navigator>
-  <text>和</text>
-  <navigator class="consent-link" url="/pages/library/index?mode=privacy" hover-class="none">《隐私政策》</navigator>
+  <view class="consent-docs">
+    <navigator class="consent-link" url="/pages/library/index?mode=terms" hover-class="none">《用户服务协议》</navigator>
+    <text>和</text>
+    <navigator class="consent-link" url="/pages/library/index?mode=privacy" hover-class="none">《隐私政策》</navigator>
+  </view>
 </view>

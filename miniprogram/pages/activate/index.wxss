@@ -2,11 +2,31 @@
 @import "../../styles/business.wxss";
 @import "./entry.wxss";
 .activation-page {
-  padding-top: 40px;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 460px;
+  min-height: calc(100vh - 88px);
+  margin: 0 auto;
+  padding: 22px 20px calc(24px + env(safe-area-inset-bottom));
+}
+.activation-page .page-backdrop {
+  height: 330px;
+  opacity: 0.2;
+  -webkit-mask-image: linear-gradient(#000 0%, #000 18%, transparent 92%);
+  mask-image: linear-gradient(#000 0%, #000 18%, transparent 92%);
+}
+.activation-hero {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 136px;
+  padding-top: 4px;
 }
 .activation-intro {
-  max-width: 300px;
-  margin: 12px auto 0;
+  max-width: 288px;
+  margin: 8px auto 0;
   text-align: center;
 }
 .activation-status {
@@ -25,16 +45,34 @@
 }
 .activation-logo {
   display: block;
-  width: 160px;
-  height: 78px;
-  margin: 0 auto 24px;
+  width: 132px;
+  height: 64px;
+  margin: 0 auto 18px;
+  border-radius: 14px;
 }
 .activation-title {
   display: block;
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 600;
-  line-height: 1.4;
+  line-height: 32px;
+  letter-spacing: -0.02em;
   text-align: center;
+}
+.activation-auth-card {
+  margin-top: 26px;
+  padding: 10px 16px 8px;
+  border: 1px solid var(--ui-border);
+  border-radius: 20px;
+  background: var(--ui-surface);
+}
+.activation-auth-card button.biz-action {
+  min-height: 54px;
+  margin-top: 8px;
+  font-size: 16px;
+}
+.activation-auth-card button.phone-alternative {
+  color: var(--ui-link);
+  font-size: 14px;
 }
 .activation-links {
   display: flex;
@@ -61,7 +99,8 @@
   flex-wrap: wrap;
   font-size: 13px;
   color: var(--ui-muted);
-  margin-top: 18px;
+  margin-top: auto;
+  padding-top: 16px;
 }
 .activation-legal .legal-link {
   min-height: 44px;
@@ -105,4 +144,30 @@ button.browse-link {
 }
 .status-icon {
   margin-bottom: 12px;
+}
+@media (max-height: 700px) {
+  .activation-page {
+    padding-top: 14px;
+  }
+  .activation-hero {
+    min-height: 120px;
+  }
+  .activation-logo {
+    width: 118px;
+    height: 56px;
+    margin-bottom: 14px;
+  }
+  .activation-auth-card {
+    margin-top: 18px;
+  }
+}
+@media (max-width: 350px) {
+  .activation-page {
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+  .activation-auth-card {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
 }

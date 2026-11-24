@@ -2,7 +2,7 @@ const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const { harness } = require("./harness.cjs");
 
-test("trial configuration, login, access and uploads run without automatic debug", async () => {
+test("configuration, login, access and uploads wait for the same trial debug callback", async () => {
   const h = harness(), debug = [], sent = [];
   h.wx.getAccountInfoSync = () => ({ miniProgram: { envVersion: "trial" } });
   h.wx.setEnableDebug = options => debug.push(options);
@@ -21,8 +21,13 @@ test("trial configuration, login, access and uploads run without automatic debug
     h.service("access").accessStatus(),
     h.api.upload("temp-image.png"),
   ];
+  await Promise.resolve();
+  await Promise.resolve();
+  assert.equal(debug.length, 1);
+  assert.equal(debug[0].enableDebug, true);
+  assert.deepEqual(sent, []);
+  debug[0].success();
   await Promise.all(calls);
-  assert.equal(debug.length, 0);
   assert.equal(sent.length, 4);
   assert.ok(sent.some(url => url.endsWith("/api/config")));
   assert.ok(sent.some(url => url.endsWith("/api/auth/wechat")));
