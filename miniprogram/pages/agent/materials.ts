@@ -91,6 +91,14 @@ export const materialHandlers = {
       error(err);
     }
   },
+  // Tap on a draft attachment: 查看 or 替换.
+  attachAction(this: Page, e: WechatMiniprogram.TouchEvent) {
+    const id = e.currentTarget.dataset.id as string;
+    wx.showActionSheet({
+      itemList: ["查看", "替换"],
+      success: (r) => (r.tapIndex === 0 ? materialHandlers.previewMaterial.call(this, e) : void replaceAttachment(this, id)),
+    });
+  },
   // Tap shows a material full screen (an attachment, or one in a sent message).
   previewMaterial(this: Page, e: WechatMiniprogram.TouchEvent) {
     const m = this.data.materials.find((x) => x.id === e.currentTarget.dataset.id);
@@ -111,3 +119,29 @@ export async function dropDraft(page: Page) {
     // they stay in the project; nothing else is affected
   }
 }
+
+// 替换 a draft attachment. One uploaded for this draft keeps its place and
+// number (图片3 stays 图片3); one an edited question brought back may be named
+// by earlier plans and messages, so the new file joins as the next number.
+async function replaceAttachment(page: Page, id: string) {
+  const old = page.data.attached.find((m) => m.id === id);
+  if (!old || page.data.uploading || !page.data.session) return;
+  if (!old.fresh && page.data.materials.length >= MAX_MATERIALS) return error(new Error(`每个项目最多 ${MAX_MATERIALS} 个素材`));
+  page.setData({ uploading: true });
+  try {
+    const session = page.data.session;
+    const [file] = await chooseReferenceFiles(old.isImage ? "image" : "video", 1);
+    const row = editorAsset(await upload(file.path));
+    if (page.destroyed || page.data.session?.id !== session.id || !page.data.attached.some((m) => m.id === id)) return;
+    const materials = old.fresh ? page.data.materials.map((m) => (m.id === id ? row : m)) : [...page.data.materials, row];
+    const attached = page.data.attached.map((m) => (m.id === id ? { ...row, label: "", fresh: true } : m));
+    await save(page, page.data.session, materials, attached);
+    const label = page.data.attached.find((m) => m.id === row.id)?.label;
+    wx.showToast({ title: old.fresh ? `已替换${label || ""}` : `已换成${label || "新素材"}`, icon: "none" });
+  } catch (err) {
+    if (!cancelled(err) && !page.destroyed) error(err);
+  } finally {
+    if (!page.destroyed) page.setData({ uploading: false });
+  }
+}
+

@@ -28,6 +28,10 @@ Component({
       const item = this.item();
       if (item) this.triggerEvent("mention", { id: item.id });
     },
+    replace() {
+      const item = this.item();
+      if (item) this.triggerEvent("replace", { id: item.id });
+    },
     remove() {
       const item = this.item();
       if (item) this.triggerEvent("remove", { id: item.id });

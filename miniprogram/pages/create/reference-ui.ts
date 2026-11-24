@@ -1,9 +1,10 @@
-import type { VisibleEditor } from "./editor-types";
+import type { VisibleEditor, ReferenceEditor } from "./editor-types";
 import { pickMention, appendMention, cancelMention } from "./mentions";
 import { openReferencePreview, closeViewer } from "./reference-preview";
 import { positionMention } from "./mention-position";
+import { replaceReference, removeOrReplace } from "./replace";
 
-type Editor = VisibleEditor & { removeAsset(id: string): void };
+type Editor = VisibleEditor & ReferenceEditor & { removeAsset(id: string): void };
 type Tap = WechatMiniprogram.TouchEvent;
 type Detail = WechatMiniprogram.CustomEvent<{ id: string }>;
 const imageNumber = (page: Editor, id: string) =>
@@ -22,7 +23,7 @@ export const referenceHandlers = {
     this.setData({ keyboardHeight: Math.max(0, e.detail.height) });
     if (this.data.mentionOpen) positionMention(this);
   },
-  // Images open the in-page viewer (引用 / 删除); videos play full screen.
+  // Images open the in-page viewer (引用 / 替换 / 删除); videos play full screen.
   previewReference(this: Editor, e: Tap) {
     const asset = this.data.assets.find((a) => a.id === e.currentTarget.dataset.id);
     if (asset?.isVideo) wx.previewMedia({ sources: [{ url: asset.data.url, type: "video", poster: asset.data.thumbnailUrl || undefined }], fail() {} });
@@ -44,8 +45,12 @@ export const referenceHandlers = {
       wx.showToast({ title: `已引用图片${number}`, icon: "none" });
     }
   },
+  viewerReplace(this: Editor, e: Detail) {
+    closeViewer(this);
+    return replaceReference(this, e.detail.id);
+  },
   viewerRemove(this: Editor, e: Detail) {
     closeViewer(this);
-    this.removeAsset(e.detail.id);
+    return removeOrReplace(this, e.detail.id);
   },
 };

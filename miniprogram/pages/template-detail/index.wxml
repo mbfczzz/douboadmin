@@ -34,7 +34,7 @@
     <text class="upload-description"><block wx:if="{{template.data.requiredImages}}">只需 {{template.data.requiredImages}} 张照片，即可制作同款视频</block><block wx:else>可以直接生成，也可以添加参考照片</block></text>
     <scroll-view scroll-x class="slots" enhanced show-scrollbar="{{false}}">
       <view class="slot-row">
-        <view wx:for="{{assets}}" wx:key="id" class="slot uploaded">
+        <view wx:for="{{assets}}" wx:key="id" class="slot uploaded" data-index="{{index}}" bindtap="replaceSlot" hover-class="slot-pressed" aria-role="button" aria-label="换一张照片">
           <image src="{{item.data.url}}" mode="aspectFill" />
           <text class="slot-tag">{{index>=template.data.requiredImages?'补充':'主体图'}}</text>
           <view class="slot-remove" data-id="{{item.id}}" catchtap="remove" aria-role="button" aria-label="删除这张照片"><t-icon name="close" size="14" /></view>

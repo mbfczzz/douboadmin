@@ -13,6 +13,7 @@ import { addReference, selectedModel } from "./references";
 import { chooseMention, promptWithout, clearMentions, cancelMention } from "./mentions";
 import { cancelPreview } from "./reference-preview";
 import { referenceHandlers } from "./reference-ui";
+import { removeOrReplace } from "./replace";
 import { applyFeature, featureHandlers, featureModel, startFeatureScript } from "./feature";
 import {
   restoreEditorAssets,
@@ -264,7 +265,7 @@ Page({
     await addReference(this, e?.currentTarget.dataset.kind || "image");
   },
   remove(e: WechatMiniprogram.TouchEvent) {
-    this.removeAsset(e.currentTarget.dataset.id);
+    return removeOrReplace(this, e.currentTarget.dataset.id);
   },
   removeAsset(id: string) {
     const prompt = promptWithout(this.data.prompt, this.data.assets, id);

@@ -80,4 +80,4 @@
     <text class="source-note">已添加 {{assets.length}} / {{maxReferences}}</text>
   </view>
 </t-popup>
-<media-viewer show="{{viewerOpen}}" items="{{viewerItems}}" current="{{viewerIndex}}" bind:close="closeViewer" bind:mention="viewerMention" bind:remove="viewerRemove" />
+<media-viewer show="{{viewerOpen}}" items="{{viewerItems}}" current="{{viewerIndex}}" bind:close="closeViewer" bind:mention="viewerMention" bind:replace="viewerReplace" bind:remove="viewerRemove" />

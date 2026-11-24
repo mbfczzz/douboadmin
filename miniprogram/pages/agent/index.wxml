@@ -162,7 +162,7 @@
       <view class="attach-btn" data-kind="video" bindtap="addMaterial" hover-class="icon-pressed" aria-role="button" aria-label="添加视频"><image class="gl gl-16" src="/assets/glyphs/video-muted.png" /><text>视频</text></view>
     </view>
     <view wx:if="{{attached.length||uploading}}" class="attach-row">
-      <view wx:for="{{attached}}" wx:key="id" class="attach" data-id="{{item.id}}" bindtap="previewMaterial" aria-role="button" aria-label="{{'查看'+item.label}}">
+      <view wx:for="{{attached}}" wx:key="id" class="attach" data-id="{{item.id}}" bindtap="attachAction" aria-role="button" aria-label="{{'查看或替换'+item.label}}">
         <image class="attach-photo" src="{{item.isImage?item.data.url:item.data.thumbnailUrl}}" mode="aspectFill" />
         <view wx:if="{{!item.isImage}}" class="attach-play"><image class="gl gl-12" src="/assets/glyphs/play-muted.png" /></view>
         <text class="attach-label">{{item.label}}</text>

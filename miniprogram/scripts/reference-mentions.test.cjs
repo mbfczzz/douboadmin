@@ -86,15 +86,16 @@ test("cancel, missing images, prompt limits and page hide preserve the draft", (
   assert.equal(page.data.prompt, "@");
 });
 
-test("removing a reference clears that mention and renumbers later images only", () => {
+test("removing a reference clears that mention and renumbers later images only", async () => {
   const h = harness(),
     page = h.page("create");
   page.refreshParameters = () => {};
+  h.wx.showModal = (o) => o.success({ confirm: false, cancel: true }); // 删除, not 换一张
   page.setData({
     assets: [image(1), image(2), image(3)],
     prompt: "@图片1 作为背景，@图片2 和 @图片3 保持姿态",
   });
-  page.remove({ currentTarget: { dataset: { id: "image-2" } } });
+  await page.remove({ currentTarget: { dataset: { id: "image-2" } } });
   assert.equal(page.data.prompt, "@图片1 作为背景， 和 @图片2 保持姿态");
   assert.equal(page.data.assets.length, 2);
 });
@@ -109,10 +110,11 @@ test("clearing references removes every image mention but keeps ordinary text",(
   assert.equal(page.data.assets.length,0);
 });
 
-test("the viewer quotes or deletes the image it shows", () => {
+test("the viewer quotes or deletes the image it shows", async () => {
   const h = harness(),
     page = h.page("create"),
     toasts = [];
+  h.wx.showModal = (o) => o.success({ confirm: false, cancel: true }); // 删除, not 换一张
   h.wx.showToast = (o) => toasts.push(o.title);
   page.refreshParameters = () => {};
   page.setData({ assets: [image(1), image(2)], prompt: "海边", maxPromptChars: 500, viewerOpen: true });
@@ -121,7 +123,7 @@ test("the viewer quotes or deletes the image it shows", () => {
   assert.equal(page.data.viewerOpen, false);
   assert.deepEqual(toasts, ["已引用图片2"]);
   page.setData({ viewerOpen: true });
-  page.viewerRemove({ detail: { id: "image-2" } });
+  await page.viewerRemove({ detail: { id: "image-2" } });
   assert.equal(page.data.prompt, "海边  ");
   assert.equal(page.data.assets.length, 1);
   assert.equal(page.data.viewerOpen, false);

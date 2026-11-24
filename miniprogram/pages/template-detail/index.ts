@@ -48,6 +48,7 @@ Page({
   },
   id: "",
   favoriteRevision: 0,
+  replaceAt: -1, // index of the uploaded photo being replaced, -1 to add
   visible: true,
   destroyed: false,
   onHide() {
@@ -133,7 +134,14 @@ Page({
     }
   },
   choose() {
+    this.replaceAt = -1;
     if (!this.data.uploading) this.setData({ sourceOpen: true });
+  },
+  // Tap an uploaded photo: the new one takes its place (and its role).
+  replaceSlot(e: WechatMiniprogram.TouchEvent) {
+    if (this.data.uploading || this.data.busy) return;
+    this.replaceAt = Number(e.currentTarget.dataset.index);
+    this.setData({ sourceOpen: true });
   },
   // One bottom button: it uploads until the photos are in, then generates.
   primary() {
@@ -152,6 +160,7 @@ Page({
     if (this.data.uploading) return;
     this.setData({ sourceOpen: false });
     const position = this.data.recipeActiveSlot;
+    const at = this.replaceAt;
     const templateId = this.data.template?.id;
     const owner = sessionToken();
     const shape = JSON.stringify(this.data.template?.data.imageSlots);
@@ -166,6 +175,7 @@ Page({
           confirmed: (a: Row<Asset>) => {
             if (this.destroyed || this.data.template?.id !== templateId || owner !== sessionToken() || shape !== JSON.stringify(this.data.template?.data.imageSlots)) return;
             if (this.data.template?.data.imageSlots?.length) recipeAsset(this, position, a);
+            else if (at >= 0 && this.data.assets[at]) this.setData({ assets: this.data.assets.map((x: Row<Asset>, i: number) => (i === at ? a : x)) });
             else this.setData({ assets: [...this.data.assets, a] });
           },
         },
