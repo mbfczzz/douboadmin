@@ -9,7 +9,10 @@ import RequestState from "../components/RequestState";
 import Badge from "../components/Badge";
 import Tag, { Delta, IdChip } from "../components/Tag";
 import UserActivation from "./UserActivation";
-import { phoneVerified } from "../users/registration";
+import {
+  phoneVerified,
+  visitorOriginLabel,
+} from "../users/registration";
 import {
   points,
   ledgerLabels,
@@ -73,6 +76,12 @@ export default function UserDetails({
           )}
           <dt>注册来源</dt>
           <dd>{sourceLabel(initialSource(user.data))}</dd>
+          {user.data.access?.visitorOrigin && (
+            <>
+              <dt>游客来源</dt>
+              <dd>{visitorOriginLabel(user.data.access.visitorOrigin)}</dd>
+            </>
+          )}
           <dt>使用过的端</dt>
           <dd>
             {(user.data.sources || [initialSource(user.data)])

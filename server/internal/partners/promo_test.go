@@ -44,7 +44,7 @@ func TestPromoRegistrationJoinsTheReferrersProvider(t *testing.T) {
 		t.Fatal("a member used their own promo code")
 	}
 	access := register(t, s, ctx, promo, "friend")
-	if access.PartnerID != s2 {
+	if access.PartnerID != s2 || access.VisitorOrigin != "scan" {
 		t.Fatal("promo joined another provider", access)
 	}
 	_, reg, _ := get[core.Registration](reader{ctx, s.Store}, "registrations", "friend")
@@ -61,6 +61,16 @@ func TestPromoRegistrationJoinsTheReferrersProvider(t *testing.T) {
 	_, m, _ := get[core.Membership](reader{ctx, s.Store}, "memberships", "friend")
 	if m.Referrer != "fan" || m.Status != "active" {
 		t.Fatal("approved visitor lost referrer", m)
+	}
+	identity, err := s.IdentityAssignment(ctx, "friend")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = s.ChangeIdentity(ctx, "friend", core.RoleVisitor, "", "admin", identity.Version); err != nil {
+		t.Fatal(err)
+	}
+	if access, err = s.Access(ctx, "friend"); err != nil || access.VisitorOrigin != "scan" {
+		t.Fatal("restored visitor lost scan origin", access, err)
 	}
 	// Once the referrer is no longer active the code stops working.
 	row, _ := s.Store.Get(ctx, "memberships", "fan")

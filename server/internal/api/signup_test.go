@@ -38,7 +38,7 @@ func TestOpenSignupCreatesSourceLessVisitorUntilApproval(t *testing.T) {
 		t.Fatal("signup setting not exposed", v)
 	}
 	w = call(a, "POST", "/api/access/direct", user, "", map[string]any{})
-	if w.Code != 200 || !strings.Contains(w.Body.String(), `"status":"review"`) || !strings.Contains(w.Body.String(), `"canBrowse":true`) {
+	if w.Code != 200 || !strings.Contains(w.Body.String(), `"status":"review"`) || !strings.Contains(w.Body.String(), `"visitorOrigin":"direct"`) || !strings.Contains(w.Body.String(), `"canBrowse":true`) {
 		t.Fatal("ordinary signup did not create a visitor", w.Code, w.Body.String())
 	}
 	if _, err := a.Store.Get(t.Context(), "direct_access", "user-a"); !errors.Is(err, core.ErrNotFound) {
@@ -105,6 +105,16 @@ func TestOpenSignupCreatesSourceLessVisitorUntilApproval(t *testing.T) {
 		if json.Unmarshal(visitorRow.Data, &visitor) != nil || visitor.Role != core.RoleVisitor || visitor.PartnerID != core.RootPartner || visitor.Referrer != "user-a" {
 			t.Fatal("promo visitor lost root source or referrer", visitor)
 		}
+	}
+	identity, err := a.Partners.IdentityAssignment(t.Context(), "user-a")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = a.Partners.ChangeIdentity(t.Context(), "user-a", core.RoleVisitor, "", "admin", identity.Version); err != nil {
+		t.Fatal(err)
+	}
+	if access, err := a.Partners.Access(t.Context(), "user-a"); err != nil || access.VisitorOrigin != "direct" {
+		t.Fatal("restored visitor lost direct origin", access, err)
 	}
 }
 

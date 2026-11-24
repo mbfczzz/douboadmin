@@ -95,6 +95,7 @@ export interface Profile {
     status: string;
     partnerId?: string;
     partnerName?: string;
+    visitorOrigin?: "direct" | "scan" | "code" | "admin";
     message?: string;
   };
   nickname: string;

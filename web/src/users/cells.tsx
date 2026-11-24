@@ -1,7 +1,11 @@
 import { date, type Row } from "../api";
 import Tag from "../components/Tag";
 import type { Profile } from "../business/types";
-import { phoneVerified, registered } from "./registration";
+import {
+  phoneVerified,
+  registered,
+  visitorOriginLabel,
+} from "./registration";
 
 // Table cells for the 小程序用户 list, kept narrow enough for 1280px screens.
 
@@ -39,7 +43,11 @@ export const accessCell = (r: Row<Profile>) => {
           <Tag tone="accent">合伙人</Tag>
         )
       ) : a?.status === "review" ? (
-        <Tag tone="warning">游客 · 待开通</Tag>
+        <Tag tone="warning">
+          {a.visitorOrigin
+            ? visitorOriginLabel(a.visitorOrigin)
+            : "待审核开通"}
+        </Tag>
       ) : (
         <Tag>未开通</Tag>
       )}

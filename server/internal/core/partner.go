@@ -106,9 +106,10 @@ type VisitorIdentity struct {
 	ChangedBy      string    `json:"changedBy"`
 }
 type Access struct {
-	Active      bool   `json:"active"`
-	Status      string `json:"status"`
-	PartnerID   string `json:"partnerId,omitempty"`
-	PartnerName string `json:"partnerName,omitempty"`
-	Message     string `json:"message,omitempty"`
+	Active        bool   `json:"active"`
+	Status        string `json:"status"`
+	PartnerID     string `json:"partnerId,omitempty"`
+	PartnerName   string `json:"partnerName,omitempty"`
+	VisitorOrigin string `json:"visitorOrigin,omitempty"` // direct, scan, code or admin
+	Message       string `json:"message,omitempty"`
 }

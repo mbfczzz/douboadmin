@@ -27,7 +27,7 @@ func TestProviderVisitorRoundTripPreservesTreeAndLogin(t *testing.T) {
 	if err != nil || visitor.Kind != core.RoleVisitor || visitor.PreviousKind != core.RoleS1 || visitor.PreviousPartner != provider {
 		t.Fatal(visitor, err)
 	}
-	if access, _ := s.Access(ctx, "boss"); access.Active || access.Status != "review" {
+	if access, _ := s.Access(ctx, "boss"); access.Active || access.Status != "review" || access.VisitorOrigin != "admin" {
 		t.Fatal(access)
 	}
 	_, owner, _ := get[core.PartnerOwner](reader{ctx, s.Store}, "partner_owners", "boss")

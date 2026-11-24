@@ -8,11 +8,48 @@ import (
 
 const reviewMessage = "账号待管理员开通，暂不可使用该功能"
 
+func registrationVisitorOrigin(reg core.Registration) string {
+	if reg.Role != core.RoleVisitor {
+		return ""
+	}
+	if reg.Method == "direct" || reg.CodeKind == "direct" {
+		return "direct"
+	}
+	if reg.Method == "scan" {
+		return "scan"
+	}
+	if reg.Method == "code" {
+		return "code"
+	}
+	if reg.Code != "" {
+		return "scan"
+	}
+	return ""
+}
+
+func storedVisitorOrigin(r Reader, user string) (string, error) {
+	_, reg, err := get[core.Registration](r, "registrations", user)
+	if errors.Is(err, core.ErrNotFound) {
+		return "", nil
+	}
+	if err != nil {
+		return "", err
+	}
+	return registrationVisitorOrigin(reg), nil
+}
+
 // access is what a mini-program user may do. Scanning only registers; the
 // super-administrator approval opens generation access.
 func access(r Reader, user string) (core.Access, error) {
 	if _, visitor, e := get[core.VisitorIdentity](r, "visitor_identities", user); e == nil && visitor.Enabled {
-		out := core.Access{Status: "review", PartnerID: visitor.PartnerID, Message: reviewMessage}
+		origin, err := storedVisitorOrigin(r, user)
+		if err != nil {
+			return core.Access{}, err
+		}
+		if origin == "" {
+			origin = "admin"
+		}
+		out := core.Access{Status: "review", PartnerID: visitor.PartnerID, VisitorOrigin: origin, Message: reviewMessage}
 		if visitor.PartnerID != "" {
 			if _, partner, err := node(r, visitor.PartnerID); err == nil {
 				out.PartnerName = partner.Name
@@ -122,7 +159,7 @@ func (s *Service) OwnedPartner(ctx context.Context, user string) (string, error)
 func unregistered(r Reader, user string) (core.Access, error) {
 	_, reg, e := get[core.Registration](r, "registrations", user)
 	if e == nil && reg.Status == "pending" && reg.Role == core.RoleVisitor {
-		out := core.Access{Status: "review", PartnerID: reg.PartnerID, Message: reviewMessage}
+		out := core.Access{Status: "review", PartnerID: reg.PartnerID, VisitorOrigin: registrationVisitorOrigin(reg), Message: reviewMessage}
 		if _, partner, err := node(r, reg.PartnerID); err == nil {
 			out.PartnerName = partner.Name
 		} else if !errors.Is(err, core.ErrNotFound) {
