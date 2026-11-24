@@ -15,13 +15,11 @@
   </view>
   <view wx:if="{{total>20}}" class="job-pagination"><button bindtap="previous" disabled="{{loading||page<=1}}">上一页</button><text>第 {{page}} 页 · 共 {{total}} 个</text><button bindtap="next" disabled="{{loading||page*20>=total}}">下一页</button></view>
 </view>
-<t-popup visible="{{!!detail}}" placement="bottom" bind:visible-change="popupChange">
-  <view wx:if="{{detail}}" class="featured-preview">
+<t-popup wx:if="{{detail}}" visible placement="bottom" bind:visible-change="popupChange">
+  <view class="featured-preview">
     <view class="featured-preview-head"><text>{{detail.title}}</text><view bindtap="close" aria-role="button" aria-label="关闭作品预览"><t-icon name="close" size="24" /></view></view>
-    <view wx:if="{{previewError}}" class="error-box">{{previewError}}</view>
     <scroll-view scroll-y class="featured-preview-body">
-      <result-gallery wx:if="{{detail.kind==='image'}}" images="{{detail.results}}" bind:preview="preview" />
-      <video wx:else src="{{detail.result}}" poster="{{detail.thumbnailUrl}}" controls object-fit="contain" binderror="mediaError" />
+      <result-gallery images="{{detail.results}}" bind:preview="preview" />
     </scroll-view>
   </view>
 </t-popup>

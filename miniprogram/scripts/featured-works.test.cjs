@@ -1,11 +1,35 @@
 const { test } = require("node:test");
 const assert = require("node:assert/strict");
+const fs = require("node:fs");
 const { harness } = require("./harness.cjs");
 // 优秀作品 lives in a component shown inside the 模板 tab page; `visible`
 // stands for the host's active flag.
 const featured = (h) => { const c = h.component("components/featured-works"); c.self().visible = true; return c; };
 const work = (id = "image") => ({ id, title: "优秀作品", kind: id === "video" ? "video" : "image", result: "https://fixture.test/1.png",
   results: id === "video" ? [] : [1, 2, 3, 4].map((n) => `https://fixture.test/${n}.png`), createdAt: "2026-11-15T00:00:00Z" });
+
+test("featured pagination uses the shared compact horizontal layout", () => {
+  const styles = fs.readFileSync("components/featured-works/index.wxss", "utf8");
+  const template = fs.readFileSync("components/featured-works/index.wxml", "utf8");
+  assert.match(styles, /@import "\.\.\/\.\.\/styles\/job-pagination\.wxss"/);
+  assert.match(template, /class="job-pagination"/);
+  assert.match(template, /第 \{\{page\}\} 页 · 共 \{\{total\}\} 个/);
+});
+
+test("featured videos use WeChat's adaptive native media viewer", async () => {
+  const styles = fs.readFileSync("components/featured-works/index.wxss", "utf8");
+  const template = fs.readFileSync("components/featured-works/index.wxml", "utf8");
+  assert.doesNotMatch(template, /<video/);
+  assert.doesNotMatch(styles, /featured-preview video[^}]*52vh/);
+  const h = harness(), service = h.service("featured-works"), page = featured(h);
+  let shown;
+  h.wx.previewMedia = (options) => { shown = options; };
+  service.featuredDetail = async () => work("video");
+  await page.open({ currentTarget: { dataset: { id: "video" } } });
+  assert.equal(shown.sources[0].type, "video");
+  assert.equal(shown.sources[0].url, work("video").result);
+  assert.equal(page.data.detail, null);
+});
 
 test("featured works display mixed media, filters and paginates without login", async () => {
   const h = harness(), service = h.service("featured-works"), page = featured(h);

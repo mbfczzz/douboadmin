@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -28,6 +29,11 @@ func (a *Server) featuredView(r *http.Request, j core.Job, meta core.WorkMeta) (
 	out := featuredWorkView{ID: j.ID, Kind: j.Input.Kind, Title: meta.Title, CreatedAt: j.CreatedAt}
 	if out.Kind == "mix" {
 		out.Kind = "video"
+	}
+	// Admin uploads use an operator-reviewed title rather than a private user
+	// prompt. Existing uploads gain their real title without a data migration.
+	if out.Title == "" && j.Input.Uploaded() {
+		out.Title = strings.TrimSpace(j.Input.Prompt)
 	}
 	if out.Title == "" {
 		if out.Kind == "image" {

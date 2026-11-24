@@ -3,6 +3,7 @@ package api
 import (
 	"bytes"
 	"doubo/server/internal/core"
+	"doubo/server/internal/media"
 	"encoding/json"
 	"io"
 	"mime/multipart"
@@ -32,6 +33,7 @@ func workUpload(a *Server, token, user, title string, data []byte) *httptest.Res
 
 func TestAdminUploadedWorkLooksLikeAFinishedVideo(t *testing.T) {
 	a, user, _ := setup(t)
+	a.Media = &media.Service{Store: a.Store, Dir: a.Config.MediaDir}
 	admin := adminLoginToken(t, a, "admin", "Tt661ea2")
 	ctx := t.Context()
 	_, _ = a.Store.Put(ctx, "users", core.Record{ID: "user-a", Data: core.Data(map[string]string{"name": "A", "phone": "13800000001"})}, 0)
@@ -63,6 +65,14 @@ func TestAdminUploadedWorkLooksLikeAFinishedVideo(t *testing.T) {
 	_ = json.Unmarshal(w.Body.Bytes(), &job)
 	if job.UserID != "user-a" || job.Status != "succeeded" || job.Input.Kind != "video" || !job.Input.Uploaded() || job.Input.Prompt != "门店宣传片" || job.ModelName != "用户上传" || job.Result == "" {
 		t.Fatalf("uploaded work %+v", job)
+	}
+	if featured := call(a, "PUT", "/api/admin/works/"+job.ID+"/featured", admin, "", map[string]any{"featured": true, "version": 0}); featured.Code != 200 {
+		t.Fatal(featured.Code, featured.Body.String())
+	}
+	public := call(a, "GET", "/api/featured-works/"+job.ID, "", "", nil)
+	var view featuredWorkView
+	if public.Code != 200 || json.Unmarshal(public.Body.Bytes(), &view) != nil || view.Title != "门店宣传片" {
+		t.Fatal("uploaded title missing from public work", public.Code, public.Body.String())
 	}
 	if _, e := a.Store.Claim(ctx); e == nil {
 		t.Fatal("an uploaded work entered the generation queue")
