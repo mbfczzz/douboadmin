@@ -126,7 +126,12 @@ export async function surfaceFixtures(page: Page, catalog?: Row<Model>[]) {
     "/models": models,
     "/users": {
       items: [
-        row("qa-user", { nickname: "界面质检用户", name: "", phone: "" }),
+        row("qa-user", {
+          nickname: "界面质检用户",
+          name: "",
+          phone: "",
+          availableUnits: 12345,
+        }),
       ],
       page: 1,
       size: 20,

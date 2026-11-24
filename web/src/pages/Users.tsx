@@ -28,7 +28,7 @@ const Registrations = lazy(() => import("../users/Registrations"));
 
 type Dialog =
   "detail" | "models" | "activity" | "points" | "edit" | "identity" | "status" | "delete";
-import type { Profile } from "../business/types";
+import { points, type Profile } from "../business/types";
 
 // The platform switches between the user list and scan registrations; each
 // view loads only its own data.
@@ -143,6 +143,13 @@ function UserList({
           },
           { title: "姓名 / 手机号", render: nameCell },
           {
+            title: "积分",
+            align: "right",
+            render: (r) => (
+              <span className="mono">{points(r.data.availableUnits || 0)}</span>
+            ),
+          },
+          {
             title: "注册来源",
             render: (r) => sourceLabel(initialSource(r.data)),
           },
@@ -217,7 +224,12 @@ function UserList({
         </Suspense>
       )}
       {open?.kind === "points" && (
-        <UserPoints user={open.row} onClose={close} notify={notify} />
+        <UserPoints
+          user={open.row}
+          onClose={close}
+          onSaved={resource.reload}
+          notify={notify}
+        />
       )}
       {open?.kind === "edit" && (
         <UserEdit

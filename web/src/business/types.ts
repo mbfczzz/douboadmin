@@ -85,6 +85,7 @@ export interface Review {
   reviewedAt?: string;
 }
 export interface Profile {
+  availableUnits?: number;
   source?: string;
   sources?: string[];
   lastLoginSource?: string;

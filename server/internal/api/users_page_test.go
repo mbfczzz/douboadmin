@@ -19,6 +19,12 @@ func TestAdminUsersArePagedAndFilteredByTheServer(t *testing.T) {
 		if _, e := a.Store.Put(t.Context(), "users", core.Record{ID: fmt.Sprintf("page-user-%02d", i), Data: core.Data(profile)}, 0); e != nil {
 			t.Fatal(e)
 		}
+		if i == 3 {
+			wallet := core.Wallet{UserID: "page-user-03", Available: 12345}
+			if _, e := a.Store.Put(t.Context(), "wallets", core.Record{ID: wallet.UserID, Owner: wallet.UserID, Data: core.Data(wallet)}, 0); e != nil {
+				t.Fatal(e)
+			}
+		}
 	}
 	admin := adminLoginToken(t, a, "admin", "Tt661ea2")
 	var page struct {
@@ -31,7 +37,8 @@ func TestAdminUsersArePagedAndFilteredByTheServer(t *testing.T) {
 		t.Fatal(w.Code, w.Body.String())
 	}
 	var profile struct {
-		Access *core.Access `json:"access"`
+		Access         *core.Access `json:"access"`
+		AvailableUnits int64        `json:"availableUnits"`
 	}
 	if json.Unmarshal(page.Items[0].Data, &profile) != nil || profile.Access == nil {
 		t.Fatal("rows lost their access", string(page.Items[0].Data))
@@ -39,6 +46,9 @@ func TestAdminUsersArePagedAndFilteredByTheServer(t *testing.T) {
 	w = call(a, "GET", "/api/admin/users?q=分页用户0&state=disabled", admin, "", nil)
 	if w.Code != 200 || json.Unmarshal(w.Body.Bytes(), &page) != nil || page.Total != 1 || page.Items[0].ID != "page-user-03" {
 		t.Fatal("filtered", w.Code, w.Body.String())
+	}
+	if json.Unmarshal(page.Items[0].Data, &profile) != nil || profile.AvailableUnits != 12345 {
+		t.Fatal("wallet balance missing", string(page.Items[0].Data))
 	}
 	if w = call(a, "GET", "/api/admin/users?access=vip", admin, "", nil); w.Code != 400 {
 		t.Fatal("unknown filter accepted", w.Code)

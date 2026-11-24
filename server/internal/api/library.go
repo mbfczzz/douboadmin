@@ -105,6 +105,28 @@ func (a *Server) users(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	rows := out.Items
+	balances := map[string]int64{}
+	if len(rows) > 0 {
+		ids := make([]string, len(rows))
+		for i := range rows {
+			ids[i] = rows[i].ID
+		}
+		wallets, err := a.Store.RecordPage(r.Context(), core.RecordQuery{
+			Namespace: "wallets", IDs: ids, Page: 1, Size: len(ids),
+		})
+		if err != nil {
+			dbError(w, err)
+			return
+		}
+		for _, row := range wallets.Items {
+			var wallet core.Wallet
+			if err = json.Unmarshal(row.Data, &wallet); err != nil {
+				dbError(w, err)
+				return
+			}
+			balances[row.ID] = wallet.Available
+		}
+	}
 	for i := range rows {
 		var profile map[string]any
 		if e = json.Unmarshal(rows[i].Data, &profile); e != nil {
@@ -116,6 +138,7 @@ func (a *Server) users(w http.ResponseWriter, r *http.Request) {
 			dbError(w, err)
 			return
 		}
+		profile["availableUnits"] = balances[rows[i].ID]
 		profile["access"] = access
 		member, err := a.Store.Get(r.Context(), "memberships", rows[i].ID)
 		if err == nil {

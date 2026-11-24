@@ -12,10 +12,12 @@ import "./user-activation.css";
 export default function UserPoints({
   user,
   onClose,
+  onSaved,
   notify,
 }: {
   user: Row<Profile>;
   onClose: () => void;
+  onSaved: () => void | Promise<void>;
   notify: Notify;
 }) {
   const wallet = useResource<{ wallet: Wallet }>(
@@ -59,6 +61,7 @@ export default function UserPoints({
           },
         },
       });
+      await onSaved();
       notify("积分调整已记录");
       onClose();
     } catch (e) {
