@@ -39,7 +39,7 @@ export const accessCell = (r: Row<Profile>) => {
           <Tag tone="accent">合伙人</Tag>
         )
       ) : a?.status === "review" ? (
-        <Tag tone="warning">待开通</Tag>
+        <Tag tone="warning">游客 · 待开通</Tag>
       ) : (
         <Tag>未开通</Tag>
       )}

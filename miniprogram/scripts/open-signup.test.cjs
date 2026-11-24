@@ -4,7 +4,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { harness } = require("./harness.cjs");
 
-test("open signup enters directly without submitting an invite", async () => {
+test("open signup creates a source-less visitor without submitting an invite", async () => {
   const h = harness(),
     page = h.page("activate"),
     calls = [],
@@ -18,7 +18,7 @@ test("open signup enters directly without submitting an invite", async () => {
   });
   h.api.request = async (route, method, body) => {
     calls.push([route, method, body]);
-    return { active: true, status: "direct", openSignup: true };
+    return { active: false, canBrowse: true, status: "review", openSignup: true };
   };
   h.wx.reLaunch = (options) => moves.push(options.url);
   await page.direct();

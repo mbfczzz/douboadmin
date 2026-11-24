@@ -14,10 +14,11 @@ var ErrUserDisabled = errors.New("账号已停用，请联系管理员")
 // Provider roles. Growth goes through QR codes: a 分公司 grows S1 and S2,
 // an S1 grows S2, and every provider grows 会员.
 const (
-	RoleBranch = "branch"
-	RoleS1     = "s1"
-	RoleS2     = "s2"
-	RoleMember = "member"
+	RoleBranch  = "branch"
+	RoleS1      = "s1"
+	RoleS2      = "s2"
+	RoleMember  = "member"
+	RoleVisitor = "visitor"
 )
 
 type Partner struct {
@@ -41,7 +42,7 @@ type Partner struct {
 // Registration is a mini-program user's request to join, made by scanning a
 // code. Generation stays blocked until a super administrator approves it.
 type Registration struct {
-	Role      string `json:"role"`      // member, branch, s1 or s2
+	Role      string `json:"role"`      // visitor, member, branch, s1 or s2
 	PartnerID string `json:"partnerId"` // the provider joined, created or bound
 	ParentID  string `json:"parentId,omitempty"`
 	Referrer  string `json:"referrer,omitempty"` // member whose promo code was used
@@ -91,6 +92,18 @@ type Membership struct {
 	ActivatedAt time.Time `json:"activatedAt"`
 	ChangedAt   time.Time `json:"changedAt"`
 	Reason      string    `json:"reason,omitempty"`
+}
+
+// VisitorIdentity overlays a preserved member/provider relationship. The
+// relationship stays in place while Enabled blocks its user-facing powers.
+type VisitorIdentity struct {
+	Enabled        bool      `json:"enabled"`
+	PreviousRole   string    `json:"previousRole,omitempty"`
+	PartnerID      string    `json:"partnerId,omitempty"`
+	ParentID       string    `json:"parentId,omitempty"`
+	PausedAccounts []string  `json:"pausedAccounts,omitempty"`
+	ChangedAt      time.Time `json:"changedAt"`
+	ChangedBy      string    `json:"changedBy"`
 }
 type Access struct {
 	Active      bool   `json:"active"`

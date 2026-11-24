@@ -41,7 +41,7 @@
     <block wx:else>
       <view wx:if="{{status.message&&status.status!=='pending'}}" class="biz-card activation-status">
         <image wx:if="{{status.status==='review'}}" class="empty-photo status-icon" src="/assets/photos/empty-review.jpg" mode="aspectFill" aria-hidden="true" />
-        <text class="biz-list-title">{{status.status==='review'?'等待审核开通':'授权状态'}}</text>
+        <text class="biz-list-title">{{status.status==='review'?'游客 · 等待管理员开通':'授权状态'}}</text>
         <text class="biz-note">{{status.status==='review'&&status.partnerName?'已登记到「'+status.partnerName+'」，开通后会通知你，也可稍后刷新查看。':status.message}}</text>
       </view>
       <view wx:if="{{!loadError&&(status.status==='pending'||status.status==='unbound'||status.status==='rejected')}}" class="biz-card activation-options">

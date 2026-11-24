@@ -12,6 +12,8 @@ func (a *Server) businessRoutes() {
 	m.HandleFunc("POST /api/visits", a.visit)
 	m.HandleFunc("PUT /api/admin/users/{id}/status", a.superAdmin(a.userStatus))
 	m.HandleFunc("PUT /api/admin/users/{id}", a.superAdmin(a.updateUser))
+	m.HandleFunc("GET /api/admin/users/{id}/business-identity", a.superAdmin(a.userBusinessIdentity))
+	m.HandleFunc("PUT /api/admin/users/{id}/business-identity", a.superAdmin(a.changeUserBusinessIdentity))
 	m.HandleFunc("DELETE /api/admin/users/{id}", a.superAdmin(a.archiveUser))
 	m.HandleFunc("GET /api/wallet", a.auth("user", a.wallet))
 	m.HandleFunc("GET /api/wallet/ledger", a.auth("user", a.ledger))

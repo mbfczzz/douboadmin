@@ -22,6 +22,14 @@ func requireActiveMember(tx Transaction, user string) error {
 	if json.Unmarshal(row.Data, &profile) != nil || profile == nil || profile.Disabled || profile.Archived {
 		return core.ErrActivationRequired
 	}
+	if visitor, err := tx.Get("visitor_identities", user); err == nil {
+		var state core.VisitorIdentity
+		if json.Unmarshal(visitor.Data, &state) != nil || state.Enabled {
+			return core.ErrActivationRequired
+		}
+	} else if !errors.Is(err, core.ErrNotFound) {
+		return err
+	}
 	if direct, err := tx.Get("direct_access", user); err == nil {
 		var grant *core.DirectAccess
 		if json.Unmarshal(direct.Data, &grant) != nil || grant == nil {

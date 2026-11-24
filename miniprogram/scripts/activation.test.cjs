@@ -25,7 +25,7 @@ test("typed and scanned share codes join with their method", async () => {
   ]);
 });
 
-test("a scan only registers: the page waits for the platform to open it", async () => {
+test("a scan registers a visitor and opens featured works", async () => {
   const h = harness(),
     page = h.page("activate"),
     toasts = [];
@@ -38,13 +38,14 @@ test("a scan only registers: the page waits for the platform to open it", async 
   h.api.request = async () => ({
     active: false,
     status: "review",
-    message: "已登记，等待审核开通",
+    canBrowse: true,
+    message: "账号待管理员开通，暂不可使用该功能",
     partnerName: "华东分公司",
   });
   await page.join("ABCD2345", "scan");
-  assert.equal(enters, 0);
+  assert.equal(enters, 1);
   assert.equal(page.data.status.status, "review");
-  assert.deepEqual(toasts, ["已登记，等待审核开通"]);
+  assert.deepEqual(toasts, []);
 });
 
 test("activation-required business response redirects instead of exposing data", async () => {

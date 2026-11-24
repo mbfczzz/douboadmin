@@ -34,7 +34,7 @@ func TestActivationSourceShowsChainRegistrationAndReferrer(t *testing.T) {
 		t.Fatal(e)
 	}
 	register(t, s, ctx, promo, "u2")
-	if out, _ = s.Source(ctx, "u2"); out.Referrer == nil || out.Referrer.ID != "u1" || out.Referrer.Name != "u1" || out.Registration.Referrer != "u1" {
+	if out, _ = s.Source(ctx, "u2"); out.Kind != "none" || out.Membership != nil || out.Referrer == nil || out.Referrer.ID != "u1" || out.Referrer.Name != "u1" || out.Registration.Role != core.RoleVisitor || out.Registration.Referrer != "u1" || len(out.Chain) != 3 {
 		t.Fatal("referrer", out.Referrer, out.Registration)
 	}
 	// An invited provider's owner sees the chain down to their own provider.

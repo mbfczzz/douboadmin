@@ -57,12 +57,13 @@ var ops = map[string]op{
 	"PUT /api/admin/accounts/{id}": {label: "修改管理账号", target: "admin", summary: func(q, _ map[string]any) string {
 		return "角色 " + str(q, "role") + map[bool]string{true: " · 停用", false: ""}[q["disabled"] == true]
 	}},
-	"PUT /api/admin/accounts/{id}/password": {label: "重置管理账号密码", target: "admin"},
-	"DELETE /api/admin/accounts/{id}":       {label: "归档管理账号", target: "admin"},
-	"POST /api/admin/roles":                 {creates: "role", label: "创建角色", summary: func(q, _ map[string]any) string { return str(q, "name") }},
-	"PUT /api/admin/roles/{id}":             {label: "修改角色", target: "role", summary: func(q, _ map[string]any) string { return str(q, "name") }},
-	"DELETE /api/admin/roles/{id}":          {label: "删除角色", target: "role"},
-	"PUT /api/admin/users/{id}":             {label: "编辑用户资料", target: "user"},
+	"PUT /api/admin/accounts/{id}/password":       {label: "重置管理账号密码", target: "admin"},
+	"DELETE /api/admin/accounts/{id}":             {label: "归档管理账号", target: "admin"},
+	"POST /api/admin/roles":                       {creates: "role", label: "创建角色", summary: func(q, _ map[string]any) string { return str(q, "name") }},
+	"PUT /api/admin/roles/{id}":                   {label: "修改角色", target: "role", summary: func(q, _ map[string]any) string { return str(q, "name") }},
+	"DELETE /api/admin/roles/{id}":                {label: "删除角色", target: "role"},
+	"PUT /api/admin/users/{id}":                   {label: "编辑用户资料", target: "user"},
+	"PUT /api/admin/users/{id}/business-identity": {label: "修改用户业务身份", target: "user"},
 	"PUT /api/admin/users/{id}/status": {label: "修改用户状态", target: "user", summary: func(q, _ map[string]any) string {
 		return map[bool]string{true: "停用", false: "启用"}[q["disabled"] == true] + reason(q, "reason")
 	}},

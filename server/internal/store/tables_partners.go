@@ -3,6 +3,9 @@ package store
 // Provider tree (分公司 → S1 → S2 → 会员), codes, registrations and commission.
 func init() {
 	register(
+		Table{Name: "visitor_identities", Comment: "游客身份及可恢复的业务关系；id = 用户 id", Owner: "用户", Cols: []Col{
+			c("enabled", Bool), c("previousRole", Key), c("partnerId", Key), c("parentId", Key), c("pausedAccounts", JSON), c("changedAt", Time), c("changedBy", Key),
+		}},
 		Table{Name: "signup_settings", Comment: "普通用户注册开关（单行 id = platform）", Cols: []Col{
 			c("openSignup", Bool),
 		}},

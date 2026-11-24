@@ -48,7 +48,7 @@ func (a *Server) memberRegistrations(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	a.replyRegistrations(w, r, core.RecordQuery{Namespace: "registrations", PartnerID: id,
-		Fields: map[string]string{"role": "member"}, Status: status,
+		FieldsIn: map[string][]string{"role": {core.RoleMember, core.RoleVisitor}}, Status: status,
 		Search: r.URL.Query().Get("q"), Page: page, Size: 20})
 }
 

@@ -149,6 +149,18 @@ func (a *Server) saveProviderAccount(w http.ResponseWriter, r *http.Request) {
 	}
 	var p core.Partner
 	_ = json.Unmarshal(partner.Data, &p)
+	if p.OwnerUser != "" {
+		if state, e := a.Store.Get(r.Context(), "visitor_identities", p.OwnerUser); e == nil {
+			var visitor core.VisitorIdentity
+			if json.Unmarshal(state.Data, &visitor) == nil && visitor.Enabled {
+				fail(w, 409, "服务商负责人当前为游客，请先恢复服务商身份")
+				return
+			}
+		} else if !errors.Is(e, core.ErrNotFound) {
+			dbError(w, e)
+			return
+		}
+	}
 	if core.IsBusinessRole(in.Role) && in.Role != p.Role {
 		fail(w, 400, "角色与当前服务商层级不匹配，请保留对应角色或选择自定义权限角色")
 		return

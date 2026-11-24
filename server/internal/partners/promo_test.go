@@ -2,6 +2,7 @@ package partners
 
 import (
 	"doubo/server/internal/core"
+	"errors"
 	"strings"
 	"testing"
 )
@@ -46,14 +47,20 @@ func TestPromoRegistrationJoinsTheReferrersProvider(t *testing.T) {
 	if access.PartnerID != s2 {
 		t.Fatal("promo joined another provider", access)
 	}
-	_, m, _ := get[core.Membership](reader{ctx, s.Store}, "memberships", "friend")
 	_, reg, _ := get[core.Registration](reader{ctx, s.Store}, "registrations", "friend")
-	if m.Referrer != "fan" || m.Status != "pending" || reg.Referrer != "fan" || reg.CodeKind != PromoCode || reg.Role != "member" {
-		t.Fatal("referrer", m, reg)
+	if _, _, e := get[core.Membership](reader{ctx, s.Store}, "memberships", "friend"); !errors.Is(e, core.ErrNotFound) {
+		t.Fatal("visitor gained membership before approval", e)
+	}
+	if reg.Referrer != "fan" || reg.CodeKind != PromoCode || reg.Role != core.RoleVisitor {
+		t.Fatal("visitor source", reg)
 	}
 	decide(t, s, ctx, "friend", true)
 	if a, _ := s.Access(ctx, "friend"); !a.Active || a.PartnerID != s2 {
 		t.Fatal(a)
+	}
+	_, m, _ := get[core.Membership](reader{ctx, s.Store}, "memberships", "friend")
+	if m.Referrer != "fan" || m.Status != "active" {
+		t.Fatal("approved visitor lost referrer", m)
 	}
 	// Once the referrer is no longer active the code stops working.
 	row, _ := s.Store.Get(ctx, "memberships", "fan")

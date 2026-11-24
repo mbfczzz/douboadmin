@@ -6,11 +6,24 @@ import (
 	"errors"
 )
 
-const reviewMessage = "已登记，等待审核开通"
+const reviewMessage = "账号待管理员开通，暂不可使用该功能"
 
 // access is what a mini-program user may do. Scanning only registers; the
 // super-administrator approval opens generation access.
 func access(r Reader, user string) (core.Access, error) {
+	if _, visitor, e := get[core.VisitorIdentity](r, "visitor_identities", user); e == nil && visitor.Enabled {
+		out := core.Access{Status: "review", PartnerID: visitor.PartnerID, Message: reviewMessage}
+		if visitor.PartnerID != "" {
+			if _, partner, err := node(r, visitor.PartnerID); err == nil {
+				out.PartnerName = partner.Name
+			} else if !errors.Is(err, core.ErrNotFound) {
+				return out, err
+			}
+		}
+		return out, nil
+	} else if e != nil && !errors.Is(e, core.ErrNotFound) {
+		return core.Access{}, e
+	}
 	if _, _, e := get[core.DirectAccess](r, "direct_access", user); e == nil {
 		return core.Access{Active: true, Status: "direct"}, nil
 	} else if !errors.Is(e, core.ErrNotFound) {
@@ -65,6 +78,9 @@ func ownerAccess(r Reader, user string) (core.Access, bool, error) {
 	if e != nil {
 		return core.Access{}, true, e
 	}
+	if o.Status == "visitor" {
+		return core.Access{}, false, nil
+	}
 	_, p, e := node(r, o.PartnerID)
 	if e != nil {
 		return core.Access{}, true, e
@@ -105,6 +121,15 @@ func (s *Service) OwnedPartner(ctx context.Context, user string) (string, error)
 // rejected by the platform, in which case they see why and may scan again.
 func unregistered(r Reader, user string) (core.Access, error) {
 	_, reg, e := get[core.Registration](r, "registrations", user)
+	if e == nil && reg.Status == "pending" && reg.Role == core.RoleVisitor {
+		out := core.Access{Status: "review", PartnerID: reg.PartnerID, Message: reviewMessage}
+		if _, partner, err := node(r, reg.PartnerID); err == nil {
+			out.PartnerName = partner.Name
+		} else if !errors.Is(err, core.ErrNotFound) {
+			return out, err
+		}
+		return out, nil
+	}
 	if errors.Is(e, core.ErrNotFound) || (e == nil && reg.Status != "rejected") {
 		return core.Access{Status: "pending", Message: core.ErrActivationRequired.Error()}, nil
 	}

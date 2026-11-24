@@ -4,6 +4,7 @@ import (
 	"context"
 	"doubo/server/internal/core"
 	"doubo/server/internal/store"
+	"errors"
 	"strings"
 )
 
@@ -39,6 +40,8 @@ func (s *Service) decide(ctx context.Context, user string, approve bool, reason 
 			return rulef("该账号已停用或注销，只能拒绝")
 		}
 		switch {
+		case reg.Role == core.RoleVisitor:
+			e = decideVisitor(tx, user, reg, approve)
 		case reg.Role == "member":
 			e = decideMember(tx, user, approve)
 		case reg.CodeKind == BindCode:
@@ -60,6 +63,23 @@ func (s *Service) decide(ctx context.Context, user string, approve bool, reason 
 		return audit(tx, user, "registration_"+reg.Status, actor, reason, reg)
 	})
 	return
+}
+
+func decideVisitor(tx store.Transaction, user string, reg core.Registration, approve bool) error {
+	if !approve {
+		return nil
+	}
+	row, _, e := get[core.Membership](tx, "memberships", user)
+	if errors.Is(e, core.ErrNotFound) {
+		row, e = core.Record{ID: user, Owner: user}, nil
+	}
+	if e != nil {
+		return e
+	}
+	now := nowUTC()
+	membership := core.Membership{PartnerID: reg.PartnerID, Status: "active", CodeID: reg.Code, Method: reg.Method, Referrer: reg.Referrer, ActivatedAt: now, ChangedAt: now}
+	_, e = put(tx, "memberships", row, membership)
+	return e
 }
 
 func decideMember(tx store.Transaction, user string, approve bool) error {

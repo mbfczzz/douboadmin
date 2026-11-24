@@ -30,10 +30,12 @@ func chainActive(partner string) string {
 }
 
 var userAccess = `CASE
+	WHEN v.enabled=1 THEN 'review'
 	WHEN d.id IS NOT NULL THEN 'direct'
 	WHEN o.id IS NOT NULL THEN IF(o.status='pending','review',IF(` + chainActive("o.partner_id") + `,'owner','none'))
 	WHEN m.status='pending' THEN 'review'
 	WHEN m.status='active' AND ` + chainActive("m.partner_id") + ` THEN 'member'
+	WHEN r.status='pending' AND r.role='visitor' THEN 'review'
 	ELSE 'none' END`
 
 func (m *MySQL) UserPage(ctx context.Context, q core.UserQuery) (out core.RecordPage, err error) {
@@ -42,7 +44,7 @@ func (m *MySQL) UserPage(ctx context.Context, q core.UserQuery) (out core.Record
 	if err != nil || !q.Valid() {
 		return out, fmt.Errorf("invalid user page")
 	}
-	from := ` FROM users u LEFT JOIN direct_access d ON d.id=u.id LEFT JOIN partner_owners o ON o.id=u.id AND o.partner_id<>'' LEFT JOIN memberships m ON m.id=u.id WHERE 1=1`
+	from := ` FROM users u LEFT JOIN visitor_identities v ON v.id=u.id LEFT JOIN direct_access d ON d.id=u.id LEFT JOIN partner_owners o ON o.id=u.id AND o.partner_id<>'' LEFT JOIN memberships m ON m.id=u.id LEFT JOIN registrations r ON r.id=u.id WHERE 1=1`
 	args := []any{}
 	if q.Search != "" {
 		from += ` AND LOCATE(?, CONCAT_WS(' ', u.id, u.nickname, u.name, u.phone))>0`
@@ -72,10 +74,10 @@ func (m *MySQL) UserPage(ctx context.Context, q core.UserQuery) (out core.Record
 
 // userRow is what the memory list reads of a user and its provider links.
 type userRow struct {
-	Nickname, Name, Phone string
-	Disabled, Archived    bool
-	PartnerID, Status     string
-	Path                  []string
+	Nickname, Name, Phone       string
+	Disabled, Archived, Enabled bool
+	PartnerID, Status, Role     string
+	Path                        []string
 }
 
 func (m *Memory) UserPage(_ context.Context, q core.UserQuery) (out core.RecordPage, err error) {
@@ -111,6 +113,9 @@ func (m *Memory) UserPage(_ context.Context, q core.UserQuery) (out core.RecordP
 }
 
 func (m *Memory) accessOf(user string) string {
+	if visitor := m.decode("visitor_identities:" + user); visitor.Enabled {
+		return "review"
+	}
 	if _, ok := m.records["direct_access:"+user]; ok {
 		return "direct"
 	}
@@ -125,6 +130,9 @@ func (m *Memory) accessOf(user string) string {
 		return "review"
 	case v.Status == "active" && m.chainActive(v.PartnerID):
 		return "member"
+	}
+	if registration := m.decode("registrations:" + user); registration.Status == "pending" && registration.Role == "visitor" {
+		return "review"
 	}
 	return "none"
 }

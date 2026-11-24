@@ -129,8 +129,8 @@ Page({
       }
       this.setData({ status, logged: hasSession(), loadError: "" });
       prefill(this, status);
-      if (status.active) {
-        clearInvite();
+      if (status.active || status.canBrowse) {
+        if (status.active) clearInvite();
         this.enter();
       }
     } catch (e) {
@@ -270,7 +270,7 @@ Page({
       this.revision++; // newer than any status load still in flight
       this.setData({ status, loading: false, codeMode: false });
       clearCode(this);
-      if (status.active) this.enter();
+      if (status.active || status.canBrowse) this.enter();
       else wx.showToast({ title: "已登记，等待审核开通", icon: "none" });
     } catch (e) {
       if (!this.destroyed) {

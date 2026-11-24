@@ -104,7 +104,9 @@ export async function directSignup(page: DirectPage, enter: () => void) {
   page.setData({ busy: true });
   try {
     const status = await registerRequest<AccessStatus>(page, "/access/direct", {});
-    if (status?.active && !page.destroyed) enter();
+    if (!status || page.destroyed) return;
+    page.setData({ status });
+    if (status.active || status.canBrowse) enter();
   } catch (e) {
     if (!page.destroyed) error(e);
   } finally {

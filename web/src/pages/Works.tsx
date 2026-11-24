@@ -9,7 +9,6 @@ import Table from "../business/Table";
 import Modal from "../components/Modal";
 import MediaPreview from "../business/MediaPreview";
 import JobThumbnail from "../components/JobThumbnail";
-import { IdChip } from "../components/Tag";
 import { ask } from "../confirm/ask";
 import { Upload } from "lucide-react";
 import WorkUpload from "../business/WorkUpload";
@@ -88,7 +87,7 @@ export default function Works({ notify, config }: PageProps) {
         <input
           type="search"
           aria-label="搜索作品"
-          placeholder="搜索创作描述或用户编号"
+          placeholder="搜索创作描述或任务编号"
           value={query}
           onChange={(e) => {
             setQuery(e.target.value);
@@ -137,7 +136,11 @@ export default function Works({ notify, config }: PageProps) {
               </div>
             ),
           },
-          { title: "用户", render: (j) => <IdChip>{j.userId}</IdChip> },
+          { title: "用户名", render: (j) => j.userName || "—" },
+          {
+            title: "手机号",
+            render: (j) => <span className="mono">{j.userPhone || "—"}</span>,
+          },
           {
             title: "状态",
             render: (j) => (

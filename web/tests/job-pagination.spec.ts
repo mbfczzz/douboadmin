@@ -28,6 +28,8 @@ test("generation paging and search are server queries", async ({ page }) => {
           {
             id: `job-page-${number}`,
             userId: "qa-user",
+            userName: "测试用户",
+            userPhone: "13900139000",
             status: "succeeded",
             progress: 100,
             costUnits: 1234,
@@ -61,13 +63,17 @@ test("generation paging and search are server queries", async ({ page }) => {
   });
   await page.getByRole("button", { name: "生成任务", exact: true }).click();
   await expect(page.locator("tbody")).toContainText("page 1 prompt");
+  await expect(page.getByRole("columnheader", { name: "用户名" })).toBeVisible();
+  await expect(page.getByRole("columnheader", { name: "手机号" })).toBeVisible();
+  await expect(page.locator("tbody")).toContainText("测试用户");
+  await expect(page.locator("tbody")).toContainText("13900139000");
   await expect(page.getByRole("columnheader", { name: "消耗积分" })).toBeVisible();
   await expect(page.locator("tbody")).toContainText("12.34");
   await expect(
-    page.getByRole("row", { name: /已退回任务/ }).getByRole("cell").nth(1),
+    page.getByRole("row", { name: /已退回任务/ }).getByRole("cell").nth(3),
   ).toHaveText("0");
   await expect(
-    page.getByRole("row", { name: /待结算任务/ }).getByRole("cell").nth(1),
+    page.getByRole("row", { name: /待结算任务/ }).getByRole("cell").nth(3),
   ).toHaveText("待结算");
   await page.getByRole("button", { name: "下一页", exact: true }).click();
   await expect(page.locator("tbody")).toContainText("page 2 prompt");

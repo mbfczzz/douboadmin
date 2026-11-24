@@ -73,9 +73,13 @@ export default function UserActivation({ userId }: { userId: string }) {
       {source && source.kind !== "direct" && (reg || source.kind !== "none") && (
         <>
           <div className="source-head">
-            {source.kind !== "none" && (
+            {(source.kind !== "none" || reg?.status === "pending") && (
               <Tag tone="accent">
-                {source.kind === "member" ? "合伙人" : "服务商负责人"}
+                {reg?.status === "pending"
+                  ? "游客"
+                  : source.kind === "member"
+                    ? "合伙人"
+                    : "服务商负责人"}
               </Tag>
             )}
             {state && <Badge state={tone!} label={state} />}

@@ -12,7 +12,7 @@ import (
 	"doubo/server/internal/hotvideo"
 )
 
-func TestPreviewDiscoveryDoesNotCallPaidUpstream(t *testing.T) {
+func TestVisitorDiscoveryDoesNotCallPaidUpstream(t *testing.T) {
 	a, user, _ := awaitingBrowser(t, "member")
 	var calls atomic.Int32
 	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) { calls.Add(1); w.WriteHeader(503) }))

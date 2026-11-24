@@ -58,6 +58,8 @@ export interface Job {
   retryable: boolean;
   id: string;
   userId: string;
+  userName?: string;
+  userPhone?: string;
   input: {
     kind: string;
     prompt: string;

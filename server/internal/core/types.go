@@ -91,6 +91,8 @@ type Job struct {
 	Retryable           bool      `json:"retryable"`
 	ID                  string    `json:"id"`
 	UserID              string    `json:"userId"`
+	UserName            string    `json:"userName,omitempty"`
+	UserPhone           string    `json:"userPhone,omitempty"`
 	Input               JobInput  `json:"input"`
 	Status              string    `json:"status"`
 	Progress            int       `json:"progress"`

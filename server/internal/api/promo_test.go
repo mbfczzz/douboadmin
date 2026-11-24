@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"strings"
 	"testing"
 
@@ -11,6 +12,7 @@ import (
 func TestPromoCodeRecordsTheReferrer(t *testing.T) {
 	a, _, _ := activationFixture(t)
 	ctx := t.Context()
+	admin := adminLoginToken(t, a, "admin", "Tt661ea2")
 	branch := newBranch(t, a, "promo")
 	s1, e := a.Partners.Create(ctx, branch, "华东", core.RoleS1, "promo-s1", "admin")
 	if e != nil {
@@ -35,8 +37,15 @@ func TestPromoCodeRecordsTheReferrer(t *testing.T) {
 	}
 	row, _ := a.Store.Get(ctx, "registrations", "friend")
 	var reg core.Registration
-	if json.Unmarshal(row.Data, &reg) != nil || reg.Referrer != "fan" || reg.PartnerID != s1.ID || reg.CodeKind != "promo" || reg.Role != "member" {
+	if json.Unmarshal(row.Data, &reg) != nil || reg.Referrer != "fan" || reg.PartnerID != s1.ID || reg.CodeKind != "promo" || reg.Role != core.RoleVisitor {
 		t.Fatal("promo registration", string(row.Data))
+	}
+	if _, e := a.Store.Get(ctx, "memberships", "friend"); !errors.Is(e, core.ErrNotFound) {
+		t.Fatal("promo visitor gained membership before approval", e)
+	}
+	page := memberReviewPage(t, a, s1.ID, admin, "?status=pending")
+	if page.Total != 1 || page.Items[0].ID != "friend" || !strings.Contains(string(page.Items[0].Data), `"role":"visitor"`) {
+		t.Fatal("promo visitor missing from review inbox", page)
 	}
 	approve(t, a, "friend")
 	src, e := a.Partners.Source(ctx, "friend")

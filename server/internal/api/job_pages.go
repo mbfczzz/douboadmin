@@ -2,8 +2,10 @@ package api
 
 import (
 	"doubo/server/internal/core"
+	"encoding/json"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -63,8 +65,53 @@ func (a *Server) pagedJobs(w http.ResponseWriter, r *http.Request, works bool) {
 		dbError(w, e)
 		return
 	}
+	if identity(r).Role == "admin" {
+		if e = a.presentJobUsers(r, out.Items); e != nil {
+			dbError(w, e)
+			return
+		}
+	}
 	for i := range out.Items {
 		a.presentJob(r.Context(), &out.Items[i])
 	}
 	reply(w, 200, out)
+}
+
+func (a *Server) presentJobUsers(r *http.Request, jobs []core.Job) error {
+	ids, seen := make([]string, 0, len(jobs)), map[string]bool{}
+	for _, job := range jobs {
+		if job.UserID != "" && !seen[job.UserID] {
+			ids, seen[job.UserID] = append(ids, job.UserID), true
+		}
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	page, err := a.Store.RecordPage(r.Context(), core.RecordQuery{
+		Namespace: "users", IDs: ids, Page: 1, Size: len(ids),
+	})
+	if err != nil {
+		return err
+	}
+	type userLabel struct {
+		Nickname string `json:"nickname"`
+		Name     string `json:"name"`
+		Phone    string `json:"phone"`
+	}
+	users := map[string]userLabel{}
+	for _, row := range page.Items {
+		var user userLabel
+		if json.Unmarshal(row.Data, &user) == nil {
+			users[row.ID] = user
+		}
+	}
+	for i := range jobs {
+		user := users[jobs[i].UserID]
+		jobs[i].UserName = strings.TrimSpace(user.Name)
+		if jobs[i].UserName == "" {
+			jobs[i].UserName = strings.TrimSpace(user.Nickname)
+		}
+		jobs[i].UserPhone = strings.TrimSpace(user.Phone)
+	}
+	return nil
 }

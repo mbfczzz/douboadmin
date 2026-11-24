@@ -264,6 +264,9 @@ console.log(
 // Public shared works add a visible AI-generated label and complaint entry:
 // after legal pages stop making runtime requests, 1,139,124 B, still within
 // the reviewed 1113 KiB ceiling.
+// Visitor admission keeps every page readable while write/paid operations
+// fail closed on the server: 1,139,269 B, still within 1113 KiB. See
+// docs/visitor-access.md.
 const budget = 1113 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);

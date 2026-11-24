@@ -53,6 +53,11 @@ export default function JobTable({
             );
           },
         },
+        { title: "用户名", render: (j) => j.userName || "—" },
+        {
+          title: "手机号",
+          render: (j) => <span className="mono">{j.userPhone || "—"}</span>,
+        },
         {
           title: "消耗积分",
           align: "right",

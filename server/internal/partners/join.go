@@ -51,8 +51,10 @@ func (s *Service) Join(ctx context.Context, user, input, method string) (out cor
 		}
 		reg := core.Registration{CodeKind: sc.Kind, Code: code, Method: method, Name: profile.Name, Phone: profile.Phone, Status: "pending", RegisteredAt: nowUTC()}
 		switch sc.Kind {
-		case MemberCode, PromoCode:
+		case MemberCode:
 			e = registerMember(tx, user, sc, &reg)
+		case PromoCode:
+			e = registerPromoVisitor(tx, user, sc, &reg)
 		case S1Code, S2Code:
 			e = registerProvider(tx, user, sc, &reg)
 		case BindCode:
@@ -72,17 +74,24 @@ func (s *Service) Join(ctx context.Context, user, input, method string) (out cor
 	return
 }
 
+// registerPromoVisitor preserves the source without creating membership.
+// Membership begins only after an administrator approves the visitor.
+func registerPromoVisitor(tx store.Transaction, user string, sc core.ShareCode, reg *core.Registration) error {
+	_, referrer, e := get[core.Membership](tx, "memberships", sc.User)
+	if e != nil || referrer.Status != "active" || sc.User == user {
+		return rulef("推广码已失效，请联系推广人")
+	}
+	if e = activeChain(tx, referrer.PartnerID); e != nil {
+		return e
+	}
+	reg.Role, reg.PartnerID, reg.Referrer = core.RoleVisitor, referrer.PartnerID, sc.User
+	return nil
+}
+
 // registerMember: a member code joins its provider; a promo code joins the
 // promoting member's provider with that member as referrer.
 func registerMember(tx store.Transaction, user string, sc core.ShareCode, reg *core.Registration) error {
 	partner := sc.PartnerID
-	if sc.Kind == PromoCode {
-		_, referrer, e := get[core.Membership](tx, "memberships", sc.User)
-		if e != nil || referrer.Status != "active" || sc.User == user {
-			return rulef("推广码已失效，请联系推广人")
-		}
-		partner, reg.Referrer = referrer.PartnerID, sc.User
-	}
 	// Old platform-level codes no longer register anyone.
 	if e := canHold(tx, partner, MemberCode); e != nil {
 		return e

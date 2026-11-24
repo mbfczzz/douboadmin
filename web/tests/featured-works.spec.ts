@@ -18,6 +18,8 @@ for (const width of [1440, 390]) {
             {
               id: "feature-work",
               userId: "user-a",
+              userName: "王小明",
+              userPhone: "13900139000",
               status: "succeeded",
               result,
               results: [result, "https://fixture.test/2.png"],
@@ -48,6 +50,9 @@ for (const width of [1440, 390]) {
     // Each row shows its small cover and the template's name, not the recipe.
     await expect(page.locator(".job-thumbnail img").first()).toBeVisible();
     await expect(page.getByText("W01 社区日常综合宣传")).toBeVisible();
+    await expect(page.getByText("王小明", { exact: true })).toBeVisible();
+    await expect(page.getByText("13900139000", { exact: true })).toBeVisible();
+    await expect(page.getByText("user-a", { exact: true })).toHaveCount(0);
     await page.getByRole("button", { name: "设为优秀", exact: true }).click();
     const confirm = page.getByRole("dialog", {
       name: "设为优秀作品？",

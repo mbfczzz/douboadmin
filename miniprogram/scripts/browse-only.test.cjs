@@ -6,7 +6,7 @@ const preview = {
   active: false,
   canBrowse: true,
   status: "review",
-  message: "已登记，等待总部开通",
+  message: "账号待管理员开通，暂不可使用该功能",
 };
 const denial = {
   statusCode: 403,
@@ -17,7 +17,7 @@ const denial = {
   },
 };
 
-test("pending users can choose browsing while the approval page remains available", async () => {
+test("pending visitors are sent directly to featured works", async () => {
   const h = harness();
   await h.api.signIn();
   const page = h.page("activate"),
@@ -27,8 +27,6 @@ test("pending users can choose browsing while the approval page remains availabl
   await page.load();
   assert.equal(page.data.status.canBrowse, true);
   assert.equal(page.data.status.active, false);
-  assert.equal(moves.length, 0);
-  page.enter();
   assert.deepEqual(moves, ["/pages/templates/index"]);
 });
 
@@ -38,17 +36,17 @@ test("a newly scanned pending identity receives its browse permission immediatel
   await h.api.signIn();
   page.owner = h.api.sessionUserId();
   page.setData({ logged: true });
+  const moves = [];
+  h.wx.reLaunch = (o) => moves.push(o.url);
   h.api.request = async () => preview;
   await page.join("KMNP2345", "scan");
   assert.equal(page.data.status.canBrowse, true);
   assert.equal(page.data.status.active, false);
+  assert.deepEqual(moves, ["/pages/templates/index"]);
 });
 
-for (const status of [
-  preview,
-  { active: true, canBrowse: true, status: "active" },
-]) {
-  test(`${status.status} users remain in the mini-program on resume`, async () => {
+for (const status of [preview, { active: true, canBrowse: true, status: "active" }]) {
+  test(`${status.status} access is enforced on resume`, async () => {
     const h = harness();
     await h.api.signIn();
     const moves = [];
@@ -109,7 +107,7 @@ for (const mode of ["request", "upload"]) {
       (e) =>
         e instanceof h.api.RequestError &&
         e.status === 403 &&
-        e.message.includes("等待总部开通"),
+        e.message.includes("账号待管理员开通"),
     );
     assert.deepEqual(moves, []);
     assert.equal(h.api.hasSession(), true);
@@ -141,7 +139,7 @@ test("generation stops before confirmation while pending and works after approva
     );
   };
   const input = { kind: "image", model: "model", prompt: "test" };
-  await assert.rejects(h.api.submitInput(input, "preview"), /等待总部开通/);
+  await assert.rejects(h.api.submitInput(input, "preview"), /账号待管理员开通/);
   assert.equal(modals, 0);
   assert.deepEqual(calls, ["/api/jobs/quote"]);
   active = true;

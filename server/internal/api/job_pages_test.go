@@ -61,6 +61,16 @@ func TestJobQueryParsesModelAndShanghaiDateRange(t *testing.T) {
 
 func TestAdminJobPageIncludesSettledPoints(t *testing.T) {
 	a, _, admin := activationFixture(t)
+	user, err := a.Store.Get(t.Context(), "users", "user-a")
+	if err != nil {
+		t.Fatal(err)
+	}
+	user.Data = core.Data(map[string]string{
+		"nickname": "创作者昵称", "name": "创作者姓名", "phone": "13900139000",
+	})
+	if _, err = a.Store.Put(t.Context(), "users", user, user.Version); err != nil {
+		t.Fatal(err)
+	}
 	j := core.NewJob("user-a", "points-page", core.JobInput{Kind: "video", Model: "demo-video", Prompt: "points marker"})
 	j.Status = "succeeded"
 	if _, err := a.Store.CreateJob(t.Context(), j); err != nil {
@@ -81,5 +91,8 @@ func TestAdminJobPageIncludesSettledPoints(t *testing.T) {
 	}
 	if page.Items[0].CostUnits != 1234 || page.Items[0].BillingState != "charged" {
 		t.Fatal(page.Items[0].CostUnits, page.Items[0].BillingState)
+	}
+	if page.Items[0].UserName != "创作者姓名" || page.Items[0].UserPhone != "13900139000" {
+		t.Fatal(page.Items[0].UserName, page.Items[0].UserPhone)
 	}
 }

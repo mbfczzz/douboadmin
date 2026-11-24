@@ -139,12 +139,12 @@ func (a *Server) directAccess(w http.ResponseWriter, r *http.Request) {
 		fail(w, http.StatusForbidden, "当前未开放普通用户注册，请使用服务商邀请码登记")
 		return
 	}
-	access, err := a.Partners.ActivateDirect(r.Context(), identity(r).ID)
+	access, err := a.Partners.RegisterDirectVisitor(r.Context(), identity(r).ID)
 	if err != nil {
 		partnerError(w, err)
 		return
 	}
-	reply(w, http.StatusOK, access)
+	reply(w, http.StatusOK, accessView{Access: access, CanBrowse: canBrowse(access, true), OpenSignup: true})
 }
 func (a *Server) joinAccess(w http.ResponseWriter, r *http.Request) {
 	var input struct {

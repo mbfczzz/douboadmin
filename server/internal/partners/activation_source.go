@@ -50,7 +50,14 @@ func (s *Service) Source(ctx context.Context, user string) (ActivationSource, er
 		return out, e
 	}
 	partner := ""
-	if _, o, e := get[core.PartnerOwner](r, "partner_owners", user); e == nil && o.PartnerID != "" {
+	visitor := out.Registration != nil && out.Registration.Role == core.RoleVisitor && out.Registration.Status != "approved"
+	if visitor {
+		partner = out.Registration.PartnerID
+		if referrer := out.Registration.Referrer; referrer != "" {
+			_, ref, _ := get[SourceUser](r, "users", referrer)
+			ref.ID, out.Referrer = referrer, &ref
+		}
+	} else if _, o, e := get[core.PartnerOwner](r, "partner_owners", user); e == nil && o.PartnerID != "" {
 		out.Kind, out.OwnerOf, partner = "owner", o.PartnerID, o.PartnerID
 	} else if e != nil && !errors.Is(e, core.ErrNotFound) {
 		return out, e

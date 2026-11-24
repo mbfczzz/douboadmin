@@ -22,11 +22,12 @@ import { accessCell, createdCell, nameCell } from "../users/cells";
 // Record dialogs load when opened, keeping the users list itself light.
 const UserModels = lazy(() => import("../users/UserModels"));
 const UserActivity = lazy(() => import("../users/UserActivity"));
+const UserIdentity = lazy(() => import("../business/UserIdentity"));
 // Scan registrations awaiting the platform; provider logins never see them.
 const Registrations = lazy(() => import("../users/Registrations"));
 
 type Dialog =
-  "detail" | "models" | "activity" | "points" | "edit" | "status" | "delete";
+  "detail" | "models" | "activity" | "points" | "edit" | "identity" | "status" | "delete";
 import type { Profile } from "../business/types";
 
 // The platform switches between the user list and scan registrations; each
@@ -182,6 +183,7 @@ function UserList({
                   <>
                     <button onClick={() => show("points", r)}>积分</button>
                     <button onClick={() => show("edit", r)}>编辑</button>
+                    <button onClick={() => show("identity", r)}>身份</button>
                     <button
                       className="danger-text"
                       onClick={() => show("delete", r)}
@@ -224,6 +226,11 @@ function UserList({
           onSaved={resource.reload}
           notify={notify}
         />
+      )}
+      {open?.kind === "identity" && (
+        <Suspense fallback={null}>
+          <UserIdentity user={open.row} onClose={close} onSaved={resource.reload} notify={notify} />
+        </Suspense>
       )}
       {(open?.kind === "status" || open?.kind === "delete") && (
         <UserStatus

@@ -66,7 +66,7 @@ func checkActivator(r Reader, reviewer string) error {
 // the reviewer or of any provider below it, or a provider/binding whose node
 // has the reviewer among its ancestors.
 func below(r Reader, reg core.Registration, reviewer string) (bool, error) {
-	if reg.Role == "member" && reg.PartnerID == reviewer {
+	if (reg.Role == core.RoleMember || reg.Role == core.RoleVisitor) && reg.PartnerID == reviewer {
 		return true, nil
 	}
 	_, target, e := node(r, reg.PartnerID)

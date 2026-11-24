@@ -9,7 +9,7 @@ import (
 	"doubo/server/internal/core"
 )
 
-func TestAllScannedIdentitiesCanBrowseWhileAwaitingApproval(t *testing.T) {
+func TestAllPendingIdentitiesCanBrowseWhileAwaitingApproval(t *testing.T) {
 	for _, kind := range []string{"member", "s1", "s2", "bind", "promo"} {
 		t.Run(kind, func(t *testing.T) {
 			a, user, _ := awaitingBrowser(t, kind)
@@ -22,16 +22,16 @@ func TestAllScannedIdentitiesCanBrowseWhileAwaitingApproval(t *testing.T) {
 				"/api/jobs?page=1", "/api/works?page=1", "/api/wallet", "/api/wallet/ledger", "/api/orders", "/api/preferences", "/api/notifications",
 			} {
 				if w := call(a, "GET", path, user, "", nil); w.Code != 200 {
-					t.Fatal("read blocked", path, w.Code, w.Body.String())
+					t.Fatal("visitor read blocked", path, w.Code, w.Body.String())
 				}
 			}
 			config := call(a, "GET", "/api/config", user, "", nil)
 			if config.Code != 200 || !strings.Contains(config.Body.String(), "demo-image") || strings.Contains(config.Body.String(), "9.999") {
-				t.Fatal("preview catalog missing or exposes internal costs", config.Body.String())
+				t.Fatal("visitor catalog missing or exposes internal costs", config.Body.String())
 			}
 			catalog := call(a, "GET", "/api/templates", user, "", nil)
 			if !strings.Contains(catalog.Body.String(), "可浏览模板") || strings.Contains(catalog.Body.String(), "内部未上架") {
-				t.Fatal("incorrect preview templates", catalog.Body.String())
+				t.Fatal("incorrect visitor templates", catalog.Body.String())
 			}
 			if w := call(a, "GET", "/api/templates/hidden-template", user, "", nil); w.Code != 404 {
 				t.Fatal("hidden template exposed", w.Code)

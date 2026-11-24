@@ -27,16 +27,16 @@ func TestRegistrationWaitsForSuperAdminApproval(t *testing.T) {
 	if status, body := joinHTTP(a, user, code); status != 200 || !strings.Contains(body, `"status":"review"`) {
 		t.Fatal(status, body)
 	}
-	if v := accessOf(t, a, user); v.Active || v.Status != "review" || v.PartnerID != branch || v.Message != "已登记，等待审核开通" {
+	if v := accessOf(t, a, user); v.Active || v.Status != "review" || v.PartnerID != branch || v.Message != "账号待管理员开通，暂不可使用该功能" {
 		t.Fatal("pending access", v)
 	}
 	if w := call(a, "GET", "/api/templates", user, "", nil); w.Code != 200 {
-		t.Fatal("pending user cannot browse templates", w.Code)
+		t.Fatal("visitor could not browse templates", w.Code)
 	}
 	if w := call(a, "POST", "/api/jobs", user, "", map[string]any{}); w.Code != 403 || !strings.Contains(w.Body.String(), "ACTIVATION_REQUIRED") {
 		t.Fatal("pending user could generate", w.Code)
 	}
-	if status, body := joinHTTP(a, user, code); status != 400 || !strings.Contains(body, "等待审核开通") {
+	if status, body := joinHTTP(a, user, code); status != 400 || !strings.Contains(body, "待管理员开通") {
 		t.Fatal("registered twice while pending", status, body)
 	}
 	page := registrationPage(t, a, admin, "?status=pending&q=测试用户")

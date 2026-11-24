@@ -20,6 +20,16 @@ func menuAllowed(role string, _ []string, method, path string) bool {
 // the admin: unknown roles, provider roles without a provider (or the reverse)
 // and providers whose own node or an ancestor is disabled. A message means 403.
 func (a *Server) adminAccess(ctx context.Context, account core.AdminAccount) (core.AdminRole, string, error) {
+	if account.UserID != "" {
+		if row, err := a.Store.Get(ctx, "visitor_identities", account.UserID); err == nil {
+			var visitor core.VisitorIdentity
+			if json.Unmarshal(row.Data, &visitor) == nil && visitor.Enabled {
+				return core.AdminRole{}, "小程序身份已转为游客，后台登录已暂停", nil
+			}
+		} else if !errors.Is(err, core.ErrNotFound) {
+			return core.AdminRole{}, "", err
+		}
+	}
 	role, ok, err := a.adminRole(ctx, account.Role)
 	if err != nil {
 		return role, "", err
