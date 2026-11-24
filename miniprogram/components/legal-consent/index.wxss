@@ -1,34 +1,48 @@
-.consent-row,
-.consent-group,
-.consent-label,
-.consent-docs {
+/* One sentence that wraps like text; the small check keeps a 40px hit area. */
+.consent {
   display: flex;
-  align-items: center;
-}
-.consent-row {
-  justify-content: flex-start;
-  flex-wrap: wrap;
-  gap: 2px 3px;
+  align-items: flex-start;
+  gap: 8px;
   margin: 0 0 10px;
   color: var(--ui-muted);
   font-size: 13px;
-  line-height: 1.7;
+  line-height: 20px;
   text-align: left;
 }
-.consent-label {
-  min-height: 40px;
+.consent-hit {
+  flex-shrink: 0;
+  margin: -10px -6px -10px -10px;
+  padding: 11px 6px 11px 10px;
 }
-.consent-check {
-  margin-right: 4px;
-  transform: scale(0.78);
+.consent-box {
+  position: relative;
+  box-sizing: border-box;
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid var(--ui-placeholder);
+  border-radius: 50%;
+}
+.on .consent-box {
+  border-color: var(--ui-brand);
+  background: var(--ui-brand);
+}
+.on .consent-box::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 5.5px;
+  width: 4px;
+  height: 8px;
+  border: solid var(--ui-on-brand);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+.consent-text {
+  flex: 1;
+  min-width: 0;
 }
 .consent-link {
-  min-height: 40px;
-  display: flex;
-  align-items: center;
+  display: inline-block;
   color: var(--ui-link);
-}
-.consent-docs {
-  flex-shrink: 0;
-  gap: 3px;
+  white-space: nowrap;
 }

@@ -1,6 +1,7 @@
 <nav-bar title="授权开通" />
-<view class="subpage activation-page has-backdrop">
+<view class="subpage activation-page has-backdrop {{logged?'':'signed-out'}}">
   <image wx:if="{{backdrop}}" class="page-backdrop" src="{{backdrop}}" mode="aspectFill" aria-hidden="true" />
+  <view wx:if="{{!logged}}" class="signed-out-gap top" />
   <view class="activation-hero">
     <image wx:if="{{brandIcon}}" class="activation-logo brand-tile" src="{{brandIcon}}" mode="aspectFit" aria-label="豆播 AI" binderror="brandError" />
     <view wx:else class="activation-logo brand-tile brand-placeholder" bindtap="load" aria-role="button" aria-label="重新加载项目图标">豆播 AI</view>
@@ -20,9 +21,9 @@
     <view class="activation-auth-card">
       <legal-consent checked="{{legalAgreed}}" bindchange="legalConsent" />
       <button wx:if="{{phoneReady&&legalAgreed}}" class="biz-action" open-type="getPhoneNumber" bindgetphonenumber="phoneLogin" loading="{{busy}}" disabled="{{busy||loading||!wechatReady}}">{{accountDeleted?'手机号授权重新注册':'手机号授权登录'}}</button>
-      <button wx:elif="{{phoneReady}}" class="biz-action" disabled="{{busy||loading||!wechatReady}}" bindtap="needConsent">{{accountDeleted?'手机号授权重新注册':'手机号授权登录'}}</button>
+      <button wx:elif="{{phoneReady}}" class="biz-action needs-consent" disabled="{{busy||loading||!wechatReady}}" bindtap="needConsent">{{accountDeleted?'手机号授权重新注册':'手机号授权登录'}}</button>
       <button wx:elif="{{legalAgreed}}" class="biz-action" loading="{{busy}}" disabled="{{busy||loading||!wechatReady}}" bindtap="login">微信登录</button>
-      <button wx:else class="biz-action" disabled="{{busy||loading||!wechatReady}}" bindtap="needConsent">微信登录</button>
+      <button wx:else class="biz-action needs-consent" disabled="{{busy||loading||!wechatReady}}" bindtap="needConsent">微信登录</button>
       <navigator wx:if="{{phoneReady}}" url="/pages/login/index?sms=1" hover-class="none"><button class="text-button phone-alternative" disabled="{{busy||loading}}">使用其他手机号</button></navigator>
     </view>
   </block>
@@ -86,5 +87,6 @@
     <view class="activation-links"><view class="activation-link" bindtap="refresh" aria-role="button"><art-icon name="icRefresh" size="16" /><text>{{loading?'正在检查授权…':'刷新授权状态'}}</text></view><view class="activation-link sign-out" bindtap="signOut" aria-role="button"><art-icon name="icLogout" size="16" /><text>退出登录</text></view></view>
   </block>
   </block>
+  <view wx:if="{{!logged}}" class="signed-out-gap bottom" />
   <view class="activation-legal"><navigator class="legal-link" url="/pages/library/index?mode=terms" hover-class="none">用户协议</navigator><navigator class="legal-link divided" url="/pages/library/index?mode=privacy" hover-class="none">隐私政策</navigator><text class="legal-link divided" bindtap="privacy">微信隐私指引</text></view>
 </view>

@@ -1,6 +1,7 @@
 @import "../../styles/backdrop.wxss";
 @import "../../styles/business.wxss";
 @import "./entry.wxss";
+@import "./signed-out.wxss";
 .activation-page {
   display: flex;
   flex-direction: column;
@@ -8,7 +9,7 @@
   max-width: 460px;
   min-height: calc(100vh - 88px);
   margin: 0 auto;
-  padding: 22px 20px calc(24px + env(safe-area-inset-bottom));
+  padding: calc(18px + 4vh) 20px calc(16px + env(safe-area-inset-bottom));
 }
 .activation-page .page-backdrop {
   height: 330px;
@@ -21,12 +22,11 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-height: 136px;
   padding-top: 4px;
 }
 .activation-intro {
   max-width: 288px;
-  margin: 8px auto 0;
+  margin: 10px auto 0;
   text-align: center;
 }
 .activation-status {
@@ -40,15 +40,15 @@
   padding-top: 24px;
   border-top: 1px solid var(--ui-border);
 }
-.direct-signup .biz-action {
+.direct-signup button.biz-action {
   margin-top: 0;
 }
 .activation-logo {
   display: block;
   width: 132px;
   height: 64px;
-  margin: 0 auto 18px;
-  border-radius: 14px;
+  margin: 0 auto 20px;
+  border-radius: 16px;
 }
 .activation-title {
   display: block;
@@ -59,20 +59,23 @@
   text-align: center;
 }
 .activation-auth-card {
-  margin-top: 26px;
-  padding: 10px 16px 8px;
+  margin-top: 28px;
+  padding: 18px 16px 4px;
   border: 1px solid var(--ui-border);
   border-radius: 20px;
-  background: var(--ui-surface);
+  background: rgba(36, 37, 43, 0.88);
 }
 .activation-auth-card button.biz-action {
-  min-height: 54px;
-  margin-top: 8px;
+  min-height: 52px;
+  margin-top: 6px;
   font-size: 16px;
 }
 .activation-auth-card button.phone-alternative {
+  min-height: 44px;
+  margin-top: 4px;
   color: var(--ui-link);
   font-size: 14px;
+  font-weight: 500;
 }
 .activation-links {
   display: flex;
@@ -97,18 +100,25 @@
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
-  font-size: 13px;
-  color: var(--ui-muted);
+  font-size: 12px;
+  color: var(--ui-placeholder);
   margin-top: auto;
-  padding-top: 16px;
+  padding-top: 24px;
 }
 .activation-legal .legal-link {
-  min-height: 44px;
+  position: relative;
+  min-height: 40px;
   display: flex;
   align-items: center;
-  padding: 0 10px;
+  padding: 0 12px;
 }
-.activation-legal .legal-link.divided {
+.activation-legal .legal-link.divided::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  height: 12px;
+  margin-top: -6px;
   border-left: 1px solid var(--ui-border);
 }
 .activation-path button.biz-action + .biz-input,
@@ -148,9 +158,6 @@ button.browse-link {
 @media (max-height: 700px) {
   .activation-page {
     padding-top: 14px;
-  }
-  .activation-hero {
-    min-height: 120px;
   }
   .activation-logo {
     width: 118px;

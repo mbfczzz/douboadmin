@@ -1,13 +1,4 @@
-<view class="consent-row">
-  <checkbox-group class="consent-group" bindchange="change">
-    <label class="consent-label">
-      <checkbox class="consent-check" value="accepted" checked="{{checked}}" color="#006a73" />
-      <text>我已阅读并同意</text>
-    </label>
-  </checkbox-group>
-  <view class="consent-docs">
-    <navigator class="consent-link" url="/pages/library/index?mode=terms" hover-class="none">《用户服务协议》</navigator>
-    <text>和</text>
-    <navigator class="consent-link" url="/pages/library/index?mode=privacy" hover-class="none">《隐私政策》</navigator>
-  </view>
+<view class="consent {{checked?'on':''}}">
+  <view class="consent-hit" bindtap="toggle" aria-role="checkbox" aria-checked="{{checked}}" aria-label="我已阅读并同意用户服务协议和隐私政策"><view class="consent-box" /></view>
+  <view class="consent-text"><text bindtap="toggle">我已阅读并同意</text><navigator class="consent-link" url="/pages/library/index?mode=terms" hover-class="none">《用户服务协议》</navigator><text bindtap="toggle">和</text><navigator class="consent-link" url="/pages/library/index?mode=privacy" hover-class="none">《隐私政策》</navigator></view>
 </view>

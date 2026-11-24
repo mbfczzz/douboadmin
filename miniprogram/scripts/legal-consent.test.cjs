@@ -24,6 +24,9 @@ test("phone authorization exists only after active agreement on every entry", ()
   const component = fs.readFileSync("components/legal-consent/index.wxml", "utf8");
   assert.match(component, /《用户服务协议》/);
   assert.match(component, /《隐私政策》/);
+  // A small custom check that reads as one wrapping sentence, not the oversized native box.
+  assert.match(component, /aria-role="checkbox"[^>]+aria-checked="{{checked}}"/);
+  assert.doesNotMatch(component, /<checkbox/);
   for (const page of ["login", "activate"]) {
     const markup = fs.readFileSync(`pages/${page}/index.wxml`, "utf8");
     const config = fs.readFileSync(`pages/${page}/index.json`, "utf8");
@@ -31,4 +34,12 @@ test("phone authorization exists only after active agreement on every entry", ()
     assert.match(markup, /phoneReady&&legalAgreed/);
     assert.match(config, /components\/legal-consent\/index/);
   }
+});
+
+test("activation keeps every agreement link and dims login until consent", () => {
+  const markup = fs.readFileSync("pages/activate/index.wxml", "utf8");
+  // Agreement entries stay reachable for review: in the consent line and the footer.
+  for (const mode of ["terms", "privacy"]) assert.match(markup, new RegExp(`library/index\\?mode=${mode}`));
+  assert.match(markup, /微信隐私指引/);
+  assert.match(markup, /class="biz-action needs-consent"/);
 });

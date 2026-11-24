@@ -3,10 +3,9 @@ Component({
     checked: { type: Boolean, value: false },
   },
   methods: {
-    change(event: WechatMiniprogram.CheckboxGroupChange) {
-      this.triggerEvent("change", {
-        checked: event.detail.value.includes("accepted"),
-      });
+    // The page owns the state; the box only reports the requested value.
+    toggle() {
+      this.triggerEvent("change", { checked: !this.data.checked });
     },
   },
 });

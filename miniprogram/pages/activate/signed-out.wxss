@@ -1,0 +1,14 @@
+/* Signed out: on tall phones lower the content slightly (1:3 above/below). */
+.signed-out-gap.top {
+  flex: 1;
+}
+.signed-out-gap.bottom {
+  flex: 3;
+}
+.signed-out .activation-legal {
+  margin-top: 0;
+}
+/* Before agreement the button still answers taps, but reads as not ready. */
+.activation-auth-card button.biz-action.needs-consent {
+  opacity: 0.55;
+}

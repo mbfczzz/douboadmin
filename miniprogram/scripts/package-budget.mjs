@@ -272,7 +272,9 @@ console.log(
 // docs/trial-debug.md.
 // Activation polish groups consent and login in one compact surface, scales
 // the brand hero and adapts short/narrow phones: 1,141,829 B. 1114 -> 1116 KiB.
-const budget = 1116 * 1024;
+// Activation UI pass: a small custom consent check and tall-phone spacing:
+// 1,143,104 B. 1116 -> 1117 KiB.
+const budget = 1117 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");
