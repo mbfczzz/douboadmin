@@ -149,6 +149,16 @@ test("我的 shows 服务商中心 to providers and 我的推广码 to members",
   }
 });
 
+test("我的 shows 游客 beside the nickname without a business menu", async () => {
+  const h = harness();
+  await h.api.signIn();
+  const page = h.page("mine");
+  h.api.request = async (path) => (path === "/me/role" ? { kind: "visitor", label: "游客" } : []);
+  await page.loadIdentity();
+  assert.equal(page.data.roleLabel, "游客");
+  assert.equal(page.data.roleMenu, null);
+});
+
 test("the profile page shows the account's role from the shared catalog", async () => {
   const h = harness();
   await h.api.signIn();

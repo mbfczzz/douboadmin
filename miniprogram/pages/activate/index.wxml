@@ -52,7 +52,6 @@
       <view wx:if="{{!loadError&&(status.status==='pending'||status.status==='unbound'||status.status==='rejected')}}" class="biz-card activation-options">
         <view wx:if="{{status.openSignup&&!invite}}" class="activation-path direct-signup">
           <button class="biz-action" loading="{{busy}}" disabled="{{busy||loading}}" bindtap="direct">普通用户直接注册</button>
-          <text class="biz-note">不绑定服务商，不参与服务商分佣</text>
         </view>
         <view class="activation-path">
           <button wx:if="{{invite}}" class="biz-action" loading="{{busy}}" disabled="{{busy||loading}}" bindtap="retryInvite">继续登记</button>

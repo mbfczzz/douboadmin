@@ -4,22 +4,33 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"strings"
 
 	"doubo/server/internal/core"
 )
 
+const visitorLabel = "游客"
+
 // Legacy response shape; names resolve through the permission role catalog.
 // Business eligibility and hierarchy continue to come from Access.
 type identityView struct {
-	Kind    string `json:"kind"` // branch, s1, s2, member or ""
+	Kind    string `json:"kind"` // visitor, branch, s1, s2, member or ""
 	Label   string `json:"label"`
 	Partner string `json:"partner,omitempty"`
 }
 
 func (a *Server) identityOf(ctx context.Context, user string) (identityView, error) {
 	access, e := a.Partners.Access(ctx, user)
-	if e != nil || !access.Active {
+	if e != nil {
 		return identityView{}, e
+	}
+	if !access.Active {
+		// Not yet opened as a provider or partner: shown as 游客. A stopped
+		// account or provider gets no badge rather than a misleading one.
+		if strings.HasSuffix(access.Status, "disabled") {
+			return identityView{}, nil
+		}
+		return identityView{Kind: core.RoleVisitor, Label: visitorLabel}, nil
 	}
 	kind, partner := core.RoleMember, access.PartnerName
 	if access.Status == "provider" {

@@ -1,6 +1,7 @@
 package api
 
 import (
+	"doubo/server/internal/core"
 	"encoding/json"
 	"testing"
 )
@@ -55,15 +56,55 @@ func TestIdentityLabelsEachKindOfUser(t *testing.T) {
 			t.Fatal(want.Label, w.Code, w.Body.String())
 		}
 	}
-	// Visitors may read the page, but have no approved identity.
+	// Visitors may read the page; they show as 游客, not a business role.
+	visitor := identityView{Kind: core.RoleVisitor, Label: "游客"}
 	var pending identityView
-	if w := call(a, "GET", "/api/me/identity", waiting, "", nil); w.Code != 200 || json.Unmarshal(w.Body.Bytes(), &pending) != nil || pending != (identityView{}) {
-		t.Fatal("visitor gained an approved identity", w.Code, w.Body.String())
+	if w := call(a, "GET", "/api/me/identity", waiting, "", nil); w.Code != 200 || json.Unmarshal(w.Body.Bytes(), &pending) != nil || pending != visitor {
+		t.Fatal("visitor badge", w.Code, w.Body.String())
 	}
-	// Without the activation gate an unopened account has no identity.
+	// Ordinary direct registration also stays a visitor until it is approved.
+	direct := user("direct-waiting", "小林", "13900000007")
+	if _, err := a.Partners.RegisterDirectVisitor(t.Context(), "direct-waiting"); err != nil {
+		t.Fatal(err)
+	}
+	var directVisitor identityView
+	if w := call(a, "GET", "/api/me/identity", direct, "", nil); w.Code != 200 || json.Unmarshal(w.Body.Bytes(), &directVisitor) != nil || directVisitor != visitor {
+		t.Fatal("direct visitor badge", w.Code, w.Body.String())
+	}
+	// An administrator-managed visitor gets the same badge without inheriting
+	// the previous member label or provider menu.
+	assignment, err := a.Partners.IdentityAssignment(t.Context(), "fan")
+	if err != nil {
+		t.Fatal(err)
+	}
+	managed, err := a.Partners.ChangeIdentity(t.Context(), "fan", core.RoleVisitor, "", "admin", assignment.Version)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var managedVisitor identityView
+	if w := call(a, "GET", "/api/me/identity", fan, "", nil); w.Code != 200 || json.Unmarshal(w.Body.Bytes(), &managedVisitor) != nil || managedVisitor != visitor {
+		t.Fatal("managed visitor badge", w.Code, w.Body.String())
+	}
+	if _, err = a.Partners.ChangeIdentity(t.Context(), "fan", core.RoleMember, s1, "admin", managed.Version); err != nil {
+		t.Fatal(err)
+	}
+	// Without the activation gate an unopened account is still a 游客.
 	a.Config.RequireActivation = false
 	var got identityView
-	if w := call(a, "GET", "/api/me/identity", waiting, "", nil); w.Code != 200 || json.Unmarshal(w.Body.Bytes(), &got) != nil || got != (identityView{}) {
+	if w := call(a, "GET", "/api/me/identity", waiting, "", nil); w.Code != 200 || json.Unmarshal(w.Body.Bytes(), &got) != nil || got != visitor {
 		t.Fatal("pending identity", w.Code, w.Body.String())
+	}
+	// A member whose provider is stopped gets no badge rather than 游客.
+	row, _ := a.Store.Get(t.Context(), "partners", s1)
+	var stopped core.Partner
+	_ = json.Unmarshal(row.Data, &stopped)
+	stopped.Status = "disabled"
+	row.Data = core.Data(stopped)
+	if _, e := a.Store.Put(t.Context(), "partners", row, row.Version); e != nil {
+		t.Fatal(e)
+	}
+	var none identityView
+	if w := call(a, "GET", "/api/me/identity", fan, "", nil); w.Code != 200 || json.Unmarshal(w.Body.Bytes(), &none) != nil || none != (identityView{}) {
+		t.Fatal("stopped provider member", w.Code, w.Body.String())
 	}
 }
