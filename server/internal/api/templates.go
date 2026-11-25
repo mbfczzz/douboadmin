@@ -141,7 +141,7 @@ func (a *Server) modelReady(r *http.Request) func(string) bool {
 		ok, cached := seen[id]
 		if !cached {
 			m, err := a.model(r.Context(), id)
-			ok = err == nil && m.Usable()
+			ok = err == nil && m.Usable() && clientSupportsModel(r, m)
 			seen[id] = ok
 		}
 		return ok

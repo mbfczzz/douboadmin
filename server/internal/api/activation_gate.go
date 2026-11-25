@@ -104,7 +104,7 @@ func (a *Server) myAccess(w http.ResponseWriter, r *http.Request) {
 		reply(w, 200, core.Access{Active: true, Status: "active"})
 		return
 	}
-	access, e := a.accessFor(r.Context(), identity(r).ID)
+	access, e := a.accessFor(r.Context(), identity(r).ID, clientCapability(r, capabilityVisitorBrowse))
 	if e != nil {
 		dbError(w, e)
 		return
@@ -128,6 +128,10 @@ func (a *Server) registeredOnly(w http.ResponseWriter, r *http.Request) bool {
 
 func (a *Server) directAccess(w http.ResponseWriter, r *http.Request) {
 	if !a.registeredOnly(w, r) {
+		return
+	}
+	if !clientCapability(r, capabilityVisitorBrowse) {
+		fail(w, http.StatusConflict, "请更新小程序后使用普通注册，或使用服务商邀请码登记")
 		return
 	}
 	_, settings, err := a.signup(r.Context())
@@ -168,5 +172,6 @@ func (a *Server) joinAccess(w http.ResponseWriter, r *http.Request) {
 		partnerError(w, e)
 		return
 	}
-	reply(w, 200, accessView{Access: access, CanBrowse: canBrowse(access, true), PhoneVerificationRequired: a.registrationRequired()})
+	view := accessView{Access: access, CanBrowse: canBrowse(access, true), PhoneVerificationRequired: a.registrationRequired()}
+	reply(w, 200, compatibleAccessView(view, clientCapability(r, capabilityVisitorBrowse)))
 }

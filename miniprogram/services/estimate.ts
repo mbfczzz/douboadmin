@@ -3,6 +3,7 @@ import { sessionToken } from "./session";
 import { AuthCancelledError, RequestError } from "./errors";
 import type { EstimateInput, Estimate } from "./estimate-types";
 import { points } from "./business";
+import { clientCapabilityHeaders } from "./client-capabilities";
 export type { EstimateInput } from "./estimate-types";
 export function estimateCost(input: EstimateInput, owner: string) {
   let task: WechatMiniprogram.RequestTask | undefined;
@@ -18,7 +19,7 @@ export function estimateCost(input: EstimateInput, owner: string) {
     task = wx.request({
       url: API_BASE + "/api/jobs/estimate?" + query,
       method: "GET",
-      header: { Authorization: "Bearer " + owner },
+      header: { ...clientCapabilityHeaders, Authorization: "Bearer " + owner },
       timeout: 10000,
       success(res) {
         if (sessionToken() !== owner) return reject(new AuthCancelledError());

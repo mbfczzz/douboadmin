@@ -27,9 +27,13 @@ func (a *Server) config(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	models := []core.Model{}
+	visibleModels := map[string]bool{}
 	for _, row := range rows {
 		var m core.Model
 		if json.Unmarshal(row.Data, &m) == nil && m.Usable() && (a.Relay.Ready() || directChat(m) || arkVideo(m)) {
+			if !clientSupportsModel(r, m) {
+				continue
+			}
 			m = m.Effective()
 			if !m.Usable() {
 				continue
@@ -46,6 +50,7 @@ func (a *Server) config(w http.ResponseWriter, r *http.Request) {
 			m.ParamsSchema = nil
 			m.PriceModifiers = nil
 			models = append(models, m)
+			visibleModels[row.ID] = true
 		}
 	}
 	sort.Slice(models, func(i, j int) bool {
@@ -63,7 +68,7 @@ func (a *Server) config(w http.ResponseWriter, r *http.Request) {
 	seen := map[string]bool{"推荐": true}
 	for _, row := range templates {
 		var t core.Template
-		if json.Unmarshal(row.Data, &t) == nil && t.Kind == "video" && t.Published && !t.Deleted && t.Category != "" && !seen[t.Category] {
+		if json.Unmarshal(row.Data, &t) == nil && t.Kind == "video" && t.Published && !t.Deleted && visibleModels[t.Model] && t.Category != "" && !seen[t.Category] {
 			categories = append(categories, t.Category)
 			seen[t.Category] = true
 		}

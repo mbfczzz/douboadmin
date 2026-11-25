@@ -8,11 +8,11 @@ test("configuration, login, access and uploads wait for the same trial debug cal
   h.wx.setEnableDebug = options => debug.push(options);
   h.storage.set("douboSession", { token: "test-session", userId: "one", expiresAt: Date.now() + 60000 });
   h.wx.request = options => {
-    sent.push(options.url);
+    sent.push(options);
     options.success({ statusCode: 200, data: { active: true, activationRequired: true } });
   };
   h.wx.uploadFile = options => {
-    sent.push(options.url);
+    sent.push(options);
     options.success({ statusCode: 200, data: JSON.stringify({ id: "asset", data: { url: "https://example.test/image.png" } }) });
   };
   const calls = [
@@ -29,8 +29,9 @@ test("configuration, login, access and uploads wait for the same trial debug cal
   debug[0].success();
   await Promise.all(calls);
   assert.equal(sent.length, 4);
-  assert.ok(sent.some(url => url.endsWith("/api/config")));
-  assert.ok(sent.some(url => url.endsWith("/api/auth/wechat")));
-  assert.ok(sent.some(url => url.endsWith("/api/access")));
-  assert.ok(sent.some(url => url.endsWith("/api/assets")));
+  assert.ok(sent.some(options => options.url.endsWith("/api/config")));
+  assert.ok(sent.some(options => options.url.endsWith("/api/auth/wechat")));
+  assert.ok(sent.some(options => options.url.endsWith("/api/access")));
+  assert.ok(sent.some(options => options.url.endsWith("/api/assets")));
+  assert.ok(sent.every(options => options.header["X-Doubo-Capabilities"].includes("visitor-browse-v1")));
 });

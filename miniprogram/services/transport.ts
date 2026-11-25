@@ -1,6 +1,7 @@
 import { API_BASE } from "../config";
 import { RequestError } from "./errors";
 import { trialDebug } from "./trial-debug";
+import { clientCapabilityHeaders } from "./client-capabilities";
 
 // Authentication requests must not depend on the authenticated request wrapper.
 export function publicRequest<T>(
@@ -13,7 +14,7 @@ export function publicRequest<T>(
       url: API_BASE + "/api" + path,
       method,
       data: data as object,
-      header: { "Content-Type": "application/json" },
+      header: { "Content-Type": "application/json", ...clientCapabilityHeaders },
       timeout: 20000,
       success(r) {
         if (r.statusCode >= 400) {

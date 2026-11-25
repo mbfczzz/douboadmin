@@ -53,6 +53,17 @@ type accessView struct {
 	PhoneVerified             bool   `json:"phoneVerified"`
 }
 
+// Old released clients enter only when active=true, but already understand
+// canBrowse on rejected writes and therefore do not redirect. This response
+// shim never changes the stored Access used by server-side authorization.
+func compatibleAccessView(v accessView, visitorBrowse bool) accessView {
+	v.OpenSignup = v.OpenSignup && visitorBrowse
+	if !visitorBrowse && v.CanBrowse {
+		v.Active = true
+	}
+	return v
+}
+
 const errProfileRequired = "请先填写姓名并验证手机号"
 const errBasicProfileRequired = "请先填写姓名和手机号"
 
@@ -63,7 +74,7 @@ func (a *Server) profileRequiredMessage() string {
 	return errBasicProfileRequired
 }
 
-func (a *Server) accessFor(ctx context.Context, id string) (accessView, error) {
+func (a *Server) accessFor(ctx context.Context, id string, visitorBrowse bool) (accessView, error) {
 	flags, e := a.userState(ctx, id)
 	if e != nil {
 		return accessView{}, e
@@ -81,5 +92,5 @@ func (a *Server) accessFor(ctx context.Context, id string) (accessView, error) {
 	if v.ProfileRequired {
 		v.Active, v.Message, v.Name, v.Phone = false, a.profileRequiredMessage(), flags.Name, flags.Phone
 	}
-	return v, nil
+	return compatibleAccessView(v, visitorBrowse), nil
 }

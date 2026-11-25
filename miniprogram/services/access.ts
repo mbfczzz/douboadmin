@@ -2,6 +2,7 @@ import { API_BASE } from "../config";
 import { sessionToken, storedToken, forgetDeletedAccount, clearSession } from "./session";
 import { AuthCancelledError, RequestError } from "./errors";
 import { trialDebug } from "./trial-debug";
+import { clientCapabilityHeaders } from "./client-capabilities";
 
 import type { AccessStatus } from "./access-types";
 export type { AccessStatus } from "./access-types";
@@ -34,7 +35,7 @@ export function accessStatus(): Promise<AccessStatus> {
       new Promise<AccessStatus>((resolve, reject) => {
         wx.request({
           url: API_BASE + "/api/access",
-          header: { Authorization: "Bearer " + token },
+          header: { ...clientCapabilityHeaders, Authorization: "Bearer " + token },
           timeout: 15000,
           success(r) {
             if (sessionToken() !== token) {

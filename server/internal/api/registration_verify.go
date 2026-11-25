@@ -64,7 +64,7 @@ func (a *Server) register(w http.ResponseWriter, r *http.Request) {
 		fail(w, 400, problem)
 		return
 	}
-	out, e := a.accessFor(r.Context(), user)
+	out, e := a.accessFor(r.Context(), user, clientCapability(r, capabilityVisitorBrowse))
 	if e != nil {
 		dbError(w, e)
 		return

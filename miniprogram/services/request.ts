@@ -10,6 +10,7 @@ import type { Row, Asset, ResponseMeta } from "./types";
 import { requestPurpose } from "./login-context";
 import { activationRedirect } from "./access";
 import { trialDebug } from "./trial-debug";
+import { clientCapabilityHeaders } from "./client-capabilities";
 function accountFailure(meta: ResponseMeta, status: number) {
   if (status !== 403 || !["ACCOUNT_DELETED", "ACCOUNT_DISABLED"].includes(meta?.code || "")) return;
   if (meta.code === "ACCOUNT_DELETED") forgetDeletedAccount();
@@ -50,6 +51,7 @@ export function request<T>(
           data: data as object,
           header: {
             "Content-Type": "application/json",
+            ...clientCapabilityHeaders,
             ...(sentToken ? { Authorization: "Bearer " + sentToken } : {}),
             ...(key ? { "Idempotency-Key": key } : {}),
           },
@@ -138,7 +140,7 @@ export function upload(
           url: API_BASE + "/api/assets" + (avatar ? "?purpose=avatar" : ""),
           filePath: path,
           name: "file",
-          header: { Authorization: "Bearer " + sentToken },
+          header: { ...clientCapabilityHeaders, Authorization: "Bearer " + sentToken },
           timeout: onProgress ? 1200000 : 90000,
           success(r) {
             try {

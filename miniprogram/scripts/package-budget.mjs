@@ -280,7 +280,10 @@ console.log(
 // Virtual-payment recovery: issued orders no longer show an unusable pay
 // countdown, and an explicitly confirmed unpaid order can release the local
 // checkout lock while remaining queryable: 1,151,143 B. 1123 -> 1125 KiB.
-const budget = 1125 * 1024;
+// Legacy-release capability negotiation keeps visitor browsing and new video
+// billing models away from clients that cannot render them: 1,152,471 B.
+// 1125 -> 1126 KiB.
+const budget = 1126 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

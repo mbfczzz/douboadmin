@@ -65,7 +65,7 @@ func (a *Server) templatePage(w http.ResponseWriter, r *http.Request, ids []stri
 		ready := []string{}
 		for _, row := range models {
 			var m core.Model
-			if json.Unmarshal(row.Data, &m) == nil && m.Effective().Usable() {
+			if json.Unmarshal(row.Data, &m) == nil && m.Effective().Usable() && clientSupportsModel(r, m) {
 				ready = append(ready, row.ID)
 			}
 		}
