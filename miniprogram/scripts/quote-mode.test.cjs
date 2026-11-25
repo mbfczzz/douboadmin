@@ -9,6 +9,8 @@ test("quotes say 按次 or 按秒 with the per-second rate and this run's total"
     { quoteMode: "按秒", quoteRate: "每秒 7 积分 × 5 秒", quoteText: "本次 35 积分" });
   assert.deepEqual({ ...quoteParts({ units: 3500, billingEnabled: true, perSecond: false }, 5) },
     { quoteMode: "按次", quoteRate: "", quoteText: "本次 35 积分" });
+  assert.deepEqual({ ...quoteParts({ units: 6500, referenceUnits: 3000, billingEnabled: true, perSecond: true }, 5) },
+    { quoteMode: "按秒", quoteRate: "生成 35 + 参考 30 积分（折后）", quoteText: "本次 65 积分" });
   // Images (no duration) and older servers without the flag stay 按次.
   assert.equal(quoteParts({ units: 400, billingEnabled: true, perSecond: true }, 0).quoteMode, "按次");
   assert.equal(quoteParts({ units: 400, billingEnabled: true }, 5).quoteMode, "按次");

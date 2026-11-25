@@ -4,7 +4,6 @@ import { captureInvite } from "./services/invitation";
 import { enforceAccess } from "./services/access";
 import { pauseVisit, resumeVisit } from "./services/analytics";
 App({
-  globalData: {},
   onShow(options) {
     captureInvite(options.query);
     resumeVisit(options.scene);
@@ -12,8 +11,9 @@ App({
   },
   onHide: pauseVisit,
   onLaunch() {
+    const update = wx.getUpdateManager?.();
+    update?.onUpdateReady(() => wx.showModal({ title: "版本更新", content: "新版本已就绪，是否立即更新？", confirmText: "立即更新", success: (r) => r.confirm && update.applyUpdate() }));
     void initializeDebug().catch(() => undefined);
-    // Warm the shared config so the first tab paints without waiting on it.
     void loadConfig().catch(() => undefined);
     wx.setBackgroundColor({
       backgroundColor: "#0f0f11",

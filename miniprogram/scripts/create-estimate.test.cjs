@@ -39,7 +39,8 @@ async function fixture(authenticated = true) {
     id: "video-priced",
     kind: "video",
     durations: [5, 10],
-    modes: ["t2v"],
+    modes: ["t2v", "omni_ref"],
+    referenceTypes: ["video"],
   };
   h.api.request = async () => ({ models: [image, video] });
   h.wx.showToast = (o) => messages.push(o);
@@ -149,6 +150,29 @@ test("switching models and video duration refreshes estimates; busy controls pre
   assert.equal(f.page.data.duration, 10);
   assert.equal(f.page.data.resolution, resolution);
   assert.equal(f.page.data.quality, quality);
+});
+
+test("an attached reference video is included in the live discounted estimate", async () => {
+  const f = await fixture();
+  await f.flush();
+  reply(f.requests[0], 625);
+  await tick();
+  f.page.mode({ currentTarget: { dataset: { kind: "video" } } });
+  await tick();
+  await f.flush();
+  reply(f.requests[1], 3500);
+  await tick();
+  f.page.setData({ assets: [{ id: "video-ref", isVideo: true, isImage: false, data: {} }] });
+  f.page.refreshParameters();
+  await f.flush();
+  const request = f.requests[2];
+  assert.match(request.url, /assets=video-ref/);
+  request.success({ statusCode: 200, data: {
+    units: 6500, referenceUnits: 3000, billingEnabled: true, perSecond: true,
+  } });
+  await tick();
+  assert.equal(f.page.data.quoteText, "本次 65 积分");
+  assert.equal(f.page.data.quoteRate, "生成 35 + 参考 30 积分（折后）");
 });
 
 for (const statusCode of [401, 403, 503, 200]) {

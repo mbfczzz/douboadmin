@@ -55,6 +55,17 @@ func TestQuoteChargesReferenceVideosByDurationTier(t *testing.T) {
 			t.Fatal("7 s reference should add 50% of the 10 s price", code, q)
 		}
 	}
+	estimate := call(a, "GET", "/api/jobs/estimate?kind=video&model=ref-billed&resolution=720p&ratio=9%3A16&duration=5&assets=short", user, "", nil)
+	var estimated map[string]any
+	_ = json.Unmarshal(estimate.Body.Bytes(), &estimated)
+	if estimate.Code != 200 || estimated["units"] != float64(6500) || estimated["referenceUnits"] != float64(3000) {
+		t.Fatal("live estimate omitted discounted reference", estimate.Code, estimated)
+	}
+	_, _ = a.Store.Put(ctx, "assets", core.Record{ID: "foreign", Owner: "another-user", Data: core.Data(map[string]any{"type": "video/mp4"})}, 0)
+	foreign := call(a, "GET", "/api/jobs/estimate?kind=video&model=ref-billed&resolution=720p&ratio=9%3A16&duration=5&assets=foreign", user, "", nil)
+	if foreign.Code != 400 || !strings.Contains(foreign.Body.String(), "不属于当前用户") {
+		t.Fatal("live estimate accepted another user's asset", foreign.Code, foreign.Body.String())
+	}
 	if served != 1 {
 		t.Fatal("the video length is read once, got", served)
 	}

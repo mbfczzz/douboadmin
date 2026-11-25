@@ -9,6 +9,7 @@ function harness(timers = {}) {
     sent = [],
     nav = [];
   let loginCount = 0,
+    capturedApp,
     capturedPage,
     capturedComponent;
   const ctx = { storage, sent, nav, pages: [], loginCount: () => loginCount };
@@ -20,6 +21,7 @@ function harness(timers = {}) {
     removeStorageSync: (k) => storage.delete(k),
     navigateTo: (o) => nav.push(o),
     showToast() {},
+    setBackgroundColor() {},
     stopPullDownRefresh() {},
     login: async () => ({ code: "fresh-code-" + ++loginCount }),
     request: (o) => {
@@ -70,6 +72,9 @@ function harness(timers = {}) {
         setTimeout: timers.setTimeout || setTimeout,
         clearTimeout: timers.clearTimeout || clearTimeout,
         getCurrentPages: () => ctx.pages,
+        App: (o) => {
+          capturedApp = o;
+        },
         Page: (o) => {
           capturedPage = o;
         },
@@ -104,6 +109,12 @@ function harness(timers = {}) {
       },
     };
   }
+  function app() {
+    capturedApp = undefined;
+    load(path.join(process.cwd(), "app.ts"));
+    assert.ok(capturedApp);
+    return capturedApp;
+  }
   function component(name) {
     capturedComponent = undefined;
     load(path.join(process.cwd(), name, "index.ts"));
@@ -121,6 +132,7 @@ function harness(timers = {}) {
   return {
     ...ctx,
     wx,
+    app,
     page,
     component,
     service: (name) => load(path.join(process.cwd(), "services", name + ".ts")),

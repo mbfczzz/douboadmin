@@ -13,9 +13,8 @@ export function estimateCost(input: EstimateInput, owner: string) {
       return;
     }
     const query = Object.entries(input)
-      .map(([key, value]) => key + "=" + encodeURIComponent(value ?? ""))
+      .map(([key, value]) => key + "=" + encodeURIComponent(String(value ?? "")))
       .join("&");
-    // Background pricing must never open login, activation, or error dialogs.
     task = wx.request({
       url: API_BASE + "/api/jobs/estimate?" + query,
       method: "GET",
@@ -42,15 +41,15 @@ export function estimateCost(input: EstimateInput, owner: string) {
   return { promise, abort: () => task?.abort() };
 }
 
-// 按秒 when the price comes from the video duration table, 按量 when it is the
-// most a task can cost (settled on usage), else 按次.
 export function quoteParts(q: Estimate, duration = 0) {
   if (!q.units) return { quoteMode: "", quoteRate: "", quoteText: "本次不扣积分" };
   if (q.perToken) return { quoteMode: "按量", quoteRate: "按实际用量扣除，多余退回", quoteText: `最多 ${points(q.units)} 积分` };
   const perSecond = !!q.perSecond && duration > 0;
+  const reference = Math.max(0, Math.min(q.referenceUnits || 0, q.units));
+  const rate = perSecond ? `每秒 ${points(Math.round((q.units - reference) / duration))} 积分 × ${duration} 秒` : "";
   return {
     quoteMode: perSecond ? "按秒" : "按次",
-    quoteRate: perSecond ? `每秒 ${points(Math.round(q.units / duration))} 积分 × ${duration} 秒` : "",
+    quoteRate: reference ? `生成 ${points(q.units - reference)} + 参考 ${points(reference)} 积分（折后）` : rate,
     quoteText: `本次 ${points(q.units)} 积分`,
   };
 }

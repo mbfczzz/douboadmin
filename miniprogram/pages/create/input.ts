@@ -11,6 +11,7 @@ export function pricingInput(data: typeof creationData): EstimateInput {
     quality: data.quality,
     ratio: data.ratio,
     duration: data.kind === "video" ? data.duration : 0,
+    ...(data.assets.length ? { assets: data.assets.map((asset) => asset.id) } : {}),
   };
 }
 export function creationInput(data: typeof creationData, model: Model): Input {
