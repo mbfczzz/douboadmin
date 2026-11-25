@@ -36,6 +36,9 @@ func completeJobAccounting(tx Transaction, j core.Job, failure string) error {
 		used := min(max(*bill.UsedUnits, 0), bill.Units)
 		entry.Kind, entry.AvailableDelta = "job_usage", bill.Units-used
 		entry.Note = fmt.Sprintf("对话按用量扣除 %s 积分（输入 %d / 输出 %d token）", core.FormatPoints(used), bill.InputTokens, bill.OutputTokens)
+		if bill.VideoTokens > 0 {
+			entry.Note = fmt.Sprintf("视频按用量扣除 %s 积分（%d 视频 token）", core.FormatPoints(used), bill.VideoTokens)
+		}
 		if bill.CachedTokens > 0 || bill.Peak {
 			extra := []string{}
 			if bill.CachedTokens > 0 {

@@ -93,6 +93,10 @@ var definitions = []Group{
 		{Key: "CHAT_ARK_API_KEY", Label: "火山方舟 API Key", Kind: "secret", Hint: "留空时使用「视频理解」的 API Key。"},
 		{Key: "CHAT_ARK_MODELS", Label: "豆包模型", Kind: "text", Default: DefaultArkChatModels, Hint: "只能填豆包 Seed 对话模型 ID 或 ep- 接入点，多个用逗号分隔；不能填 Seedance / multi- 视频生成接入点。"},
 	}},
+	{ID: "seedance", Name: "火山方舟视频生成", Hint: "模型管理里固定的 Seedance 2.0 / 2.0 Fast / 2.0 Mini / 2.5 / 2.5 Flash 直接调用火山方舟官方接口，按实际视频 token 计费（官方价，1 元 = 10 积分），不随中转站同步变化。只用于创作提交的视频任务；需单独填写火山方舟 API Key。保存后重启服务生效。", Fields: []Field{
+		{Key: "ARK_VIDEO_BASE_URL", Label: "API 地址", Kind: "url", Default: "https://ark.cn-beijing.volces.com/api/v3"},
+		{Key: "ARK_VIDEO_API_KEY", Label: "火山方舟 API Key", Kind: "secret", Hint: "独立于「对话模型」「视频理解」的 Key。"},
+	}},
 	{ID: "notifications", Name: "完成订阅通知", Hint: "需先配置微信登录，并在微信后台取得订阅消息模板。", Fields: []Field{
 		{Key: "WECHAT_COMPLETION_TEMPLATE_ID", Label: "订阅模板 ID", Kind: "text"},
 		{Key: "WECHAT_COMPLETION_FIELDS", Label: "模板字段映射", Kind: "mapping", Default: "{}", Hint: "例如 thing1 对应 {{title}}；字段名以微信模板为准。", Limit: 30, Columns: []Column{

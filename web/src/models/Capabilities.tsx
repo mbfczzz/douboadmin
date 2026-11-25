@@ -26,7 +26,7 @@ function ReferenceLimits({
   const set = (key: string, value: number) =>
     onChange({ refLimits: { ...limits, [key]: value } });
   return (
-    <Section label={label} hint="0 沿用平台与上游限制；单个文件最多 50 MB">
+    <Section label={label} hint="0 沿用平台与上游限制；视频最多 500 MB，其他文件 50 MB">
       {types
         .filter((t) => m.referenceTypes.includes(t))
         .map((typ) => {
@@ -67,7 +67,7 @@ function ReferenceLimits({
                   <NumberField
                     label={`${prefix === "omniRef" ? "全能参考 · " : label + " · "}${name}大小（MB）`}
                     span={2}
-                    max={50}
+                    max={500}
                     value={limits[prefix + "." + typ + "SizeMB"] || 0}
                     onChange={(n) => set(prefix + "." + typ + "SizeMB", n)}
                   />

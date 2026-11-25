@@ -19,6 +19,9 @@ export interface ModelSettings {
   ideas?: string[];
   maxPromptChars?: number;
   videoBillingMode?: "duration" | "per_request";
+  referenceVideoBillingEnabled?: boolean;
+  // 火山方舟 Seedance: points per million video tokens by output resolution.
+  videoTokenPrices?: Record<string, { plain: number; withVideo: number }>;
   priceMatrix?: Record<string, Record<string, number>>;
   pricePerRequestByResolution?: Record<string, number>;
   tokenInputPrice?: number;

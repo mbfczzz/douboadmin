@@ -66,12 +66,13 @@ func (a *Server) submit(w http.ResponseWriter, r *http.Request, in core.JobInput
 		fail(w, 400, e.Error())
 		return
 	}
-	units, cost, billed, e := a.priceInput(r, in)
+	p, e := a.priceInput(r, in)
 	if e != nil {
-		dbError(w, e)
+		quoteError(w, e)
 		return
 	}
-	j.EstimatedCostMicros = cost
+	units, billed := p.Units, p.Enabled
+	j.EstimatedCostMicros = p.Estimated
 	j.Input = in
 	if billed && identity(r).Role == "user" {
 		if units > 0 && in.ExpectedCostUnits == nil {

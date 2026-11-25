@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"doubo/server/internal/api"
+	"doubo/server/internal/arkvideo"
 	"doubo/server/internal/hotvideo"
 	"doubo/server/internal/llm"
 	"doubo/server/internal/media"
@@ -52,7 +53,12 @@ func integrations(ctx context.Context, app *api.Server, values settings.Values) 
 	}
 	feedWords, _ := settings.FeedKeywords(values["HOT_FEED_KEYWORDS"]) // bad values fall back to defaults
 	app.Hot = &hotvideo.Service{Client: &hotvideo.Client{BaseURL: values["TIKHUB_BASE_URL"], Key: values["TIKHUB_API_KEY"]}, Store: app.Store, Redis: app.Sessions.Redis, Keywords: feedWords, Source: values["HOT_FEED_SOURCE"], TTL: hotCacheTTL(values)}
-	return provider.Router{AI: ai, Import: hotvideo.Importer{Service: app.Hot, Media: app.Media, Vision: app.Vision}, Chat: chatModels(ctx, app, values)}, nil
+	app.ArkVideo = &arkvideo.Client{BaseURL: values.Get("ARK_VIDEO_BASE_URL", "https://ark.cn-beijing.volces.com/api/v3"), Key: values["ARK_VIDEO_API_KEY"]}
+	if err := arkvideo.Ensure(ctx, app.Store, app.ArkVideo.Ready()); err != nil {
+		slog.Warn("火山方舟视频模型登记失败", "error", err)
+	}
+	seedance := &provider.ArkVideo{Client: app.ArkVideo, Store: app.Store, Assets: app.Media.Inputs, SaveResult: app.Media.Save}
+	return provider.Router{AI: ai, Import: hotvideo.Importer{Service: app.Hot, Media: app.Media, Vision: app.Vision}, Chat: chatModels(ctx, app, values), ArkVideo: seedance}, nil
 }
 
 // chatModels sets up DeepSeek / 豆包 (服务接入配置 → 对话模型) and lists their

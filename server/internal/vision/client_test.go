@@ -20,7 +20,7 @@ func TestBreakdownRequestAndParse(t *testing.T) {
 	}))
 	defer server.Close()
 	c := &Client{BaseURL: server.URL + "/api/v3", Key: "k", Model: "doubao-seed-1-6-vision-250815"}
-	b, err := c.Breakdown(context.Background(), "https://oss.example/v.mp4?sig=1")
+	b, err := c.Breakdown(context.Background(), Video{URL: "https://oss.example/v.mp4?sig=1"})
 	if err != nil || b.Hook != "撕快递" || len(b.Shots) != 1 || b.Shots[0].End != 2.5 || b.SellingPoints[0] != "显白" {
 		t.Fatalf("%+v %v", b, err)
 	}
@@ -37,7 +37,7 @@ func TestBreakdownErrors(t *testing.T) {
 		_, _ = w.Write([]byte(`{"error":{"message":"The API key is invalid"}}`))
 	}))
 	defer server.Close()
-	_, err := (&Client{BaseURL: server.URL, Key: "k", Model: "m"}).Breakdown(context.Background(), "https://x/v.mp4")
+	_, err := (&Client{BaseURL: server.URL, Key: "k", Model: "m"}).Breakdown(context.Background(), Video{URL: "https://x/v.mp4"})
 	if err == nil || err.Error() != "视频理解 API Key 无效：The API key is invalid" {
 		t.Fatal(err)
 	}
@@ -71,7 +71,7 @@ func TestFallbackWatchesWhenTheModelCannotBeUsed(t *testing.T) {
 	defer server.Close()
 	doubao := &Client{BaseURL: server.URL, Key: "k", Model: "doubao-seed-2-1-lite-260915"}
 	c := &Client{BaseURL: server.URL, Key: "k", Model: "seed-vision", Fallback: doubao}
-	b, err := c.Breakdown(context.Background(), "https://x/v.mp4")
+	b, err := c.Breakdown(context.Background(), Video{URL: "https://x/v.mp4"})
 	if err != nil || len(models) != 2 || models[1] != "doubao-seed-2-1-lite-260915" {
 		t.Fatal(err, models)
 	}
@@ -82,7 +82,7 @@ func TestFallbackWatchesWhenTheModelCannotBeUsed(t *testing.T) {
 	if !unset.Ready() {
 		t.Fatal("a fallback alone is ready")
 	}
-	if _, err := unset.Breakdown(context.Background(), "https://x/v.mp4"); err != nil {
+	if _, err := unset.Breakdown(context.Background(), Video{URL: "https://x/v.mp4"}); err != nil {
 		t.Fatal(err)
 	}
 }

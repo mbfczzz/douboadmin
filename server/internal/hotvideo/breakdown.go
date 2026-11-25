@@ -23,7 +23,7 @@ type BreakdownRecord struct {
 	FinishedAt time.Time         `json:"finishedAt"`
 }
 
-const breakdownStale = 5 * time.Minute
+const breakdownStale = 20 * time.Minute // a large video is uploaded first
 
 // breakdownPoll is how often a caller checks on someone else's run.
 var breakdownPoll = 3 * time.Second
@@ -51,7 +51,7 @@ func (s *Service) ReadBreakdown(ctx context.Context, model, videoID string) (Bre
 // EnsureBreakdown returns the video's breakdown: the stored one, the one
 // another run finishes meanwhile, or a new run here. link signs the user's
 // saved copy of the video only when a run is needed.
-func (s *Service) EnsureBreakdown(ctx context.Context, model *vision.Client, videoID string, link func() (string, error)) (*vision.Breakdown, error) {
+func (s *Service) EnsureBreakdown(ctx context.Context, model *vision.Client, videoID string, source func() (vision.Video, error)) (*vision.Breakdown, error) {
 	modelID := model.ModelID()
 	for {
 		rec, version, err := s.ReadBreakdown(ctx, modelID, videoID)
@@ -76,15 +76,15 @@ func (s *Service) EnsureBreakdown(ctx context.Context, model *vision.Client, vid
 			}
 			return nil, err
 		}
-		return s.runBreakdown(ctx, model, claim, link)
+		return s.runBreakdown(ctx, model, claim, source)
 	}
 }
 
-func (s *Service) runBreakdown(ctx context.Context, model *vision.Client, rec BreakdownRecord, link func() (string, error)) (*vision.Breakdown, error) {
-	url, err := link()
+func (s *Service) runBreakdown(ctx context.Context, model *vision.Client, rec BreakdownRecord, source func() (vision.Video, error)) (*vision.Breakdown, error) {
+	video, err := source()
 	var result vision.Breakdown
 	if err == nil {
-		result, err = model.Breakdown(ctx, url)
+		result, err = model.Breakdown(ctx, video)
 	}
 	rec.FinishedAt = time.Now().UTC()
 	if err != nil {

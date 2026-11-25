@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"doubo/server/internal/core"
+	"doubo/server/internal/media"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -46,7 +47,14 @@ func (a *Server) referenceClip(w http.ResponseWriter, r *http.Request) {
 	id := core.Digest(user + ":reference-clip:" + row.ID + ":" + strconv.Itoa(body.Seconds))[:32]
 	clip, err := a.Store.Get(ctx, "assets", id)
 	if err != nil {
-		clip, err = a.cutClip(ctx, user, id, src.Key, body.Seconds)
+		// A large original (up to 500 MB) takes longer than the server's
+		// 90-second window to fetch. The cut also outlives a client that gave
+		// up, so asking again finds the finished clip.
+		rc := http.NewResponseController(w)
+		_ = rc.SetWriteDeadline(time.Now().Add(clipWindow))
+		cut, cancel := context.WithTimeout(context.WithoutCancel(ctx), clipWindow)
+		defer cancel()
+		clip, err = a.cutClip(cut, user, id, src.Key, body.Seconds)
 		if errors.Is(err, exec.ErrNotFound) {
 			slog.Warn("ffmpeg is not installed; 一键复刻 sends the whole original video")
 			clip, err = row, nil
@@ -62,6 +70,8 @@ func (a *Server) referenceClip(w http.ResponseWriter, r *http.Request) {
 	}
 	reply(w, 200, clip)
 }
+
+const clipWindow = 10 * time.Minute
 
 // cutClip keeps the first seconds of the video stream (no audio) and stores it.
 func (a *Server) cutClip(ctx context.Context, user, id, key string, seconds int) (core.Record, error) {
@@ -111,6 +121,9 @@ func (a *Server) cutClip(ctx context.Context, user, id, key string, seconds int)
 		return core.Record{}, err
 	}
 	asset := map[string]any{"name": "参考片段（前 " + strconv.Itoa(seconds) + " 秒，无声）", "url": url, "key": clipKey, "type": "video/mp4", "size": len(data)}
+	if length, err := media.MP4Duration(bytes.NewReader(data)); err == nil {
+		asset["duration"] = length // 参考视频计费 reads it without fetching the clip
+	}
 	rec, err := a.Store.Put(ctx, "assets", core.Record{ID: id, Owner: user, Data: core.Data(asset)}, 0)
 	if err == core.ErrConflict {
 		return a.Store.Get(ctx, "assets", id)
@@ -118,13 +131,13 @@ func (a *Server) cutClip(ctx context.Context, user, id, key string, seconds int)
 	return rec, err
 }
 
-// fetchOriginal copies the stored video to path (at most 200 MB).
+// fetchOriginal copies the stored video to path (at most the upload limit).
 func (a *Server) fetchOriginal(ctx context.Context, key, path string) (string, error) {
 	url, err := a.Objects.URL(ctx, key)
 	if err != nil {
 		return "", err
 	}
-	get, cancel := context.WithTimeout(ctx, 2*time.Minute)
+	get, cancel := context.WithTimeout(ctx, 10*time.Minute)
 	defer cancel()
 	req, err := http.NewRequestWithContext(get, http.MethodGet, url, nil)
 	if err != nil {
@@ -142,12 +155,12 @@ func (a *Server) fetchOriginal(ctx context.Context, key, path string) (string, e
 	if err != nil {
 		return "", err
 	}
-	n, err := io.Copy(out, io.LimitReader(res.Body, 200<<20+1))
+	n, err := io.Copy(out, io.LimitReader(res.Body, videoUploadLimit+1))
 	if cerr := out.Close(); err == nil {
 		err = cerr
 	}
-	if err == nil && n > 200<<20 {
-		err = errors.New("original video is over 200 MB")
+	if err == nil && n > videoUploadLimit {
+		err = errors.New("original video is over 500 MB")
 	}
 	return path, err
 }

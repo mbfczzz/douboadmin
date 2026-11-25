@@ -104,7 +104,7 @@ func (s *Service) Save(ctx context.Context, j core.Job, u string) (string, error
 	}
 	defer os.Remove(tmp.Name())
 	defer tmp.Close()
-	limit := int64(200 << 20)
+	limit := int64(500 << 20) // a long 4K video
 	if j.Input.Kind == "image" {
 		limit = 30 << 20
 	}

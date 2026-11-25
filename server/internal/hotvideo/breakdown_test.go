@@ -30,7 +30,7 @@ func TestEnsureBreakdownSharedOnce(t *testing.T) {
 	defer model.Close()
 	s := &Service{Client: &Client{}, Store: store.NewMemory()}
 	v := &vision.Client{BaseURL: model.URL, Key: "k", Model: "m"}
-	link := func() (string, error) { return "https://oss.example/v.mp4", nil }
+	link := func() (vision.Video, error) { return vision.Video{URL: "https://oss.example/v.mp4"}, nil }
 	ctx := context.Background()
 	breakdownPoll = 20 * time.Millisecond
 

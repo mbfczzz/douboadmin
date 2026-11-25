@@ -96,11 +96,16 @@ func (p Importer) Generate(ctx context.Context, j core.Job) (string, error) {
 // breakdown is best effort: the remake goes on from the caption without it.
 func (p Importer) breakdown(ctx context.Context, j core.Job, videoID string, asset map[string]any) {
 	key, _ := asset["key"].(string)
-	if size, _ := asset["size"].(float64); key == "" || size > 50<<20 { // Ark takes up to 50 MB by URL
+	size, _ := asset["size"].(float64)
+	if key == "" || size > vision.FileLimit { // over 50 MB goes through 方舟's Files API
 		return
 	}
 	_ = p.Service.Store.Progress(ctx, j, 70, "拆解原视频的钩子和分镜")
-	if _, err := p.Service.EnsureBreakdown(ctx, p.Vision, videoID, func() (string, error) { return p.Media.InputURL(ctx, key) }); err != nil {
+	source := func() (vision.Video, error) {
+		url, err := p.Media.InputURL(ctx, key)
+		return vision.Link(url, int64(size)), err
+	}
+	if _, err := p.Service.EnsureBreakdown(ctx, p.Vision, videoID, source); err != nil {
 		slog.Warn("video breakdown failed", "video", videoID, "error", err.Error())
 	}
 }

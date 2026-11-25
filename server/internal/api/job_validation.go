@@ -36,7 +36,11 @@ func (a *Server) validateJob(ctx context.Context, user string, in *core.JobInput
 	if direct && in.Kind != "chat" {
 		return fmt.Errorf("请选择豆播创作中已上架的模型")
 	}
-	if !direct && !a.Relay.Ready() {
+	if _, ark := core.ArkVideo(m.Key); ark {
+		if !a.ArkVideo.Ready() {
+			return errNotReady
+		}
+	} else if !direct && !a.Relay.Ready() {
 		return errNotReady
 	}
 	if err = a.checkSession(ctx, user, in); err != nil {

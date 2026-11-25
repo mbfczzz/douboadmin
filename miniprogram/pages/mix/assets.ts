@@ -4,6 +4,7 @@ import {
   upload,
   cancelled,
   chooseReferenceFile,
+  checkUploadSize,
 } from "../../utils/api";
 import type { Row, Asset } from "../../services/types";
 
@@ -23,8 +24,7 @@ export async function addAssets(page: Editor) {
       sourceType: ["album"],
     });
     for (const file of selected.tempFiles) {
-      if (file.size > 50 * 1024 * 1024)
-        throw new Error("单个素材不能超过 50 MB");
+      checkUploadSize(file.size, file.fileType === "video");
       if (revision !== page.assetRevision) return;
       const row = await upload(file.tempFilePath);
       if (revision !== page.assetRevision) return;

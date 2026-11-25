@@ -53,8 +53,9 @@ export function request<T>(
             ...(sentToken ? { Authorization: "Bearer " + sentToken } : {}),
             ...(key ? { "Idempotency-Key": key } : {}),
           },
-          // Douyin data (TikHub) can take up to the server's 40 s wait.
-          timeout: path.startsWith("/hot/") ? 45000 : 20000,
+          // Douyin data (TikHub) can take up to the server's 40 s wait; a
+          // 一键复刻 reference clip may first fetch a video of hundreds of MB.
+          timeout: path.endsWith("/reference-clip") ? 180000 : path.startsWith("/hot/") ? 45000 : 20000,
           success(res) {
             const meta = res.data as ResponseMeta;
             if (storedToken() !== storedAtSend) {
@@ -108,8 +109,9 @@ export function request<T>(
       })),
   );
 }
-// onProgress (0–100) is for large files such as videos; they also get five
-// minutes instead of ninety seconds, enough for ~50 MB on a slow uplink.
+// onProgress (0–100) is for large files such as videos; they also get twenty
+// minutes instead of ninety seconds (the server allows the same for a 500 MB
+// video).
 export function upload(
   path: string,
   avatar = false,
@@ -137,7 +139,7 @@ export function upload(
           filePath: path,
           name: "file",
           header: { Authorization: "Bearer " + sentToken },
-          timeout: onProgress ? 300000 : 90000,
+          timeout: onProgress ? 1200000 : 90000,
           success(r) {
             try {
               if (storedToken() !== sentToken) throw new AuthCancelledError();

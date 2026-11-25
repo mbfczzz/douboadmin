@@ -27,7 +27,7 @@ func (a *Server) remakeUpload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	user := identity(r).ID
-	if _, problem := a.breakdownAsset(r.Context(), v.Video, user); problem != "" {
+	if _, _, problem := a.breakdownAsset(r.Context(), v.Video, user); problem != "" {
 		fail(w, 400, problem)
 		return
 	}

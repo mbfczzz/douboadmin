@@ -1,6 +1,7 @@
 package api
 
 import (
+	"doubo/server/internal/arkvideo"
 	"doubo/server/internal/billing"
 	"doubo/server/internal/core"
 	"doubo/server/internal/partners"
@@ -121,24 +122,63 @@ func (a *Server) adjustWallet(w http.ResponseWriter, r *http.Request) {
 	}
 	reply(w, 200, value)
 }
-func (a *Server) priceInput(r *http.Request, in core.JobInput) (units int64, estimated *int64, enabled bool, err error) {
+
+// jobPrice is what a job costs: the generation plus any 参考视频计费.
+type jobPrice struct {
+	Units, ReferenceUnits int64
+	Estimated             *int64
+	Enabled, PerSecond    bool
+	PerToken              bool
+}
+
+func (a *Server) priceInput(r *http.Request, in core.JobInput) (p jobPrice, err error) {
 	if !core.IsGeneration(in.Kind) {
-		return 0, nil, false, fmt.Errorf("该任务类型暂未开放")
+		return p, fmt.Errorf("该任务类型暂未开放")
 	}
 	_, settings, err := a.platform(r.Context())
 	if err != nil {
 		return
 	}
-	enabled = settings.BillingEnabled
+	p.Enabled = settings.BillingEnabled
 	m, err := a.model(r.Context(), in.Model)
 	if err != nil {
-		return 0, nil, enabled, err
+		return p, err
 	}
-	units, err = billing.Quote(m, in)
+	if p.Units, p.PerSecond, err = billing.QuoteDetail(m, in); err != nil {
+		return p, err
+	}
+	p.PerToken = in.Kind == "chat" && m.Settings.TokenPriced()
+	_, ark := core.ArkVideo(m.Key)
+	switch {
+	case !p.Enabled || in.Kind != "video": // free generation never reads the reference videos
+	case ark:
+		// 火山方舟 counts input video seconds too; settled on reported usage.
+		p.PerToken = true
+		seconds, err := a.referenceSeconds(r.Context(), in)
+		if err == nil {
+			arkID, _ := core.ArkVideo(m.Key)
+			err = arkvideo.CheckReferences(arkID, a.assetCounts(r.Context(), in), seconds)
+		}
+		if err == nil {
+			p.Units, err = billing.ArkVideoHold(m, in, seconds)
+		}
+		if err != nil {
+			return p, err
+		}
+	case m.Settings.ReferenceVideoBilling:
+		seconds, err := a.referenceSeconds(r.Context(), in)
+		if err == nil {
+			p.ReferenceUnits, err = core.ReferenceVideoUnits(m, in, seconds)
+		}
+		if err != nil {
+			return p, err
+		}
+		p.Units += p.ReferenceUnits
+	}
 	if m.Settings.CostUSD != "" {
 		if cost, e := strconv.ParseFloat(m.Settings.CostUSD, 64); e == nil {
 			micros := int64(cost*1e6 + .5)
-			estimated = &micros
+			p.Estimated = &micros
 		}
 	}
 	return
@@ -152,9 +192,9 @@ func (a *Server) quoteJob(w http.ResponseWriter, r *http.Request) {
 		fail(w, 400, e.Error())
 		return
 	}
-	units, _, enabled, e := a.priceInput(r, in)
+	p, e := a.priceInput(r, in)
 	if e != nil {
-		dbError(w, e)
+		quoteError(w, e)
 		return
 	}
 	wallet, e := a.Billing.Wallet(r.Context(), identity(r).ID)
@@ -162,16 +202,12 @@ func (a *Server) quoteJob(w http.ResponseWriter, r *http.Request) {
 		dbError(w, e)
 		return
 	}
-	charge := units
-	if !enabled {
+	charge := p.Units
+	if !p.Enabled {
 		charge = 0
 	}
 	// perSecond lets the confirm dialog say 按秒 (duration table) or 按次;
-	// perToken (按量) means units is the most this chat turn can cost.
-	perSecond, perToken := false, false
-	if m, err := a.model(r.Context(), in.Model); err == nil {
-		_, perSecond, _ = billing.QuoteDetail(m, in)
-		perToken = in.Kind == "chat" && m.Settings.TokenPriced()
-	}
-	reply(w, 200, map[string]any{"units": charge, "configuredUnits": units, "billingEnabled": enabled, "availableUnits": wallet.Available, "sufficient": wallet.Available >= charge, "perSecond": perSecond, "perToken": perToken})
+	// perToken (按量) means units is the most this chat turn can cost;
+	// referenceUnits is the 参考视频计费 part of units.
+	reply(w, 200, map[string]any{"units": charge, "configuredUnits": p.Units, "billingEnabled": p.Enabled, "availableUnits": wallet.Available, "sufficient": wallet.Available >= charge, "perSecond": p.PerSecond, "perToken": p.PerToken, "referenceUnits": p.ReferenceUnits})
 }

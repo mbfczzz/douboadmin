@@ -1,6 +1,7 @@
 import {
   Bell,
   Bot,
+  Clapperboard,
   Cloud,
   CreditCard,
   Globe,
@@ -42,6 +43,11 @@ export const groupMeta: Record<
     icon: MessagesSquare,
     desc: "Agent 与 AI 写剧本的 DeepSeek、豆包",
     capability: "chat",
+  },
+  seedance: {
+    icon: Clapperboard,
+    desc: "Seedance 视频模型直连火山方舟",
+    capability: "seedance",
   },
   notifications: {
     icon: Bell,

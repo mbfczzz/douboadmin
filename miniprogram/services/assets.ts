@@ -1,3 +1,11 @@
+// Upload limits (the server checks the same): videos up to 500 MB, since
+// 一键复刻 takes whole phone recordings; pictures, audio and files 50 MB.
+const MB = 1024 * 1024;
+export function checkUploadSize(size: number, video: boolean) {
+  if (video && size > 500 * MB) throw new Error("视频不能超过 500 MB");
+  if (!video && size > 50 * MB) throw new Error("文件不能超过 50 MB");
+}
+
 export async function chooseMediaFile(
   imageOnly = false,
   sourceIndex?: number,
@@ -24,7 +32,7 @@ export async function chooseMediaFile(
     const f = res.tempFiles[0];
     if (imageOnly && !/\.(jpe?g|png|webp)$/i.test(f.name))
       throw new Error("请选择 JPG、PNG 或 WebP 图片");
-    if (f.size > 50 * 1024 * 1024) throw new Error("文件不能超过 50 MB");
+    checkUploadSize(f.size, /\.mp4$/i.test(f.name));
     return { path: f.path, name: f.name };
   }
   const res = await wx.chooseMedia({
@@ -33,7 +41,7 @@ export async function chooseMediaFile(
     sourceType: imageOnly && action.tapIndex === 1 ? ["camera"] : ["album"],
   });
   const f = res.tempFiles[0];
-  if (f.size > 50 * 1024 * 1024) throw new Error("文件不能超过 50 MB");
+  checkUploadSize(f.size, f.fileType === "video");
   return {
     path: f.tempFilePath,
     name: f.fileType === "video" ? "视频素材.mp4" : "参考照片.jpg",
@@ -51,7 +59,7 @@ export async function chooseReferenceFile(kind: "image" | "video" | "audio") {
       extension: ["mp3", "wav"],
     });
     const file = res.tempFiles[0];
-    if (file.size > 50 * 1024 * 1024) throw new Error("文件不能超过 50 MB");
+    checkUploadSize(file.size, false);
     return { path: file.path, name: file.name, size: file.size };
   }
   const res = await wx.chooseMedia({
@@ -60,7 +68,7 @@ export async function chooseReferenceFile(kind: "image" | "video" | "audio") {
     sourceType: ["album"],
   });
   const file = res.tempFiles[0];
-  if (file.size > 50 * 1024 * 1024) throw new Error("文件不能超过 50 MB");
+  checkUploadSize(file.size, kind === "video");
   return {
     path: file.tempFilePath,
     name: kind === "video" ? "参考视频.mp4" : "参考图片.jpg",
@@ -70,9 +78,9 @@ export async function chooseReferenceFile(kind: "image" | "video" | "audio") {
 }
 
 // Several pictures (or one video) from the album at once, e.g. a shop's
-// photos for an Agent project. Files over 50 MB are refused as a whole.
+// photos for an Agent project. An oversized file refuses the whole pick.
 export async function chooseReferenceFiles(kind: "image" | "video", count: number) {
   const res = await wx.chooseMedia({ count: kind === "video" ? 1 : Math.max(1, count), mediaType: [kind], sourceType: ["album"] });
-  if (res.tempFiles.some((f) => f.size > 50 * 1024 * 1024)) throw new Error("文件不能超过 50 MB");
+  res.tempFiles.forEach((f) => checkUploadSize(f.size, kind === "video"));
   return res.tempFiles.map((f) => ({ path: f.tempFilePath, name: kind === "video" ? "参考视频.mp4" : "参考图片.jpg", size: f.size }));
 }

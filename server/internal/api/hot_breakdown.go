@@ -4,6 +4,7 @@ import (
 	"context"
 	"doubo/server/internal/core"
 	"doubo/server/internal/media"
+	"doubo/server/internal/vision"
 	"encoding/json"
 	"errors"
 	"log/slog"
@@ -15,8 +16,6 @@ import (
 // 一键复刻 breakdown (hotvideo/breakdown.go): GET reads the shared result;
 // POST starts it in the background from the caller's own saved copy when
 // nobody has. The remake preparation job normally runs it already.
-const breakdownMaxSize = 50 << 20 // Ark takes video URLs up to 50 MB
-
 func (a *Server) hotBreakdown(w http.ResponseWriter, r *http.Request) {
 	if !a.Vision.Ready() {
 		fail(w, 503, "视频拆解暂未开放")
@@ -28,7 +27,7 @@ func (a *Server) hotBreakdown(w http.ResponseWriter, r *http.Request) {
 	if upload := uploadID.MatchString(id); !videoID.MatchString(id) && !upload {
 		fail(w, 400, "视频标识无效")
 		return
-	} else if _, problem := a.breakdownAsset(r.Context(), id[1:], identity(r).ID); upload && problem != "" {
+	} else if _, _, problem := a.breakdownAsset(r.Context(), id[1:], identity(r).ID); upload && problem != "" {
 		fail(w, 404, "视频不存在")
 		return
 	}
@@ -51,15 +50,19 @@ func (a *Server) hotBreakdown(w http.ResponseWriter, r *http.Request) {
 	if !decode(w, r, &v) {
 		return
 	}
-	key, problem := a.breakdownAsset(r.Context(), v.AssetID, identity(r).ID)
+	key, size, problem := a.breakdownAsset(r.Context(), v.AssetID, identity(r).ID)
 	if problem != "" {
 		fail(w, 400, problem)
 		return
 	}
 	go func() {
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+		ctx, cancel := context.WithTimeout(context.Background(), 20*time.Minute) // a large video is uploaded first
 		defer cancel()
-		if _, err := a.Hot.EnsureBreakdown(ctx, a.Vision, id, func() (string, error) { return a.Media.InputURL(ctx, key) }); err != nil {
+		source := func() (vision.Video, error) {
+			url, err := a.Media.InputURL(ctx, key)
+			return vision.Link(url, size), err
+		}
+		if _, err := a.Hot.EnsureBreakdown(ctx, a.Vision, id, source); err != nil {
 			slog.Warn("video breakdown failed", "video", id, "error", err.Error())
 		}
 	}()
@@ -67,16 +70,16 @@ func (a *Server) hotBreakdown(w http.ResponseWriter, r *http.Request) {
 }
 
 // breakdownAsset checks the caller's own saved copy of the video.
-func (a *Server) breakdownAsset(ctx context.Context, assetID, user string) (string, string) {
+func (a *Server) breakdownAsset(ctx context.Context, assetID, user string) (string, int64, string) {
 	row, err := a.Store.Get(ctx, "assets", assetID)
 	var asset media.Asset
 	if err != nil || row.Owner != user || json.Unmarshal(row.Data, &asset) != nil || !strings.HasPrefix(asset.Type, "video/") {
-		return "", "原视频素材不可用"
+		return "", 0, "原视频素材不可用"
 	}
-	if asset.Size > breakdownMaxSize {
-		return "", "原视频超过 50 MB，无法拆解"
+	if asset.Size > vision.FileLimit { // over 50 MB is uploaded through 方舟's Files API
+		return "", 0, "原视频超过 512 MB，无法拆解"
 	}
-	return asset.Key, ""
+	return asset.Key, asset.Size, ""
 }
 
 // The vision service's own words (keys, quota, upstream errors) stay in the

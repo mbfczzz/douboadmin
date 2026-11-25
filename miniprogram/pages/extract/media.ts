@@ -1,4 +1,4 @@
-import { upload, error, cancelled, chooseMediaFile, chooseReferenceFile, request } from "../../utils/api";
+import { upload, error, cancelled, chooseMediaFile, chooseReferenceFile, checkUploadSize, request } from "../../utils/api";
 import { askChat, chatChoices } from "../../services/ai-script";
 import { loadConfig } from "../../utils/config-cache";
 import { pickerItems, savedModel, saveModel } from "../../utils/model-pick";
@@ -74,7 +74,7 @@ export const mediaHandlers = {
       const r = await wx.chooseMessageFile({ count: 1, type: "all", extension: ["jpg", "jpeg", "png", "webp", "mp4", "mov", "mp3", "wav", "m4a", "pdf", "doc", "docx", "txt"] });
       const f = r.tempFiles[0];
       if (!/\.(jpe?g|png|webp|mp4|mov)$/i.test(f.name)) throw new Error("暂只支持聊天里的图片和视频，音频和文档即将开放");
-      if (f.size > 50 * 1024 * 1024) throw new Error("文件不能超过 50 MB");
+      checkUploadSize(f.size, /\.(mp4|mov)$/i.test(f.name));
       return { path: f.path };
     });
   },

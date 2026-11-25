@@ -116,6 +116,16 @@ test("reference audio selection uses supported file formats and checks size", as
   };
   await assert.rejects(h.api.chooseReferenceFile("audio"), /50 MB/);
 });
+test("a reference video may be up to 500 MB; a picture stays at 50 MB", async () => {
+  const h = harness(), MB = 1024 * 1024;
+  let file = { tempFilePath: "v.mp4", fileType: "video", size: 300 * MB };
+  h.wx.chooseMedia = async () => ({ tempFiles: [file] });
+  assert.equal((await h.api.chooseReferenceFile("video")).size, 300 * MB);
+  file = { ...file, size: 501 * MB };
+  await assert.rejects(h.api.chooseReferenceFile("video"), /500 MB/);
+  file = { tempFilePath: "p.jpg", fileType: "image", size: 51 * MB };
+  await assert.rejects(h.api.chooseReferenceFile("image"), /50 MB/);
+});
 test("template more action appends remaining templates to the two columns", async () => {
   const h = harness(),
     page = h.page("templates");

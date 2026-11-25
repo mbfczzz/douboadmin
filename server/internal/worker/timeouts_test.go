@@ -136,8 +136,22 @@ func TestImageRoundWaitsForSlowSynchronousSubmit(t *testing.T) {
 	if got := roundLimit(j, now); got != 10*time.Minute {
 		t.Fatal("4K image submit would be cut off early", got)
 	}
+	// A finished video (up to 500 MB, e.g. Seedance 4K) is copied to storage
+	// within one round; polls themselves end with their HTTP timeouts.
 	j.Input.Kind = "video"
+	if got := roundLimit(j, now); got != 10*time.Minute {
+		t.Fatal("a large video result would be cut off while saving", got)
+	}
+	j.Input.Kind = "audio"
 	if got := roundLimit(j, now); got != 130*time.Second {
-		t.Fatal("async video round should stay short", got)
+		t.Fatal("other async rounds stay short", got)
+	}
+}
+
+// A 一键复刻 import may upload a large video to the Files API first.
+func TestImportRoundsAllowALargeUpload(t *testing.T) {
+	j := core.NewJob("u", "import", core.JobInput{Kind: "import"})
+	if got := roundLimit(j, time.Now()); got != 20*time.Minute {
+		t.Fatal(got)
 	}
 }

@@ -50,6 +50,8 @@ func (a *Server) estimateJob(w http.ResponseWriter, r *http.Request) {
 	if !settings.BillingEnabled {
 		units = 0
 	}
-	// perSecond: video priced by duration (按秒); otherwise a flat 按次 price.
-	reply(w, 200, map[string]any{"units": units, "billingEnabled": settings.BillingEnabled, "perSecond": perSecond})
+	// perSecond: video priced by duration (按秒); perToken: 火山方舟 Seedance,
+	// units is the most it can cost (按量); otherwise a flat 按次 price.
+	_, perToken := core.ArkVideo(m.Key)
+	reply(w, 200, map[string]any{"units": units, "billingEnabled": settings.BillingEnabled, "perSecond": perSecond, "perToken": perToken})
 }

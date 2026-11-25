@@ -227,3 +227,16 @@
     border-left: 0;
   }
 }
+.config-reference-billing {
+  margin: 16px 0 4px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+.config-reference-billing .config-hint {
+  margin-top: 8px;
+}
+.model-config .config-subtitle {
+  margin: 14px 0 6px;
+  font-size: 13px;
+  font-weight: 600;
+}

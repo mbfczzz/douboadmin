@@ -90,6 +90,9 @@ func (p *Relay) Generate(ctx context.Context, j core.Job) (string, error) {
 		if _, _, direct := core.DirectChat(m.Key); direct {
 			return "", fmt.Errorf("生成模型配置无效")
 		}
+		if _, ark := core.ArkVideo(m.Key); ark { // generated at 火山方舟, never the relay
+			return "", fmt.Errorf("火山方舟视频生成尚未配置")
+		}
 		assets, err := p.Assets(ctx, j)
 		if err != nil {
 			return "", err

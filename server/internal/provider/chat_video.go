@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"doubo/server/internal/core"
+	"doubo/server/internal/vision"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -15,9 +16,10 @@ import (
 // note is kept per video, so asking about it again is instant.
 
 const (
-	videoNoteRunes = 1500     // within billing's per-material allowance
-	videoMaxBytes  = 50 << 20 // 方舟 reads video URLs up to 50 MB
-	videoNoteStale = 5 * time.Minute
+	videoNoteRunes = 1500             // within billing's per-material allowance
+	videoMaxBytes  = vision.FileLimit // over 50 MB is uploaded through 方舟's Files API
+	videoNoteStale = 10 * time.Minute // a large video is uploaded before it is watched
+	videoNoteRetry = 5 * time.Minute  // a failed video is not watched again sooner
 	videoNotePoll  = 500 * time.Millisecond
 )
 
@@ -37,8 +39,9 @@ func (p *DirectChat) videoNote(ctx context.Context, j core.Job, assetID, url str
 		return "【" + label + "】暂时看不到这个视频的画面；请告诉用户暂时无法查看视频，并请用户描述视频内容，不要提及任何配置或服务原因。"
 	}
 	modelID := p.Vision.ModelID()
-	if size := assetSize(ctx, p, assetID); size > videoMaxBytes {
-		return "【" + label + "】视频超过 50MB，无法观看；请告诉用户剪短或压缩后重新上传。"
+	size := assetSize(ctx, p, assetID)
+	if size > videoMaxBytes {
+		return "【" + label + "】视频超过 512MB，无法观看；请告诉用户剪短或压缩后重新上传。"
 	}
 	for {
 		row, err := p.Store.Get(ctx, "video_notes", assetID)
@@ -49,7 +52,7 @@ func (p *DirectChat) videoNote(ctx context.Context, j core.Job, assetID, url str
 			if n.Model == modelID && (n.Status == "done" || n.Status == "") && n.Note != "" {
 				return videoNoteText(label, n.Note)
 			}
-			if n.Model == modelID && n.Status == "failed" && time.Since(n.At) < videoNoteStale {
+			if n.Model == modelID && n.Status == "failed" && time.Since(n.At) < videoNoteRetry {
 				return videoNoteFailure(label)
 			}
 			if n.Model == modelID && n.Status == "running" && time.Since(n.StartedAt) < videoNoteStale {
@@ -71,13 +74,13 @@ func (p *DirectChat) videoNote(ctx context.Context, j core.Job, assetID, url str
 		if err != nil {
 			return videoNoteFailure(label)
 		}
-		return p.watchVideoNote(ctx, j, label, url, claimed, claim)
+		return p.watchVideoNote(ctx, j, label, vision.Link(url, size), claimed, claim)
 	}
 }
 
-func (p *DirectChat) watchVideoNote(ctx context.Context, j core.Job, label, url string, row core.Record, n videoNote) string {
+func (p *DirectChat) watchVideoNote(ctx context.Context, j core.Job, label string, video vision.Video, row core.Record, n videoNote) string {
 	_ = p.Store.Progress(ctx, j, 5, "正在观看"+label+"…")
-	b, err := p.Vision.Breakdown(ctx, url)
+	b, err := p.Vision.Breakdown(ctx, video)
 	if err != nil {
 		n.Status, n.Error, n.At = "failed", err.Error(), time.Now().UTC()
 		p.saveVideoNote(ctx, row, n)

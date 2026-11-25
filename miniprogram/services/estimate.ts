@@ -41,9 +41,11 @@ export function estimateCost(input: EstimateInput, owner: string) {
   return { promise, abort: () => task?.abort() };
 }
 
-// 按秒 when the price comes from the video duration table, else 按次.
+// 按秒 when the price comes from the video duration table, 按量 when it is the
+// most a task can cost (settled on usage), else 按次.
 export function quoteParts(q: Estimate, duration = 0) {
   if (!q.units) return { quoteMode: "", quoteRate: "", quoteText: "本次不扣积分" };
+  if (q.perToken) return { quoteMode: "按量", quoteRate: "按实际用量扣除，多余退回", quoteText: `最多 ${points(q.units)} 积分` };
   const perSecond = !!q.perSecond && duration > 0;
   return {
     quoteMode: perSecond ? "按秒" : "按次",

@@ -1,6 +1,7 @@
 // Package vision asks a video-understanding model (Doubao Seed Vision on
 // Volcengine Ark by default, any OpenAI-compatible chat API that takes
 // video_url) to break a video down for 一键复刻: hook, shots, selling points.
+// Videos over 50 MB go through Ark's Files API (files.go).
 package vision
 
 import (
@@ -77,24 +78,33 @@ const instruction = `你是短视频爆款拆解专家。请完整观看这条�
 
 // Breakdown watches the video; when this model cannot be used (not
 // configured, not activated, no access) the fallback model watches instead.
-func (c *Client) Breakdown(ctx context.Context, videoURL string) (Breakdown, error) {
+func (c *Client) Breakdown(ctx context.Context, v Video) (Breakdown, error) {
 	if !c.own() {
-		return c.Fallback.watch(ctx, videoURL)
+		return c.Fallback.watchVideo(ctx, v)
 	}
-	b, err := c.watch(ctx, videoURL)
+	b, err := c.watchVideo(ctx, v)
 	var refused *refusedError
 	if errors.As(err, &refused) && c.Fallback.own() {
-		return c.Fallback.watch(ctx, videoURL)
+		return c.Fallback.watchVideo(ctx, v)
 	}
 	return b, err
 }
 
-func (c *Client) watch(ctx context.Context, videoURL string) (Breakdown, error) {
+// watchVideo reads a small video by link and uploads a large one.
+func (c *Client) watchVideo(ctx context.Context, v Video) (Breakdown, error) {
+	if v.Size > URLLimit {
+		return c.watchFile(ctx, v)
+	}
+	return c.watch(ctx, map[string]any{"url": v.URL, "fps": 1})
+}
+
+// watch asks the model about one video_url item: {url, fps} or {file_id}.
+func (c *Client) watch(ctx context.Context, video map[string]any) (Breakdown, error) {
 	started := time.Now()
 	body := map[string]any{
 		"model": c.Model,
 		"messages": []any{map[string]any{"role": "user", "content": []any{
-			map[string]any{"type": "video_url", "video_url": map[string]any{"url": videoURL, "fps": 1}},
+			map[string]any{"type": "video_url", "video_url": video},
 			map[string]any{"type": "text", "text": instruction},
 		}}},
 		"temperature": 0.2,

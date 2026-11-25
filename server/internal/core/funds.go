@@ -43,6 +43,8 @@ type JobBilling struct {
 	OutputTokens  int    `json:"outputTokens,omitempty"`
 	CachedTokens  int    `json:"cachedTokens,omitempty"` // of InputTokens, read from the provider's cache
 	Peak          bool   `json:"peak,omitempty"`         // charged at peak-hour prices
+	// VideoTokens: 火山方舟 Seedance's reported video tokens (usage.completion_tokens).
+	VideoTokens int64 `json:"videoTokens,omitempty"`
 }
 type Order struct {
 	Virtual       *VirtualOrder         `json:"virtual,omitempty"`

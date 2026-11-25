@@ -89,7 +89,9 @@ func (s ModelSettings) Validate(m Model) error {
 			}
 			continue
 		}
-		if !allowed || !validRate(n) || n > 50 || (strings.HasSuffix(key, "Count") && (n > 20 || math.Trunc(n) != n)) {
+		// Sizes up to the 500 MB video upload limit; at most 20 of a kind
+		// (a job takes 20 materials).
+		if !allowed || !validRate(n) || n > 500 || (strings.HasSuffix(key, "Count") && (n > 20 || math.Trunc(n) != n)) {
 			return fmt.Errorf("素材限制字段无效")
 		}
 	}
@@ -133,6 +135,12 @@ func (s ModelSettings) Validate(m Model) error {
 		if len(col) > 32 || !validRate(n) {
 			return fmt.Errorf("按次积分无效")
 		}
+	}
+	if err := s.validateReferenceVideoBilling(m); err != nil {
+		return err
+	}
+	if err := s.validateVideoTokenPrices(m); err != nil {
+		return err
 	}
 	if len(s.ErrorHints) > 20 {
 		return fmt.Errorf("最多设置 20 条错误提示映射")

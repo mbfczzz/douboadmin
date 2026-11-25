@@ -3,12 +3,14 @@ package api
 import (
 	"context"
 	"doubo/server/internal/core"
+	"doubo/server/internal/media"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
 	"slices"
 	"strings"
+	"time"
 )
 
 func (a *Server) upload(w http.ResponseWriter, r *http.Request) {
@@ -21,11 +23,18 @@ func (a *Server) upload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	avatar := r.URL.Query().Get("purpose") == "avatar" || r.URL.Query().Get("purpose") == "cover"
-	limit := int64(50 << 20)
-	message := "文件不能超过 50 MB"
+	// Videos may be up to 500 MB (一键复刻 takes whole phone recordings);
+	// other files stay at 50 MB, checked once the type is known.
+	limit := int64(videoUploadLimit)
+	message := "文件不能超过 500 MB"
 	if avatar {
 		limit = 5 << 20
 		message = "图片不能超过 5 MB"
+	} else {
+		// A large upload outlasts the server's 90-second request window.
+		rc := http.NewResponseController(w)
+		_ = rc.SetReadDeadline(time.Now().Add(workUploadWindow))
+		_ = rc.SetWriteDeadline(time.Now().Add(workUploadWindow))
 	}
 	r.Body = http.MaxBytesReader(w, r.Body, limit+(1<<20))
 	if e := r.ParseMultipartForm(2 << 20); e != nil {
@@ -58,6 +67,15 @@ func (a *Server) upload(w http.ResponseWriter, r *http.Request) {
 		fail(w, 400, "支持 JPG、PNG、WebP、MP4、MP3 和 WAV")
 		return
 	}
+	if !strings.HasPrefix(typ, "video/") && header.Size > fileUploadLimit {
+		fail(w, 400, "文件不能超过 50 MB（视频可到 500 MB）")
+		return
+	}
+	length := 0.0 // read here so 参考视频计费 never fetches a large video again
+	if strings.HasPrefix(typ, "video/") {
+		length, _ = media.MP4Duration(file)
+		_, _ = file.Seek(0, 0)
+	}
 	row, e := a.saveAsset(r.Context(), identity(r).ID, file, header.Filename, typ, header.Size)
 	if e != nil {
 		if errors.Is(e, errSaveFile) {
@@ -66,6 +84,12 @@ func (a *Server) upload(w http.ResponseWriter, r *http.Request) {
 			dbError(w, e)
 		}
 		return
+	}
+	if length > 0 {
+		a.keepDuration(r.Context(), row, length)
+		if fresh, err := a.Store.Get(r.Context(), "assets", row.ID); err == nil {
+			row = fresh
+		}
 	}
 	if row, e = a.signedAsset(r.Context(), row); e != nil {
 		dbError(w, e)

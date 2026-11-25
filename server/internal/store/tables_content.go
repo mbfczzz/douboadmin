@@ -29,7 +29,7 @@ func init() {
 		}},
 		Table{Name: "assets", Comment: "上传文件与生成结果文件", Owner: "上传者或任务所属用户", Cols: []Col{
 			c("name", Short), c("url", Text), c("key", Text), c("type", Short), c("size", Int),
-			c("sourceUrl", Text), c("sourceVideoId", Key),
+			c("sourceUrl", Text), c("sourceVideoId", Key), c("duration", Float),
 		}},
 		Table{Name: "executions", Comment: "生成任务在上游的执行状态；id = 任务 id", Cols: []Col{
 			c("phase", Key), c("modelKey", Short), c("taskId", Short), c("startedAt", Time),
@@ -49,7 +49,7 @@ func init() {
 		Table{Name: "job_billing", Comment: "生成任务计费（预留/结算/退回）；id = 任务 id", Owner: "用户", Cols: []Col{
 			c("units", Int), c("state", Key), c("estimatedCostMicros", Int),
 			c("usedUnits", Int), c("reservedUnits", Int), c("inputTokens", Int), c("outputTokens", Int),
-			c("cachedTokens", Int), c("peak", Bool),
+			c("cachedTokens", Int), c("peak", Bool), c("videoTokens", Int),
 		}},
 		Table{Name: "work_meta", Comment: "作品标题与删除标记；id = 任务 id", Owner: "用户", Cols: []Col{
 			c("featured", Bool), c("featuredAt", Time),

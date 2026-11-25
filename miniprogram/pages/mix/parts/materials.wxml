@@ -17,7 +17,7 @@
         >{{uploading?'上传中':'添加素材'}}</text
       ></view
     ></view
-  ><text class="biz-note">{{assets.length}} / 10 个素材，单个不超过 50 MB</text
+  ><text class="biz-note">{{assets.length}} / 10 个素材，视频不超过 500 MB</text
   ><view wx:if="{{restoreError}}" class="biz-error"
     ><text>{{restoreError}}</text
     ><view class="row"

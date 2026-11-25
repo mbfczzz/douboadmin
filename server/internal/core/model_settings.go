@@ -34,6 +34,12 @@ type ModelSettings struct {
 	Ideas             []string           `json:"ideas,omitempty"`
 	MaxPromptChars    int                `json:"maxPromptChars,omitempty"`
 	VideoBillingMode  string             `json:"videoBillingMode,omitempty"`
+	// ReferenceVideoBilling charges each 全能参考 video on top of the
+	// generation (FlowLight 参考视频计费); see ReferenceVideoUnits.
+	ReferenceVideoBilling bool `json:"referenceVideoBillingEnabled,omitempty"`
+	// VideoTokenPrices: 火山方舟 Seedance (arkvideo:) is billed on the video
+	// tokens it reports; points per million tokens by output resolution.
+	VideoTokenPrices map[string]VideoTokenPrice `json:"videoTokenPrices,omitempty"`
 	// 按量计费 for chat: points per 1,000 input / output tokens.
 	TokenInputPrice  float64 `json:"tokenInputPrice,omitempty"`
 	TokenOutputPrice float64 `json:"tokenOutputPrice,omitempty"`
@@ -76,10 +82,16 @@ func (m Model) Effective() Model {
 	m.Settings.Modes = s.Modes
 	beforeModes := len(m.Modes)
 	m.Modes = selection(m.Modes, s.Modes)
+	official := m // 火山方舟 Seedance takes only its own values: narrowed, never widened
 	m.Resolutions = parameterSelection(m.Resolutions, s.Resolutions)
 	m.Ratios = parameterSelection(m.Ratios, s.Ratios)
 	m.Qualities = parameterSelection(m.Qualities, s.Qualities)
 	m.Durations = parameterSelection(m.Durations, s.Durations)
+	if _, ark := ArkVideo(m.Key); ark {
+		m.Resolutions = selection(official.Resolutions, s.Resolutions)
+		m.Ratios = selection(official.Ratios, s.Ratios)
+		m.Durations = selection(official.Durations, s.Durations)
+	}
 	m = m.fixedParameters()
 	if beforeModes > 0 && len(m.Modes) == 0 {
 		m.Available = false

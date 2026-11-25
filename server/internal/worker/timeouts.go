@@ -30,8 +30,15 @@ func roundLimit(j core.Job, now time.Time) time.Duration {
 	limit := 130 * time.Second
 	// Image submits are synchronous and may run for minutes; mix encodes
 	// locally; a chat turn may watch videos and write a long reply.
-	if j.Input.Kind == "image" || j.Input.Kind == "mix" || j.Input.Kind == "chat" {
+	// A finished video (up to 500 MB, e.g. Seedance 4K) is copied to storage
+	// within one round.
+	if j.Input.Kind == "image" || j.Input.Kind == "mix" || j.Input.Kind == "chat" || j.Input.Kind == "video" {
 		limit = 10 * time.Minute
+	}
+	// A 一键复刻 import may upload a video of hundreds of MB to 方舟's Files
+	// API before breaking it down.
+	if j.Input.Kind == "import" {
+		limit = 20 * time.Minute
 	}
 	if deadline := core.JobDeadline(j); !deadline.IsZero() {
 		return min(limit, max(0, deadline.Sub(now)))

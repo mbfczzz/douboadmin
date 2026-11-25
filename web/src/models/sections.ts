@@ -40,6 +40,8 @@ export const modelFieldLabels: Record<string, string> = {
   ideas: "灵感提示词",
   maxPromptChars: "提示词字数上限",
   videoBillingMode: "视频计费方式",
+  referenceVideoBillingEnabled: "参考视频计费",
+  videoTokenPrices: "视频 token 单价（积分/百万 token）",
   priceMatrix: "积分定价",
   pricePerRequestByResolution: "按次定价",
   tokenInputPrice: "输入单价（积分/千 token）",

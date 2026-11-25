@@ -13,6 +13,9 @@ test("quotes say 按次 or 按秒 with the per-second rate and this run's total"
   assert.equal(quoteParts({ units: 400, billingEnabled: true, perSecond: true }, 0).quoteMode, "按次");
   assert.equal(quoteParts({ units: 400, billingEnabled: true }, 5).quoteMode, "按次");
   assert.deepEqual({ ...quoteParts({ units: 0, billingEnabled: false }, 5) }, { quoteMode: "", quoteRate: "", quoteText: "本次不扣积分" });
+  // 火山方舟 Seedance: the most a task can cost, settled on usage.
+  assert.deepEqual({ ...quoteParts({ units: 5714, billingEnabled: true, perToken: true }, 5) },
+    { quoteMode: "按量", quoteRate: "按实际用量扣除，多余退回", quoteText: "最多 57.14 积分" });
   const wxml = fs.readFileSync("pages/create/index.wxml", "utf8");
   assert.match(wxml, /class="quote-mode">\{\{quoteMode\}\}/);
   assert.match(wxml, /class="quote-rate">\{\{quoteRate\}\}/);

@@ -77,7 +77,7 @@ test("hot videos are offered while nothing is chosen; a tap loads one", async ()
   assert.equal(page.data.video.id, "703");
 });
 
-test("a video upload reports its progress and may take five minutes; other uploads keep 90 s", async () => {
+test("a video upload reports its progress and may take twenty minutes; other uploads keep 90 s", async () => {
   const h = harness();
   await h.api.signIn();
   const sent = [], seen = [];
@@ -89,7 +89,7 @@ test("a video upload reports its progress and may take five minutes; other uploa
   await h.api.upload("v.mp4", false, undefined, (p) => seen.push(p));
   await h.api.upload("p.jpg");
   assert.deepEqual(seen, [55]);
-  assert.equal(sent[0].timeout, 300000);
+  assert.equal(sent[0].timeout, 1200000);
   assert.equal(sent[1].timeout, 90000);
 });
 

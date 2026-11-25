@@ -12,6 +12,12 @@ import (
 
 var errSaveFile = errors.New("asset file not saved")
 
+// Upload limits: videos (a whole phone recording for 一键复刻) and the rest.
+const (
+	videoUploadLimit = 500 << 20
+	fileUploadLimit  = 50 << 20
+)
+
 var assetExts = map[string]string{"image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp", "video/mp4": ".mp4", "audio/mpeg": ".mp3", "audio/wave": ".wav", "audio/x-wav": ".wav"}
 
 // saveAsset stores an uploaded file for owner (OSS, or local media in

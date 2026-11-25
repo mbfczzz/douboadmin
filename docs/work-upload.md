@@ -21,4 +21,4 @@
 
 ## 大文件上传
 
-上限 500 MB。该接口单独放宽了 API 的读写时限（20 分钟，其余接口仍为 90 秒），视频先暂存到 API 的临时目录再传到 OSS，不读入内存。Nginx 需为该接口单独放宽请求体大小和超时，见 `deploy/native/nginx.conf.example` 中的 `location = /api/admin/works`；上传期间临时目录约需与视频同等大小的磁盘空间。
+上限 500 MB。该接口单独放宽了 API 的读写时限（20 分钟，其余接口仍为 90 秒），视频先暂存到 API 的临时目录再传到 OSS，不读入内存。Nginx 需为该接口单独放宽请求体大小和超时，见 `deploy/native/nginx.conf.example` 中的 `location ~ ^/api/(assets(/[^/]+/reference-clip)?|admin/works)$`（小程序素材上传 `/api/assets` 的视频同样最大 500 MB，图片、音频仍为 50 MB）；上传期间临时目录约需与视频同等大小的磁盘空间。
