@@ -8,8 +8,9 @@ import (
 	"errors"
 )
 
-// Ensure lists the fixed Seedance models in 模型管理 at start. Their official
-// capabilities are restored every time; the operator's name, order, shelf
+// Ensure lists the fixed Seedance models in 模型管理 at start, named
+// "Seedance 2.0 官方" etc. Their official capabilities are restored every
+// time; the operator's name, order, shelf
 // state and settings (prices included) are kept. A deleted row stays deleted.
 // They are usable only once the 火山方舟视频生成 key is set (ready).
 func Ensure(ctx context.Context, s store.Store, ready bool) error {
@@ -17,7 +18,7 @@ func Ensure(ctx context.Context, s store.Store, ready bool) error {
 		id := ModelID(spec.ID)
 		row, err := s.Get(ctx, "models", id)
 		if errors.Is(err, core.ErrNotFound) {
-			m := core.Model{ID: id, Name: spec.Name, Published: true, Available: ready, Sort: 800 + i, Settings: spec.Defaults()}
+			m := core.Model{ID: id, Name: spec.Label(), Published: true, Available: ready, Sort: 800 + i, Settings: spec.Defaults()}
 			spec.Apply(&m)
 			if _, err = s.Put(ctx, "models", core.Record{ID: id, Data: core.Data(m)}, 0); err != nil && !errors.Is(err, core.ErrConflict) {
 				return err // a lost race with the other process is fine
@@ -32,6 +33,9 @@ func Ensure(ctx context.Context, s store.Store, ready bool) error {
 			continue
 		}
 		before := string(core.Data(m))
+		if m.Name == spec.Name { // the earlier default, never renamed by the operator
+			m.Name = spec.Label()
+		}
 		spec.Apply(&m)
 		m.Available = ready
 		if len(m.Settings.VideoTokenPrices) == 0 {

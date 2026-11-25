@@ -67,14 +67,16 @@ func TestEnsureKeepsOperatorEditsAndOfficialCapabilities(t *testing.T) {
 		return m, row.Version
 	}
 	m, v := read("doubao-seedance-2-5-260628")
-	if m.Key != "arkvideo:doubao-seedance-2-5-260628" || m.Available || len(m.Durations) != 27 || m.Durations[26] != 30 || len(m.Resolutions) != 4 ||
+	if m.Name != "Seedance 2.5 官方" || m.Key != "arkvideo:doubao-seedance-2-5-260628" || m.Available || len(m.Durations) != 27 || m.Durations[26] != 30 || len(m.Resolutions) != 4 ||
 		m.Settings.VideoTokenPrices["1080p"].Plain != 770 || m.Settings.VideoTokenPrices["720p"].WithVideo != 420 || m.Settings.RefLimits["omniRef.imageCount"] != 20 {
 		t.Fatalf("Seedance 2.5 %+v", m)
 	}
 	if err := m.Settings.Validate(m); err != nil {
 		t.Fatal("the default settings must pass the console's validation:", err)
 	}
-	mini, _ := read("doubao-seedance-2-0-mini-260615")
+	mini, mv := read("doubao-seedance-2-0-mini-260615")
+	mini.Name = "Seedance 2.0 Mini" // a row registered before 官方 was added
+	_, _ = s.Put(ctx, "models", core.Record{ID: mini.ID, Data: core.Data(mini)}, mv)
 	if len(mini.Durations) != 12 || len(mini.Resolutions) != 2 || mini.Settings.VideoTokenPrices["720p"].Plain != 230 {
 		t.Fatalf("mini %+v", mini)
 	}
@@ -93,6 +95,9 @@ func TestEnsureKeepsOperatorEditsAndOfficialCapabilities(t *testing.T) {
 	}
 	if again, _ := read("doubao-seedance-2-0-fast-260128"); !again.Deleted {
 		t.Fatal("a deleted model came back")
+	}
+	if renamed, _ := read("doubao-seedance-2-0-mini-260615"); renamed.Name != "Seedance 2.0 Mini 官方" {
+		t.Fatal("the earlier default name was not marked 官方", renamed.Name)
 	}
 }
 

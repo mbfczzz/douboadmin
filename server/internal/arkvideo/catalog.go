@@ -78,6 +78,10 @@ var Modes = []string{"t2v", "i2v", "keyframe", "omni_ref"}
 // Size limits per reference file, MB (图片 30, 视频 200, 音频 15).
 const imageMB, videoMB, audioMB = 30, 200, 15
 
+// Label is the name a new row gets: the model name marked 官方 (generated
+// at 火山方舟 itself, not through the relay).
+func (s Spec) Label() string { return s.Name + " 官方" }
+
 // ModelID is the 模型管理 row of a fixed model.
 func ModelID(id string) string { return "arkvideo-" + id }
 

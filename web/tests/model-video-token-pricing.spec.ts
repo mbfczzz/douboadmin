@@ -12,7 +12,7 @@ test("Seedance pricing edits video token prices per resolution", async ({
   row.data = {
     ...row.data,
     key: "arkvideo:doubao-seedance-2-0-260128",
-    name: "Seedance 2.0",
+    name: "Seedance 2.0 官方",
     resolutions: ["480p", "720p"],
     durations: [4, 5, 6],
     modes: ["t2v", "omni_ref"],
