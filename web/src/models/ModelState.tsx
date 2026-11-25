@@ -29,7 +29,9 @@ export default function ModelState({
         {model.settings?.availabilityStatus === "maintenance"
           ? "维护中"
           : !model.available
-            ? "上游不可用"
+            ? model.key.startsWith("arkvideo:")
+              ? "未配置火山方舟 Key" // fixed Seedance models: not the relay's
+              : "上游不可用"
             : !supportedModel(model)
               ? "未开放创作"
               : model.published

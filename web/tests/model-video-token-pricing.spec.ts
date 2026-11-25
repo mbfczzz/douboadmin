@@ -52,3 +52,21 @@ test("Seedance pricing edits video token prices per resolution", async ({
     withVideo: 300,
   });
 });
+
+// Without the 火山方舟 key a fixed model says so, not "上游不可用".
+test("an unavailable Seedance model asks for the 火山方舟 key", async ({
+  page,
+}) => {
+  const row = modelPage("video").items[0] as Row<Model>;
+  row.data = {
+    ...row.data,
+    key: "arkvideo:doubao-seedance-2-0-260128",
+    name: "Seedance 2.0 官方",
+    available: false,
+  };
+  await openModels(page, (route) =>
+    route.fulfill({ json: { ...modelPage("video"), items: [row] } }),
+  );
+  await expect(page.getByText("未配置火山方舟 Key").first()).toBeVisible();
+  await expect(page.getByText("上游不可用")).toHaveCount(0);
+});
