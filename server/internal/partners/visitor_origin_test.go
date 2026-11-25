@@ -22,3 +22,18 @@ func TestRegistrationVisitorOrigin(t *testing.T) {
 		}
 	}
 }
+
+func TestPendingRegistrationOriginIncludesOldRequestedRoles(t *testing.T) {
+	for _, item := range []struct {
+		registration core.Registration
+		want         string
+	}{
+		{core.Registration{Role: core.RoleMember, Method: "scan"}, "scan"},
+		{core.Registration{Role: core.RoleS1, Method: "code"}, "code"},
+		{core.Registration{Role: core.RoleS2, Code: "ABCD2345"}, "scan"},
+	} {
+		if got := registrationOrigin(item.registration); got != item.want {
+			t.Fatalf("origin %q, want %q for %+v", got, item.want, item.registration)
+		}
+	}
+}

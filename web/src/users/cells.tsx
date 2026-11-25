@@ -46,7 +46,7 @@ export const accessCell = (r: Row<Profile>) => {
         <Tag tone="warning">
           {a.visitorOrigin
             ? visitorOriginLabel(a.visitorOrigin)
-            : "待审核开通"}
+            : "游客 · 待开通"}
         </Tag>
       ) : (
         <Tag>未开通</Tag>

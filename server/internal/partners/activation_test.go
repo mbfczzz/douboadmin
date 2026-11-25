@@ -27,7 +27,7 @@ func TestScanRegistersAndOnlyApprovalOpensTheAccount(t *testing.T) {
 	}
 	typed := strings.ToLower(code[:4]) + "-" + code[4:]
 	access, e := s.Join(ctx, "a", typed, "code")
-	if e != nil || access.Active || access.Status != "review" || access.PartnerID != s1 || access.Message != reviewMessage {
+	if e != nil || access.Active || access.Status != "review" || access.PartnerID != s1 || access.VisitorOrigin != "code" || access.Message != reviewMessage {
 		t.Fatal(access, e)
 	}
 	_, reg, e := get[core.Registration](reader{ctx, s.Store}, "registrations", "a")

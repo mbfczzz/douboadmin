@@ -19,7 +19,7 @@ func TestInviteRegistersAPendingProviderUntilApproved(t *testing.T) {
 	access := register(t, s, ctx, code.Code, "boss")
 	id := access.PartnerID
 	p := partnerOf(t, s, ctx, id)
-	if p.Status != "pending" || p.Role != core.RoleS1 || p.ParentID != branch || p.OwnerUser != "boss" || p.Name != "boss" || access.PartnerName != partnerOf(t, s, ctx, branch).Name {
+	if p.Status != "pending" || p.Role != core.RoleS1 || p.ParentID != branch || p.OwnerUser != "boss" || p.Name != "boss" || access.PartnerName != partnerOf(t, s, ctx, branch).Name || access.VisitorOrigin != "scan" {
 		t.Fatal("pending provider", p, access)
 	}
 	if owned, e := s.OwnedPartner(ctx, "boss"); e != nil || owned != id {

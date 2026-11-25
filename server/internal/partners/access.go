@@ -8,10 +8,7 @@ import (
 
 const reviewMessage = "账号待管理员开通，暂不可使用该功能"
 
-func registrationVisitorOrigin(reg core.Registration) string {
-	if reg.Role != core.RoleVisitor {
-		return ""
-	}
+func registrationOrigin(reg core.Registration) string {
 	if reg.Method == "direct" || reg.CodeKind == "direct" {
 		return "direct"
 	}
@@ -27,6 +24,13 @@ func registrationVisitorOrigin(reg core.Registration) string {
 	return ""
 }
 
+func registrationVisitorOrigin(reg core.Registration) string {
+	if reg.Role != core.RoleVisitor {
+		return ""
+	}
+	return registrationOrigin(reg)
+}
+
 func storedVisitorOrigin(r Reader, user string) (string, error) {
 	_, reg, err := get[core.Registration](r, "registrations", user)
 	if errors.Is(err, core.ErrNotFound) {
@@ -36,6 +40,17 @@ func storedVisitorOrigin(r Reader, user string) (string, error) {
 		return "", err
 	}
 	return registrationVisitorOrigin(reg), nil
+}
+
+func storedRegistrationOrigin(r Reader, user string) (string, error) {
+	_, reg, err := get[core.Registration](r, "registrations", user)
+	if errors.Is(err, core.ErrNotFound) {
+		return "", nil
+	}
+	if err != nil {
+		return "", err
+	}
+	return registrationOrigin(reg), nil
 }
 
 // access is what a mini-program user may do. Scanning only registers; the
@@ -85,7 +100,11 @@ func access(r Reader, user string) (core.Access, error) {
 	switch m.Status {
 	case "active":
 	case "pending":
-		out.Status, out.Message = "review", reviewMessage
+		origin, err := storedRegistrationOrigin(r, user)
+		if err != nil {
+			return out, err
+		}
+		out.Status, out.Message, out.VisitorOrigin = "review", reviewMessage, origin
 		return out, nil
 	case "rejected":
 		return unregistered(r, user)
@@ -130,7 +149,11 @@ func ownerAccess(r Reader, user string) (core.Access, bool, error) {
 				out.PartnerName = parent.Name
 			}
 		}
-		out.Status, out.Message = "review", reviewMessage
+		origin, err := storedRegistrationOrigin(r, user)
+		if err != nil {
+			return out, true, err
+		}
+		out.Status, out.Message, out.VisitorOrigin = "review", reviewMessage, origin
 		return out, true, nil
 	}
 	if e = activeChain(r, o.PartnerID); errors.Is(e, core.ErrPartnerDisabled) {
@@ -159,7 +182,7 @@ func (s *Service) OwnedPartner(ctx context.Context, user string) (string, error)
 func unregistered(r Reader, user string) (core.Access, error) {
 	_, reg, e := get[core.Registration](r, "registrations", user)
 	if e == nil && reg.Status == "pending" && reg.Role == core.RoleVisitor {
-		out := core.Access{Status: "review", PartnerID: reg.PartnerID, VisitorOrigin: registrationVisitorOrigin(reg), Message: reviewMessage}
+		out := core.Access{Status: "review", PartnerID: reg.PartnerID, VisitorOrigin: registrationOrigin(reg), Message: reviewMessage}
 		if _, partner, err := node(r, reg.PartnerID); err == nil {
 			out.PartnerName = partner.Name
 		} else if !errors.Is(err, core.ErrNotFound) {

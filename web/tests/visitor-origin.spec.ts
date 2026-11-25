@@ -45,6 +45,6 @@ test("user list distinguishes direct, scanned and adjusted visitors", async ({
     "身份调整游客",
   ])
     await expect(page.getByText(label, { exact: true })).toBeVisible();
-  await expect(page.getByText("待审核开通", { exact: true })).toBeVisible();
-  await expect(page.getByText("游客 · 待开通", { exact: true })).toHaveCount(0);
+  await expect(page.getByText("游客 · 待开通", { exact: true })).toBeVisible();
+  await expect(page.getByText("待审核开通", { exact: true })).toHaveCount(0);
 });
