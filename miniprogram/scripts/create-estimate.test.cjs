@@ -167,6 +167,7 @@ test("an attached reference video is included in the live discounted estimate", 
   await f.flush();
   const request = f.requests[2];
   assert.match(request.url, /assets=video-ref/);
+  assert.equal(request.timeout, 180000);
   request.success({ statusCode: 200, data: {
     units: 6500, referenceUnits: 3000, billingEnabled: true, perSecond: true,
   } });

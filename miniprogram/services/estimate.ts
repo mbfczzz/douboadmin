@@ -19,7 +19,7 @@ export function estimateCost(input: EstimateInput, owner: string) {
       url: API_BASE + "/api/jobs/estimate?" + query,
       method: "GET",
       header: { ...clientCapabilityHeaders, Authorization: "Bearer " + owner },
-      timeout: 10000,
+      timeout: input.assets?.length ? 180000 : 10000,
       success(res) {
         if (sessionToken() !== owner) return reject(new AuthCancelledError());
         if (res.statusCode < 200 || res.statusCode >= 300)

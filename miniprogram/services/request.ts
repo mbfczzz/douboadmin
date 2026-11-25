@@ -55,9 +55,8 @@ export function request<T>(
             ...(sentToken ? { Authorization: "Bearer " + sentToken } : {}),
             ...(key ? { "Idempotency-Key": key } : {}),
           },
-          // Douyin data (TikHub) can take up to the server's 40 s wait; a
-          // 一键复刻 reference clip may first fetch a video of hundreds of MB.
-          timeout: path.endsWith("/reference-clip") ? 180000 : path.startsWith("/hot/") ? 45000 : 20000,
+          // Large video operations may first fetch the original file.
+          timeout: path.endsWith("/reference-clip") || path === "/jobs/quote" ? 180000 : path.startsWith("/hot/") ? 45000 : 20000,
           success(res) {
             const meta = res.data as ResponseMeta;
             if (storedToken() !== storedAtSend) {

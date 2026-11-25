@@ -37,7 +37,7 @@ export async function confirmBudget(input: Input, quietPerToken = false): Promis
     availableUnits: number;
     perSecond?: boolean;
     perToken?: boolean; // units is the most a chat turn can cost
-    referenceUnits?: number; // discounted reference-video add-on
+    referenceUnits?: number;
   }>("/jobs/quote", "POST", input);
   if (!q.billingEnabled || !q.units) return { ...input, expectedCostUnits: 0 };
   if (!q.sufficient) {

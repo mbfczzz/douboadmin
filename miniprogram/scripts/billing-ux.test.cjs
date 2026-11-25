@@ -12,6 +12,7 @@ test("an uncertain submit retry reuses both its idempotency key and approved pri
   h.wx.request = (o) => {
     if (o.url.endsWith("/jobs/quote")) {
       quotes++;
+      assert.equal(o.timeout, 180000);
       o.success({
         statusCode: 200,
         data: {
