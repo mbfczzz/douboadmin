@@ -91,3 +91,13 @@ test("an uncertain issued order can be deferred and replaced after explicit conf
   assert.equal(orders.data.rows[0].state, "需核对支付结果");
   assert.equal(orders.data.rows[0].awaiting, false);
 });
+
+test("pending payment can be released right away after confirming no charge", async () => {
+  const f = await fixture();
+  assert.equal(f.page.data.paymentWaiting, false);
+  assert.equal(f.page.data.pendingOrderId, "old-order");
+  f.h.wx.showModal = o => o.success({ confirm: true });
+  await f.page.additionalPurchase();
+  assert.equal(f.page.data.pendingOrderId, "");
+  assert.equal(f.h.storage.get("pending-payments")[0].deferred, true);
+});

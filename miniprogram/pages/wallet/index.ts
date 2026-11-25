@@ -210,7 +210,7 @@ Page({
   async additionalPurchase() {
     const id = this.data.pendingOrderId,
       owner = this.data.info?.wallet.userId;
-    if (!id || !owner || !this.data.paymentWaiting || this.data.busy) return;
+    if (!id || !owner || this.data.busy) return;
     this.setData({ busy: true });
     try {
       if ((await confirmAdditionalPurchase(id, owner)) && !this.destroyed) {

@@ -12,7 +12,7 @@
       <view class="payment-head"><view class="payment-ring"><t-loading wx:if="{{!paymentWaiting}}" size="20px" /><image wx:else class="gl gl-20" src="/assets/glyphs/clock-brand.png" /></view><text class="biz-heading">{{paymentWaiting?'到账待确认':'正在确认到账'}}</text></view>
       <text class="biz-note" aria-role="status">{{paymentNotice}}</text>
       <button class="biz-action" bindtap="orders">查看订单</button>
-      <button wx:if="{{paymentWaiting}}" class="text-button phone-alternative" disabled="{{busy}}" bindtap="additionalPurchase">另购积分</button>
+      <button class="text-button phone-alternative" disabled="{{busy}}" bindtap="additionalPurchase">没有付款？重新购买</button>
     </view>
     <view wx:elif="{{paymentNotice}}" class="biz-note" aria-role="status">{{paymentNotice}}</view>
     <view wx:if="{{info}}" class="biz-card wallet-summary">
