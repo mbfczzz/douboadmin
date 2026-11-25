@@ -26,7 +26,7 @@ func setup(t *testing.T) (*Server, string, string) {
 func call(a *Server, method, path, token, key string, body any) *httptest.ResponseRecorder {
 	b, _ := json.Marshal(body)
 	r := httptest.NewRequest(method, path, bytes.NewReader(b))
-	r.Header.Set(capabilityHeader, strings.Join([]string{capabilityVisitorBrowse, capabilityVideoTokenPrice, capabilityReferenceBilling}, ","))
+	r.Header.Set(capabilityHeader, strings.Join([]string{capabilityVisitorBrowse, capabilityVideoTokenPrice}, ","))
 	if token != "" {
 		r.Header.Set("Authorization", "Bearer "+token)
 	}

@@ -4,6 +4,5 @@ export const clientCapabilityHeaders = {
   "X-Doubo-Capabilities": [
     "visitor-browse-v1",
     "video-token-pricing-v1",
-    "reference-video-billing-v1",
   ].join(","),
 };

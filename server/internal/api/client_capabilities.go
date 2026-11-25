@@ -7,10 +7,9 @@ import (
 )
 
 const (
-	capabilityHeader           = "X-Doubo-Capabilities"
-	capabilityVisitorBrowse    = "visitor-browse-v1"
-	capabilityVideoTokenPrice  = "video-token-pricing-v1"
-	capabilityReferenceBilling = "reference-video-billing-v1"
+	capabilityHeader          = "X-Doubo-Capabilities"
+	capabilityVisitorBrowse   = "visitor-browse-v1"
+	capabilityVideoTokenPrice = "video-token-pricing-v1"
 )
 
 func clientCapability(r *http.Request, capability string) bool {
@@ -29,5 +28,7 @@ func clientSupportsModel(r *http.Request, model core.Model) bool {
 	if _, ark := core.ArkVideo(model.Key); ark && !clientCapability(r, capabilityVideoTokenPrice) {
 		return false
 	}
-	return !model.Settings.ReferenceVideoBilling || clientCapability(r, capabilityReferenceBilling)
+	// Reference-video pricing is server-side: every client confirms the total
+	// returned by /jobs/quote, so it is safe to keep these models visible.
+	return true
 }

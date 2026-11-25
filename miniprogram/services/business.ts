@@ -37,6 +37,7 @@ export async function confirmBudget(input: Input, quietPerToken = false): Promis
     availableUnits: number;
     perSecond?: boolean;
     perToken?: boolean; // units is the most a chat turn can cost
+    referenceUnits?: number; // discounted reference-video add-on
   }>("/jobs/quote", "POST", input);
   if (!q.billingEnabled || !q.units) return { ...input, expectedCostUnits: 0 };
   if (!q.sufficient) {
@@ -62,12 +63,15 @@ export async function confirmBudget(input: Input, quietPerToken = false): Promis
     return { ...input, expectedCostUnits: q.units };
   }
   const seconds = input.kind === "video" && q.perSecond ? input.duration || 0 : 0;
+  const referenceUnits = Math.max(0, Math.min(q.referenceUnits || 0, q.units));
+  const generationUnits = q.units - referenceUnits;
   const approved = await ask({
     title: "本次将使用",
     amount: points(q.units),
     unit: "积分",
     rows: [
-      { label: "计费方式", value: seconds ? `按秒 · 每秒 ${points(Math.round(q.units / seconds))} × ${seconds} 秒` : "按次" },
+      { label: "计费方式", value: seconds ? `按秒 · 每秒 ${points(Math.round(generationUnits / seconds))} × ${seconds} 秒` : "按次" },
+      ...(referenceUnits ? [{ label: "参考视频附加", value: `${points(referenceUnits)} 积分（折后）` }] : []),
       { label: "当前可用", value: `${points(q.availableUnits)} 积分` },
       { label: "确认后剩余", value: `${points(q.availableUnits - q.units)} 积分` },
     ],

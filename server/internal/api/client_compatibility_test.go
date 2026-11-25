@@ -77,7 +77,7 @@ func TestLegacyInviteRegistrationEntersBrowseWithoutOpeningRole(t *testing.T) {
 	}
 }
 
-func TestLegacyMiniProgramDoesNotReceiveNewVideoBillingModels(t *testing.T) {
+func TestLegacyMiniProgramKeepsServerPricedReferenceModels(t *testing.T) {
 	a, _, _ := setup(t)
 	id := templateVideoModel(t, a)
 	row, _ := a.Store.Get(t.Context(), "models", id)
@@ -100,13 +100,13 @@ func TestLegacyMiniProgramDoesNotReceiveNewVideoBillingModels(t *testing.T) {
 	if !strings.Contains(modern, id) || !strings.Contains(modern, "arkvideo-") || !strings.Contains(modern, "新计费") {
 		t.Fatal("modern catalog lost new models", modern)
 	}
-	if strings.Contains(legacy, id) || strings.Contains(legacy, "arkvideo-") || strings.Contains(legacy, "新计费") || !strings.Contains(legacy, "demo-image") {
-		t.Fatal("legacy catalog is unsafe or empty", legacy)
+	if !strings.Contains(legacy, id) || strings.Contains(legacy, "arkvideo-") || !strings.Contains(legacy, "新计费") || !strings.Contains(legacy, "demo-image") {
+		t.Fatal("legacy catalog lost server-priced models or exposed token-priced models", legacy)
 	}
 	if body := call(a, "GET", "/api/templates", "", "", nil).Body.String(); !strings.Contains(body, "new-billing-template") {
 		t.Fatal("modern templates lost compatible model", body)
 	}
-	if body := legacyCall(a, "GET", "/api/templates", "", "", nil).Body.String(); strings.Contains(body, "new-billing-template") {
-		t.Fatal("legacy templates exposed a hidden model", body)
+	if body := legacyCall(a, "GET", "/api/templates", "", "", nil).Body.String(); !strings.Contains(body, "new-billing-template") {
+		t.Fatal("legacy templates lost a server-priced model", body)
 	}
 }

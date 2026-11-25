@@ -60,3 +60,21 @@ test("the points confirm lists billing mode, balance and what remains", async ()
   await confirmBudget({ kind: "video", duration: 5, model: "m", prompt: "p" });
   assert.equal(shown.rows[0].value, "按次");
 });
+
+test("reference-video fees stay separate from the generation rate", async () => {
+  const h = harness();
+  await h.api.signIn();
+  let shown;
+  h.pages.push({ selectComponent: () => ({ open: async (o) => { shown = o; return true; } }) });
+  h.wx.request = (o) => o.success({ statusCode: 200, data: {
+    units: 6500, referenceUnits: 3000, billingEnabled: true,
+    sufficient: true, availableUnits: 10000, perSecond: true,
+  } });
+  const { confirmBudget } = h.service("business");
+  const out = await confirmBudget({ kind: "video", duration: 5, model: "m", prompt: "p" });
+  assert.equal(out.expectedCostUnits, 6500);
+  assert.equal(shown.amount, "65");
+  assert.deepEqual(Array.from(shown.rows, (r) => r.value), [
+    "按秒 · 每秒 7 × 5 秒", "30 积分（折后）", "100 积分", "35 积分",
+  ]);
+});
