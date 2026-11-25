@@ -73,7 +73,9 @@ function UserList({
   const [typed, setTyped] = useRememberedState("users.query", ""),
     [search, setSearch] = useState(typed.trim()),
     [state, setState] = useRememberedState("users.state", ""),
-    [access, setAccess] = useRememberedState("users.joined", ""),
+    [joined, setAccess] = useRememberedState("users.joined", ""),
+    // 普通注册 left the filter; a remembered choice of it shows everyone.
+    access = joined === "direct" ? "" : joined,
     [page, setPage] = useState(1),
     [open, setOpen] = useState<{ kind: Dialog; row: Row<Profile> } | null>(
       null,

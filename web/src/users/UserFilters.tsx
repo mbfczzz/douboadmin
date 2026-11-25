@@ -32,7 +32,6 @@ export default function UserFilters(p: {
         onChange={(e) => p.onAccess(e.target.value)}
       >
         <option value="">全部开通状态</option>
-        <option value="direct">普通注册</option>
         <option value="member">合伙人</option>
         <option value="owner">服务商负责人</option>
         <option value="review">游客（待开通）</option>
