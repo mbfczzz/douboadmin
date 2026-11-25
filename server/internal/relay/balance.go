@@ -24,7 +24,7 @@ func (c *Client) Balance(ctx context.Context) (Balance, error) {
 		Unit    string   `json:"unit"`
 	}
 	if json.Unmarshal(raw, &response) != nil || response.Balance == nil || response.Unit != "points" || *response.Balance < 0 || math.IsNaN(*response.Balance) || math.IsInf(*response.Balance, 0) {
-		return Balance{}, fmt.Errorf("中转站余额响应格式无效")
+		return Balance{}, fmt.Errorf("算力余额响应格式无效")
 	}
 	return Balance{Balance: *response.Balance, Unit: response.Unit}, nil
 }

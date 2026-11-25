@@ -32,7 +32,7 @@ test("slow balance leaves models usable and shows no old amount while refreshing
   await page.goto("/#models");
   const balance = page.getByLabel("中转站账户余额", { exact: true });
   const refresh = balance.getByRole("button", {
-    name: "刷新中转余额",
+    name: "刷新算力余额",
     exact: true,
   });
   await expect(balance).toContainText("查询中…");
@@ -79,7 +79,7 @@ test("unconfigured and malformed responses never become a zero balance", async (
   await page.goto("/#models");
   const balance = page.getByLabel("中转站账户余额", { exact: true });
   const refresh = balance.getByRole("button", {
-    name: "刷新中转余额",
+    name: "刷新算力余额",
     exact: true,
   });
   await expect(balance).toContainText("查询失败");

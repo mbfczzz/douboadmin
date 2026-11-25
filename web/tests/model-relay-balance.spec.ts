@@ -49,7 +49,7 @@ for (const width of [1440, 390, 320]) {
     await page.getByRole("button", { name: "刷新", exact: true }).click();
     await expect(balance).toContainText("0 积分");
     await balance
-      .getByRole("button", { name: "刷新中转余额", exact: true })
+      .getByRole("button", { name: "刷新算力余额", exact: true })
       .click();
     await expect(balance).toContainText("查询失败");
     await expect(balance).not.toContainText("0 积分");
@@ -58,7 +58,7 @@ for (const width of [1440, 390, 320]) {
       page.getByRole("heading", { name: "模型管理", exact: true }),
     ).toBeVisible();
     await balance
-      .getByRole("button", { name: "刷新中转余额", exact: true })
+      .getByRole("button", { name: "刷新算力余额", exact: true })
       .click();
     await expect(balance).toContainText("0 积分");
     await expect(balance).not.toHaveClass(/has-error/);

@@ -18,7 +18,7 @@ func (a *Server) relayBalance(w http.ResponseWriter, r *http.Request) {
 	defer cancel()
 	balance, err := a.Relay.Balance(ctx)
 	if err != nil {
-		message := "中转站余额查询失败，请稍后重试"
+		message := "算力余额查询失败，请稍后重试"
 		var upstream *relay.HTTPError
 		if errors.As(err, &upstream) {
 			switch upstream.Status {
@@ -27,10 +27,10 @@ func (a *Server) relayBalance(w http.ResponseWriter, r *http.Request) {
 			case 404:
 				message = "当前中转站暂不支持余额查询接口"
 			case 500:
-				message = "中转站余额读取失败，请稍后重试"
+				message = "算力余额读取失败，请稍后重试"
 			}
 		} else if ctx.Err() != nil {
-			message = "中转站余额查询超时，请重试"
+			message = "算力余额查询超时，请重试"
 		}
 		fail(w, 502, message)
 		return

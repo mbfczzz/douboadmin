@@ -23,7 +23,7 @@ export default function RelayBalance({
   const error =
     resource.error ||
     (!resource.loading && resource.data && !valid
-      ? "中转站余额响应格式无效"
+      ? "算力余额响应格式无效"
       : "");
   const title =
     error ||
@@ -36,7 +36,7 @@ export default function RelayBalance({
       title={title}
       aria-label="中转站账户余额"
     >
-      <span className="relay-balance-label">中转余额</span>
+      <span className="relay-balance-label">算力余额</span>
       <span className="relay-balance-value" role="status">
         {resource.loading
           ? "查询中…"
@@ -49,7 +49,7 @@ export default function RelayBalance({
       <button
         type="button"
         className="icon"
-        aria-label="刷新中转余额"
+        aria-label="刷新算力余额"
         disabled={resource.loading}
         onClick={() => void resource.reload()}
       >
