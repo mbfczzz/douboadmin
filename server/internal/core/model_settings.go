@@ -37,6 +37,9 @@ type ModelSettings struct {
 	// ReferenceVideoBilling charges each 全能参考 video on top of the
 	// generation (FlowLight 参考视频计费); see ReferenceVideoUnits.
 	ReferenceVideoBilling bool `json:"referenceVideoBillingEnabled,omitempty"`
+	// ReferenceVideoPricePercent discounts only the reference-video charge.
+	// Nil keeps legacy records at 100%; configured values are 1–100.
+	ReferenceVideoPricePercent *float64 `json:"referenceVideoPricePercent,omitempty"`
 	// VideoTokenPrices: 火山方舟 Seedance (arkvideo:) is billed on the video
 	// tokens it reports; points per million tokens by output resolution.
 	VideoTokenPrices map[string]VideoTokenPrice `json:"videoTokenPrices,omitempty"`

@@ -235,6 +235,10 @@
 .config-reference-billing .config-hint {
   margin-top: 8px;
 }
+.config-reference-rate { max-width: 360px; margin-top: 12px; }
+.config-reference-rate .config-inline { margin: 0; }
+.config-reference-rate .config-inline > input { flex: 0 1 180px; }
+.config-reference-rate strong { font-size: 13px; }
 .model-config .config-subtitle {
   margin: 14px 0 6px;
   font-size: 13px;

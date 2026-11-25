@@ -34,6 +34,19 @@ func TestReferenceVideoUnitsRoundUpToADurationTier(t *testing.T) {
 	if got, _ := ReferenceVideoUnits(m, JobInput{Kind: "image"}, []float64{7}); got != 0 {
 		t.Fatal("charged an image", got)
 	}
+	half := m
+	halfPercent := 50.0
+	half.Settings.ReferenceVideoPricePercent = &halfPercent
+	if got, err := ReferenceVideoUnits(half, in, []float64{7, 2}); err != nil || got != 4775 {
+		t.Fatal("50% reference discount", got, err)
+	}
+	for percent, want := range map[float64]int64{1: 96, 100: 9550} {
+		priced := m
+		priced.Settings.ReferenceVideoPricePercent = &percent
+		if got, err := ReferenceVideoUnits(priced, in, []float64{7, 2}); err != nil || got != want {
+			t.Fatal("reference percentage", percent, got, err)
+		}
+	}
 }
 
 // Turning it on needs video references and a price in every cell.
@@ -60,5 +73,12 @@ func TestReferenceVideoBillingValidation(t *testing.T) {
 	image := Model{Kind: "image"}
 	if err := (ModelSettings{ReferenceVideoBilling: true}).Validate(image); err == nil {
 		t.Fatal("image model accepted")
+	}
+	for _, percent := range []float64{0, 101, -1} {
+		badPercent := m.Settings
+		badPercent.ReferenceVideoPricePercent = &percent
+		if err := badPercent.Validate(m); err == nil || !strings.Contains(err.Error(), "1%–100%") {
+			t.Fatal("invalid reference percentage accepted", percent, err)
+		}
 	}
 }

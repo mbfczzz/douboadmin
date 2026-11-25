@@ -17,8 +17,9 @@ func (e ReferenceVideoError) Error() string { return string(e) }
 // ReferenceVideoUnits prices the reference videos of a video job the way
 // FlowLight's 参考视频计费 does: each video is rounded up to the shortest
 // configured output duration that covers it and costs that duration's
-// 时长 × 清晰度 price, on top of the generation itself. seconds holds the
-// measured length of every reference video (one entry per use).
+// 时长 × 清晰度 price after the configured percentage, on top of the
+// generation itself. seconds holds the measured length of every reference
+// video (one entry per use).
 func ReferenceVideoUnits(m Model, in JobInput, seconds []float64) (int64, error) {
 	if in.Kind != "video" || !m.Settings.ReferenceVideoBilling || len(seconds) == 0 {
 		return 0, nil
@@ -44,7 +45,11 @@ func ReferenceVideoUnits(m Model, in JobInput, seconds []float64) (int64, error)
 		if !ok || price <= 0 {
 			return 0, ReferenceVideoError("参考视频计费价格未配置，请联系客服")
 		}
-		units, err := PointUnits(price)
+		percent := 100.0
+		if m.Settings.ReferenceVideoPricePercent != nil {
+			percent = *m.Settings.ReferenceVideoPricePercent
+		}
+		units, err := PointUnits(price * percent / 100)
 		if err != nil {
 			return 0, err
 		}
@@ -59,6 +64,9 @@ func ReferenceVideoUnits(m Model, in JobInput, seconds []float64) (int64, error)
 // validateReferenceVideoBilling: the billing needs a price for every
 // duration × resolution it may charge, and the model must take video.
 func (s ModelSettings) validateReferenceVideoBilling(m Model) error {
+	if p := s.ReferenceVideoPricePercent; p != nil && (!validRate(*p) || *p < 1 || *p > 100) {
+		return fmt.Errorf("参考视频价格比例应为 1%%–100%%")
+	}
 	if !s.ReferenceVideoBilling {
 		return nil
 	}

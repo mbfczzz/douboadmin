@@ -29,10 +29,30 @@ export default function ReferenceBilling({
       </label>
       <p className="config-hint">
         开启后，每段参考视频按实际秒数向上取到最近的支持时长，按下表「时长 ×
-        清晰度」的积分另行收取，与生成费用相加。例如参考视频 7 秒、支持 5 / 10
-        秒时，按 10 秒档收费；超过最长时长的参考视频无法提交。
+        清晰度」的积分乘以价格比例后另行收取，与生成费用相加。例如参考视频 7
+        秒、支持 5 / 10 秒时，按 10 秒档收费；超过最长时长的参考视频无法提交。
         {on && " 下表每个格子都必须填写大于 0 的积分。"}
       </p>
+      {on && (
+        <div className="config-field config-reference-rate">
+          <span>参考视频价格比例</span>
+          <div className="config-inline">
+            <input
+              aria-label="参考视频价格比例"
+              type="number"
+              min={1}
+              max={100}
+              step="any"
+              value={s.referenceVideoPricePercent || 100}
+              onChange={(e) =>
+                onChange({ referenceVideoPricePercent: Number(e.target.value) })
+              }
+            />
+            <strong>%</strong>
+          </div>
+          <small>100% 为原价，50% 为半价；仅影响参考视频附加费用。</small>
+        </div>
+      )}
     </div>
   );
 }

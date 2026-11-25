@@ -33,9 +33,10 @@ func TestQuoteChargesReferenceVideosByDurationTier(t *testing.T) {
 	defer oss.Close()
 	a.Objects = &linkedObjects{link: oss.URL, put: map[string][]byte{}}
 	ctx := context.Background()
+	halfPrice := 50.0
 	m := core.Model{ID: "ref-billed", Key: "video-test", Kind: "video", Published: true, Available: true, Points: 9,
 		Resolutions: []string{"720p"}, Ratios: []string{"9:16"}, Durations: []int{5, 10}, Modes: []string{"omni_ref"}, ReferenceTypes: []string{"video"},
-		Settings: core.ModelSettings{ReferenceVideoBilling: true, PriceMatrix: map[string]map[string]float64{"5s": {"720p": 35}, "10s": {"720p": 60}}}}
+		Settings: core.ModelSettings{ReferenceVideoBilling: true, ReferenceVideoPricePercent: &halfPrice, PriceMatrix: map[string]map[string]float64{"5s": {"720p": 35}, "10s": {"720p": 60}}}}
 	if _, err := a.Store.Put(ctx, "models", core.Record{ID: m.ID, Data: core.Data(m)}, 0); err != nil {
 		t.Fatal(err)
 	}
@@ -50,8 +51,8 @@ func TestQuoteChargesReferenceVideosByDurationTier(t *testing.T) {
 		return w.Code, out
 	}
 	for range 2 {
-		if code, q := quote(); code != 200 || q["units"] != float64(9500) || q["referenceUnits"] != float64(6000) {
-			t.Fatal("7 s reference should add the 10 s price", code, q)
+		if code, q := quote(); code != 200 || q["units"] != float64(6500) || q["referenceUnits"] != float64(3000) {
+			t.Fatal("7 s reference should add 50% of the 10 s price", code, q)
 		}
 	}
 	if served != 1 {
@@ -64,11 +65,11 @@ func TestQuoteChargesReferenceVideosByDurationTier(t *testing.T) {
 	if _, err := a.Billing.Adjust(ctx, "user-a", "ref-billing-test", "admin", "测试充值", 20000); err != nil {
 		t.Fatal(err)
 	}
-	expected := int64(9500)
+	expected := int64(6500)
 	in.Assets, in.ExpectedCostUnits = []string{"short"}, &expected
 	w := call(a, "POST", "/api/jobs", user, "ref-billed-key-1", in)
 	var job core.Job
-	if w.Code != 202 || json.Unmarshal(w.Body.Bytes(), &job) != nil || job.CostUnits != 9500 {
+	if w.Code != 202 || json.Unmarshal(w.Body.Bytes(), &job) != nil || job.CostUnits != 6500 {
 		t.Fatal("submit charges generation + reference", w.Code, w.Body.String())
 	}
 }

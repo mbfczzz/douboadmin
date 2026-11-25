@@ -36,6 +36,8 @@ test("reference video billing shows and saves the duration table", async ({
     0,
   );
   await dialog.getByText("参考视频计费", { exact: true }).click();
+  await expect(dialog.getByLabel("参考视频价格比例")).toHaveValue("100");
+  await dialog.getByLabel("参考视频价格比例").fill("50");
   await dialog.getByLabel("5s 720P 积分", { exact: true }).fill("35");
   await dialog.getByLabel("10s 720P 积分", { exact: true }).fill("60");
   await expect(dialog.getByLabel("720P 按次积分", { exact: true })).toHaveValue(
@@ -45,6 +47,7 @@ test("reference video billing shows and saves the duration table", async ({
   await confirmSubmission(page);
   await expect(dialog).toHaveCount(0);
   expect(row.data.settings?.referenceVideoBillingEnabled).toBe(true);
+  expect(row.data.settings?.referenceVideoPricePercent).toBe(50);
   expect(row.data.settings?.priceMatrix).toEqual({
     "5s": { "720p": 35 },
     "10s": { "720p": 60 },
