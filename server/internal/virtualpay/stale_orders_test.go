@@ -45,11 +45,11 @@ func (f *fixture) status(t *testing.T) string {
 }
 
 // A signed order WeChat never took payment for (not found, or still unpaid)
-// closes a day after it expired instead of being queried forever; a payment
+// closes after its payment window instead of being queried forever; a payment
 // that WeChat confirms later still credits it.
 func TestStaleUnpaidOrdersCloseAndALatePaymentStillCredits(t *testing.T) {
 	f := newFixture(t)
-	f.signed(t, 2*time.Hour) // expired, but within the grace period
+	f.signed(t, -10*time.Minute) // payment window is still open
 	notFound := true
 	answer(f, "/xpay/query_order", func() any {
 		if notFound {
@@ -58,9 +58,9 @@ func TestStaleUnpaidOrdersCloseAndALatePaymentStillCredits(t *testing.T) {
 		return nil
 	})
 	if err := f.svc.Refresh(t.Context(), f.row.ID); err == nil || f.status(t) != "created" {
-		t.Fatal("closed inside the grace period", err)
+		t.Fatal("closed inside the payment window", err)
 	}
-	f.signed(t, 25*time.Hour)
+	f.signed(t, time.Minute)
 	if err := f.svc.Refresh(t.Context(), f.row.ID); err != nil || f.status(t) != "closed" {
 		t.Fatal("a day-old unpaid order is still open", err)
 	}

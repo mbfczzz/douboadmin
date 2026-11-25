@@ -164,7 +164,7 @@ Page({
         this.setData({
           paymentWaiting: true,
           paymentNotice:
-            "暂未确认到账，请先查看订单状态。另购不会取消原订单。",
+            "暂未确认到账。若微信账单没有扣款，可确认后重新购买。",
         });
       },
     );

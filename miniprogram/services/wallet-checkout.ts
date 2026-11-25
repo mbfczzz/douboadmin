@@ -55,10 +55,13 @@ export async function confirmAdditionalPurchase(
 ): Promise<boolean> {
   const token = sessionToken();
   const confirmed = await ask({
-    title: "另购一笔积分？",
-    rows: [{ label: "原订单", value: "仍可能到账" }, { label: "另购", value: "新建一笔付费订单" }],
-    content: "原订单可在充值订单中继续查询",
-    confirmText: "另购一笔",
+    title: "确认支付未完成？",
+    rows: [
+      { label: "请先核对", value: "微信账单没有扣款" },
+      { label: "重新购买", value: "创建一笔新订单" },
+    ],
+    content: "确认后可重新购买，原订单仍保留在充值订单中",
+    confirmText: "重新购买",
     cancelText: "继续等待",
     icon: "time",
   });

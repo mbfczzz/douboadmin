@@ -31,6 +31,8 @@ test("orders expose a payment window, progress steps and detail lines", () => {
   const created = orderExtras({ id: "o1", createdAt: "2026-11-12T09:55:00Z", data: { status: "created", amountFen: 990, pointsUnits: 100000, expiresAt: "2026-11-12T10:12:30Z", channel: "wechat_virtual", virtual: { productName: "入门积分包" } } }, now);
   assert.equal(created.window, "13 分钟内完成支付");
   assert.deepEqual([...created.steps].map((s) => s.on), [true, false, false]);
+  const issued = orderExtras({ id: "o-issued", createdAt: "2026-11-12T09:55:00Z", data: { status: "created", amountFen: 990, pointsUnits: 100000, expiresAt: "2026-11-12T10:12:30Z", channel: "wechat_virtual", virtual: { productName: "入门积分包", issued: true } } }, now);
+  assert.equal(issued.window, "", "an issued payment cannot show a pay-again countdown");
   const paid = orderExtras({ id: "o2", createdAt: "2026-11-12T09:55:00Z", data: { status: "paid", amountFen: 4990, pointsUnits: 520000, expiresAt: "2026-11-12T09:00:00Z", transactionId: "4200001" } }, now);
   assert.equal(paid.window, "");
   assert.deepEqual([...paid.steps].map((s) => s.on), [true, true, true]);

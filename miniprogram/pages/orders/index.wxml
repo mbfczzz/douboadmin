@@ -25,10 +25,11 @@
       <text class="lines-hint">长按任意一行可复制</text>
     </view>
     <view class="order-more" data-id="{{item.id}}" bindtap="toggle"><text>{{open===item.id?'收起':'订单详情'}}</text><t-icon name="{{open===item.id?'chevron-up':'chevron-down'}}" size="14" /></view>
-    <text wx:if="{{item.data.status==='created'&&item.data.virtual.issued}}" class="biz-note">此支付单不能再次拉起支付。若已取消，可返回积分页重新购买；已付款请先查支付结果。</text>
+    <text wx:if="{{item.data.status==='created'&&item.data.virtual.issued}}" class="biz-note">此支付单不能再次拉起。请先核对微信账单；没有扣款可重新购买。</text>
     <view wx:if="{{item.data.status==='created'}}" class="order-actions">
       <text class="order-check {{busy?'is-busy':''}}" data-id="{{item.id}}" bindtap="refresh">查支付结果</text>
       <button wx:if="{{item.canPay}}" class="order-pay" loading="{{busy===item.id}}" disabled="{{busy}}" data-id="{{item.id}}" bindtap="pay">继续支付</button>
+      <button wx:elif="{{item.awaiting}}" class="order-pay" loading="{{busy===item.id}}" disabled="{{busy}}" data-id="{{item.id}}" bindtap="repurchase">重新购买</button>
     </view>
   </view>
   <view wx:if="{{!needsLogin&&pages>1}}" class="job-pagination">

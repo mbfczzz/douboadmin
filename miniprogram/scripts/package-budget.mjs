@@ -277,7 +277,10 @@ console.log(
 // 替换 for references: swap a picture in place so @图片N keeps pointing at
 // it (create page, its viewer and ×, template slots, Agent attachments):
 // 1,149,730 B. 1117 -> 1123 KiB.
-const budget = 1123 * 1024;
+// Virtual-payment recovery: issued orders no longer show an unusable pay
+// countdown, and an explicitly confirmed unpaid order can release the local
+// checkout lock while remaining queryable: 1,151,143 B. 1123 -> 1125 KiB.
+const budget = 1125 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

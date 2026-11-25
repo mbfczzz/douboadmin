@@ -19,11 +19,13 @@ import { payExisting } from "../../services/payment";
 import { financePage } from "../../services/finance-page";
 import type { FinancePage } from "../../services/finance-page";
 import {
+  activePendingPayments,
   pendingPayments,
   clearPayment,
   paymentMessage,
   watchPayments,
 } from "../../services/payment-status";
+import { confirmAdditionalPurchase } from "../../services/wallet-checkout";
 Page({
   wallet() {
     openOrBack(this, "/pages/wallet/index");
@@ -48,6 +50,7 @@ Page({
         tone: string;
         time: string;
         canPay: boolean;
+        awaiting: boolean;
         photo: string;
       } & ReturnType<typeof orderExtras>
     >,
@@ -127,22 +130,26 @@ Page({
       const rows = result.items;
       if (revision !== this.revision) return;
       this.loadedPage = result.page;
-      const pendingIds = new Set(pendingPayments(rows[0]?.data.userId || ""));
+      const owner = rows[0]?.data.userId || "";
+      const pendingIds = new Set(pendingPayments(owner));
+      const activePendingIds = new Set(activePendingPayments(owner));
       for (const row of rows) {
         if (row.data.status !== "created" && pendingIds.has(row.id)) {
           clearPayment(row.id);
           pendingIds.delete(row.id);
+          activePendingIds.delete(row.id);
         }
       }
       this.setData({
         rows: rows.map((r) => {
-          const awaiting = pendingIds.has(r.id),
+          const awaiting = activePendingIds.has(r.id),
             expired = Date.parse(r.data.expiresAt) <= Date.now();
           return {
             ...r,
             amount: money(r.data.amountFen),
             photo: tierByAmount(r.data.amountFen),
             points: points(r.data.pointsUnits),
+            awaiting,
             tone: r.data.status === "paid" ? "succeeded" : r.data.status === "refunding" || awaiting ? "running" : r.data.status === "created" && !expired ? "warning" : "",
             state:
               r.data.status === "created"
@@ -238,6 +245,25 @@ Page({
         this.setData({ busy: "" });
         await this.load().catch(() => undefined);
       }
+    }
+  },
+  async repurchase(e: WechatMiniprogram.TouchEvent) {
+    if (this.data.busy) return;
+    const id = e.currentTarget.dataset.id;
+    const row = this.data.rows.find(
+      (item: { id: string; awaiting: boolean; data: Order }) => item.id === id,
+    );
+    if (!row?.awaiting || !row.data.virtual?.issued) return;
+    this.setData({ busy: id });
+    try {
+      if (await confirmAdditionalPurchase(id, row.data.userId)) {
+        this.stopWatching?.();
+        this.watching = "";
+        await this.load();
+        this.wallet();
+      }
+    } finally {
+      if (!this.destroyed) this.setData({ busy: "" });
     }
   },
   async refresh(e: WechatMiniprogram.TouchEvent) {

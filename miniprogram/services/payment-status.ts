@@ -37,6 +37,12 @@ export function pendingPayments(owner: string): string[] {
     .map((record) => record.id);
 }
 
+export function activePendingPayments(owner: string): string[] {
+  return paymentRecords()
+    .filter((record) => record.owner === owner && !record.deferred)
+    .map((record) => record.id);
+}
+
 export function pendingPayment(owner: string): string {
   return (
     paymentRecords().find(

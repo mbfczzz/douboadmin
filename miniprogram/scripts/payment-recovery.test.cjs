@@ -55,7 +55,7 @@ test("payment timeout exposes recovery without dropping order or crediting point
   assert.equal(f.page.data.pendingOrderId, "");
   const orders = f.h.page("orders");
   await orders.load();
-  assert.equal(orders.data.rows[0].state, "确认到账中");
+  assert.equal(orders.data.rows[0].state, "需核对支付结果");
   assert.equal(orders.data.rows[0].canPay, false);
 });
 
@@ -78,4 +78,16 @@ test("cancelled issued virtual order explains why checkout cannot reopen", async
   await orders.load();
   assert.equal(orders.data.rows[0].state, "需核对支付结果");
   assert.equal(orders.data.rows[0].canPay, false);
+});
+
+test("an uncertain issued order can be deferred and replaced after explicit confirmation", async () => {
+  const f = await fixture();
+  const orders = f.h.page("orders");
+  await orders.load();
+  assert.equal(orders.data.rows[0].awaiting, true);
+  f.h.wx.showModal = (options) => options.success({ confirm: true });
+  await orders.repurchase({ currentTarget: { dataset: { id: "old-order" } } });
+  assert.equal(f.h.storage.get("pending-payments")[0].deferred, true);
+  assert.equal(orders.data.rows[0].state, "需核对支付结果");
+  assert.equal(orders.data.rows[0].awaiting, false);
 });

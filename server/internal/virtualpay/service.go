@@ -34,14 +34,11 @@ func (s *Service) order(ctx context.Context, id string) (core.Record, core.Order
 	return row, o, e
 }
 
-// staleUnpaid: an order still unpaid a day after it expired (the payment
-// sheet was cancelled, rejected or never completed). It is closed instead of
-// being queried forever. Closing is safe: Settle still accepts a closed order,
-// so a payment notice that arrives later still credits it.
-const unpaidGrace = 24 * time.Hour
-
 func staleUnpaid(o core.Order) bool {
-	return o.Status == "created" && time.Now().After(o.ExpiresAt.Add(unpaidGrace))
+	// The native sheet cannot be opened again after this deadline. Closing an
+	// unpaid order now is safe: Settle accepts a closed order, so a delayed
+	// verified payment notice still credits the user exactly once.
+	return o.Status == "created" && time.Now().After(o.ExpiresAt)
 }
 
 func (s *Service) Refresh(ctx context.Context, id string) error {

@@ -23,7 +23,13 @@ export function orderExtras(r: Row<Order>, now = Date.now()) {
     ...(o.transactionId ? [["微信交易号", o.transactionId]] : []),
   ].map(([label, value]) => ({ label, value }));
   return {
-    window: o.status === "created" && left > 0 ? `${left} 分钟内完成支付` : "",
+    // A virtual order can only open its native payment sheet once. After its
+    // signature is issued, a countdown would falsely suggest it can be paid
+    // again from this card.
+    window:
+      o.status === "created" && !o.virtual?.issued && left > 0
+        ? `${left} 分钟内完成支付`
+        : "",
     steps: [
       { label: "下单", on: true },
       { label: "支付", on: paid },
