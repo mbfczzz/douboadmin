@@ -6,11 +6,15 @@ import (
 	"doubo/server/internal/media"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log/slog"
+	"math"
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
+	"time"
 )
 
 const errReferenceLength = core.ReferenceVideoError("参考视频时长读取失败，请换一个 MP4 视频")
@@ -104,4 +108,34 @@ func (a *Server) assetCounts(ctx context.Context, in core.JobInput) map[string]i
 		}
 	}
 	return counts
+}
+
+// checkReferenceLengths refuses, before any model is called, a reference
+// video longer than the model takes (模型配置 → 参考视频时长, else the
+// official limit: Seedance 2.0 15 s, 2.5 30 s), naming it so the user can cut
+// it. A video whose length cannot be read is left to the model.
+func (a *Server) checkReferenceLengths(ctx context.Context, m core.Model, in core.JobInput) error {
+	seconds, err := a.referenceSeconds(ctx, in)
+	if err != nil {
+		slog.Warn("reference video length unknown", "model", m.ID, "error", err)
+		return nil
+	}
+	limit := core.RefVideoSeconds(m)
+	for i, n := range seconds {
+		if n > float64(limit) {
+			return fmt.Errorf("参考视频%d 时长 %s 秒，%s 最长只能参考 %d 秒，请剪短后再提交", i+1, strconv.FormatFloat(math.Ceil(n*10)/10, 'f', -1, 64), m.Name, limit)
+		}
+	}
+	return nil
+}
+
+// referenceWindow: the first look at an older video's length (saved before
+// lengths were recorded) fetches it, which can outlast the server's
+// 90-second window; the mini-program waits up to 3 minutes for these.
+const referenceWindow = 3 * time.Minute
+
+func allowReferenceReads(w http.ResponseWriter, assets []string) {
+	if len(assets) > 0 {
+		_ = http.NewResponseController(w).SetWriteDeadline(time.Now().Add(referenceWindow))
+	}
 }

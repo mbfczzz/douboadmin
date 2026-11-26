@@ -72,24 +72,20 @@ func TestDuplicateJobAndFencedCompletionDoNotRepeatCharges(t *testing.T) {
 	}
 }
 
-func TestFailedJobReleasesFundsButAmbiguousSubmissionKeepsHold(t *testing.T) {
-	for _, unknown := range []bool{false, true} {
+// Every failed job returns its points at once, the upstream outcome known or
+// not; nothing waits for an administrator.
+func TestFailedJobReleasesFundsAtOnce(t *testing.T) {
+	for _, failure := range []string{"failed", "提交结果暂未确认"} {
 		s, ctx := funded(t)
 		j := core.NewJob("user", "failure", core.JobInput{Prompt: "test"})
 		j.CostUnits = 500
 		_, _ = s.Store.CreateJob(ctx, j)
 		claimed, _ := s.Store.Claim(ctx)
-		claimed.HoldOnFailure = unknown
-		if e := s.Store.Finish(ctx, claimed, "", "failed"); e != nil {
+		if e := s.Store.Finish(ctx, claimed, "", failure); e != nil {
 			t.Fatal(e)
 		}
-		w, _ := s.Wallet(ctx, "user")
-		if unknown {
-			if w.Available != 9500 || w.Held != 500 {
-				t.Fatal(w)
-			}
-		} else if w.Available != 10000 || w.Held != 0 {
-			t.Fatal(w)
+		if w, _ := s.Wallet(ctx, "user"); w.Available != 10000 || w.Held != 0 {
+			t.Fatal(failure, w)
 		}
 	}
 }

@@ -22,7 +22,8 @@ import (
 // referenceClip: 一键复刻 hands the video model the original video as @视频1.
 // Video models take short references (火山方舟: Seedance 2.0 up to 15 s, 2.5
 // up to 30 s) and the original's sound can fail the provider's content
-// review, so the reference is the original's first N seconds without audio
+// review, so the reference is the original's opening (just under N seconds,
+// so it is within the limit) without audio
 // (POST /api/assets/{id}/reference-clip {seconds}). Made once per video and
 // length with ffmpeg (stream copy, no re-encoding) and kept as the user's own
 // asset. A server without ffmpeg answers with the original, as before.
@@ -44,7 +45,8 @@ func (a *Server) referenceClip(w http.ResponseWriter, r *http.Request) {
 		fail(w, 404, "参考视频不存在或已删除")
 		return
 	}
-	id := core.Digest(user + ":reference-clip:" + row.ID + ":" + strconv.Itoa(body.Seconds))[:32]
+	// v2: clips are cut within the limit (earlier ones could run over it).
+	id := core.Digest(user + ":reference-clip:v2:" + row.ID + ":" + strconv.Itoa(body.Seconds))[:32]
 	clip, err := a.Store.Get(ctx, "assets", id)
 	if err != nil {
 		// A large original (up to 500 MB) takes longer than the server's
@@ -96,16 +98,24 @@ func (a *Server) cutClip(ctx context.Context, user, id, key string, seconds int)
 	out := filepath.Join(dir, "clip.mp4")
 	run, cancel := context.WithTimeout(ctx, 2*time.Minute)
 	defer cancel()
-	var stderr bytes.Buffer
-	cmd := exec.CommandContext(run, ffmpeg, "-nostdin", "-loglevel", "error", "-t", strconv.Itoa(seconds), "-i", input,
-		"-map", "0:v:0", "-c", "copy", "-an", "-movflags", "+faststart", "-f", "mp4", out)
-	cmd.Stderr = &stderr
-	if err := cmd.Run(); err != nil {
-		return core.Record{}, errors.New(strings.TrimSpace(err.Error() + " " + stderr.String()))
-	}
-	data, err := os.ReadFile(out)
-	if err != nil || len(data) == 0 {
-		return core.Record{}, errors.New("ffmpeg produced no clip")
+	// A stream copy can only end on a frame boundary, so cutting at exactly N
+	// seconds gave 30.167 s for a 30 s limit, which the model refused. Cut
+	// short of it and check; cut shorter again if it still runs over.
+	var data []byte
+	for _, margin := range []float64{0.5, 1.5} {
+		var stderr bytes.Buffer
+		cmd := exec.CommandContext(run, ffmpeg, "-nostdin", "-loglevel", "error", "-y", "-t", strconv.FormatFloat(max(float64(seconds)-margin, 0.5), 'f', 1, 64), "-i", input,
+			"-map", "0:v:0", "-c", "copy", "-an", "-movflags", "+faststart", "-f", "mp4", out)
+		cmd.Stderr = &stderr
+		if err := cmd.Run(); err != nil {
+			return core.Record{}, errors.New(strings.TrimSpace(err.Error() + " " + stderr.String()))
+		}
+		if data, err = os.ReadFile(out); err != nil || len(data) == 0 {
+			return core.Record{}, errors.New("ffmpeg produced no clip")
+		}
+		if length, e := media.MP4Duration(bytes.NewReader(data)); e != nil || length <= float64(seconds) {
+			break
+		}
 	}
 	clipKey, url := "uploads/"+user+"/"+id+".mp4", ""
 	if a.Objects != nil {

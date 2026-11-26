@@ -43,6 +43,10 @@ func (s *Service) storeResult(ctx context.Context, j core.Job, file io.ReadSeeke
 	}
 	key := "results/" + j.UserID + "/" + id + ext
 	a := Asset{Key: key, Type: typ, Size: size}
+	if typ == "video/mp4" {
+		a.Duration, _ = MP4Duration(file)
+		_, _ = file.Seek(0, 0)
+	}
 	if s.Objects != nil {
 		if writer, ok := s.Objects.(interface {
 			PutResult(context.Context, string, io.Reader, string) error

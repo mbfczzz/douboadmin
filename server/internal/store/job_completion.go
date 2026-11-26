@@ -24,7 +24,8 @@ func completeJobAccounting(tx Transaction, j core.Job, failure string) error {
 	if err = json.Unmarshal(row.Data, &bill); err != nil {
 		return err
 	}
-	if bill.State != "reserved" || (failure != "" && j.HoldOnFailure) {
+	// Failed: the points go back at once, outcome known or not.
+	if bill.State != "reserved" {
 		return nil
 	}
 	entry := core.LedgerEntry{UserID: j.UserID, Reference: "job:" + j.ID + ":settle", Kind: "job_charge", HeldDelta: -bill.Units, Note: "生成成功扣除积分"}

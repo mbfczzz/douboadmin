@@ -26,19 +26,20 @@ func TestGenerationResumePreservesStateAndRollsBackOnBillingConflict(t *testing.
 			if e != nil {
 				t.Fatal(e)
 			}
-			claimed.HoldOnFailure = true
 			if e = a.Store.Finish(ctx, claimed, "", "save interrupted"); e != nil {
 				t.Fatal(e)
+			}
+			if !release { // a job held under the earlier policy, still awaiting an administrator
+				row, _ := a.Store.Get(ctx, "job_billing", j.ID)
+				row.Data = core.Data(core.JobBilling{State: "reserved", Units: 100})
+				if _, e = a.Store.Put(ctx, "job_billing", row, row.Version); e != nil {
+					t.Fatal(e)
+				}
 			}
 			state := map[string]any{"phase": "polling", "startedAt": time.Now().Add(-2 * time.Hour), "taskId": "upstream-task", "result": "asset:output"}
 			before, e := a.Store.Put(ctx, "executions", core.Record{ID: j.ID, Data: core.Data(state)}, 0)
 			if e != nil {
 				t.Fatal(e)
-			}
-			if release {
-				if e = a.Billing.ReleaseJob(ctx, j.ID, "admin", "已核实未生成"); e != nil {
-					t.Fatal(e)
-				}
 			}
 			w := call(a, "POST", "/api/admin/jobs/"+j.ID+"/resume", admin, "", nil)
 			after, e := a.Store.Get(ctx, "executions", j.ID)

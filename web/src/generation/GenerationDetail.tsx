@@ -99,7 +99,7 @@ export default function GenerationDetail({
                 <h4>仍在自动重试</h4>
                 <p>{g.execution?.note}</p>
                 <p className="quiet">
-                  约每分钟重试一次；从开始执行算起超过一小时仍未成功，任务会标记为失败，需要管理员核实后处理。
+                  约每分钟重试一次；从开始执行算起超过一小时仍未成功，任务会标记为失败并自动退回积分。
                 </p>
               </section>
             )}

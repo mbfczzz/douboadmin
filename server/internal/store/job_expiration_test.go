@@ -37,7 +37,7 @@ func expirationFixture(t *testing.T, kind, phase string, elapsed time.Duration) 
 	return s, claimed
 }
 
-func TestExpirationStopsLiveLeaseAndPreservesVerifiedBillingPolicy(t *testing.T) {
+func TestExpirationStopsLiveLeaseAndReturnsThePoints(t *testing.T) {
 	for _, phase := range []string{"", "failed", "polling", "output", "uncertain", "succeeded"} {
 		t.Run(phase, func(t *testing.T) {
 			s, j := expirationFixture(t, "image", phase, 11*time.Minute)
@@ -57,8 +57,8 @@ func TestExpirationStopsLiveLeaseAndPreservesVerifiedBillingPolicy(t *testing.T)
 			walletRow, _ := s.Get(t.Context(), "wallets", "user")
 			var wallet core.Wallet
 			_ = json.Unmarshal(walletRow.Data, &wallet)
-			hold := phase != "" && phase != "failed"
-			if hold && (wallet.Available != 800 || wallet.Held != 200) || !hold && (wallet.Available != 1000 || wallet.Held != 0) {
+			// A timed-out job returns its points at once, whatever its upstream phase.
+			if wallet.Available != 1000 || wallet.Held != 0 {
 				t.Fatal("unexpected funds", phase, wallet)
 			}
 			if phase != "" {

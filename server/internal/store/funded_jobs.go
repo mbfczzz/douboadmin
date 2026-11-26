@@ -71,7 +71,6 @@ func finishFundedJob(ctx context.Context, s Store, j core.Job, result, failure s
 		if e = tx.CompleteJob(j, result, failure); e != nil {
 			return e
 		}
-		stored.HoldOnFailure = j.HoldOnFailure
 		return completeJobAccounting(tx, stored, failure)
 	})
 }

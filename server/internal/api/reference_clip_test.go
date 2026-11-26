@@ -51,7 +51,7 @@ func TestReferenceClipIsTheFirstSecondsWithoutSound(t *testing.T) {
 	}
 	lines := strings.Fields(text)
 	seconds, _ := strconv.ParseFloat(lines[len(lines)-1], 64)
-	if seconds < 1.5 || seconds > 2.6 {
+	if seconds < 1 || seconds > 2 { // never over the limit asked for
 		t.Fatal("duration", seconds)
 	}
 	if again, _ := clip(one, 2); again.ID != row.ID {

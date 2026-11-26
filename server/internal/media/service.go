@@ -21,6 +21,9 @@ type Asset struct {
 	Key  string `json:"key"`
 	Type string `json:"type"`
 	Size int64  `json:"size"`
+	// Duration of a video in seconds, read from the file when it is saved
+	// (reference-length checks and 参考视频计费 never fetch it again).
+	Duration float64 `json:"duration,omitempty"`
 }
 type Service struct {
 	Store      store.Store

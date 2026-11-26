@@ -126,6 +126,11 @@ func (a *Server) validateJob(ctx context.Context, user string, in *core.JobInput
 	if err := validateModelReferences(m, mode, counts, sizes); err != nil {
 		return err
 	}
+	if in.Kind == "video" && counts["video"] > 0 {
+		if err := a.checkReferenceLengths(ctx, m, *in); err != nil {
+			return err
+		}
+	}
 	_ = json.Unmarshal(m.ParamsSchema, &schema)
 	if mode == "i2i" && counts["image"] < schema.EditImages.Min {
 		return fmt.Errorf("参考图片少于模型要求的最小数量")

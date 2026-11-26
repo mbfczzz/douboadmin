@@ -103,6 +103,7 @@ func (a *Server) createJob(w http.ResponseWriter, r *http.Request) {
 	if !decode(w, r, &in) {
 		return
 	}
+	allowReferenceReads(w, in.Assets)
 	a.submit(w, r, in)
 }
 

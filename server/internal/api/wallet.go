@@ -188,6 +188,7 @@ func (a *Server) quoteJob(w http.ResponseWriter, r *http.Request) {
 	if !decode(w, r, &in) {
 		return
 	}
+	allowReferenceReads(w, in.Assets)
 	if e := a.validateJob(r.Context(), identity(r).ID, &in); e != nil {
 		fail(w, 400, e.Error())
 		return

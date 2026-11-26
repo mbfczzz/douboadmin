@@ -112,3 +112,26 @@ func TestPollingAFinishedSafetyFailureLabelledUnavailableEndsTheTask(t *testing.
 		t.Fatal(e)
 	}
 }
+
+// The upstream refusing a too-long reference video, still answered as 503 /
+// 5006 while the task is queried, ends the task at once (refunded) instead
+// of an hour of retries.
+func TestPollingARefusedReferenceLengthEndsTheTask(t *testing.T) {
+	p, job := fixture(t, func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == "POST" {
+			_, _ = w.Write([]byte(`{"id":"poll-task","status":"processing"}`))
+			return
+		}
+		w.WriteHeader(503)
+		_, _ = w.Write([]byte(`{"error":{"code":5006,"type":"provider_unavailable","message":"upstream_error: Reference video 1 lasts 30.167 seconds; each reference video must last between 2 and 30 seconds; 备用渠道不可用：provider unavailable: HTTP 401 MEDIA_TOKEN_DENIED: 未提供有效的 API 凭据。"}}`))
+	})
+	if _, err := p.Generate(context.Background(), job); !errors.Is(err, ErrPending) {
+		t.Fatal(err)
+	}
+	if _, err := p.Generate(context.Background(), job); err == nil || errors.Is(err, ErrRetryLater) || errors.Is(err, ErrPending) {
+		t.Fatal("still retrying", err)
+	}
+	if e := executionOf(t, p, job.ID); e.Phase != "failed" || e.ErrorCode != 5101 || e.ErrorRetryable {
+		t.Fatal(e)
+	}
+}

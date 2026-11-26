@@ -27,6 +27,7 @@ func (a *Server) estimateJob(w http.ResponseWriter, r *http.Request) {
 	}
 	if value := strings.TrimSpace(q.Get("assets")); value != "" {
 		in.Assets = strings.Split(value, ",")
+		allowReferenceReads(w, in.Assets)
 		if len(in.Assets) > 20 {
 			fail(w, 400, "参考素材过多")
 			return

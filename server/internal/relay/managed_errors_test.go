@@ -75,4 +75,25 @@ func TestManagedErrorSettlesAFinishedFailureLabelledUnavailable(t *testing.T) {
 	if got := ParseManagedError([]byte(`{"error":{"code":5003,"message":"generation_failed: bad size"}}`)); got.Code != 5003 {
 		t.Fatalf("a specific code is kept: %+v", got)
 	}
+	// The upstream refusing a material, still labelled 5006, ends the task
+	// with the reason the user can act on.
+	for message, want := range map[string]int{
+		"upstream_error: Reference video 1 lasts 30.167 seconds; each reference video must last between 2 and 30 seconds; 备用渠道不可用：provider unavailable: HTTP 401": 5101,
+		"upstream_error: reference audio duration must be at most 15 seconds":                                                                                     5101,
+		"upstream_error: reference video format is not supported":                                                                                                 5102,
+		"upstream_error: failed to decode input video":                                                                                                            5103,
+		"upstream_error: reference image aspect ratio out of range":                                                                                               5104,
+		"upstream_error: InvalidParameter: duration":                                                                                                              5003,
+	} {
+		got := ParseManagedError([]byte(`{"error":{"code":5006,"type":"provider_unavailable","message":` + strconv.Quote(message) + `}}`))
+		if got.Code != want || got.Retryable {
+			t.Fatalf("%q: %+v", message, got)
+		}
+	}
+	for _, outage := range []string{"provider unavailable: HTTP 401 MEDIA_TOKEN_DENIED", "upstream timeout after 60s", "rate limited, try later",
+		"upstream video request took too long", "video generation duration exceeded the queue window"} {
+		if got := ParseManagedError([]byte(`{"error":{"code":5006,"message":` + strconv.Quote(outage) + `}}`)); got.Code != 5006 {
+			t.Fatalf("an outage stays retryable: %q %+v", outage, got)
+		}
+	}
 }

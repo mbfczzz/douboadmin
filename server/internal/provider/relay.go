@@ -18,7 +18,7 @@ var ErrPending = errors.New("上游任务处理中")
 // querying upstream): the worker waits longer before the next try instead of
 // repeating the same failure every few seconds.
 var ErrRetryLater = fmt.Errorf("%w，稍后重试", ErrPending)
-var ErrUncertain = errors.New("提交结果暂未确认，请联系管理员核实；为避免重复扣费，已停止自动重试")
+var ErrUncertain = errors.New("提交结果暂未确认，已停止自动重试以免重复生成；积分已退回")
 
 type Provider interface {
 	Generate(context.Context, core.Job) (string, error)

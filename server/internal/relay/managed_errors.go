@@ -119,19 +119,43 @@ func ParseManagedError(raw []byte) ManagedError {
 }
 
 // settledCode: a generic "unavailable / internal / network" code whose own
-// message says the generation already ended (failed, or blocked by content
-// review) is that ending. The relay has labelled a finished task's content
-// review failure as 5006 provider_unavailable, which kept a finished task
-// being queried as if the model were only down for a moment.
+// message says how the task ended is that ending. The relay has labelled a
+// finished task's content review failure, and the upstream rejecting a
+// reference video's length ("Reference video 1 lasts 30.167 seconds; each
+// reference video must last between 2 and 30 seconds"), as 5006
+// provider_unavailable, which kept a task that can never succeed being
+// queried for an hour as if the model were only down for a moment. A real
+// outage says nothing of the kind and stays retryable.
 func settledCode(code int, message string) int {
 	if code != 5006 && code != 5012 && code != 5202 {
 		return code
 	}
 	m := strings.ToLower(message)
+	has := func(words ...string) bool {
+		for _, w := range words {
+			if strings.Contains(m, w) {
+				return true
+			}
+		}
+		return false
+	}
+	reference := has("reference video", "reference audio", "reference image", "input video", "input audio", "input image", "参考视频", "参考音频", "参考图")
 	switch {
-	case strings.Contains(m, "safety review") || strings.Contains(m, "content safety") || strings.Contains(m, "安全审核"):
+	case has("safety review", "content safety", "sensitive", "安全审核"):
 		return 5002
-	case strings.Contains(m, "generation_failed"):
+	// Only words naming a reference material count: an outage can say "video"
+	// and "took too long" without anything having been refused.
+	case reference && has("must last", "lasts", "duration", "时长"):
+		return 5101 // a reference's length is outside what the model takes
+	case reference && has("unsupported format", "format is not supported", "not supported format", "invalid format", "格式"):
+		return 5102
+	case reference && has("decode", "cannot be parsed", "unable to parse", "corrupt", "无法解析"):
+		return 5103
+	case reference && has("aspect ratio", "宽高比"):
+		return 5104
+	case has("invalidparameter", "invalid parameter", "invalid_parameter", "参数错误", "参数无效"):
+		return 5003
+	case has("generation_failed"):
 		return 5001
 	}
 	return code

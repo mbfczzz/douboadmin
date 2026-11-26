@@ -20,19 +20,18 @@ func TestDashboardPointsUseCommittedJobAccounting(t *testing.T) {
 		}
 		return j
 	}
-	finish := func(id, kind string, cost int64, failure string, hold bool) {
+	finish := func(id, kind string, cost int64, failure string) {
 		create(id, kind, cost)
 		j, err := a.Store.Claim(ctx)
 		if err != nil {
 			t.Fatal(err)
 		}
-		j.HoldOnFailure = hold
 		if err = a.Store.Finish(ctx, j, "result", failure); err != nil {
 			t.Fatal(err)
 		}
 	}
-	finish("image", "image", 300, "", false)
-	finish("video", "video", 900, "", false)
+	finish("image", "image", 300, "")
+	finish("video", "video", 900, "")
 	chat := create("chat", "chat", 1000)
 	claimed, err := a.Store.ClaimChat(ctx)
 	if err != nil {
@@ -47,8 +46,8 @@ func TestDashboardPointsUseCommittedJobAccounting(t *testing.T) {
 	if err = a.Store.Finish(ctx, claimed, "reply", ""); err != nil {
 		t.Fatal(err)
 	}
-	finish("failed", "image", 500, "failed", false)
-	finish("unknown", "video", 700, "need verification", true)
+	finish("failed", "image", 500, "failed")
+	finish("unknown", "video", 700, "need verification") // returned at once too
 	create("running", "video", 400)
 	if _, err = a.Store.Claim(ctx); err != nil {
 		t.Fatal(err)
@@ -62,12 +61,5 @@ func TestDashboardPointsUseCommittedJobAccounting(t *testing.T) {
 			t.Fatalf("status=%d points=%+v want=%+v body=%s", w.Code, report.Points, want, w.Body.String())
 		}
 	}
-	want := core.PointStats{SpentUnits: 1450, ImageUnits: 300, VideoUnits: 900, OtherUnits: 250, ChargedJobs: 3, ReservedUnits: 1700, ReservedJobs: 3, ReleasedUnits: 500, ReleasedJobs: 1}
-	read(want)
-	unknown := core.NewJob("point-report", "unknown", core.JobInput{})
-	if err = a.Billing.ReleaseJob(ctx, unknown.ID, "admin", "已核实未生成"); err != nil {
-		t.Fatal(err)
-	}
-	want.ReservedUnits, want.ReservedJobs, want.ReleasedUnits, want.ReleasedJobs = 1000, 2, 1200, 2
-	read(want)
+	read(core.PointStats{SpentUnits: 1450, ImageUnits: 300, VideoUnits: 900, OtherUnits: 250, ChargedJobs: 3, ReservedUnits: 1000, ReservedJobs: 2, ReleasedUnits: 1200, ReleasedJobs: 2})
 }

@@ -84,3 +84,28 @@ func TestQuoteChargesReferenceVideosByDurationTier(t *testing.T) {
 		t.Fatal("submit charges generation + reference", w.Code, w.Body.String())
 	}
 }
+
+// A reference video longer than the model takes is refused before any model
+// is called, naming the video and the limit so the user can cut it.
+func TestReferenceLongerThanTheModelTakesIsRefused(t *testing.T) {
+	a, user, _ := setup(t)
+	a.Objects = &countingObjects{}
+	ctx := context.Background()
+	m := core.Model{ID: "sd20", Key: "video-test", Name: "Seedance 2.0", Kind: "video", Published: true, Available: true, Points: 9,
+		Resolutions: []string{"720p"}, Ratios: []string{"9:16"}, Durations: []int{5}, Modes: []string{"omni_ref"}, ReferenceTypes: []string{"video"}}
+	if _, err := a.Store.Put(ctx, "models", core.Record{ID: m.ID, Data: core.Data(m)}, 0); err != nil {
+		t.Fatal(err)
+	}
+	for id, seconds := range map[string]float64{"long": 16, "ok": 15} {
+		_, _ = a.Store.Put(ctx, "assets", core.Record{ID: id, Owner: "user-a", Data: core.Data(map[string]any{"key": "uploads/user-a/" + id + ".mp4", "type": "video/mp4", "size": 1, "duration": seconds})}, 0)
+	}
+	in := core.JobInput{Kind: "video", Model: m.ID, Prompt: "复刻@视频2", Resolution: "720p", Ratio: "9:16", Duration: 5, Mode: "omni_ref", Assets: []string{"ok", "long"}}
+	w := call(a, "POST", "/api/jobs/quote", user, "", in)
+	if w.Code != 400 || !strings.Contains(w.Body.String(), "参考视频2 时长 16 秒，Seedance 2.0 最长只能参考 15 秒") {
+		t.Fatal(w.Code, w.Body.String())
+	}
+	in.Assets = []string{"ok"}
+	if w := call(a, "POST", "/api/jobs/quote", user, "", in); w.Code != 200 {
+		t.Fatal("15 s is within the limit", w.Code, w.Body.String())
+	}
+}

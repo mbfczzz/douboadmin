@@ -58,10 +58,6 @@ func expireFundedJob(ctx context.Context, s Store, id string, now time.Time) err
 			if json.Unmarshal(row.Data, &data) != nil || data == nil {
 				data = map[string]json.RawMessage{}
 			}
-			var phase string
-			_ = json.Unmarshal(data["phase"], &phase)
-			// Preserve the existing verified-failure policy for submitted upstream work.
-			j.HoldOnFailure = phase != "failed"
 			data["phase"], data["error"], data["note"] = core.Data("timed_out"), core.Data(failure), core.Data(failure)
 			delete(data, "errorCause")
 			row.Data = core.Data(data)

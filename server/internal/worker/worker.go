@@ -69,10 +69,11 @@ func run(ctx context.Context, s store.Store, p provider.Provider, claim func(con
 				_ = s.Hold(ctx, j, 5, true)
 				continue
 			}
+			// A failed job returns its points at once, even when the upstream
+			// outcome is unknown (the platform bears that rare cost).
 			failure := ""
 			if err != nil {
 				failure = err.Error()
-				j.HoldOnFailure = holdFailedCharge(ctx, s, j.ID, err)
 			}
 			if err = s.Finish(ctx, j, result, failure); err != nil {
 				slog.Warn("completion rejected or unavailable", "task", j.ID, "error", err)

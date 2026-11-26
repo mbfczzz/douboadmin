@@ -81,7 +81,6 @@ type Job struct {
 	CostUnits           int64     `json:"costUnits"`
 	BillingState        string    `json:"billingState,omitempty"`
 	EstimatedCostMicros *int64    `json:"estimatedCostMicros,omitempty"`
-	HoldOnFailure       bool      `json:"-"`
 	Stage               string    `json:"stage,omitempty"`
 	Deleted             bool      `json:"deleted,omitempty"`
 	Featured            bool      `json:"featured,omitempty"`
