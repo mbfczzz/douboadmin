@@ -29,20 +29,33 @@ test("only chosen pictures go, numbered by the swaps that use them", () => {
   assert.deepEqual(out.swaps.map((s) => [s.name, s.ref]), [["主角", "@图片1"], ["保温杯", "@图片2"]]);
 });
 
-test("the description names each swap; nothing is left to guess", () => {
+test("the server writes 生成同款 from the swaps; the editor's brief puts the pictures into the shots", async () => {
   const h = harness();
-  const { remakePrompt, remakeInstruction } = h.service("../pages/create/remake-brief");
+  const { remakeInstruction } = h.service("../pages/create/remake-brief");
   const breakdown = { subjects, summary: "", hook: "回眸", structure: "", sellingPoints: [], style: "", music: "", shots: [{ start: 0, end: 3, scene: "窗边", action: "回头", camera: "", speech: "" }] };
   const swaps = [
     { name: "主角", kind: "person", look: "长发女生", ref: "@图片1" },
     { name: "保温杯", kind: "product", look: "白色", ref: "@图片2" },
   ];
-  const prompt = remakePrompt({ title: "t", text: "", duration: 10, breakdown, images: 2, swaps }, 10, 2000);
-  assert.match(prompt, /把【主角（长发女生）】换成@图片1中的人物；把【保温杯（白色）】换成@图片2中的商品/);
-  assert.match(prompt, /其他主体保持原样/);
-  assert.match(remakeInstruction({ title: "t", text: "", duration: 10, breakdown, images: 2, swaps }, 10, 800), /用户指定了替换：把【主角/);
-  // Without matches (an older breakdown), all pictures with the general wording.
-  assert.match(remakePrompt({ title: "t", text: "", duration: 10, breakdown, images: 2 }, 10, 2000), /换成@图片1、@图片2中的商品或人物/);
+  const brief = remakeInstruction({ title: "t", text: "", duration: 10, breakdown, images: 2, swaps }, 10, 800);
+  assert.match(brief, /用户指定了替换：把【主角（长发女生）】换成@图片1中的人物/);
+  assert.match(brief, /分镜里凡是出现被替换的主体，都直接写成对应图片中的人物或商品/);
+  assert.doesNotMatch(brief, /保持原视频的样子/);
+  await h.api.signIn();
+  const posts = [];
+  h.wx.request = (o) => { posts.push(o); o.success({ statusCode: 200, data: { prompt: "描述" } }); };
+  const { remakeBrief } = h.service("hot-import");
+  assert.equal((await remakeBrief("job-1", 10, 2000, 2, swaps)).prompt, "描述");
+  const sent = posts.find((p) => p.url.endsWith("/remake/prompt"));
+  assert.deepEqual(plain(sent.data), { job: "job-1", seconds: 10, limit: 2000, images: 2, swaps: [{ name: "主角", picture: 1 }, { name: "保温杯", picture: 2 }] });
+});
+
+test("keeping the main person while swapping others warns the remake will look like the original", () => {
+  const { mainKept } = harness().service("../pages/task-detail/swap");
+  const rows = (...picks) => subjects.map((s, i) => ({ ...s, pick: picks[i] || "" }));
+  assert.equal(mainKept(rows()), "", "nothing swapped: nothing to warn about");
+  assert.equal(mainKept(rows("", "", "p1")), "主角");
+  assert.equal(mainKept(rows("p1", "", "p2")), "");
 });
 
 test("each subject has its own slot: upload replaces it, × keeps the original; no pictures needed first", async () => {
@@ -78,5 +91,27 @@ test("pictures given with an older remake are the first guess, shown in their sl
   await page.loadSwaps();
   assert.deepEqual(plain(page.data.swaps.map((r) => r.pick)), ["p1", "", "p2"]);
   assert.equal(page.data.swapUrls.p2, "https://oss/p2.jpg");
+  page.onUnload && page.onUnload();
+});
+
+test("a remake without its breakdown says so and can be broken down again", async () => {
+  const h = harness(), messages = [], posts = [];
+  await h.api.signIn();
+  h.wx.showToast = (o) => messages.push(o.title);
+  const page = h.page("task-detail");
+  h.wx.request = (o) => o.success({ statusCode: 200, data: { status: "failed", result: null } });
+  page.setData({ job: { id: "j", status: "succeeded", resultAssetId: "orig", input: { purpose: "remake", sourceId: "7301", assets: [] } } });
+  await page.loadSwaps();
+  assert.equal(page.data.breakdownMissing, true);
+  // Failing again is said, and the button comes back.
+  await page.retryBreakdown();
+  assert.match(messages.at(-1), /还是没有拆解成功/);
+  assert.equal(page.data.rebreaking, false);
+  h.wx.request = (o) => { posts.push(o); o.success({ statusCode: 200, data: { status: "done", result: { subjects, shots: [{ start: 0, end: 3, scene: "窗边" }] } } }); };
+  await page.retryBreakdown();
+  assert.deepEqual(plain(posts[0].data), { assetId: "orig" });
+  assert.ok(posts[0].url.endsWith("/hot/videos/7301/breakdown"));
+  assert.equal(page.data.breakdownMissing, false);
+  assert.deepEqual(plain(page.data.swaps.map((r) => r.name)), ["主角", "背景店铺", "保温杯"]);
   page.onUnload && page.onUnload();
 });

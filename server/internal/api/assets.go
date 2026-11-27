@@ -71,9 +71,15 @@ func (a *Server) upload(w http.ResponseWriter, r *http.Request) {
 		fail(w, 400, "文件不能超过 50 MB（视频可到 500 MB）")
 		return
 	}
-	length := 0.0 // read here so 参考视频计费 never fetches a large video again
+	// Read here so 参考视频计费 and 生成同款 never fetch a large video again.
+	facts := map[string]any{}
 	if strings.HasPrefix(typ, "video/") {
-		length, _ = media.MP4Duration(file)
+		if length, err := media.MP4Duration(file); err == nil && length > 0 {
+			facts["duration"] = length
+		}
+		if w, h, err := media.MP4Shape(file); err == nil {
+			facts["width"], facts["height"] = w, h
+		}
 		_, _ = file.Seek(0, 0)
 	}
 	row, e := a.saveAsset(r.Context(), identity(r).ID, file, header.Filename, typ, header.Size)
@@ -85,8 +91,8 @@ func (a *Server) upload(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	if length > 0 {
-		a.keepDuration(r.Context(), row, length)
+	if len(facts) > 0 {
+		a.keepVideoFacts(r.Context(), row, facts)
 		if fresh, err := a.Store.Get(r.Context(), "assets", row.ID); err == nil {
 			row = fresh
 		}

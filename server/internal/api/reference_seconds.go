@@ -75,11 +75,18 @@ func (a *Server) measureVideo(ctx context.Context, key string) (float64, error) 
 // keepDuration saves the measured length; a concurrent edit just means the
 // next quote measures again.
 func (a *Server) keepDuration(ctx context.Context, row core.Record, seconds float64) {
+	a.keepVideoFacts(ctx, row, map[string]any{"duration": seconds})
+}
+
+// keepVideoFacts adds what was read from a video file to its asset.
+func (a *Server) keepVideoFacts(ctx context.Context, row core.Record, facts map[string]any) {
 	var data map[string]any
 	if json.Unmarshal(row.Data, &data) != nil {
 		return
 	}
-	data["duration"] = seconds
+	for k, v := range facts {
+		data[k] = v
+	}
 	row.Data = core.Data(data)
 	if _, err := a.Store.Put(ctx, "assets", row, row.Version); err != nil && !errors.Is(err, core.ErrConflict) {
 		slog.Warn("keep reference video length", "asset", row.ID, "error", err)

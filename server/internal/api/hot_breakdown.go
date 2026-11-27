@@ -31,7 +31,7 @@ func (a *Server) hotBreakdown(w http.ResponseWriter, r *http.Request) {
 		fail(w, 404, "视频不存在")
 		return
 	}
-	rec, _, err := a.Hot.ReadBreakdown(r.Context(), a.Vision.ModelID(), id)
+	rec, err := a.Hot.SavedBreakdown(r.Context(), a.Vision.ModelID(), id)
 	if err != nil && !errors.Is(err, core.ErrNotFound) {
 		dbError(w, err)
 		return
@@ -51,6 +51,10 @@ func (a *Server) hotBreakdown(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	key, size, problem := a.breakdownAsset(r.Context(), v.AssetID, identity(r).ID)
+	if problem == "" && !a.copyOf(r.Context(), v.AssetID, id) {
+		problem = "原视频素材不可用"
+	}
+	seconds := a.assetSeconds(r.Context(), v.AssetID)
 	if problem != "" {
 		fail(w, 400, problem)
 		return
@@ -60,7 +64,9 @@ func (a *Server) hotBreakdown(w http.ResponseWriter, r *http.Request) {
 		defer cancel()
 		source := func() (vision.Video, error) {
 			url, err := a.Media.InputURL(ctx, key)
-			return vision.Link(url, size), err
+			video := vision.Link(url, size)
+			video.Seconds = seconds
+			return video, err
 		}
 		if _, err := a.Hot.EnsureBreakdown(ctx, a.Vision, id, source); err != nil {
 			slog.Warn("video breakdown failed", "video", id, "error", err.Error())
@@ -80,6 +86,28 @@ func (a *Server) breakdownAsset(ctx context.Context, assetID, user string) (stri
 		return "", 0, "原视频超过 512 MB，无法拆解"
 	}
 	return asset.Key, asset.Size, ""
+}
+
+// copyOf: the breakdown is shared by everyone, so it is made only from the
+// user's saved copy of that very video (the upload itself for "u" ids).
+func (a *Server) copyOf(ctx context.Context, assetID, videoID string) bool {
+	if strings.HasPrefix(videoID, "u") {
+		return videoID[1:] == assetID
+	}
+	var asset struct {
+		SourceVideoID string `json:"sourceVideoId"`
+	}
+	row, err := a.Store.Get(ctx, "assets", assetID)
+	return err == nil && json.Unmarshal(row.Data, &asset) == nil && asset.SourceVideoID == videoID
+}
+
+// assetSeconds is the video's length when it was read at upload (0: unknown).
+func (a *Server) assetSeconds(ctx context.Context, id string) float64 {
+	var asset media.Asset
+	if row, err := a.Store.Get(ctx, "assets", id); err == nil {
+		_ = json.Unmarshal(row.Data, &asset)
+	}
+	return asset.Duration
 }
 
 // The vision service's own words (keys, quota, upstream errors) stay in the

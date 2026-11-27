@@ -99,6 +99,7 @@ function harness(timers = {}) {
     return {
       ...capturedPage,
       data: JSON.parse(JSON.stringify(capturedPage.data)),
+      selectComponent: () => null, // no child components render here
       setData(v) {
         for (const [k, value] of Object.entries(v)) {
           const keys = k.match(/[^.[\]]+/g);

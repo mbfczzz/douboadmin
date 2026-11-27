@@ -212,19 +212,6 @@ test("story pages: style cards, examples that fill the text, 清空 and switches
   assert.ok(remix.data.sections.some((s) => s.type === "toggles" && s.items[0].label === "视频加结尾"));
 });
 
-test("a long original squeezed into a short remake merges overlapping beats", () => {
-  const h = harness();
-  const { remakePrompt } = h.service("../pages/create/remake-brief");
-  const shots = Array.from({ length: 6 }, (_, i) => ({ start: i * 10, end: i * 10 + 10, scene: "场景" + i, action: "", camera: "", speech: "" }));
-  const text = remakePrompt({ title: "t", text: "", duration: 60, breakdown: { hook: "", style: "", shots } }, 5, 2000);
-  const lines = text.split("\n").slice(1);
-  const starts = lines.map((l) => Number(l.split("–")[0]));
-  assert.deepEqual(starts, [...new Set(starts)], "no repeated time ranges");
-  assert.ok(lines.every((l) => /^\d+–\d+秒：/.test(l)));
-  assert.match(text, /场景0[^]*场景5/);
-  assert.ok(Number(lines[lines.length - 1].split("–")[1].split("秒")[0]) <= 5);
-});
-
 test("a failed 一键复刻 preparation offers 重新复刻 on the remake page", () => {
   const h = harness(), detail = h.page("task-detail");
   detail.setData({ job: { id: "j", status: "failed", input: { kind: "import", purpose: "remake", sourceId: "7301", prompt: "一键复刻：t", assets: [] } } });

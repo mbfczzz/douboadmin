@@ -10,6 +10,7 @@ func (a *Server) hotRoutes() {
 	m.HandleFunc("POST /api/hot/videos/{id}/breakdown", a.auth("user", a.hotBreakdown))
 	m.HandleFunc("GET /api/hot/videos/{id}/breakdown", a.auth("user", a.hotBreakdown))
 	m.HandleFunc("POST /api/remake/upload", a.auth("user", a.remakeUpload))
+	m.HandleFunc("POST /api/remake/prompt", a.auth("user", a.remakeBrief))
 	m.HandleFunc("GET /api/hot/history", a.auth("user", a.searchHistory))
 	m.HandleFunc("DELETE /api/hot/history", a.auth("user", a.searchHistory))
 }

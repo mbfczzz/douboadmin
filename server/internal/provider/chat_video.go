@@ -39,7 +39,7 @@ func (p *DirectChat) videoNote(ctx context.Context, j core.Job, assetID, url str
 		return "【" + label + "】暂时看不到这个视频的画面；请告诉用户暂时无法查看视频，并请用户描述视频内容，不要提及任何配置或服务原因。"
 	}
 	modelID := p.Vision.ModelID()
-	size := assetSize(ctx, p, assetID)
+	size, seconds := assetSize(ctx, p, assetID)
 	if size > videoMaxBytes {
 		return "【" + label + "】视频超过 512MB，无法观看；请告诉用户剪短或压缩后重新上传。"
 	}
@@ -74,7 +74,9 @@ func (p *DirectChat) videoNote(ctx context.Context, j core.Job, assetID, url str
 		if err != nil {
 			return videoNoteFailure(label)
 		}
-		return p.watchVideoNote(ctx, j, label, vision.Link(url, size), claimed, claim)
+		video := vision.Link(url, size)
+		video.Seconds = seconds
+		return p.watchVideoNote(ctx, j, label, video, claimed, claim)
 	}
 }
 
@@ -158,12 +160,14 @@ func assetType(ctx context.Context, p *DirectChat, id string) string {
 	return strings.Split(a.Type, "/")[0]
 }
 
-func assetSize(ctx context.Context, p *DirectChat, id string) int64 {
+// assetSize is the video's size and, when it was read at upload, its length.
+func assetSize(ctx context.Context, p *DirectChat, id string) (int64, float64) {
 	var a struct {
-		Size int64 `json:"size"`
+		Size     int64   `json:"size"`
+		Duration float64 `json:"duration"`
 	}
 	if row, err := p.Store.Get(ctx, "assets", id); err == nil {
 		_ = json.Unmarshal(row.Data, &a)
 	}
-	return a.Size
+	return a.Size, a.Duration
 }

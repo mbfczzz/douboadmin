@@ -73,7 +73,7 @@ func TestLargeVideoGoesThroughTheFilesAPI(t *testing.T) {
 	defer server.Close()
 	size := int64(URLLimit + 1)
 	opened := 0
-	video := Video{URL: "https://oss.example/big.mp4", Size: size, Open: func(context.Context) (io.ReadCloser, error) {
+	video := Video{URL: "https://oss.example/big.mp4", Size: size, Seconds: 40, Open: func(context.Context) (io.ReadCloser, error) {
 		opened++
 		return io.NopCloser(io.LimitReader(zeros{}, size)), nil
 	}}
@@ -82,7 +82,7 @@ func TestLargeVideoGoesThroughTheFilesAPI(t *testing.T) {
 	if err != nil || b.Hook != "开场" {
 		t.Fatal(b, err)
 	}
-	if opened != 1 || ark.uploaded != size || ark.fields["purpose"] != "user_data" || ark.fields["preprocess_configs[video][model]"] != c.Model || ark.fields["preprocess_configs[video][fps]"] != "1" || ark.fields["expire_at"] == "" {
+	if opened != 1 || ark.uploaded != size || ark.fields["purpose"] != "user_data" || ark.fields["preprocess_configs[video][model]"] != c.Model || ark.fields["preprocess_configs[video][fps]"] != "2" || ark.fields["expire_at"] == "" {
 		t.Fatal("upload", opened, ark.uploaded, ark.fields)
 	}
 	if ark.video["file_id"] != "file-1" || ark.video["url"] != nil || ark.polls < 2 || len(ark.deleted) != 1 {
@@ -118,3 +118,13 @@ func TestLinkOpensTheStoredVideo(t *testing.T) {
 type zeros struct{}
 
 func (zeros) Read(p []byte) (int, error) { clear(p); return len(p), nil }
+
+// Two frames a second while the length is known and within 5 minutes; a
+// longer or unknown one keeps one, so its frames stay within the model's take.
+func TestFrameRateFollowsTheLength(t *testing.T) {
+	for seconds, want := range map[float64]float64{0: 1, 25: 2, 300: 2, 301: 1} {
+		if got := (Video{Seconds: seconds}).fps(); got != want {
+			t.Fatal(seconds, got)
+		}
+	}
+}

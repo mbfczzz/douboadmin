@@ -23,6 +23,11 @@
   line-height: 1.5;
   color: var(--ui-muted);
 }
+.swap-warn {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ui-warning);
+}
 .swap-add {
   height: 76px;
   border-radius: 12px;

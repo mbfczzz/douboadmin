@@ -24,6 +24,10 @@ type Asset struct {
 	// Duration of a video in seconds, read from the file when it is saved
 	// (reference-length checks and 参考视频计费 never fetch it again).
 	Duration float64 `json:"duration,omitempty"`
+	// Displayed size of a video (rotation applied), read when it is saved
+	// (生成同款 keeps the original's shape).
+	Width  int `json:"width,omitempty"`
+	Height int `json:"height,omitempty"`
 }
 type Service struct {
 	Store      store.Store

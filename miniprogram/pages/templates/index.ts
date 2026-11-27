@@ -73,6 +73,7 @@ Page({
           wx.pageScrollTo({ scrollTop: at[to], duration: 0 });
         }).exec();
       else wx.pageScrollTo({ scrollTop: 0, duration: 0 });
+      if (!featured) this.selectComponent("#featured")?.close(); // a work's popup goes with its view
       this.setData({ featured });
     }
     tab(this, 0);

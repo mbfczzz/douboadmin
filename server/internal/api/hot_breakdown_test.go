@@ -33,11 +33,16 @@ func TestHotBreakdownSharedAndRetryable(t *testing.T) {
 	defer model.Close()
 	a.Vision = &vision.Client{BaseURL: model.URL, Key: "k", Model: "doubao-seed-1-6-vision-250815"}
 	for id, owner := range map[string]string{"clip-a": "user-a", "clip-b": "user-b"} {
-		_, _ = a.Store.Put(t.Context(), "assets", core.Record{ID: id, Owner: owner, Data: core.Data(map[string]any{"key": "uploads/" + id, "type": "video/mp4", "size": 1024})}, 0)
+		_, _ = a.Store.Put(t.Context(), "assets", core.Record{ID: id, Owner: owner, Data: core.Data(map[string]any{"key": "uploads/" + id, "type": "video/mp4", "size": 1024, "sourceVideoId": "7301"})}, 0)
 	}
 	path := "/api/hot/videos/7301/breakdown"
 	if w := call(a, "POST", path, one, "", map[string]string{"assetId": "clip-b"}); w.Code != 400 {
 		t.Fatal("someone else's video accepted", w.Code)
+	}
+	// The shared breakdown comes only from a saved copy of that very video.
+	_, _ = a.Store.Put(t.Context(), "assets", core.Record{ID: "other", Owner: "user-a", Data: core.Data(map[string]any{"key": "uploads/other", "type": "video/mp4", "size": 1024, "sourceVideoId": "7302"})}, 0)
+	if w := call(a, "POST", path, one, "", map[string]string{"assetId": "other"}); w.Code != 400 {
+		t.Fatal("another video's copy accepted", w.Code)
 	}
 	failing.Store(true)
 	if w := call(a, "POST", path, one, "", map[string]string{"assetId": "clip-a"}); w.Code != 202 {

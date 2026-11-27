@@ -3,7 +3,12 @@ import { readView, writeView } from "../../utils/view-cache";
 import { featuredPage, featuredDetail } from "../../services/featured-works";
 import type { FeaturedWork } from "../../services/featured-works";
 
-type Self = { revision: number; detailRevision: number; visible: boolean };
+type Self = { revision: number; detailRevision: number; visible: boolean; loaded?: { key: string; at: number } };
+
+// A list shown within this long is shown again as it was (covers are signed
+// for 15 minutes): coming back from a video or picture preview hides and
+// shows the page, which must not reload every cover.
+const FRESH = 10 * 60 * 1000;
 
 // 优秀作品 inside the 模板 tab page; `active` starts loads, and answers
 // arriving after it turns off are dropped.
@@ -34,14 +39,22 @@ Component({
       return s;
     },
     show() {
-      this.self().visible = true;
+      const s = this.self();
+      s.visible = true;
+      // (A load cut short by the hide, e.g. a pull-down refresh, runs again.)
+      if (s.loaded?.key === this.viewKey() && Date.now() - s.loaded.at < FRESH && !this.data.loading && !this.data.loadError) return;
       void this.load();
     },
+    // Late answers are dropped; an open picture popup stays for the return.
     hide() {
       const s = this.self();
       s.visible = false;
       s.revision++;
-      this.close();
+      s.detailRevision++;
+      this.setData({ opening: "" });
+    },
+    viewKey() {
+      return `featured:${this.data.kind}:${this.data.page}`;
     },
     refresh() {
       this.setData({ page: 1 });
@@ -50,7 +63,7 @@ Component({
     async load() {
       const s = this.self(), version = ++s.revision;
       // Seen this session (covers are signed for 15 min): show it at once.
-      const key = `featured:${this.data.kind}:${this.data.page}`;
+      const key = this.viewKey();
       const seen = readView<{ items: FeaturedWork[]; total: number }>(key, 10 * 60 * 1000);
       this.setData({ loading: true, loadError: "", ...(seen && !this.data.works.length ? { works: seen.items, total: seen.total } : {}) });
       try {
@@ -59,6 +72,7 @@ Component({
         const last = Math.max(1, Math.ceil(result.total / 20));
         if (this.data.page > last) { this.setData({ page: last, works: [] }); void this.load(); return; }
         this.setData({ works: result.items, total: result.total });
+        s.loaded = { key, at: Date.now() };
         writeView(key, { items: result.items, total: result.total }, false);
       } catch (e) {
         if (s.visible && version === s.revision) this.setData({ works: [], total: 0, loadError: (e as Error).message });

@@ -97,13 +97,19 @@ func (p Importer) Generate(ctx context.Context, j core.Job) (string, error) {
 func (p Importer) breakdown(ctx context.Context, j core.Job, videoID string, asset map[string]any) {
 	key, _ := asset["key"].(string)
 	size, _ := asset["size"].(float64)
+	seconds, _ := asset["duration"].(float64)
+	if seconds <= 0 {
+		seconds = float64(j.Input.Duration) // the original's length the user saw
+	}
 	if key == "" || size > vision.FileLimit { // over 50 MB goes through 方舟's Files API
 		return
 	}
 	_ = p.Service.Store.Progress(ctx, j, 70, "拆解原视频的钩子和分镜")
 	source := func() (vision.Video, error) {
 		url, err := p.Media.InputURL(ctx, key)
-		return vision.Link(url, int64(size)), err
+		video := vision.Link(url, int64(size))
+		video.Seconds = seconds
+		return video, err
 	}
 	if _, err := p.Service.EnsureBreakdown(ctx, p.Vision, videoID, source); err != nil {
 		slog.Warn("video breakdown failed", "video", videoID, "error", err.Error())

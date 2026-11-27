@@ -103,16 +103,17 @@ test("a finished 一键复刻 task hands video, pictures and breakdown to the ed
   assert.equal(draft.duration, 18);
 });
 
-test("生成同款 picks a fitting model, writes from the breakdown and submits after one confirmation", async () => {
-  const h = harness(), submitted = [];
-  h.service("hot-breakdown").readBreakdown = async () => ({ hook: "撕快递", style: "手持暖光", shots: [{ start: 0, end: 6, scene: "卧室", action: "撕开快递", camera: "手持", speech: "终于到了" }, { start: 6, end: 18, scene: "镜前", action: "试色", camera: "特写", speech: "" }] });
+test("生成同款 picks a fitting model, has the server write the description and submits after one confirmation", async () => {
+  const h = harness(), submitted = [], briefs = [];
+  let size = { width: 0, height: 0 };
+  h.service("hot-import").remakeBrief = async (...args) => { briefs.push(args); return { prompt: "服务器写的复刻描述", ...size }; };
   const video = (id, refs) => ({ id, kind: "video", name: id, referenceTypes: refs, modes: ["t2v", "omni_ref"], durations: [5, 10, 15], resolutions: ["480p", "720p"], ratios: ["9:16", "16:9"], settings: {}, referenceRules: { omni_ref: { video: { maxCount: 3, maxSizeMB: 50, maxSeconds: 30 } } } });
   h.service("../utils/config-cache").loadConfig = async () => ({ models: [video("text-only", []), video("video-only", ["video"]), video("both", ["image", "video"])] });
   h.api.submitInput = async (input, channel) => { submitted.push([input, channel]); return { id: "gen-1", input, status: "queued" }; };
   const clips = [];
   h.service("reference-clip").referenceClip = async (id, model) => { clips.push([id, model.id]); return id + "-clip"; };
   const detail = h.page("task-detail");
-  detail.setData({ job: { id: "job-1", status: "succeeded", resultAssetId: "asset-1", input: { kind: "import", purpose: "remake", sourceId: "7301", prompt: "一键复刻：开箱口红", duration: 18, assets: [] } } });
+  detail.setData({ swapLoaded: true, job: { id: "job-1", status: "succeeded", resultAssetId: "asset-1", input: { kind: "import", purpose: "remake", sourceId: "7301", prompt: "一键复刻：开箱口红", duration: 18, assets: [] } } });
   detail.setData({ assets: [{ id: "pic-1", isImage: true, data: { type: "image/jpeg", size: 10 } }] });
   await detail.generateRemake();
   const [input, channel] = submitted[0];
@@ -123,9 +124,19 @@ test("生成同款 picks a fitting model, writes from the breakdown and submits 
   // The original goes cut to the chosen model's limit and without sound (reference-clip).
   assert.deepEqual(Array.from(input.assets), ["asset-1-clip", "pic-1"]);
   assert.deepEqual(clips, [["asset-1", "both"]]);
-  assert.match(input.prompt, /^参考@视频1[^]*15 秒的同款视频[^]*换成@图片1[^]*开头 3 秒保留钩子：撕快递[^]*\n0–5秒：卧室，撕开快递，手持，台词“终于到了”\n5–15秒：镜前，试色，特写$/);
+  assert.equal(input.prompt, "服务器写的复刻描述");
+  assert.deepEqual(JSON.parse(JSON.stringify(briefs)), [["job-1", 15, 2000, 1, []]]);
+  assert.equal(input.ratio, "9:16", "before the video has loaded");
   assert.equal(h.nav[0].url, "/pages/task-detail/index?id=gen-1");
   assert.equal(detail.data.busy, false);
+  // A landscape original stays landscape instead of being cropped to portrait:
+  // as the player reports it, and as the server read it from the file first.
+  detail.videoShape({ detail: { width: 1440, height: 1080 } });
+  await detail.generateRemake();
+  assert.equal(submitted[1][0].ratio, "16:9");
+  size = { width: 1080, height: 1920 };
+  await detail.generateRemake();
+  assert.equal(submitted[2][0].ratio, "9:16");
 });
 
 test("生成同款 never sends pictures to a model that only accepts video", async () => {
@@ -137,7 +148,7 @@ test("生成同款 never sends pictures to a model that only accepts video", asy
   h.api.submitInput = async () => { submitted++; };
   h.service("reference-clip").referenceClip = async (id) => id + "-clip";
   const page = h.page("task-detail");
-  page.setData({ job: { id: "job", status: "succeeded", resultAssetId: "source-video", input: { kind: "import", purpose: "remake", sourceId: "7301", prompt: "一键复刻：标题", duration: 10, assets: [] } }, assets: [{ id: "picture", isImage: true, data: { type: "image/jpeg", size: 10 } }] });
+  page.setData({ swapLoaded: true, job: { id: "job", status: "succeeded", resultAssetId: "source-video", input: { kind: "import", purpose: "remake", sourceId: "7301", prompt: "一键复刻：标题", duration: 10, assets: [] } }, assets: [{ id: "picture", isImage: true, data: { type: "image/jpeg", size: 10 } }] });
   await page.generateRemake();
   assert.equal(submitted, 0);
   assert.match(messages[0], /同时支持原视频和这些图片/);
@@ -147,7 +158,7 @@ test("调整后再生成 still opens the editor preset; labels say 一键复刻"
   const h = harness();
   h.service("hot-breakdown").readBreakdown = async (id) => (id === "7301" ? { hook: "钩子", shots: [] } : null);
   const detail = h.page("task-detail");
-  detail.setData({ job: { id: "job-1", status: "succeeded", resultAssetId: "asset-1", input: { kind: "import", purpose: "remake", sourceId: "7301", prompt: "一键复刻：标题", duration: 10, assets: [] } } });
+  detail.setData({ swapLoaded: true, job: { id: "job-1", status: "succeeded", resultAssetId: "asset-1", input: { kind: "import", purpose: "remake", sourceId: "7301", prompt: "一键复刻：标题", duration: 10, assets: [] } } });
   await detail.editRemake();
   assert.equal(h.storage.get("remake-source").breakdown.hook, "钩子");
   assert.equal(h.nav[0].url, "/pages/create/index?feature=remake");
@@ -198,4 +209,42 @@ test("功能点击统计默认关闭，未同意时不发送匿名请求", () =>
   const h = harness(), page = h.page("studio");
   page.open({ currentTarget: { dataset: { key: "tryon" } } });
   assert.equal(h.sent.filter((o) => o.url.includes("/api/features/")).length, 0);
+});
+
+test("生成同款 waits for the subjects, and reads them again when the breakdown changed", async () => {
+  const h = harness(), messages = [], briefs = [];
+  const video = { id: "v", kind: "video", name: "v", referenceTypes: ["image", "video"], modes: ["omni_ref"], durations: [], resolutions: ["480p"], ratios: ["16:9", "9:16", "1:1"], settings: {} };
+  h.service("../utils/config-cache").loadConfig = async () => ({ models: [video] });
+  h.service("reference-clip").referenceClip = async (id) => id + "-clip";
+  const { RequestError } = h.service("errors");
+  h.service("hot-import").remakeBrief = async (...args) => { briefs.push(args); throw new RequestError(409, "原视频的拆解已更新，请重新选择要替换的人物或商品"); };
+  let reads = 0;
+  h.service("hot-breakdown").readBreakdown = async () => { reads++; return { subjects: [{ name: "主角", kind: "person", look: "", when: "" }], shots: [{ start: 0, end: 3 }] }; };
+  h.wx.showToast = (o) => messages.push(o.title);
+  let submitted = 0;
+  h.api.submitInput = async () => { submitted++; };
+  const page = h.page("task-detail");
+  page.setData({ job: { id: "job", status: "succeeded", resultAssetId: "src", input: { kind: "import", purpose: "remake", sourceId: "7301", prompt: "一键复刻：t", duration: 12, assets: [] } } });
+  await page.generateRemake();
+  assert.equal(briefs.length, 0, "not before the subjects are read");
+  await page.loadSwaps();
+  await page.generateRemake();
+  assert.equal(briefs[0][1], 12, "a model listing no lengths writes for the original's");
+  assert.equal(submitted, 0);
+  assert.match(messages.at(-1), /拆解已更新/);
+  await new Promise(setImmediate);
+  assert.equal(reads, 2, "the subjects are read again");
+  assert.equal(page.data.swapLoaded, true);
+});
+
+test("the ratio nearest the original's shape, else nearest 9:16; an uploaded remake restarts on the remake page", () => {
+  const h = harness();
+  const { nearestRatio } = h.service("../pages/task-detail/remake");
+  assert.equal(nearestRatio(["16:9", "1:1"], { width: 1440, height: 1080 }), "16:9");
+  assert.equal(nearestRatio(["16:9", "3:4", "adaptive"]), "3:4");
+  assert.equal(nearestRatio(["adaptive"]), "9:16");
+  const page = h.page("task-detail");
+  page.setData({ job: { id: "j", status: "failed", input: { purpose: "remake", sourceId: "uasset1" } } });
+  page.remakeAgain();
+  assert.equal(h.nav[0].url, "/pages/remake/index");
 });

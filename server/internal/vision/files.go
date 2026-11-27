@@ -23,9 +23,10 @@ const (
 // Video is what a model watches: a link it reads itself, or — over URLLimit —
 // a file the client uploads first.
 type Video struct {
-	URL  string
-	Size int64
-	Open func(context.Context) (io.ReadCloser, error)
+	URL     string
+	Size    int64
+	Seconds float64 // its length when known (sets the frame rate)
+	Open    func(context.Context) (io.ReadCloser, error)
 }
 
 // filePoll is how often an uploaded file is checked until Ark has processed it.
@@ -60,7 +61,7 @@ func (c *Client) upload(ctx context.Context, v Video) (string, error) {
 	body, form := io.Pipe()
 	mw := multipart.NewWriter(form)
 	go func() { // streamed: a 500 MB video is never held in memory
-		fields := [][2]string{{"purpose", "user_data"}, {"preprocess_configs[video][fps]", "1"},
+		fields := [][2]string{{"purpose", "user_data"}, {"preprocess_configs[video][fps]", strconv.FormatFloat(v.fps(), 'f', -1, 64)},
 			{"expire_at", strconv.FormatInt(time.Now().Add(25*time.Hour).Unix(), 10)}}
 		if !strings.HasPrefix(c.Model, "ep-") { // the frame policy follows the model that watches
 			fields = append(fields, [2]string{"preprocess_configs[video][model]", c.Model})

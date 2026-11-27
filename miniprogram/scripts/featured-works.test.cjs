@@ -117,3 +117,44 @@ test("page changes clear the previous page cards while the next page is loading"
   await new Promise(setImmediate);
   assert.equal(page.data.works[0].id, "video");
 });
+
+test("coming back from a preview shows the list and popup as they were, without reloading", async () => {
+  const h = harness(), service = h.service("featured-works"), page = featured(h);
+  let calls = 0;
+  service.featuredPage = async () => { calls++; return { items: [work()], total: 1 }; };
+  service.featuredDetail = async () => work();
+  page.show();
+  await new Promise(setImmediate);
+  await page.open({ currentTarget: { dataset: { id: "image" } } });
+  page.hide(); // the native preview hides the page
+  page.show();
+  await new Promise(setImmediate);
+  assert.equal(calls, 1, "no reload: the covers stay as they were");
+  assert.equal(page.data.detail.id, "image", "the open popup stays");
+  assert.equal(page.data.loading, false);
+  // After a while the covers' signatures run out: the list loads again.
+  page.hide();
+  page.self().loaded.at -= 11 * 60 * 1000;
+  page.show();
+  await new Promise(setImmediate);
+  assert.equal(calls, 2);
+});
+
+test("a refresh cut short by leaving runs again on return", async () => {
+  const h = harness(), service = h.service("featured-works"), page = featured(h);
+  let calls = 0, release;
+  service.featuredPage = async () => { calls++; return { items: [work()], total: 1 }; };
+  page.show();
+  await new Promise(setImmediate);
+  service.featuredPage = () => { calls++; return new Promise((resolve) => { release = resolve; }); };
+  const pending = page.refresh();
+  page.hide();
+  release({ items: [], total: 0 });
+  await pending;
+  service.featuredPage = async () => { calls++; return { items: [work("video")], total: 1 }; };
+  page.show();
+  await new Promise(setImmediate);
+  assert.equal(calls, 3);
+  assert.equal(page.data.loading, false);
+  assert.equal(page.data.works[0].id, "video");
+});

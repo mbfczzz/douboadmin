@@ -18,6 +18,20 @@ export type Breakdown = {
   shots: BreakdownShot[];
 };
 
+type BreakdownState = { status: string; result: Breakdown | null };
+
+// 重新拆解 from the user's saved copy of the original, waiting for it (5
+// minutes at most, while the page is open); null when it failed again.
+export async function rerunBreakdown(videoId: string, assetId: string, alive: () => boolean): Promise<Breakdown | null> {
+  const path = "/hot/videos/" + videoId + "/breakdown";
+  let state = await request<BreakdownState>(path, "POST", { assetId });
+  for (let i = 0; state.status === "running" && i < 100 && alive(); i++) {
+    await new Promise((resolve) => setTimeout(resolve, 3000));
+    state = await request<BreakdownState>(path);
+  }
+  return state.status === "done" ? state.result : null;
+}
+
 export async function readBreakdown(videoId: string): Promise<Breakdown | null> {
   try {
     const reply = await request<{ status: string; result: Breakdown | null }>("/hot/videos/" + videoId + "/breakdown");

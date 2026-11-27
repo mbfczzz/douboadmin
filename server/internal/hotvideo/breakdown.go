@@ -34,8 +34,31 @@ func (r BreakdownRecord) Active() bool {
 }
 
 // v2: breakdowns list the subjects a remake can swap (older ones did not).
+// v3: shots name people by those subjects, never by their real names, so a
+// remake can put the user's picture into every shot the subject is in.
 func breakdownID(model, videoID string) string {
-	return core.Digest("v2:" + model + ":" + videoID)[:32]
+	return versionedID("v3", model, videoID)
+}
+
+func versionedID(version, model, videoID string) string {
+	return core.Digest(version + ":" + model + ":" + videoID)[:32]
+}
+
+// SavedBreakdown reads the current breakdown; until it is done (none,
+// running for someone else's new remake, or failed) a finished v2 one
+// stands in, so a remake prepared before v3 keeps its shots. New remakes
+// run v3.
+func (s *Service) SavedBreakdown(ctx context.Context, model, videoID string) (BreakdownRecord, error) {
+	rec, _, err := s.ReadBreakdown(ctx, model, videoID)
+	if err != nil && !errors.Is(err, core.ErrNotFound) || err == nil && rec.Status == "done" {
+		return rec, err
+	}
+	row, e := s.Store.Get(ctx, "hot_breakdowns", versionedID("v2", model, videoID))
+	var old BreakdownRecord
+	if e != nil || json.Unmarshal(row.Data, &old) != nil || old.Status != "done" {
+		return rec, err
+	}
+	return old, nil
 }
 
 // ReadBreakdown returns the shared record (core.ErrNotFound when none).

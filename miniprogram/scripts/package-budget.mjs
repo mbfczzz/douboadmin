@@ -283,7 +283,10 @@ console.log(
 // Legacy-release capability negotiation keeps visitor browsing and new video
 // billing models away from clients that cannot render them: 1,152,471 B.
 // 1125 -> 1126 KiB.
-const budget = 1126 * 1024;
+// 生成同款 takes its description and the original's size from the server,
+// keeps the original's ratio, guards swaps and offers 重新拆解; 优秀作品 keeps
+// its list after a preview: 1,157,348 B. 1126 -> 1131 KiB.
+const budget = 1131 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

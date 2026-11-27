@@ -30,6 +30,9 @@ Page({
     swapUrls: {} as Record<string, string>, // picture of each swap pick
     swapUploading: -1, // the subject whose picture is uploading
     swapLoaded: false,
+    mainKept: "", // the main person, kept while others are swapped
+    breakdownMissing: false, // 生成同款 would have only the title to go on
+    rebreaking: false,
     remakeModels: [] as { id: string; label: string }[], // 生成同款 can use (model-picker)
     remakeModel: "",
     genericUploading: false,

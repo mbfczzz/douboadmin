@@ -67,6 +67,7 @@
         autoplay="{{autoplay}}"
         show-center-play-btn
         object-fit="contain"
+        bindloadedmetadata="videoShape"
       />
     </view>
     <view wx:if="{{job.status==='succeeded'&&!job.deleted&&job.input.purpose==='remake'&&swapLoaded}}" class="swap-list">
@@ -80,6 +81,7 @@
             <view wx:if="{{row.pick}}" class="swap-clear" data-index="{{i}}" catchtap="clearSwap" aria-role="button" aria-label="{{row.name+'保持原样'}}">×</view>
           </view>
         </view>
+        <text wx:if="{{mainKept}}" class="swap-warn">「{{mainKept}}」出镜最多，不替换的话成片会和原视频很像</text>
       </block>
       <view wx:else class="asset-grid swap-upload-row">
         <block wx:for="{{assets}}" wx:for-item="pic" wx:key="id"><view wx:if="{{pic.isImage}}" class="asset-row" data-url="{{pic.data.url}}" bindtap="previewAsset"><image class="asset-thumb" src="{{pic.data.url}}" mode="aspectFill" /><view class="swap-remove" data-id="{{pic.id}}" catchtap="removeGenericPicture" aria-role="button" aria-label="删除替换图片">×</view></view></block>
@@ -88,11 +90,12 @@
     </view>
     <view wx:if="{{job.status==='succeeded'&&!job.deleted&&job.input.purpose==='remake'}}" class="remake-ready">
       <view class="remake-copy">
-        <text>原视频已拆解，确认积分后直接生成同款</text>
+        <text>{{!swapLoaded?'正在读取原视频拆解…':breakdownMissing?'原视频没有拆解成功，生成同款只能参考标题':'原视频已拆解，确认积分后直接生成同款'}}</text>
+        <text wx:if="{{breakdownMissing}}" class="remake-edit" bindtap="retryBreakdown">{{rebreaking?'正在重新拆解…':'重新拆解 ›'}}</text>
         <model-picker models="{{remakeModels}}" value="{{remakeModel}}" title="生成同款用的模型" disabled="{{busy}}" bind:change="chooseRemakeModel" />
         <text class="remake-edit" bindtap="editRemake">调整后再生成 ›</text>
       </view>
-      <button class="retry-pill remake-go" loading="{{busy}}" disabled="{{busy||genericUploading||swapUploading>=0||loadingAssets}}" bindtap="generateRemake">生成同款</button>
+      <button class="retry-pill remake-go" loading="{{busy}}" disabled="{{busy||!swapLoaded||rebreaking||genericUploading||swapUploading>=0||loadingAssets}}" bindtap="generateRemake">生成同款</button>
     </view>
     <view wx:elif="{{job.status==='succeeded'&&!job.deleted}}" class="result-actions">
       <view class="act" bindtap="save" hover-class="act-pressed" aria-role="button"><view class="act-icon primary"><t-loading wx:if="{{busy}}" size="20px" /><image wx:else class="gl gl-22" src="/assets/glyphs/download-dark.png" /></view><text>{{job.results.length>1?'保存全部':'保存'}}</text></view>

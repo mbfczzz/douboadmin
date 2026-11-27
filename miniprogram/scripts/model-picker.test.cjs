@@ -22,13 +22,13 @@ test("each generation page shows the picker", () => {
 
 test("生成同款 offers the models that take the original video and uses the pick", async () => {
   const h = harness(), submitted = [], toasts = [];
-  h.service("hot-breakdown").readBreakdown = async () => ({ shots: [] });
+  h.service("hot-import").remakeBrief = async () => ({ prompt: "复刻描述", width: 0, height: 0 });
   h.service("../utils/config-cache").loadConfig = async () => ({ models: [video("text-only", []), video("video-only", ["video"]), video("both", ["image", "video"])] });
   h.api.submitInput = async (input) => { submitted.push(input); return { id: "gen", input, status: "queued" }; };
   h.wx.showToast = (o) => toasts.push(o.title);
   h.service("reference-clip").referenceClip = async (id) => id + "-clip";
   const page = h.page("task-detail");
-  page.setData({ job: { id: "job", status: "succeeded", resultAssetId: "src", input: { kind: "import", purpose: "remake", sourceId: "7301", prompt: "一键复刻：t", duration: 10, assets: [] } } });
+  page.setData({ swapLoaded: true, job: { id: "job", status: "succeeded", resultAssetId: "src", input: { kind: "import", purpose: "remake", sourceId: "7301", prompt: "一键复刻：t", duration: 10, assets: [] } } });
   await page.loadRemakeModels();
   assert.equal(ids(page.data.remakeModels), "video-only,both");
   assert.equal(page.data.remakeModel, "video-only");
@@ -96,13 +96,13 @@ test("the reference clip length is the model's limit (15 s when unknown)", () =>
 test("an original longer than the chosen model's reference limit is refused, naming a model that can take it", async () => {
   const h = harness(), submitted = [], toasts = [];
   const rules = (s) => ({ omni_ref: { video: { maxCount: 3, maxSizeMB: 50, maxSeconds: s } } });
-  h.service("hot-breakdown").readBreakdown = async () => ({ shots: [] });
+  h.service("hot-import").remakeBrief = async () => ({ prompt: "复刻描述", width: 0, height: 0 });
   h.service("../utils/config-cache").loadConfig = async () => ({ models: [{ ...video("sd20", ["video"]), name: "Seedance 2.0", referenceRules: rules(15) }, { ...video("sd25", ["video"]), name: "Seedance 2.5", referenceRules: rules(30) }] });
   h.api.submitInput = async (input) => { submitted.push(input); return { id: "gen", input, status: "queued" }; };
   h.service("reference-clip").referenceClip = async (id) => id + "-muted";
   h.wx.showToast = (o) => toasts.push(o.title);
   const page = h.page("task-detail");
-  page.setData({ job: { id: "job", status: "succeeded", resultAssetId: "src", input: { kind: "import", purpose: "remake", sourceId: "7301", prompt: "一键复刻：t", duration: 20, assets: [] } } });
+  page.setData({ swapLoaded: true, job: { id: "job", status: "succeeded", resultAssetId: "src", input: { kind: "import", purpose: "remake", sourceId: "7301", prompt: "一键复刻：t", duration: 20, assets: [] } } });
   page.chooseRemakeModel({ detail: { id: "sd20" } });
   await page.generateRemake();
   assert.equal(submitted.length, 0);

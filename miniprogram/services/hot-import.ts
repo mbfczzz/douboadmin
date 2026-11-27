@@ -51,8 +51,18 @@ export function remakeOriginal(job: Job): RemakeOriginal {
   return { title: first.replace(/^一键复刻：/, ""), text: rest.join("\n"), duration: job.input.duration || 0 };
 }
 
+// 生成同款's description, written by the server from the remake task and its
+// breakdown (the wording changes there, without a mini-program release),
+// with the original's size (0 when it could not be read).
+export type RemakeBrief = { prompt: string; width: number; height: number };
+export function remakeBrief(job: string, seconds: number, limit: number, images: number, swaps: Swap[]) {
+  const picture = (s: Swap) => Number(s.ref.replace("@图片", ""));
+  const body = { job, seconds, limit, images, swaps: swaps.map((s) => ({ name: s.name, picture: picture(s) })) };
+  return request<RemakeBrief>("/remake/prompt", "POST", body);
+}
+
 // Opens the editor's preset with the saved video (@视频1) and pictures (@图片N).
-export function remakeHandoff(job: Job, breakdown: Breakdown | null, chosen?: { swaps: Swap[]; pictures: string[] }) {
+export function remakeHandoff(job: Job, breakdown: Breakdown | null, chosen?: { swaps: Swap[]; pictures: string[] }, ratio = "9:16") {
   const original = remakeOriginal(job);
   const pictures = chosen ? chosen.pictures : job.input.assets || [];
   const refs = pictures.map((_, i) => "@图片" + (i + 1)).join("、");
@@ -64,7 +74,7 @@ export function remakeHandoff(job: Job, breakdown: Breakdown | null, chosen?: { 
   wx.setStorageSync("edit-draft", {
     kind: "video",
     prompt: `参考@视频1的画面内容、镜头运动和节奏，复刻一条同款视频${swap}。视频主题：${original.title}`,
-    ratio: "9:16",
+    ratio,
     resolution: "",
     duration: Math.round(original.duration) || 5,
     assets: [job.resultAssetId, ...pictures],

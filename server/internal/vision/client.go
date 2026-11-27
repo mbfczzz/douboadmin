@@ -73,8 +73,8 @@ type Breakdown struct {
 }
 
 const instruction = `你是短视频爆款拆解专家。请完整观看这条视频，拆解它为什么能火，只输出一个 JSON 对象，不要任何其他文字：
-{"subjects":[{"name":"主体名称，如 主角、商品","kind":"person 或 product 或 other","look":"外观特征，便于辨认","when":"出现的时间段，如 0-8秒"}],"summary":"一句话概括视频内容","hook":"前 3 秒用什么画面或台词抓住观众","structure":"整体结构，如：痛点开场→产品展示→效果对比→引导下单","sellingPoints":["卖点或情绪点"],"style":"画面风格、色调、拍摄方式（手持/固定/口播等）","music":"背景音乐与音效的风格和节奏","shots":[{"start":0,"end":3,"scene":"场景与人物外观","action":"按时间顺序的具体动作","camera":"景别与运镜","speech":"台词、口播或画面字幕，没有则留空"}]}
-要求：subjects 列出视频里可以被替换的主要人物和商品（1–5 个，按重要程度排序，不列背景）；shots 按时间顺序覆盖整条视频，3–12 个；时间单位为秒；描述具体、可被 AI 视频模型直接执行；没有的信息留空字符串。`
+{"subjects":[{"name":"角色称呼，如 男主角、眼镜女生、口红","kind":"person 或 product 或 other","look":"外观特征，便于辨认","when":"出现的时间段，如 0-8秒"}],"summary":"一句话概括视频内容","hook":"前 3 秒用什么画面或台词抓住观众","structure":"整体结构，如：痛点开场→产品展示→效果对比→引导下单","sellingPoints":["卖点或情绪点"],"style":"画面风格、色调、拍摄方式（手持/固定/口播等）","music":"背景音乐与音效的风格和节奏","shots":[{"start":0,"end":3,"scene":"场景、环境与道具（人物外观只写在 subjects 的 look 里）","action":"按时间顺序的具体动作","camera":"景别与运镜","speech":"台词、口播或画面字幕，没有则留空"}]}
+要求：subjects 列出视频里可以被替换的主要人物和商品（1–5 个，按出镜多少排序，不列背景），name 互不相同且不超过 8 个字；任何地方都不写演员、网红、品牌代言人等真实姓名；hook、scene、action 中提到这些人物或商品时，必须写成【name】（如【眼镜女生】拿起【口红】），不要换别的叫法，speech 中不加括号；shots 按时间顺序覆盖整条视频，3–12 个；时间单位为秒；描述具体、可被 AI 视频模型直接执行；没有的信息留空字符串。`
 
 // Breakdown watches the video; when this model cannot be used (not
 // configured, not activated, no access) the fallback model watches instead.
@@ -90,12 +90,23 @@ func (c *Client) Breakdown(ctx context.Context, v Video) (Breakdown, error) {
 	return b, err
 }
 
+// fps is how many frames a second the model watches: 2 so a fast cut's
+// short shots are seen (the cost is the platform's, by choice). A video over
+// 5 minutes, or of unknown length, keeps 1 so its frames stay within what
+// the model can take.
+func (v Video) fps() float64 {
+	if v.Seconds > 0 && v.Seconds <= 300 {
+		return 2
+	}
+	return 1
+}
+
 // watchVideo reads a small video by link and uploads a large one.
 func (c *Client) watchVideo(ctx context.Context, v Video) (Breakdown, error) {
 	if v.Size > URLLimit {
 		return c.watchFile(ctx, v)
 	}
-	return c.watch(ctx, map[string]any{"url": v.URL, "fps": 1})
+	return c.watch(ctx, map[string]any{"url": v.URL, "fps": v.fps()})
 }
 
 // watch asks the model about one video_url item: {url, fps} or {file_id}.
@@ -108,7 +119,7 @@ func (c *Client) watch(ctx context.Context, video map[string]any) (Breakdown, er
 			map[string]any{"type": "text", "text": instruction},
 		}}},
 		"temperature": 0.2,
-		"max_tokens":  4096,
+		"max_tokens":  8192, // 12 detailed shots can pass 4096, and a cut-off JSON is no breakdown
 	}
 	if strings.HasPrefix(c.Model, "doubao-seed") { // no deep thinking: a breakdown does not need it
 		body["thinking"] = map[string]string{"type": "disabled"}

@@ -45,6 +45,7 @@ func (s *Service) storeResult(ctx context.Context, j core.Job, file io.ReadSeeke
 	a := Asset{Key: key, Type: typ, Size: size}
 	if typ == "video/mp4" {
 		a.Duration, _ = MP4Duration(file)
+		a.Width, a.Height, _ = MP4Shape(file)
 		_, _ = file.Seek(0, 0)
 	}
 	if s.Objects != nil {

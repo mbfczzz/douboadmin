@@ -29,7 +29,7 @@ func init() {
 		}},
 		Table{Name: "assets", Comment: "上传文件与生成结果文件", Owner: "上传者或任务所属用户", Cols: []Col{
 			c("name", Short), c("url", Text), c("key", Text), c("type", Short), c("size", Int),
-			c("sourceUrl", Text), c("sourceVideoId", Key), c("duration", Float),
+			c("sourceUrl", Text), c("sourceVideoId", Key), c("duration", Float), c("width", Int), c("height", Int),
 		}},
 		Table{Name: "executions", Comment: "生成任务在上游的执行状态；id = 任务 id", Cols: []Col{
 			c("phase", Key), c("modelKey", Short), c("taskId", Short), c("startedAt", Time),
