@@ -5,13 +5,15 @@ import LogFilters from "../logs/LogFilters";
 import LogTable from "../logs/LogTable";
 import PointsLog from "../logs/PointsLog";
 import FeatureStats from "../logs/FeatureStats";
+import ErrorRules from "../errors/ErrorRules";
+import type { PageProps } from "../navigation";
 import { logTabs, type LogTab } from "../logs/types";
 import { onPreset, takePreset } from "../logs/preset";
 import "../logs/logs.css";
 
 // 日志管理: business operations, every API call, upstream model calls,
 // points movements and sign-ins, each with its own filters.
-export default function Logs() {
+export default function Logs({ notify }: PageProps) {
   // Opened from "我的操作日志": business tab filtered to that operator.
   const [actor, setActor] = useState(""),
     [tab, setTab] = useRememberedState<LogTab>("logs.tab", "business"),
@@ -48,7 +50,7 @@ export default function Logs() {
         ))}
       </div>
       <p className="quiet log-intro">{current[2]}</p>
-      {tab !== "features" && (
+      {tab !== "features" && tab !== "rules" && (
         <LogFilters
           key={tab + actor}
           tab={tab}
@@ -62,6 +64,8 @@ export default function Logs() {
       <section className="panel">
         {tab === "features" ? (
           <FeatureStats revision={revision} />
+        ) : tab === "rules" ? (
+          <ErrorRules revision={revision} notify={notify} />
         ) : tab === "points" ? (
           <PointsLog key={query + revision} query={query} />
         ) : (

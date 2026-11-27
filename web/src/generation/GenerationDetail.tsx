@@ -10,6 +10,8 @@ import { kindNames, points } from "../business/types";
 import Inputs from "./Inputs";
 import Calls from "./Calls";
 import Result from "./Result";
+import UserFailure from "../errors/UserFailure";
+import type { Notify } from "../navigation";
 import {
   billingNames,
   elapsed,
@@ -28,9 +30,11 @@ import "./generation.css";
 export default function GenerationDetail({
   path,
   onClose,
+  notify = () => {},
 }: {
   path: string;
   onClose: () => void;
+  notify?: Notify;
 }) {
   // Refresh while the task runs, like the task list does.
   const [live, setLive] = useState(true),
@@ -108,6 +112,12 @@ export default function GenerationDetail({
                 <h4>失败原因</h4>
                 {/* Only the reason; the upstream reply is under 模型调用. */}
                 <p>{j.error || cause}</p>
+                <UserFailure
+                  publicError={g.publicError}
+                  cause={cause}
+                  notify={notify}
+                  onFiled={res.reload}
+                />
               </section>
             )}
             <section aria-label="生成结果">

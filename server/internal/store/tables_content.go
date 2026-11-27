@@ -40,6 +40,9 @@ func init() {
 		Table{Name: "video_notes", Comment: "对话中视频的观看结果（视频理解模型整理）；id = 素材 id", Owner: "用户", Cols: []Col{
 			c("model", Short), c("status", Key), c("note", Long), c("error", Text), c("startedAt", Time), c("at", Time),
 		}},
+		Table{Name: "error_rules", Comment: "错误归档：上游失败原文中的片段 → 给用户看的提示", Cols: []Col{
+			c("contains", Text), c("message", Short), c("action", Short), c("deleted", Bool),
+		}},
 		Table{Name: "chat_stops", Comment: "用户要求停止的对话回复；id = 任务 id", Owner: "用户", Cols: []Col{
 			c("at", Time),
 		}},

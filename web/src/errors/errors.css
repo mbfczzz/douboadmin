@@ -1,0 +1,16 @@
+.gen-public-error {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+.gen-public-error p {
+  flex: 1 1 260px;
+}
+.error-rules table td {
+  overflow-wrap: anywhere;
+}

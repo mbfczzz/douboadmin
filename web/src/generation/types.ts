@@ -27,6 +27,8 @@ export interface Generation {
   calls: LogEntry[];
   polls: number;
   morePolls: boolean;
+  // A failed job: what its user reads (错误归档 or the default).
+  publicError?: { message: string; action?: string } | null;
 }
 
 // Generation parameters worth showing, in display order.

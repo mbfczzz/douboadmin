@@ -148,6 +148,7 @@ export default function Jobs({ notify }: PageProps) {
           <GenerationDetail
             path={`/admin/jobs/${encodeURIComponent(detail.id)}/detail`}
             onClose={() => setDetail(null)}
+            notify={notify}
           />
         </Suspense>
       )}

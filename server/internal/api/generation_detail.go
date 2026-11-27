@@ -120,6 +120,14 @@ func (a *Server) generationDetail(w http.ResponseWriter, r *http.Request, user s
 		return
 	}
 	inputs := a.generationInputs(r.Context(), j.Input.Assets)
+	// What the job's owner reads for a failure (错误归档 shows it beside the
+	// upstream text).
+	var public map[string]string
+	if j.Status == "failed" {
+		mine := j
+		a.presentJob(context.WithValue(r.Context(), identityKey, Identity{ID: j.UserID, Role: "user"}), &mine)
+		public = map[string]string{"message": mine.Error, "action": mine.ErrorAction}
+	}
 	a.presentJob(r.Context(), &j)
 	var exec *genExecution
 	if row, e := a.Store.Get(r.Context(), "executions", j.ID); e == nil {
@@ -136,7 +144,7 @@ func (a *Server) generationDetail(w http.ResponseWriter, r *http.Request, user s
 		dbError(w, e)
 		return
 	}
-	reply(w, 200, map[string]any{"job": j, "inputs": inputs, "execution": exec, "calls": calls, "polls": polls, "morePolls": more})
+	reply(w, 200, map[string]any{"job": j, "inputs": inputs, "execution": exec, "calls": calls, "polls": polls, "morePolls": more, "publicError": public})
 }
 
 // GET /api/admin/users/{id}/jobs/{job}: from the user's 模型记录.

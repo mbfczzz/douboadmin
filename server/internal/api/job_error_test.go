@@ -25,6 +25,8 @@ func TestUsersSeeOnlyActionableFailures(t *testing.T) {
 		{"safety", "内容未通过安全审核，请调整提示词或参考素材。", "调整提示词或参考素材，不要原样重试。", 5002, "内容未通过安全审核", "请调整提示词"},
 		{"copyright", "内容涉及版权限制", "更换为有权使用的素材。", 5009, "内容涉及版权限制", "有权使用"},
 		{"reference", "参考素材时长超出限制", "缩短参考素材后提交。", 5101, "参考素材时长超出模型限制", "缩短"},
+		// The relay's own text names the cause; the user gets our words only.
+		{"relay-text", "video_generation_failed: 本次生成失败：第1个视频素材：素材时长 30.067 秒，要求大于 0 且不超过 30 秒。已释放原预留款项。", "", 5101, "参考素材时长超出模型限制", "缩短"},
 		// Only the relay's codes count: words alone are a system error.
 		{"text-only", "generation_failed: The generated audio did not pass the content safety review.", "", 0, "系统异常，生成失败，请稍后重试", ""},
 	} {
@@ -35,7 +37,7 @@ func TestUsersSeeOnlyActionableFailures(t *testing.T) {
 		if mine.Error != tc.want || !strings.Contains(mine.ErrorAction, tc.wantAct) || mine.ErrorCode != 0 || mine.ErrorType != "" {
 			t.Fatal(tc.id, mine.Error, mine.ErrorAction, mine.ErrorCode)
 		}
-		for _, leak := range []string{"幂等键", "中转服务", "private", "5007", "5006", "HTTP 503"} {
+		for _, leak := range []string{"幂等键", "中转服务", "private", "5007", "5006", "HTTP 503", "30.067", "video_generation_failed", "预留款项"} {
 			if strings.Contains(out, leak) {
 				t.Fatal(tc.id, "leaked", leak, out)
 			}
@@ -60,9 +62,9 @@ func TestUsersSeeOnlyActionableFailures(t *testing.T) {
 	if timeout.Error != (&core.JobTimeout{Kind: "video"}).Error() {
 		t.Fatal(timeout.Error)
 	}
-	note := core.Job{Status: "failed", Error: "已核实上游未生成结果，积分已退回，可重新提交创作"}
+	note := core.Job{Status: "failed", Error: "生成未完成，积分已退回，可重新提交创作"}
 	publicFailure(&note, false)
-	if note.Error != "已核实上游未生成结果，积分已退回，可重新提交创作" {
+	if note.Error != "生成未完成，积分已退回，可重新提交创作" {
 		t.Fatal(note.Error)
 	}
 }

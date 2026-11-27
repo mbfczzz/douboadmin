@@ -135,3 +135,25 @@ func TestPollingARefusedReferenceLengthEndsTheTask(t *testing.T) {
 		t.Fatal(e)
 	}
 }
+
+// A plain "generation failed" (502 / 5001) whose text names a too-long
+// reference video ends the task as that cause, so the user is told to cut it.
+func TestPollingAFailedTaskNamingTheReferenceLength(t *testing.T) {
+	p, job := fixture(t, func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == "POST" {
+			_, _ = w.Write([]byte(`{"id":"poll-task","status":"processing"}`))
+			return
+		}
+		w.WriteHeader(502)
+		_, _ = w.Write([]byte(`{"error":{"code":5001,"type":"task_failed","message":"video_generation_failed: 本次生成失败：第1个视频素材：素材时长 30.067 秒，要求大于 0 且不超过 30 秒。已释放原预留款项。"}}`))
+	})
+	if _, err := p.Generate(context.Background(), job); !errors.Is(err, ErrPending) {
+		t.Fatal(err)
+	}
+	if _, err := p.Generate(context.Background(), job); err == nil || errors.Is(err, ErrPending) {
+		t.Fatal(err)
+	}
+	if e := executionOf(t, p, job.ID); e.Phase != "failed" || e.ErrorCode != 5101 {
+		t.Fatal(e)
+	}
+}

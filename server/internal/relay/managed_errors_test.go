@@ -90,6 +90,17 @@ func TestManagedErrorSettlesAFinishedFailureLabelledUnavailable(t *testing.T) {
 			t.Fatalf("%q: %+v", message, got)
 		}
 	}
+	// A plain 5001 that names the cause is that cause.
+	for message, want := range map[string]int{
+		"video_generation_failed: 本次生成失败：第1个视频素材：素材时长 30.067 秒，要求大于 0 且不超过 30 秒。已释放原预留款项。": 5101,
+		"video_generation_failed: 第2个图片素材格式不受支持":                                           5102,
+		"video_generation_failed: the output did not pass the content safety review":       5002,
+		"video_generation_failed: upstream internal error":                                 5001,
+	} {
+		if got := ParseManagedError([]byte(`{"error":{"code":5001,"type":"task_failed","message":` + strconv.Quote(message) + `}}`)); got.Code != want {
+			t.Fatalf("5001 %q: %+v", message, got)
+		}
+	}
 	for _, outage := range []string{"provider unavailable: HTTP 401 MEDIA_TOKEN_DENIED", "upstream timeout after 60s", "rate limited, try later",
 		"upstream video request took too long", "video generation duration exceeded the queue window"} {
 		if got := ParseManagedError([]byte(`{"error":{"code":5006,"message":` + strconv.Quote(outage) + `}}`)); got.Code != 5006 {

@@ -125,9 +125,12 @@ func ParseManagedError(raw []byte) ManagedError {
 // reference video must last between 2 and 30 seconds"), as 5006
 // provider_unavailable, which kept a task that can never succeed being
 // queried for an hour as if the model were only down for a moment. A real
-// outage says nothing of the kind and stays retryable.
+// outage says nothing of the kind and stays retryable. A plain "generation
+// failed" (5001) whose text names the cause ("第1个视频素材：素材时长 30.067
+// 秒，要求大于 0 且不超过 30 秒") is that cause too, so the user is told what
+// to change instead of 系统异常 — in our own fixed words, never the text.
 func settledCode(code int, message string) int {
-	if code != 5006 && code != 5012 && code != 5202 {
+	if code != 5001 && code != 5006 && code != 5012 && code != 5202 {
 		return code
 	}
 	m := strings.ToLower(message)
@@ -139,7 +142,7 @@ func settledCode(code int, message string) int {
 		}
 		return false
 	}
-	reference := has("reference video", "reference audio", "reference image", "input video", "input audio", "input image", "参考视频", "参考音频", "参考图")
+	reference := has("reference video", "reference audio", "reference image", "input video", "input audio", "input image", "参考视频", "参考音频", "参考图", "素材")
 	switch {
 	case has("safety review", "content safety", "sensitive", "安全审核"):
 		return 5002
@@ -155,7 +158,7 @@ func settledCode(code int, message string) int {
 		return 5104
 	case has("invalidparameter", "invalid parameter", "invalid_parameter", "参数错误", "参数无效"):
 		return 5003
-	case has("generation_failed"):
+	case has("generation_failed") && code != 5001:
 		return 5001
 	}
 	return code

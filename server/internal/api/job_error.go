@@ -35,7 +35,7 @@ var failReference = map[int]userFailure{
 }
 
 // Kept as written: our own outcome notes, not upstream detail.
-var keptNotes = []string{"已核实上游未生成结果，积分已退回",
+var keptNotes = []string{"生成未完成，积分已退回",
 	(&core.JobTimeout{Kind: "image"}).Error(), (&core.JobTimeout{Kind: "video"}).Error()}
 
 // action: the guidance shown so far (presentJob marks a missing route there).
@@ -101,6 +101,9 @@ func (a *Server) publicMessage(ctx context.Context, j core.Job) string {
 		var e provider.Execution
 		if json.Unmarshal(row.Data, &e) == nil {
 			j.ErrorCode, j.ErrorAction = e.ErrorCode, e.ErrorAction
+			if rule, ok := a.matchErrorRule(ctx, e.ErrorCause, j.Error); ok && e.ErrorCause != "" {
+				return rule.Message // 错误归档 (error_rules.go)
+			}
 		}
 	}
 	publicFailure(&j, false)

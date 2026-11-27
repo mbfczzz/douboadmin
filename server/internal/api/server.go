@@ -54,20 +54,22 @@ type Server struct {
 	Vision       *vision.Client // 一键复刻's video breakdown (hot_breakdown.go)
 	// ArkVideo generates the fixed Seedance models at 火山方舟 (worker side);
 	// the API checks it is set up before taking a job for them.
-	ArkVideo  *arkvideo.Client
-	ChatReady bool // a DeepSeek or 豆包 API Key is set (服务接入配置 → 对话模型)
-	Billing   *billing.Service
-	Pay       *payments.Client
-	Virtual   *virtualpay.Service
-	Objects   Objects
-	Relay     *relay.Client
-	Media     *media.Service
-	WeChat    *wechat.Client
-	SMS       SMSSender
-	Store     store.Store
-	Sessions  *Sessions
-	Config    Config
-	Mux       *http.ServeMux
+	ArkVideo *arkvideo.Client
+	// errorRules caches 错误归档 for failure views (error_rules.go).
+	errorRules errorRules
+	ChatReady  bool // a DeepSeek or 豆包 API Key is set (服务接入配置 → 对话模型)
+	Billing    *billing.Service
+	Pay        *payments.Client
+	Virtual    *virtualpay.Service
+	Objects    Objects
+	Relay      *relay.Client
+	Media      *media.Service
+	WeChat     *wechat.Client
+	SMS        SMSSender
+	Store      store.Store
+	Sessions   *Sessions
+	Config     Config
+	Mux        *http.ServeMux
 	// Audit queues operation logs; nil when the store cannot keep them.
 	Audit      *audit.Writer
 	statsCache auditStatsCache

@@ -36,6 +36,11 @@ export const logTabs = [
   ["points", "积分变动", "每一笔积分的增减、预留与退回"],
   ["auth", "登录日志", "管理员与用户的登录、退出"],
   ["features", "功能使用", "小程序各功能的点击次数与使用次数，按使用排序"],
+  [
+    "rules",
+    "错误归档",
+    "失败原文包含匹配内容时，用户看到这里写的提示（不再是「系统异常」），看不到原文",
+  ],
 ] as const;
 export type LogTab = (typeof logTabs)[number][0];
 

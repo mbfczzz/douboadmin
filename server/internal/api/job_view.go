@@ -58,14 +58,14 @@ func (a *Server) presentJob(ctx context.Context, j *core.Job) {
 		// before offering 分享, so report every work as shareable.
 		j.ReviewStatus = "approved"
 	}
-	verifiedRefund, hinted := false, false
+	verifiedRefund, hinted, ruleAction := false, false, ""
 	if row, e := a.Store.Get(ctx, "job_billing", j.ID); e == nil {
 		var bill core.JobBilling
 		if json.Unmarshal(row.Data, &bill) == nil {
 			j.CostUnits = bill.Units
 			j.BillingState = bill.State
 			if j.Status == "failed" && bill.State == "released" && strings.HasPrefix(j.Error, uncertainPrefix) {
-				j.Error = "已核实上游未生成结果，积分已退回，可重新提交创作"
+				j.Error = "生成未完成，积分已退回，可重新提交创作"
 				verifiedRefund = true
 			}
 		}
@@ -120,6 +120,11 @@ func (a *Server) presentJob(ctx context.Context, j *core.Job) {
 					j.Error = m.Settings.ErrorMessage(e.ErrorCause, j.Error)
 					hinted = j.Error != before // the operator's own wording for users
 				}
+				// 错误归档 (error_rules.go): what users read for a failure an
+				// administrator has filed; administrators keep the full text.
+				if rule, ok := a.matchErrorRule(ctx, e.ErrorCause, j.Error); !hinted && !isAdmin(ctx) && ok {
+					j.Error, hinted, ruleAction = rule.Message, true, rule.Action
+				}
 			}
 		}
 	}
@@ -131,5 +136,8 @@ func (a *Server) presentJob(ctx context.Context, j *core.Job) {
 	}
 	if !isAdmin(ctx) {
 		publicFailure(j, hinted) // users see only what they can act on (job_error.go)
+		if ruleAction != "" && j.BillingState != "reserved" {
+			j.ErrorAction = ruleAction
+		}
 	}
 }
