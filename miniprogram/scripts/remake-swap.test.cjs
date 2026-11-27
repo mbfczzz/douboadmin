@@ -115,3 +115,39 @@ test("a remake without its breakdown says so and can be broken down again", asyn
   assert.deepEqual(plain(page.data.swaps.map((r) => r.name)), ["主角", "背景店铺", "保温杯"]);
   page.onUnload && page.onUnload();
 });
+
+test("a breakdown not read for the network is said so and read again, not taken for a failed one", async () => {
+  const h = harness();
+  await h.api.signIn();
+  const page = h.page("task-detail");
+  h.wx.request = (o) => o.fail({ errMsg: "request:fail timeout" });
+  page.setData({ job: { id: "j", status: "succeeded", resultAssetId: "orig", input: { purpose: "remake", sourceId: "7301", assets: [] } } });
+  await page.loadSwaps();
+  assert.equal(page.data.swapLoaded, true, "生成同款 still works: the server reads it");
+  assert.equal(page.data.breakdownUnread, true);
+  assert.equal(page.data.breakdownMissing, false);
+  h.wx.request = (o) => o.success({ statusCode: 200, data: { status: "done", result: { subjects, shots: [{ start: 0, end: 3, scene: "窗边" }] } } });
+  page.reloadSwaps();
+  await new Promise(setImmediate);
+  await new Promise(setImmediate);
+  assert.equal(page.data.breakdownUnread, false);
+  assert.deepEqual(plain(page.data.swaps.map((r) => r.name)), ["主角", "背景店铺", "保温杯"]);
+  // None at all (404) is a missing breakdown, offered 重新拆解.
+  const fresh = harness();
+  await fresh.api.signIn();
+  const other = fresh.page("task-detail");
+  fresh.wx.request = (o) => o.success({ statusCode: 404, data: { error: "这条视频还没有拆解" } });
+  other.setData({ job: { id: "j", status: "succeeded", resultAssetId: "orig", input: { purpose: "remake", sourceId: "7301", assets: [] } } });
+  await other.loadSwaps();
+  assert.equal(other.data.breakdownMissing, true);
+  assert.equal(other.data.breakdownUnread, false);
+});
+
+test("the editor's brief shows on-screen words apart from lines, never as lines", () => {
+  const { remakeInstruction } = harness().service("../pages/create/remake-brief");
+  const breakdown = { subjects, summary: "", hook: "", structure: "", sellingPoints: [], style: "", music: "",
+    shots: [{ start: 0, end: 3, scene: "窗边", action: "回头", camera: "", speech: "早上好", caption: "第一天打卡" }] };
+  const brief = remakeInstruction({ title: "t", text: "", duration: 3, breakdown }, 3, 800);
+  assert.match(brief, /台词\/口播：早上好｜画面文字：第一天打卡/);
+  assert.match(brief, /「画面文字」只作内容参考，不写成台词/);
+});

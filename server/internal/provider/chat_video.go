@@ -95,14 +95,28 @@ func (p *DirectChat) watchVideoNote(ctx context.Context, j core.Job, label strin
 	if len(b.SellingPoints) > 0 {
 		lines = append(lines, "亮点："+strings.Join(b.SellingPoints, "；"))
 	}
+	// Looks are written once per subject; the shots name them as 【称呼】.
+	if len(b.Subjects) > 0 {
+		cast := make([]string, len(b.Subjects))
+		for i, s := range b.Subjects {
+			cast[i] = s.Name
+			if s.Look != "" {
+				cast[i] += "（" + s.Look + "）"
+			}
+		}
+		lines = append(lines, "人物与商品："+strings.Join(cast, "；"))
+	}
 	for _, s := range b.Shots {
 		shot := fmt.Sprintf("%g–%g秒 %s，%s", s.Start, s.End, s.Scene, s.Action)
 		if s.Speech != "" {
 			shot += "（台词：" + s.Speech + "）"
 		}
+		if s.Caption != "" {
+			shot += "（画面文字：" + s.Caption + "）"
+		}
 		lines = append(lines, shot)
 	}
-	note := []rune(strings.Join(lines, "\n"))
+	note := []rune(strings.NewReplacer("【", "", "】", "").Replace(strings.Join(lines, "\n")))
 	if len(note) > videoNoteRunes {
 		note = note[:videoNoteRunes]
 	}

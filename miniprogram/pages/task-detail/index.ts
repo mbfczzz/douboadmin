@@ -32,6 +32,7 @@ Page({
     swapLoaded: false,
     mainKept: "", // the main person, kept while others are swapped
     breakdownMissing: false, // 生成同款 would have only the title to go on
+    breakdownUnread: false, // the breakdown could not be read (network)
     rebreaking: false,
     remakeModels: [] as { id: string; label: string }[], // 生成同款 can use (model-picker)
     remakeModel: "",

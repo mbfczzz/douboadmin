@@ -219,7 +219,7 @@ test("生成同款 waits for the subjects, and reads them again when the breakdo
   const { RequestError } = h.service("errors");
   h.service("hot-import").remakeBrief = async (...args) => { briefs.push(args); throw new RequestError(409, "原视频的拆解已更新，请重新选择要替换的人物或商品"); };
   let reads = 0;
-  h.service("hot-breakdown").readBreakdown = async () => { reads++; return { subjects: [{ name: "主角", kind: "person", look: "", when: "" }], shots: [{ start: 0, end: 3 }] }; };
+  h.service("hot-breakdown").fetchBreakdown = async () => { reads++; return { subjects: [{ name: "主角", kind: "person", look: "", when: "" }], shots: [{ start: 0, end: 3 }] }; };
   h.wx.showToast = (o) => messages.push(o.title);
   let submitted = 0;
   h.api.submitInput = async () => { submitted++; };

@@ -43,7 +43,7 @@ func (a *Server) remakeUpload(w http.ResponseWriter, r *http.Request) {
 	}
 	title := v.Title
 	if title == "" {
-		title = "我上传的视频"
+		title = hotvideo.UploadTitle
 	}
 	in := core.JobInput{Kind: "import", Model: "hot-import", Purpose: hotvideo.RemakePurpose, SourceID: hotvideo.UploadSource(v.Video),
 		Assets: v.Assets, Duration: v.Duration, Prompt: remakePrompt(title, "")}

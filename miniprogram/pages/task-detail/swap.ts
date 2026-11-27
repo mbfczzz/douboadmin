@@ -1,4 +1,4 @@
-import { readBreakdown, rerunBreakdown } from "../../services/hot-breakdown";
+import { fetchBreakdown, rerunBreakdown } from "../../services/hot-breakdown";
 import { chooseReferenceFile, upload, media, cancelled, error } from "../../utils/api";
 import type { Breakdown, BreakdownSubject } from "../../services/hot-breakdown";
 import type { Swap } from "../../services/hot-import";
@@ -69,7 +69,7 @@ function showSwaps(page: Page, breakdown: Breakdown | null, given?: string[]) {
   for (const a of page.data.assets) if (a.isImage) urls[a.id] = a.data.url;
   const pictures = (given || Object.keys(urls)).filter((id) => urls[id]);
   const rows = breakdown?.subjects?.length ? firstGuess(breakdown.subjects, pictures) : [];
-  page.setData({ swapLoaded: true, breakdownMissing: !breakdown?.shots?.length, swapUrls: urls, swaps: rows, mainKept: mainKept(rows) });
+  page.setData({ swapLoaded: true, breakdownUnread: false, breakdownMissing: !breakdown?.shots?.length, swapUrls: urls, swaps: rows, mainKept: mainKept(rows) });
 }
 
 export const swapHandlers = {
@@ -78,9 +78,20 @@ export const swapHandlers = {
     const job = this.data.job;
     if (!job || job.input.purpose !== "remake" || job.status !== "succeeded" || this.breakdown !== undefined) return;
     this.breakdown = null; // loading (once)
-    const breakdown = await readBreakdown(job.input.sourceId || "");
-    if (this.destroyed) return;
-    showSwaps(this, breakdown, job.input.assets || []);
+    try {
+      const breakdown = await fetchBreakdown(job.input.sourceId || "");
+      if (!this.destroyed) showSwaps(this, breakdown, job.input.assets || []);
+    } catch {
+      // Not read (network): said as such, with 重新读取; 生成同款 still
+      // works, the server reads the breakdown itself.
+      this.breakdown = undefined;
+      if (!this.destroyed) this.setData({ swapLoaded: true, breakdownUnread: true, breakdownMissing: false, swaps: [], mainKept: "" });
+    }
+  },
+  reloadSwaps(this: Page) {
+    if (this.data.busy || this.data.rebreaking) return;
+    this.setData({ swapLoaded: false, breakdownUnread: false });
+    void swapHandlers.loadSwaps.call(this);
   },
   // Without a breakdown 生成同款 has only the title to go on: run it again.
   async retryBreakdown(this: Page) {

@@ -15,7 +15,7 @@ import (
 	"time"
 )
 
-const watched = `{"choices":[{"message":{"content":"{\"summary\":\"女生在窗边拍写真\",\"hook\":\"逆光回眸\",\"structure\":\"开场→换装→收尾\",\"style\":\"日系柔光\",\"shots\":[{\"start\":0,\"end\":3,\"scene\":\"窗边\",\"action\":\"回头微笑\",\"speech\":\"\"}]}"}}]}`
+const watched = `{"choices":[{"message":{"content":"{\"summary\":\"女生在窗边拍写真\",\"hook\":\"逆光回眸\",\"structure\":\"开场→换装→收尾\",\"style\":\"日系柔光\",\"subjects\":[{\"name\":\"女生\",\"kind\":\"person\",\"look\":\"白裙长发\"}],\"shots\":[{\"start\":0,\"end\":3,\"scene\":\"窗边\",\"action\":\"【女生】回头微笑\",\"speech\":\"\",\"caption\":\"夏日写真\"}]}"}}]}`
 
 // A named video is watched once by 视频理解 and told to the chat model as text.
 func TestNamedVideosAreWatchedAndRemembered(t *testing.T) {
@@ -47,6 +47,12 @@ func TestNamedVideosAreWatchedAndRemembered(t *testing.T) {
 	note := p.videoNote(t.Context(), j, "v1", "https://x/v.mp4")
 	if watches != 1 || !strings.Contains(note, "女生在窗边拍写真") {
 		t.Fatal(watches, note)
+	}
+	// Looks once per subject, on-screen words as such, no 【】 marks.
+	for _, want := range []string{"人物与商品：女生（白裙长发）", "窗边，女生回头微笑（画面文字：夏日写真）"} {
+		if !strings.Contains(note, want) || strings.Contains(note, "【女生】") {
+			t.Fatal(want, note)
+		}
 	}
 }
 

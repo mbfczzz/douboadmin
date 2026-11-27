@@ -177,3 +177,16 @@ func TestRemakePromptReplacesOnlyMarkedNames(t *testing.T) {
 		t.Fatal(got)
 	}
 }
+
+// Words only shown on screen are not voiced; with no breakdown the video
+// itself leads, and an upload's placeholder title is no theme.
+func TestRemakePromptLeavesCaptionsAndPlaceholderTitlesOut(t *testing.T) {
+	b := &vision.Breakdown{Shots: []vision.Shot{{Start: 0, End: 3, Action: "开箱", Speech: "终于到了", Caption: "双十一必买"}}}
+	if got := RemakePrompt(b, Original{Duration: 3}, 3, 2000, 0, nil); !strings.HasSuffix(got, "0–3秒：开箱，台词“终于到了”") || strings.Contains(got, "双十一必买") {
+		t.Fatal(got)
+	}
+	got := RemakePrompt(nil, Original{Title: UploadTitle}, 5, 2000, 0, nil)
+	if !strings.HasSuffix(got, "画面内容、人物动作和场景以@视频1为准，按它的镜头顺序复刻。") || strings.Contains(got, "视频主题") {
+		t.Fatal(got)
+	}
+}

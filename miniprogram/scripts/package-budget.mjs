@@ -286,7 +286,8 @@ console.log(
 // 生成同款 takes its description and the original's size from the server,
 // keeps the original's ratio, guards swaps and offers 重新拆解; 优秀作品 keeps
 // its list after a preview: 1,157,348 B. 1126 -> 1131 KiB.
-const budget = 1131 * 1024;
+// A breakdown not read for the network offers 重新读取: 1,158,836 B. -> 1132 KiB.
+const budget = 1132 * 1024;
 if (report.referencedSourceBytes > budget)
   throw new Error(`Referenced source budget exceeded (${budget / 1024} KiB).`);
 const out = path.resolve(root, "../.runtime");

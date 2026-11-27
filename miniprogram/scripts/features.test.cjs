@@ -148,7 +148,7 @@ test("the remake brief follows the video breakdown and swaps in the user's pictu
   const { remakeInstruction } = h.service("../pages/create/remake-brief");
   const source = { title: "开箱口红", text: "", duration: 18, images: 2, breakdown: { summary: "深夜开箱", hook: "撕快递盒", structure: "开箱→试色→下单", sellingPoints: ["显白"], style: "手持暖光", music: "轻快", shots: [{ start: 0, end: 2.5, scene: "卧室书桌", action: "撕开快递", camera: "手持中景", speech: "" }, { start: 2.5, end: 6, scene: "镜前", action: "试色", camera: "特写", speech: "黄皮也能涂" }] } };
   const text = remakeInstruction(source, 10, 500);
-  assert.match(text, /视频理解模型对原视频的拆解[^]*开头钩子：撕快递盒[^]*0–2.5秒｜场景：卧室书桌｜动作：撕开快递｜镜头：手持中景\n2.5–6秒[^]*台词\/字幕：黄皮也能涂/);
+  assert.match(text, /视频理解模型对原视频的拆解[^]*开头钩子：撕快递盒[^]*0–2.5秒｜场景：卧室书桌｜动作：撕开快递｜镜头：手持中景\n2.5–6秒[^]*台词\/口播：黄皮也能涂/);
   assert.match(text, /生成时长为 10 秒[^]*前 3 秒[^]*@图片1、@图片2[^]*@视频1/);
   const plain = remakeInstruction({ title: "t", text: "文案", duration: 8 }, 5, 300);
   assert.match(plain, /未能拆解画面[^]*文案：文案[^]*不要照搬原作者/);

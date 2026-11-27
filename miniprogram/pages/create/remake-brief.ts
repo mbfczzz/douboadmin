@@ -16,7 +16,7 @@ export function swapText(swaps: Swap[]) {
 
 function shotsText(b: Breakdown) {
   return b.shots
-    .map((s) => `${second(s.start)}–${second(s.end)}秒｜场景：${s.scene}｜动作：${s.action}｜镜头：${s.camera}${s.speech ? "｜台词/字幕：" + s.speech : ""}`)
+    .map((s) => `${second(s.start)}–${second(s.end)}秒｜场景：${s.scene}｜动作：${s.action}｜镜头：${s.camera}${s.speech ? "｜台词/口播：" + s.speech : ""}${s.caption ? "｜画面文字：" + s.caption : ""}`)
     .join("\n");
 }
 
@@ -53,6 +53,6 @@ export function remakeInstruction(source: RemakeSource, seconds: number, limit: 
 1. 保留原视频的开头钩子、结构、节奏和卖点；原视频比 ${seconds} 秒长时，合并或精简镜头，开头钩子必须保留在前 3 秒。
 2. 按时间分段书写，格式如「0–3秒：…」，每段写清场景、人物动作（按先后顺序）、景别与运镜；台词或口播用引号写出。
 3. ${swap}
-4. 用 @视频1 指代参考视频，说明参考它的镜头与节奏。
+4. 用 @视频1 指代参考视频，说明参考它的镜头与节奏。拆解中的【称呼】写成普通称呼；「画面文字」只作内容参考，不写成台词，画面中不要出现字幕和水印。
 不超过 ${limit} 字。只输出描述本身，不要标题和解释。`;
 }

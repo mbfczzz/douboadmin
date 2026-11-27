@@ -25,6 +25,10 @@ const RemakePurpose = "remake"
 // UploadSource is the source of a 一键复刻 from the user's own uploaded video.
 func UploadSource(assetID string) string { return "u" + assetID }
 
+// UploadTitle names an uploaded video the user gave no title: it says
+// nothing about the content.
+const UploadTitle = "我上传的视频"
+
 // uploaded: the user's own video, kept as it is and broken down.
 func (p Importer) uploaded(ctx context.Context, j core.Job) (string, error) {
 	assetID := strings.TrimPrefix(j.Input.SourceID, "u")

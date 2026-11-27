@@ -1,9 +1,11 @@
 import { request } from "./request";
+import { RequestError } from "./errors";
 
 // 一键复刻's breakdown of the original (hook, shots, selling points) by the
 // server's video model; the remake task produces it. Missing (not configured,
 // failed, too large) yields null: the remake then goes on from the caption.
-export type BreakdownShot = { start: number; end: number; scene: string; action: string; camera: string; speech: string };
+// speech: what someone says; caption: words only shown on screen (newer breakdowns).
+export type BreakdownShot = { start: number; end: number; scene: string; action: string; camera: string; speech: string; caption?: string };
 // Someone or something the original is about, which the user can swap for
 // one of their pictures (kind: person | product | other).
 export type BreakdownSubject = { name: string; kind: string; look: string; when: string };
@@ -32,11 +34,18 @@ export async function rerunBreakdown(videoId: string, assetId: string, alive: ()
   return state.status === "done" ? state.result : null;
 }
 
-export async function readBreakdown(videoId: string): Promise<Breakdown | null> {
+// The breakdown, null when there is none (never run, failed, not offered);
+// a network or server problem throws, so it is not taken for none.
+export async function fetchBreakdown(videoId: string): Promise<Breakdown | null> {
   try {
-    const reply = await request<{ status: string; result: Breakdown | null }>("/hot/videos/" + videoId + "/breakdown");
+    const reply = await request<BreakdownState>("/hot/videos/" + videoId + "/breakdown");
     return reply.status === "done" ? reply.result : null;
-  } catch {
-    return null;
+  } catch (e) {
+    if (e instanceof RequestError && [400, 404, 503].includes(e.status)) return null;
+    throw e;
   }
+}
+
+export async function readBreakdown(videoId: string): Promise<Breakdown | null> {
+  return fetchBreakdown(videoId).catch(() => null);
 }

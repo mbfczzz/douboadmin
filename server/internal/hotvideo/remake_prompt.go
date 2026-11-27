@@ -31,8 +31,11 @@ const cleanFrame = "画面中不要出现字幕、水印和平台标识。"
 
 func RemakePrompt(b *vision.Breakdown, o Original, seconds, limit, images int, swaps []Swap) string {
 	head := remakeHead(b, seconds, images, swaps) + cleanFrame
-	if b == nil || len(b.Shots) == 0 { // no breakdown: what the caption says
-		head += "视频主题：" + o.Title
+	if b == nil || len(b.Shots) == 0 { // no breakdown: the video itself, and what its caption says
+		head += "画面内容、人物动作和场景以@视频1为准，按它的镜头顺序复刻。"
+		if title := strings.TrimSpace(o.Title); title != "" && title != UploadTitle {
+			head += "视频主题：" + title
+		}
 		if text := cut(strings.TrimSpace(o.Text), 300); text != "" {
 			head += "\n原视频文案：" + text
 		}
