@@ -9,13 +9,14 @@ import { CHAT_CHOICE, DEFAULT_CHAT, preferredChat } from "../../services/chat-mo
 // remembered across visits, and what one turn costs on it.
 // sees: reads pictures; rec: the recommended default; desc: one line for the picker.
 // watches: no chat model takes videos itself any more; the server has 视频理解 watch each video once.
-export type ChatModel = { id: string; name: string; sees: boolean; watches: boolean; key?: string; icon: string; desc: string; rec: boolean };
+// limit: the most characters one message may have (模型管理 → 提示词字数上限).
+export type ChatModel = { id: string; name: string; sees: boolean; watches: boolean; key?: string; icon: string; desc: string; rec: boolean; limit: number };
 const STORE = CHAT_CHOICE;
 
 export const chatModels = (config: Config): ChatModel[] =>
   config.models
     .filter((m) => m.kind === "chat")
-    .map((m) => ({ id: m.id, name: m.name, key: m.key, icon: m.icon || "", desc: m.settings?.description || "", rec: m.key === DEFAULT_CHAT, sees: (m.referenceTypes || []).includes("image"), watches: (m.referenceTypes || []).includes("video") }));
+    .map((m) => ({ id: m.id, name: m.name, key: m.key, icon: m.icon || "", desc: m.settings?.description || "", rec: m.key === DEFAULT_CHAT, limit: m.settings?.maxPromptChars || 500, sees: (m.referenceTypes || []).includes("image"), watches: (m.referenceTypes || []).includes("video") }));
 
 type Quote = { units: number; billingEnabled: boolean; perToken?: boolean };
 // 按量 models: the most one turn can hold; settled on the tokens used.
@@ -43,7 +44,7 @@ export const agentModels = {
     const saved = wx.getStorageSync(STORE) as string;
     const current = preferredChat(models, saved);
     const model = current?.id || "";
-    this.setData({ models, model, current: current || null, sees: !!current?.sees });
+    this.setData({ models, model, current: current || null, sees: !!current?.sees, limit: current?.limit || 500 });
     if (model) {
       const hint = await priceHint(model);
       if (!this.destroyed && this.data.model === model) this.setData({ priceHint: hint });
@@ -66,7 +67,7 @@ export const agentModels = {
     if (model === this.data.model) return;
     wx.setStorageSync(STORE, model);
     const current = this.data.models.find((m) => m.id === model);
-    this.setData({ model, current, priceHint: this.data.modelPrices[model] || "", sees: !!current?.sees });
+    this.setData({ model, current, priceHint: this.data.modelPrices[model] || "", sees: !!current?.sees, limit: current?.limit || 500 });
     const hint = await priceHint(model);
     if (!this.destroyed && this.data.model === model) this.setData({ priceHint: hint });
   },

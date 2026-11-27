@@ -51,6 +51,7 @@ Page({
     uploading: false,
     generating: false,
     prompt: "",
+    limit: 20000, // characters one message may have: the chosen model's (模型管理) once loaded; the default before
     messages: [] as ChatMessage[],
     busy: false,
     replying: false, // a reply is being written: the send button stops it
@@ -193,7 +194,8 @@ Page({
     const sent = plan ? sentMaterials(planPrompt(plan), this.data.materials) : undefined;
     wx.setStorageSync("edit-draft", {
       kind: plan?.kind || "video",
-      prompt: (sent?.prompt || m?.text || e.currentTarget.dataset.text || "").slice(0, 2000),
+      // Whole: a revised long prompt keeps its end; the editor shows its own limit.
+      prompt: sent?.prompt || m?.text || e.currentTarget.dataset.text || "",
       ratio: plan?.ratio || "9:16",
       resolution: "",
       duration: plan?.kind === "image" ? 0 : plan?.duration || 5,

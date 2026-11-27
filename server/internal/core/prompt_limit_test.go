@@ -9,7 +9,7 @@ func TestPromptLimitsAndConfiguredText(t *testing.T) {
 	for _, tc := range []struct {
 		kind string
 		want int
-	}{{"image", 2000}, {"video", 20000}, {"chat", 500}, {"audio", 500}} {
+	}{{"image", 2000}, {"video", 20000}, {"chat", 20000}, {"audio", 500}} {
 		t.Run(tc.kind, func(t *testing.T) {
 			m := Model{Kind: tc.kind}
 			s := ModelSettings{}

@@ -149,7 +149,7 @@
       <t-icon wx:if="{{models.length>1}}" name="chevron-down" size="14" />
     </view>
     <view class="bar-gap" />
-    <text wx:if="{{prompt.length>400}}" class="bar-note {{prompt.length>=500?'full':''}}">{{prompt.length}}/500</text>
+    <text wx:if="{{prompt.length>limit*0.8}}" class="bar-note {{prompt.length>=limit?'full':''}}">{{prompt.length}}/{{limit}}</text>
     <text wx:elif="{{priceHint}}" class="bar-note">{{priceHint}}</text>
   </view>
   <view class="composer {{focus?'is-focus':''}} {{models.length>1||priceHint||session?'has-bar':''}}">
@@ -171,8 +171,8 @@
       <view wx:if="{{uploading}}" class="attach attach-busy"><t-loading size="16px" /></view>
     </view>
     <view class="composer-row">
-      <textarea auto-height maxlength="500" focus="{{focus}}" placeholder="{{attached.length?'说说想怎么分析，或直接发送':messages.length?'继续说说要怎么改…':'说说你的创作想法…'}}" placeholder-class="composer-placeholder" value="{{prompt}}" bindinput="input" bindblur="blur" cursor-spacing="24" show-confirm-bar="{{false}}" />
-      <text wx:if="{{prompt.length>400&&!(current||priceHint)}}" class="composer-count {{prompt.length>=500?'full':''}}">{{prompt.length}}/500</text>
+      <textarea auto-height maxlength="{{limit}}" focus="{{focus}}" placeholder="{{attached.length?'说说想怎么分析，或直接发送':messages.length?'继续说说要怎么改…':'说说你的创作想法…'}}" placeholder-class="composer-placeholder" value="{{prompt}}" bindinput="input" bindblur="blur" cursor-spacing="24" show-confirm-bar="{{false}}" />
+      <text wx:if="{{prompt.length>limit*0.8&&!(current||priceHint)}}" class="composer-count {{prompt.length>=limit?'full':''}}">{{prompt.length}}/{{limit}}</text>
       <view wx:if="{{replying&&!busy&&!prompt&&!attached.length}}" class="send ready" bindtap="stopReply" hover-class="icon-pressed" aria-role="button" aria-label="停止回复"><view class="stop-mark" /></view>
       <view wx:else class="send {{(prompt||attached.length)&&!busy&&!uploading?'ready':''}}" bindtap="send" hover-class="icon-pressed" aria-role="button" aria-label="发送">
         <t-loading wx:if="{{busy}}" size="18px" /><image wx:else class="gl gl-20" src="/assets/glyphs/send-{{(prompt||attached.length)&&!busy&&!uploading?'dark':'muted'}}.png" />

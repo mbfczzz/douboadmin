@@ -39,3 +39,24 @@ func TestHistoryStaysWithinItsBudget(t *testing.T) {
 		t.Fatal("the last turn must stay, capped")
 	}
 }
+
+// A whole prompt pasted to be revised (Agent messages may now be 20,000
+// characters) is read whole on its own turn; sent again as history it is
+// capped like a reply, so history stays within what a turn holds.
+func TestLongEarlierMessagesAreCappedInHistory(t *testing.T) {
+	pasted := strings.Repeat("词", 20000)
+	out := trimTurns([]core.Job{turn(pasted, "改好了"), turn(pasted, strings.Repeat("长", 9000))}, 4000)
+	total := 0
+	for _, o := range out {
+		total += len([]rune(o.Input.Prompt)) + len([]rune(o.Result))
+		if !strings.HasSuffix(o.Input.Prompt, "…（后文略）") || len([]rune(o.Input.Prompt)) != 4000+len([]rune("…（后文略）")) {
+			t.Fatal("not capped", len([]rune(o.Input.Prompt)))
+		}
+	}
+	if len(out) != 1 || total > historyRunes+20 {
+		t.Fatal(len(out), total)
+	}
+	if short := trimTurns([]core.Job{turn("写一段咖啡店脚本", "好的")}, 4000); short[0].Input.Prompt != "写一段咖啡店脚本" {
+		t.Fatal("a short message is sent as it was")
+	}
+}

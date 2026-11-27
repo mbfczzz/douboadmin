@@ -6,6 +6,7 @@ import type { Model, Row } from "../src/api";
 for (const [kind, defaultLimit, customLimit] of [
   ["image", 2000, 4000],
   ["video", 20000, 30000],
+  ["chat", 20000, 30000], // one Agent message: no longer held at 500
 ] as const) {
   test(`${kind}: prompt defaults, longer text and custom limits persist`, async ({ page }) => {
     let row = modelPage(kind).items[0] as Row<Model>;

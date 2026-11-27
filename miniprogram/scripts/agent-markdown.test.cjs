@@ -45,3 +45,15 @@ test("带到创作 carries a plan's materials, or what a plain reply's question 
   assert.equal(draft.prompt, "开场@图片1\n分镜：\n0-3秒：推门（用@视频1）");
   page.onUnload();
 });
+
+test("带到创作 carries a long revised prompt whole; the editor shows its own limit", () => {
+  const h = harness();
+  const page = h.page("agent");
+  h.wx.navigateTo = () => {};
+  const long = "改写后的提示词".repeat(500); // 3,500 characters
+  page.history = [];
+  page.setData({ materials: [], messages: [{ id: "c1a", role: "assistant", text: long }] });
+  page.use({ currentTarget: { dataset: { index: 0 } } });
+  assert.equal(h.wx.getStorageSync("edit-draft").prompt, long);
+  page.onUnload();
+});

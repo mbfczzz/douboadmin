@@ -81,6 +81,12 @@ func trim(turns []core.Job, keep, budget int) []core.Job {
 		if r := []rune(t.Result); len(r) > keep {
 			t.Result = string(r[:keep])
 		}
+		// An earlier message is capped too: a long one (a whole prompt pasted
+		// to be revised) was read whole on its own turn, and history must
+		// stay within what a turn holds (billing.chatHistoryChars).
+		if r := []rune(t.Input.Prompt); len(r) > keep {
+			t.Input.Prompt = string(r[:keep]) + "…（后文略）"
+		}
 		out[i] = t
 		total += len([]rune(t.Input.Prompt)) + len([]rune(t.Result))
 	}

@@ -13,7 +13,7 @@ func TestGenerationUsesModelPromptLimits(t *testing.T) {
 	for _, tc := range []struct {
 		kind              string
 		configured, limit int
-	}{{"image", 0, 2000}, {"video", 0, 20000}, {"image", 4000, 4000}, {"video", 30000, 30000}, {"video", 500, 500}, {"chat", 0, 500}} {
+	}{{"image", 0, 2000}, {"video", 0, 20000}, {"image", 4000, 4000}, {"video", 30000, 30000}, {"video", 500, 500}, {"chat", 0, 20000}, {"chat", 12000, 12000}} {
 		t.Run(fmt.Sprintf("%s/%d", tc.kind, tc.configured), func(t *testing.T) {
 			a, _ := modelServer(t)
 			m := core.Model{ID: "prompt-test", Kind: tc.kind, Available: true, Published: true, Durations: []int{5}, Settings: core.ModelSettings{MaxPromptChars: tc.configured}}

@@ -12,7 +12,7 @@ function server(h, sent, modals) {
   h.wx.request = (o) => {
     const path = o.url.split("/api")[1];
     const ok = (data, statusCode = 200) => o.success({ statusCode, data });
-    if (path === "/config") return ok({ models: [{ id: "ds", name: "DeepSeek", kind: "chat" }, { id: "db", name: "豆包", kind: "chat" }, { id: "img", name: "图", kind: "image" }] });
+    if (path === "/config") return ok({ models: [{ id: "ds", name: "DeepSeek", kind: "chat", settings: { maxPromptChars: 5000 } }, { id: "db", name: "豆包", kind: "chat", settings: { maxPromptChars: 8000 } }, { id: "img", name: "图", kind: "image" }] });
     if (path === "/jobs/quote") return ok({ units: 43, billingEnabled: true, sufficient: true, availableUnits: 1000, perToken: o.data.model === "ds" });
     if (path === "/jobs" && o.method === "POST") {
       sent.push(o.data);
@@ -32,8 +32,10 @@ test("Agent switches between chat models and shows the per-turn price", async ()
   assert.deepEqual(page.data.models.map((m) => m.id), ["ds", "db"]);
   assert.equal(page.data.model, "ds");
   assert.equal(page.data.priceHint, "每轮最多约 0.43 积分");
+  assert.equal(page.data.limit, 5000, "one message may be as long as 模型管理 sets");
   await page.pickModel({ currentTarget: { dataset: { id: "db" } } });
   assert.equal(page.data.priceHint, "每轮 0.43 积分");
+  assert.equal(page.data.limit, 8000);
   assert.equal(h.wx.getStorageSync("agent-model"), "db");
   // The choice is remembered on the next visit.
   await page.loadModels();
@@ -95,7 +97,7 @@ test("the model picker shows each model's logo, description and price, and close
   };
   const page = h.page("agent");
   await page.loadModels();
-  assert.deepEqual(JSON.parse(JSON.stringify(page.data.current)), { id: "fl", name: "DeepSeek", key: "deepseek:deepseek-flash", icon: "/i/ds.png", desc: "反应快", rec: true, sees: true, watches: false });
+  assert.deepEqual(JSON.parse(JSON.stringify(page.data.current)), { id: "fl", name: "DeepSeek", key: "deepseek:deepseek-flash", icon: "/i/ds.png", desc: "反应快", rec: true, limit: 500, sees: true, watches: false });
   page.openModels();
   assert.equal(page.data.modelsOpen, true);
   for (let i = 0; i < 20 && !page.data.modelPrices.pro; i++) await new Promise((r) => setTimeout(r, 10));
@@ -137,4 +139,11 @@ test("a login the server forgot (guest config, no models) signs in again and sen
   assert.equal(sent.length, 1, "sent after signing in again");
   assert.equal(sent[0].model, "fl");
   page.onUnload();
+});
+
+test("the Agent box follows the chosen model's limit instead of a fixed 500", () => {
+  const wxml = require("node:fs").readFileSync("pages/agent/index.wxml", "utf8");
+  assert.match(wxml, /<textarea auto-height maxlength="\{\{limit\}\}"/);
+  assert.match(wxml, /\{\{prompt\.length\}\}\/\{\{limit\}\}/);
+  assert.doesNotMatch(wxml, /\/500|maxlength="500"/);
 });
