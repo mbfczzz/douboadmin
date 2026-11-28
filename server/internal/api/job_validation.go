@@ -135,14 +135,17 @@ func (a *Server) validateJob(ctx context.Context, user string, in *core.JobInput
 	if mode == "i2i" && counts["image"] < schema.EditImages.Min {
 		return fmt.Errorf("参考图片少于模型要求的最小数量")
 	}
-	if in.Kind == "image" && schema.EditImages.Max > 0 && len(in.Assets) > schema.EditImages.Max {
+	// The relay's declared counts apply only where 模型管理 sets none: a
+	// count set there is the limit (validateModelReferences, as the
+	// mini-program is told by publicReferenceRules).
+	if in.Kind == "image" && m.Settings.MaxRefImages == 0 && schema.EditImages.Max > 0 && len(in.Assets) > schema.EditImages.Max {
 		return fmt.Errorf("参考图片超过模型数量限制")
 	}
 	if supported := schema.ResolutionByMode[mode]; m.Kind != "image" && m.Kind != "video" && len(m.Settings.Resolutions) == 0 && len(supported) > 0 && !slices.Contains(supported, in.Resolution) {
 		return fmt.Errorf("此生成方式不支持所选分辨率")
 	}
 	for typ, count := range counts {
-		if limit, ok := schema.RefLimit(typ); mode == "omni_ref" && ok && count > limit {
+		if limit, ok := schema.RefLimit(typ); mode == "omni_ref" && ok && count > limit && m.Settings.RefLimits["omniRef."+typ+"Count"] == 0 {
 			return fmt.Errorf("参考素材超过模型数量限制")
 		}
 	}
