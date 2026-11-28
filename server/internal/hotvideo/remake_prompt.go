@@ -55,7 +55,9 @@ func RemakePrompt(b *vision.Breakdown, o Original, seconds, limit, images int, s
 	}
 	// The breakdown's hook is analysis (why it works); the first shots carry
 	// what the opening shows.
-	if b.Style != "" {
+	if len(swaps) > 0 {
+		head = swapHead(b, seconds, swaps) + "\n分镜："
+	} else if b.Style != "" {
 		head += "画面风格：" + sentence(b.Style)
 	}
 	list := beats(b.Shots, o.Duration, seconds, swapper(b, swaps))

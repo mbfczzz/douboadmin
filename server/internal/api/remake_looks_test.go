@@ -57,7 +57,7 @@ func TestRemakePromptDescribesTheSwappedPerson(t *testing.T) {
 		return v.Prompt
 	}
 	got := read([]string{"face"})
-	if !strings.HasPrefix(got, "替换：把@视频1中的女主整个换成@图片1中的人物（圆脸，黑色长波浪卷发，下巴有一颗小痣）。") || strings.Contains(got, "蕾丝领") || strings.Contains(got, "。，") {
+	if !strings.Contains(got, "仅将@视频1中的女主替换为@图片1中的人物") || !strings.Contains(got, "人物身份严格匹配@图片1（圆脸，黑色长波浪卷发，下巴有一颗小痣）：") || strings.Contains(got, "蕾丝领") || strings.Contains(got, "。，") {
 		t.Fatal(got)
 	}
 	if q, _ := asked.Load().(string); !strings.Contains(q, "https://fixture.test/original") || !strings.Contains(q, "不描述衣服") {
@@ -69,7 +69,7 @@ func TestRemakePromptDescribesTheSwappedPerson(t *testing.T) {
 	if got := read([]string{"theirs"}); calls.Load() != 1 || strings.Contains(got, "圆脸") {
 		t.Fatal("another user's picture was read", got)
 	}
-	if got := read(nil); !strings.HasPrefix(got, "替换：把@视频1中的女主整个换成@图片1中的人物。") {
+	if got := read(nil); !strings.Contains(got, "人物身份严格匹配@图片1：") {
 		t.Fatal("an older page (no pictures) should still get the prompt:", got)
 	}
 }

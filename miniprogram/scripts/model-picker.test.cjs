@@ -126,5 +126,5 @@ test("生成同款 offers the official Seedance models first: they mark pictures
   assert.equal(page.data.remakeModel, "ark");
   const { remakeInstruction } = h.service("../pages/create/remake-brief");
   const brief = remakeInstruction({ title: "t", text: "", duration: 10, images: 1, swaps: [{ name: "主角", kind: "person", look: "长发", ref: "@图片1" }] }, 10, 2000);
-  assert.match(brief, /以@视频1为动作、运镜、节奏和场景参考[^]*不要写“复刻同款”[^]*把@视频1中的某人（外貌、位置）整个换成@图片N中的人物[^]*不作为开场画面/);
+  assert.match(brief, /参考@视频1，保持原视频的画面比例[^]*仅将@视频1中的某人替换为@图片N中的人物[^]*人物身份严格匹配@图片N[^]*图片不作为开场画面/);
 });
