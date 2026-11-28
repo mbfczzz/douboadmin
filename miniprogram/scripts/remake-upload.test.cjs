@@ -113,3 +113,27 @@ test("a hot video longer than the longest reference says it cannot be remade and
   assert.equal(posts.filter((p) => p.startsWith("/remake") || p.startsWith("/hot/videos/7301/import")).length, 0, "nothing started");
   assert.match(require("node:fs").readFileSync("pages/remake/index.wxml", "utf8"), /参考视频最长只能 \{\{limit\}\} 秒，这条视频生成不了/);
 });
+
+test("a 图文 post says it has no video to remake and does not start", async () => {
+  const h = harness();
+  await h.api.signIn();
+  const page = h.page("remake");
+  const posts = [];
+  h.wx.request = (o) => {
+    const path = o.url.split("/api")[1].split("?")[0];
+    if (o.method === "POST") posts.push(path);
+    const data = path.startsWith("/hot/videos/") ? { id: "7712", title: "国风写真", cover: "/c.jpg", duration: 10, likes: 0, views: 0, publishedAt: "2026-11-01T00:00:00Z", author: "a", text: "", imagePost: true } : { models: [], enabled: false, keywords: [] };
+    o.success({ statusCode: 200, data });
+  };
+  page.onLoad({ id: "7712" });
+  await page.load();
+  await page.start();
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.equal(page.data.imagePost, true);
+  assert.equal(posts.length, 0, "nothing started");
+  const wxml = require("node:fs").readFileSync("pages/remake/index.wxml", "utf8");
+  assert.match(wxml, /这是图文作品，没有视频可以复刻/);
+  assert.match(wxml, /wx:if="\{\{video&&!busy&&!imagePost\}\}" class="biz-action remake-start"/);
+  page.change();
+  assert.equal(page.data.imagePost, false);
+});

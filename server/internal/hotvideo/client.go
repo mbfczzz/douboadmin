@@ -27,6 +27,8 @@ type Video struct {
 	Comments    *int64    `json:"comments"`
 	PublishedAt time.Time `json:"publishedAt"`
 	Duration    float64   `json:"duration"`
+	// ImagePost: a 图文 post (pictures over music), which has no video to remake.
+	ImagePost bool `json:"imagePost,omitempty"`
 }
 type Query struct {
 	Keyword, Sort, SearchID, Backtrace string

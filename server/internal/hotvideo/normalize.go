@@ -75,8 +75,15 @@ func video(m map[string]any) Video {
 	if play == "" {
 		play = urls(media["download_addr"])
 	}
-	return Video{ID: id, Title: string(runes), Text: text, Author: str(author["nickname"]), Cover: cover, URL: play, SourceURL: "https://www.douyin.com/video/" + id, Likes: integer(stats["digg_count"]), Views: integer(stats["play_count"]), Comments: integer(stats["comment_count"]), PublishedAt: time.Unix(number(m["create_time"]), 0).UTC(), Duration: float64(number(media["duration"])) / 1000}
+	images, _ := m["images"].([]any)
+	return Video{ID: id, Title: string(runes), Text: text, Author: str(author["nickname"]), Cover: cover, URL: play, SourceURL: "https://www.douyin.com/video/" + id, Likes: integer(stats["digg_count"]), Views: integer(stats["play_count"]), Comments: integer(stats["comment_count"]), PublishedAt: time.Unix(number(m["create_time"]), 0).UTC(), Duration: float64(number(media["duration"])) / 1000,
+		ImagePost: len(images) > 0 || number(m["aweme_type"]) == imagePostType}
 }
+
+// imagePostType is Douyin's aweme_type of a 图文 post (its "images" list is
+// the other sign).
+const imagePostType = 68
+
 func normalizeSearch(root map[string]any) (Result, error) {
 	rows, data := searchRows(root)
 	if code := integer(data["status_code"]); code != nil && *code != 0 {

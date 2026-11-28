@@ -15,7 +15,7 @@ test("detail pages wait on the loading page, with what is being loaded", () => {
   // 一键复刻: nothing to start until a video is chosen (so not while it is read).
   // 一键复刻 starts by itself; the button only comes back if starting failed.
   assert.match(read("pages/remake/index.wxml"), /<page-loading wx:if="\{\{\(loading&&!video\)\|\|busy\}\}"/);
-  assert.match(read("pages/remake/index.wxml"), /<button wx:if="\{\{video&&!busy\}\}" class="biz-action remake-start"/);
+  assert.match(read("pages/remake/index.wxml"), /<button wx:if="\{\{video&&!busy&&!imagePost\}\}" class="biz-action remake-start"/);
 });
 
 test("list skeletons carry the slow-network line; both appear late", () => {

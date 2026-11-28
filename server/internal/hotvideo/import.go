@@ -6,6 +6,7 @@ import (
 	"doubo/server/internal/media"
 	"doubo/server/internal/vision"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log/slog"
 	"strings"
@@ -24,6 +25,12 @@ const RemakePurpose = "remake"
 
 // UploadSource is the source of a 一键复刻 from the user's own uploaded video.
 func UploadSource(assetID string) string { return "u" + assetID }
+
+// Why a post cannot be imported, said to the user as written (api keptNotes).
+const (
+	NoVideoImagePost = "这是图文作品，没有视频可以导入，一键复刻只支持视频，请换一条视频"
+	NoVideoMP4       = "这条作品没有可用的 MP4 视频（可能是图文或特殊格式），请换一条视频"
+)
 
 // UploadTitle names an uploaded video the user gave no title: it says
 // nothing about the content.
@@ -62,6 +69,9 @@ func (p Importer) Generate(ctx context.Context, j core.Job) (string, error) {
 	if e != nil {
 		return "", e
 	}
+	if v.ImagePost {
+		return "", errors.New(NoVideoImagePost)
+	}
 	// The original upload has no watermark; when TikHub cannot give it
 	// (blue-V or promoted videos) the clean play address is used.
 	source := v.URL
@@ -75,6 +85,14 @@ func (p Importer) Generate(ctx context.Context, j core.Job) (string, error) {
 	saveJob := j
 	saveJob.Input.Kind = "video"
 	result, e := p.Media.Save(ctx, saveJob, source)
+	// The original upload need not be an MP4 (an iPhone .mov): Douyin's own
+	// clean play copy is.
+	if errors.Is(e, media.ErrResultType) && v.URL != "" && v.URL != source {
+		result, e = p.Media.Save(ctx, saveJob, v.URL)
+	}
+	if errors.Is(e, media.ErrResultType) {
+		return "", errors.New(NoVideoMP4)
+	}
 	if e != nil {
 		return "", e
 	}

@@ -20,6 +20,7 @@ Page({
     video: null as ReturnType<typeof hotView> | null,
     seconds: 0,
     tooLong: false,
+    imagePost: false, // a 图文 post: nothing to remake
     limit: 0, // the longest reference any model takes, when tooLong
     loading: false,
     loadError: "",
@@ -63,11 +64,15 @@ Page({
         : await request<HotVideo>("/hot/link", "POST", { text: this.data.link });
       if (version !== this.revision) return;
       this.id = video.id;
+      if (video.imagePost) {
+        this.setData({ video: hotView(video), seconds: 0, tooLong: false, imagePost: true });
+        return;
+      }
       const seconds = Math.round(video.duration) || 0;
       const limit = await longestReference().catch(() => 0);
       if (version !== this.revision) return;
       const tooLong = !!limit && seconds > limit;
-      this.setData({ video: hotView(video), seconds, tooLong, limit });
+      this.setData({ video: hotView(video), seconds, tooLong, imagePost: false, limit });
       if (!tooLong) void this.start(); // no confirmation step: straight to the breakdown
     } catch (e) {
       if (version === this.revision) this.setData({ loadError: (e as Error).message });
@@ -91,11 +96,11 @@ Page({
     this.id = "";
     this.uploadId = "";
     this.revision++;
-    this.setData({ video: null, seconds: 0, tooLong: false, link: "", loadError: "", loading: false });
+    this.setData({ video: null, seconds: 0, tooLong: false, imagePost: false, link: "", loadError: "", loading: false });
   },
   async start() {
     const video = this.data.video;
-    if (!video || this.data.busy || this.data.tooLong) return;
+    if (!video || this.data.busy || this.data.tooLong || this.data.imagePost) return;
     this.setData({ busy: true });
     try {
       const pictures: string[] = []; // chosen per subject on the task page (task-detail/swap.ts)

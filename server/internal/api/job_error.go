@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"doubo/server/internal/core"
+	"doubo/server/internal/hotvideo"
 	"doubo/server/internal/provider"
 	"encoding/json"
 	"strings"
@@ -36,7 +37,8 @@ var failReference = map[int]userFailure{
 
 // Kept as written: our own outcome notes, not upstream detail.
 var keptNotes = []string{"生成未完成，积分已退回",
-	(&core.JobTimeout{Kind: "image"}).Error(), (&core.JobTimeout{Kind: "video"}).Error()}
+	(&core.JobTimeout{Kind: "image"}).Error(), (&core.JobTimeout{Kind: "video"}).Error(),
+	hotvideo.NoVideoImagePost, hotvideo.NoVideoMP4}
 
 // action: the guidance shown so far (presentJob marks a missing route there).
 func failureFor(code int, action, kind string) userFailure {

@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"doubo/server/internal/core"
+	"doubo/server/internal/hotvideo"
 	"doubo/server/internal/provider"
 	"strings"
 	"testing"
@@ -66,6 +67,13 @@ func TestUsersSeeOnlyActionableFailures(t *testing.T) {
 	publicFailure(&note, false)
 	if note.Error != "生成未完成，积分已退回，可重新提交创作" {
 		t.Fatal(note.Error)
+	}
+	// A 一键复刻 import that has no video says why, not 系统异常.
+	for _, why := range []string{hotvideo.NoVideoImagePost, hotvideo.NoVideoMP4} {
+		imported := core.Job{Status: "failed", Error: why, Input: core.JobInput{Kind: "import"}}
+		if publicFailure(&imported, false); imported.Error != why {
+			t.Fatal(imported.Error)
+		}
 	}
 }
 

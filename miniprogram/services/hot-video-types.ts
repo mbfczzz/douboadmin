@@ -11,6 +11,7 @@ export interface HotVideo {
   comments: number | null;
   publishedAt: string;
   duration: number;
+  imagePost?: boolean; // a 图文 post: pictures over music, no video to remake
 }
 export interface HotResult {
   items: HotVideo[];

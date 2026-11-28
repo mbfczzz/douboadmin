@@ -21,6 +21,7 @@
     </view>
     <text class="biz-note remake-tip">手机视频建议 15 秒以内，越短读取和上传越快</text>
   </view>
+  <text wx:if="{{video&&imagePost}}" class="biz-note remake-long">这是图文作品，没有视频可以复刻。一键复刻只支持视频，请换一条视频。</text>
   <text wx:if="{{video&&tooLong&&!busy}}" class="biz-note remake-long">原视频 {{seconds}} 秒，参考视频最长只能 {{limit}} 秒，这条视频生成不了。请换一条 {{limit}} 秒以内的视频。</text>
   <view wx:if="{{!video&&!loading&&pickWords.length}}" class="remake-picks">
     <text class="remake-label">热门同款，点一下就能复刻</text>
@@ -36,5 +37,5 @@
     </view>
   </view>
   <!-- Starts by itself once a video is chosen; shown again only if that failed. -->
-  <button wx:if="{{video&&!busy}}" class="biz-action remake-start" bindtap="start">开始复刻</button>
+  <button wx:if="{{video&&!busy&&!imagePost}}" class="biz-action remake-start" bindtap="start">开始复刻</button>
 </view>

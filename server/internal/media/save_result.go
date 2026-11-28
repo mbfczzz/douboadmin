@@ -3,6 +3,7 @@ package media
 import (
 	"context"
 	"doubo/server/internal/core"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -10,6 +11,10 @@ import (
 	"path/filepath"
 	"strings"
 )
+
+// ErrResultType: the file is not of the kind the job makes (an image job's
+// non-image, a video job's non-MP4 such as an iPhone .mov or an audio track).
+var ErrResultType = errors.New("生成结果类型无效")
 
 func (s *Service) SaveLocal(ctx context.Context, j core.Job, path string) (string, error) {
 	file, err := os.Open(path)
@@ -39,7 +44,7 @@ func (s *Service) storeResult(ctx context.Context, j core.Job, file io.ReadSeeke
 	typ := http.DetectContentType(head[:n])
 	ext := map[string]string{"image/png": ".png", "image/jpeg": ".jpg", "image/webp": ".webp", "video/mp4": ".mp4", "audio/mpeg": ".mp3", "audio/wave": ".wav", "audio/x-wav": ".wav", "audio/ogg": ".ogg", "application/ogg": ".ogg"}[typ]
 	if ext == "" || (j.Input.Kind == "image" && !strings.HasPrefix(typ, "image/")) || ((j.Input.Kind == "video" || j.Input.Kind == "mix") && typ != "video/mp4") || (j.Input.Kind == "audio" && !strings.HasPrefix(typ, "audio/") && typ != "application/ogg") {
-		return "", fmt.Errorf("生成结果类型无效")
+		return "", ErrResultType
 	}
 	key := "results/" + j.UserID + "/" + id + ext
 	a := Asset{Key: key, Type: typ, Size: size}

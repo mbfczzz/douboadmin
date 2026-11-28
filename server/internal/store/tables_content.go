@@ -64,7 +64,7 @@ func init() {
 		Table{Name: "hot_videos", Comment: "抖音视频信息；id = 视频 id", Cols: []Col{
 			{Field: "id", Kind: Key, Name: "video_id"}, c("title", Text), c("text", Text), c("author", Short),
 			c("cover", Text), c("url", Text), c("sourceUrl", Text), c("likes", Int), c("views", Int),
-			c("comments", Int), c("publishedAt", Time), c("duration", Float), c("cachedAt", Time),
+			c("comments", Int), c("publishedAt", Time), c("duration", Float), c("imagePost", Bool), c("cachedAt", Time),
 		}},
 		Table{Name: "hot_breakdowns", Comment: "一键复刻的视频拆解结果；id = 模型与抖音视频 ID 的摘要", Cols: []Col{
 			c("videoId", Key), c("model", Short), c("status", Key), c("result", JSON), c("error", Text),
