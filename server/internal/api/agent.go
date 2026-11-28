@@ -4,6 +4,7 @@ import (
 	"context"
 	"doubo/server/internal/core"
 	"doubo/server/internal/store"
+	"doubo/server/internal/wechat"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -59,6 +60,10 @@ func (a *Server) createAgentSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	title := strings.TrimSpace(in.Title)
+	if a.textRisky(r, wechat.SceneForum, title) {
+		fail(w, 400, unsafeText)
+		return
+	}
 	if title == "" {
 		title = skill.Name
 	}
@@ -106,6 +111,10 @@ func (a *Server) updateAgentSession(w http.ResponseWriter, r *http.Request) {
 	if in.Title != nil {
 		if s.Title = clip(strings.TrimSpace(*in.Title), 30); s.Title == "" {
 			fail(w, 400, "请输入项目名称")
+			return
+		}
+		if a.textRisky(r, wechat.SceneForum, s.Title) {
+			fail(w, 400, unsafeText)
 			return
 		}
 	}

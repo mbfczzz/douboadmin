@@ -1,4 +1,10 @@
-import { Bot, Globe, LogIn, MousePointerClick } from "lucide-react";
+import {
+  Bot,
+  Globe,
+  LogIn,
+  MousePointerClick,
+  ShieldCheck,
+} from "lucide-react";
 import { failed, visibleError, type LogEntry } from "../logs/types";
 
 const kinds: Record<string, [typeof Bot, string]> = {
@@ -6,6 +12,7 @@ const kinds: Record<string, [typeof Bot, string]> = {
   business: [MousePointerClick, "操作"],
   api: [Globe, "接口请求"],
   model: [Bot, "模型调用"],
+  security: [ShieldCheck, "内容安全"],
 };
 
 // "2026-11-09 17:23:39" in Beijing time.

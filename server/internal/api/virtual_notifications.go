@@ -38,6 +38,16 @@ func (a *Server) virtualNotify(w http.ResponseWriter, r *http.Request) {
 		fail(w, 403, "消息验证失败")
 		return
 	}
+	// 内容安全's results come to the same message push address.
+	if event.Name == "wxa_media_check" {
+		if e = a.mediaChecked(r.Context(), event.Payload); e != nil {
+			fail(w, 503, "通知处理尚未完成，请重试")
+			return
+		}
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		_, _ = io.WriteString(w, "success")
+		return
+	}
 	if event.Name == "xpay_subscribe_ios_refund_query_notify" {
 		ctx, cancel := context.WithTimeout(r.Context(), 2*time.Second)
 		defer cancel()

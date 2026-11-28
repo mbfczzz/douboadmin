@@ -43,6 +43,30 @@ const result = (e: LogEntry) => (
     label={e.status ? String(e.status) : failed(e) ? "失败" : "成功"}
   />
 );
+// 内容安全: what WeChat decided (a refusal is red, a doubt stands out).
+const verdict = (e: LogEntry) => {
+  const word = e.summary?.split(" · ")[0];
+  return (
+    <Badge
+      state={
+        failed(e)
+          ? "failed"
+          : word?.startsWith("疑似")
+            ? "running"
+            : "succeeded"
+      }
+      label={
+        e.status >= 400
+          ? "调用失败"
+          : e.error
+            ? "已拦截"
+            : word?.startsWith("疑似")
+              ? "疑似"
+              : word || "已提交"
+      }
+    />
+  );
+};
 const took = (e: LogEntry) => (
   <span className={e.durationMs > 1000 ? "log-slow" : undefined}>
     {e.durationMs} ms
@@ -99,6 +123,14 @@ function columns(
       { title: "动作", render: action },
       { title: "任务", render: target },
       { title: "状态", render: result },
+      { title: "耗时", render: took },
+    ],
+    security: [
+      time,
+      { title: "用户", render: actor },
+      { title: "检测", render: action },
+      { title: "对象", render: target },
+      { title: "判定", render: verdict },
       { title: "耗时", render: took },
     ],
     // One user's own records: the actor is implied.

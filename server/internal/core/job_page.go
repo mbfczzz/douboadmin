@@ -13,7 +13,7 @@ type JobQuery struct {
 
 func (q JobQuery) Valid() bool {
 	validRange := q.CreatedFrom.IsZero() || q.CreatedBefore.IsZero() || q.CreatedFrom.Before(q.CreatedBefore)
-	return q.Page > 0 && q.Page <= 1000000 && q.Size > 0 && q.Size <= 100 && len([]rune(q.Search)) <= 100 && len(q.Status) < 20 && len(q.Kind) < 20 && len(q.Model) <= 64 && len(q.Session) <= 64 && validRange && (q.Deleted == "" || q.Deleted == "active" || q.Deleted == "deleted")
+	return q.Page > 0 && q.Page <= 1000000 && q.Size > 0 && q.Size <= 100 && len([]rune(q.Search)) <= 100 && len(q.Status) < 20 && len(q.Kind) < 20 && len(q.Model) <= 64 && len(q.Session) <= 64 && validRange && (q.Deleted == "" || q.Deleted == "active" || q.Deleted == "deleted" || q.Deleted == "blocked")
 }
 
 type JobPage struct {

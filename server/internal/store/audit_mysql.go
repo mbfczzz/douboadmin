@@ -176,7 +176,7 @@ func (m *MySQL) PruneLogs(ctx context.Context, writes, reads time.Time) (int64, 
 func (m *MySQL) LogStats(ctx context.Context, since time.Time) (core.APIStats, error) {
 	var out core.APIStats
 	var avg sql.NullFloat64
-	err := m.db.QueryRowContext(ctx, `SELECT COUNT(*),COALESCE(SUM(status>=500),0),COALESCE(SUM(status BETWEEN 400 AND 499),0),COALESCE(SUM(duration_ms>1000),0),AVG(duration_ms),COUNT(DISTINCT CASE WHEN actor_type='user' THEN actor_id END) FROM audit_logs WHERE at>=? AND category<>'model'`, since.UTC()).Scan(&out.Requests, &out.Errors, &out.Rejected, &out.Slow, &avg, &out.Users)
+	err := m.db.QueryRowContext(ctx, `SELECT COUNT(*),COALESCE(SUM(status>=500),0),COALESCE(SUM(status BETWEEN 400 AND 499),0),COALESCE(SUM(duration_ms>1000),0),AVG(duration_ms),COUNT(DISTINCT CASE WHEN actor_type='user' THEN actor_id END) FROM audit_logs WHERE at>=? AND category NOT IN ('model','security')`, since.UTC()).Scan(&out.Requests, &out.Errors, &out.Rejected, &out.Slow, &avg, &out.Users)
 	out.AvgMs = avg.Float64
 	return out, err
 }

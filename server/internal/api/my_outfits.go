@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"doubo/server/internal/core"
+	"doubo/server/internal/wechat"
 	"encoding/json"
 	"net/http"
 	"strings"
@@ -106,6 +107,10 @@ func (a *Server) addMyOutfit(w http.ResponseWriter, r *http.Request) {
 	v.Title = strings.TrimSpace(v.Title)
 	if utf8.RuneCountInString(v.Title) > 20 {
 		fail(w, 400, "名称不超过 20 字")
+		return
+	}
+	if a.textRisky(r, wechat.SceneForum, v.Title) {
+		fail(w, 400, unsafeText)
 		return
 	}
 	if count, err := a.Store.RecordPage(ctx, core.RecordQuery{Namespace: "user_outfits", Owner: user, Fields: map[string]string{"deleted": "false"}, Page: 1, Size: 1}); err != nil {

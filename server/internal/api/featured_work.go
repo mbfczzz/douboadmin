@@ -3,6 +3,7 @@ package api
 import (
 	"doubo/server/internal/core"
 	"doubo/server/internal/store"
+	"doubo/server/internal/wechat"
 	"encoding/json"
 	"net/http"
 	"time"
@@ -71,6 +72,11 @@ func (a *Server) setFeaturedWork(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		dbError(w, err)
 		return
+	}
+	if *in.Featured {
+		// Shown to everyone from now on: WeChat judges it with its author's
+		// openid, and a risky work leaves 优秀作品 again (checkShareAccess).
+		a.checkMedia(r.Context(), Identity{ID: j.UserID, Role: "user"}, wechat.SceneForum, "work", j.ID, a.workFiles(r.Context(), j))
 	}
 	reply(w, 200, map[string]bool{"ok": true})
 }

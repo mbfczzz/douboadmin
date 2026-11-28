@@ -121,7 +121,7 @@ func (m *Memory) LogStats(_ context.Context, since time.Time) (core.APIStats, er
 	var total int64
 	users := map[string]bool{}
 	for _, e := range m.logs {
-		if e.Category == core.LogModel || e.At.Before(since) {
+		if e.Category == core.LogModel || e.Category == core.LogSecurity || e.At.Before(since) {
 			continue
 		}
 		out.Requests++

@@ -5,6 +5,7 @@ import (
 	"crypto/subtle"
 	"doubo/server/internal/core"
 	"doubo/server/internal/store"
+	"doubo/server/internal/wechat"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -35,6 +36,10 @@ func (a *Server) register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if !a.allowAll(w, r, "验证过于频繁，请稍后再试", limit{"sms-verify:" + user, 10}) {
+		return
+	}
+	if a.textRisky(r, wechat.SceneProfile, name) {
+		fail(w, 400, unsafeText)
 		return
 	}
 	var problem string

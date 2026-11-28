@@ -105,6 +105,7 @@ export default function Works({ notify, config }: PageProps) {
           <option value="">全部作品</option>
           <option value="active">正常</option>
           <option value="deleted">已删除</option>
+          <option value="blocked">违规下架</option>
         </select>
       </div>
       <Table
@@ -143,12 +144,20 @@ export default function Works({ notify, config }: PageProps) {
           },
           {
             title: "状态",
-            render: (j) => (
-              <Badge
-                state={j.deleted ? "muted" : "succeeded"}
-                label={j.deleted ? "已删除" : "正常"}
-              />
-            ),
+            render: (j) =>
+              j.blocked && !j.deleted ? (
+                <div>
+                  <Badge state="failed" label="违规下架" />
+                  <small className="cell-note">
+                    微信判定：{j.blockReason || "违规"}，已停止对外展示
+                  </small>
+                </div>
+              ) : (
+                <Badge
+                  state={j.deleted ? "muted" : "succeeded"}
+                  label={j.deleted ? "已删除" : "正常"}
+                />
+              ),
           },
           { title: "时间", render: (j) => date(j.createdAt) },
           {
@@ -158,7 +167,11 @@ export default function Works({ notify, config }: PageProps) {
               <div className="business-actions">
                 <button onClick={() => setDetail(j)}>预览</button>
                 <button
-                  disabled={!!busy || j.deleted || (!j.featured && !j.result)}
+                  disabled={
+                    !!busy ||
+                    j.deleted ||
+                    (!j.featured && (!j.result || j.blocked))
+                  }
                   onClick={() => void feature(j)}
                 >
                   {j.featured ? "取消优秀" : "设为优秀"}

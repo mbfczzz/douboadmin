@@ -1,6 +1,7 @@
 package api
 
 import (
+	"cmp"
 	"context"
 	"doubo/server/internal/core"
 	"doubo/server/internal/media"
@@ -26,6 +27,8 @@ type genInput struct {
 	Size  int64  `json:"size"`
 	URL   string `json:"url"`
 	Label string `json:"label"`
+	// Blocked: 内容安全 found the file risky (WeChat's label, or 违规).
+	Blocked string `json:"blocked,omitempty"`
 }
 
 type genExecution struct {
@@ -50,6 +53,10 @@ func (a *Server) generationInputs(ctx context.Context, ids []string) []genInput 
 				if kind, _, _ := strings.Cut(asset.Type, "/"); inputWords[kind] != "" {
 					in.Kind = kind
 				}
+			}
+			var check struct{ SecCheck, SecReason string }
+			if json.Unmarshal(row.Data, &check) == nil && check.SecCheck == "risky" {
+				in.Blocked = cmp.Or(check.SecReason, "违规")
 			}
 			if a.Media != nil { // signed object-storage URL when configured
 				if u, e := a.Media.URL(ctx, "asset:"+id); e == nil {

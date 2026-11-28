@@ -89,10 +89,14 @@ func (a *Server) validateJob(ctx context.Context, user string, in *core.JobInput
 			return fmt.Errorf("素材不存在或不属于当前用户")
 		}
 		var asset struct {
-			Type string `json:"type"`
-			Size int64  `json:"size"`
+			Type     string `json:"type"`
+			Size     int64  `json:"size"`
+			SecCheck string `json:"secCheck"`
 		}
 		_ = json.Unmarshal(r.Data, &asset)
+		if asset.SecCheck == "risky" {
+			return fmt.Errorf("有素材未通过内容安全检测，请更换后重试")
+		}
 		typ := strings.Split(asset.Type, "/")[0]
 		counts[typ]++
 		sizes[typ] = append(sizes[typ], asset.Size)

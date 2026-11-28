@@ -14,7 +14,7 @@ var uncertainPrefix = strings.SplitN(provider.ErrUncertain.Error(), "，", 2)[0]
 func (a *Server) presentJob(ctx context.Context, j *core.Job) {
 	a.hideTemplateRecipe(ctx, j)
 	resultRef := j.Result
-	j.Featured, j.WorkMetaVersion = false, 0
+	j.Featured, j.WorkMetaVersion, j.Blocked, j.BlockReason = false, 0, false, ""
 	j.ErrorCode, j.ErrorType, j.ErrorAction, j.ErrorEditable = 0, "", "", false
 	j.Results = nil
 	if j.Input.Kind == "image" {
@@ -50,6 +50,7 @@ func (a *Server) presentJob(ctx context.Context, j *core.Job) {
 		if json.Unmarshal(row.Data, &meta) == nil {
 			j.Deleted = meta.Deleted
 			j.Featured = meta.Featured && !meta.Deleted
+			j.Blocked, j.BlockReason = meta.Blocked, meta.BlockReason
 			j.WorkMetaVersion = row.Version
 		}
 	}

@@ -56,6 +56,9 @@ func jobWhere(q core.JobQuery, referenceID string) (string, []any) {
 	if q.Deleted == "deleted" {
 		w += " AND w.deleted=1"
 	}
+	if q.Deleted == "blocked" {
+		w += " AND w.blocked=1"
+	}
 	if q.Search != "" {
 		add(" AND LOCATE(?,CONCAT_WS(' ',j.id,j.user_id,j.input->>'$.prompt'))>0", q.Search)
 	}
@@ -99,7 +102,7 @@ func (m *MySQL) JobPage(ctx context.Context, q core.JobQuery) (out core.JobPage,
 	return out, tx.Commit()
 }
 
-func jobMatches(j core.Job, q core.JobQuery, deleted bool) bool {
+func jobMatches(j core.Job, q core.JobQuery, meta core.WorkMeta) bool {
 	if q.User != "" && j.UserID != q.User || q.Status != "" && j.Status != q.Status {
 		return false
 	}
@@ -121,7 +124,7 @@ func jobMatches(j core.Job, q core.JobQuery, deleted bool) bool {
 	if q.Ended && j.Status != "succeeded" && j.Status != "failed" {
 		return false
 	}
-	if q.Deleted == "active" && deleted || q.Deleted == "deleted" && !deleted {
+	if q.Deleted == "active" && meta.Deleted || q.Deleted == "deleted" && !meta.Deleted || q.Deleted == "blocked" && !meta.Blocked {
 		return false
 	}
 	return q.Search == "" || strings.Contains(strings.ToLower(j.ID+" "+j.UserID+" "+j.Input.Prompt), strings.ToLower(q.Search))
@@ -138,7 +141,7 @@ func (m *Memory) JobPage(_ context.Context, q core.JobQuery) (out core.JobPage, 
 	for _, j := range m.jobs {
 		var meta core.WorkMeta
 		_ = json.Unmarshal(m.records["work_meta:"+j.ID].Data, &meta)
-		if jobMatches(j, q, meta.Deleted) {
+		if jobMatches(j, q, meta) {
 			all = append(all, copyJob(j))
 		}
 	}

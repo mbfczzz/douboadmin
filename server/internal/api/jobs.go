@@ -2,6 +2,7 @@ package api
 
 import (
 	"doubo/server/internal/core"
+	"doubo/server/internal/wechat"
 	"errors"
 	"net/http"
 )
@@ -64,6 +65,10 @@ func (a *Server) submit(w http.ResponseWriter, r *http.Request, in core.JobInput
 	}
 	if e := a.validateJob(r.Context(), user, &in); e != nil {
 		fail(w, 400, e.Error())
+		return
+	}
+	if a.textRisky(r, wechat.SceneForum, in.Prompt) {
+		fail(w, 400, unsafeText)
 		return
 	}
 	p, e := a.priceInput(r, in)

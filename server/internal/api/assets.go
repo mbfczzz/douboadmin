@@ -4,6 +4,7 @@ import (
 	"context"
 	"doubo/server/internal/core"
 	"doubo/server/internal/media"
+	"doubo/server/internal/wechat"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -97,6 +98,11 @@ func (a *Server) upload(w http.ResponseWriter, r *http.Request) {
 			row = fresh
 		}
 	}
+	scene := wechat.SceneForum
+	if avatar {
+		scene = wechat.SceneProfile
+	}
+	a.checkMedia(r.Context(), identity(r), scene, "asset", row.ID, assetFiles(row))
 	if row, e = a.signedAsset(r.Context(), row); e != nil {
 		dbError(w, e)
 		return

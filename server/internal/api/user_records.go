@@ -77,7 +77,7 @@ func (a *Server) userActivity(w http.ResponseWriter, r *http.Request) {
 	v := r.URL.Query()
 	q := core.AuditQuery{Categories: []string{core.LogBusiness, core.LogAuth}, ActorID: r.PathValue("id"), Before: v.Get("before")}
 	if v.Get("scope") == "all" {
-		q.Categories = append(q.Categories, core.LogAPI, core.LogModel)
+		q.Categories = append(q.Categories, core.LogAPI, core.LogModel, core.LogSecurity)
 	}
 	q.Limit, _ = strconv.Atoi(v.Get("limit"))
 	if len(q.Before) > 26 {

@@ -1,4 +1,5 @@
 import { ExternalLink, FileText, Image, Music, Video } from "lucide-react";
+import Badge from "../components/Badge";
 import type { GenInput } from "./types";
 
 const groups = [
@@ -45,6 +46,12 @@ export default function Inputs({ inputs }: { inputs: GenInput[] }) {
                   ) : null}
                   <figcaption>
                     <b>{i.label}</b>
+                    {i.blocked && (
+                      <Badge
+                        state="failed"
+                        label={`微信判定违规（${i.blocked}）`}
+                      />
+                    )}
                     <span className="quiet" title={i.mime}>
                       {(i.mime.split("/")[1] || "未知格式").toUpperCase()}
                       {i.size ? " · " + size(i.size) : ""}

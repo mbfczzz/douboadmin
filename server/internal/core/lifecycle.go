@@ -15,6 +15,10 @@ type WorkMeta struct {
 	Deleted    bool       `json:"deleted"`
 	DeletedAt  *time.Time `json:"deletedAt,omitempty"`
 	Title      string     `json:"title,omitempty"`
+	// Blocked: WeChat's 内容安全 found the work risky; it is shown to no one
+	// else (shares, 优秀作品).
+	Blocked     bool   `json:"blocked,omitempty"`
+	BlockReason string `json:"blockReason,omitempty"` // WeChat's label (色情, 广告…)
 }
 type Review struct {
 	JobID      string     `json:"jobId"`

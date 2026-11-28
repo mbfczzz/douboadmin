@@ -3,6 +3,7 @@ package api
 import (
 	"doubo/server/internal/core"
 	"doubo/server/internal/store"
+	"doubo/server/internal/wechat"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -94,6 +95,14 @@ func (a *Server) updateMe(w http.ResponseWriter, r *http.Request) {
 	v.Nickname = strings.TrimSpace(v.Nickname)
 	if len([]rune(v.Nickname)) < 1 || len([]rune(v.Nickname)) > 30 || (v.Bio != nil && len([]rune(*v.Bio)) > 120) {
 		fail(w, 400, "昵称或简介长度无效")
+		return
+	}
+	bio := ""
+	if v.Bio != nil {
+		bio = *v.Bio
+	}
+	if a.textRisky(r, wechat.SceneProfile, v.Nickname, bio) {
+		fail(w, 400, unsafeText)
 		return
 	}
 	id := identity(r).ID

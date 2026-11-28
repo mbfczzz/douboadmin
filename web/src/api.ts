@@ -48,6 +48,9 @@ export interface Template {
 }
 export interface Job {
   featured?: boolean;
+  // 内容安全: WeChat found the work risky; it is no longer shown to others.
+  blocked?: boolean;
+  blockReason?: string;
   workMetaVersion?: number;
   results?: string[];
   deleted?: boolean;

@@ -33,6 +33,11 @@ export const logTabs = [
   ["business", "业务日志", "谁在什么时候对什么做了什么操作"],
   ["api", "接口日志", "每一次接口调用：参数、返回、状态与耗时"],
   ["model", "模型调用", "向上游中转提交生成与查询结果的每一次调用"],
+  [
+    "security",
+    "内容安全",
+    "微信内容安全接口的每一次调用与结果：文字当场判定；图片、音频和视频画面提交后由微信推送结果。违规的素材不能再用于创作，违规的作品不再对外展示",
+  ],
   ["points", "积分变动", "每一笔积分的增减、预留与退回"],
   ["auth", "登录日志", "管理员与用户的登录、退出"],
   ["features", "功能使用", "小程序各功能的点击次数与使用次数，按使用排序"],
@@ -69,6 +74,8 @@ export const targetLabels: Record<string, string> = {
   alert: "告警",
   group: "配置分组",
   video: "热门视频",
+  asset: "素材",
+  work: "作品",
 };
 
 export const methodTones: Record<string, Tone> = {

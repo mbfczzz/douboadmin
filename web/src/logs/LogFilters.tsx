@@ -68,8 +68,10 @@ export default function LogFilters({
           结果
           <select name="status" aria-label="结果">
             <option value="">全部</option>
-            <option value="ok">成功</option>
-            <option value="fail">失败</option>
+            <option value="ok">{tab === "security" ? "未拦截" : "成功"}</option>
+            <option value="fail">
+              {tab === "security" ? "已拦截或调用失败" : "失败"}
+            </option>
           </select>
         </label>
       )}

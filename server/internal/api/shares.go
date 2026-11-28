@@ -2,6 +2,7 @@ package api
 
 import (
 	"doubo/server/internal/core"
+	"doubo/server/internal/wechat"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -56,6 +57,10 @@ func (a *Server) createShare(w http.ResponseWriter, r *http.Request) {
 		fail(w, 400, "分享标题不能超过 60 字")
 		return
 	}
+	if a.textRisky(r, wechat.SceneForum, v.Title) {
+		fail(w, 400, unsafeText)
+		return
+	}
 	share := core.Share{JobID: j.ID, Title: v.Title, ShowPrompt: v.ShowPrompt, ExpiresAt: time.Now().UTC().Add(30 * 24 * time.Hour)}
 	id := core.NewID()
 	_, e = a.Store.Put(r.Context(), "shares", core.Record{ID: id, Owner: j.UserID, Data: core.Data(share)}, 0)
@@ -63,6 +68,9 @@ func (a *Server) createShare(w http.ResponseWriter, r *http.Request) {
 		dbError(w, e)
 		return
 	}
+	// Shown to others from now on: WeChat judges it, and a risky work is
+	// taken down (checkShareAccess).
+	a.checkMedia(r.Context(), identity(r), wechat.SceneForum, "work", j.ID, a.workFiles(r.Context(), j))
 	base := strings.TrimRight(a.Config.PublicBaseURL, "/")
 	reply(w, 201, map[string]any{"token": id, "path": "/pages/shared-work/index?token=" + id, "shortPath": "/s/" + id, "url": base + "/s/" + id, "publicDomainConfigured": base != "", "expiresAt": share.ExpiresAt})
 }

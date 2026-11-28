@@ -32,6 +32,7 @@ var auditTabs = map[string][]string{
 	"business": {core.LogBusiness},
 	"auth":     {core.LogAuth},
 	"model":    {core.LogModel},
+	"security": {core.LogSecurity},
 	"api":      {core.LogAPI, core.LogBusiness, core.LogAuth},
 }
 

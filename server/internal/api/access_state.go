@@ -19,7 +19,7 @@ func (a *Server) checkShareAccess(ctx context.Context, j core.Job) error {
 		if json.Unmarshal(row.Data, &meta) != nil || meta == nil {
 			return fmt.Errorf("作品状态异常")
 		}
-		if meta.Deleted {
+		if meta.Deleted || meta.Blocked {
 			return core.ErrNotFound
 		}
 	} else if !errors.Is(e, core.ErrNotFound) {

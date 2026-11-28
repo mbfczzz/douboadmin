@@ -8,6 +8,8 @@ export interface GenInput {
   size: number;
   url: string;
   label: string;
+  // 内容安全: WeChat found the file risky (its label); it cannot be used again.
+  blocked?: string;
 }
 export interface GenExecution {
   phase: string;

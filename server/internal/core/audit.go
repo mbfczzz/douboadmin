@@ -4,12 +4,14 @@ import "time"
 
 // Log categories. Every HTTP request is one entry: "business" when it is a
 // known write operation, "auth" for sign-in/out, otherwise "api". Upstream
-// model calls are "model".
+// model calls are "model"; calls to WeChat's 内容安全 and its results are
+// "security".
 const (
 	LogAPI      = "api"
 	LogBusiness = "business"
 	LogAuth     = "auth"
 	LogModel    = "model"
+	LogSecurity = "security"
 )
 
 // AuditEntry is one log line. Request/Response hold redacted, size-capped

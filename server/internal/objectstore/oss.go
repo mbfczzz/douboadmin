@@ -64,3 +64,24 @@ func (o *OSS) Thumbnail(ctx context.Context, key, kind string) (string, error) {
 	}
 	return r.URL, nil
 }
+
+// CheckURL is a file as WeChat's 内容安全 fetches it (signed for 2 hours,
+// within its size limit): an image scaled to 1280, a video's frame at ms,
+// an audio file as it is.
+func (o *OSS) CheckURL(ctx context.Context, key, kind string, ms int) (string, error) {
+	process := "image/resize,m_lfit,w_1280,h_1280,limit_1/auto-orient,1/format,jpg/quality,q_85"
+	switch kind {
+	case "video":
+		process = fmt.Sprintf("video/snapshot,t_%d,f_jpg,w_720,h_0,m_fast", max(ms, 0))
+	case "audio":
+		return o.InputURL(ctx, key)
+	case "image":
+	default:
+		return "", fmt.Errorf("unsupported check kind")
+	}
+	r, err := o.client.Presign(ctx, &oss.GetObjectRequest{Bucket: oss.Ptr(o.bucket), Key: oss.Ptr(key), Process: oss.Ptr(process)}, func(p *oss.PresignOptions) { p.Expires = 2 * time.Hour })
+	if err != nil {
+		return "", err
+	}
+	return r.URL, nil
+}
