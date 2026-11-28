@@ -53,8 +53,12 @@ func publicReferenceRules(m core.Model) map[string]map[string]core.ReferenceRule
 					rule.MaxCount = min(rule.MaxCount, limit)
 				}
 			}
-			if count > 0 {
-				rule.MaxCount = min(rule.MaxCount, int(count))
+			// The operator's count is the limit (as validateModelReferences
+			// checks on submit), above the relay's declaration too: a relay
+			// may declare fewer than its upstream takes. i2v and keyframe
+			// stay fixed by their mode.
+			if count > 0 && (mode == "i2i" || mode == "omni_ref") {
+				rule.MaxCount = min(int(count), 20)
 			}
 			if size > 0 {
 				rule.MaxSizeMB = math.Min(rule.MaxSizeMB, size)

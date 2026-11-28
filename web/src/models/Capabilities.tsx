@@ -63,6 +63,7 @@ function ReferenceLimits({
                     max={20}
                     value={limits[prefix + "." + typ + "Count"] || 0}
                     onChange={(n) => set(prefix + "." + typ + "Count", n)}
+                    hint={prefix === "omniRef" ? "0 沿用上游声明的数量；填写后以此为准，可超过上游声明" : undefined}
                   />
                   <NumberField
                     label={`${prefix === "omniRef" ? "全能参考 · " : label + " · "}${name}大小（MB）`}
@@ -152,7 +153,7 @@ export default function Capabilities({ model: m, onChange }: SettingsProps) {
               max={20}
               value={s.maxRefImages || 0}
               onChange={(maxRefImages) => onChange({ maxRefImages })}
-              hint="0 沿用上游数量限制"
+              hint="0 沿用上游声明的数量；填写后以此为准，可超过上游声明（请确认上游实际支持）"
             />
             <NumberField
               label="单张参考图大小（MB）"

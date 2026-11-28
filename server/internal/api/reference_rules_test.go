@@ -36,8 +36,10 @@ func TestPublicReferenceRulesFollowOperatorAndUpstreamLimits(t *testing.T) {
 		}
 		return v.Models[0]
 	}
+	// The operator's count is the limit, above the relay's declaration too
+	// (a relay may declare fewer than its upstream takes); sizes only lower.
 	got := read()
-	if got.ReferenceRules["i2i"]["image"].MaxCount != 6 || got.ReferenceRules["i2i"]["image"].MaxSizeMB != 2 {
+	if got.ReferenceRules["i2i"]["image"].MaxCount != 8 || got.ReferenceRules["i2i"]["image"].MaxSizeMB != 2 {
 		t.Fatal(got.ReferenceRules)
 	}
 	m.Settings.MaxRefImages = 2
@@ -47,6 +49,15 @@ func TestPublicReferenceRulesFollowOperatorAndUpstreamLimits(t *testing.T) {
 	}
 	if read().ReferenceRules["i2i"]["image"].MaxCount != 2 {
 		t.Fatal("updated setting not reflected")
+	}
+	m.Settings.MaxRefImages = 0 // 0: the relay's declaration
+	row, _ = a.Store.Get(ctx, "models", "demo-image")
+	row.Data = core.Data(m)
+	if _, e = a.Store.Put(ctx, "models", row, row.Version); e != nil {
+		t.Fatal(e)
+	}
+	if read().ReferenceRules["i2i"]["image"].MaxCount != 6 {
+		t.Fatal("0 does not follow the relay")
 	}
 	m.Settings.Modes = []string{"t2i"}
 	got = m.Effective()
@@ -60,7 +71,7 @@ func TestVideoPublicReferenceRulesArePerTypeAndMode(t *testing.T) {
 	m.Settings.RefLimits = map[string]float64{"omniRef.videoCount": 4, "omniRef.videoSizeMB": 10, "keyframe.imageSizeMB": 3}
 	m.Settings.OmniReferences = map[string]bool{"audio": false}
 	rules := publicReferenceRules(m.Effective())
-	if rules["omni_ref"]["video"].MaxCount != 2 || rules["omni_ref"]["video"].MaxSizeMB != 10 || rules["keyframe"]["image"].MaxCount != 2 || rules["keyframe"]["image"].MaxSizeMB != 3 || rules["i2v"]["image"].MaxCount != 1 {
+	if rules["omni_ref"]["video"].MaxCount != 4 || rules["omni_ref"]["video"].MaxSizeMB != 10 || rules["keyframe"]["image"].MaxCount != 2 || rules["keyframe"]["image"].MaxSizeMB != 3 || rules["i2v"]["image"].MaxCount != 1 {
 		t.Fatal(rules)
 	}
 	if _, ok := rules["omni_ref"]["audio"]; ok {
