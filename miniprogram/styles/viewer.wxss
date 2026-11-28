@@ -1,0 +1,31 @@
+/* Full-screen dark viewer. */
+.viewer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 12000;
+  display: flex;
+  flex-direction: column;
+  background: #000;
+  color: #fff;
+  animation: viewer-in 180ms ease-out;
+}
+@keyframes viewer-in {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+.viewer-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: calc(env(safe-area-inset-top) + 8px) 8px 8px;
+}
+.viewer-icon {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

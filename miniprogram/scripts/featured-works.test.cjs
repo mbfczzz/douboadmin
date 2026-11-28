@@ -16,9 +16,14 @@ test("featured pagination uses the shared compact horizontal layout", () => {
   assert.match(template, /第 \{\{page\}\} 页 · 共 \{\{total\}\} 个/);
 });
 
-test("featured videos play in the popup's own video player", async () => {
+test("featured videos play full screen in the app's own video player", async () => {
   const template = fs.readFileSync("components/featured-works/index.wxml", "utf8");
-  assert.match(template, /<video wx:if="\{\{detail\.kind==='video'\}\}" class="featured-player"[^>]*src="\{\{detail\.result\}\}"[^>]*binderror="videoFailed"/);
+  const styles = fs.readFileSync("components/featured-works/index.wxss", "utf8");
+  assert.match(template, /<view wx:if="\{\{detail\.kind==='video'\}\}" class="viewer featured-viewer"[^]*<video src="\{\{detail\.result\}\}"[^>]*binderror="videoFailed"/);
+  assert.match(template, /<t-popup wx:elif="\{\{detail\}\}"/);
+  assert.match(styles, /@import "\.\.\/\.\.\/styles\/viewer\.wxss";/);
+  assert.match(fs.readFileSync("styles/viewer.wxss", "utf8"), /\.viewer \{[^}]*position: fixed;[^}]*z-index: 12000;[^}]*background: #000;/);
+  assert.match(styles, /\.featured-viewer video \{ flex: 1; width: 100%;/);
   const h = harness(), service = h.service("featured-works"), page = featured(h);
   let native = false;
   h.wx.previewMedia = () => { native = true; };
@@ -26,11 +31,8 @@ test("featured videos play in the popup's own video player", async () => {
   await page.open({ currentTarget: { dataset: { id: "video" } } });
   assert.equal(native, false);
   assert.equal(page.data.detail.result, work("video").result);
-  // A tall video takes its own shape, within the popup.
-  page.videoShape({ detail: { width: 720, height: 1280 } });
-  assert.equal(page.data.videoHeight, "height: 549px;");
-  page.videoShape({ detail: { width: 1280, height: 720 } });
-  assert.equal(page.data.videoHeight, "height: 201px;");
+  page.close();
+  assert.equal(page.data.detail, null);
   // It plays alone: the 模板 view's hero preview stops under 优秀.
   assert.match(fs.readFileSync("pages/templates/index.wxml", "utf8"), /<video wx:if="\{\{heroPlay&&!featured&&hero\.data\.preview\}\}"/);
 });

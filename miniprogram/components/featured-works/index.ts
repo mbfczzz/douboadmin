@@ -17,7 +17,7 @@ Component({
   properties: { active: { type: Boolean, value: false } },
   data: {
     works: [] as FeaturedWork[], total: 0, page: 1, kind: "", loading: true, loadError: "",
-    detail: null as FeaturedWork | null, opening: "", videoError: "", videoHeight: "",
+    detail: null as FeaturedWork | null, opening: "", videoError: "",
     filters: [{ key: "", text: "全部" }, { key: "image", text: "图片" }, { key: "video", text: "视频" }],
   },
   observers: {
@@ -91,7 +91,7 @@ Component({
     next() { if (!this.data.loading && this.data.page * 20 < this.data.total) { this.close(); this.setData({ page: this.data.page + 1, works: [] }); void this.load(); } },
     async open(e: WechatMiniprogram.TouchEvent) {
       const s = this.self(), id = e.currentTarget.dataset.id, version = ++s.detailRevision;
-      this.setData({ opening: id, detail: null, videoError: "", videoHeight: "" });
+      this.setData({ opening: id, detail: null, videoError: "" });
       try {
         const detail = await featuredDetail(id);
         if (s.visible && version === s.detailRevision) this.setData({ detail });
@@ -117,12 +117,7 @@ Component({
         if (s.visible && version === s.detailRevision) { this.close(); error(e); void this.load(); }
       }
     },
-    // A tall video keeps its shape within the popup.
-    videoShape(e: WechatMiniprogram.CustomEvent<{ width: number; height: number }>) {
-      const { width, height } = e.detail, view = wx.getWindowInfo();
-      if (width > 0 && height > 0) this.setData({ videoHeight: `height: ${Math.round(Math.min(view.windowHeight * 0.65, (view.windowWidth - 32) * height / width))}px;` });
-    },
-    // (A tap signs the video again.)
     videoFailed() { this.setData({ videoError: "视频暂时无法播放，点击重试" }); },
+    hold() {},
   },
 });
