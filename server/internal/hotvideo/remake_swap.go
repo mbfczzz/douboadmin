@@ -19,7 +19,9 @@ func swapHead(b *vision.Breakdown, seconds int, swaps []Swap) string {
 	var products []string
 	for i, s := range swaps {
 		cast[i] = "将@视频1中的" + s.Name + "替换为" + pictureOf(b, s)
-		if kindOf(b, s.Name) != "person" {
+		if kindOf(b, s.Name) == "person" {
+			cast[i] += fmt.Sprintf("（脸部必须和@图片%d完全一样）", s.Picture)
+		} else {
 			products = append(products, pictureOf(b, s))
 		}
 	}
@@ -52,7 +54,7 @@ func swapLines(b *vision.Breakdown, s Swap, products []string) []string {
 			clothes = "衣着以" + strings.Join(products, "、") + "和下面的分镜为准，不要换成" + ref + "里的衣服；" + ref + "只负责人物身份，不保留图片里的背景、姿势和手势，也不作为开场画面。"
 		}
 		return []string{
-			"人物身份严格匹配" + ref + look + "：保留其面部轮廓、五官比例、发型与发际线、肤色、年龄感和自然皮肤纹理，保持本人辨识度，不换成网红脸，不瘦脸。表情自然、贴合画面情绪，不套用原人物的表情习惯。转身、低头和侧脸时，同样保持这位人物的头型与面部特征，全片每个镜头都是同一个人，不串回@视频1中的" + s.Name + "。",
+			"脸部必须和" + ref + "完全一样" + look + "，这是最重要的要求：以" + ref + "的脸为唯一标准，脸型与下颌线、眉形、眼型与双眼皮、鼻梁与鼻头、嘴唇形状、痣和斑点的位置、肤色都与图片一致，保留自然皮肤纹理和年龄感，发型与发际线也以" + ref + "为准；不参考@视频1中" + s.Name + "的脸，不把两张脸融合，不美颜、不磨皮、不瘦脸、不改脸型，不换成网红脸。近景、远景、侧脸、低头、转身和快速运动时都保持这张脸，全片每个镜头都是同一个人，不串回@视频1中的" + s.Name + "。表情自然、贴合画面情绪，不套用原人物的表情习惯。",
 			clothes,
 			pic + "接替" + s.Name + "的全部动作，动作方向、先后顺序、脚步落点、身体朝向和节奏均以@视频1为准；按自身正常身形调整动作幅度，保持灵活、利落，不刻意放慢，不额外加入摆拍。",
 		}

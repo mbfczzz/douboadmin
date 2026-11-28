@@ -16,7 +16,7 @@ import (
 // the original again; the text must say who the new person is. So each
 // picture is described once: a person's face and hair (not clothes, pose or
 // background), a product's look.
-const describePerson = "这张图片中的人物将替换进一段视频。只用一句话描述能让视频模型认出这是同一个人的长相特征：脸型、五官特点、发型与发色、肤色、年龄感，以及明显特征（痣、眼镜、耳饰等）。不描述衣服、姿势、背景和表情，不写真实姓名，不超过 60 字，只输出描述本身。"
+const describePerson = "这张图片中人物的脸将替换进一段视频，视频里的脸必须和图片完全一样。用一句话描述这张脸，让视频模型画出同一个人：脸型与下颌线、眉形、眼型（单双眼皮）、鼻子、嘴唇、肤色、年龄感、发型与发色，以及痣、斑点、酒窝、眼镜、耳饰等明显特征和它们的位置。不描述衣服、姿势、背景和表情，不写真实姓名，不超过 80 字，只输出描述本身。"
 
 const describeProduct = "这张图片中的商品将替换进一段视频。只用一句话描述它的外观：品类、颜色、材质、形状、图案和上面的文字。不描述背景，不超过 60 字，只输出描述本身。"
 
@@ -76,5 +76,5 @@ func (c *Client) Describe(ctx context.Context, imageURL, kind string) (string, e
 	if json.Unmarshal(data, &reply) != nil || len(reply.Choices) == 0 {
 		return "", fmt.Errorf("图片描述返回格式无效")
 	}
-	return clip(strings.Trim(strings.TrimSpace(reply.Choices[0].Message.Content), "。.\"“”"), 80), nil
+	return clip(strings.Trim(strings.TrimSpace(reply.Choices[0].Message.Content), "。.\"“”"), 100), nil
 }

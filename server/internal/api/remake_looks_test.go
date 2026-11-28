@@ -57,10 +57,10 @@ func TestRemakePromptDescribesTheSwappedPerson(t *testing.T) {
 		return v.Prompt
 	}
 	got := read([]string{"face"})
-	if !strings.Contains(got, "仅将@视频1中的女主替换为@图片1中的人物") || !strings.Contains(got, "人物身份严格匹配@图片1（圆脸，黑色长波浪卷发，下巴有一颗小痣）：") || strings.Contains(got, "蕾丝领") || strings.Contains(got, "。，") {
+	if !strings.Contains(got, "仅将@视频1中的女主替换为@图片1中的人物") || !strings.Contains(got, "脸部必须和@图片1完全一样（圆脸，黑色长波浪卷发，下巴有一颗小痣），这是最重要的要求：") || strings.Contains(got, "蕾丝领") || strings.Contains(got, "。，") {
 		t.Fatal(got)
 	}
-	if q, _ := asked.Load().(string); !strings.Contains(q, "https://fixture.test/original") || !strings.Contains(q, "不描述衣服") {
+	if q, _ := asked.Load().(string); !strings.Contains(q, "https://fixture.test/original") || !strings.Contains(q, "视频里的脸必须和图片完全一样") {
 		t.Fatal("the picture was not asked about as a face:", q)
 	}
 	if read([]string{"face"}); calls.Load() != 1 {
@@ -69,7 +69,7 @@ func TestRemakePromptDescribesTheSwappedPerson(t *testing.T) {
 	if got := read([]string{"theirs"}); calls.Load() != 1 || strings.Contains(got, "圆脸") {
 		t.Fatal("another user's picture was read", got)
 	}
-	if got := read(nil); !strings.Contains(got, "人物身份严格匹配@图片1：") {
+	if got := read(nil); !strings.Contains(got, "脸部必须和@图片1完全一样，这是最重要的要求：") {
 		t.Fatal("an older page (no pictures) should still get the prompt:", got)
 	}
 }

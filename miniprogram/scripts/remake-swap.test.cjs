@@ -40,7 +40,7 @@ test("the server writes 生成同款 from the swaps; the editor's brief puts the
   const brief = remakeInstruction({ title: "t", text: "", duration: 10, breakdown, images: 2, swaps }, 10, 800);
   assert.match(brief, /用户指定了替换：把【主角（长发女生）】换成@图片1中的人物/);
   assert.match(brief, /分镜里被替换的人写成对应图片中的人物/);
-  assert.match(brief, /人物身份严格匹配@图片N[^]*有商品替换时以商品图片为准[^]*不写“第几套”[^]*结尾再强调全片与图片一致/);
+  assert.match(brief, /脸部必须和@图片N完全一样，这是最重要的要求[^]*有商品替换时以商品图片为准[^]*不写“第几套”[^]*结尾再强调全片与图片一致/);
   assert.doesNotMatch(brief, /保持原视频的样子/);
   await h.api.signIn();
   const posts = [];

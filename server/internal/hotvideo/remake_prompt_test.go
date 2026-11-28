@@ -41,8 +41,10 @@ func TestRemakePromptPutsThePicturesIntoTheShots(t *testing.T) {
 		t.Fatal(got)
 	}
 	for _, want := range []string{
-		"仅将@视频1中的女生替换为@图片2中的人物，将@视频1中的眼镜女生替换为@图片1中的人物；其他人物、商品和场景保持@视频1的样子。",
-		"人物身份严格匹配@图片1（圆脸，黑色长波浪卷发，下巴有一颗小痣）：保留其面部轮廓",
+		"仅将@视频1中的女生替换为@图片2中的人物（脸部必须和@图片2完全一样），将@视频1中的眼镜女生替换为@图片1中的人物（脸部必须和@图片1完全一样）；其他人物、商品和场景保持@视频1的样子。",
+		"脸部必须和@图片1完全一样（圆脸，黑色长波浪卷发，下巴有一颗小痣），这是最重要的要求：以@图片1的脸为唯一标准，脸型与下颌线、眉形、眼型与双眼皮、鼻梁与鼻头、嘴唇形状、痣和斑点的位置、肤色都与图片一致",
+		"不参考@视频1中眼镜女生的脸，不把两张脸融合，不美颜、不磨皮、不瘦脸、不改脸型",
+		"近景、远景、侧脸、低头、转身和快速运动时都保持这张脸",
 		"全片每个镜头都是同一个人，不串回@视频1中的眼镜女生。",
 		"服装采用@图片1中的穿着，全程同一套",
 		"@图片1只负责人物身份和服装，不保留图片里的背景、姿势和手势，也不作为开场画面。",
@@ -79,7 +81,7 @@ func TestRemakePromptWithoutSwaps(t *testing.T) {
 	// A product swap is pinned as a 商品; the limit is in characters, and one
 	// too small even for the opening keeps the opening.
 	got := RemakePrompt(b, Original{Duration: 9}, 9, 20000, 1, []Swap{{Name: "口红", Picture: 1}})
-	if !strings.Contains(got, "仅将@视频1中的口红替换为@图片1中的商品") || !strings.Contains(got, "商品严格匹配@图片1：") || strings.Contains(got, "人物身份严格匹配") {
+	if !strings.Contains(got, "仅将@视频1中的口红替换为@图片1中的商品") || !strings.Contains(got, "商品严格匹配@图片1：") || strings.Contains(got, "脸部必须和") {
 		t.Fatal(got)
 	}
 	if got := RemakePrompt(b, Original{Duration: 9}, 9, 300, 1, []Swap{{Name: "口红", Picture: 1}}); runes(got) != 300 || !strings.HasPrefix(got, "参考@视频1，生成一条 9 秒的视频") {
@@ -229,7 +231,8 @@ func TestRemakePromptBindsTheSwapsToEveryShot(t *testing.T) {
 	swaps := []Swap{{Name: "卷发女生", Picture: 1}, {Name: "黑发女生", Picture: 2}, {Name: "通勤穿搭套装", Picture: 3}}
 	got := RemakePrompt(b, Original{Duration: 15}, 15, 20000, 3, swaps)
 	for _, want := range []string{
-		"人物身份严格匹配@图片1：", "人物身份严格匹配@图片2：",
+		"脸部必须和@图片1完全一样，这是最重要的要求：", "脸部必须和@图片2完全一样，这是最重要的要求：",
+		"（全片要求：@图片1中的人物、@图片2中的人物的脸在每一个镜头都和图片完全一样，",
 		"不串回@视频1中的卷发女生", "不串回@视频1中的黑发女生",
 		"商品严格匹配@图片3：", "全片每个镜头都是同一款，不换回@视频1中原来的通勤穿搭套装",
 		"衣着以@图片3中的商品和下面的分镜为准，不要换成@图片1里的衣服；@图片1只负责人物身份",
@@ -244,7 +247,7 @@ func TestRemakePromptBindsTheSwapsToEveryShot(t *testing.T) {
 	}
 	// A short limit keeps the whole binding and its ending; the shots shrink.
 	limit := roomFor(t, got, 100)
-	if short := RemakePrompt(b, Original{Duration: 15}, 15, limit, 3, swaps); runes(short) > limit || !strings.Contains(short, "人物身份严格匹配") || !strings.Contains(short, "商品严格匹配") ||
+	if short := RemakePrompt(b, Original{Duration: 15}, 15, limit, 3, swaps); runes(short) > limit || !strings.Contains(short, "脸部必须和@图片1完全一样") || !strings.Contains(short, "商品严格匹配") ||
 		!strings.HasSuffix(short, "人物和商品。）") || !strings.Contains(short, "2–15秒：") {
 		t.Fatal(runes(short), short)
 	}

@@ -36,7 +36,11 @@ func lockRules(b *vision.Breakdown, images int, swaps []Swap) (head, tail string
 	if len(people) > 0 && len(things) > 0 {
 		head += "人物图片只用来确定长相和发型；衣着以" + strings.Join(things, "、") + "和下面的分镜为准，不要换成人物图片里的衣服。"
 	}
-	return head, "（全片要求：" + strings.Join(all, "、") + "从第一个镜头到最后一个镜头都与图片保持一致，不随镜头切换变回@视频1中的人物和商品。）"
+	face := ""
+	if len(people) > 0 {
+		face = strings.Join(people, "、") + "的脸在每一个镜头都和图片完全一样，"
+	}
+	return head, "（全片要求：" + face + strings.Join(all, "、") + "从第一个镜头到最后一个镜头都与图片保持一致，不随镜头切换变回@视频1中的人物和商品。）"
 }
 
 func kindOf(b *vision.Breakdown, name string) string {
