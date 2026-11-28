@@ -5,9 +5,10 @@ import { guardedClose } from "../hooks/unsaved";
 import type { Notify } from "../navigation";
 
 const limit = 500 << 20;
+const imageLimit = 50 << 20;
+const imageTypes = ["image/jpeg", "image/png", "image/webp"];
 
-// Upload a finished MP4 into a user's 作品; it appears in the mini-program
-// like any generated video and can be shared, featured or deleted.
+// Upload finished media into a user's 作品; it behaves like generated output.
 export default function WorkUpload({
   onClose,
   onSaved,
@@ -25,9 +26,10 @@ export default function WorkUpload({
     const data = new FormData(form),
       file = data.get("file");
     if (!(file instanceof File) || !file.size)
-      return setError("请选择视频文件");
-    if (file.size > limit || file.type !== "video/mp4")
-      return setError("仅支持 500 MB 以内的 MP4 视频");
+      return setError("请选择图片或视频文件");
+    const image = imageTypes.includes(file.type);
+    if ((!image && file.type !== "video/mp4") || file.size > (image ? imageLimit : limit))
+      return setError("支持 50 MB 以内的 JPG、PNG、WebP 图片或 500 MB 以内的 MP4 视频");
     setBusy(true);
     setError("");
     try {
@@ -69,16 +71,16 @@ export default function WorkUpload({
               <input name="title" maxLength={60} required />
             </label>
             <label>
-              视频文件
+              图片或视频文件
               <input
                 name="file"
                 type="file"
-                accept="video/mp4"
+                accept="image/jpeg,image/png,image/webp,video/mp4"
                 required
                 aria-describedby="work-file-hint"
               />
               <small id="work-file-hint" className="quiet field-hint">
-                MP4，500 MB 以内；上传后用户可播放、保存、分享或删除
+                图片 50 MB 以内，MP4 视频 500 MB 以内；上传后用户可预览、保存、分享或删除
               </small>
             </label>
             {error && (

@@ -6,10 +6,10 @@ import (
 	"fmt"
 )
 
-// CreateUploadedWork stores an uploaded video as a finished work with a free
+// CreateUploadedWork stores uploaded media as a finished work with a free
 // billing record, so lists show 0 consumed points and nothing is ever held.
 func CreateUploadedWork(ctx context.Context, s AtomicStore, j core.Job) error {
-	if !j.Input.Uploaded() || j.Input.Kind != "video" || j.Result == "" {
+	if !j.Input.Uploaded() || (j.Input.Kind != "video" && j.Input.Kind != "image") || j.Result == "" {
 		return fmt.Errorf("uploaded work is invalid")
 	}
 	return s.Atomic(ctx, func(tx Transaction) error {

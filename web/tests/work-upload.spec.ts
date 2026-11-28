@@ -1,12 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { mockLogin } from "./mock-login";
 
-// An MP4 header Go's content sniffing (and the browser) treat as video/mp4.
-const mp4 = Buffer.concat([
-  Buffer.from("\x00\x00\x00\x18ftypmp42\x00\x00\x00\x00mp42isom", "binary"),
-  Buffer.alloc(64),
-]);
-
 for (const width of [1440, 390]) {
   test(`super admin uploads a work for a user at ${width}px`, async ({
     page,
@@ -34,7 +28,7 @@ for (const width of [1440, 390]) {
           modelName: "用户上传",
           createdAt: "2026-11-23T10:00:00Z",
           input: {
-            kind: "video",
+            kind: "image",
             prompt: "门店宣传片",
             assets: [],
             source: "upload",
@@ -47,19 +41,19 @@ for (const width of [1440, 390]) {
     await page.getByRole("button", { name: "上传作品", exact: true }).click();
     const dialog = page.getByRole("dialog", { name: "为用户上传作品" });
     await dialog.getByLabel("作品标题").fill("门店宣传片");
-    await dialog.getByLabel("视频文件").setInputFiles({
-      name: "clip.png",
-      mimeType: "image/png",
-      buffer: Buffer.from("png"),
+    await dialog.getByLabel("图片或视频文件").setInputFiles({
+      name: "clip.txt",
+      mimeType: "text/plain",
+      buffer: Buffer.from("invalid"),
     });
     await dialog.getByLabel("用户手机号或用户编号").fill("13900000000");
     await dialog.getByRole("button", { name: "上传作品" }).click();
-    await expect(dialog.getByRole("alert")).toContainText("MP4");
+    await expect(dialog.getByRole("alert")).toContainText("JPG");
     expect(posts).toHaveLength(0);
-    await dialog.getByLabel("视频文件").setInputFiles({
-      name: "clip.mp4",
-      mimeType: "video/mp4",
-      buffer: mp4,
+    await dialog.getByLabel("图片或视频文件").setInputFiles({
+      name: "poster.png",
+      mimeType: "image/png",
+      buffer: Buffer.from("png"),
     });
     await dialog.getByRole("button", { name: "上传作品" }).click();
     await expect(dialog.getByRole("alert")).toContainText("没有找到");

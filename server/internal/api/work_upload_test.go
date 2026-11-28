@@ -14,13 +14,14 @@ import (
 )
 
 var mp4Head = append([]byte("\x00\x00\x00\x18ftypmp42\x00\x00\x00\x00mp42isom"), make([]byte, 64)...)
+var pngPixel = []byte("\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15\xc4\x89")
 
-func workUpload(a *Server, token, user, title string, data []byte) *httptest.ResponseRecorder {
+func workUploadFile(a *Server, token, user, title, name string, data []byte) *httptest.ResponseRecorder {
 	var body bytes.Buffer
 	w := multipart.NewWriter(&body)
 	_ = w.WriteField("user", user)
 	_ = w.WriteField("title", title)
-	part, _ := w.CreateFormFile("file", "clip.mp4")
+	part, _ := w.CreateFormFile("file", name)
 	_, _ = part.Write(data)
 	_ = w.Close()
 	r := httptest.NewRequest("POST", "/api/admin/works", &body)
@@ -29,6 +30,10 @@ func workUpload(a *Server, token, user, title string, data []byte) *httptest.Res
 	out := httptest.NewRecorder()
 	a.Handler().ServeHTTP(out, r)
 	return out
+}
+
+func workUpload(a *Server, token, user, title string, data []byte) *httptest.ResponseRecorder {
+	return workUploadFile(a, token, user, title, "clip.mp4", data)
 }
 
 func TestAdminUploadedWorkLooksLikeAFinishedVideo(t *testing.T) {
@@ -92,6 +97,19 @@ func TestAdminUploadedWorkLooksLikeAFinishedVideo(t *testing.T) {
 	}
 	if call(a, "DELETE", "/api/works/"+job.ID, owner, "", nil).Code != 200 {
 		t.Fatal("owner cannot delete the uploaded work")
+	}
+	image := workUploadFile(a, admin, "user-a", "门店海报", "poster.png", pngPixel)
+	var imageJob core.Job
+	if image.Code != 201 || json.Unmarshal(image.Body.Bytes(), &imageJob) != nil || imageJob.Input.Kind != "image" {
+		t.Fatal("image upload failed", image.Code, image.Body.String())
+	}
+	if featured := call(a, "PUT", "/api/admin/works/"+imageJob.ID+"/featured", admin, "", map[string]any{"featured": true, "version": 0}); featured.Code != 200 {
+		t.Fatal(featured.Code, featured.Body.String())
+	}
+	publicImage := call(a, "GET", "/api/featured-works/"+imageJob.ID, "", "", nil)
+	var imageView featuredWorkView
+	if publicImage.Code != 200 || json.Unmarshal(publicImage.Body.Bytes(), &imageView) != nil || imageView.Kind != "image" || len(imageView.Results) != 1 {
+		t.Fatal("uploaded image missing from public works", publicImage.Code, publicImage.Body.String())
 	}
 }
 
