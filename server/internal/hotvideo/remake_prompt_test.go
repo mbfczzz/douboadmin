@@ -25,14 +25,19 @@ func remakeFixture() *vision.Breakdown {
 	}
 }
 
-// The pictures take the swapped subjects' places in every shot they are in,
-// the original only lends its pacing, and the lines stay as they were said.
+// With swaps @视频1 lends movement, camera, pacing and setting (not "复刻
+// 同款"); each swap names who in @视频1 it replaces, by look; the pictures
+// are only looks, never an opening shot; the pictures take the swapped
+// subjects' places in every shot, and the lines stay as they were said.
 func TestRemakePromptPutsThePicturesIntoTheShots(t *testing.T) {
-	got := RemakePrompt(remakeFixture(), Original{Title: "祝福", Duration: 9}, 9, 2000, 2,
+	b := remakeFixture()
+	b.Subjects[1].Look = "细框眼镜、偏左"
+	got := RemakePrompt(b, Original{Title: "祝福", Duration: 9}, 9, 2000, 2,
 		[]Swap{{Name: "女生", Picture: 2}, {Name: "眼镜女生", Picture: 1}})
 	for _, want := range []string{
-		"参考@视频1的画面结构、镜头运动和节奏，复刻一条 9 秒的同款视频。",
-		"替换：女生＝@图片2中的人物；眼镜女生＝@图片1中的人物。",
+		"以@视频1为动作、运镜、节奏和场景参考，生成一条 9 秒的视频。",
+		"替换：把@视频1中的女生整个换成@图片2中的人物；把@视频1中的眼镜女生（细框眼镜、偏左）整个换成@图片1中的人物。",
+		"@图片2、@图片1只提供长相和外观，不作为开场画面，画面里不要出现图片中的背景、姿势和构图；从第一秒起就是@视频1的场景。",
 		"没有替换的保持@视频1的样子。",
 		"男主角看着@图片1中的人物，@图片1中的人物微笑",
 		"@图片2中的人物拿起口红",
@@ -43,7 +48,7 @@ func TestRemakePromptPutsThePicturesIntoTheShots(t *testing.T) {
 			t.Fatalf("missing %q in\n%s", want, got)
 		}
 	}
-	for _, banned := range []string{"保持原样", "。。", "钩子"} {
+	for _, banned := range []string{"保持原样", "。。", "钩子", "复刻", "同款"} {
 		if strings.Contains(got, banned) {
 			t.Fatalf("%q in\n%s", banned, got)
 		}
@@ -55,15 +60,15 @@ func TestRemakePromptWithoutSwaps(t *testing.T) {
 	if got := RemakePrompt(b, Original{Duration: 9}, 9, 2000, 0, nil); !strings.HasPrefix(got, "参考@视频1的画面结构、镜头运动和节奏，复刻一条 9 秒的同款视频。") || !strings.Contains(got, "男主角抬手") {
 		t.Fatal(got)
 	}
-	if got := RemakePrompt(b, Original{Duration: 9}, 9, 2000, 2, nil); !strings.Contains(got, "换成@图片1、@图片2中的商品或人物") {
+	if got := RemakePrompt(b, Original{Duration: 9}, 9, 2000, 2, nil); !strings.Contains(got, "换成@图片1、@图片2中的商品或人物") || !strings.Contains(got, "不作为开场画面") {
 		t.Fatal(got)
 	}
 	if got := RemakePrompt(nil, Original{Title: "开箱", Text: " 黄皮也能涂 "}, 5, 2000, 0, nil); !strings.HasSuffix(got, "视频主题：开箱\n原视频文案：黄皮也能涂") {
 		t.Fatal(got)
 	}
 	// A product swap names the picture as a 商品; the limit is in characters.
-	got := RemakePrompt(b, Original{Duration: 9}, 9, 60, 1, []Swap{{Name: "口红", Picture: 1}})
-	if !strings.Contains(got, "口红＝@图片1中的商品") || len([]rune(got)) != 60 {
+	got := RemakePrompt(b, Original{Duration: 9}, 9, 70, 1, []Swap{{Name: "口红", Picture: 1}})
+	if !strings.Contains(got, "把@视频1中的口红整个换成@图片1中的商品") || len([]rune(got)) != 70 {
 		t.Fatal(got)
 	}
 }

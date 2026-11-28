@@ -114,3 +114,17 @@ test("an original longer than the chosen model's reference limit is refused, nam
   assert.equal(submitted[0].model, "sd25");
   assert.equal(submitted[0].assets[0], "src-muted");
 });
+
+test("生成同款 offers the official Seedance models first: they mark pictures as references, not an opening frame", async () => {
+  const h = harness();
+  const official = { ...video("ark", ["image", "video"]), key: "arkvideo:doubao-seedance-2-0" };
+  h.service("../utils/config-cache").loadConfig = async () => ({ models: [video("relay", ["image", "video"]), official, video("video-only", ["video"])] });
+  const page = h.page("task-detail");
+  page.setData({ job: { id: "job", status: "succeeded", resultAssetId: "src", input: { kind: "import", purpose: "remake", sourceId: "7301", prompt: "一键复刻：t", duration: 10, assets: [] } } });
+  await page.loadRemakeModels();
+  assert.equal(ids(page.data.remakeModels), "ark,relay,video-only");
+  assert.equal(page.data.remakeModel, "ark");
+  const { remakeInstruction } = h.service("../pages/create/remake-brief");
+  const brief = remakeInstruction({ title: "t", text: "", duration: 10, images: 1, swaps: [{ name: "主角", kind: "person", look: "长发", ref: "@图片1" }] }, 10, 2000);
+  assert.match(brief, /以@视频1为动作、运镜、节奏和场景参考[^]*不要写“复刻同款”[^]*把@视频1中的某人（外貌、位置）整个换成@图片N中的人物[^]*不作为开场画面/);
+});

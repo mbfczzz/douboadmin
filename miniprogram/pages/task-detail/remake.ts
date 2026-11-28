@@ -64,9 +64,13 @@ export function nearestRatio(ratios: string[], shape?: Shape) {
 
 // The video models that can take the original video (the 生成同款 choices).
 const ORIGINAL = { id: "original", data: { type: "video/mp4", size: 0 } } as Row<Asset>;
-// Strongest at keeping swapped people and products first: models that take
-// pictures alongside the original, the most pictures first (else the admin's order).
-const keepsSwaps = (m: Model) => (referenceSettings(m).allowImage ? 100 : 0) + Math.min(m.referenceRules?.omni_ref?.image?.maxCount || 0, 99);
+// Strongest at keeping swapped people and products first: the official
+// Seedance models (方舟 direct, "arkvideo:"; their request marks the pictures
+// as reference images, where a relay may take one as the opening frame),
+// then models that take pictures alongside the original, the most pictures
+// first (else the admin's order).
+const keepsSwaps = (m: Model) =>
+  (m.key?.startsWith("arkvideo:") ? 1000 : 0) + (referenceSettings(m).allowImage ? 100 : 0) + Math.min(m.referenceRules?.omni_ref?.image?.maxCount || 0, 99);
 const byKeeping = (a: Model, b: Model) => keepsSwaps(b) - keepsSwaps(a);
 const remakeModels = (config: Config) => modelChoices(config.models, "video").filter((m) => !referenceError(m, [ORIGINAL], true)).sort(byKeeping);
 

@@ -4,6 +4,7 @@ import (
 	"doubo/server/internal/vision"
 	"fmt"
 	"regexp"
+	"slices"
 	"sort"
 	"strings"
 )
@@ -65,26 +66,48 @@ func RemakePrompt(b *vision.Breakdown, o Original, seconds, limit, images int, s
 	return cut(fitBeats(head, list, room)+"\n"+tail, limit)
 }
 
-// The original lends its pictures, pacing and camera work; what is swapped
-// takes the pictures' looks, and what is not stays as in the original (the
-// task page says 不传保持原样).
+// Without swaps the remake copies the original. With them @视频1 lends only
+// its movement, camera, pacing and setting: told to "复刻同款", or not told
+// which person in @视频1 each picture replaces, a model plays the original
+// back and uses the pictures for an opening shot (their studio background
+// first, then @视频1's own people). So each swap names the original person
+// with the look that tells them apart, and the pictures are only looks.
 func remakeHead(b *vision.Breakdown, seconds, images int, swaps []Swap) string {
-	head := fmt.Sprintf("参考@视频1的画面结构、镜头运动和节奏，复刻一条 %d 秒的同款视频。", seconds)
-	if len(swaps) > 0 {
-		cast := make([]string, len(swaps))
-		for i, s := range swaps {
-			cast[i] = s.Name + "＝" + pictureOf(b, s)
-		}
-		return head + "替换：" + strings.Join(cast, "；") + "。被替换的人物和商品一律以图片为准，不要沿用@视频1中原来的样子；没有替换的保持@视频1的样子。"
+	if len(swaps) == 0 && images == 0 {
+		return fmt.Sprintf("参考@视频1的画面结构、镜头运动和节奏，复刻一条 %d 秒的同款视频。", seconds)
 	}
-	if images > 0 {
-		refs := make([]string, images)
-		for i := range refs {
-			refs[i] = fmt.Sprintf("@图片%d", i+1)
-		}
-		return head + "把原视频中的商品或人物换成" + strings.Join(refs, "、") + "中的商品或人物，外观以图片为准，不要沿用@视频1中原来的样子。"
+	head := fmt.Sprintf("以@视频1为动作、运镜、节奏和场景参考，生成一条 %d 秒的视频。", seconds)
+	pictures := make([]string, images)
+	for i := range pictures {
+		pictures[i] = fmt.Sprintf("@图片%d", i+1)
 	}
-	return head
+	only := "只提供长相和外观，不作为开场画面，画面里不要出现图片中的背景、姿势和构图；从第一秒起就是@视频1的场景。"
+	if len(swaps) == 0 {
+		return head + "把@视频1中的商品或人物换成" + strings.Join(pictures, "、") + "中的商品或人物，外观以图片为准，不要沿用@视频1中原来的样子。" + strings.Join(pictures, "、") + only
+	}
+	cast := make([]string, len(swaps))
+	used := []string{}
+	for i, s := range swaps {
+		cast[i] = "把@视频1中的" + s.Name + lookOf(b, s.Name) + "整个换成" + pictureOf(b, s)
+		if ref := fmt.Sprintf("@图片%d", s.Picture); !slices.Contains(used, ref) {
+			used = append(used, ref)
+		}
+	}
+	return head + "替换：" + strings.Join(cast, "；") + "。" + strings.Join(used, "、") + only +
+		"被替换的人物和商品一律以图片为准，不要沿用@视频1中原来的样子；没有替换的保持@视频1的样子。"
+}
+
+// lookOf: "（波浪卷发、偏左）", how the original subject is told apart in
+// @视频1 (the breakdown's look).
+func lookOf(b *vision.Breakdown, name string) string {
+	if b != nil {
+		for _, s := range b.Subjects {
+			if s.Name == name && strings.TrimSpace(s.Look) != "" {
+				return "（" + strings.TrimRight(strings.TrimSpace(s.Look), "。.") + "）"
+			}
+		}
+	}
+	return ""
 }
 
 // Unknown reports a swap naming no subject of the breakdown (one read
