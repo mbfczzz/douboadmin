@@ -40,6 +40,7 @@ test("the server writes 生成同款 from the swaps; the editor's brief puts the
   const brief = remakeInstruction({ title: "t", text: "", duration: 10, breakdown, images: 2, swaps }, 10, 800);
   assert.match(brief, /用户指定了替换：把【主角（长发女生）】换成@图片1中的人物/);
   assert.match(brief, /分镜里凡是出现被替换的主体，都直接写成对应图片中的人物或商品/);
+  assert.match(brief, /替换就是全片替换[^]*人物身份严格匹配[^]*主体严格匹配[^]*不写“第几套”[^]*结尾再强调一次全片与图片保持一致/);
   assert.doesNotMatch(brief, /保持原视频的样子/);
   await h.api.signIn();
   const posts = [];
@@ -150,4 +151,35 @@ test("the editor's brief shows on-screen words apart from lines, never as lines"
   const brief = remakeInstruction({ title: "t", text: "", duration: 3, breakdown }, 3, 800);
   assert.match(brief, /台词\/口播：早上好｜画面文字：第一天打卡/);
   assert.match(brief, /「画面文字」只作内容参考，不写成台词/);
+});
+
+test("an old breakdown, or one that found nobody, offers 重新拆解 and waits for that run", async () => {
+  const h = harness(), urls = [], messages = [];
+  await h.api.signIn();
+  h.wx.showToast = (o) => messages.push(o.title);
+  const page = h.page("task-detail");
+  const old = { subjects, shots: [{ start: 0, end: 3, scene: "窗边", action: "主角回头" }] }; // no 【】 marks
+  h.wx.request = (o) => { urls.push(o.url); o.success({ statusCode: 200, data: { status: "done", result: old } }); };
+  page.setData({ job: { id: "j", status: "succeeded", resultAssetId: "orig", input: { purpose: "remake", sourceId: "7301", assets: [] } } });
+  await page.loadSwaps();
+  assert.equal(page.data.breakdownStale, true);
+  assert.equal(page.data.breakdownMissing, false);
+  const wxml = require("node:fs").readFileSync("pages/task-detail/index.wxml", "utf8");
+  assert.match(wxml, /breakdownMissing\|\|breakdownStale\}\}" class="remake-edit" bindtap="retryBreakdown"/);
+  // The new run reports itself (fresh), not the older result.
+  let polls = 0;
+  h.wx.request = (o) => {
+    urls.push(o.url);
+    if (o.method === "POST") return o.success({ statusCode: 202, data: { status: "running", result: null } });
+    polls++;
+    o.success({ statusCode: 200, data: { status: "done", result: { subjects, shots: [{ start: 0, end: 3, scene: "窗边", action: "【主角】回头" }] } } });
+  };
+  const timer = global.setTimeout;
+  global.setTimeout = (fn) => timer(fn, 0);
+  try { await page.retryBreakdown(); } finally { global.setTimeout = timer; }
+  assert.ok(urls.some((u) => u.endsWith("/hot/videos/7301/breakdown?fresh=1")));
+  assert.equal(polls, 1);
+  assert.equal(page.data.breakdownStale, false);
+  assert.equal(messages.length, 0);
+  page.onUnload && page.onUnload();
 });

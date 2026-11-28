@@ -1,4 +1,4 @@
-import { fetchBreakdown, rerunBreakdown } from "../../services/hot-breakdown";
+import { fetchBreakdown, rerunBreakdown, usableBreakdown } from "../../services/hot-breakdown";
 import { chooseReferenceFile, upload, media, cancelled, error } from "../../utils/api";
 import type { Breakdown, BreakdownSubject } from "../../services/hot-breakdown";
 import type { Swap } from "../../services/hot-import";
@@ -69,7 +69,8 @@ function showSwaps(page: Page, breakdown: Breakdown | null, given?: string[]) {
   for (const a of page.data.assets) if (a.isImage) urls[a.id] = a.data.url;
   const pictures = (given || Object.keys(urls)).filter((id) => urls[id]);
   const rows = breakdown?.subjects?.length ? firstGuess(breakdown.subjects, pictures) : [];
-  page.setData({ swapLoaded: true, breakdownUnread: false, breakdownMissing: !breakdown?.shots?.length, swapUrls: urls, swaps: rows, mainKept: mainKept(rows) });
+  const missing = !breakdown?.shots?.length;
+  page.setData({ swapLoaded: true, breakdownUnread: false, breakdownMissing: missing, breakdownStale: !missing && !usableBreakdown(breakdown), swapUrls: urls, swaps: rows, mainKept: mainKept(rows) });
 }
 
 export const swapHandlers = {
@@ -103,6 +104,7 @@ export const swapHandlers = {
       if (this.destroyed) return;
       if (!breakdown) throw new Error("原视频还是没有拆解成功，可稍后再试");
       showSwaps(this, breakdown);
+      if (!usableBreakdown(breakdown)) error(new Error("重新拆解完成，但仍没认出可替换的人物或商品"));
     } catch (e) {
       if (!this.destroyed) error(e);
     } finally {

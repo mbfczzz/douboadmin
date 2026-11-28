@@ -114,9 +114,9 @@ export const featureHandlers = {
     const images = count(false), videos = count(true);
     const refs = (images ? `用户上传了 ${images} 张参考图，用 @图片1…@图片${images} 指代并写进画面里。` : "") + (videos ? `参考视频用 @视频1…@视频${videos} 指代，沿用它的镜头和节奏。` : "");
     const idea = this.data.prompt.trim() || "（未填写，请根据参考图自由发挥）";
-    const limit = Math.min(this.data.maxPromptChars, 500);
+    const limit = Math.min(this.data.maxPromptChars, 20000);
     const source = this.data.feature === "remake" ? this.data.remakeSource : null;
-    const instruction = source ? remakeInstruction(source, this.data.duration || 5, limit) : `你是短视频编剧。为一条 ${this.data.duration || 5} 秒的${f.script}写一段可直接用于 AI 视频生成的画面描述：按时间顺序写清场景、人物动作、镜头运动和要展示的重点，不超过 ${limit} 字。${refs}只输出画面描述本身，不要标题和解释。\n用户的想法：${idea}`;
+    const instruction = source ? remakeInstruction(source, this.data.duration || 5, limit) : `你是短视频编剧。为一条 ${this.data.duration || 5} 秒的${f.script}写一段可直接用于 AI 视频生成的画面描述：按时间顺序写清场景、人物动作、镜头运动和要展示的重点，一般 800 字左右，用户要求更细时可以更长，最长 ${limit} 字。${refs}只输出画面描述本身，不要标题和解释。\n用户的想法：${idea}`;
     this.setData({ scriptBusy: true });
     try {
       const script = await writeScript(instruction, () => this.visible && !this.destroyed, this.data.scriptModel);

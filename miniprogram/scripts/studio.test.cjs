@@ -125,7 +125,7 @@ test("生成同款 picks a fitting model, has the server write the description a
   assert.deepEqual(Array.from(input.assets), ["asset-1-clip", "pic-1"]);
   assert.deepEqual(clips, [["asset-1", "both"]]);
   assert.equal(input.prompt, "服务器写的复刻描述");
-  assert.deepEqual(JSON.parse(JSON.stringify(briefs)), [["job-1", 15, 2000, 1, []]]);
+  assert.deepEqual(JSON.parse(JSON.stringify(briefs)), [["job-1", 15, 20000, 1, []]]);
   assert.equal(input.ratio, "9:16", "before the video has loaded");
   assert.equal(h.nav[0].url, "/pages/task-detail/index?id=gen-1");
   assert.equal(detail.data.busy, false);

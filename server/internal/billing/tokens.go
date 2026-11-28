@@ -11,7 +11,12 @@ import (
 // Chinese and English the models see, so characters bound tokens from above.
 const (
 	// provider.trimTurns: earlier turns (8000) + system prompt and summary
-	// (3000) + slack for labels and the summary instruction (1000).
+	// (3000) + slack for labels and the summary instruction (1000). A newest
+	// plan longer than a reply's 4000 (provider.planKeep) and a long reply's
+	// further calls (provider.continueReply) are not held for: holding every
+	// message for a rare 20,000-character plan would raise it about 6×.
+	// Settlement charges at most the hold, so the user never pays more than
+	// shown; the platform bears that rare excess.
 	chatHistoryChars = 8000 + 3000 + 1000
 	// provider.summarize: an earlier summary and the turns folded into it, and
 	// the summary it writes (charged at the output price).

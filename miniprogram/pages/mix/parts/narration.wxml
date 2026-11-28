@@ -1,6 +1,6 @@
 <view class="biz-card">
   <text class="mix-label">文案与配音</text>
-  <textarea class="biz-input textarea" always-embed value="{{script}}" maxlength="500" placeholder="输入旁白或字幕文案，也可以从原声识别…" bindinput="input" />
+  <textarea class="biz-input textarea" always-embed value="{{script}}" maxlength="20000" placeholder="输入旁白或字幕文案，也可以从原声识别…" bindinput="input" />
   <view class="mix-features">
     <view wx:for="{{features}}" wx:key="field" class="mix-feature {{on[item.field]?'on':''}}" data-field="{{item.field}}" bindtap="flip" aria-role="switch" aria-label="{{item.label}}">
       <image class="gl gl-22" src="/assets/glyphs/{{item.glyph}}{{on[item.field]?'':'-muted'}}.png" />

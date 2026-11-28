@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"doubo/server/internal/core"
+	"doubo/server/internal/hotvideo"
 	"doubo/server/internal/media"
 	"doubo/server/internal/vision"
 	"encoding/json"
@@ -32,11 +33,17 @@ func (a *Server) hotBreakdown(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	rec, err := a.Hot.SavedBreakdown(r.Context(), a.Vision.ModelID(), id)
+	if r.Method == "GET" && r.URL.Query().Get("fresh") == "1" { // 重新拆解 waits for its own run, not an older result
+		rec, _, err = a.Hot.ReadBreakdown(r.Context(), a.Vision.ModelID(), id)
+	}
 	if err != nil && !errors.Is(err, core.ErrNotFound) {
 		dbError(w, err)
 		return
 	}
-	if r.Method == "GET" || rec.Status == "done" || rec.Active() {
+	// 重新拆解 runs again only a finished breakdown that is old or found
+	// nobody (hotvideo.Usable), and not within minutes of the last run.
+	again := rec.Status == "done" && !hotvideo.Usable(rec.Result) && time.Since(rec.FinishedAt) > redoAfter
+	if r.Method == "GET" || rec.Status == "done" && !again || rec.Active() {
 		if err != nil {
 			fail(w, 404, "这条视频还没有拆解")
 			return
@@ -59,6 +66,12 @@ func (a *Server) hotBreakdown(w http.ResponseWriter, r *http.Request) {
 		fail(w, 400, problem)
 		return
 	}
+	if again {
+		if err := a.Hot.Redo(r.Context(), a.Vision.ModelID(), id); err != nil {
+			dbError(w, err)
+			return
+		}
+	}
 	go func() {
 		ctx, cancel := context.WithTimeout(context.Background(), 20*time.Minute) // a large video is uploaded first
 		defer cancel()
@@ -74,6 +87,10 @@ func (a *Server) hotBreakdown(w http.ResponseWriter, r *http.Request) {
 	}()
 	reply(w, 202, breakdownView("running", true, nil, ""))
 }
+
+// redoAfter: 重新拆解 of a finished breakdown waits this long after it (a
+// video that truly shows nobody is not broken down over and over).
+const redoAfter = 5 * time.Minute
 
 // breakdownAsset checks the caller's own saved copy of the video.
 func (a *Server) breakdownAsset(ctx context.Context, assetID, user string) (string, int64, string) {

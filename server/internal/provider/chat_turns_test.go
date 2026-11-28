@@ -60,3 +60,12 @@ func TestLongEarlierMessagesAreCappedInHistory(t *testing.T) {
 		t.Fatal("a short message is sent as it was")
 	}
 }
+
+// A summary's input (budget 0) keeps every turn, a long newest plan or not.
+func TestSummaryInputKeepsEveryTurnWithALongPlan(t *testing.T) {
+	long := "```plan\n{\"prompt\":\"" + strings.Repeat("镜", 9000) + "\"}\n```"
+	turns := []core.Job{turn("一", strings.Repeat("说", 3000)), turn("二", strings.Repeat("说", 3000)), turn("出方案", long), turn("三", "好")}
+	if out := trim(turns, 2000, 0); len(out) != 4 {
+		t.Fatal("turns dropped from a summary's input:", len(out))
+	}
+}

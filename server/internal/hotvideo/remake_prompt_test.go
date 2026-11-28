@@ -90,7 +90,7 @@ func TestRemakePromptFitsEveryShotUnderTheLimit(t *testing.T) {
 		t.Fatal("a shot left out:", whole)
 	}
 	got := RemakePrompt(b, Original{Duration: 24}, 24, 900, 1, []Swap{{Name: "女生", Picture: 1}})
-	if runes(got) > 900 || !strings.Contains(got, "\n22–24秒：") || !strings.HasSuffix(got, "台词“第11句”") {
+	if runes(got) > 900 || !strings.Contains(got, "\n22–24秒：") || !strings.Contains(got, "台词“第11句”") {
 		t.Fatal(runes(got), got)
 	}
 	if clause("看着@图片1中的人物", 5, true) != "看着" || clause("看着@图片1中的人物笑", 10, true) != "看着@图片1中的人物" ||
@@ -116,13 +116,13 @@ func TestRemakePromptLeavesKeptNamesAlone(t *testing.T) {
 func TestShortenedShotsKeepTheSwap(t *testing.T) {
 	b := remakeFixture()
 	b.Shots[1].Scene = "夜晚户外，背景模糊的绿色墙面与圆形灯光，远处有车流"
-	got := RemakePrompt(b, Original{Duration: 9}, 9, 260, 1, []Swap{{Name: "眼镜女生", Picture: 1}})
-	if runes(got) > 260 || !strings.Contains(got, "3–6秒：") || !strings.Contains(got, "男主角看着@图片1中的人物") {
+	got := RemakePrompt(b, Original{Duration: 9}, 9, 620, 1, []Swap{{Name: "眼镜女生", Picture: 1}})
+	if runes(got) > 620 || !strings.Contains(got, "3–6秒：") || !strings.Contains(got, "男主角看着@图片1中的人物") {
 		t.Fatal(runes(got), got)
 	}
 	// A pause before the picture does not cut it out.
 	b.Shots[1].Action = "男主角举杯说话；切到眼镜女生在绿植前微笑"
-	got = RemakePrompt(b, Original{Duration: 9}, 9, 240, 1, []Swap{{Name: "眼镜女生", Picture: 1}})
+	got = RemakePrompt(b, Original{Duration: 9}, 9, 600, 1, []Swap{{Name: "眼镜女生", Picture: 1}})
 	if !strings.Contains(got, "男主角举杯说话；切到@图片1中的人物") {
 		t.Fatal(got)
 	}
@@ -156,8 +156,8 @@ func TestShortenedShotsKeepEveryPictureAndTheEnd(t *testing.T) {
 			Action: "男主角走过来把一束花递给女主角", Speech: strings.Repeat("台词很长", 15)})
 	}
 	swaps := []Swap{{Name: "男主角", Picture: 1}, {Name: "女主角", Picture: 2}}
-	got := RemakePrompt(b, Original{Duration: 20}, 20, 600, 2, swaps)
-	if runes(got) > 600 || strings.Count(got, "@图片2中的人物") < 11 || !strings.Contains(got, "\n18–20秒：") {
+	got := RemakePrompt(b, Original{Duration: 20}, 20, 1000, 2, swaps)
+	if runes(got) > 1000 || strings.Count(got, "@图片2中的人物") < 11 || !strings.Contains(got, "\n18–20秒：") {
 		t.Fatal(runes(got), got)
 	}
 	if !Unknown(b, []Swap{{Name: "主角", Picture: 1}}) || Unknown(b, swaps) || !Unknown(nil, swaps) || Unknown(nil, nil) {
@@ -187,6 +187,63 @@ func TestRemakePromptLeavesCaptionsAndPlaceholderTitlesOut(t *testing.T) {
 	}
 	got := RemakePrompt(nil, Original{Title: UploadTitle}, 5, 2000, 0, nil)
 	if !strings.HasSuffix(got, "画面内容、人物动作和场景以@视频1为准，按它的镜头顺序复刻。") || strings.Contains(got, "视频主题") {
+		t.Fatal(got)
+	}
+}
+
+// The swaps are bound to every shot (a long remake drifts back to @视频1's
+// people and products at each cut): before the shots and once more after
+// them; a person's picture gives only the face when a product picture gives
+// what is worn; "第十套" of a single item goes.
+func TestRemakePromptBindsTheSwapsToEveryShot(t *testing.T) {
+	b := &vision.Breakdown{
+		Subjects: []vision.Subject{{Name: "卷发女生", Kind: "person"}, {Name: "黑发女生", Kind: "person"}, {Name: "通勤穿搭套装", Kind: "product"}},
+		Shots: []vision.Shot{
+			{Start: 0, End: 2, Action: "【卷发女生】和【黑发女生】走向镜头，展示第一套【通勤穿搭套装】"},
+			{Start: 2, End: 15, Action: "【卷发女生】和【黑发女生】走向镜头，展示第十套【通勤穿搭套装】"},
+		},
+	}
+	swaps := []Swap{{Name: "卷发女生", Picture: 1}, {Name: "黑发女生", Picture: 2}, {Name: "通勤穿搭套装", Picture: 3}}
+	got := RemakePrompt(b, Original{Duration: 15}, 15, 20000, 3, swaps)
+	for _, want := range []string{
+		"人物身份严格匹配：@图片1中的人物、@图片2中的人物在全片每一个镜头里都是图片中的同一个人",
+		"绝不能变回@视频1中的原人物",
+		"主体严格匹配：@图片3中的商品在全片每一个镜头里都保持图片中的同一款",
+		"人物图片只用来确定长相和发型；衣着以@图片3中的商品和下面的分镜为准",
+		"展示@图片3中的商品\n2–15秒：",
+	} {
+		if !strings.Contains(got, want) {
+			t.Fatalf("missing %q in\n%s", want, got)
+		}
+	}
+	if strings.Contains(got, "第十套") || !strings.HasSuffix(got, "从第一个镜头到最后一个镜头都与图片保持一致，不随镜头切换变回@视频1中的人物和商品。）") {
+		t.Fatal(got)
+	}
+	// A short limit keeps the whole binding and its ending; the shots shrink.
+	if short := RemakePrompt(b, Original{Duration: 15}, 15, 900, 3, swaps); runes(short) > 900 || !strings.Contains(short, "人物身份严格匹配") || !strings.Contains(short, "主体严格匹配") ||
+		!strings.HasSuffix(short, "人物和商品。）") || !strings.Contains(short, "2–15秒：") {
+		t.Fatal(runes(short), short)
+	}
+	// People only: no clothing rule; nothing swapped: nothing bound.
+	if got := RemakePrompt(b, Original{Duration: 15}, 15, 20000, 1, swaps[:1]); strings.Contains(got, "人物图片只用来") || strings.Contains(got, "主体严格匹配") {
+		t.Fatal(got)
+	}
+	if got := RemakePrompt(b, Original{Duration: 15}, 15, 20000, 0, nil); strings.Contains(got, "严格匹配") || strings.Contains(got, "全片要求") {
+		t.Fatal(got)
+	}
+	if got := RemakePrompt(b, Original{Duration: 15}, 15, 20000, 2, nil); !strings.Contains(got, "换上的人物和商品在全片每一个镜头里都与图片保持一致") {
+		t.Fatal(got)
+	}
+}
+
+// Without a breakdown the binding is said again at the end too; a swapped
+// 主体 loses its "第几个" as a product does.
+func TestRemakePromptBindsWithoutABreakdownAndForOtherSubjects(t *testing.T) {
+	if got := RemakePrompt(nil, Original{Title: "开箱"}, 5, 20000, 2, nil); !strings.HasSuffix(got, "不随镜头切换变回@视频1中的样子。）") {
+		t.Fatal(got)
+	}
+	b := &vision.Breakdown{Subjects: []vision.Subject{{Name: "花瓶", Kind: "other"}}, Shots: []vision.Shot{{Start: 0, End: 3, Action: "拿起第二个【花瓶】"}}}
+	if got := RemakePrompt(b, Original{Duration: 3}, 3, 20000, 1, []Swap{{Name: "花瓶", Picture: 1}}); !strings.Contains(got, "拿起@图片1中的主体") || strings.Contains(got, "第二个") {
 		t.Fatal(got)
 	}
 }

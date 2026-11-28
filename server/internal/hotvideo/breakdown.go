@@ -126,3 +126,26 @@ func (s *Service) runBreakdown(ctx context.Context, model *vision.Client, rec Br
 	}
 	return &result, nil
 }
+
+// Usable: the breakdown names its subjects and marks them in the shots (v3),
+// so swaps reach every shot. An older one, or one that found nobody, is
+// worth running again (重新拆解).
+func Usable(b *vision.Breakdown) bool {
+	return b != nil && len(b.Subjects) > 0 && usesMarks(b.Shots)
+}
+
+// Redo lets a finished breakdown that is not Usable run again: its record is
+// marked failed so EnsureBreakdown starts over. Only a v2 one, or none: the
+// v3 run starts fresh anyway.
+func (s *Service) Redo(ctx context.Context, model, videoID string) error {
+	rec, version, err := s.ReadBreakdown(ctx, model, videoID)
+	if errors.Is(err, core.ErrNotFound) {
+		return nil
+	}
+	if err != nil || rec.Status != "done" || Usable(rec.Result) {
+		return err
+	}
+	rec.Status, rec.Error = "failed", "重新拆解"
+	_, err = s.Store.Put(ctx, "hot_breakdowns", core.Record{ID: breakdownID(model, videoID), Data: core.Data(rec)}, version)
+	return err
+}

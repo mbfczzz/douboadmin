@@ -134,7 +134,11 @@ func (p *DirectChat) Generate(ctx context.Context, j core.Job) (string, error) {
 	go watchStop(call, p.Store, j.ID, cancel)
 	written := ""
 	started := time.Now()
-	text, usage, err := client.Complete(call, key, messages, m.Settings.OutputTokens(), p.partial(ctx, j.ID, &row, &e, &written))
+	onText := p.partial(ctx, j.ID, &row, &e, &written)
+	text, usage, err := client.Complete(call, key, messages, m.Settings.OutputTokens(), onText)
+	if err == nil && usage.Truncated { // a long plan: carried on in further calls
+		text, usage, err = continueReply(call, client, key, messages, m.Settings.OutputTokens(), m.Settings.ReplyRounds(), text, usage, onText)
+	}
 	logDirectCall(j, key, "reply", started, usage, err)
 	if errors.Is(err, errTurnTaken) {
 		return "", ErrPending

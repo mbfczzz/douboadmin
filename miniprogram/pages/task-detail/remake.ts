@@ -4,8 +4,8 @@ import { rememberRows } from "../../utils/view-cache";
 import { readBreakdown } from "../../services/hot-breakdown";
 import { remakeBrief, remakeHandoff, remakeOriginal } from "../../services/hot-import";
 import { modelChoices, modelSettings } from "../create/models";
-import { referenceError, creationMode } from "../create/references";
-import type { Job, Row, Asset } from "../../services/types";
+import { referenceError, creationMode, referenceSettings } from "../create/references";
+import type { Job, Row, Asset, Model } from "../../services/types";
 import type { Breakdown } from "../../services/hot-breakdown";
 import { RequestError } from "../../services/errors";
 import { chosenSwaps } from "./swap";
@@ -64,14 +64,18 @@ export function nearestRatio(ratios: string[], shape?: Shape) {
 
 // The video models that can take the original video (the 生成同款 choices).
 const ORIGINAL = { id: "original", data: { type: "video/mp4", size: 0 } } as Row<Asset>;
-const remakeModels = (config: Config) => modelChoices(config.models, "video").filter((m) => !referenceError(m, [ORIGINAL], true));
+// Strongest at keeping swapped people and products first: models that take
+// pictures alongside the original, the most pictures first (else the admin's order).
+const keepsSwaps = (m: Model) => (referenceSettings(m).allowImage ? 100 : 0) + Math.min(m.referenceRules?.omni_ref?.image?.maxCount || 0, 99);
+const byKeeping = (a: Model, b: Model) => keepsSwaps(b) - keepsSwaps(a);
+const remakeModels = (config: Config) => modelChoices(config.models, "video").filter((m) => !referenceError(m, [ORIGINAL], true)).sort(byKeeping);
 
 // The server writes the description from the task's breakdown.
 async function remakeInput(job: Job, swapRows: SwapRow[], pictureAssets: AssetView[], chosen: string, shape?: Shape) {
   const config = await loadConfig();
   const { swaps, pictures } = pictureSwaps(job, swapRows, pictureAssets);
 
-  const models = modelChoices(config.models, "video");
+  const models = modelChoices(config.models, "video").sort(byKeeping);
   const references = [
     { id: job.resultAssetId!, data: { type: "video/mp4", size: 0 } } as Row<Asset>,
     ...pictures.map((id) => pictureAssets.find((a) => a.id === id) || ({ id, data: { type: "image/jpeg", size: 0 } } as Row<Asset>)),
@@ -88,7 +92,7 @@ async function remakeInput(job: Job, swapRows: SwapRow[], pictureAssets: AssetVi
   const [clip, brief] = await Promise.all([
     referenceClip(job.resultAssetId!, model),
     // A model listing no lengths still has the original's (within 60 s) to write for.
-    remakeBrief(job.id, s.duration || Math.min(60, Math.round(original.duration) || 5), Math.min(s.maxPromptChars, 2000), pictures.length, swaps),
+    remakeBrief(job.id, s.duration || Math.min(60, Math.round(original.duration) || 5), Math.min(s.maxPromptChars, 20000), pictures.length, swaps),
   ]);
   // The original's shape as the server read it from the file, else as the player reported it.
   const ratio = nearestRatio(model.ratios, brief.width && brief.height ? brief : shape);

@@ -47,7 +47,7 @@ export default function TokenPricing({ model: m, onChange }: SettingsProps) {
           value={s.maxOutputTokens || 0}
           max={32768}
           integer
-          hint="0 表示默认 4096（约 3000 汉字，够一份完整方案）；上限越大，发送时预留的积分越多。"
+          hint="每次调用的上限，0 表示默认 8192。回复超过它会自动续写，最多约 24000 token（一份 20000 字的方案）；上限越大，发送时预留的积分越多。"
           onChange={(maxOutputTokens) => onChange({ maxOutputTokens })}
         />
       </div>

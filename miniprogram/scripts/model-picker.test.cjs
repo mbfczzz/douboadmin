@@ -30,9 +30,11 @@ test("生成同款 offers the models that take the original video and uses the p
   const page = h.page("task-detail");
   page.setData({ swapLoaded: true, job: { id: "job", status: "succeeded", resultAssetId: "src", input: { kind: "import", purpose: "remake", sourceId: "7301", prompt: "一键复刻：t", duration: 10, assets: [] } } });
   await page.loadRemakeModels();
-  assert.equal(ids(page.data.remakeModels), "video-only,both");
-  assert.equal(page.data.remakeModel, "video-only");
+  // The model that also takes pictures comes first: it keeps swaps best.
+  assert.equal(ids(page.data.remakeModels), "both,video-only");
+  assert.equal(page.data.remakeModel, "both");
   // With a picture, a pick that cannot take it says so instead of switching.
+  page.chooseRemakeModel({ detail: { id: "video-only" } });
   page.setData({ assets: [{ id: "pic", isImage: true, data: { type: "image/jpeg", size: 1 } }] });
   await page.generateRemake();
   assert.equal(submitted.length, 0);

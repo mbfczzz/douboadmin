@@ -5,14 +5,14 @@ import type { SettingsProps } from "./settings";
 export default function PromptFields({ model, onChange }: SettingsProps) {
   const s = model.settings,
     ideas = s.ideas || [],
-    defaultLimit = { image: 2000, video: 20000, chat: 20000 }[model.kind] || 500,
+    defaultLimit = { image: 20000, video: 20000, chat: 20000 }[model.kind] || 500,
     limit = s.maxPromptChars || defaultLimit,
     maxLimit = { image: 100000, video: 100000, chat: 50000 }[model.kind] || 500;
   return (
     <Card title="提示词配置">
       <Section
         label="提示词字数限制"
-        hint={`当前上限 ${limit} 字，最多可设 ${maxLimit} 字。未配置或填 0 时，图片默认 2000 字、视频默认 20000 字、对话（Agent 每条消息）默认 20000 字，其他类型默认 500 字。`}
+        hint={`当前上限 ${limit} 字，最多可设 ${maxLimit} 字。未配置或填 0 时，图片、视频、对话（Agent 每条消息）默认都是 20000 字，其他类型默认 500 字。`}
       >
         <div className="config-grid">
           <NumberField

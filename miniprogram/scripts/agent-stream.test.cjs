@@ -78,7 +78,13 @@ test("a new message waits for the reply being written, unless it is stuck", asyn
   await page.send();
   assert.equal(posts.length, 0);
   assert.match(toasts.join(), /上一条还在回复/);
+  // A long plan may take minutes: still waited for at three minutes...
   page.history = [{ ...job("running", ""), createdAt: new Date(Date.now() - 180000).toISOString() }];
+  toasts.length = 0;
+  await page.send();
+  assert.match(toasts.join(), /上一条还在回复/);
+  // ...but not when stuck for over ten.
+  page.history = [{ ...job("running", ""), createdAt: new Date(Date.now() - 660000).toISOString() }];
   toasts.length = 0;
   await page.send();
   assert.doesNotMatch(toasts.join(), /上一条还在回复/);

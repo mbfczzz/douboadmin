@@ -5,11 +5,7 @@ package core
 // the models take far more, 500 was only ours.
 func DefaultPromptChars(kind string) int {
 	switch kind {
-	case "image":
-		return 2000
-	case "video":
-		return 20000
-	case "chat":
+	case "image", "video", "chat":
 		return 20000
 	default:
 		return 500

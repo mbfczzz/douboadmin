@@ -36,8 +36,9 @@ func roundLimit(j core.Job, now time.Time) time.Duration {
 		limit = 10 * time.Minute
 	}
 	// A 一键复刻 import may upload a video of hundreds of MB to 方舟's Files
-	// API before breaking it down.
-	if j.Input.Kind == "import" {
+	// API before breaking it down; a chat turn may write a 20,000-character
+	// plan over several calls (provider.continueReply).
+	if j.Input.Kind == "import" || j.Input.Kind == "chat" {
 		limit = 20 * time.Minute
 	}
 	if deadline := core.JobDeadline(j); !deadline.IsZero() {

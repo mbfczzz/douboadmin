@@ -4,7 +4,7 @@ import { confirmSubmission } from "./helpers";
 import type { Model, Row } from "../src/api";
 
 for (const [kind, defaultLimit, customLimit] of [
-  ["image", 2000, 4000],
+  ["image", 20000, 40000],
   ["video", 20000, 30000],
   ["chat", 20000, 30000], // one Agent message: no longer held at 500
 ] as const) {

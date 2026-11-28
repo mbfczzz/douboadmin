@@ -77,7 +77,7 @@ type Breakdown struct {
 
 const instruction = `你是短视频爆款拆解专家。请完整观看这条视频，拆解它为什么能火，只输出一个 JSON 对象，不要任何其他文字：
 {"subjects":[{"name":"角色称呼，如 男主角、眼镜女生、口红","kind":"person 或 product 或 other","look":"外观特征，便于辨认","when":"出现的时间段，如 0-8秒"}],"summary":"一句话概括视频内容","hook":"前 3 秒用什么画面或台词抓住观众","structure":"整体结构，如：痛点开场→产品展示→效果对比→引导下单","sellingPoints":["卖点或情绪点"],"style":"画面风格、色调、拍摄方式（手持/固定/口播等）","music":"背景音乐与音效的风格和节奏","shots":[{"start":0,"end":3,"scene":"场景、环境与道具（人物外观只写在 subjects 的 look 里）","action":"按时间顺序的具体动作","camera":"景别与运镜","speech":"人物说的台词或口播（画面里有人在说，或字幕明显是对白、配音），没有则留空","caption":"只显示在画面上、没人说出来的文字（标题、花字、说明、歌词），没有则留空"}]}
-要求：subjects 列出视频里可以被替换的主要人物和商品（1–5 个，按出镜多少排序，不列背景），name 互不相同且不超过 8 个字；任何地方都不写演员、网红、品牌代言人等真实姓名；hook、scene、action 中提到这些人物或商品时，必须写成【name】（如【眼镜女生】拿起【口红】），不要换别的叫法，speech、caption 中不加括号；shots 按时间顺序覆盖整条视频，3–12 个；时间单位为秒；描述具体、可被 AI 视频模型直接执行；没有的信息留空字符串。`
+要求：subjects 列出视频里可以被替换的主要人物和商品（1–5 个，按出镜多少排序，不列背景），name 互不相同且不超过 8 个字；任何地方都不写演员、网红、品牌代言人等真实姓名；hook、scene、action 中提到这些人物或商品时，必须写成【name】（如【眼镜女生】拿起【口红】），不要换别的叫法；同一个人换了衣服、发型或场景仍是同一个 name，每个镜头里出现的每一个列出的人物或商品都要标出，不能用外貌描述（如“穿格子衬衫的女生”）代替；speech、caption 中不加括号；shots 按时间顺序覆盖整条视频，3–12 个；时间单位为秒；描述具体、可被 AI 视频模型直接执行；没有的信息留空字符串。`
 
 // Breakdown watches the video; when this model cannot be used (not
 // configured, not activated, no access) the fallback model watches instead.

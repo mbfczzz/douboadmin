@@ -23,7 +23,7 @@ func (a *Server) remakeBrief(w http.ResponseWriter, r *http.Request) {
 	if !decode(w, r, &v) {
 		return
 	}
-	if v.Seconds < 1 || v.Seconds > 60 || v.Limit < 50 || v.Limit > 5000 || v.Images < 0 || v.Images > 9 || len(v.Swaps) > 5 {
+	if v.Seconds < 1 || v.Seconds > 60 || v.Limit < 50 || v.Limit > core.MaxPlanPromptChars || v.Images < 0 || v.Images > 9 || len(v.Swaps) > 5 {
 		fail(w, 400, "复刻参数无效")
 		return
 	}

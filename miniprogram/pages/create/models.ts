@@ -30,7 +30,8 @@ export function modelChoices(models: Model[], kind: string): ModelChoice[] {
     }));
 }
 
-export const defaultPromptChars = (kind: string) => kind === "image" ? 2000 : 20000;
+// Used before the server's limit is known (core.DefaultPromptChars: 20000 for image, video and chat).
+export const defaultPromptChars = (_kind: string) => 20000;
 const matching = (values: string[], value = "") => values.find((v) => v.toLowerCase() === value.toLowerCase());
 const highest = (values: string[], order: string[]) => order.map((key) => matching(values, key)).find(Boolean) || values[0] || "";
 

@@ -155,3 +155,11 @@ func TestImportRoundsAllowALargeUpload(t *testing.T) {
 		t.Fatal(got)
 	}
 }
+
+// A chat turn may write a 20,000-character plan over several calls.
+func TestChatTurnsHaveTimeForALongPlan(t *testing.T) {
+	j := core.Job{Input: core.JobInput{Kind: "chat"}}
+	if got := roundLimit(j, time.Now()); got != 20*time.Minute {
+		t.Fatal(got)
+	}
+}

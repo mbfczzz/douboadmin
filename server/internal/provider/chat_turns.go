@@ -78,8 +78,8 @@ func trim(turns []core.Job, keep, budget int) []core.Job {
 				return "（这里给出过方案《" + title + "》，已被后面的版本取代）"
 			})
 		}
-		if r := []rune(t.Result); len(r) > keep {
-			t.Result = string(r[:keep])
+		if r, cap := []rune(t.Result), keepOf(i == newest, keep); len(r) > cap {
+			t.Result = string(r[:cap])
 		}
 		// An earlier message is capped too: a long one (a whole prompt pasted
 		// to be revised) was read whole on its own turn, and history must
@@ -90,11 +90,38 @@ func trim(turns []core.Job, keep, budget int) []core.Job {
 		out[i] = t
 		total += len([]rune(t.Input.Prompt)) + len([]rune(t.Result))
 	}
+	// The oldest go first; the newest plan stays (a revision builds on it)
+	// and its length beyond keep is allowed for (not held: see
+	// billing.chatHistoryChars).
+	if newest >= 0 && budget > 0 { // budget 0 keeps every turn (a summary's input)
+		budget += max(len([]rune(out[newest].Result))-keep, 0)
+	}
 	for budget > 0 && len(out) > 1 && total > budget {
-		total -= len([]rune(out[0].Input.Prompt)) + len([]rune(out[0].Result))
-		out = out[1:]
+		drop := 0
+		if newest == 0 {
+			drop = 1
+		}
+		if drop >= len(out)-1 && drop != 0 {
+			break // only the plan and the newest turn are left
+		}
+		total -= len([]rune(out[drop].Input.Prompt)) + len([]rune(out[drop].Result))
+		out = append(out[:drop:drop], out[drop+1:]...)
+		if drop < newest {
+			newest--
+		}
 	}
 	return out
+}
+
+// planKeep: the newest plan reaches the model whole, its prompt up to
+// core.MaxPlanPromptChars and its shots.
+const planKeep = core.MaxPlanPromptChars + 4000
+
+func keepOf(newestPlan bool, keep int) int {
+	if newestPlan {
+		return max(keep, planKeep)
+	}
+	return keep
 }
 
 func hasPlan(text string) bool {

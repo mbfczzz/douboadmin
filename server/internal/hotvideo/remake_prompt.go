@@ -3,6 +3,7 @@ package hotvideo
 import (
 	"doubo/server/internal/vision"
 	"fmt"
+	"regexp"
 	"sort"
 	"strings"
 )
@@ -30,7 +31,10 @@ type Original struct {
 const cleanFrame = "画面中不要出现字幕、水印和平台标识。"
 
 func RemakePrompt(b *vision.Breakdown, o Original, seconds, limit, images int, swaps []Swap) string {
-	head := remakeHead(b, seconds, images, swaps) + cleanFrame
+	lock, tail := lockRules(b, images, swaps)
+	// A swap is always the whole video: the binding goes in whole, whatever
+	// the limit (the shots are shortened instead).
+	head := remakeHead(b, seconds, images, swaps) + lock + cleanFrame
 	if b == nil || len(b.Shots) == 0 { // no breakdown: the video itself, and what its caption says
 		head += "画面内容、人物动作和场景以@视频1为准，按它的镜头顺序复刻。"
 		if title := strings.TrimSpace(o.Title); title != "" && title != UploadTitle {
@@ -39,6 +43,9 @@ func RemakePrompt(b *vision.Breakdown, o Original, seconds, limit, images int, s
 		if text := cut(strings.TrimSpace(o.Text), 300); text != "" {
 			head += "\n原视频文案：" + text
 		}
+		if tail != "" {
+			head += "\n" + tail
+		}
 		return cut(head, limit)
 	}
 	// The breakdown's hook is analysis (why it works); the first shots carry
@@ -46,7 +53,16 @@ func RemakePrompt(b *vision.Breakdown, o Original, seconds, limit, images int, s
 	if b.Style != "" {
 		head += "画面风格：" + sentence(b.Style)
 	}
-	return fitBeats(head, beats(b.Shots, o.Duration, seconds, swapper(b, swaps)), limit)
+	list := beats(b.Shots, o.Duration, seconds, swapper(b, swaps))
+	if tail == "" {
+		return fitBeats(head, list, limit)
+	}
+	// The binding once more after the shots, where the model reads last.
+	room := limit
+	if limit > 0 { // the shots shrink first; a limit too small even for the opening keeps the opening
+		room = max(limit-runes(tail)-1, runes(head))
+	}
+	return cut(fitBeats(head, list, room)+"\n"+tail, limit)
 }
 
 // The original lends its pictures, pacing and camera work; what is swapped
@@ -59,7 +75,7 @@ func remakeHead(b *vision.Breakdown, seconds, images int, swaps []Swap) string {
 		for i, s := range swaps {
 			cast[i] = s.Name + "＝" + pictureOf(b, s)
 		}
-		return head + "替换：" + strings.Join(cast, "；") + "。被替换的人物或商品，长相、发型、服装和外观一律以图片为准，不要沿用@视频1中原来的样子；没有替换的保持@视频1的样子。"
+		return head + "替换：" + strings.Join(cast, "；") + "。被替换的人物和商品一律以图片为准，不要沿用@视频1中原来的样子；没有替换的保持@视频1的样子。"
 	}
 	if images > 0 {
 		refs := make([]string, images)
@@ -128,9 +144,19 @@ func swapper(b *vision.Breakdown, swaps []Swap) func(string) string {
 		}
 	}
 	if b != nil && usesMarks(b.Shots) {
-		return strings.NewReplacer(append(marked, "【", "", "】", "")...).Replace
+		return oneItem(strings.NewReplacer(append(marked, "【", "", "】", "")...).Replace)
 	}
-	return strings.NewReplacer(plain...).Replace
+	return oneItem(strings.NewReplacer(plain...).Replace)
+}
+
+// ordinal is "第三套" right before a picture's product: the original showed
+// several (an outfit-change video), the remake shows the one in the picture.
+var ordinal = regexp.MustCompile(`第[一二三四五六七八九十百0-9]+[套件款身个]\s*(@图片\d+中的(?:商品|主体))`)
+
+// oneItem drops such ordinals once the names are replaced, so no shot asks
+// for "第十套" of a single item (which sends the model back to @视频1's).
+func oneItem(put func(string) string) func(string) string {
+	return func(text string) string { return ordinal.ReplaceAllString(put(text), "$1") }
 }
 
 // usesMarks: the breakdown writes its subjects as 【name】 (v3).

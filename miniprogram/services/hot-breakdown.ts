@@ -29,7 +29,7 @@ export async function rerunBreakdown(videoId: string, assetId: string, alive: ()
   let state = await request<BreakdownState>(path, "POST", { assetId });
   for (let i = 0; state.status === "running" && i < 100 && alive(); i++) {
     await new Promise((resolve) => setTimeout(resolve, 3000));
-    state = await request<BreakdownState>(path);
+    state = await request<BreakdownState>(path + "?fresh=1"); // this run, not an older result
   }
   return state.status === "done" ? state.result : null;
 }
@@ -45,6 +45,11 @@ export async function fetchBreakdown(videoId: string): Promise<Breakdown | null>
     throw e;
   }
 }
+
+// Usable: subjects found and marked as 【称呼】 in the shots, so swaps reach
+// every shot (an older breakdown, or one that found nobody, is worth 重新拆解).
+export const usableBreakdown = (b: Breakdown | null) =>
+  !!b?.subjects?.length && b.shots.some((s) => (s.scene + s.action).includes("【"));
 
 export async function readBreakdown(videoId: string): Promise<Breakdown | null> {
   return fetchBreakdown(videoId).catch(() => null);

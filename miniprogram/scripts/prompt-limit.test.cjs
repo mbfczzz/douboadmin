@@ -10,7 +10,7 @@ const model = (kind, limit) => ({
 test("image and video defaults follow the selected kind and refresh configured limits", async () => {
   const h = harness(), page = h.page("create");
   let videoLimit = 0;
-  h.api.request = async () => ({ models: [model("image", 0), model("video", videoLimit)] });
+  h.api.request = async () => ({ models: [model("image", 2000), model("video", videoLimit)] }); // an image model set lower
   assert.equal(page.data.maxPromptChars, 20000);
   await page.loadModels();
   assert.equal(page.data.maxPromptChars, 20000);
@@ -36,7 +36,7 @@ test("image and video defaults follow the selected kind and refresh configured l
   assert.equal(page.data.prompt.length, 2500);
 });
 
-for (const [kind, configured, limit] of [["image", 0, 2000], ["video", 0, 20000], ["image", 4000, 4000], ["video", 30000, 30000]]) {
+for (const [kind, configured, limit] of [["image", 0, 20000], ["video", 0, 20000], ["image", 4000, 4000], ["video", 30000, 30000]]) {
   test(`${kind}: ${limit} characters submit intact; the next character is rejected`, async () => {
     const h = harness(), page = h.page("create"), sent = [];
     h.api.request = async () => ({ models: [model(kind, configured)] });

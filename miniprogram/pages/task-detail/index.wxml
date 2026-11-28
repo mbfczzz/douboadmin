@@ -90,9 +90,9 @@
     </view>
     <view wx:if="{{job.status==='succeeded'&&!job.deleted&&job.input.purpose==='remake'}}" class="remake-ready">
       <view class="remake-copy">
-        <text>{{!swapLoaded?'正在读取原视频拆解…':breakdownUnread?'原视频拆解没有读取到，请检查网络':breakdownMissing?'原视频没有拆解成功，生成同款只能参考原视频画面':'原视频已拆解，确认积分后直接生成同款'}}</text>
+        <text>{{!swapLoaded?'正在读取原视频拆解…':breakdownUnread?'原视频拆解没有读取到，请检查网络':breakdownMissing?'原视频没有拆解成功，生成同款只能参考原视频画面':breakdownStale?'原视频的拆解较旧或没认出人物，重新拆解后替换更准确':'原视频已拆解，确认积分后直接生成同款'}}</text>
         <text wx:if="{{breakdownUnread}}" class="remake-edit" bindtap="reloadSwaps">重新读取 ›</text>
-        <text wx:elif="{{breakdownMissing}}" class="remake-edit" bindtap="retryBreakdown">{{rebreaking?'正在重新拆解…':'重新拆解 ›'}}</text>
+        <text wx:elif="{{breakdownMissing||breakdownStale}}" class="remake-edit" bindtap="retryBreakdown">{{rebreaking?'正在重新拆解…':'重新拆解 ›'}}</text>
         <model-picker models="{{remakeModels}}" value="{{remakeModel}}" title="生成同款用的模型" disabled="{{busy}}" bind:change="chooseRemakeModel" />
         <text class="remake-edit" bindtap="editRemake">调整后再生成 ›</text>
       </view>
