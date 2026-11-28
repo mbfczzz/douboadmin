@@ -19,7 +19,9 @@
   <view class="featured-preview">
     <view class="featured-preview-head"><text>{{detail.title}}</text><view bindtap="close" aria-role="button" aria-label="关闭作品预览"><t-icon name="close" size="24" /></view></view>
     <scroll-view scroll-y class="featured-preview-body">
-      <result-gallery images="{{detail.results}}" bind:preview="preview" />
+      <video wx:if="{{detail.kind==='video'}}" class="featured-player" style="{{videoHeight}}" src="{{detail.result}}" poster="{{detail.thumbnailUrl}}" controls autoplay bindloadedmetadata="videoShape" binderror="videoFailed" />
+      <result-gallery wx:else images="{{detail.results}}" bind:preview="preview" />
+      <view wx:if="{{videoError}}" class="error-box" data-id="{{detail.id}}" bindtap="open">{{videoError}}</view>
     </scroll-view>
   </view>
 </t-popup>

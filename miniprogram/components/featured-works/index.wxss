@@ -17,3 +17,4 @@
 .featured-preview-head > text { flex: 1; min-width: 0; overflow-wrap: anywhere; }
 .featured-preview-head > view { padding: 8px; }
 .featured-preview-body { max-height: 65vh; }
+.featured-player { display: block; width: 100%; height: 56vh; margin-bottom: 12px; border-radius: 12px; background: #000; }

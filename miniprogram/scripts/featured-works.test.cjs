@@ -16,19 +16,52 @@ test("featured pagination uses the shared compact horizontal layout", () => {
   assert.match(template, /第 \{\{page\}\} 页 · 共 \{\{total\}\} 个/);
 });
 
-test("featured videos use WeChat's adaptive native media viewer", async () => {
-  const styles = fs.readFileSync("components/featured-works/index.wxss", "utf8");
+test("featured videos play in the popup's own video player", async () => {
   const template = fs.readFileSync("components/featured-works/index.wxml", "utf8");
-  assert.doesNotMatch(template, /<video/);
-  assert.doesNotMatch(styles, /featured-preview video[^}]*52vh/);
+  assert.match(template, /<video wx:if="\{\{detail\.kind==='video'\}\}" class="featured-player"[^>]*src="\{\{detail\.result\}\}"[^>]*binderror="videoFailed"/);
   const h = harness(), service = h.service("featured-works"), page = featured(h);
-  let shown;
-  h.wx.previewMedia = (options) => { shown = options; };
+  let native = false;
+  h.wx.previewMedia = () => { native = true; };
   service.featuredDetail = async () => work("video");
   await page.open({ currentTarget: { dataset: { id: "video" } } });
-  assert.equal(shown.sources[0].type, "video");
-  assert.equal(shown.sources[0].url, work("video").result);
+  assert.equal(native, false);
+  assert.equal(page.data.detail.result, work("video").result);
+  // A tall video takes its own shape, within the popup.
+  page.videoShape({ detail: { width: 720, height: 1280 } });
+  assert.equal(page.data.videoHeight, "height: 549px;");
+  page.videoShape({ detail: { width: 1280, height: 720 } });
+  assert.equal(page.data.videoHeight, "height: 201px;");
+  // It plays alone: the 模板 view's hero preview stops under 优秀.
+  assert.match(fs.readFileSync("pages/templates/index.wxml", "utf8"), /<video wx:if="\{\{heroPlay&&!featured&&hero\.data\.preview\}\}"/);
+});
+
+test("a failed featured video says so and loads the work again", async () => {
+  const h = harness(), service = h.service("featured-works"), page = featured(h);
+  let calls = 0;
+  service.featuredDetail = async () => { calls++; return { ...work("video"), result: `https://fixture.test/${calls}.mp4` }; };
+  await page.open({ currentTarget: { dataset: { id: "video" } } });
+  page.videoFailed();
+  assert.match(page.data.videoError, /无法播放/);
+  assert.match(fs.readFileSync("components/featured-works/index.wxml", "utf8"), /class="error-box" data-id="\{\{detail\.id\}\}" bindtap="open"/);
+  page.open({ currentTarget: { dataset: { id: "video" } } });
+  await new Promise(setImmediate);
+  assert.equal(calls, 2);
+  assert.equal(page.data.detail.result, "https://fixture.test/2.mp4");
+  assert.equal(page.data.videoError, "");
+});
+
+test("leaving the page stops a playing video but keeps a picture popup", async () => {
+  const h = harness(), service = h.service("featured-works"), page = featured(h);
+  service.featuredPage = async () => ({ items: [], total: 0 });
+  service.featuredDetail = async () => work("video");
+  await page.open({ currentTarget: { dataset: { id: "video" } } });
+  page.hide();
   assert.equal(page.data.detail, null);
+  page.self().visible = true;
+  service.featuredDetail = async () => work();
+  await page.open({ currentTarget: { dataset: { id: "image" } } });
+  page.hide();
+  assert.equal(page.data.detail.id, "image");
 });
 
 test("featured works display mixed media, filters and paginates without login", async () => {

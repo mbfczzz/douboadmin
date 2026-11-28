@@ -6,8 +6,8 @@ import type { FeaturedWork } from "../../services/featured-works";
 type Self = { revision: number; detailRevision: number; visible: boolean; loaded?: { key: string; at: number } };
 
 // A list shown within this long is shown again as it was (covers are signed
-// for 15 minutes): coming back from a video or picture preview hides and
-// shows the page, which must not reload every cover.
+// for 15 minutes): coming back from a picture preview hides and shows the
+// page, which must not reload every cover.
 const FRESH = 10 * 60 * 1000;
 
 // 优秀作品 inside the 模板 tab page; `active` starts loads, and answers
@@ -17,7 +17,7 @@ Component({
   properties: { active: { type: Boolean, value: false } },
   data: {
     works: [] as FeaturedWork[], total: 0, page: 1, kind: "", loading: true, loadError: "",
-    detail: null as FeaturedWork | null, opening: "",
+    detail: null as FeaturedWork | null, opening: "", videoError: "", videoHeight: "",
     filters: [{ key: "", text: "全部" }, { key: "image", text: "图片" }, { key: "video", text: "视频" }],
   },
   observers: {
@@ -45,12 +45,14 @@ Component({
       if (s.loaded?.key === this.viewKey() && Date.now() - s.loaded.at < FRESH && !this.data.loading && !this.data.loadError) return;
       void this.load();
     },
-    // Late answers are dropped; an open picture popup stays for the return.
+    // Late answers are dropped; a picture popup stays for the return, a video
+    // does not.
     hide() {
       const s = this.self();
       s.visible = false;
       s.revision++;
       s.detailRevision++;
+      if (this.data.detail?.kind === "video") this.setData({ detail: null });
       this.setData({ opening: "" });
     },
     viewKey() {
@@ -89,15 +91,10 @@ Component({
     next() { if (!this.data.loading && this.data.page * 20 < this.data.total) { this.close(); this.setData({ page: this.data.page + 1, works: [] }); void this.load(); } },
     async open(e: WechatMiniprogram.TouchEvent) {
       const s = this.self(), id = e.currentTarget.dataset.id, version = ++s.detailRevision;
-      this.setData({ opening: id, detail: null });
+      this.setData({ opening: id, detail: null, videoError: "", videoHeight: "" });
       try {
         const detail = await featuredDetail(id);
-        if (!s.visible || version !== s.detailRevision) return;
-        if (detail.kind === "video") wx.previewMedia({
-          sources: [{ url: detail.result, type: "video", poster: detail.thumbnailUrl || "" }],
-          fail: () => error(new Error("作品暂时无法加载，请稍后重试")),
-        });
-        else this.setData({ detail });
+        if (s.visible && version === s.detailRevision) this.setData({ detail });
       } catch (e) {
         if (s.visible && version === s.detailRevision) { error(e); void this.load(); }
       } finally {
@@ -120,5 +117,12 @@ Component({
         if (s.visible && version === s.detailRevision) { this.close(); error(e); void this.load(); }
       }
     },
+    // A tall video keeps its shape within the popup.
+    videoShape(e: WechatMiniprogram.CustomEvent<{ width: number; height: number }>) {
+      const { width, height } = e.detail, view = wx.getWindowInfo();
+      if (width > 0 && height > 0) this.setData({ videoHeight: `height: ${Math.round(Math.min(view.windowHeight * 0.65, (view.windowWidth - 32) * height / width))}px;` });
+    },
+    // (A tap signs the video again.)
+    videoFailed() { this.setData({ videoError: "视频暂时无法播放，点击重试" }); },
   },
 });
