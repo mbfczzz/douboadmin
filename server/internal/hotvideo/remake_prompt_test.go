@@ -31,14 +31,17 @@ func remakeFixture() *vision.Breakdown {
 // subjects' places in every shot, and the lines stay as they were said.
 func TestRemakePromptPutsThePicturesIntoTheShots(t *testing.T) {
 	b := remakeFixture()
-	b.Subjects[1].Look = "细框眼镜、偏左"
+	b.Subjects[1].Look = "黑色长直发、灰色蕾丝领大衣" // the original's: never written
+	b.Shots[0].Scene = "投影幕布前。"
 	got := RemakePrompt(b, Original{Title: "祝福", Duration: 9}, 9, 2000, 2,
-		[]Swap{{Name: "女生", Picture: 2}, {Name: "眼镜女生", Picture: 1}})
+		[]Swap{{Name: "女生", Picture: 2}, {Name: "眼镜女生", Picture: 1, Look: "圆脸，黑色长波浪卷发，下巴有一颗小痣。"}})
+	if !strings.HasPrefix(got, "替换：把@视频1中的女生整个换成@图片2中的人物；把@视频1中的眼镜女生整个换成@图片1中的人物（圆脸，黑色长波浪卷发，下巴有一颗小痣）。以@视频1为动作、运镜、节奏和场景参考，生成一条 9 秒的视频。") {
+		t.Fatal(got)
+	}
 	for _, want := range []string{
-		"以@视频1为动作、运镜、节奏和场景参考，生成一条 9 秒的视频。",
-		"替换：把@视频1中的女生整个换成@图片2中的人物；把@视频1中的眼镜女生（细框眼镜、偏左）整个换成@图片1中的人物。",
 		"@图片2、@图片1只提供长相和外观，不作为开场画面，画面里不要出现图片中的背景、姿势和构图；从第一秒起就是@视频1的场景。",
-		"没有替换的保持@视频1的样子。",
+		"不要沿用@视频1中原来的长相、发型和样子",
+		"0–3秒：投影幕布前，",
 		"男主角看着@图片1中的人物，@图片1中的人物微笑",
 		"@图片2中的人物拿起口红",
 		"台词“眼镜女生要开心”",
@@ -48,7 +51,7 @@ func TestRemakePromptPutsThePicturesIntoTheShots(t *testing.T) {
 			t.Fatalf("missing %q in\n%s", want, got)
 		}
 	}
-	for _, banned := range []string{"保持原样", "。。", "钩子", "复刻", "同款"} {
+	for _, banned := range []string{"保持原样", "。。", "。，", "钩子", "复刻", "同款", "蕾丝领"} {
 		if strings.Contains(got, banned) {
 			t.Fatalf("%q in\n%s", banned, got)
 		}

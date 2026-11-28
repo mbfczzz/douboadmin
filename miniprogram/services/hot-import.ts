@@ -55,9 +55,11 @@ export function remakeOriginal(job: Job): RemakeOriginal {
 // breakdown (the wording changes there, without a mini-program release),
 // with the original's size (0 when it could not be read).
 export type RemakeBrief = { prompt: string; width: number; height: number };
-export function remakeBrief(job: string, seconds: number, limit: number, images: number, swaps: Swap[]) {
+// pictures: their asset ids in @图片 order, so the server describes who
+// each swapped person is.
+export function remakeBrief(job: string, seconds: number, limit: number, images: number, swaps: Swap[], pictures: string[] = []) {
   const picture = (s: Swap) => Number(s.ref.replace("@图片", ""));
-  const body = { job, seconds, limit, images, swaps: swaps.map((s) => ({ name: s.name, picture: picture(s) })) };
+  const body = { job, seconds, limit, images, pictures, swaps: swaps.map((s) => ({ name: s.name, picture: picture(s) })) };
   return request<RemakeBrief>("/remake/prompt", "POST", body);
 }
 

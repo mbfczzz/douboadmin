@@ -15,10 +15,14 @@ import (
 // pacing and camera work: a description that still describes the original
 // people next to their full video makes the model copy them.
 
-// Swap: the breakdown subject named Name is replaced by @图片Picture.
+// Swap: the breakdown subject named Name is replaced by @图片Picture. Look
+// is the picture's own description (the server reads it, never a client):
+// the text must say who the new person is, or the model draws the one
+// @视频1 shows.
 type Swap struct {
 	Name    string `json:"name"`
 	Picture int    `json:"picture"`
+	Look    string `json:"-"`
 }
 
 // Original is what the remake task keeps about the video.
@@ -76,7 +80,8 @@ func remakeHead(b *vision.Breakdown, seconds, images int, swaps []Swap) string {
 	if len(swaps) == 0 && images == 0 {
 		return fmt.Sprintf("参考@视频1的画面结构、镜头运动和节奏，复刻一条 %d 秒的同款视频。", seconds)
 	}
-	head := fmt.Sprintf("以@视频1为动作、运镜、节奏和场景参考，生成一条 %d 秒的视频。", seconds)
+	reference := fmt.Sprintf("以@视频1为动作、运镜、节奏和场景参考，生成一条 %d 秒的视频。", seconds)
+	head := reference
 	pictures := make([]string, images)
 	for i := range pictures {
 		pictures[i] = fmt.Sprintf("@图片%d", i+1)
@@ -85,29 +90,22 @@ func remakeHead(b *vision.Breakdown, seconds, images int, swaps []Swap) string {
 	if len(swaps) == 0 {
 		return head + "把@视频1中的商品或人物换成" + strings.Join(pictures, "、") + "中的商品或人物，外观以图片为准，不要沿用@视频1中原来的样子。" + strings.Join(pictures, "、") + only
 	}
+	// The swap leads, and says who the new person is (the picture's look);
+	// the original is named only, never described (its hair and clothes
+	// in the text draw it again).
 	cast := make([]string, len(swaps))
 	used := []string{}
 	for i, s := range swaps {
-		cast[i] = "把@视频1中的" + s.Name + lookOf(b, s.Name) + "整个换成" + pictureOf(b, s)
+		cast[i] = "把@视频1中的" + s.Name + "整个换成" + pictureOf(b, s)
+		if look := strings.TrimSpace(s.Look); look != "" {
+			cast[i] += "（" + strings.TrimRight(look, "。.") + "）"
+		}
 		if ref := fmt.Sprintf("@图片%d", s.Picture); !slices.Contains(used, ref) {
 			used = append(used, ref)
 		}
 	}
-	return head + "替换：" + strings.Join(cast, "；") + "。" + strings.Join(used, "、") + only +
-		"被替换的人物和商品一律以图片为准，不要沿用@视频1中原来的样子；没有替换的保持@视频1的样子。"
-}
-
-// lookOf: "（波浪卷发、偏左）", how the original subject is told apart in
-// @视频1 (the breakdown's look).
-func lookOf(b *vision.Breakdown, name string) string {
-	if b != nil {
-		for _, s := range b.Subjects {
-			if s.Name == name && strings.TrimSpace(s.Look) != "" {
-				return "（" + strings.TrimRight(strings.TrimSpace(s.Look), "。.") + "）"
-			}
-		}
-	}
-	return ""
+	return "替换：" + strings.Join(cast, "；") + "。" + reference + strings.Join(used, "、") + only +
+		"被替换的人物和商品一律以图片为准，不要沿用@视频1中原来的长相、发型和样子；没有替换的保持@视频1的样子。"
 }
 
 // Unknown reports a swap naming no subject of the breakdown (one read

@@ -103,10 +103,12 @@ func (p part) seen(keep int) string {
 	return joinFilled("，", scene, action, camera)
 }
 
+// joinFilled joins the non-empty parts, each without its own closing
+// punctuation (no "门口摆放木质小凳。，").
 func joinFilled(sep string, parts ...string) string {
 	kept := []string{}
 	for _, p := range parts {
-		if p != "" {
+		if p = strings.TrimRight(strings.TrimSpace(p), "。.；;，, "); p != "" {
 			kept = append(kept, p)
 		}
 	}

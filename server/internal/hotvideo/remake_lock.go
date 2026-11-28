@@ -49,3 +49,6 @@ func kindOf(b *vision.Breakdown, name string) string {
 	}
 	return "other"
 }
+
+// SubjectKind is the breakdown's kind of a subject (person, product, other).
+func SubjectKind(b *vision.Breakdown, name string) string { return kindOf(b, name) }

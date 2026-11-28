@@ -96,7 +96,7 @@ async function remakeInput(job: Job, swapRows: SwapRow[], pictureAssets: AssetVi
   const [clip, brief] = await Promise.all([
     referenceClip(job.resultAssetId!, model),
     // A model listing no lengths still has the original's (within 60 s) to write for.
-    remakeBrief(job.id, s.duration || Math.min(60, Math.round(original.duration) || 5), Math.min(s.maxPromptChars, 20000), pictures.length, swaps),
+    remakeBrief(job.id, s.duration || Math.min(60, Math.round(original.duration) || 5), Math.min(s.maxPromptChars, 20000), pictures.length, swaps, pictures),
   ]);
   // The original's shape as the server read it from the file, else as the player reported it.
   const ratio = nearestRatio(model.ratios, brief.width && brief.height ? brief : shape);

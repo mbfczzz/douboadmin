@@ -19,11 +19,14 @@ func (a *Server) remakeBrief(w http.ResponseWriter, r *http.Request) {
 		Limit   int             `json:"limit"`
 		Images  int             `json:"images"`
 		Swaps   []hotvideo.Swap `json:"swaps"`
+		// The pictures' asset ids in @图片 order (newer pages), read for
+		// each swap's look.
+		Pictures []string `json:"pictures"`
 	}
 	if !decode(w, r, &v) {
 		return
 	}
-	if v.Seconds < 1 || v.Seconds > 60 || v.Limit < 50 || v.Limit > core.MaxPlanPromptChars || v.Images < 0 || v.Images > 9 || len(v.Swaps) > 5 {
+	if v.Seconds < 1 || v.Seconds > 60 || v.Limit < 50 || v.Limit > core.MaxPlanPromptChars || v.Images < 0 || v.Images > 9 || len(v.Swaps) > 5 || len(v.Pictures) > 9 {
 		fail(w, 400, "复刻参数无效")
 		return
 	}
@@ -52,6 +55,7 @@ func (a *Server) remakeBrief(w http.ResponseWriter, r *http.Request) {
 		fail(w, 409, "原视频的拆解已更新，请重新选择要替换的人物或商品")
 		return
 	}
+	a.swapLooks(r.Context(), identity(r).ID, breakdown, v.Pictures, v.Swaps)
 	title, text, _ := strings.Cut(j.Input.Prompt, "\n")
 	original := hotvideo.Original{Title: strings.TrimPrefix(title, "一键复刻："), Text: text, Duration: float64(j.Input.Duration)}
 	prompt := hotvideo.RemakePrompt(breakdown, original, v.Seconds, v.Limit, v.Images, v.Swaps)

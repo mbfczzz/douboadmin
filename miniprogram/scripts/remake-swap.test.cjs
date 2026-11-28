@@ -46,9 +46,9 @@ test("the server writes 生成同款 from the swaps; the editor's brief puts the
   const posts = [];
   h.wx.request = (o) => { posts.push(o); o.success({ statusCode: 200, data: { prompt: "描述" } }); };
   const { remakeBrief } = h.service("hot-import");
-  assert.equal((await remakeBrief("job-1", 10, 2000, 2, swaps)).prompt, "描述");
+  assert.equal((await remakeBrief("job-1", 10, 2000, 2, swaps, ["cup", "girl"])).prompt, "描述");
   const sent = posts.find((p) => p.url.endsWith("/remake/prompt"));
-  assert.deepEqual(plain(sent.data), { job: "job-1", seconds: 10, limit: 2000, images: 2, swaps: [{ name: "主角", picture: 1 }, { name: "保温杯", picture: 2 }] });
+  assert.deepEqual(plain(sent.data), { job: "job-1", seconds: 10, limit: 2000, images: 2, pictures: ["cup", "girl"], swaps: [{ name: "主角", picture: 1 }, { name: "保温杯", picture: 2 }] });
 });
 
 test("keeping the main person while swapping others warns the remake will look like the original", () => {
